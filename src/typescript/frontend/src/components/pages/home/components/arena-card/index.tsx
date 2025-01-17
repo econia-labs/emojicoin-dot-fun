@@ -10,6 +10,8 @@ import "./module.css";
 import { useInterval } from "react-use";
 import { useMemo, useState } from "react";
 import darkTheme from "theme/dark";
+import { useMatchBreakpoints } from "@hooks/index";
+import { getEmojisInString } from "@sdk/emoji_data";
 
 type ArenaCardProps = {
   market0Symbol: string;
@@ -68,7 +70,7 @@ const Timer = ({ startTime, duration }: { startTime: bigint; duration: bigint })
   );
 
   return (
-    <div className="text-light-gray flex flex-row text-6xl">
+    <div className="text-light-gray flex flex-row pixel-clock w-min">
       <TimerNumber n={hours.split("")[0]} />
       <TimerNumber n={hours.split("")[1]} />
       <div className="my-auto w-[1ch] text-center">:</div>
@@ -82,11 +84,13 @@ const Timer = ({ startTime, duration }: { startTime: bigint; duration: bigint })
 };
 
 const GlowingEmoji = ({ emoji }: { emoji: string }) => (
-  <div className="relative">
-    <div className="absolute top-0 z-[-1]" style={{ filter: "blur(15px)" }}>
-      <Emoji emojis={emoji} />
+  <div
+    className={`relative grid items-center place-items-center symbol-${getEmojisInString(emoji).length}`}
+  >
+    <div className="absolute z-[-1]" style={{ filter: "blur(15px)" }}>
+      <Emoji className="flex flex-nowrap text-nowrap" emojis={emoji} />
     </div>
-    <Emoji emojis={emoji} />
+    <Emoji className="flex flex-nowrap text-nowrap" emojis={emoji} />
   </div>
 );
 
@@ -99,41 +103,56 @@ export const ArenaCard = ({
   startTime,
   duration,
 }: ArenaCardProps) => {
+  const { isMobile } = useMatchBreakpoints();
+
+  const headerText = (
+    <span
+      className={`arena-pixel-heading-text text-white uppercase ${isMobile ? "text-center" : ""}`}
+    >
+      Lock in early to get the most rewards !
+    </span>
+  );
+
+  const arenaVs = (
+    <div
+      className="grid gap-[.3em]"
+      style={{
+        gridTemplateColumns: "1fr auto 1fr",
+      }}
+    >
+      <GlowingEmoji emoji={market0Symbol} />
+      <span className="vs text-light-gray uppercase m-auto text-[.8em]">vs</span>
+      <GlowingEmoji emoji={market1Symbol} />
+    </div>
+  );
+
   return (
     <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
       <div
-        className="w-full max-w-full"
+        className="w-full max-w-full gap-[2em]"
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gridTemplateRows: !isMobile ? "1fr" : "1fr 1fr",
         }}
       >
-        <Link className="place-self-center flex flex-col gap-[3em]" href={ROUTES.arena}>
-          <div className="flex items-center">
-            <div className={`flex flex-row gap-[.3em] styled-double-emoji uppercase`}>
-              <GlowingEmoji emoji={market0Symbol} />
-              <span className="text-light-gray uppercase m-auto text-[.8em]">vs</span>
-              <GlowingEmoji emoji={market1Symbol} />
-            </div>
-          </div>
-          <Button scale="xl" className="mx-auto">
-            Enter now
-          </Button>
+        <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena}>
+          {isMobile && headerText}
+          {arenaVs}
+          {!isMobile && (
+            <Button scale="xl" className="mx-auto">
+              Enter now
+            </Button>
+          )}
         </Link>
-        <div className="flex flex-col gap-[1em] max-w-full">
-          <div className="flex flex-row items-center">
-            <span className="text-white pixel-heading-text uppercase">
-              Lock in early to get the most rewards !
-            </span>
-          </div>
+        <div className={`flex flex-col gap-[2em] max-w-full ${isMobile ? "items-center" : ""}`}>
+          {!isMobile && headerText}
           <Timer duration={duration} startTime={startTime} />
 
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-[.4em] arena-market-data-text">
             <FlexGap gap="8px">
-              <div className="font-forma text-medium-gray market-data-text uppercase">
-                Rewards remaining:
-              </div>
-              <div className="font-forma text-white market-data-text uppercase">
+              <div className="font-forma text-medium-gray uppercase">Rewards remaining:</div>
+              <div className="font-forma text-white uppercase">
                 <div className="flex flex-row items-center justify-center">
                   <FormattedNumber value={rewardsRemaining} suffix=" APT" nominalize scramble />
                 </div>
@@ -142,11 +161,9 @@ export const ArenaCard = ({
 
             <FlexGap gap="8px">
               <div className="uppercase">
-                <div className="font-forma text-medium-gray market-data-text uppercase">
-                  Melee volume:
-                </div>
+                <div className="font-forma text-medium-gray uppercase">Melee volume:</div>
               </div>
-              <div className="font-forma text-white market-data-text uppercase">
+              <div className="font-forma text-white uppercase">
                 <div className="flex flex-row items-center justify-center">
                   <FormattedNumber value={meleeVolume} suffix=" APT" scramble nominalize />
                 </div>
@@ -154,10 +171,8 @@ export const ArenaCard = ({
             </FlexGap>
 
             <FlexGap gap="8px">
-              <div className="font-forma text-medium-gray market-data-text uppercase">
-                APT locked:
-              </div>
-              <div className="font-forma text-white market-data-text uppercase">
+              <div className="font-forma text-medium-gray uppercase">APT locked:</div>
+              <div className="font-forma text-white uppercase">
                 <div className="flex flex-row items-center justify-center">
                   <FormattedNumber value={aptLocked} suffix=" APT" scramble nominalize />
                 </div>
