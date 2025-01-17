@@ -94,10 +94,14 @@ NAMED_ADDRESSES=$(
 )
 aptos move publish \
     --assume-yes \
-    --move-2 \
+    --max-gas 500000 \
     --named-addresses $NAMED_ADDRESSES \
     --profile $PROFILE
 ```
+
+Note that the `--max-gas` argument is required to prevent issues with the
+simulator reporting that the `emojicoin_arena` module doesn't exist (even though
+it shouldn't exist, because it's the one being published).
 
 [this `emojicoin-dot-fun` pull request comment]: https://github.com/econia-labs/emojicoin-dot-fun/pull/408#discussion_r1887856202
 [`aptos-core` #15436]: https://github.com/aptos-labs/aptos-core/issues/15436
