@@ -417,7 +417,7 @@ export type Types = {
   };
 
   ArenaVaultBalanceUpdate: {
-    new_balance: bigint;
+    newBalance: bigint;
   };
 
   ArenaPositions: {
