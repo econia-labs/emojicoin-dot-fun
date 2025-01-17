@@ -5,8 +5,8 @@
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
-const math = require('remark-math');
-const katex = require('rehype-katex');
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 module.exports = {
   title: "emojicoin dot fun Docs",
@@ -35,8 +35,8 @@ module.exports = {
           breadcrumbs: false,
           showLastUpdateAuthor: false,
           showLastUpdateTime: false,
-          remarkPlugins: [math],
-          rehypePlugins: [katex],
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],
         },
         blog: false,
         theme: {
