@@ -65,18 +65,6 @@ writeset-aware offchain processing. In order words, the data model is designed
 to enable full indexing using only writesets and events, with as few struct and
 event fields as possible.
 
-As an example, calculating PnL offchain for a given escrow looks something like:
-
-```python
-profit = sum_over_all_events_since_escrow_was_last_empty(
-    Enter.input_amount + Enter.match_amount
-) / current_value_of_holdings()
-```
-
-Where `current_value_of_holdings()` aggregates all `Enter`, `Swap`, and `Exit`
-events for a given `{user, melee_id}` to determine current holdings and then
-converts them to octas using the most recent `ExchangeRate`.
-
 ## Pseudo-randomness
 
 Since randomness is not supported in `init_module` per [`aptos-core` #15436],
@@ -84,5 +72,48 @@ pseudo-random substitute implementations are used for the first crank. For a
 detailed rationale that explains how this implementation is effectively random
 in practice, see [this `emojicoin-dot-fun` pull request comment].
 
+## Publish commands
+
+Set variables:
+
+```sh
+EMOJICOIN_ARENA=0xaaa...
+EMOJICOIN_DOT_FUN=0xbbb...
+INTEGRATOR=0xccc...
+PROFILE=my-profile
+```
+
+Publish:
+
+```sh
+NAMED_ADDRESSES=$(
+    printf "%s,%s,%s" \
+        "emojicoin_arena=$EMOJICOIN_ARENA" \
+        "emojicoin_dot_fun=$EMOJICOIN_DOT_FUN" \
+        "integrator=$INTEGRATOR"
+)
+aptos move publish \
+    --assume-yes \
+    --max-gas 500000 \
+    --named-addresses $NAMED_ADDRESSES \
+    --profile $PROFILE
+```
+
+Note that the `--max-gas` argument is required to prevent
+[a simulator issue] where it is reported that the `emojicoin_arena` module
+doesn't exist (even though it shouldn't exist, because it's the module being
+published), namely:
+
+<!-- markdownlint-disable MD013 -->
+
+```sh
+{
+  "Error": "API error: API error Error(InternalError): Failed to convert transaction data from storage: Module ModuleId { address: <PUBLISHER_ADDRESS>, name: Identifier(\"emojicoin_arena\") } can't be found"
+}
+```
+
+<!-- markdownlint-enable MD013 -->
+
+[a simulator issue]: https://github.com/aptos-labs/aptos-core/issues/15769
 [this `emojicoin-dot-fun` pull request comment]: https://github.com/econia-labs/emojicoin-dot-fun/pull/408#discussion_r1887856202
 [`aptos-core` #15436]: https://github.com/aptos-labs/aptos-core/issues/15436
