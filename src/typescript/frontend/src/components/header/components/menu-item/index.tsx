@@ -8,7 +8,7 @@ import { FlexGap } from "@containers";
 
 import { type MenuItemProps } from "./types";
 
-const MenuItem: React.FC<MenuItemProps> = ({ title, onClick = () => {} }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ title, onClick = () => {}, pill }) => {
   const { t } = translationFunction();
 
   const { ref, replay } = useScramble({
@@ -32,6 +32,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, onClick = () => {} }) => {
         ref={ref}
         ellipsis
       />
+      {pill}
       <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">
         {" }"}
       </Text>

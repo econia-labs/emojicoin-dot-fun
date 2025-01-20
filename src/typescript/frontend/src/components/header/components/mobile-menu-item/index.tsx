@@ -14,6 +14,7 @@ const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
   title,
   onClick = () => {},
   borderBottom = true,
+  pill,
 }) => {
   const { t } = translationFunction();
 
@@ -25,7 +26,7 @@ const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
 
   return (
     <StyledItemWrapper onMouseOver={replay} onClick={onClick} borderBottom={borderBottom}>
-      <div className={withIcon?.className}>
+      <div className={`${withIcon?.className} ${pill?.className}`}>
         {withIcon?.icon}
         <Text
           textScale={withIcon ? "pixelHeading4" : "pixelHeading3"}
@@ -33,6 +34,7 @@ const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
           textTransform="uppercase"
           ref={ref}
         />
+        {pill?.pill}
       </div>
       {!withIcon && <Arrow width="18px" color="black" />}
     </StyledItemWrapper>
