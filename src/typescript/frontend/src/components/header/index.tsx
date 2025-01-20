@@ -19,6 +19,7 @@ import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton
 import { useSearchParams } from "next/navigation";
 import Link, { type LinkProps } from "next/link";
 import { useEmojiPicker } from "context/emoji-picker-context";
+import { Badge } from "components/Badge";
 
 const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
   const { isDesktop } = useMatchBreakpoints();
@@ -91,7 +92,11 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
                     href={path}
                     target={path.startsWith("https://") ? "_blank" : undefined}
                   >
-                    <MenuItem width={width} title={title} />
+                    <MenuItem
+                      width={width}
+                      title={title}
+                      pill={title === "arena" ? <Badge color="econiaBlue">NEW</Badge> : undefined}
+                    />
                   </Link>
                 );
               })}
