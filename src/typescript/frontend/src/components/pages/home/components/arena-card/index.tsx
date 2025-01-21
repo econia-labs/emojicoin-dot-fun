@@ -7,11 +7,9 @@ import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 import "./module.css";
-import { useInterval } from "react-use";
-import { useMemo, useState } from "react";
-import darkTheme from "theme/dark";
 import { useMatchBreakpoints } from "@hooks/index";
 import { getEmojisInString } from "@sdk/emoji_data";
+import { Countdown } from "components/Countdown";
 
 type ArenaCardProps = {
   market0Symbol: string;
@@ -21,66 +19,6 @@ type ArenaCardProps = {
   aptLocked: bigint;
   startTime: bigint;
   duration: bigint;
-};
-
-const TimerNumber = ({ n }: { n: string }) => (
-  <div
-    style={{
-      border: `1px solid ${darkTheme.colors.darkGray}`,
-      borderRadius: "5px",
-      background: "black",
-      width: "1.7ch",
-      textAlign: "center",
-      margin: ".1em",
-      paddingLeft: ".05em",
-      color: darkTheme.colors.econiaBlue,
-    }}
-  >
-    {n}
-  </div>
-);
-
-const Timer = ({ startTime, duration }: { startTime: bigint; duration: bigint }) => {
-  const getRemaining = () => Number(duration) - (new Date().getTime() / 1000 - Number(startTime));
-  const [remaining, setRemaining] = useState<number>(getRemaining());
-  useInterval(() => {
-    setRemaining(getRemaining());
-  }, 1000);
-
-  const seconds = useMemo(
-    () =>
-      Math.max(Math.round(remaining) % 60, 0)
-        .toString()
-        .padStart(2, "0"),
-    [remaining]
-  );
-  const minutes = useMemo(
-    () =>
-      Math.max(Math.round(remaining / 60) % 60, 0)
-        .toString()
-        .padStart(2, "0"),
-    [remaining]
-  );
-  const hours = useMemo(
-    () =>
-      Math.max(Math.round(remaining / 60 / 60), 0)
-        .toString()
-        .padStart(2, "0"),
-    [remaining]
-  );
-
-  return (
-    <div className="text-light-gray flex flex-row pixel-clock w-min">
-      <TimerNumber n={hours.split("")[0]} />
-      <TimerNumber n={hours.split("")[1]} />
-      <div className="my-auto w-[1ch] text-center">:</div>
-      <TimerNumber n={minutes.split("")[0]} />
-      <TimerNumber n={minutes.split("")[1]} />
-      <div className="my-auto w-[1ch] text-center">:</div>
-      <TimerNumber n={seconds.split("")[0]} />
-      <TimerNumber n={seconds.split("")[1]} />
-    </div>
-  );
 };
 
 const GlowingEmoji = ({ emoji }: { emoji: string }) => (
@@ -147,7 +85,7 @@ export const ArenaCard = ({
         </Link>
         <div className={`flex flex-col gap-[2em] max-w-full ${isMobile ? "items-center" : ""}`}>
           {!isMobile && headerText}
-          <Timer duration={duration} startTime={startTime} />
+          <Countdown duration={duration} startTime={startTime} />
 
           <div className="flex flex-col gap-[.4em] arena-market-data-text">
             <FlexGap gap="8px">
