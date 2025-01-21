@@ -57,6 +57,9 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "volume_in_1m_state_tracker",
   "daily_volume",
   "volume",
+  "base_volume",
+  "base_volume_in_1m_state_tracker",
+  "daily_base_volume",
 ]);
 
 /**

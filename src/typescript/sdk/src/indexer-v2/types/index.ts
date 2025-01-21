@@ -517,6 +517,7 @@ export const toProcessedData = (
   dailyTvlPerLPCoinGrowth: Big(data.daily_tvl_per_lp_coin_growth ?? 0).toString(),
   inBondingCurve: data.in_bonding_curve,
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
+  baseVolumeIn1MStateTracker: BigInt(data.base_volume_in_1m_state_tracker),
 });
 
 export const toMarketLatestStateEventModel = (
@@ -533,6 +534,7 @@ export const toMarketLatestStateEventModel = (
 export const toMarketStateModel = (data: DatabaseJsonType["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
+  dailyBaseVolume: BigInt(data.daily_base_volume),
 });
 
 export const toTransactionMetadataForUserLiquidityPools = (
@@ -578,6 +580,7 @@ export const toMarket1MPeriodsInLastDay = (
   insertedAt: data.inserted_at ? postgresTimestampToDate(data.inserted_at) : new Date(0),
   nonce: BigInt(data.nonce),
   volume: BigInt(data.volume),
+  baseVolume: BigInt(data.base_volume),
   startTime: data.start_time,
 });
 
