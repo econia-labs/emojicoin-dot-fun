@@ -58,8 +58,8 @@ export async function GET(request: NextRequest) {
     target_currency: APTOS_COIN,
     pool_id: e.symbol_emojis.join(""),
     last_price: toNominalPrice(e.last_swap_avg_execution_price_q64).toString(),
-    base_volume: toNominal(BigInt(e.daily_volume)).toString(),
-    target_volume: toNominal(BigInt(e.daily_base_volume)).toString(),
+    base_volume: toNominal(BigInt(e.daily_base_volume)).toString(),
+    target_volume: toNominal(BigInt(e.daily_volume)).toString(),
     liquidity_in_usd: estimateLiquidityInUSD(e),
   }));
 
