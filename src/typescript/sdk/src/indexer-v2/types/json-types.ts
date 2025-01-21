@@ -320,6 +320,19 @@ type ArenaPositionsData = {
   losses: Uint64String;
 };
 
+type ArenaInfoData = {
+  melee_id: Uint64String;
+  volume: Uint64String;
+  rewards_remaining: Uint64String;
+  apt_locked: Uint64String;
+  emojicoin_0_market_address: string;
+  emojicoin_1_market_address: string;
+  start_time: Uint64String;
+  duration: Uint64String;
+  max_match_percentage: Uint64String;
+  max_match_amount: Uint64String;
+};
+
 type ArenaLeaderboardData = {
   user: string;
   open: boolean;
@@ -349,6 +362,7 @@ export type DatabaseStructType = {
   ArenaVaultBalanceUpdate: ArenaVaultBalanceUpdateEventData;
   ArenaPositions: ArenaPositionsData;
   ArenaLeaderboard: ArenaLeaderboardData;
+  ArenaInfo: ArenaInfoData;
 };
 
 export type AnyEventDatabaseRow =
@@ -381,6 +395,7 @@ export enum TableName {
   ArenaSwapEvents = "arena_swap_events",
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_updates_events",
   ArenaPositions = "arena_positions",
+  ArenaInfo = "arena_info",
 }
 
 export enum DatabaseRpc {
@@ -476,6 +491,7 @@ export type DatabaseJsonType = {
     TransactionMetadata & ArenaVaultBalanceUpdateEventData
   >;
   [TableName.ArenaPositions]: ArenaPositionsData;
+  [TableName.ArenaInfo]: ArenaInfoData;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
@@ -505,6 +521,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaSwapEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
   DatabaseJsonType[TableName.ArenaPositions] &
+  DatabaseJsonType[TableName.ArenaInfo] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.PriceFeed] &
   DatabaseJsonType[DatabaseRpc.ArenaLeaderboard];

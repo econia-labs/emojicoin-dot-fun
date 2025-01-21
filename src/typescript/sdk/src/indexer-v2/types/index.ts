@@ -188,6 +188,19 @@ const toArenaLeaderboardFromDatabase = (
   pnl: data.pnl,
 });
 
+const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
+  meleeId: BigInt(data.melee_id),
+  volume: BigInt(data.volume),
+  rewardsRemaining: BigInt(data.rewards_remaining),
+  aptLocked: BigInt(data.apt_locked),
+  emojicoin0MarketAddress: data.emojicoin_0_market_address,
+  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  startTime: BigInt(data.start_time),
+  duration: BigInt(data.duration),
+  maxMatchPercentage: BigInt(data.max_match_percentage),
+  maxMatchAmount: BigInt(data.max_match_amount),
+});
+
 type GlobalStateEventData = {
   emitTime: bigint;
   registryNonce: bigint;
@@ -415,6 +428,7 @@ export type ArenaSwapModel = ReturnType<typeof toArenaSwapModel>;
 export type ArenaVaultBalanceUpdateModel = ReturnType<typeof toArenaVaultBalanceUpdateModel>;
 export type ArenaPositionsModel = ReturnType<typeof toArenaPositionsModel>;
 export type ArenaLeaderboardRPCModel = ReturnType<typeof toArenaLeaderboardRPCModel>;
+export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 
 /**
@@ -485,6 +499,7 @@ export const withArenaLeaderboardData = curryToNamedType(
   toArenaLeaderboardFromDatabase,
   "arenaLeaderboard"
 );
+export const withArenaInfoData = curryToNamedType(toArenaInfoFromDatabase, "arenaInfo");
 
 const EVENT_NAMES = {
   GlobalState: "GlobalState",
@@ -745,6 +760,10 @@ export const toArenaLeaderboardRPCModel = (data: DatabaseJsonType["arena_leaderb
   ...withArenaLeaderboardData(data),
 });
 
+export const toArenaInfoModel = (data: DatabaseJsonType["arena_info"]) => ({
+  ...withArenaInfoData(data),
+});
+
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
@@ -794,6 +813,7 @@ export type DatabaseModels = {
   [TableName.ArenaSwapEvents]: ArenaSwapModel;
   [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
   [TableName.ArenaPositions]: ArenaPositionsModel;
+  [TableName.ArenaInfo]: ArenaInfoModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
   [DatabaseRpc.ArenaLeaderboard]: ArenaLeaderboardRPCModel;
 };

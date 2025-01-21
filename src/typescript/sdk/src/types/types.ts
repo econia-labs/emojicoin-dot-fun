@@ -439,6 +439,19 @@ export type Types = {
     losses: bigint;
     pnl: number;
   };
+
+  ArenaInfo: {
+    meleeId: bigint;
+    volume: bigint;
+    rewardsRemaining: bigint;
+    aptLocked: bigint;
+    emojicoin0MarketAddress: string;
+    emojicoin1MarketAddress: string;
+    startTime: bigint;
+    duration: bigint;
+    maxMatchPercentage: bigint;
+    maxMatchAmount: bigint;
+  };
 };
 
 export const toExtendRef = (data: JsonTypes["ExtendRef"]): Types["ExtendRef"] => ({
