@@ -24,7 +24,7 @@ export type EnterPayloadMoveArguments = {
 };
 
 export class Enter extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = ARENA_MODULE_ADDRESS;
+  public readonly moduleAddress = ARENA_MODULE_ADDRESS ?? AccountAddress.ONE;
 
   public readonly moduleName = "emojicoin_arena";
 
@@ -110,7 +110,7 @@ export class Enter extends EntryFunctionPayloadBuilder {
 }
 
 export class Exit extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = ARENA_MODULE_ADDRESS;
+  public readonly moduleAddress = ARENA_MODULE_ADDRESS ?? AccountAddress.ONE;
 
   public readonly moduleName = "emojicoin_arena";
 
@@ -187,7 +187,7 @@ export class Exit extends EntryFunctionPayloadBuilder {
 }
 
 export class Swap extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = ARENA_MODULE_ADDRESS;
+  public readonly moduleAddress = ARENA_MODULE_ADDRESS ?? AccountAddress.ONE;
 
   public readonly moduleName = "emojicoin_arena";
 
