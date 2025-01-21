@@ -8,4 +8,8 @@ export type MobileMenuItemProps = {
   title: string;
   onClick?: () => void;
   borderBottom?: boolean;
+  pill?: {
+    className: string;
+    pill: React.ReactNode;
+  };
 };
