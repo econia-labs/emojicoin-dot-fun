@@ -510,6 +510,12 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
   ...GuidGetters.liquidityEvent(data),
 });
 
+/**
+ * Default to 0n while the processor is in need of a cold upgrade, otherwise the /stats
+ * page will fail to render and the build can't complete. This is temporary.
+ */
+const temporarilyDefaultToZero = (value: AnyNumberString) => BigInt(value ?? 0n);
+
 // Note that daily TVL defaults to `0` since that's the initial value in the database.
 export const toProcessedData = (
   data: ProcessedFields & { daily_tvl_per_lp_coin_growth_q64?: string }
@@ -517,7 +523,7 @@ export const toProcessedData = (
   dailyTvlPerLPCoinGrowth: Big(data.daily_tvl_per_lp_coin_growth ?? 0).toString(),
   inBondingCurve: data.in_bonding_curve,
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
-  baseVolumeIn1MStateTracker: BigInt(data.base_volume_in_1m_state_tracker),
+  baseVolumeIn1MStateTracker: temporarilyDefaultToZero(data.base_volume_in_1m_state_tracker),
 });
 
 export const toMarketLatestStateEventModel = (
@@ -534,7 +540,7 @@ export const toMarketLatestStateEventModel = (
 export const toMarketStateModel = (data: DatabaseJsonType["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
-  dailyBaseVolume: BigInt(data.daily_base_volume),
+  dailyBaseVolume: temporarilyDefaultToZero(data.daily_base_volume),
 });
 
 export const toTransactionMetadataForUserLiquidityPools = (
