@@ -2,17 +2,15 @@ import { toReserves } from "@sdk-types";
 import { type Uint64String } from "@sdk/emojicoin_dot_fun";
 import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
 import Big from "big.js";
-import { getAptPrice } from "lib/queries/get-apt-price";
 import "server-only";
 
-export const estimateLiquidityInUSD = async (e: {
+export const estimateLiquidityInUSD = (e: {
   clamm_virtual_reserves_base: Uint64String;
   clamm_virtual_reserves_quote: Uint64String;
   cpamm_real_reserves_base: Uint64String;
   cpamm_real_reserves_quote: Uint64String;
   lp_coin_supply: Uint64String;
-}) => {
-  const aptPrice = Big((await getAptPrice()) ?? 0.0);
+}, aptPrice: number) => {
   const clammVirtualReserves = toReserves({
     base: e.clamm_virtual_reserves_base,
     quote: e.clamm_virtual_reserves_quote,
@@ -38,6 +36,6 @@ export const estimateLiquidityInUSD = async (e: {
     quote: Big(reserves.quote.toString()),
   };
   const totalAPTInReserves = bigReserves.quote.plus(bigReserves.base.mul(priceRatio));
-  const totalUSDInReserves = totalAPTInReserves.mul(aptPrice);
-  return totalUSDInReserves;
+  const totalUSDInReserves = totalAPTInReserves.mul(aptPrice).div(Big(10 ** 8));
+  return totalUSDInReserves.toFixed(4);
 };

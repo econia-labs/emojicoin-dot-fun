@@ -6,6 +6,7 @@ import { toNominal } from "lib/utils/decimals";
 import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
 import { estimateLiquidityInUSD } from "./utils";
+import { getAptPrice } from "lib/queries/get-apt-price";
 
 // Since this is a public endpoint, set revalidate to 1 to ensure it can't spam the indexer.
 export const revalidate = 1;
@@ -52,6 +53,8 @@ export async function GET(request: NextRequest) {
 
   const APTOS_COIN = APTOS_COIN_TYPE_TAG.toString();
 
+  const aptPrice = await getAptPrice();
+
   const data = markets.data?.map((e) => ({
     ticker_id: `${e.market_address}::coin_factory::Emojicoin_${APTOS_COIN}`,
     base_currency: `${e.market_address}::coin_factory::Emojicoin`,
@@ -60,7 +63,7 @@ export async function GET(request: NextRequest) {
     last_price: toNominalPrice(e.last_swap_avg_execution_price_q64).toString(),
     base_volume: toNominal(BigInt(e.daily_base_volume)).toString(),
     target_volume: toNominal(BigInt(e.daily_volume)).toString(),
-    liquidity_in_usd: estimateLiquidityInUSD(e),
+    liquidity_in_usd: aptPrice !== undefined ? estimateLiquidityInUSD(e, aptPrice) : undefined,
   }));
 
   return new Response(stringifyJSON(data), { headers: { "Content-type": "application/json" } });
