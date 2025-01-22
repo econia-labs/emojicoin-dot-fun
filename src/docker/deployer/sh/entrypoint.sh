@@ -78,7 +78,7 @@ fund_and_publish() {
 		--max-gas 2000000 \
 		--gas-unit-price $gas_unit_price \
 		--profile $profile
-	
+
 	# aptos move run \
 	# 	--assume-yes \
 	# 	--json-file /app/json/emojicoin_arena.json \
