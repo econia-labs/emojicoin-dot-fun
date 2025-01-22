@@ -9,7 +9,9 @@ export default async function Arena() {
   try {
     melee = await fetchMelee({});
   } catch (e) {
-    console.warn("Could not get melee data. This probably means that the backend is running an outdated version of the processor, without the arena processing. Please update.")
+    console.warn(
+      "Could not get melee data. This probably means that the backend is running an outdated version of the processor, without the arena processing. Please update."
+    );
     redirect("/home");
   }
 
