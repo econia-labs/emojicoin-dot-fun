@@ -300,6 +300,7 @@ export type ProcessedFields = {
   daily_tvl_per_lp_coin_growth: UnsizedDecimalString;
   in_bonding_curve: boolean;
   volume_in_1m_state_tracker: Uint128String;
+  base_volume_in_1m_state_tracker: Uint128String;
 };
 
 type UserLPCoinBalance = {
@@ -354,10 +355,12 @@ export type DatabaseJsonType = {
     inserted_at?: PostgresTimestamp; // Omitted if the data is transmitted from the broker.
     nonce: Uint64String;
     volume: Uint128String;
+    base_volume: Uint128String;
     start_time: PostgresTimestamp;
   };
   [TableName.MarketState]: DatabaseJsonType["market_latest_state_event"] & {
     daily_volume: Uint128String;
+    daily_base_volume: Uint128String;
   };
   [TableName.ProcessorStatus]: {
     processor: string;
