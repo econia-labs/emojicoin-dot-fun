@@ -4,13 +4,16 @@ import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
 import Big from "big.js";
 import "server-only";
 
-export const estimateLiquidityInUSD = (e: {
-  clamm_virtual_reserves_base: Uint64String;
-  clamm_virtual_reserves_quote: Uint64String;
-  cpamm_real_reserves_base: Uint64String;
-  cpamm_real_reserves_quote: Uint64String;
-  lp_coin_supply: Uint64String;
-}, aptPrice: number) => {
+export const estimateLiquidityInUSD = (
+  e: {
+    clamm_virtual_reserves_base: Uint64String;
+    clamm_virtual_reserves_quote: Uint64String;
+    cpamm_real_reserves_base: Uint64String;
+    cpamm_real_reserves_quote: Uint64String;
+    lp_coin_supply: Uint64String;
+  },
+  aptPrice: number
+) => {
   const clammVirtualReserves = toReserves({
     base: e.clamm_virtual_reserves_base,
     quote: e.clamm_virtual_reserves_quote,
