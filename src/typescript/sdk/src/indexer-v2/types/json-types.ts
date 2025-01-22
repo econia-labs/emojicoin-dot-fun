@@ -523,7 +523,6 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaPositions] &
   DatabaseJsonType[TableName.ArenaInfo] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
-  DatabaseJsonType[DatabaseRpc.PriceFeed] &
   DatabaseJsonType[DatabaseRpc.ArenaLeaderboard];
 
 export type AnyColumnName = keyof Columns;
