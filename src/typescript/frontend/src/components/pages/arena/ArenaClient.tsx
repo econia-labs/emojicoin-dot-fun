@@ -5,6 +5,7 @@ import type { ArenaInfoModel, MarketStateModel } from "@sdk/indexer-v2/types";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
 import type { CSSProperties } from "react";
+import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
@@ -15,6 +16,35 @@ type Props = {
   market1: MarketStateModel;
 };
 
+type Tab = {
+  name: string;
+  emoji: string;
+  element: React.ReactNode;
+};
+
+const TABS: Tab[] = [
+  {
+    name: "Position",
+    emoji: emoji("smiling face with horns"),
+    element: <div className="text-ec-blue">tab number one</div>,
+  },
+  {
+    name: "Profile",
+    emoji: emoji("ninja"),
+    element: <div className="text-ec-blue">tab number two</div>,
+  },
+  {
+    name: "Chat",
+    emoji: emoji("left speech bubble"),
+    element: <div className="text-ec-blue">tab number three</div>,
+  },
+  {
+    name: "Info",
+    emoji: emoji("books"),
+    element: <div className="text-ec-blue">tab number four</div>,
+  },
+];
+
 const Box: React.FC<React.PropsWithChildren<{ className?: string; style?: CSSProperties }>> = ({
   children,
   className,
@@ -22,10 +52,61 @@ const Box: React.FC<React.PropsWithChildren<{ className?: string; style?: CSSPro
 }) => {
   return (
     <div
-      className={`border-solid border-[1px] border-dark-gray rounded-[3px] bg-black/50 ${className}`}
+      className={`border-solid border-[1px] border-dark-gray rounded-[3px] bg-black/75 ${className}`}
       style={style}
     >
       {children}
+    </div>
+  );
+};
+
+const TabContainer = ({ tabs }: { tabs: Tab[] }) => {
+  const [selectedTab, setSelectedTab] = useState(tabs.length > 0 ? tabs[0].name : undefined);
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateRows: "1fr auto",
+      }}
+    >
+      <div className="relative flex flex-row mt-[.5em]">
+        {tabs.map((t) => {
+          return (
+            <div className="flex flex-row" key={`tab-${t.name}`}>
+              <div className="w-[1em] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
+              <div className="flex flex-col">
+                <div
+                  onClick={() => setSelectedTab(t.name)}
+                  className={`flex flex-row gap-[.2em] uppercase pixel-heading-3 border-solid ${t.name === selectedTab ? "rounded-t-[6px] border-t-dark-gray border-x-dark-gray border-x-[2px] border-t-[2px] text-white" : "mt-[2px] text-light-gray"}`}
+                  style={
+                    t.name !== selectedTab
+                      ? {
+                          paddingLeft: "calc(.5em + 2px)",
+                          paddingRight: "calc(.5em + 2px)",
+                        }
+                      : {
+                          paddingLeft: ".5em",
+                          paddingRight: ".5em",
+                        }
+                  }
+                >
+                  <div>{t.name}</div> <Emoji className="text-[.75em]" emojis={t.emoji} />
+                </div>
+                {t.name === selectedTab ? (
+                  <div className="flex flex-row justify-between">
+                    <div className="w-[2px] bg-dark-gray h-[2px]"></div>
+                    <div className="w-[2px] bg-dark-gray h-[2px]"></div>
+                  </div>
+                ) : (
+                  <div className="w-[100%] bg-dark-gray h-[2px]"></div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
+      </div>
+      <div>{tabs.find((t) => t.name === selectedTab)?.element}</div>
     </div>
   );
 };
@@ -83,38 +164,6 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
   );
 };
 
-const Desktop: React.FC<Props> = ({ arenaInfo, market0, market1 }) => {
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateRows: "auto 1fr",
-        gridTemplateColumns: "1fr 0.65fr 0.85fr 1fr",
-        height: "100%",
-        width: "100%",
-        padding: "2em",
-        gap: "2em",
-      }}
-    >
-      <Box className="grid place-items-center">
-        <EmojiTitle
-          market0Symbols={market0.market.symbolEmojis}
-          market1Symbols={market1.market.symbolEmojis}
-        />
-      </Box>
-      <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
-        <Countdown
-          startTime={arenaInfo.arenaInfo.startTime / 1000n / 1000n}
-          duration={arenaInfo.arenaInfo.duration / 1000n / 1000n}
-        />
-      </Box>
-      <RewardsRemainingBox rewardsRemaining={arenaInfo.arenaInfo.rewardsRemaining} />
-      <Box className="col-start-1 col-end-3"></Box>
-      <Box className="col-start-3 col-end-5"></Box>
-    </div>
-  );
-};
-
 const BottomNavigationItem = ({
   emoji,
   text,
@@ -142,10 +191,43 @@ const BottomNavigation = () => {
         placeItems: "center",
       }}
     >
-      <BottomNavigationItem emoji={emoji("smiling face with horns")} text="enter" />
-      <BottomNavigationItem emoji={emoji("ninja")} text="profile" />
-      <BottomNavigationItem emoji={emoji("left speech bubble")} text="chat" />
-      <BottomNavigationItem emoji={emoji("books")} text="info" />
+      {TABS.map((t) => (
+        <BottomNavigationItem emoji={t.emoji} text={t.name} key={`navigation-item-${t.name}`} />
+      ))}
+    </div>
+  );
+};
+
+const Desktop: React.FC<Props> = ({ arenaInfo, market0, market1 }) => {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+        gridTemplateColumns: "1fr 0.65fr 0.85fr 1fr",
+        height: "100%",
+        width: "100%",
+        padding: "2em",
+        gap: "2em",
+      }}
+    >
+      <Box className="grid place-items-center">
+        <EmojiTitle
+          market0Symbols={market0.market.symbolEmojis}
+          market1Symbols={market1.market.symbolEmojis}
+        />
+      </Box>
+      <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
+        <Countdown
+          startTime={arenaInfo.arenaInfo.startTime / 1000n / 1000n}
+          duration={arenaInfo.arenaInfo.duration / 1000n / 1000n}
+        />
+      </Box>
+      <RewardsRemainingBox rewardsRemaining={arenaInfo.arenaInfo.rewardsRemaining} />
+      <Box className="col-start-1 col-end-3"></Box>
+      <Box className="col-start-3 col-end-5">
+        <TabContainer tabs={TABS} />
+      </Box>
     </div>
   );
 };
