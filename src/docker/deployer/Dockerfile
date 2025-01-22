@@ -26,6 +26,9 @@ COPY src/move/rewards/Move.toml move/rewards/Move.toml
 COPY src/move/market_metadata/sources/* move/market_metadata/sources/
 COPY src/move/market_metadata/Move.toml move/market_metadata/Move.toml
 
+COPY src/move/emojicoin_arena/sources/* move/emojicoin_arena/sources/
+COPY src/move/emojicoin_arena/Move.toml move/emojicoin_arena/Move.toml
+
 RUN mkdir json
 
 COPY src/docker/deployer/sh/* sh/

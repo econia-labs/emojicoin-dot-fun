@@ -26,11 +26,15 @@ export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransact
     (p) => rawPeriodToEnum(p.period) === Period.Period1M
   )?.volumeQuote;
 
+  const baseVolumeIn1MStateTracker = marketResource.periodicStateTrackers.find(
+    (p) => rawPeriodToEnum(p.period) === Period.Period1M
+  )?.volumeBase;
+
   const periodicStateTracker1D = marketResource.periodicStateTrackers.find(
     (p) => rawPeriodToEnum(p.period) === Period.Period1D
   );
 
-  if (volumeIn1MStateTracker === undefined) {
+  if (volumeIn1MStateTracker === undefined || baseVolumeIn1MStateTracker === undefined) {
     throw new Error("There should be a 1M periodic state tracker in the Market resource.");
   }
 
@@ -45,6 +49,7 @@ export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransact
     dailyTvlPerLPCoinGrowth,
     inBondingCurve,
     volumeIn1MStateTracker,
+    baseVolumeIn1MStateTracker,
   };
 };
 

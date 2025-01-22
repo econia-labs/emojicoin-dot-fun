@@ -149,6 +149,7 @@ export function getEventsAsProcessorModels(
           dailyTvlPerLPCoinGrowth: "0",
           inBondingCurve: true,
           volumeIn1MStateTracker: 0n,
+          baseVolumeIn1MStateTracker: 0n,
         };
 
     // Convert the eventGroup data to the processor's `latest market state event` model.
