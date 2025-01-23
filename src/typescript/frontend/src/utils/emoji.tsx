@@ -1,4 +1,5 @@
 import { type AnyEmojiData, getEmojisInString } from "@sdk/index";
+import { useEmojiFontClassName } from "lib/hooks/use-emoji-font-family";
 import { cn } from "lib/utils/class-name";
 import { useMemo, type DetailedHTMLProps, type HTMLAttributes } from "react";
 
@@ -8,6 +9,8 @@ export const Emoji = ({
 }: Omit<DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "children"> & {
   emojis: AnyEmojiData[] | string;
 }) => {
+  const emojiFontClassName = useEmojiFontClassName();
+
   const data = useMemo(
     () =>
       typeof emojis === "string"
@@ -19,7 +22,7 @@ export const Emoji = ({
   return (
     <span
       {...props}
-      className={cn(props.className, "!font-noto-color-emoji")}
+      className={cn(props.className, emojiFontClassName)}
       style={{ fontVariantEmoji: "emoji" }}
     >
       {data}

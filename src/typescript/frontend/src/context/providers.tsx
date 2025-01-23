@@ -1,6 +1,5 @@
 "use client";
 
-// cspell:word bitget
 // cspell:word martianwallet
 // cspell:word pontem
 // cspell:word okwallet
@@ -25,7 +24,6 @@ import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
-import { BitgetWallet } from "@bitget-wallet/aptos-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
@@ -54,21 +52,17 @@ enableMapSet();
 
 const queryClient = new QueryClient();
 
-const ThemedApp = ({ children }) => {
+const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
+  userAgent,
+  children,
+}) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
-
   const isMobileMenuOpen = isOpen && !isDesktop;
 
   const wallets = useMemo(
-    () => [
-      new BitgetWallet(),
-      new PontemWallet(),
-      new RiseWallet(),
-      new MartianWallet(),
-      new OKXWallet(),
-    ],
+    () => [new PontemWallet(), new RiseWallet(), new MartianWallet(), new OKXWallet()],
     []
   );
 
@@ -76,7 +70,7 @@ const ThemedApp = ({ children }) => {
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <EventStoreProvider>
-          <UserSettingsProvider>
+          <UserSettingsProvider userAgent={userAgent}>
             <AptosWalletAdapterProvider
               plugins={wallets}
               autoConnect={true}
@@ -115,7 +109,10 @@ const ThemedApp = ({ children }) => {
   );
 };
 
-const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Providers: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
+  userAgent,
+  children,
+}) => {
   const [p, setP] = useState(false);
 
   // Hack for now because I'm unsure how to get rid of the warning.
@@ -127,7 +124,7 @@ const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     p && (
       <ThemeContextProvider>
-        <ThemedApp>{children}</ThemedApp>
+        <ThemedApp userAgent={userAgent}>{children}</ThemedApp>
       </ThemeContextProvider>
     )
   );

@@ -20,6 +20,7 @@ import { isIOS, isMacOs } from "react-device-detect";
 import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { MAX_SYMBOL_LENGTH } from "@sdk/const";
+import { notoColorEmoji } from "styles/fonts";
 
 export type SearchResult = Array<EmojiPickerSearchData>;
 
@@ -79,6 +80,7 @@ export default function EmojiPicker(
 
   useEffect(() => {
     const root = document.querySelector("em-emoji-picker")?.shadowRoot;
+
     if (root) {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(`
@@ -113,8 +115,9 @@ export default function EmojiPicker(
           isMacOs || isIOS
             ? ""
             : `.individual-emoji {
-          font-family: var(--font-noto-color-emoji) !important;
-          font-size: 0.9em;
+          font-family: ${notoColorEmoji.style.fontFamily} !important;
+          font-style: ${notoColorEmoji.style.fontStyle ?? "normal"};
+          font-weight: ${notoColorEmoji.style.fontWeight ?? 400};
         }`
         }
 

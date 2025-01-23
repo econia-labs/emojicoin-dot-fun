@@ -16,11 +16,8 @@ import { getEmojisInString } from "@sdk/emoji_data";
 import { createPortal } from "react-dom";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import "./triangle.css";
-
-const EMOJI_FONT_FAMILY =
-  '"Noto Color Emoji", "Apple Color Emoji", "EmojiMart", "Segoe UI Emoji", ' +
-  '"Segoe UI Symbol", "Segoe UI", "Twemoji Mozilla", ' +
-  '"Android Emoji"';
+import { cn } from "lib/utils/class-name";
+import { useEmojiFontClassName } from "lib/hooks/use-emoji-font-family";
 
 const ChatInputBox = ({ children }: { children: React.ReactNode }) => {
   const { connected } = useWallet();
@@ -193,6 +190,8 @@ export const EmojiPickerWithInput = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  const emojiFontClassName = useEmojiFontClassName();
+
   return (
     <Flex
       style={{ ...(mode === "search" ? { width: "100%" } : {}) }}
@@ -213,7 +212,10 @@ export const EmojiPickerWithInput = ({
                 {mode !== "search" && close}
                 <Textarea
                   id="emoji-picker-text-area"
-                  className={`!font-noto-color-emoji relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`}
+                  className={cn(
+                    `relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`,
+                    emojiFontClassName
+                  )}
                   ref={onRefChange}
                   autoFocus={false}
                   onPaste={handlePaste}
@@ -247,7 +249,6 @@ export const EmojiPickerWithInput = ({
                     }
                   }}
                   data-testid="emoji-input"
-                  style={{ fontFamily: EMOJI_FONT_FAMILY }}
                 />
                 {mode === "search" && close}
                 {mode === "chat" ? (
