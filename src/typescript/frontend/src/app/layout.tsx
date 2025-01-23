@@ -7,6 +7,7 @@ import "../app/global.css";
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { fontsStyle } from "styles/fonts";
 import { headers } from "next/headers";
+import { getBooleanUserAgentSelectors } from "lib/utils/user-agent-selectors";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -15,6 +16,10 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const userAgent = headers().get("user-agent") || "";
+  console.log("user agent string:", userAgent);
+  Object.entries(getBooleanUserAgentSelectors(userAgent)).map(([key, value]) => {
+    console.log(key, value);
+  });
   return (
     <html>
       <body>
