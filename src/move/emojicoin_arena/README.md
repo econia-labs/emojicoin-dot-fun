@@ -1,6 +1,6 @@
 <!-- cspell:word gamified -->
 
-# Emojicoin arena
+# emojicoin arena
 
 ## Overview
 
