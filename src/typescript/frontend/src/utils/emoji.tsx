@@ -27,11 +27,15 @@ export const Emoji = ({
     // Wrap this in div so that any font families from tailwind utility classes don't clash with the emoji font class
     // name. This means it's not necessary to manually change each usage of font utility classes in the codebase, and
     // instead just let the font size / line height cascade downwards but override the font family with the emoji font.
-    <div className={props.className}>
-      <span {...props} className={emojiFontClassName} style={{ fontVariantEmoji: "emoji" }}>
+    <span className={props.className}>
+      <span
+        {...props}
+        className={emojiFontClassName}
+        style={{ fontVariantEmoji: "emoji", display: "inline" }}
+      >
         {data}
       </span>
-    </div>
+    </span>
   );
 };
 
