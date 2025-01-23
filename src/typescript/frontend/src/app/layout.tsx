@@ -7,7 +7,6 @@ import "../app/global.css";
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
 import { headers } from "next/headers";
-import { getBooleanUserAgentSelectors } from "lib/utils/user-agent-selectors";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -16,10 +15,6 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const userAgent = headers().get("user-agent") || "";
-  console.log("user agent string:", userAgent);
-  Object.entries(getBooleanUserAgentSelectors(userAgent)).map(([key, value]) => {
-    console.log(key, value);
-  });
   return (
     <html>
       <body>
@@ -32,7 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </Providers>
         </StyledComponentsRegistry>
         {/* Load the font regardless of the user agent string so that there's no flashing. */}
-        <div className={notoColorEmoji.className + " opacity-0"}>{"👽"}</div>
+        <div className={notoColorEmoji.className + " absolute top-0 left-0 hidden"}>{"👽"}</div>
       </body>
     </html>
   );
