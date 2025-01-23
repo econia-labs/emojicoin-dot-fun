@@ -136,8 +136,18 @@ indexer deployments.
    `/emojicoin/package-address/<mainnet|testnet|devnet>`
 
    </td><td>
-    The address of the Move package you want to index.
-    </td></tr></table>
+
+   The address of the [`emojicoin dot fun`] Move package you want to index.
+
+   </td></tr><tr><td>
+
+   `/emojicoin/arena-package-address/<mainnet|testnet|devnet>`
+
+   </td><td>
+
+   The address of the [`emojicoin arena`] Move package you want to index.
+
+   </td></tr></table>
 
    <!-- markdownlint-enable MD033 -->
 
@@ -563,4 +573,6 @@ REST and WebSocket endpoints.
 [web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
 [web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
+[`emojicoin arena`]: ../move/emojicoin_arena
+[`emojicoin dot fun`]: ../move/emojicoin_dot_fun
 [`rain`]: https://github.com/aws-cloudformation/rain
