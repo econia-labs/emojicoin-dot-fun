@@ -81,5 +81,5 @@
     "test:unit": "pnpm jest tests/unit"
   },
   "typings": "dist/index.d.ts",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }
