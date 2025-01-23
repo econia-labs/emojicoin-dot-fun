@@ -1,3 +1,4 @@
+// cspell:word noto
 import { CDN_URL } from "lib/env";
 import { Noto_Color_Emoji } from "next/font/google";
 

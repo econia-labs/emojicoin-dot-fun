@@ -1,3 +1,4 @@
+// cspell:word noto
 import { useUserSettings } from "context/event-store-context";
 import { getBooleanUserAgentSelectors } from "lib/utils/user-agent-selectors";
 import { useMemo } from "react";
