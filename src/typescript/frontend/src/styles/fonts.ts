@@ -33,7 +33,9 @@ export const fontsStyle = `
 
 export const notoColorEmoji = Noto_Color_Emoji({
   weight: "400",
+  style: ["normal"],
   subsets: ["emoji"],
   preload: true,
+  display: "swap",
   variable: "--font-noto-color-emoji",
 });

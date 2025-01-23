@@ -5,7 +5,7 @@ import StyledComponentsRegistry from "lib/registry";
 import "react-toastify/dist/ReactToastify.css";
 import "../app/global.css";
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
-import { fontsStyle } from "styles/fonts";
+import { fontsStyle, notoColorEmoji } from "styles/fonts";
 import { headers } from "next/headers";
 import { getBooleanUserAgentSelectors } from "lib/utils/user-agent-selectors";
 
@@ -31,6 +31,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
           </Providers>
         </StyledComponentsRegistry>
+        {/* Load the font regardless of the user agent string so that there's no flashing. */}
+        <div className={notoColorEmoji.className + " opacity-0"}>{"👽"}</div>
       </body>
     </html>
   );
