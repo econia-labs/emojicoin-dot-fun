@@ -17,7 +17,7 @@ import { createPortal } from "react-dom";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import "./triangle.css";
 import { cn } from "lib/utils/class-name";
-import { useEmojiFontClassName } from "lib/hooks/use-emoji-font-family";
+import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
 
 const ChatInputBox = ({ children }: { children: React.ReactNode }) => {
   const { connected } = useWallet();
@@ -190,7 +190,7 @@ export const EmojiPickerWithInput = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const emojiFontClassName = useEmojiFontClassName();
+  const { emojiFontClassName } = useEmojiFontConfig();
 
   return (
     <Flex

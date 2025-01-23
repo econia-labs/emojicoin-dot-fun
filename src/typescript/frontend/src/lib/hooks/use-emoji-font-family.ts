@@ -7,13 +7,13 @@ import { notoColorEmoji } from "styles/fonts";
 /**
  * A hook to retrieve the proper font, given the user agent string stored in global state.
  */
-export const useEmojiFontClassName = () => {
+export const useEmojiFontConfig = () => {
   const userAgent = useUserSettings((s) => s.userAgent);
-  const className = useMemo(() => {
+  const { isIOS, isMacOs, emojiFontClassName } = useMemo(() => {
     const { isIOS, isMacOs } = getBooleanUserAgentSelectors(userAgent);
-    const maybeNotoFontClassName = isIOS || isMacOs ? "" : notoColorEmoji.className;
-    return maybeNotoFontClassName;
+    const emojiFontClassName = isIOS || isMacOs ? "" : notoColorEmoji.className;
+    return { isIOS, isMacOs, emojiFontClassName };
   }, [userAgent]);
 
-  return className;
+  return { isIOS, isMacOs, emojiFontClassName };
 };
