@@ -5,7 +5,8 @@ import StyledComponentsRegistry from "lib/registry";
 import "react-toastify/dist/ReactToastify.css";
 import "../app/global.css";
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
-import { fontsStyle } from "styles/fonts";
+import { fontsStyle, notoColorEmoji } from "styles/fonts";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -13,17 +14,20 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const userAgent = headers().get("user-agent") || "";
   return (
     <html>
       <body>
         {/* This is used to avoid React escaping the quotes in `fontsStyle`. */}
         <style dangerouslySetInnerHTML={{ __html: fontsStyle }} />
         <StyledComponentsRegistry>
-          <Providers>
+          <Providers userAgent={userAgent}>
             <DisplayDebugData />
             {children}
           </Providers>
         </StyledComponentsRegistry>
+        {/* Load the font regardless of the user agent string so that there's no flashing. */}
+        <div className={notoColorEmoji.className + " absolute top-0 left-0 hidden"}>{"👽"}</div>
       </body>
     </html>
   );

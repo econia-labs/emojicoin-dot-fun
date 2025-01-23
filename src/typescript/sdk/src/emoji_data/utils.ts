@@ -1,13 +1,14 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
 import { normalizeHex } from "../utils/hex";
-import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA } from "./emoji-data";
+import { CHAT_EMOJI_DATA, getRandomSymbolEmoji, SYMBOL_EMOJI_DATA } from "./emoji-data";
 import {
   type SymbolEmojiData,
   type SymbolEmojiName,
   type SymbolData,
   type SymbolEmoji,
   type AnyEmoji,
+  type AnyEmojiData,
 } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
@@ -23,34 +24,20 @@ export const getSymbolEmojisInString = (symbols: string): SymbolEmoji[] => {
 
 /**
  *
- * A function that returns an emoji's data from any input that could represent a single
- * emoji, be its hex string, name, emoji character, or Uint8Array bytes.
+ * A function that returns an emoji's data from any string input that could represent a single
+ * emoji, be its name or native emoji character.
  *
- * If you know the input type, consider using the more specific map {@link SYMBOL_EMOJI_DATA}.
- *
- * @param input any input that could represent an emoji
- * @returns SymbolEmoji if the input is a valid emoji, otherwise undefined.
+ * @param input any emoji or emoji name
+ * @returns the emoji data for that emoji or undefined
  *
  */
-export const getEmojiData = (input: HexInput | SymbolEmojiName): SymbolEmojiData | undefined => {
-  if (typeof input === "string") {
-    if (SYMBOL_EMOJI_DATA.hasEmoji(input)) {
-      return SYMBOL_EMOJI_DATA.byEmoji(input);
-    }
-    if (SYMBOL_EMOJI_DATA.hasName(input)) {
-      return SYMBOL_EMOJI_DATA.byName(input);
-    }
-    if (input.startsWith("0x")) {
-      return SYMBOL_EMOJI_DATA.byHex(input as `0x${string}`);
-    }
-    if (SYMBOL_EMOJI_DATA.hasHex(normalizeHex(input))) {
-      return SYMBOL_EMOJI_DATA.byHex(`0x${input}`);
-    }
-    return undefined;
-  }
-  const hex = normalizeHex(input);
-  return SYMBOL_EMOJI_DATA.byHex(hex);
-};
+export const getEmojiData = (input: string = ""): AnyEmojiData | undefined =>
+  input
+    ? (SYMBOL_EMOJI_DATA.byEmoji(input) ??
+      CHAT_EMOJI_DATA.byEmoji(input) ??
+      SYMBOL_EMOJI_DATA.byName(input) ??
+      CHAT_EMOJI_DATA.byName(input))
+    : undefined;
 
 /**
  *

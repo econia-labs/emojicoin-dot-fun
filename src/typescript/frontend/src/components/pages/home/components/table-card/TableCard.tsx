@@ -24,15 +24,11 @@ import {
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import EmojiMarketPageLink from "./LinkOrAnimationTrigger";
-import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { Emoji } from "utils/emoji";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import "./module.css";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
-
-const getFontSize = (emojis: SymbolEmojiData[]) =>
-  emojis.length <= 2 ? ("pixel-heading-1" as const) : ("pixel-heading-1b" as const);
 
 const TableCard = ({
   index,
@@ -237,7 +233,8 @@ const TableCard = ({
             </Flex>
 
             <Emoji
-              className={`${getFontSize(emojis)} text-center mb-[22px] text-nowrap`}
+              // Font size and line height are taken from `pixel-heading-1` and `pixel-heading-1b`.
+              className={`${emojis.length <= 2 ? "text-[64px]" : "text-[52px]"} leading-[48px] text-center mb-[22px] text-nowrap`}
               emojis={emojis}
             />
             <Text

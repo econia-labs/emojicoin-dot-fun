@@ -1,4 +1,6 @@
+// cspell:word noto
 import { CDN_URL } from "lib/env";
+import { Noto_Color_Emoji } from "next/font/google";
 
 export const fontsStyle = `
   @font-face {
@@ -28,3 +30,12 @@ export const fontsStyle = `
     --font-formaM: FormaM;
   }
 `;
+
+export const notoColorEmoji = Noto_Color_Emoji({
+  weight: "400",
+  style: ["normal"],
+  subsets: ["emoji"],
+  preload: true,
+  display: "swap",
+  variable: "--font-noto-color-emoji",
+});

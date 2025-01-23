@@ -14,14 +14,10 @@ import { variants } from "./animation-variants";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
 import { getEmojisInString } from "@sdk/emoji_data";
 import { createPortal } from "react-dom";
-import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import "./triangle.css";
-
-const EMOJI_FONT_FAMILY =
-  '"EmojiMart", "Segoe UI Emoji", "Segoe UI Symbol", ' +
-  '"Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", ' +
-  '"Android Emoji"';
+import { cn } from "lib/utils/class-name";
+import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
 
 const ChatInputBox = ({ children }: { children: React.ReactNode }) => {
   const { connected } = useWallet();
@@ -56,13 +52,11 @@ export const EmojiPickerWithInput = ({
   pickerButtonClassName,
   inputGroupProps,
   inputClassName = "",
-  filterEmojis,
 }: {
   handleClick: (message: string) => Promise<void>;
   pickerButtonClassName?: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
-  filterEmojis?: (e: EmojiMartData["emojis"][string]) => boolean;
 }) => {
   const inputRef = useRef<HTMLDivElement | null>(null);
   const sendButtonRef = useRef<HTMLDivElement | null>(null);
@@ -196,6 +190,8 @@ export const EmojiPickerWithInput = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  const { emojiFontClassName } = useEmojiFontConfig();
+
   return (
     <Flex
       style={{ ...(mode === "search" ? { width: "100%" } : {}) }}
@@ -216,7 +212,10 @@ export const EmojiPickerWithInput = ({
                 {mode !== "search" && close}
                 <Textarea
                   id="emoji-picker-text-area"
-                  className={`relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`}
+                  className={cn(
+                    `relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`,
+                    emojiFontClassName
+                  )}
                   ref={onRefChange}
                   autoFocus={false}
                   onPaste={handlePaste}
@@ -250,7 +249,6 @@ export const EmojiPickerWithInput = ({
                     }
                   }}
                   data-testid="emoji-input"
-                  style={{ fontFamily: EMOJI_FONT_FAMILY }}
                 />
                 {mode === "search" && close}
                 {mode === "chat" ? (
@@ -319,7 +317,6 @@ export const EmojiPickerWithInput = ({
               data-testid="picker"
               className={mode}
               drag={(e) => ctrls.start(e, { snapToCursor: false })}
-              filterEmojis={filterEmojis}
             />
           </motion.button>
         </div>,

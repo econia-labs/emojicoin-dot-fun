@@ -84,7 +84,15 @@ export default async function Home({ searchParams }: HomePageParams) {
     marketsPromise,
     numMarketsPromise,
     aptPricePromise,
-  ]);
+  ]).catch((e) => {
+    console.error(e);
+    return [
+      [] as DatabaseModels["price_feed"][],
+      [] as DatabaseModels["market_state"][],
+      0,
+      undefined,
+    ] as const;
+  });
 
   return (
     <AptPriceContextProvider aptPrice={aptPrice}>

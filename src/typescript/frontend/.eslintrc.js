@@ -25,6 +25,7 @@ module.exports = {
     "playwright.config.js",
     "postcss.config.js",
     "tailwind.config.js",
+    "jest.config.ts",
     "tests/**",
   ],
   parser: "@typescript-eslint/parser",
@@ -76,7 +77,7 @@ module.exports = {
     "no-console": [
       "warn",
       {
-        allow: ["warn", "error", "debug", "clear", "trace"],
+        allow: ["warn", "error", "debug", "clear", "trace", "info"],
       },
     ],
     "no-unreachable": "error",

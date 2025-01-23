@@ -17,8 +17,8 @@
     "@aptos-labs/wallet-adapter-react": "3.7.7",
     "@bitget-wallet/aptos-wallet-adapter": "^0.1.2",
     "@econia-labs/emojicoin-sdk": "workspace:*",
-    "@emoji-mart/data": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz",
-    "@emoji-mart/react": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz",
+    "@emoji-mart/data": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.3.0.tgz",
+    "@emoji-mart/react": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.2.0.tgz",
     "@emotion/is-prop-valid": "^1.3.1",
     "@headlessui/react": "^2.1.9",
     "@headlessui/tailwindcss": "^0.2.1",
@@ -41,7 +41,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
-    "emoji-mart": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz",
+    "emoji-mart": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.7.0.tgz",
     "emoji-regex": "^10.4.0",
     "framer-motion": "^11.11.4",
     "immer": "^10.1.1",
@@ -68,7 +68,9 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/big.js": "^6.2.2",
+    "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.10",
     "@types/node": "^20.16.11",
     "@types/react": "^18.3.11",
@@ -82,9 +84,12 @@
     "eslint-config-next": "^14.2.15",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.13",
+    "ts-jest": "^29.2.5",
     "typescript": "5.6.2"
   },
   "engines": {
@@ -110,6 +115,7 @@
     "submodule": "./submodule.sh",
     "test": "pnpm run test:e2e",
     "test:e2e": "playwright test --project=firefox",
+    "test:unit": "pnpm jest tests/unit",
     "vercel-install": "./submodule.sh && pnpm i"
   },
   "version": "1.1.0"
