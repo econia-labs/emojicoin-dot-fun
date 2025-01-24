@@ -2,7 +2,7 @@
 // cspell:word unpathify
 
 import React, { useEffect, useMemo } from "react";
-import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-emoji-circle";
+import AnimatedEmojiCircle from "./pages/launch-emojicoin/animated-emoji-circle";
 import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@sdk/emoji_data";
 import { Emoji } from "utils/emoji";
 import { usePathname } from "next/navigation";
@@ -64,7 +64,7 @@ export const Loading = ({
             title={emojiName}
             emojis={emoji}
           />
-          <AnimatedStatusIndicator className={centered} numEmojis={numEmojis} />
+          <AnimatedEmojiCircle className={centered} numEmojis={numEmojis} />
         </div>
       </div>
     </>

@@ -40,7 +40,8 @@ const TestData = {
     ":false,"last_swap_avg_execution_price_q64":150958365430955,"last_swap_base_volume":120975585426
     07,"last_swap_quote_volume":99000000,"last_swap_nonce":2,"last_swap_time":"2024-10-04T09:29:38.6
     9085","daily_tvl_per_lp_coin_growth":0,"in_bonding_curve":true,"volume_in_1m_state_tracker":9900
-    0000,"daily_volume":99000000}]
+    0000,"daily_volume":99000000,"base_volume_in_1m_state_tracker":12097558542607,"daily_base_volume
+    ":12097558542607}]
     `.replaceAll(/\s/g, ""),
   },
   postBondingCurve: {
@@ -62,7 +63,8 @@ const TestData = {
     4":7244903199401139,"last_swap_base_volume":756212034737,"last_swap_quote_volume":297000000,"las
     t_swap_nonce":47667,"last_swap_time":"2024-10-03T15:55:08.649388","daily_tvl_per_lp_coin_growth"
     :1.001499814363967876933091555675361179387333896289378370590041427871042284306953206420708127389
-    545305,"in_bonding_curve":false,"volume_in_1m_state_tracker":297000000,"daily_volume":0}]
+    545305,"in_bonding_curve":false,"volume_in_1m_state_tracker":297000000,"daily_volume":0,"base_vo
+    lume_in_1m_state_tracker":756212034737,"daily_base_volume":0}]
     `.replaceAll(/\s/g, ""),
   },
 };

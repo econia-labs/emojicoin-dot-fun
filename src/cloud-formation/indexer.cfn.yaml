@@ -1420,6 +1420,9 @@ Resources:
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
           Value: !Sub
             '{{resolve:ssm:/emojicoin/package-address/${Network}}}'
+        - Name: 'EMOJICOIN_ARENA_MODULE_ADDRESS'
+          Value: !Sub
+            '{{resolve:ssm:/emojicoin/arena-package-address/${Network}}}'
         - Name: 'WS_PORT'
           Value: !FindInMap
           - 'Constants'

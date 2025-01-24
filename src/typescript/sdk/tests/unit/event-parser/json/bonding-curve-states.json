@@ -15,6 +15,7 @@
       "cumulative_stats_quote_volume": 198321507000,
       "daily_tvl_per_lp_coin_growth": 1.001499814363967876933091555675361179387333896289378370590041427871042284306953206420708127389545305,
       "daily_volume": 0,
+      "daily_base_volume": 0,
       "entry_function": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::provide_liquidity",
       "in_bonding_curve": false,
       "inserted_at": "2024-10-03T01:09:52.037678",
@@ -41,7 +42,8 @@
       "transaction_timestamp": "2024-10-03T15:55:32.080509",
       "transaction_version": 6080639845,
       "trigger": "provide_liquidity",
-      "volume_in_1m_state_tracker": 297000000
+      "volume_in_1m_state_tracker": 297000000,
+      "base_volume_in_1m_state_tracker": 756212034737
     }
   ],
   "pre_bonding_curve": [
@@ -60,6 +62,7 @@
       "cumulative_stats_quote_volume": 99000000,
       "daily_tvl_per_lp_coin_growth": 0,
       "daily_volume": 99000000,
+      "daily_base_volume": 12097558542607,
       "entry_function": "0x22227920701e36651a6649be2067cd7eebf3fabb94717ff3b256e3ada58b2222::emojicoin_dot_fun_rewards::swap_with_rewards",
       "in_bonding_curve": true,
       "inserted_at": "2024-10-04T09:29:14.65541",
@@ -86,7 +89,8 @@
       "transaction_timestamp": "2024-10-04T09:29:38.69085",
       "transaction_version": 6084169932,
       "trigger": "swap_buy",
-      "volume_in_1m_state_tracker": 99000000
+      "volume_in_1m_state_tracker": 99000000,
+      "base_volume_in_1m_state_tracker": 12097558542607
     }
   ]
 }

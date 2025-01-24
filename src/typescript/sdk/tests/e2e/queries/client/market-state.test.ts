@@ -38,6 +38,9 @@ describe("queries a market by market state with the emojicoin client", () => {
     // Copy over the daily volume because we can't get that field from the mini processor.
     (stateFromMiniProcessor as MarketStateModel).dailyVolume =
       stateFromIndexerProcessor!.dailyVolume;
+    // Copy over the daily base volume because we can't get that field from the mini processor.
+    (stateFromMiniProcessor as MarketStateModel).dailyBaseVolume =
+      stateFromIndexerProcessor!.dailyBaseVolume;
     // Copy over the `insertedAt` field because it's inserted at insertion time in postgres.
     (stateFromMiniProcessor as MarketStateModel).transaction.insertedAt =
       stateFromIndexerProcessor!.transaction.insertedAt;

@@ -490,11 +490,16 @@ const MarketLatestState = (row: MarketLatestStateEventModel, response: UserTrans
     (p) => rawPeriodToEnum(p.period) === Period.Period1M
   )!.volumeQuote;
 
+  const baseVolumeInStateTrackerFromWriteSet = marketResource.periodicStateTrackers.find(
+    (p) => rawPeriodToEnum(p.period) === Period.Period1M
+  )!.volumeBase;
+
   const periodicStateTracker1D = marketResource.periodicStateTrackers.find(
     (p) => rawPeriodToEnum(p.period) === Period.Period1D
   )!;
 
   expect(volumeInStateTrackerFromWriteSet).toBeDefined();
+  expect(baseVolumeInStateTrackerFromWriteSet).toBeDefined();
   expect(periodicStateTracker1D).toBeDefined();
 
   compareMarketAndStateMetadata(row, stateEvent);
@@ -504,6 +509,7 @@ const MarketLatestState = (row: MarketLatestStateEventModel, response: UserTrans
   expect(row.dailyTvlPerLPCoinGrowth).toEqual(calculateTvlGrowth(periodicStateTracker1D));
   expect(row.inBondingCurve).toEqual(stateEvent.lpCoinSupply === BigInt(0));
   expect(row.volumeIn1MStateTracker).toEqual(volumeInStateTrackerFromWriteSet);
+  expect(row.baseVolumeIn1MStateTracker).toEqual(baseVolumeInStateTrackerFromWriteSet);
 };
 
 const RowEqualityChecks = {
