@@ -1,0 +1,12 @@
+[addresses]
+zebra_market = "0xb87c674ff0ebff4115288bdb63a5601ed452019f00deeeb2ba848cbf37ba918a"
+
+[dev-dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[package]
+name = "ZebraCoinFactory"
+upgrade_policy = "immutable"
+version = "1.0.0"

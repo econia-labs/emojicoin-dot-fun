@@ -51,13 +51,14 @@ export const EventStoreProvider = ({ children }: EventStoreProviderProps) => {
 export const UserSettingsContext = createContext<StoreApi<UserSettingsStore> | null>(null);
 
 export interface UserSettingsProviderProps {
+  userAgent: string;
   children: ReactNode;
 }
 
-export const UserSettingsProvider = ({ children }: UserSettingsProviderProps) => {
+export const UserSettingsProvider = ({ userAgent, children }: UserSettingsProviderProps) => {
   const store = useRef<StoreApi<UserSettingsStore>>();
   if (!store.current) {
-    store.current = createUserSettingsStore();
+    store.current = createUserSettingsStore(userAgent);
   }
   return (
     <UserSettingsContext.Provider value={store.current}>{children}</UserSettingsContext.Provider>

@@ -1,3 +1,4 @@
+// cspell:word noto
 /** @type {import('tailwindcss').Config} */
 import colors from "tailwindcss/colors";
 delete colors.lightBlue;
@@ -9,7 +10,6 @@ delete colors.blueGray;
 import { fontFamily } from "tailwindcss/defaultTheme";
 
 module.exports = {
-  darkMode: ["class"],
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
@@ -18,6 +18,7 @@ module.exports = {
         pixelar: ["var(--font-pixelar)", ...fontFamily.sans],
         forma: ["var(--font-forma)", ...fontFamily.sans],
         "forma-bold": ["var(--font-formaM)", ...fontFamily.sans],
+        "forma-thin": ["var(--font-formaDR)", ...fontFamily.sans],
       },
       screens: {
         tall: { raw: "(min-height: 960px)" },

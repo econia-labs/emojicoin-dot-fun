@@ -7,7 +7,6 @@ export const Textarea = styled.textarea<TextareaProps>`
   height: 45px;
   background-color: transparent;
   color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.fonts.forma};
   display: block;
   resize: none;
   font-size: 16px;

@@ -1,6 +1,5 @@
 "use client";
 
-// cspell:word bitget
 // cspell:word martianwallet
 // cspell:word pontem
 // cspell:word okwallet
@@ -25,7 +24,6 @@ import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
-import { BitgetWallet } from "@bitget-wallet/aptos-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
@@ -33,55 +31,46 @@ import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import { isMobile, isTablet } from "react-device-detect";
 import { getAptosApiKey } from "@sdk/const";
-import type { EmojiMartData } from "components/pages/emoji-picker/types";
-import { init } from "emoji-mart";
 import { HeaderSpacer } from "components/header-spacer";
 import { GeoblockedBanner } from "components/geoblocking";
+import { completePickerData } from "utils/picker-data/complete-picker-data";
+import { type EmojiMartData } from "components/pages/emoji-picker/types";
+import { init } from "emoji-mart";
+
+/**
+ * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
+ */
+fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then((res) =>
+  res
+    .json()
+    .then((data) => data as EmojiMartData)
+    .then(completePickerData)
+    .then((data) => init({ set: "native", data }))
+);
 
 enableMapSet();
 
 const queryClient = new QueryClient();
 
-// This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
-// TBH, we should probably just fork the library.
-const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then(
-  (res) =>
-    res.json().then((data) => {
-      return data as EmojiMartData;
-    })
-);
-
-const ThemedApp = ({ children }) => {
+const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
+  userAgent,
+  children,
+}) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
-
   const isMobileMenuOpen = isOpen && !isDesktop;
 
   const wallets = useMemo(
-    () => [
-      new BitgetWallet(),
-      new PontemWallet(),
-      new RiseWallet(),
-      new MartianWallet(),
-      new OKXWallet(),
-    ],
+    () => [new PontemWallet(), new RiseWallet(), new MartianWallet(), new OKXWallet()],
     []
   );
-
-  useEffect(() => {
-    data.then((d) => {
-      init({ set: "native", data: d });
-    });
-
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
 
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <EventStoreProvider>
-          <UserSettingsProvider>
+          <UserSettingsProvider userAgent={userAgent}>
             <AptosWalletAdapterProvider
               plugins={wallets}
               autoConnect={true}
@@ -120,7 +109,10 @@ const ThemedApp = ({ children }) => {
   );
 };
 
-const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Providers: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
+  userAgent,
+  children,
+}) => {
   const [p, setP] = useState(false);
 
   // Hack for now because I'm unsure how to get rid of the warning.
@@ -132,7 +124,7 @@ const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     p && (
       <ThemeContextProvider>
-        <ThemedApp>{children}</ThemedApp>
+        <ThemedApp userAgent={userAgent}>{children}</ThemedApp>
       </ThemeContextProvider>
     )
   );
