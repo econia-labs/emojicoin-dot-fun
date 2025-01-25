@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { standardizeAddress, truncateAddress } from "@sdk/utils";
 import { getIsOnCustomAllowlist } from "./get-verification-status";
-import { EXTERNAL_LINK_PROPS } from "components/link";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
@@ -83,13 +82,6 @@ export const ClientVerifyPage = ({
                 <div>Passes geoblocking: {checkmarkOrX(!geoblocked)}</div>
                 <div>Country: {country ?? "unknown"}</div>
                 <div>Region: {region ?? "unknown"}</div>
-                <a
-                  className="underline text-ec-blue"
-                  href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
-                  {...EXTERNAL_LINK_PROPS}
-                >
-                  Galxe Campaign
-                </a>
               </div>
             </ButtonWithConnectWalletFallback>
           </div>
