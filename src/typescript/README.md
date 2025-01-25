@@ -200,6 +200,7 @@ These keys:
 - **Example**:
 
 ```shell
+# Not to be used as a real key.
 NEXT_PUBLIC_TESTNET_APTOS_API_KEY="AG-FL4PYMZ1YX1LGAJCWP2R1ACYTYRCBY1GB"
 ```
 
@@ -219,6 +220,7 @@ These keys:
 <!-- markdownlint-disable MD013 -->
 
 ```shell
+# Not to be used as a real key.
 SERVER_TESTNET_APTOS_API_KEY="aptoslabs_aXjFX8fDdZv_AXMynDZvp711WTBpSBmqLyj12RV9RFA6B"
 ```
 
