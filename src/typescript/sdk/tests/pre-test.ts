@@ -17,13 +17,10 @@ export default async function preTest() {
     // --------------------------------------------------------------------------------------
     //                             Start the docker containers.
     // --------------------------------------------------------------------------------------
-    // Start the Docker test harness without the frontend container.
+    // Start the Docker test harness.
     await DockerTestHarness.run({
-      frontend: false,
       filterLogsFrom:
-        process.env.FILTER_TEST_LOGS === "true"
-          ? ["broker", "processor", "frontend", "postgres"]
-          : [],
+        process.env.FILTER_TEST_LOGS === "true" ? ["broker", "processor", "postgres"] : [],
     });
   }
 }
