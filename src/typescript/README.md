@@ -1,6 +1,9 @@
 <!-- cspell:word geoblocking -->
+
 <!-- cspell:word PYMZ -->
+
 <!-- cspell:word LGAJCWP -->
+
 <!-- cspell:word ACYTYRCBY -->
 
 # How to build and deploy this application
@@ -11,13 +14,15 @@
 
 #### `NEXT_PUBLIC_APTOS_NETWORK`
 
-The Aptos network. Options: `mainnet`, `testnet`, `devnet`, `local`, or `custom`.
+The Aptos network. Options: `mainnet`, `testnet`, `devnet`, `local`, or `custom`
 
 - **Example**: `"testnet"`
 
 #### `NEXT_PUBLIC_MODULE_ADDRESS`
 
 The contract address of the main `emojicoin-dot-fun` module.
+
+<!-- markdownlint-disable MD013 -->
 
 - **Example**: `"0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111"`
 
@@ -33,6 +38,8 @@ The integrator address for the contract, aka the address that receives fees.
 
 - **Example**: `"0x33332c9ea4c220e0572b7f83f397164f8171e1c9f681136bb8ab78efa6c43333"`
 
+<!-- markdownlint-enable MD013 -->
+
 ______________________________________________________________________
 
 ### Emojicoin Indexer, Broker, and Allowlister
@@ -40,14 +47,16 @@ ______________________________________________________________________
 #### `EMOJICOIN_INDEXER_URL`
 
 The indexer's PostgREST REST API endpoint.
-**Note**: In production, it's recommended to use an API key for this URL (see `EMOJICOIN_INDEXER_API_KEY`).
+**Note**: In production, it's recommended to use an API key for this URL. See
+`EMOJICOIN_INDEXER_API_KEY`.
 
 - **Example**: `"http://localhost:3000"`
 
 #### `NEXT_PUBLIC_BROKER_URL`
 
 The broker's WebSocket endpoint.
-**Note**: In local development, the broker must use an insecure WebSocket (`ws://`). In production, use `wss://`.
+**Note**: In local development, the broker must use an insecure WebSocket
+(`ws://`). In production, use `wss://`.
 
 - **Example**: `"ws://localhost:3009"`
 
@@ -72,7 +81,11 @@ Used for inserting directly into the database.
 
 Used for publishing the contract.
 
+<!-- markdownlint-disable MD013 -->
+
 - **Example**: `"eaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e"`
+
+<!-- markdownlint-enable MD013 -->
 
 **Note**: These variables can be empty when not running unit tests.
 
@@ -88,7 +101,8 @@ The BPS fee rate for each swap or liquidity provision/removal.
 
 #### `NEXT_PUBLIC_IS_ALLOWLIST_ENABLED`
 
-Determines whether to gate access to the site with an allowlist. If `true`, `ALLOWLISTER3K_URL` must be set.
+Determines whether to gate access to the site with an allowlist.
+If `true`, `ALLOWLISTER3K_URL` must be set.
 
 - **Example**: `"false"`
 
@@ -122,7 +136,8 @@ A Next.js setting to determine some queries' revalidation length (in seconds).
 
 #### `HASH_SEED`
 
-A private environment variable used to hash the user address and store it in a cookie after the user has been verified.
+A private environment variable used to hash the user address and store it in a
+cookie after the user has been verified.
 This facilitates more efficient middleware while still requiring validation.
 
 - **Example**: `"some random string that is not public"`
@@ -158,7 +173,8 @@ ______________________________________________________________________
 
 #### `EMOJICOIN_INDEXER_API_KEY`
 
-An optional API key for the indexer. If set, all requests to the indexer will include the header:
+An optional API key for the indexer. If set, all requests to the indexer will
+include the header:
 
 ```json
 "X-Api-Key": "$EMOJICOIN_INDEXER_API_KEY"
@@ -171,11 +187,13 @@ If absent, prices will be denominated in APT.
 
 #### `NEXT_PUBLIC_<NETWORK>_APTOS_API_KEY`
 
-The public Aptos API keys for the various networks. Only the key corresponding to the active network needs to be set.
+The public Aptos API keys for the various networks. Only the key corresponding
+to the active network needs to be set.
 
 These keys:
 
-- Must be **exposed publicly**, as they are passed to the wallet adapter context provider.
+- Must be **exposed publicly**, as they are passed to the wallet adapter context
+  provider.
 
 - Are safe to expose.
 
@@ -185,11 +203,12 @@ These keys:
 NEXT_PUBLIC_TESTNET_APTOS_API_KEY="AG-FL4PYMZ1YX1LGAJCWP2R1ACYTYRCBY1GB"
 ```
 
-Refer to the [Aptos API Key Documentation](https://developers.aptoslabs.com/docs/api-access/api-keys) for more details.
+Refer to the [Aptos API key documentation] for more details.
 
 #### `SERVER_<NETWORK>_APTOS_API_KEY`
 
-The backend/private Aptos API keys for the various networks. Only the key corresponding to the active network needs to be set.
+The backend/private Aptos API keys for the various networks. Only the key
+corresponding to the active network needs to be set.
 
 These keys:
 
@@ -197,9 +216,13 @@ These keys:
 
 - **Example**:
 
+<!-- markdownlint-disable MD013 -->
+
 ```shell
-SERVER_TESTNET_APTOS_API_KEY="aptoslabs_aXjFX8fDdZv_AXMynDZvp711WTBpSBmqLyj12RV"
+SERVER_TESTNET_APTOS_API_KEY="aptoslabs_aXjFX8fDdZv_AXMynDZvp711WTBpSBmqLyj12RV9RFA6B"
 ```
+
+<!-- markdownlint-enable MD013 -->
 
 ## Ensure the environment variables are loaded
 
@@ -289,6 +312,7 @@ On Vercel project settings:
 This will allow Vercel to run the `frontend/vercel-install` script in order to
 download the charting library from your private personal fork.
 
+[aptos api key documentation]: https://developers.aptoslabs.com/docs/api-access/api-keys
 [cdn setup guide]: https://github.com/econia-labs/cloud-infra/blob/main/doc/cdn.md
 [fonts.ts]: ./frontend/src/styles/fonts.ts
 [privatechart.tsx]: ./frontend/src/components/charts/PrivateChart.tsx
