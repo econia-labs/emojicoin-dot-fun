@@ -26,7 +26,7 @@ You can get a token at the [Aptos Labs developer portal].
 
 Once the services are up, you have a functional emojicoin events indexer
 processor and WebSockets broker, both at their respective ports specified in
-each one's example.*.env file.
+each one's example.\*.env file.
 
 ## Run a local Aptos fullnode on the `local` network
 
@@ -88,5 +88,5 @@ there's no reason we need to run `--force-restart` at runtime, the best way to
 handle a restart is by removing the localnet test data directory prior to each
 run as well as pruning all the related volumes, which is what [prune.sh] does.
 
+[aptos labs developer portal]: https://developers.aptoslabs.com/
 [prune.sh]: ./utils/prune.sh
-[Aptos Labs developer portal]: https://developers.aptoslabs.com/
