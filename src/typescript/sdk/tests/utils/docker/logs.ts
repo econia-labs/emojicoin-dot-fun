@@ -12,7 +12,6 @@ export type ContainerName =
   | "local-testnet-postgres"
   | "broker"
   | "deployer"
-  | "frontend"
   | "localnet"
   | "processor"
   | "postgres"
@@ -35,7 +34,6 @@ const containerNames: ContainerName[] = [
   "local-testnet-postgres",
   "broker",
   "deployer",
-  "frontend",
   "localnet",
   "processor",
   "postgres",

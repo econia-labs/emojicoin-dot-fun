@@ -17,7 +17,6 @@ import {
 import { EMOJICOIN_INDEXER_URL } from "../../../src/server/env";
 import { TableName } from "../../../src/indexer-v2/types/json-types";
 import { readFileSync, writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
 const LOCAL_ENV_PATH = path.join(getGitRoot(), "src/docker", "example.local.env");
@@ -74,10 +73,8 @@ export class DockerTestHarness {
   /**
    * Stops the Docker containers.
    */
-  static async stop({ frontend }: { frontend: boolean }) {
-    await execPromise(
-      `docker compose -f ${LOCAL_COMPOSE_PATH} ${frontend ? "--profile frontend" : ""} --env-file ${LOCAL_ENV_PATH} stop`
-    );
+  static async stop() {
+    await execPromise(`docker compose -f ${LOCAL_COMPOSE_PATH} --env-file ${LOCAL_ENV_PATH} stop`);
     const process = Number(readFileSync(TMP_PID_FILE_PATH, { encoding: "utf-8" }));
     if (process) {
       kill(process);
@@ -87,16 +84,10 @@ export class DockerTestHarness {
   /**
    * Calls the Docker helper script to start the containers.
    */
-  static async run({
-    frontend,
-    filterLogsFrom = [],
-  }: {
-    frontend: boolean;
-    filterLogsFrom?: ContainerName[];
-  }) {
-    await DockerTestHarness.start({ frontend, filterLogsFrom });
+  static async run({ filterLogsFrom = [] }: { filterLogsFrom?: ContainerName[] }) {
+    await DockerTestHarness.start({ filterLogsFrom });
     const promises = [
-      DockerTestHarness.waitForPrimaryService(frontend),
+      DockerTestHarness.waitForPrimaryService(),
       DockerTestHarness.waitForDeployer(),
       DockerTestHarness.waitForMigrationsToComplete(),
     ];
@@ -106,35 +97,15 @@ export class DockerTestHarness {
   /**
    * Starts a completely new Docker environment for the test harness.
    */
-  static async start({
-    frontend,
-    filterLogsFrom,
-  }: {
-    frontend: boolean;
-    filterLogsFrom: ContainerName[];
-  }) {
+  static async start({ filterLogsFrom }: { filterLogsFrom: ContainerName[] }) {
     // Ensure that we have a fresh Docker environment before starting the test harness.
     await DockerTestHarness.remove();
 
     const command = "docker";
 
-    // Always build the frontend container if we're using it.
-    if (frontend) {
-      execSync(
-        `docker compose -f ${LOCAL_COMPOSE_PATH} --env-file ${LOCAL_ENV_PATH} build frontend`,
-        { stdio: "inherit" }
-      );
-    }
-
-    const args = [
-      "compose",
-      "-f",
-      LOCAL_COMPOSE_PATH,
-      "--env-file",
-      LOCAL_ENV_PATH,
-      ...(frontend ? ["--profile", "frontend"] : []),
-      "up",
-    ].filter((arg) => arg !== "");
+    const args = ["compose", "-f", LOCAL_COMPOSE_PATH, "--env-file", LOCAL_ENV_PATH, "up"].filter(
+      (arg) => arg !== ""
+    );
 
     const process = spawnWrapper(command, args, false, filterLogsFrom);
     writeFileSync(TMP_PID_FILE_PATH, process.pid?.toString() ?? "");
@@ -145,10 +116,9 @@ export class DockerTestHarness {
    *
    * @returns Promise<boolean>
    */
-  static async waitForPrimaryService(frontend: boolean): Promise<boolean> {
-    // The broker will be the last container up, unless we're running the frontend.
-    // In that case, the frontend will be last.
-    const container: ContainerName = frontend ? "frontend" : "broker";
+  static async waitForPrimaryService(): Promise<boolean> {
+    // The broker will be the last container up.
+    const container: ContainerName = "broker";
     const ready = await waitFor({
       condition: async () => await isPrimaryContainerReady(container),
       interval: PING_STATE_INTERVAL,

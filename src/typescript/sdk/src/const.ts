@@ -42,7 +42,7 @@ if (!APTOS_NETWORK) {
 }
 
 const clientKeys: Record<Network, string | undefined> = {
-  [Network.LOCAL]: process.env.NEXT_PUBLIC_LOCAL_APTOS_API_KEY,
+  [Network.LOCAL]: undefined,
   [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
   [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
   [Network.TESTNET]: process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY,
@@ -50,7 +50,7 @@ const clientKeys: Record<Network, string | undefined> = {
 };
 
 const serverKeys: Record<Network, string | undefined> = {
-  [Network.LOCAL]: process.env.SERVER_LOCAL_APTOS_API_KEY,
+  [Network.LOCAL]: undefined,
   [Network.CUSTOM]: process.env.SERVER_CUSTOM_APTOS_API_KEY,
   [Network.DEVNET]: process.env.SERVER_DEVNET_APTOS_API_KEY,
   [Network.TESTNET]: process.env.SERVER_TESTNET_APTOS_API_KEY,
