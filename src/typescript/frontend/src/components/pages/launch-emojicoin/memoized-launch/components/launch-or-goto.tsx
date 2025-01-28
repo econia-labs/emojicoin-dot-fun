@@ -23,18 +23,23 @@ export const LaunchButtonOrGoToMarketLink = ({
     overflow: true,
   };
 
+  const link = (
+    <Link
+      className="font-pixelar text-lg uppercase text-ec-blue"
+      href={path.join(ROUTES.market, emojis.join(""))}
+    >
+      <Button scale="lg" scrambleProps={scrambleProps}>
+        {t("Go to emojicoin market")}
+      </Button>
+    </Link>
+  );
   return (
     <>
-      <ButtonWithConnectWalletFallback>
+      {/* Force displaying the "Go to emojicoin market" link if the market is already registered,
+          regardless of whether or not the user is connected. */}
+      <ButtonWithConnectWalletFallback forceDisplayChildren={registered}>
         {registered ? (
-          <Link
-            className="font-pixelar text-lg uppercase text-ec-blue"
-            href={path.join(ROUTES.market, emojis.join(""))}
-          >
-            <Button scale="lg" scrambleProps={scrambleProps}>
-              {t("Go to emojicoin market")}
-            </Button>
-          </Link>
+          link
         ) : (
           <Button
             disabled={invalid || typeof registered === "undefined"}
