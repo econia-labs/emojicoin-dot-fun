@@ -1,8 +1,10 @@
 import { type fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
-// import { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
-// import { redirect } from "next/navigation";
-// import { parseJSON } from "utils";
+//import { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
+//import { redirect } from "next/navigation";
+//import { parseJSON } from "utils";
+//import { GET as getCandlesticks, getCandlesticksRoute } from "../candlesticks/route";
+//import { Period } from "@sdk/const";
 
 export const revalidate = 2;
 
@@ -58,30 +60,24 @@ export default async function Arena() {
     }),
   ]);
 
-  const to = Math.ceil(new Date().getTime() / 1000).toString()
-  const countBack = '500';
-  const period = 'period_1m';
-
-  const paramsCandlesticksMarket0 = new URLSearchParams({
-    marketID: market0!.market.marketID.toString(),
-    period,
-    countBack,
-    to,
-  });
-
-  const paramsCandlesticksMarket1 = new URLSearchParams({
-    marketID: market1!.market.marketID.toString(),
-    period,
-    countBack,
-    to,
-  });
+  const to = Math.ceil(new Date().getTime() / 1000);
+  const countBack = 500;
+  const period = Period.Period1M;
 
   const [candlesticksMarket0, candlesticksMarket1] = await Promise.all([
-    fetch(`/candlesticks?${paramsCandlesticksMarket0.toString()}`)
-      .then(res => res.text())
+    getCandlesticksRoute(
+      Number(market0!.market.marketID),
+      to,
+      period,
+      countBack,
+    )
       .then(res => parseJSON<PeriodicStateEventModel[]>(res)),
-    fetch(`/candlesticks?${paramsCandlesticksMarket1.toString()}`)
-      .then(res => res.text())
+    getCandlesticksRoute(
+      Number(market1!.market.marketID),
+      to,
+      period,
+      countBack,
+    )
       .then(res => parseJSON<PeriodicStateEventModel[]>(res)),
   ]);
   /* */
