@@ -6,29 +6,48 @@ import { Line } from "react-chartjs-2";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useRef } from "react";
 import useNodeDimensions from "@hooks/use-node-dimensions";
+import { q64ToBig } from "@sdk/utils";
 
 const PriceChart: React.FC<Props & { height: number; width: number }> = ({
   market0,
   market1,
   height,
   width,
+  candlesticksMarket0,
+  candlesticksMarket1,
 }) => {
   const now = Math.floor(new Date().getTime() / 1000 / 60);
   const size = 15;
-  const labels = Array.from({ length: size }).map((_, i) => {
-    const date = new Date((now - size + i) * 60 * 1000);
+  const points = Array.from({ length: size }).map((_, i) => {
+    return new Date((now - size + i) * 60 * 1000);
+  });
+  const labels = points.map((date) => {
     const hour = date.getHours().toString().padStart(2, "0");
     const minute = date.getMinutes().toString().padStart(2, "0");
     return `${hour}:${minute}`;
   });
   const color0 = darkTheme.colors.econiaBlue;
   const color1 = darkTheme.colors.pink;
+  const dataset0 = points
+    .map((p) => {
+      return candlesticksMarket0.findLast(
+        (c) => Number(c.periodicMetadata.startTime / 1000n) <= p.getTime()
+      );
+    })
+    .map((c) => (c ? q64ToBig(c.periodicState.openPriceQ64).toNumber() : 0));
+  const dataset1 = points
+    .map((p) => {
+      return candlesticksMarket1.findLast(
+        (c) => Number(c.periodicMetadata.startTime / 1000n) <= p.getTime()
+      );
+    })
+    .map((c) => (c ? q64ToBig(c.periodicState.openPriceQ64).toNumber() : 0));
   const data: ChartData<"line", (number | null)[], string> = {
     labels,
     datasets: [
       {
         label: market0.market.symbolEmojis.join(""),
-        data: [1.1, 1.2, 1.3, 1.4, 1, 0.5, 0.69, 0.75, 1.3, 1.5, 2, 2.1, null, null, 2.3],
+        data: dataset0,
         borderColor: color0,
         spanGaps: true,
         yAxisID: "0",
@@ -36,9 +55,7 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
       },
       {
         label: market1.market.symbolEmojis.join(""),
-        data: [2.9, 2.8, 2.7, 2.6, 3, 4, 3.5, 3.2, 2.6, 2.1, 2, 1.9, null, null, 1.5].map((e) =>
-          e !== null ? e * 0.01 : null
-        ),
+        data: dataset1,
         borderColor: color1,
         spanGaps: true,
         yAxisID: "1",
@@ -57,6 +74,18 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
       legend: {
         display: false,
       },
+      tooltip: {
+        callbacks: {
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+          label: (context: any) => {
+            const format = {
+              maximumFractionDigits: 8,
+            };
+            const formatter = new Intl.NumberFormat("en-US", format);
+            return formatter.format(context.raw);
+          },
+        },
+      },
     },
     scales: {
       "0": {
@@ -66,12 +95,27 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
         },
         ticks: {
           color: color0,
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+          callback: (value: any) => {
+            const format = {
+              maximumFractionDigits: 8,
+            };
+            const formatter = new Intl.NumberFormat("en-US", format);
+            return formatter.format(value);
+          },
         },
       },
       "1": {
         position: "right",
         ticks: {
           color: color1,
+          callback: (value: any) => {
+            const format = {
+              maximumFractionDigits: 8,
+            };
+            const formatter = new Intl.NumberFormat("en-US", format);
+            return formatter.format(value);
+          },
         },
       },
       x: {

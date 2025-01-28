@@ -72,7 +72,7 @@ const Desktop: React.FC<Props> = ({
     <div
       style={{
         display: "grid",
-        gridTemplateRows: "1fr 2.75fr",
+        gridTemplateRows: "1fr 3fr",
         gridTemplateColumns: "1fr 0.65fr 0.85fr 1fr",
         height: "100%",
         width: "100%",
