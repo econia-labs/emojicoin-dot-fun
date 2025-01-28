@@ -12,6 +12,9 @@ export const callAggregateMarketState = () =>
       if (res.data) {
         return res.data as DatabaseJsonType["aggregate_market_state"];
       }
+      if (res.error) {
+        console.error(res.error);
+      }
       throw new Error("RPC call to `aggregate_market_state` failed, `null` was returned.");
     })
     .then(toAggregateMarketState);

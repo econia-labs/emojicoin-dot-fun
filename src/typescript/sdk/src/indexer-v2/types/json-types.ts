@@ -515,7 +515,6 @@ export type DatabaseJsonType = {
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
   [DatabaseRpc.AggregateMarketState]: Flatten<{
-    registry_address: AccountAddressString;
     nonce: Uint64String;
     last_bump_time: PostgresTimestamp;
     n_markets: Uint64String;

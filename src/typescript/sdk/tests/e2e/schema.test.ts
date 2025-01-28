@@ -8,6 +8,7 @@ import {
 } from "../../src/indexer-v2/types/postgres-numeric-types";
 
 // This is not the full response type; it's just what we use in this test.
+// NOTE: This does *not* cover the RPC function calls/schemas. Only tables and views.
 interface DatabaseSchema {
   definitions: {
     [Table in TableName]: {
