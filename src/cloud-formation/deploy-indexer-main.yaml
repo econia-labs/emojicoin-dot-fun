@@ -20,6 +20,7 @@ parameters:
   EnableWafRulesWebSocket: 'false'
   Environment: 'main'
   Network: 'testnet'
+  ProcessorHealthCheckStartPeriod: 300
   ProcessorImageVersion: '2.2.0'
   VpcStackName: 'emoji-vpc'
 tags: null
