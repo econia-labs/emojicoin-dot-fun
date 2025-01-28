@@ -232,6 +232,9 @@ Parameters:
   PostgrestServerTraceHeader:
     Default: 'X-Request-Id'
     Type: 'String'
+  ProcessorHealthCheckStartPeriod:
+    Default: 60
+    Type: 'Number'
   ProcessorImageVersion:
     Type: 'String'
   VpcStackName:
@@ -1441,7 +1444,7 @@ Resources:
               - 'ProcessorWebsocketPort'
           Interval: 60
           Retries: 2
-          StartPeriod: 60
+          StartPeriod: !Ref 'ProcessorHealthCheckStartPeriod'
           Timeout: 5
         Image: !Join
         - ''
