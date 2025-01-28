@@ -11,16 +11,16 @@ export const TabContainer = ({ tabs }: { tabs: Tab[] }) => {
   const [selectedTab, setSelectedTab] = useState(tabs.length > 0 ? tabs[0].name : undefined);
   return (
     <div
+      className="grid h-[100%]"
       style={{
-        display: "grid",
-        gridTemplateRows: "1fr auto",
+        gridTemplateRows: "auto 1fr",
       }}
     >
       <div className="relative flex flex-row mt-[.5em] overflow-y-auto">
         {tabs.map((t) => {
           return (
             <div className="flex flex-row" key={`tab-${t.name}`}>
-              <div className="w-[1em] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
+              <div className="w-[1em] border-solid border-b-[2px] border-dark-gray"></div>
               <div className="flex flex-col">
                 <div
                   onClick={() => setSelectedTab(t.name)}
@@ -53,7 +53,7 @@ export const TabContainer = ({ tabs }: { tabs: Tab[] }) => {
         })}
         <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
       </div>
-      <div>{tabs.find((t) => t.name === selectedTab)?.element}</div>
+      <div className="h-[100%]">{tabs.find((t) => t.name === selectedTab)?.element}</div>
     </div>
   );
 };
