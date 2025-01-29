@@ -251,13 +251,13 @@ To avoid having to define environment variables in multiple places, we've
 intentionally omitted environment variables from the `frontend` directory to
 enforce that the project be built and run in a certain order.
 
-## Copy the `example.env` file to a `.env` file
+## Copy the `example.*.env` file to a `.env` file
 
-Most commands load `.env.local` first then `.env`, so copy the environment
-example file to your own file.
+Copy the example env file based on the network you want to use, for example, for
+testnet you'd run:
 
 ```shell
-cp example.env .env
+cp example.testnet.env .env
 ```
 
 ## Run the `frontend` application

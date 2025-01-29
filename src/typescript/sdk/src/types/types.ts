@@ -364,6 +364,102 @@ export type Types = {
     swap: Types["SwapEvent"];
     octasRewardAmount: bigint;
   };
+
+  ArenaMelee: {
+    meleeId: bigint;
+    emojicoin0MarketAddress: string;
+    emojicoin1MarketAddress: string;
+    startTime: bigint;
+    duration: bigint;
+    maxMatchPercentage: bigint;
+    maxMatchAmount: bigint;
+    availableRewards: bigint;
+  };
+
+  ArenaEnter: {
+    user: string;
+    meleeId: bigint;
+    inputAmount: bigint;
+    quoteVolume: bigint;
+    integratorFee: bigint;
+    matchAmount: bigint;
+    emojicoin0Proceeds: bigint;
+    emojicoin1Proceeds: bigint;
+    emojicoin0ExchangeRateBase: bigint;
+    emojicoin0ExchangeRateQuote: bigint;
+    emojicoin1ExchangeRateBase: bigint;
+    emojicoin1ExchangeRateQuote: bigint;
+  };
+
+  ArenaExit: {
+    user: string;
+    meleeId: bigint;
+    tapOutFee: bigint;
+    emojicoin0Proceeds: bigint;
+    emojicoin1Proceeds: bigint;
+    emojicoin0ExchangeRateBase: bigint;
+    emojicoin0ExchangeRateQuote: bigint;
+    emojicoin1ExchangeRateBase: bigint;
+    emojicoin1ExchangeRateQuote: bigint;
+  };
+
+  ArenaSwap: {
+    user: string;
+    meleeId: bigint;
+    quoteVolume: bigint;
+    integratorFee: bigint;
+    emojicoin0Proceeds: bigint;
+    emojicoin1Proceeds: bigint;
+    emojicoin0ExchangeRateBase: bigint;
+    emojicoin0ExchangeRateQuote: bigint;
+    emojicoin1ExchangeRateBase: bigint;
+    emojicoin1ExchangeRateQuote: bigint;
+  };
+
+  ArenaVaultBalanceUpdate: {
+    newBalance: bigint;
+  };
+
+  ArenaPositions: {
+    user: string;
+    meleeId: bigint;
+    open: boolean;
+    emojicoin0Balance: bigint;
+    emojicoin1Balance: bigint;
+    withdrawals: bigint;
+    deposits: bigint;
+  };
+
+  ArenaLeaderboardHistory: {
+    user: AccountAddressString;
+    meleeId: bigint;
+    profits: bigint;
+    losses: bigint;
+  };
+
+  ArenaLeaderboard: {
+    user: string;
+    open: boolean;
+    emojicoin0Balance: bigint;
+    emojicoin1Balance: bigint;
+    profits: bigint;
+    losses: bigint;
+    pnl_percent: number;
+    pnl_octas: number;
+  };
+
+  ArenaInfo: {
+    meleeId: bigint;
+    volume: bigint;
+    rewardsRemaining: bigint;
+    aptLocked: bigint;
+    emojicoin0MarketAddress: string;
+    emojicoin1MarketAddress: string;
+    startTime: bigint;
+    duration: bigint;
+    maxMatchPercentage: bigint;
+    maxMatchAmount: bigint;
+  };
 };
 
 export const toExtendRef = (data: JsonTypes["ExtendRef"]): Types["ExtendRef"] => ({
