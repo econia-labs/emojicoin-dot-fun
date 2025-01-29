@@ -1,4 +1,5 @@
 use log::error;
+use num_traits::ToPrimitive;
 use processor::emojicoin_dot_fun::{EmojicoinDbEvent, EmojicoinDbEventType};
 use tokio::signal;
 
@@ -7,25 +8,23 @@ use crate::types::Subscription;
 /// Get the market ID of a EmojicoinDbEvent of a given EventType
 #[allow(dead_code)]
 pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
-    let market_id: Result<u64, _> = match event {
-        EmojicoinDbEvent::Swap(s) => s.market_id,
-        EmojicoinDbEvent::Chat(c) => c.market_id,
-        EmojicoinDbEvent::MarketRegistration(mr) => mr.market_id,
-        EmojicoinDbEvent::PeriodicState(ps) => ps.market_id,
-        EmojicoinDbEvent::MarketLatestState(mls) => mls.market_id,
-        EmojicoinDbEvent::Liquidity(l) => l.market_id,
+    let market_id = match event {
+        EmojicoinDbEvent::Swap(s) => &s.market_id,
+        EmojicoinDbEvent::Chat(c) => &c.market_id,
+        EmojicoinDbEvent::MarketRegistration(mr) => &mr.market_id,
+        EmojicoinDbEvent::PeriodicState(ps) => &ps.market_id,
+        EmojicoinDbEvent::MarketLatestState(mls) => &mls.market_id,
+        EmojicoinDbEvent::Liquidity(l) => &l.market_id,
         _ => {
             return Err(
                 "Trying to get market ID from event which does not have a market ID".to_string(),
             )
         }
-    }
-    .try_into();
-    if let Ok(market_id) = market_id {
-        Ok(market_id)
-    } else {
-        Err("Got negative market ID".to_string())
-    }
+    };
+
+    market_id
+        .to_u64()
+        .ok_or("Failed to convert BigDecimal to u64".to_string())
 }
 
 /// Returns true if the given subscription should receive the given event.
