@@ -430,6 +430,13 @@ export type Types = {
     deposits: bigint;
   };
 
+  ArenaLeaderboardHistory: {
+    user: AccountAddressString;
+    meleeId: bigint;
+    profits: bigint;
+    losses: bigint;
+  };
+
   ArenaLeaderboard: {
     user: string;
     open: boolean;

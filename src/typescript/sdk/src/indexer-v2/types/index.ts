@@ -202,6 +202,15 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   maxMatchAmount: BigInt(data.max_match_amount),
 });
 
+const toArenaLeaderboardHistoryFromDatabase = (
+  data: DatabaseStructType["ArenaLeaderboardHistory"]
+): Types["ArenaLeaderboardHistory"] => ({
+  user: toAccountAddressString(data.user),
+  meleeId: BigInt(data.melee_id),
+  profits: BigInt(data.profits),
+  losses: BigInt(data.losses),
+});
+
 type GlobalStateEventData = {
   emitTime: bigint;
   registryNonce: bigint;
@@ -428,7 +437,8 @@ export type ArenaExitModel = ReturnType<typeof toArenaExitModel>;
 export type ArenaSwapModel = ReturnType<typeof toArenaSwapModel>;
 export type ArenaVaultBalanceUpdateModel = ReturnType<typeof toArenaVaultBalanceUpdateModel>;
 export type ArenaPositionsModel = ReturnType<typeof toArenaPositionsModel>;
-export type ArenaLeaderboardRPCModel = ReturnType<typeof toArenaLeaderboardRPCModel>;
+export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
+export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 
@@ -492,15 +502,6 @@ export const withArenaVaultBalanceUpdateData = curryToNamedType(
   toArenaVaultBalanceUpdateFromDatabase,
   "arenaVaultBalanceUpdate"
 );
-export const withArenaPositionsData = curryToNamedType(
-  toArenaPositionsFromDatabase,
-  "arenaPositions"
-);
-export const withArenaLeaderboardData = curryToNamedType(
-  toArenaLeaderboardFromDatabase,
-  "arenaLeaderboard"
-);
-export const withArenaInfoData = curryToNamedType(toArenaInfoFromDatabase, "arenaInfo");
 
 const EVENT_NAMES = {
   GlobalState: "GlobalState",
@@ -753,17 +754,10 @@ export const toArenaVaultBalanceUpdateModel = (
   ...withArenaVaultBalanceUpdateData(data),
 });
 
-export const toArenaPositionsModel = (data: DatabaseJsonType["arena_positions"]) => ({
-  ...withArenaPositionsData(data),
-});
-
-export const toArenaLeaderboardRPCModel = (data: DatabaseJsonType["arena_leaderboard"]) => ({
-  ...withArenaLeaderboardData(data),
-});
-
-export const toArenaInfoModel = (data: DatabaseJsonType["arena_info"]) => ({
-  ...withArenaInfoData(data),
-});
+export const toArenaPositionsModel = toArenaPositionsFromDatabase;
+export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
+export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
+export const toArenaInfoModel = toArenaInfoFromDatabase;
 
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
@@ -791,6 +785,15 @@ export const DatabaseTypeConverter = {
   [TableName.MarketState]: toMarketStateModel,
   [TableName.ProcessorStatus]: toProcessorStatus,
   [TableName.PriceFeed]: toPriceFeed,
+  [TableName.ArenaEnterEvents]: toArenaEnterModel,
+  [TableName.ArenaMeleeEvents]: toArenaMeleeModel,
+  [TableName.ArenaExitEvents]: toArenaExitModel,
+  [TableName.ArenaSwapEvents]: toArenaSwapModel,
+  [TableName.ArenaInfo]: toArenaInfoModel,
+  [TableName.ArenaPositions]: toArenaPositionsModel,
+  [TableName.ArenaVaultBalanceUpdateEvents]: toArenaVaultBalanceUpdateModel,
+  [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
+  [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
 };
 
@@ -815,8 +818,9 @@ export type DatabaseModels = {
   [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
   [TableName.ArenaPositions]: ArenaPositionsModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
+  [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
+  [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
-  [DatabaseRpc.ArenaLeaderboard]: ArenaLeaderboardRPCModel;
 };
 
 export type AnyEventTable =

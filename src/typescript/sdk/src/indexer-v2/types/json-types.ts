@@ -333,6 +333,13 @@ type ArenaInfoData = {
   max_match_amount: Uint64String;
 };
 
+type ArenaLeaderboardHistoryData = {
+  user: string;
+  melee_id: Uint64String;
+  profits: Uint64String;
+  losses: Uint64String;
+};
+
 type ArenaLeaderboardData = {
   user: string;
   open: boolean;
@@ -363,6 +370,7 @@ export type DatabaseStructType = {
   ArenaVaultBalanceUpdate: ArenaVaultBalanceUpdateEventData;
   ArenaPositions: ArenaPositionsData;
   ArenaLeaderboard: ArenaLeaderboardData;
+  ArenaLeaderboardHistory: ArenaLeaderboardHistoryData;
   ArenaInfo: ArenaInfoData;
 };
 
@@ -397,12 +405,15 @@ export enum TableName {
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
   ArenaPositions = "arena_positions",
   ArenaInfo = "arena_info",
+  // The view for the current arena leaderboard, all users.
+  ArenaLeaderboard = "arena_leaderboard",
+  // The table for a user's historic arena pnl.
+  ArenaLeaderboardHistory = "arena_leaderboard_history",
 }
 
 export enum DatabaseRpc {
   UserPools = "user_pools",
   PriceFeed = "price_feed",
-  ArenaLeaderboard = "arena_leaderboard",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -493,6 +504,9 @@ export type DatabaseJsonType = {
   >;
   [TableName.ArenaPositions]: ArenaPositionsData;
   [TableName.ArenaInfo]: ArenaInfoData;
+
+  [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
+  [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
@@ -500,7 +514,6 @@ export type DatabaseJsonType = {
       ProcessedFields &
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
-  [DatabaseRpc.ArenaLeaderboard]: ArenaLeaderboardData;
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
@@ -523,7 +536,8 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
   DatabaseJsonType[TableName.ArenaPositions] &
   DatabaseJsonType[TableName.ArenaInfo] &
-  DatabaseJsonType[DatabaseRpc.UserPools] &
-  DatabaseJsonType[DatabaseRpc.ArenaLeaderboard];
+  DatabaseJsonType[TableName.ArenaLeaderboard] &
+  DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
+  DatabaseJsonType[DatabaseRpc.UserPools];
 
 export type AnyColumnName = keyof Columns;
