@@ -25,7 +25,9 @@ export const LaunchButtonOrGoToMarketLink = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback>
+      {/* Force displaying the "Go to emojicoin market" link if the market is already registered,
+          regardless of whether or not the user is connected. */}
+      <ButtonWithConnectWalletFallback forceDisplayChildren={registered}>
         {registered ? (
           <Link
             className="font-pixelar text-lg uppercase text-ec-blue"
