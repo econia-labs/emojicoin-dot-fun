@@ -515,20 +515,25 @@ export type DatabaseJsonType = {
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
   [DatabaseRpc.AggregateMarketState]: Flatten<{
-    nonce: Uint64String;
-    last_bump_time: PostgresTimestamp;
-    n_markets: Uint64String;
+    last_emojicoin_transaction_version: Uint64String;
+    cumulative_chat_messages: Uint64String;
+    cumulative_integrator_fees: Uint128String;
     cumulative_quote_volume: Uint128String;
+    cumulative_swaps: Uint64String;
+    fully_diluted_value: Uint128String;
+    last_bump_time: PostgresTimestamp;
+    market_cap: Uint128String;
+    n_markets: Uint64String;
+    nonce: Uint64String;
     total_quote_locked: Uint128String;
     total_value_locked: Uint128String;
-    market_cap: Uint128String;
-    fully_diluted_value: Uint128String;
-    cumulative_integrator_fees: Uint128String;
-    cumulative_swaps: Uint64String;
-    cumulative_chat_messages: Uint64String;
-    last_emojicoin_transaction_version: Uint64String;
     n_markets_in_bonding_curve: Uint64String;
     n_markets_post_bonding_curve: Uint64String;
+    n_global_state_events: Uint64String;
+    n_market_registration_events: Uint64String;
+    n_swap_events: Uint64String;
+    n_chat_events: Uint64String;
+    n_liquidity_events: Uint64String;
   }>;
 };
 

@@ -774,19 +774,24 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
 
 export const toAggregateMarketState = (data: DatabaseJsonType["aggregate_market_state"]) => ({
   lastEmojicoinTransactionVersion: BigInt(data.last_emojicoin_transaction_version),
-  nonce: BigInt(data.nonce),
-  lastBumpTime: postgresTimestampToMicroseconds(data.last_bump_time),
-  numMarkets: BigInt(data.n_markets),
+  cumulativeChatMessages: BigInt(data.cumulative_chat_messages),
+  cumulativeIntegratorFees: BigInt(data.cumulative_integrator_fees),
   cumulativeQuoteVolume: BigInt(data.cumulative_quote_volume),
+  cumulativeSwaps: BigInt(data.cumulative_swaps),
+  fullyDilutedValue: BigInt(data.fully_diluted_value),
+  lastBumpTime: postgresTimestampToMicroseconds(data.last_bump_time),
+  marketCap: BigInt(data.market_cap),
+  numMarkets: BigInt(data.n_markets),
+  nonce: BigInt(data.nonce),
   totalQuoteLocked: BigInt(data.total_quote_locked),
   totalValueLocked: BigInt(data.total_value_locked),
-  marketCap: BigInt(data.market_cap),
-  fullyDilutedValue: BigInt(data.fully_diluted_value),
-  cumulativeIntegratorFees: BigInt(data.cumulative_integrator_fees),
-  cumulativeSwaps: BigInt(data.cumulative_swaps),
-  cumulativeChatMessages: BigInt(data.cumulative_chat_messages),
   numMarketsInBondingCurve: BigInt(data.n_markets_in_bonding_curve),
   numMarketsPostBondingCurve: BigInt(data.n_markets_post_bonding_curve),
+  numGlobalStateEvents: BigInt(data.n_global_state_events),
+  numMarketRegistrationEvents: BigInt(data.n_market_registration_events),
+  numSwapEvents: BigInt(data.n_swap_events),
+  numChatEvents: BigInt(data.n_chat_events),
+  numLiquidityEvents: BigInt(data.n_liquidity_events),
 });
 
 export const DatabaseTypeConverter = {
