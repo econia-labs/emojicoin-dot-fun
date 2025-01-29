@@ -393,7 +393,7 @@ export enum TableName {
   ArenaEnterEvents = "arena_enter_events",
   ArenaExitEvents = "arena_exit_events",
   ArenaSwapEvents = "arena_swap_events",
-  ArenaVaultBalanceUpdateEvents = "arena_vault_balance_updates_events",
+  ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
   ArenaPositions = "arena_positions",
   ArenaInfo = "arena_info",
 }

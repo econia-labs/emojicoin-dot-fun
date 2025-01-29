@@ -746,7 +746,7 @@ export const toArenaSwapModel = (data: DatabaseJsonType["arena_swap_events"]) =>
 });
 
 export const toArenaVaultBalanceUpdateModel = (
-  data: DatabaseJsonType["arena_vault_balance_updates_events"]
+  data: DatabaseJsonType["arena_vault_balance_update_events"]
 ) => ({
   ...withTransactionMetadata(data),
   ...withArenaVaultBalanceUpdateData(data),
