@@ -74,4 +74,11 @@ describe("verifies the schema is what's expected", () => {
     expect(marketStateColumnNames.has("daily_tvl_per_lp_coin_growth")).toBe(true);
     expect(marketStateColumnNames.has("daily_tvl_per_lp_coin_growth_q64")).toBe(false);
   });
+
+  it("ensures that there are no duplicate column names with different types", () => {
+    const mergedSetSize = new Set([...floatColumns, ...bigintColumns, ...integerColumns]).size;
+    const sumOfIndividualSetSize =
+      new Set(floatColumns).size + new Set(bigintColumns).size + new Set(integerColumns).size;
+    expect(mergedSetSize).toEqual(sumOfIndividualSetSize);
+  });
 });
