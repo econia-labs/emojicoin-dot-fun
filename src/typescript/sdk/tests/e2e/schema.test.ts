@@ -33,6 +33,7 @@ describe("verifies the schema is what's expected", () => {
     const response = await fetch(EMOJICOIN_INDEXER_URL);
     const json: DatabaseSchema = await response.json();
     const { definitions } = json;
+    console.log(definitions);
     const tables = Object.values(TableName);
     const bigints: Set<AnyColumnName> = new Set();
     const floats: Set<AnyColumnName> = new Set();
@@ -57,6 +58,7 @@ describe("verifies the schema is what's expected", () => {
 
     // Check if we have it in our set of bigint/numeric types. This is useful for ensuring that
     // we parse things correctly.
+    console.log({floats, floatColumns});
     expect(floats).toEqual(floatColumns);
     expect(bigints).toEqual(bigintColumns);
     expect(integers).toEqual(integerColumns);
