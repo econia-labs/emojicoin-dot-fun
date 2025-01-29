@@ -76,6 +76,7 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "net_proceeds",
   "nonce",
   "open_price_q64",
+  "pnl",
   "pool_fee",
   "pool_fees_base",
   "pool_fees_quote",
@@ -91,6 +92,30 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "volume_base",
   "volume_in_1m_state_tracker",
   "volume_quote",
+
+  // Arena
+  "melee_id",
+  "start_time",
+  "duration",
+  "max_match_percentage",
+  "max_match_amount",
+  "available_rewards",
+  "match_amount",
+  "emojicoin_0_proceeds",
+  "emojicoin_1_proceeds",
+  "emojicoin_0_exchange_rate_base",
+  "emojicoin_1_exchange_rate_base",
+  "emojicoin_0_exchange_rate_quote",
+  "emojicoin_1_exchange_rate_quote",
+  "tap_out_fee",
+  "new_balance",
+  "emojicoin_0_balance",
+  "emojicoin_1_balance",
+  "profits",
+  "losses",
+  "volume",
+  "rewards_remaining",
+  "apt_locked",
 ]);
 
 /**
