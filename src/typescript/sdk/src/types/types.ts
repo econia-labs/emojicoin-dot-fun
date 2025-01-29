@@ -426,8 +426,8 @@ export type Types = {
     open: boolean;
     emojicoin0Balance: bigint;
     emojicoin1Balance: bigint;
-    profits: bigint;
-    losses: bigint;
+    withdrawals: bigint;
+    deposits: bigint;
   };
 
   ArenaLeaderboard: {
@@ -437,7 +437,8 @@ export type Types = {
     emojicoin1Balance: bigint;
     profits: bigint;
     losses: bigint;
-    pnl: number;
+    pnl_percent: number;
+    pnl_octas: number;
   };
 
   ArenaInfo: {

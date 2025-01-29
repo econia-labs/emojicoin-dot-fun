@@ -316,8 +316,8 @@ type ArenaPositionsData = {
   open: boolean;
   emojicoin_0_balance: Uint64String;
   emojicoin_1_balance: Uint64String;
-  profits: Uint64String;
-  losses: Uint64String;
+  withdrawals: Uint64String;
+  deposits: Uint64String;
 };
 
 type ArenaInfoData = {
@@ -340,7 +340,8 @@ type ArenaLeaderboardData = {
   emojicoin_1_balance: Uint64String;
   profits: Uint64String;
   losses: Uint64String;
-  pnl: number;
+  pnl_percent: number;
+  pnl_octas: number;
 };
 
 export type DatabaseStructType = {

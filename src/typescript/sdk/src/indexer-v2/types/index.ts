@@ -172,8 +172,8 @@ const toArenaPositionsFromDatabase = (
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
-  profits: BigInt(data.profits),
-  losses: BigInt(data.losses),
+  withdrawals: BigInt(data.withdrawals),
+  deposits: BigInt(data.deposits),
 });
 
 const toArenaLeaderboardFromDatabase = (
@@ -185,7 +185,8 @@ const toArenaLeaderboardFromDatabase = (
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
-  pnl: data.pnl,
+  pnl_percent: data.pnl_percent,
+  pnl_octas: data.pnl_octas,
 });
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
