@@ -1,4 +1,5 @@
 #!/bin/bash
+# cspell:word obase
 
 set -e
 
