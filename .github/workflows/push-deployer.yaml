@@ -32,7 +32,7 @@ jobs:
         context: '.'
         file: 'src/docker/deployer/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
-        platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
+        platforms: 'linux/amd64'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
     timeout-minutes: 360
