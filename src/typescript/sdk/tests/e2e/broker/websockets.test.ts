@@ -392,8 +392,6 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
     const MARKET_INDEX = 5;
 
-    subscribe(client, [], []);
-
     const market_1 = marketsRegistered[MARKET_INDEX];
     const registerResponse = await RegisterMarket.submit({
       ...senderArgs[MARKET_INDEX],
@@ -408,6 +406,12 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     expect(market_2).toBeDefined();
     expect(registrationStateEventForMarket_2).toBeDefined();
     expect(market_1).not.toEqual(market_2);
+
+    subscribe(
+      client,
+      [market_1.marketID, market_2.marketID],
+      ["MarketLatestState", "Chat", "Swap"]
+    );
 
     const marketMetadata_1 = marketMetadata.find((market) =>
       market.marketAddress.equals(AccountAddress.from(market_1.marketMetadata.marketAddress))
