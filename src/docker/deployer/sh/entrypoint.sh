@@ -79,12 +79,12 @@ fund_and_publish() {
 		--gas-unit-price $gas_unit_price \
 		--profile $profile
 
-	# aptos move run \
-	# 	--assume-yes \
-	# 	--json-file /app/json/emojicoin_arena.json \
-	# 	--max-gas 2000000 \
-	# 	--gas-unit-price $gas_unit_price \
-	# 	--profile $profile
+	aptos move run \
+		--assume-yes \
+		--json-file /app/json/emojicoin_arena.json \
+		--max-gas 2000000 \
+		--gas-unit-price $gas_unit_price \
+		--profile $profile
 }
 
 fund_test_accounts() {
