@@ -1,6 +1,6 @@
 # cspell:word localnet
 
-FROM econialabs/aptos-cli:4.4.0
+FROM econialabs/aptos-cli:6.0.1
 
 RUN apt-get update && apt-get install --no-install-recommends -y bc=1.07* \
     && rm -rf /var/lib/apt/lists/*
