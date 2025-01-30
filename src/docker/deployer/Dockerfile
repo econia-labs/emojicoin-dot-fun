@@ -5,7 +5,7 @@
 # the `yq` releases on apt are outdated and technically deprecated.
 FROM mikefarah/yq:4.44.3 AS yq
 
-FROM econialabs/aptos-cli:4.4.0
+FROM econialabs/aptos-cli:6.0.1
 
 COPY --from=yq /usr/bin/yq /usr/bin/yq
 
@@ -14,6 +14,9 @@ ENV PUBLISHER_PRIVATE_KEY=${PUBLISHER_PRIVATE_KEY}
 
 # Ensure the publisher private key is set.
 RUN test -n "${PUBLISHER_PRIVATE_KEY}"
+
+RUN apt-get update && apt-get install --no-install-recommends -y bc=1.07* \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
