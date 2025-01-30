@@ -37,15 +37,15 @@ export default async function HomePageComponent({
       <div className="flex-col mb-[31px]">
         {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
         <div className="flex justify-center items-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
-          {ARENA_MODULE_ADDRESS ? (
+          {ARENA_MODULE_ADDRESS && meleeData ? (
             <ArenaCard
-              market0Symbol={meleeData!.market0.market.symbolEmojis.join("")}
-              market1Symbol={meleeData!.market1.market.symbolEmojis.join("")}
-              rewardsRemaining={meleeData!.melee.arenaInfo.rewardsRemaining}
-              meleeVolume={meleeData!.melee.arenaInfo.volume}
-              aptLocked={meleeData!.melee.arenaInfo.aptLocked}
-              startTime={meleeData!.melee.arenaInfo.startTime / 1000n / 1000n}
-              duration={meleeData!.melee.arenaInfo.duration / 1000n / 1000n}
+              market0Symbol={meleeData.market0.market.symbolEmojis.join("")}
+              market1Symbol={meleeData.market1.market.symbolEmojis.join("")}
+              rewardsRemaining={meleeData.melee.rewardsRemaining}
+              meleeVolume={meleeData.melee.volume}
+              aptLocked={meleeData.melee.aptLocked}
+              startTime={meleeData.melee.startTime / 1000n / 1000n}
+              duration={meleeData.melee.duration / 1000n / 1000n}
             />
           ) : (
             <MainCard featuredMarkets={priceFeed} page={page} sortBy={sortBy} />
