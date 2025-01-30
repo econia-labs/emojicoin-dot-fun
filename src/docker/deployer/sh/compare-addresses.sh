@@ -1,4 +1,5 @@
 #!/bin/bash
+# cspell:word obase
 
 # Strip the leading "0x" from the address and remove all leading zeros.
 function standardize_address() {
