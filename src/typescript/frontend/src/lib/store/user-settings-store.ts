@@ -7,6 +7,7 @@ export type UserSettingsState = {
 
 export type UserSettingsActions = {
   setAnimate: (value: boolean) => void;
+  userAgent: string;
   toggleAnimate: () => void;
 };
 
@@ -22,9 +23,10 @@ const defaultValues: UserSettingsState = {
 
 const readSettings = (): UserSettingsState => readLocalStorageCache("settings") ?? defaultValues;
 
-export const createUserSettingsStore = () =>
+export const createUserSettingsStore = (userAgent: string) =>
   createStore<UserSettingsStore>()((set) => ({
     ...readSettings(),
+    userAgent,
     setAnimate: (value) =>
       set(() => {
         const state = { animate: value };
