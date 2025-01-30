@@ -492,7 +492,10 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     await waitForEmojicoinIndexer(highestVersion);
     // Wait for the broker to send all 10 messages:
     // 1 registration, 2 swaps, 2 chats, and 5 state event models.
-    await customWaitFor(() => messageEvents.length === 10);
+    await customWaitFor(() => {
+      console.log(`# message events: ${messageEvents.length}`);
+      return messageEvents.length === 10;
+    });
     expect(messageEvents.length === 10);
     expect(brokerMessages.length === 10);
     expect(events.length === 10);
