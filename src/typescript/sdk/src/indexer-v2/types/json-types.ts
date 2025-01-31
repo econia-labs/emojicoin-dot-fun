@@ -413,7 +413,7 @@ export enum TableName {
 
 export enum DatabaseRpc {
   UserPools = "user_pools",
-  PriceFeed = "price_feed",
+  AggregateMarketState = "aggregate_market_state",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -514,6 +514,27 @@ export type DatabaseJsonType = {
       ProcessedFields &
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
+  [DatabaseRpc.AggregateMarketState]: Flatten<{
+    last_emojicoin_transaction_version: Uint64String;
+    cumulative_chat_messages: Uint64String;
+    cumulative_integrator_fees: Uint128String;
+    cumulative_quote_volume: Uint128String;
+    cumulative_swaps: Uint64String;
+    fully_diluted_value: Uint128String;
+    last_bump_time: PostgresTimestamp;
+    market_cap: Uint128String;
+    n_markets: Uint64String;
+    nonce: Uint64String;
+    total_quote_locked: Uint128String;
+    total_value_locked: Uint128String;
+    n_markets_in_bonding_curve: Uint64String;
+    n_markets_post_bonding_curve: Uint64String;
+    n_global_state_events: Uint64String;
+    n_market_registration_events: Uint64String;
+    n_swap_events: Uint64String;
+    n_chat_events: Uint64String;
+    n_liquidity_events: Uint64String;
+  }>;
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
@@ -538,6 +559,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaInfo] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
-  DatabaseJsonType[DatabaseRpc.UserPools];
+  DatabaseJsonType[DatabaseRpc.UserPools] &
+  DatabaseJsonType[DatabaseRpc.AggregateMarketState];
 
 export type AnyColumnName = keyof Columns;

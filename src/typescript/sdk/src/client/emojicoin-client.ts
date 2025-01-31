@@ -8,6 +8,7 @@ import {
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
   AptosConfig,
+  type LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
 import { EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
@@ -29,7 +30,7 @@ import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../cons
 import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
-import { toSwapEvent, type AnyNumberString } from "../types";
+import { toMarketView, toRegistryView, toSwapEvent, type AnyNumberString } from "../types";
 
 const { expect, Expect } = customExpect;
 
@@ -135,10 +136,14 @@ export class EmojicoinClient {
     marketExists: typeof EmojicoinClient.prototype.isMarketRegisteredView;
     simulateBuy: typeof EmojicoinClient.prototype.simulateBuy;
     simulateSell: typeof EmojicoinClient.prototype.simulateSell;
+    registry: typeof EmojicoinClient.prototype.registryView;
+    market: typeof EmojicoinClient.prototype.marketView;
   } = {
     marketExists: this.isMarketRegisteredView.bind(this),
     simulateBuy: this.simulateBuy.bind(this),
     simulateSell: this.simulateSell.bind(this),
+    registry: this.registryView.bind(this),
+    market: this.marketView.bind(this),
   };
 
   private integrator: AccountAddress;
@@ -336,6 +341,21 @@ export class EmojicoinClient {
       ...(ledgerVersion ? { options: { ledgerVersion: BigInt(ledgerVersion) } } : {}),
     });
     return typeof res.vec.pop() !== "undefined";
+  }
+
+  private async registryView(options?: LedgerVersionArg) {
+    return await EmojicoinDotFun.RegistryView.view({
+      aptos: this.aptos,
+      options,
+    }).then(toRegistryView);
+  }
+
+  private async marketView(marketAddress: AccountAddressInput, options?: LedgerVersionArg) {
+    return await EmojicoinDotFun.MarketView.view({
+      marketAddress,
+      aptos: this.aptos,
+      options,
+    }).then(toMarketView);
   }
 
   private async swap(
