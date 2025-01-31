@@ -13,23 +13,14 @@ const JSON_BIGINT = parse({
 });
 
 /**
- * In case a field doesn't match up with its proper parsing function, fall back to parsing it with
- * a primitive JSON parse.
+ * In case a field doesn't match up with its proper parsing function, fall back to not using a
+ * reviver parse function at all, and simply return the data as is.
  */
 const tryWithFallbackParse = (parser: (v: any) => any) => (v: any) => {
   try {
-    // Try the passed in parsing function.
     return parser(v);
   } catch {
-    // Otherwise, as a last resort, stringify and re-parse the JSON data and then return the value
-    // after parsing it, with no assumptions about what the parsing function should be and what data
-    // type it should return.
-    const fieldName = "substitute_json_field_name";
-    const stringified = JSON_BIGINT.stringify({
-      [fieldName]: v,
-    });
-    const parsed = JSON_BIGINT.parse(stringified);
-    return parsed[fieldName];
+    return v;
   }
 };
 const parseFloat = (v: any) => Big(v).toString();
@@ -53,10 +44,10 @@ const converter = new Map<AnyColumnName, (value: any) => any>([
  * THe parsing functions are designated by the column field name, which means there shouldn't ever
  * be overlapping column names with different types in the database, otherwise the parsing function
  * may fail.
- * 
+ *
  * In case this does happen though, there is a fallback function to try to parse the value without
  * any assumptions about how to parse it.
- * 
+ *
  * @see {@link tryWithFallbackParse}
  */
 export const parseJSONWithBigInts = <T>(msg: string): T => {

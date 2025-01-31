@@ -74,7 +74,9 @@ describe("verifies parsing of periodic state event data", () => {
       period: Period.Period1M,
     });
 
-    expect(resPeriodicEvents[0].periodicMetadata.period).toEqual(Period.Period1M);
-    expect(resPeriodicEvents[0].periodicMetadata.startTime);
+    const pEvent = resPeriodicEvents.at(0)!;
+    expect(pEvent).toBeDefined();
+    expect(pEvent.periodicMetadata.period).toEqual(Period.Period1M);
+    expect(pEvent.periodicMetadata.startTime).toBe(oneMinutePeriodicStateTracker.startTime);
   });
 });
