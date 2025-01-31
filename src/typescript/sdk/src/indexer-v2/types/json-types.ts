@@ -255,7 +255,7 @@ type ArenaMeleeEventData = {
   melee_id: Uint64String;
   emojicoin_0_market_address: string;
   emojicoin_1_market_address: string;
-  start_time: Uint64String;
+  start_time: PostgresTimestamp;
   duration: Uint64String;
   max_match_percentage: Uint64String;
   max_match_amount: Uint64String;
@@ -327,7 +327,7 @@ type ArenaInfoData = {
   apt_locked: Uint64String;
   emojicoin_0_market_address: string;
   emojicoin_1_market_address: string;
-  start_time: Uint64String;
+  start_time: PostgresTimestamp;
   duration: Uint64String;
   max_match_percentage: Uint64String;
   max_match_amount: Uint64String;

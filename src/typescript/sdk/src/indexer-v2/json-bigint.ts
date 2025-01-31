@@ -12,6 +12,19 @@ const JSON_BIGINT = parse({
   constructorAction: "ignore",
 });
 
+/**
+ * In case a field doesn't match up with its proper parsing function, fall back to not using a
+ * reviver parse function at all, and simply return the data as is.
+ */
+const tryWithFallbackParse = (parser: (v: any) => any) => (v: any) => {
+  try {
+    return parser(v);
+  } catch {
+    // Log an error on the server.
+    console.error(`Failed to parse value: ${v}`);
+    return v;
+  }
+};
 const parseFloat = (v: any) => Big(v).toString();
 const parseBigInt = (v: any) => BigInt(v);
 const parseInteger = (v: any) => Number(v);
@@ -30,12 +43,25 @@ const converter = new Map<AnyColumnName, (value: any) => any>([
  * Parses a JSON string that uses bigints- i.e., numbers too large for a normal number, but not used
  * as strings. Without this parsing method, the parsed value loses precision or results in an error.
  *
- * Eventually, this could be more fully fleshed out to utilize more precise deserialization.
+ * THe parsing functions are designated by the column field name, which means there shouldn't ever
+ * be overlapping column names with different types in the database, otherwise the parsing function
+ * may fail.
+ *
+ * In case this does happen though, there is a fallback function to try to parse the value without
+ * any assumptions about how to parse it.
+ *
+ * @see {@link tryWithFallbackParse}
  */
 export const parseJSONWithBigInts = <T>(msg: string): T => {
   return JSON_BIGINT.parse(msg, (key, value) => {
-    const fn = converter.get(key as AnyColumnName) ?? parseDefault;
-    return fn(value);
+    try {
+      const fn = converter.get(key as AnyColumnName) ?? parseDefault;
+      // Curry the retrieved parsing function to add a fallback parsing function.
+      const fnWithFallback = tryWithFallbackParse(fn);
+      return fnWithFallback(value);
+    } catch {
+      console.error(`Failed to parse ${key}: ${value} as a ${converter.get(key as AnyColumnName)}`);
+    }
   });
 };
 
