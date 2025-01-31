@@ -2,7 +2,7 @@ import React from "react";
 
 import BondingCurveArrow from "@icons/BondingCurveArrow";
 import { emoji } from "utils";
-import { Emoji } from "utils/emoji";
+import { EmojiAsImage } from "utils/emoji";
 
 export const ProgressBar = ({ length, position }: { length: number; position: number }) => {
   const aspectRatio = (115 / 30) * length;
@@ -43,7 +43,7 @@ export const ProgressBar = ({ length, position }: { length: number; position: nu
           className="grid relative w-[100%]"
           style={{ gridTemplateColumns: `repeat(${length}, 1fr)` }}
         >
-          <Emoji
+          <EmojiAsImage
             size="100%"
             className="absolute h-[175%] translate-x-[-50%] translate-y-[-18.75%]"
             emojis={emoji("rocket")}

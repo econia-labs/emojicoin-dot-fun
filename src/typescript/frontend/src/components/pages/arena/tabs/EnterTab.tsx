@@ -139,7 +139,7 @@ const EnterTabLockPhase: React.FC<{
                 const payloadBuilder = () =>
                   Enter.builder({
                     aptosConfig: aptos.config,
-                    user: account.address,
+                    entrant: account.address,
                     inputAmount: amount,
                     lockIn: innerLock,
                     typeTags: [emojicoin0, emojicoinLP0, emojicoin1, emojicoinLP1, emojicoin],

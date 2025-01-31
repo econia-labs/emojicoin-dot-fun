@@ -13,18 +13,16 @@ export default async function Arena() {
 
   /* Uncomment to use fake data */
   arenaInfo = {
-    arenaInfo: {
-      duration: 120n * 1000n * 1000n,
-      startTime: BigInt(new Date().getTime() * 1000 - 1000 * 1000 * 60),
-      volume: 123n * 10n ** 8n,
-      meleeId: 2n,
-      aptLocked: 12n * 10n ** 8n,
-      maxMatchAmount: 5n * 10n ** 8n,
-      rewardsRemaining: 12345n * 10n ** 6n,
-      maxMatchPercentage: 50n,
-      emojicoin0MarketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
-      emojicoin1MarketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
-    },
+    duration: 120n * 1000n * 1000n,
+    startTime: BigInt(new Date().getTime() * 1000 - 1000 * 1000 * 60),
+    volume: 123n * 10n ** 8n,
+    meleeId: 2n,
+    aptLocked: 12n * 10n ** 8n,
+    maxMatchAmount: 5n * 10n ** 8n,
+    rewardsRemaining: 12345n * 10n ** 6n,
+    maxMatchPercentage: 50n,
+    emojicoin0MarketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
+    emojicoin1MarketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
   };
 
   const [market0, market1] = await Promise.all([
@@ -53,10 +51,10 @@ export default async function Arena() {
 
   const [market0, market1] = await Promise.all([
     fetchMarketStateByAddress({
-      address: arenaInfo.arenaInfo.emojicoin0MarketAddress,
+      address: arenaInfo.emojicoin0MarketAddress,
     }),
     fetchMarketStateByAddress({
-      address: arenaInfo.arenaInfo.emojicoin1MarketAddress,
+      address: arenaInfo.emojicoin1MarketAddress,
     }),
   ]);
 
