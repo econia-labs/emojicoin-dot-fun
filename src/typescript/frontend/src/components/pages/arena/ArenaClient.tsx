@@ -55,7 +55,15 @@ const Desktop: React.FC<Props> = ({
     {
       name: "Profile",
       emoji: emoji("ninja"),
-      element: <ProfileTab />,
+      element: <ProfileTab positions={[{
+          user: "",
+          meleeId: 0n,
+          open: true,
+          emojicoin0Balance: 100000000n,
+          emojicoin1Balance: 0n,
+          withdrawals: 0n,
+          deposits: 10000n
+      }]} {...{market0, market1}} />,
     },
     {
       name: "Chat",
