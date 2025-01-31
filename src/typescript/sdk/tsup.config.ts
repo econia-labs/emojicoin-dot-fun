@@ -21,12 +21,10 @@ const DEFAULT_CONFIG: Options = {
   platform: "node",
 };
 
-const cjsEntries: `src/${string}`[] = ["src/", "src/client", "src/indexer-v2", "src/queries"];
-
 // Common.js config
 const COMMON_CONFIG: MandatoryOptions = {
   ...DEFAULT_CONFIG,
-  entry: cjsEntries.map((v) => `${v}/index.ts`),
+  entry: ["src/index.ts"],
   format: "cjs",
   outDir: "dist/common",
 };

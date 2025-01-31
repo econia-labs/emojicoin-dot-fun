@@ -57,12 +57,6 @@
         "default": "./dist/esm/index.mjs"
       }
     },
-    "./dist/common/client/index.js": "./dist/common/client/index.js",
-    "./dist/esm/client/index.mjs": "./dist/esm/client/index.mjs",
-    "./dist/common/indexer-v2/index.js": "./dist/common/indexer-v2/index.js",
-    "./dist/esm/indexer-v2/index.mjs": "./dist/esm/indexer-v2/index.mjs",
-    "./dist/common/queries/index.js": "./dist/common/queries/index.js",
-    "./dist/esm/queries/index.mjs": "./dist/esm/queries/index.mjs",
     "./package.json": "./package.json"
   },
   "files": [

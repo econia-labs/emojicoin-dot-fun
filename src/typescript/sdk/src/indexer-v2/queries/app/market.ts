@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
-import { LIMIT, ORDER_BY } from "../../../queries";
+import { LIMIT, ORDER_BY } from "../../const";
 import { type AnyNumberString } from "../../../types";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
