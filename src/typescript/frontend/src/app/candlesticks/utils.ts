@@ -1,5 +1,5 @@
 import {
-  AnyNumberString,
+  type AnyNumberString,
   getPeriodStartTimeFromTime,
   isPeriod,
   type Period,

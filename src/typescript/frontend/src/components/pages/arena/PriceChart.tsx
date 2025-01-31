@@ -109,6 +109,7 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
         position: "right",
         ticks: {
           color: color1,
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           callback: (value: any) => {
             const format = {
               maximumFractionDigits: 8,
@@ -139,7 +140,7 @@ export const PriceChartDesktopBox: React.FC<Props> = (props) => {
         <div className="text-light-gray tracking-wider uppercase text-xl">Total volume</div>
         <FormattedNumber
           className="font-forma text-white text-4xl"
-          value={props.arenaInfo.arenaInfo.volume}
+          value={props.arenaInfo.volume}
           nominalize
           suffix=" APT"
         />
