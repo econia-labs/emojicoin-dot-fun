@@ -1,3 +1,5 @@
+// cspell:word tsup
+
 module.exports = {
   env: {
     browser: true,

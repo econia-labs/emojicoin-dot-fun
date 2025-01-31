@@ -1,3 +1,5 @@
+// cspell:word tsup
+
 import { defineConfig } from "tsup";
 import type { Options, Format } from "tsup";
 

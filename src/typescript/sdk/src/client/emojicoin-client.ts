@@ -154,6 +154,7 @@ export class EmojicoinClient {
 
   constructor(args?: {
     aptos?: Aptos;
+    aptosApiKey?: string;
     integrator?: AccountAddressInput;
     integratorFeeRateBPs?: bigint | number;
     minOutputAmount?: bigint | number;
@@ -165,13 +166,24 @@ export class EmojicoinClient {
       integratorFeeRateBPs = 0,
       minOutputAmount = 1n,
       alwaysWaitForIndexer = false,
+      aptosApiKey,
     } = args ?? {};
+    const clientConfig = {
+      ...aptos.config.clientConfig,
+      // If the Aptos API key is passed in, use it, otherwise, use the default one set by
+      // environment variables.
+      ...(aptosApiKey
+        ? {
+            API_KEY: aptosApiKey,
+          }
+        : APTOS_CONFIG),
+    };
     // Create a client that always uses the static API_KEY config options.
-    const hardCodedConfig = new AptosConfig({
+    const aptosConfig = new AptosConfig({
       ...aptos.config,
-      clientConfig: { ...aptos.config.clientConfig, ...APTOS_CONFIG },
+      clientConfig,
     });
-    this.aptos = new Aptos(hardCodedConfig);
+    this.aptos = new Aptos(aptosConfig);
     this.integrator = AccountAddress.from(integrator);
     this.integratorFeeRateBPs = Number(integratorFeeRateBPs);
     this.minOutputAmount = BigInt(minOutputAmount);
