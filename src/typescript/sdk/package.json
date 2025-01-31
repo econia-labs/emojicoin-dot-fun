@@ -57,6 +57,28 @@
         "default": "./dist/esm/index.mjs"
       }
     },
+     "./client": {
+      "source": "./src/client/index.ts",
+      "require": {
+        "types": "./dist/common/client/index.d.ts",
+        "default": "./dist/common/client/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/client/index.d.mts",
+        "default": "./dist/esm/client/index.mjs"
+      }
+    },
+    "./indexer-v2": { 
+      "source": "./src/indexer-v2/index.ts",
+      "require": {
+        "types": "./dist/common/indexer-v2/index.d.ts",
+        "default": "./dist/common/indexer-v2/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/indexer-v2/index.d.mts",
+        "default": "./dist/esm/indexer-v2/index.mjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -94,6 +116,6 @@
     "test:unit": "pnpm jest tests/unit",
     "verify-processor-data": "pnpm dotenv -e ../.env -- pnpm tsx --conditions=react-server src/scripts/verify-processor-data.ts"
   },
-  "typings": "dist/index.d.ts",
+  "typings": "dist/common/index.d.ts",
   "version": "0.3.0-rc.5"
 }

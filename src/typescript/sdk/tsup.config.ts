@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: Options = {
 // Common.js config
 const COMMON_CONFIG: MandatoryOptions = {
   ...DEFAULT_CONFIG,
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/indexer-v2/index.ts", "src/client/index.ts"],
   format: "cjs",
   outDir: "dist/common",
 };
