@@ -20,6 +20,8 @@ const tryWithFallbackParse = (parser: (v: any) => any) => (v: any) => {
   try {
     return parser(v);
   } catch {
+    // Log an error on the server.
+    console.error(`Failed to parse value: ${v}`);
     return v;
   }
 };
