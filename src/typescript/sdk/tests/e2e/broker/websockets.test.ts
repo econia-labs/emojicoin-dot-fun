@@ -392,6 +392,11 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
     const MARKET_INDEX = 5;
 
+    // Don't subscribe to PeriodicStateEvents, or the test will possibly fail.
+    // It's unreliable knowing whether or not one will be emitted, since it depends on when the
+    // first market is registered in relation to 1-minute period boundaries.
+    subscribe(client, [], ["MarketRegistration", "MarketLatestState", "Swap", "Chat"]);
+
     const market_1 = marketsRegistered[MARKET_INDEX];
     const registerResponse = await RegisterMarket.submit({
       ...senderArgs[MARKET_INDEX],
@@ -406,12 +411,6 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     expect(market_2).toBeDefined();
     expect(registrationStateEventForMarket_2).toBeDefined();
     expect(market_1).not.toEqual(market_2);
-
-    subscribe(
-      client,
-      [market_1.marketID, market_2.marketID],
-      ["MarketLatestState", "Chat", "Swap"]
-    );
 
     const marketMetadata_1 = marketMetadata.find((market) =>
       market.marketAddress.equals(AccountAddress.from(market_1.marketMetadata.marketAddress))
@@ -492,10 +491,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     await waitForEmojicoinIndexer(highestVersion);
     // Wait for the broker to send all 10 messages:
     // 1 registration, 2 swaps, 2 chats, and 5 state event models.
-    await customWaitFor(() => {
-      console.log(`# message events: ${messageEvents.length}`);
-      return messageEvents.length === 10;
-    });
+    await customWaitFor(() => messageEvents.length === 10);
     expect(messageEvents.length === 10);
     expect(brokerMessages.length === 10);
     expect(events.length === 10);
