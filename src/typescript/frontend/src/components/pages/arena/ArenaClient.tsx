@@ -88,11 +88,11 @@ const Desktop: React.FC<Props> = ({
       </Box>
       <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
         <Countdown
-          startTime={arenaInfo.arenaInfo.startTime / 1000n / 1000n}
-          duration={arenaInfo.arenaInfo.duration / 1000n / 1000n}
+          startTime={arenaInfo.startTime / 1000n / 1000n}
+          duration={arenaInfo.duration / 1000n / 1000n}
         />
       </Box>
-      <RewardsRemainingBox rewardsRemaining={arenaInfo.arenaInfo.rewardsRemaining} />
+      <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
       <PriceChartDesktopBox
         {...{ arenaInfo, market0, market1, candlesticksMarket0, candlesticksMarket1 }}
       />
@@ -136,12 +136,12 @@ const Mobile: React.FC<Props> = ({ arenaInfo, market0, market1 }) => {
           />
           <div className="text-4xl">
             <Countdown
-              startTime={arenaInfo.arenaInfo.startTime / 1000n / 1000n}
-              duration={arenaInfo.arenaInfo.duration / 1000n / 1000n}
+              startTime={arenaInfo.startTime / 1000n / 1000n}
+              duration={arenaInfo.duration / 1000n / 1000n}
             />
           </div>
         </Box>
-        <RewardsRemainingBox rewardsRemaining={arenaInfo.arenaInfo.rewardsRemaining} />
+        <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
         <Box className="h-[500px]"></Box>
         <Box className="h-[500px]"></Box>
       </div>
