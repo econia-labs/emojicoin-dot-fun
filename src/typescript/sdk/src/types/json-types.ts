@@ -89,7 +89,7 @@ type JsonTypes = {
     fully_diluted_value: AggregatorSnapshot<Uint128String>;
     cumulative_integrator_fees: AggregatorSnapshot<Uint128String>;
     cumulative_swaps: AggregatorSnapshot<Uint128String>;
-    cumulative_chat_messages: AggregatorSnapshot<Uint128String>;
+    cumulative_chat_messages: AggregatorSnapshot<Uint64String>;
   };
 
   // The result of the contract's `market_view` view function. NOT the database view.

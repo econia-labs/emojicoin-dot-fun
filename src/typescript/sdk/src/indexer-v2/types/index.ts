@@ -441,6 +441,7 @@ export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
 export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
+export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
 
 /**
  * Converts a function that converts a type to another type into a function that converts the type
@@ -771,6 +772,28 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
   };
 };
 
+export const toAggregateMarketState = (data: DatabaseJsonType["aggregate_market_state"]) => ({
+  lastEmojicoinTransactionVersion: BigInt(data.last_emojicoin_transaction_version),
+  cumulativeChatMessages: BigInt(data.cumulative_chat_messages),
+  cumulativeIntegratorFees: BigInt(data.cumulative_integrator_fees),
+  cumulativeQuoteVolume: BigInt(data.cumulative_quote_volume),
+  cumulativeSwaps: BigInt(data.cumulative_swaps),
+  fullyDilutedValue: BigInt(data.fully_diluted_value),
+  lastBumpTime: postgresTimestampToMicroseconds(data.last_bump_time),
+  marketCap: BigInt(data.market_cap),
+  numMarkets: BigInt(data.n_markets),
+  nonce: BigInt(data.nonce),
+  totalQuoteLocked: BigInt(data.total_quote_locked),
+  totalValueLocked: BigInt(data.total_value_locked),
+  numMarketsInBondingCurve: BigInt(data.n_markets_in_bonding_curve),
+  numMarketsPostBondingCurve: BigInt(data.n_markets_post_bonding_curve),
+  numGlobalStateEvents: BigInt(data.n_global_state_events),
+  numMarketRegistrationEvents: BigInt(data.n_market_registration_events),
+  numSwapEvents: BigInt(data.n_swap_events),
+  numChatEvents: BigInt(data.n_chat_events),
+  numLiquidityEvents: BigInt(data.n_liquidity_events),
+});
+
 export const DatabaseTypeConverter = {
   [TableName.GlobalStateEvents]: toGlobalStateEventModel,
   [TableName.PeriodicStateEvents]: toPeriodicStateEventModel,
@@ -795,6 +818,7 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
   [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
+  [DatabaseRpc.AggregateMarketState]: toAggregateMarketState,
 };
 
 export type DatabaseModels = {
@@ -821,6 +845,7 @@ export type DatabaseModels = {
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
+  [DatabaseRpc.AggregateMarketState]: AggregateMarketStateModel;
 };
 
 export type AnyEventTable =

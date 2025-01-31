@@ -28,6 +28,7 @@
     "test:sdk": "pnpm --prefix src/typescript run test:sdk",
     "test:sdk:e2e": "pnpm --prefix src/typescript run test:sdk:e2e",
     "test:sdk:unit": "pnpm --prefix src/typescript run test:sdk:unit",
-    "test:verbose": "pnpm --prefix src/typescript run test:verbose"
+    "test:verbose": "pnpm --prefix src/typescript run test:verbose",
+    "verify-processor-data": "pnpm --prefix src/typescript/sdk run verify-processor-data"
   }
 }
