@@ -95,5 +95,5 @@
     "verify-processor-data": "pnpm dotenv -e ../.env -- pnpm tsx --conditions=react-server src/scripts/verify-processor-data.ts"
   },
   "typings": "dist/index.d.ts",
-  "version": "0.3.0-rc.4"
+  "version": "0.3.0-rc.5"
 }
