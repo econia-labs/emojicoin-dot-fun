@@ -50,7 +50,14 @@ const converter = new Map<AnyColumnName, (value: any) => any>([
  * Parses a JSON string that uses bigints- i.e., numbers too large for a normal number, but not used
  * as strings. Without this parsing method, the parsed value loses precision or results in an error.
  *
- * Eventually, this could be more fully fleshed out to utilize more precise deserialization.
+ * THe parsing functions are designated by the column field name, which means there shouldn't ever
+ * be overlapping column names with different types in the database, otherwise the parsing function
+ * may fail.
+ * 
+ * In case this does happen though, there is a fallback function to try to parse the value without
+ * any assumptions about how to parse it.
+ * 
+ * @see {@link tryWithFallbackParse}
  */
 export const parseJSONWithBigInts = <T>(msg: string): T => {
   return JSON_BIGINT.parse(msg, (key, value) => {

@@ -29,6 +29,24 @@ interface DatabaseSchema {
   };
 }
 
+// Note that these tests are *not* exhaustive. There is a more robust and comprehensive way to test
+// that the types in the schema match our conversion types; however, it's not worth the effort since
+// it's unlikely any significant more amount of types will be added.
+// The most ideal way to do this would be to reflect on the schema with something like:
+//
+// SELECT
+// n.nspname AS schema_name,
+//  p.proname AS function_name,
+//  pg_get_function_result(p.oid) AS result_type,
+//  pg_get_function_arguments(p.oid) AS arguments
+// FROM pg_proc p
+// JOIN pg_namespace n ON p.pronamespace = n.oid
+// WHERE p.proname = 'aggregate_market_state';
+//
+// and then using the values/types returned there to parse (and validate in schema e2e tests).
+//
+// For now, what's here is fine.
+
 describe("verifies the schema is what's expected", () => {
   it("pulls the schema from `postgrest` and compares it against the types in the SDK", async () => {
     const response = await fetch(EMOJICOIN_INDEXER_URL);
@@ -76,7 +94,7 @@ describe("verifies the schema is what's expected", () => {
     expect(marketStateColumnNames.has("daily_tvl_per_lp_coin_growth_q64")).toBe(false);
   });
 
-  it("ensures that there are no duplicate column names with different types", () => {
+  it("ensures that there are no duplicate column names with different types in the SDK", () => {
     const mergedSetSize = new Set([...floatColumns, ...bigintColumns, ...integerColumns]).size;
     const sumOfIndividualSetSize =
       new Set(floatColumns).size + new Set(bigintColumns).size + new Set(integerColumns).size;
