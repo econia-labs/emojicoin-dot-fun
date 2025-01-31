@@ -96,7 +96,6 @@ export const floatColumns: Set<AnyColumnName> = new Set([
 
   // Arena
   "melee_id",
-  "start_time",
   "duration",
   "max_match_percentage",
   "max_match_amount",
