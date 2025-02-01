@@ -62,6 +62,8 @@ const serverKeys: Record<Network, string | undefined> = {
 const clientApiKey = clientKeys[APTOS_NETWORK];
 const serverApiKey = serverKeys[APTOS_NETWORK];
 
+// If the server api key is available, use it. If it's not available, that means the runtime
+// is in a client-side context, and it should use the API key for client-side queries.
 export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
 
 // Select the API key from the list of env API keys. This means we don't have to change the env

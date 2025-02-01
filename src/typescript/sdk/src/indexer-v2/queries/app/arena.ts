@@ -2,7 +2,6 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
-import { ORDER_BY } from "../../../queries";
 import { TableName } from "../../types/json-types";
 import { postgrest } from "../client";
 import { queryHelperSingle } from "../utils";
@@ -12,6 +11,7 @@ import {
   toArenaPositionsModel,
   toMarketStateModel,
 } from "../../types";
+import { ORDER_BY } from "../../const";
 
 const selectMelee = () =>
   postgrest
