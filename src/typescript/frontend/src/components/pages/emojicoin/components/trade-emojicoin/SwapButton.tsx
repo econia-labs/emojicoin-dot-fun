@@ -5,7 +5,14 @@ import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
 import { type EntryFunctionNames, useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { useAnimationControls } from "framer-motion";
@@ -15,6 +22,7 @@ import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -44,23 +52,28 @@ export const SwapButton = ({
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
-  const handleClick = useCallback(async () => {
+  const [builder, setBuilder] = useState<EntryFunctionTransactionBuilder | null>();
+
+  useEffect(() => {
     if (!account) {
       return;
     }
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-    const builderLambda = () =>
-      SwapWithRewards.builder({
-        aptosConfig: aptos.config,
-        swapper: account.address,
-        marketAddress,
-        inputAmount: BigInt(inputAmount),
-        isSell,
-        typeTags: [emojicoin, emojicoinLP],
-        minOutputAmount: BigInt(minOutputAmount),
-      });
+    SwapWithRewards.builder({
+      aptosConfig: aptos.config,
+      swapper: account.address,
+      marketAddress,
+      inputAmount: BigInt(inputAmount),
+      isSell,
+      typeTags: [emojicoin, emojicoinLP],
+      minOutputAmount: BigInt(minOutputAmount),
+    }).then(setBuilder);
+  }, [account, aptos.config, inputAmount, isSell, marketAddress, minOutputAmount]);
 
-    const builder = await builderLambda();
+  const handleClick = useCallback(async () => {
+    if (!account || !builder) {
+      return;
+    }
     const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
     const { functionName, res: pendingRes } = await submitTransaction({
       transaction: builder.rawTransactionInput,
@@ -98,14 +111,12 @@ export const SwapButton = ({
     }
   }, [
     account,
-    aptos.config,
-    inputAmount,
-    isSell,
-    marketAddress,
     // linearSubmit,
     // submit,
     controls,
-    minOutputAmount,
+    signTransaction,
+    submitTransaction,
+    builder,
     handleTransactionSubmission,
   ]);
 
