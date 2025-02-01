@@ -49,7 +49,7 @@ export type EventState = {
   stateFirehose: readonly (MarketLatestStateEvent | MarketLatestState)[];
   marketRegistrations: readonly MarketRegistration[];
   markets: Readonly<Map<SymbolString, MarketEventStore>>;
-  globalStateEvents: Readonly<Array<GlobalState>>;
+  globalStateEvents: Readonly<GlobalState[]>;
 };
 
 export type PeriodSubscription = {
@@ -66,9 +66,9 @@ export type SetLatestBarsArgs = {
 export type EventActions = {
   getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
-  loadMarketStateFromServer: (states: Array<DatabaseModels["market_state"]>) => void;
-  loadEventsFromServer: (events: Array<AnyEventModel>) => void;
-  pushEventFromClient: (event: AnyEventModel, localize?: boolean) => void;
+  loadMarketStateFromServer: (states: DatabaseModels["market_state"][]) => void;
+  loadEventsFromServer: (events: AnyEventModel[]) => void;
+  pushEventsFromClient: (event: AnyEventModel[], pushToLocalStorage?: boolean) => void;
   setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => void;
   subscribeToPeriod: ({ marketEmojis, period, cb }: PeriodSubscription) => void;
   unsubscribeFromPeriod: ({ marketEmojis, period }: Omit<PeriodSubscription, "cb">) => void;
