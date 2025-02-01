@@ -38,7 +38,7 @@ export const SwapButton = ({
   minOutputAmount: bigint | number | string;
 }) => {
   const { t } = translationFunction();
-  const { aptos, account, submit } = useAptos();
+  const { aptos, account, submit, linearSubmit } = useAptos();
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
@@ -57,7 +57,11 @@ export const SwapButton = ({
         typeTags: [emojicoin, emojicoinLP],
         minOutputAmount: BigInt(minOutputAmount),
       });
-    const res = await submit(builderLambda);
+
+    const builder = await builderLambda();
+    const res = await linearSubmit(builder);
+
+    // const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
       const rewardsEvent = res.response.events.find(
         (e) => e.type === STRUCT_STRINGS.EmojicoinDotFunRewards
@@ -87,7 +91,8 @@ export const SwapButton = ({
     inputAmount,
     isSell,
     marketAddress,
-    submit,
+    linearSubmit,
+    // submit,
     controls,
     minOutputAmount,
   ]);

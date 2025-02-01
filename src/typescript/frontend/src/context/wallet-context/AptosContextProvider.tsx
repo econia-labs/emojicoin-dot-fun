@@ -77,6 +77,7 @@ export type AptosContextState = {
   forceRefetch(coinType: TrackedCoinType): void;
   refetchIfStale(coinType: TrackedCoinType): void;
   setBalance(coinType: TrackedCoinType, n: bigint): void;
+  linearSubmit: (builder: EntryFunctionTransactionBuilder) => SubmissionResponse;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -254,6 +255,25 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     [pushEventFromClient, parseChangesAndSetBalances]
   );
 
+  const linearSubmit = useCallback(
+    async (builder: EntryFunctionTransactionBuilder) => {
+      if (geoblocked) return null;
+      if (checkNetworkAndToast(network, true)) {
+        setStatus("prompt");
+        const input = builder.payloadBuilder.toInputPayload();
+        const { aptos, functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
+          aptos: builder.aptos,
+          functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
+          res,
+        }));
+
+        return await handleTransactionSubmission({ network, aptos, functionName, res });
+      }
+      return null;
+    },
+    [network, handleTransactionSubmission, adapterSignAndSubmitTxn, geoblocked]
+  );
+
   const submit = useCallback(
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
       if (geoblocked) return null;
@@ -318,6 +338,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     aptos,
     account,
     submit,
+    linearSubmit,
     signThenSubmit,
     copyAddress,
     status,
