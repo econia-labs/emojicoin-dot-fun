@@ -74,7 +74,7 @@ export const SwapButton = ({
     if (!account || !builder) {
       return;
     }
-    const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
+    /*     const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
     const { functionName, res: pendingRes } = await submitTransaction({
       transaction: builder.rawTransactionInput,
       senderAuthenticator,
@@ -82,9 +82,9 @@ export const SwapButton = ({
       functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
       res,
     }));
-    const res = await handleTransactionSubmission({ functionName, res: pendingRes });
-    // const res = await linearSubmit(builder);
-    // const res = await submit(builderLambda);
+    const res = await handleTransactionSubmission({ functionName, res: pendingRes }); */
+    const res = await linearSubmit(builder);
+    // const res = await submit(builder);
 
     if (res && res.response && isUserTransactionResponse(res.response)) {
       const rewardsEvent = res.response.events.find(
