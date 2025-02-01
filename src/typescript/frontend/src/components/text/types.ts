@@ -16,6 +16,7 @@ export interface ThemedProps extends TextProps {
 
 export const scales = {
   pixelDisplay1: "pixelDisplay1",
+  pixelDisplay2: "pixelDisplay2",
   display1: "display1",
   display2: "display2",
   display3: "display3",

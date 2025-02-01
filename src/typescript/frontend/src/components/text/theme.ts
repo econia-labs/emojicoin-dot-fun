@@ -11,6 +11,11 @@ export const textStyles = (k: keyof typeof scales) => {
       font-size: 128px;
       line-height: 160px;
     `,
+    [scales.pixelDisplay2]: `
+      font-family: var(--font-pixelar);
+      font-size: 120px;
+      line-height: 85px;
+    `,
     [scales.display1]: `
       font-size: 95px;
       line-height: 96px;

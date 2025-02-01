@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import clippy, { type Agent } from "clippyts";
 import "./clippy.css";
 
+const ANIMATIONS_LOOP = ["Greeting", "Processing", "IdleAtom", "Congratulate"];
+
 export const Clippy = ({ monologue }: { monologue: string[] }) => {
   const clippyRef = useRef<Agent>();
   const monologueIndex = useRef(-1);
@@ -9,8 +11,9 @@ export const Clippy = ({ monologue }: { monologue: string[] }) => {
   const renderNextText = () => {
     monologueIndex.current = monologueIndex.current + 1;
     if (monologueIndex.current === monologue.length) monologueIndex.current = 0;
+    //Play random animation from array
+    clippyRef.current?.play(ANIMATIONS_LOOP[Math.floor(Math.random() * ANIMATIONS_LOOP.length)]);
     clippyRef.current?.speak(monologue[monologueIndex.current], false);
-    clippyRef.current?.animate();
   };
 
   useEffect(() => {

@@ -12,12 +12,18 @@ interface Props {
 export const ProjectEntry: FC<Props> = ({ project, onClick }) => {
   return (
     <div
-      className="flex flex-col gap-2 cursor-pointer items-center w-[100px]"
+      className="flex flex-col gap-2 cursor-pointer items-center w-[150px]"
       onClick={() => onClick(project.id)}
     >
-      <Image width={50} height={50} src={textfile} alt="Text file" />
-      <div className="bg-white px-1">
-        <Text color="darkGray" textScale={"pixelBodyLarge"} fontWeight={"bold"}>
+      <Image width={80} height={80} src={textfile} alt="Text file" />
+      <div className="w-[100px]">
+        <Text
+          className="bg-white px-1"
+          textAlign="center"
+          color="darkGray"
+          textScale={"pixelHeading4"}
+          fontWeight={"bold"}
+        >
           {project.name}.txt
         </Text>
       </div>

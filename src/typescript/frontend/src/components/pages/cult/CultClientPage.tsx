@@ -9,6 +9,7 @@ import { Alert, TitleBar } from "@react95/core";
 import { Clippy } from "./Clippy";
 import styled from "styled-components";
 import Button from "components/button";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const PARAM_KEY = "project";
 const JSON_FILE_GITHUB_URL =
@@ -19,6 +20,7 @@ export default function CultClientPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isMobile } = useMatchBreakpoints();
 
   const project = searchParams.get(PARAM_KEY);
   const selectedProject = communityProjects.find((proj) => proj.id === project);
@@ -57,12 +59,12 @@ export default function CultClientPage() {
       <Clippy monologue={t("Cult disclaimer")?.split("\n") || []} />
       <div className="flex flex-col grow">
         <div className="flex flex-col justify-center items-center px-6 grow gap-12">
-          <div className="flex flex-col w-full max-w-[414px]">
-            <Text textAlign={"center"} textScale="pixelHeading1">
+          <div className="flex flex-col w-full max-w-[700px]">
+            <Text textAlign={"center"} textScale={isMobile ? "pixelHeading1" : "pixelDisplay2"}>
               {t("Explore cult")}
             </Text>
           </div>
-          <div className="flex flex-row gap-4 md:w-[600px] min-h-[200px] flex-wrap">
+          <div className="flex flex-row gap-4 sm:justify-start mobile-sm:justify-center md:w-[600px] min-h-[200px] flex-wrap">
             {communityProjects.map((proj) => (
               <ProjectEntry key={proj.name} project={proj} onClick={setSelectedProject} />
             ))}
@@ -70,7 +72,7 @@ export default function CultClientPage() {
         </div>
       </div>
       <div className="flex flex-col items-center grow">
-        <Button onClick={() => window.open(JSON_FILE_GITHUB_URL, "_blank")}>
+        <Button scale="lg" onClick={() => window.open(JSON_FILE_GITHUB_URL, "_blank")}>
           Submit your project
         </Button>
       </div>
