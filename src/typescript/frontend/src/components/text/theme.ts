@@ -66,6 +66,21 @@ export const textStyles = (k: keyof typeof scales) => {
       line-height: 25px;
       font-family: var(--font-pixelar);
     `,
+    [scales.pixelBodyLarge]: `
+      font-size: 16px;
+      line-height: 18px;
+      font-family: var(--font-pixelar);
+    `,
+    [scales.pixelBodySmall]: `
+      font-size: 12px;
+      line-height: 18px;
+      font-family: var(--font-pixelar);
+    `,
+    [scales.pixelBodyXSmall]: `
+      font-size: 10px;
+      line-height: 18px;
+      font-family: var(--font-pixelar);
+    `,
     [scales.heading1]: `
       font-size: 28px;
       line-height: 18px;

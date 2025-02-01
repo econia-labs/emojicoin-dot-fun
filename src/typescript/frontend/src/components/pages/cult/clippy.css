@@ -1,0 +1,4 @@
+/* fixes speech bubble overlapping clippy */
+.clippy-balloon.clippy-top-left {
+  transform: translate(-50%, -100%);
+}

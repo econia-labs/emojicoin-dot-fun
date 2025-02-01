@@ -15,7 +15,7 @@ export const simpleTranslation = (s: keyof typeof translations) => translations[
  *
  * @returns a translated string, not a function.
  */
-export const translationFunction = () => {
+export const translationFunction = (): { t: (s: string) => string | null } => {
   /*
   const languageContext = useContext(LanguageContext);
 
