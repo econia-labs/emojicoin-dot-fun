@@ -2,17 +2,10 @@ import ButtonWithConnectWalletFallback from "components/header/wallet-button/Con
 import Button from "components/button";
 import { translationFunction } from "context/language-context";
 import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
-import { type EntryFunctionNames, useAptos } from "context/wallet-context/AptosContextProvider";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import {
-  type Dispatch,
-  type SetStateAction,
-  useEffect,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { useAnimationControls } from "framer-motion";
@@ -21,8 +14,6 @@ import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -47,12 +38,9 @@ export const SwapButton = ({
   minOutputAmount: bigint | number | string;
 }) => {
   const { t } = translationFunction();
-  const { aptos, account, submit, linearSubmit, handleTransactionSubmission } = useAptos();
-  const { signTransaction, submitTransaction } = useWallet();
+  const { aptos, account, setTransactionBuilder, submit } = useAptos();
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
-
-  const [builder, setBuilder] = useState<EntryFunctionTransactionBuilder | null>();
 
   useEffect(() => {
     if (!account) {
@@ -67,24 +55,19 @@ export const SwapButton = ({
       isSell,
       typeTags: [emojicoin, emojicoinLP],
       minOutputAmount: BigInt(minOutputAmount),
-    }).then(setBuilder);
-  }, [account, aptos.config, inputAmount, isSell, marketAddress, minOutputAmount]);
+    }).then(setTransactionBuilder);
+  }, [
+    account,
+    aptos.config,
+    setTransactionBuilder,
+    inputAmount,
+    isSell,
+    marketAddress,
+    minOutputAmount,
+  ]);
 
   const handleClick = useCallback(async () => {
-    if (!account || !builder) {
-      return;
-    }
-    /*     const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
-    const { functionName, res: pendingRes } = await submitTransaction({
-      transaction: builder.rawTransactionInput,
-      senderAuthenticator,
-    }).then((res) => ({
-      functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
-      res,
-    }));
-    const res = await handleTransactionSubmission({ functionName, res: pendingRes }); */
-    const res = await linearSubmit(builder);
-    // const res = await submit(builder);
+    const res = await submit();
 
     if (res && res.response && isUserTransactionResponse(res.response)) {
       const rewardsEvent = res.response.events.find(
@@ -109,16 +92,7 @@ export const SwapButton = ({
         );
       }
     }
-  }, [
-    account,
-    // linearSubmit,
-    // submit,
-    controls,
-    signTransaction,
-    submitTransaction,
-    builder,
-    handleTransactionSubmission,
-  ]);
+  }, [controls, submit]);
 
   useEffect(() => {
     setSubmit(() => handleClick);
