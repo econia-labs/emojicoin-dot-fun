@@ -77,6 +77,13 @@ export type AptosContextState = {
   forceRefetch(coinType: TrackedCoinType): void;
   refetchIfStale(coinType: TrackedCoinType): void;
   setBalance(coinType: TrackedCoinType, n: bigint): void;
+  handleTransactionSubmission({
+    functionName,
+    res,
+  }: {
+    functionName: EntryFunctionNames;
+    res: PendingTransactionResponse;
+  }): SubmissionResponse;
   linearSubmit: (builder: EntryFunctionTransactionBuilder) => SubmissionResponse;
 };
 
@@ -189,18 +196,20 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   const handleTransactionSubmission = useCallback(
     async ({
-      network,
-      aptos,
       functionName,
       res,
     }: {
-      network: NetworkInfo;
-      aptos: Aptos;
       functionName: EntryFunctionNames;
       res: PendingTransactionResponse;
     }) => {
       let response: PendingTransactionResponse | UserTransactionResponse | null = null;
       let error: unknown;
+      if (!network) {
+        return {
+          response: null,
+          error: new Error("No valid network."),
+        };
+      }
       try {
         response = res;
         setStatus("pending");
@@ -252,7 +261,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
       return { response, error };
     },
-    [pushEventFromClient, parseChangesAndSetBalances]
+    [pushEventFromClient, parseChangesAndSetBalances, aptos, network]
   );
 
   const linearSubmit = useCallback(
@@ -261,13 +270,12 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       if (checkNetworkAndToast(network, true)) {
         setStatus("prompt");
         const input = builder.payloadBuilder.toInputPayload();
-        const { aptos, functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
-          aptos: builder.aptos,
+        const { functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
           functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
           res,
         }));
 
-        return await handleTransactionSubmission({ network, aptos, functionName, res });
+        return await handleTransactionSubmission({ functionName, res });
       }
       return null;
     },
@@ -281,13 +289,12 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         const builder = await builderFn();
         setStatus("prompt");
         const input = builder.payloadBuilder.toInputPayload();
-        const { aptos, functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
-          aptos: builder.aptos,
+        const { functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
           functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
           res,
         }));
 
-        return await handleTransactionSubmission({ network, aptos, functionName, res });
+        return await handleTransactionSubmission({ functionName, res });
       }
       return null;
     },
@@ -304,16 +311,15 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         const builder = await builderFn();
         setStatus("prompt");
         const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
-        const { aptos, functionName, res } = await submitTransaction({
+        const { functionName, res } = await submitTransaction({
           transaction: builder.rawTransactionInput,
           senderAuthenticator,
         }).then((res) => ({
-          aptos: builder.aptos,
           functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
           res,
         }));
 
-        return await handleTransactionSubmission({ network, aptos, functionName, res });
+        return await handleTransactionSubmission({ functionName, res });
       }
       return null;
     },
@@ -338,6 +344,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     aptos,
     account,
     submit,
+    handleTransactionSubmission,
     linearSubmit,
     signThenSubmit,
     copyAddress,

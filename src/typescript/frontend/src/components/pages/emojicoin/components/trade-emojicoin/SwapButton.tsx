@@ -2,7 +2,7 @@ import ButtonWithConnectWalletFallback from "components/header/wallet-button/Con
 import Button from "components/button";
 import { translationFunction } from "context/language-context";
 import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { type EntryFunctionNames, useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -38,7 +39,8 @@ export const SwapButton = ({
   minOutputAmount: bigint | number | string;
 }) => {
   const { t } = translationFunction();
-  const { aptos, account, submit, linearSubmit } = useAptos();
+  const { aptos, account, submit, linearSubmit, handleTransactionSubmission } = useAptos();
+  const { signTransaction, submitTransaction } = useWallet();
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
@@ -59,9 +61,18 @@ export const SwapButton = ({
       });
 
     const builder = await builderLambda();
-    const res = await linearSubmit(builder);
-
+    const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
+    const { functionName, res: pendingRes } = await submitTransaction({
+      transaction: builder.rawTransactionInput,
+      senderAuthenticator,
+    }).then((res) => ({
+      functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
+      res,
+    }));
+    const res = await handleTransactionSubmission({ functionName, res: pendingRes });
+    // const res = await linearSubmit(builder);
     // const res = await submit(builderLambda);
+
     if (res && res.response && isUserTransactionResponse(res.response)) {
       const rewardsEvent = res.response.events.find(
         (e) => e.type === STRUCT_STRINGS.EmojicoinDotFunRewards
@@ -91,10 +102,11 @@ export const SwapButton = ({
     inputAmount,
     isSell,
     marketAddress,
-    linearSubmit,
+    // linearSubmit,
     // submit,
     controls,
     minOutputAmount,
+    handleTransactionSubmission,
   ]);
 
   useEffect(() => {
