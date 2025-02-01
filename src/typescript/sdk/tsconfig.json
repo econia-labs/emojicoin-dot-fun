@@ -3,7 +3,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "declarationDir": "dist",
+    "declarationDir": "types",
     "declarationMap": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -43,6 +43,7 @@
     "node_modules"
   ],
   "include": [
-    "src"
+    "src",
+    "tsup.config.ts"
   ]
 }

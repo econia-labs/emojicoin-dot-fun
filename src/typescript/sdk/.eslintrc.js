@@ -1,3 +1,5 @@
+// cspell:word tsup
+
 module.exports = {
   env: {
     browser: true,
@@ -5,7 +7,13 @@ module.exports = {
     jest: true,
     node: true,
   },
-  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js", "jest.config.js"],
+  ignorePatterns: [
+    "dist/**",
+    "node_modules/**",
+    ".eslintrc.js",
+    "jest.config.js",
+    "tsup.config.ts",
+  ],
   extends: [
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",

@@ -1,8 +1,8 @@
 import { compareBigInt, sortBigIntArrays } from "../../../../src";
+import { LIMIT } from "../../../../src/indexer-v2/const";
 import { postgrest, queryHelper } from "../../../../src/indexer-v2/queries";
 import { type MarketStateModel, toMarketStateModel } from "../../../../src/indexer-v2/types";
 import { TableName } from "../../../../src/indexer-v2/types/json-types";
-import { LIMIT } from "../../../../src/queries";
 
 // differences there are in the marketIDs, values and sort order.
 type SortableResults = {
