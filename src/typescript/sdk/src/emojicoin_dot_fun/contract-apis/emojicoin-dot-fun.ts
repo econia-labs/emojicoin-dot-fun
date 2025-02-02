@@ -582,7 +582,6 @@ export class Swap extends EntryFunctionPayloadBuilder {
   }): Promise<EntryFunctionTransactionBuilder> {
     const { aptosConfig, options, feePayer } = args;
     const payloadBuilder = new this(args);
-    console.log(options);
     const rawTransactionInput = await buildTransaction({
       aptosConfig,
       sender: payloadBuilder.primarySender,

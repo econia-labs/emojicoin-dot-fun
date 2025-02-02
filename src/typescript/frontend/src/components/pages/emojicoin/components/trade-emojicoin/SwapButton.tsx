@@ -97,11 +97,7 @@ export const SwapButton = ({
       <ButtonWithConnectWalletFallback>
         {canTrade ? (
           <>
-            <Button
-              disabled={disabled || !transactionBuilder}
-              onClick={handleClick}
-              scale="lg"
-            >
+            <Button disabled={disabled || !transactionBuilder} onClick={handleClick} scale="lg">
               {t("Swap")}
             </Button>
             <RewardsAnimation controls={controls} />
