@@ -5,8 +5,8 @@ import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { type Dispatch, type SetStateAction, useEffect, useCallback, useMemo } from "react";
+import { isUserTransactionResponse, type TypeTag } from "@aptos-labs/ts-sdk";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { useAnimationControls } from "framer-motion";
 import { RewardsAnimation } from "./RewardsAnimation";
@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
+import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -38,36 +39,29 @@ export const SwapButton = ({
   minOutputAmount: bigint | number | string;
 }) => {
   const { t } = translationFunction();
-  const { aptos, account, setTransactionBuilder, submit } = useAptos();
+  const { account, submit } = useAptos();
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
-  useEffect(() => {
-    if (!account) {
-      return;
+  const memoizedArgs = useMemo(() => {
+    if (!account?.address) {
+      return null;
     }
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-    SwapWithRewards.builder({
-      aptosConfig: aptos.config,
+    return {
       swapper: account.address,
       marketAddress,
       inputAmount: BigInt(inputAmount),
       isSell,
-      typeTags: [emojicoin, emojicoinLP],
+      typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
       minOutputAmount: BigInt(minOutputAmount),
-    }).then(setTransactionBuilder);
-  }, [
-    account,
-    aptos.config,
-    setTransactionBuilder,
-    inputAmount,
-    isSell,
-    marketAddress,
-    minOutputAmount,
-  ]);
+    };
+  }, [account?.address, marketAddress, inputAmount, isSell, minOutputAmount]);
+
+  const transactionBuilder = useTransactionBuilder(memoizedArgs, SwapWithRewards);
 
   const handleClick = useCallback(async () => {
-    const res = await submit();
+    const res = await submit(transactionBuilder);
 
     if (res && res.response && isUserTransactionResponse(res.response)) {
       const rewardsEvent = res.response.events.find(
@@ -92,7 +86,7 @@ export const SwapButton = ({
         );
       }
     }
-  }, [controls, submit]);
+  }, [transactionBuilder, controls, submit]);
 
   useEffect(() => {
     setSubmit(() => handleClick);
@@ -103,7 +97,11 @@ export const SwapButton = ({
       <ButtonWithConnectWalletFallback>
         {canTrade ? (
           <>
-            <Button disabled={disabled} onClick={handleClick} scale="lg">
+            <Button
+              disabled={disabled || !transactionBuilder}
+              onClick={handleClick}
+              scale="lg"
+            >
               {t("Swap")}
             </Button>
             <RewardsAnimation controls={controls} />
