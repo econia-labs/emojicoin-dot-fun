@@ -28,6 +28,8 @@ import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useMatchBreakpoints } from "@hooks/index";
 import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
+import { doNotCallThisFunctionDirectly_serverSideLog } from "lib/utils/server-logs/log-to-server";
+import { serverLog } from "lib/utils/server-logs/wrapper";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -164,6 +166,14 @@ const Liquidity = ({ market }: LiquidityProps) => {
     }
     const marketAddress = market.market.marketAddress;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+    serverLog({
+      provider: account.address,
+      marketAddress,
+      quoteAmount: direction === "add" ? liquidity : lp,
+      typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
+      minLpCoinsOut: 1n,
+      minQuoteOut: 1n,
+    });
     return {
       ProvideOrRemove,
       memoizedArgs: {
