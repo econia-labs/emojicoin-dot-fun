@@ -13,14 +13,15 @@ import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput"
 import { getRankFromEvent } from "lib/utils/get-user-rank";
 import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { isUserTransactionResponse, type TypeTag } from "@aptos-labs/ts-sdk";
 import { motion } from "framer-motion";
 import { toChatMessageEntryFunctionArgs } from "@sdk/emoji_data/chat-message";
+import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
 
 const HARD_LIMIT = 500;
 
 const ChatBox = (props: ChatProps) => {
-  const { aptos, account, submit } = useAptos();
+  const { account, submit } = useAptos();
   const clear = useEmojiPicker((state) => state.clear);
   const setMode = useEmojiPicker((state) => state.setMode);
   const emojis = useEmojiPicker((state) => state.emojis);
@@ -32,31 +33,32 @@ const ChatBox = (props: ChatProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const sendChatMessage = async () => {
+  const memoizedArgs = useMemo(() => {
     if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS) {
-      return;
+      return null;
     }
-    // Set the picker invisible while the transaction is being processed.
-    setPickerInvisible(true);
     const emojiText = emojis.join("");
     const { marketAddress } = props.data.marketView.metadata;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
     const { emojiBytes, emojiIndicesSequence } = toChatMessageEntryFunctionArgs(emojiText);
-    const builderLambda = () =>
-      Chat.builder({
-        aptosConfig: aptos.config,
-        user: account.address,
-        marketAddress,
-        emojiBytes,
-        emojiIndicesSequence,
-        typeTags: [emojicoin, emojicoinLP],
-      });
-    const res = await submit(builderLambda);
+    return {
+      user: account.address,
+      marketAddress,
+      emojiBytes,
+      emojiIndicesSequence,
+      typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
+    };
+  }, [account, emojis, props.data.marketView.metadata]);
+
+  const transactionBuilder = useTransactionBuilder(memoizedArgs, Chat);
+
+  const sendChatMessage = async () => {
+    // Set the picker invisible while the transaction is being processed.
+    setPickerInvisible(true);
+    const res = await submit(transactionBuilder);
     if (res && res.response && isUserTransactionResponse(res.response)) {
-      // Note we only clear the input if the transaction is successful.
       clear();
     } else {
-      // Show the picker again in case the user wants to try again with the same input.
       setPickerInvisible(false);
     }
   };
