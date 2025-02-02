@@ -6,8 +6,6 @@ import {
 } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { useEffect, useState } from "react";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { doNotCallThisFunctionDirectly_serverSideLog } from "lib/utils/server-logs/log-to-server";
-import { logToServer } from "lib/utils/server-logs/wrapper";
 
 type BuilderConfig = {
   aptosConfig: AptosConfig;

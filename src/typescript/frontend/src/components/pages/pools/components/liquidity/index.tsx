@@ -28,8 +28,6 @@ import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useMatchBreakpoints } from "@hooks/index";
 import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
-import { doNotCallThisFunctionDirectly_serverSideLog } from "lib/utils/server-logs/log-to-server";
-import { logToServer } from "lib/utils/server-logs/wrapper";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
