@@ -159,15 +159,12 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
     return new TransactionPayloadEntryFunction(entryFunction);
   }
 
-  toInputPayload(args?: {
-    multisigAddress?: AccountAddress;
-    options?: InputGenerateTransactionOptions;
-  }): WalletInputTransactionData {
-    const { multisigAddress, options } = args ?? {};
+  toInputPayload(args?: { multisigAddress?: AccountAddress }): WalletInputTransactionData {
+    const { multisigAddress } = args ?? {};
     const multiSigData =
       typeof multisigAddress !== "undefined"
         ? {
-            multisigAddress,
+            multisigAddress: multisigAddress.toString(),
           }
         : {};
 
@@ -180,7 +177,9 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
         functionArguments: serializeArgsToJSON(this.args),
         // abi: undefined, // TODO: Add pre-defined ABIs.
       },
-      options,
+      // options are ignored here by the wallet adapter, so there's no need to pretend it's possible
+      // to set them. The only way to use them is to use the sign then submit flow, not sign *and*
+      // submit, since the signing is handled by the wallet adapter and the txn args are ignored.
     };
   }
 

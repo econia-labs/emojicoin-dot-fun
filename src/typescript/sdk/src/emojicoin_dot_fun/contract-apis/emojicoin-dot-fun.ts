@@ -312,6 +312,10 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
     const rawTransaction = await this.builder({
       ...args,
       integrator: AccountAddress.ONE,
+      // It's necessary to pass `accountSequenceNumber: 0` or it will be needlessly fetched.
+      options: {
+        accountSequenceNumber: 0,
+      },
     }).then((res) => res.rawTransactionInput.rawTransaction);
     const transaction = new SimpleTransaction(rawTransaction);
     const [userTransactionResponse] = await aptos.transaction.simulate.simple({
@@ -578,6 +582,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
   }): Promise<EntryFunctionTransactionBuilder> {
     const { aptosConfig, options, feePayer } = args;
     const payloadBuilder = new this(args);
+    console.log(options);
     const rawTransactionInput = await buildTransaction({
       aptosConfig,
       sender: payloadBuilder.primarySender,
@@ -637,6 +642,10 @@ export class Swap extends EntryFunctionPayloadBuilder {
     const aptos = getAptosClient(aptosConfig);
     const rawTransaction = await this.builder({
       ...args,
+      // It's necessary to pass `accountSequenceNumber: 0` or it will be needlessly fetched.
+      options: {
+        accountSequenceNumber: 0,
+      },
       integrator: AccountAddress.ONE,
     }).then((res) => res.rawTransactionInput.rawTransaction);
     const transaction = new SimpleTransaction(rawTransaction);
