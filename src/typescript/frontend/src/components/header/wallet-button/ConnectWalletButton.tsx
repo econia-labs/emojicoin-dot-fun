@@ -15,7 +15,6 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
   mobile?: boolean;
   onClick?: () => void;
   arrow?: boolean;
-  disableIfEmptyTransactionBuilder?: boolean;
   forceAllowConnect?: boolean;
   /** Display the button's children regardless of whether or not the user is connected. */
   forceDisplayChildren?: boolean;
@@ -29,7 +28,6 @@ export const ButtonWithConnectWalletFallback = ({
   className,
   onClick,
   arrow = false,
-  disableIfEmptyTransactionBuilder,
   forceAllowConnect,
   forceDisplayChildren,
 }: ConnectWalletProps) => {
@@ -45,7 +43,7 @@ export const ButtonWithConnectWalletFallback = ({
   }, [forceAllowConnect, shouldBeGeoblocked]);
 
   const [enabled, setEnabled] = useState(false);
-  const { addressName, transactionBuilder } = useAptos();
+  const { addressName } = useAptos();
 
   const text = useMemo(() => {
     if (!geoblocked && connected) {
@@ -89,7 +87,7 @@ export const ButtonWithConnectWalletFallback = ({
         className={
           className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
         }
-        disabled={geoblocked || (disableIfEmptyTransactionBuilder && transactionBuilder === null)}
+        disabled={geoblocked}
         onClick={(e) => {
           e.preventDefault();
           (onClick ?? openWalletModal)();
