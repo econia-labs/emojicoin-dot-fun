@@ -16,7 +16,10 @@ import {
   useState,
 } from "react";
 import { toast } from "react-toastify";
-import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
+import {
+  type WalletInputTransactionData,
+  type EntryFunctionTransactionBuilder,
+} from "@sdk/emojicoin_dot_fun/payload-builders";
 import {
   checkNetworkAndToast,
   parseAPIErrorAndToast,
@@ -55,10 +58,10 @@ export type EntryFunctionNames =
 
 export type AptosContextState = {
   aptos: Aptos;
-  submit: () => SubmissionResponse;
-  signThenSubmit: () => SubmissionResponse;
-  transactionBuilder?: EntryFunctionTransactionBuilder;
-  setTransactionBuilder: (builder?: EntryFunctionTransactionBuilder) => void;
+  submit: (input: WalletInputTransactionData | null) => SubmissionResponse;
+  signThenSubmit: (
+    transactionBuilder: EntryFunctionTransactionBuilder | null
+  ) => SubmissionResponse;
   account: WalletContextState["account"];
   copyAddress: () => void;
   status: TransactionStatus;
@@ -90,7 +93,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const pushEventsFromClient = useEventStore((s) => s.pushEventsFromClient);
   const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
   const [emojicoinType, setEmojicoinType] = useState<string>();
-  const [transactionBuilder, setTransactionBuilder] = useState<EntryFunctionTransactionBuilder>();
   const geoblocked = useIsUserGeoblocked();
   // We could check `account?.ansName` here but it would require conditional hook logic, plus not all wallets provide it
   // so it's not really worth the extra effort and complexity.
@@ -192,62 +194,51 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     [pushEventsFromClient, parseChangesAndSetBalances, aptos, network]
   );
 
-  const submit = useCallback(async () => {
-    if (geoblocked || !transactionBuilder) return null;
-    if (checkNetworkAndToast(network, true)) {
-      setStatus("prompt");
-      const input = transactionBuilder.payloadBuilder.toInputPayload();
-      const { functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
-        functionName: transactionBuilder.payloadBuilder.functionName as EntryFunctionNames,
-        res,
-      }));
-
-      return await handleTransactionSubmission({ functionName, res });
-    }
-    return null;
-  }, [
-    network,
-    transactionBuilder,
-    handleTransactionSubmission,
-    adapterSignAndSubmitTxn,
-    geoblocked,
-  ]);
+  const submit: AptosContextState["submit"] = useCallback(
+    async (input) => {
+      if (geoblocked || !input) return null;
+      if (checkNetworkAndToast(network, true)) {
+        setStatus("prompt");
+        const { functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
+          functionName: input.data.function.split("::").at(-1) as EntryFunctionNames,
+          res,
+        }));
+        return await handleTransactionSubmission({ functionName, res });
+      }
+      return null;
+    },
+    [network, handleTransactionSubmission, adapterSignAndSubmitTxn, geoblocked]
+  );
 
   // To manually enforce explicit gas options, we can use this transaction submission flow.
   // Note that you need to pass the options to the builder, not here. It's possible to do it here, but it's
   // unnecessary to support that and I'm not gonna write the code for it.
-  const signThenSubmit = useCallback(async () => {
-    if (geoblocked || !transactionBuilder) return null;
-    if (checkNetworkAndToast(network, true)) {
-      setStatus("prompt");
-      const senderAuthenticator = await signTransaction(transactionBuilder.rawTransactionInput);
-      const { functionName, res } = await submitTransaction({
-        transaction: transactionBuilder.rawTransactionInput,
-        senderAuthenticator,
-      }).then((res) => ({
-        functionName: transactionBuilder.payloadBuilder.functionName as EntryFunctionNames,
-        res,
-      }));
+  const signThenSubmit: AptosContextState["signThenSubmit"] = useCallback(
+    async (transactionBuilder) => {
+      if (geoblocked || !transactionBuilder) return null;
+      if (checkNetworkAndToast(network, true)) {
+        setStatus("prompt");
+        const senderAuthenticator = await signTransaction(transactionBuilder.rawTransactionInput);
+        const { functionName, res } = await submitTransaction({
+          transaction: transactionBuilder.rawTransactionInput,
+          senderAuthenticator,
+        }).then((res) => ({
+          functionName: transactionBuilder.payloadBuilder.functionName as EntryFunctionNames,
+          res,
+        }));
 
-      return await handleTransactionSubmission({ functionName, res });
-    }
-    return null;
-  }, [
-    network,
-    transactionBuilder,
-    handleTransactionSubmission,
-    signTransaction,
-    submitTransaction,
-    geoblocked,
-  ]);
+        return await handleTransactionSubmission({ functionName, res });
+      }
+      return null;
+    },
+    [network, handleTransactionSubmission, signTransaction, submitTransaction, geoblocked]
+  );
 
   const value: AptosContextState = {
     aptos,
     account,
     submit,
     signThenSubmit,
-    transactionBuilder,
-    setTransactionBuilder,
     copyAddress,
     status,
     lastResponse,
