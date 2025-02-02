@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from "react";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { doNotCallThisFunctionDirectly_serverSideLog } from "lib/utils/server-logs/log-to-server";
-import { serverLog } from "lib/utils/server-logs/wrapper";
+import { logToServer } from "lib/utils/server-logs/wrapper";
 
 type BuilderConfig = {
   aptosConfig: AptosConfig;
@@ -66,10 +66,6 @@ export function useTransactionBuilder<
         },
       })
       .then((builder) => builder.payloadBuilder.toInputPayload())
-      .then((res) => {
-        serverLog(res);
-        return res;
-      })
       .then(setInputData)
       .catch(() => setInputData(null));
   }, [aptos, builderClass, memoizedArgs]);

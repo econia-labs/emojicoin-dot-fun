@@ -29,7 +29,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { useMatchBreakpoints } from "@hooks/index";
 import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
 import { doNotCallThisFunctionDirectly_serverSideLog } from "lib/utils/server-logs/log-to-server";
-import { serverLog } from "lib/utils/server-logs/wrapper";
+import { logToServer } from "lib/utils/server-logs/wrapper";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -166,23 +166,24 @@ const Liquidity = ({ market }: LiquidityProps) => {
     }
     const marketAddress = market.market.marketAddress;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-    serverLog({
+    const sharedArgs = {
       provider: account.address,
       marketAddress,
-      quoteAmount: direction === "add" ? liquidity : lp,
       typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
-      minLpCoinsOut: 1n,
-      minQuoteOut: 1n,
-    });
+    };
     return {
       ProvideOrRemove,
       memoizedArgs: {
-        provider: account.address,
-        marketAddress,
-        quoteAmount: direction === "add" ? liquidity : lp,
-        typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
-        minLpCoinsOut: 1n,
-        minQuoteOut: 1n,
+        ...sharedArgs,
+        ...(direction === "add"
+          ? {
+              quoteAmount: liquidity,
+              minLpCoinsOut: 1n,
+            }
+          : {
+              lpCoinAmount: lp,
+              minQuoteOut: 1n,
+            }),
       },
     };
   }, [account, direction, liquidity, lp, market?.market.marketAddress]);
