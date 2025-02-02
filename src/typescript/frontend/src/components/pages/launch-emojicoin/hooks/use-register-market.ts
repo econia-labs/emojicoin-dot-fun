@@ -17,6 +17,9 @@ import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
+import { useTransactionBuilderWithOptions } from "lib/hooks/use-transaction-builder";
+import { useCallback, useEffect, useMemo } from "react";
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {
@@ -28,7 +31,7 @@ export const tryEd25519PublicKey = (account: AccountInfo) => {
   }
 };
 
-export const useRegisterMarket = () => {
+export const useRegisterMarket = (sequenceNumber: bigint | null) => {
   const emojis = useEmojiPicker((state) => state.emojis);
   const setIsLoadingRegisteredMarket = useEmojiPicker(
     (state) => state.setIsLoadingRegisteredMarket
@@ -39,7 +42,10 @@ export const useRegisterMarket = () => {
 
   const { data: numMarkets } = useNumMarkets();
 
-  const emojiBytes = emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.bytes);
+  const emojiBytes = useMemo(
+    () => emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.bytes),
+    [emojis]
+  );
 
   const { data: gasResult } = useQuery({
     queryKey: ["register-market-cost", numMarkets, account?.address, emojiBytes],
@@ -90,34 +96,47 @@ export const useRegisterMarket = () => {
     unitPrice = 100;
   }
 
-  const registerMarket = async () => {
-    if (!account) {
-      return;
-    }
-    // Set the picker invisible for the duration of the registration transaction.
+  const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
+
+  const { memoizedArgs, options } = useMemo(() => {
+    return {
+      memoizedArgs: account
+        ? {
+            registrant: account.address,
+            emojis: emojiBytes,
+            integrator: INTEGRATOR_ADDRESS,
+          }
+        : null,
+      options:
+        sequenceNumber !== null
+          ? {
+              maxGasAmount: Math.round(amount * 1.2),
+              gasUnitPrice: unitPrice,
+              accountSequenceNumber: sequenceNumber,
+            }
+          : undefined,
+    };
+  }, [sequenceNumber, emojiBytes, account, amount, unitPrice]);
+
+  const transactionBuilder = useTransactionBuilderWithOptions(
+    memoizedArgs,
+    RegisterMarket,
+    options
+  );
+
+  const registerMarket = useCallback(async () => {
+    if (!account) return;
     setPickerInvisible(true);
     let res: PendingTransactionResponse | UserTransactionResponse | undefined | null;
     let error: unknown;
-    const builderArgs = {
-      aptosConfig: aptos.config,
-      registrant: account.address,
-      emojis: emojiBytes,
-      integrator: INTEGRATOR_ADDRESS,
-    };
-    const builderLambda = () =>
-      RegisterMarket.builder({
-        ...builderArgs,
-        options: {
-          maxGasAmount: Math.round(amount * 1.2),
-          gasUnitPrice: unitPrice,
-        },
-      });
-    await signThenSubmit(builderLambda).then((r) => {
+    await signThenSubmit(transactionBuilder).then((r) => {
       res = r?.response ?? null;
       error = r?.error;
     });
 
     if (res && isUserTransactionResponse(res)) {
+      // If the transaction is successful, manually bump the sequence number in react-query state.
+      markSequenceNumberStale();
       clear();
       // The event is parsed and added as a registered market in `event-store.ts`,
       // we don't need to do anything here other than set the loading state.
@@ -131,7 +150,15 @@ export const useRegisterMarket = () => {
       console.error("Error registering market:", error);
       setIsLoadingRegisteredMarket(false);
     }
-  };
+  }, [
+    markSequenceNumberStale,
+    signThenSubmit,
+    account,
+    transactionBuilder,
+    clear,
+    setPickerInvisible,
+    setIsLoadingRegisteredMarket,
+  ]);
 
   // By default, just consider that this is the price, since in 99.99% of cases, this will be the most accurate estimate.
   let cost: number = Number(MARKET_REGISTRATION_FEE);
