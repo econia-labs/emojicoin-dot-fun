@@ -11,9 +11,7 @@ export type Primitive = boolean | number | string | bigint | undefined | null;
 export type AnyPrimitive = Primitive | Array<AnyPrimitive>;
 
 // For general-purpose serialization of entry function arguments to JSON-serializable values.
-export const serializeEntryArgsToJson = (
-  value: EntryFunctionArgumentTypes
-): AnyPrimitive => {
+export const serializeEntryArgsToJson = (value: EntryFunctionArgumentTypes): AnyPrimitive => {
   if (value instanceof MoveVector) {
     return value.values.map((v) => serializeEntryArgsToJson(v));
   }
@@ -36,8 +34,7 @@ export const serializeEntryArgsToJson = (
 };
 
 // For the wallet adapter payload.
-export const serializeEntryArgsToJsonArray = (
-  args: Record<string, EntryFunctionArgumentTypes>
-) => Object.values(args).map((v) => serializeEntryArgsToJson(v));
+export const serializeEntryArgsToJsonArray = (args: Record<string, EntryFunctionArgumentTypes>) =>
+  Object.values(args).map((v) => serializeEntryArgsToJson(v));
 
 export default serializeEntryArgsToJsonArray;
