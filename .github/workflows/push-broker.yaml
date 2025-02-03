@@ -61,6 +61,8 @@ jobs:
         echo "Digests:"
         echo "  amd64: ${{ needs.build.outputs.digest-amd64 }}"
         echo "  arm64: ${{ needs.build.outputs.digest-arm64 }}"
+    - name: 'Print metadata'
+      run: 'echo "${{ steps.metadata.outputs.json }}"'
 name: 'Push multi-platform broker image to Docker Hub'
 'on':
   push:
