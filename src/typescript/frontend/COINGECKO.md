@@ -52,7 +52,7 @@ As an AMM DEX, this is N/A.
 
 ## `/historical_trades`
 
-`/historical_trades` is implemented according to the Coingecko supplied
+`/coingecko/historical_trades` is implemented according to the Coingecko supplied
 specification, with the addition of the `skip` field.
 
 `start_time` and `end_time` are unix timestamps. Using this fields will result
