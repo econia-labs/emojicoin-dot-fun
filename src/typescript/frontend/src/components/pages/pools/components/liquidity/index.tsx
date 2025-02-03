@@ -5,7 +5,6 @@ import { translationFunction } from "context/language-context";
 import { Flex, Column, FlexGap } from "@containers";
 import { Text, Button, InputNumeric } from "components";
 import { StyledAddLiquidityWrapper } from "./styled";
-import { ProvideLiquidity, RemoveLiquidity } from "@/contract-apis/emojicoin-dot-fun";
 import {
   AptosInputLabel,
   EmojiInputLabel,
@@ -20,7 +19,6 @@ import {
   useSimulateRemoveLiquidity,
 } from "lib/hooks/queries/use-simulate-provide-liquidity";
 import { Arrows } from "components/svg";
-import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { useSearchParams } from "next/navigation";
 import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
@@ -28,6 +26,7 @@ import { type PoolsData } from "../../ClientPoolsPage";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useMatchBreakpoints } from "@hooks/index";
+import { useLiquidityTransactionBuilder } from "lib/hooks/transaction-builders/use-liquidity-builder";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -92,7 +91,6 @@ const Liquidity = ({ market }: LiquidityProps) => {
   );
 
   const {
-    aptos,
     account,
     submit,
     aptBalance,
@@ -102,29 +100,31 @@ const Liquidity = ({ market }: LiquidityProps) => {
     emojicoinLPBalance,
   } = useAptos();
 
+  const marketAddress = useMemo(() => market?.market.marketAddress, [market?.market.marketAddress]);
+
   const provideLiquidityResult = useSimulateProvideLiquidity({
-    marketAddress: market?.market.marketAddress,
-    quoteAmount: liquidity ?? 0,
+    marketAddress,
+    quoteAmount: liquidity ?? 0n,
   });
 
-  const { emojicoin } = market ? toCoinTypes(market?.market.marketAddress) : { emojicoin: "" };
+  const { emojicoin } = marketAddress ? toCoinTypes(marketAddress) : { emojicoin: "" };
 
   const removeLiquidityResult = useSimulateRemoveLiquidity({
-    marketAddress: market?.market.marketAddress,
-    lpCoinAmount: lp ?? 0,
+    marketAddress,
+    lpCoinAmount: lp ?? 0n,
     typeTags: [emojicoin ?? ""],
   });
 
   const enoughApt =
-    direction === "add" ? aptBalance !== undefined && aptBalance >= (liquidity ?? 0) : true;
+    direction === "add" ? aptBalance !== undefined && aptBalance >= (liquidity ?? 0n) : true;
   const enoughEmoji =
     direction === "add"
       ? emojicoinBalance !== undefined &&
-        emojicoinBalance >= BigInt(provideLiquidityResult?.base_amount ?? 0)
+        emojicoinBalance >= BigInt(provideLiquidityResult?.base_amount ?? 0n)
       : true;
   const enoughEmojiLP =
     direction === "remove"
-      ? emojicoinLPBalance !== undefined && emojicoinLPBalance >= (lp ?? 0)
+      ? emojicoinLPBalance !== undefined && emojicoinLPBalance >= (lp ?? 0n)
       : true;
 
   useEffect(() => {
@@ -154,6 +154,13 @@ const Liquidity = ({ market }: LiquidityProps) => {
   const balanceLabel = useMemo(() => {
     return ` (${t("Balance")}: `;
   }, [t]);
+
+  const transactionBuilder = useLiquidityTransactionBuilder(
+    marketAddress,
+    direction,
+    liquidity,
+    lp
+  );
 
   const aptInput = (
     <InnerWrapper id="apt" className="liquidity-input">
@@ -364,33 +371,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
               disabled={!isActionPossible}
               style={{ cursor: isActionPossible ? "pointer" : "not-allowed" }}
               onClick={async () => {
-                if (!account) {
-                  return;
-                }
-                const { emojicoin, emojicoinLP } = toCoinTypes(market!.market.marketAddress);
-                let builderLambda: () => Promise<EntryFunctionTransactionBuilder>;
-                if (direction === "add") {
-                  builderLambda = () =>
-                    ProvideLiquidity.builder({
-                      aptosConfig: aptos.config,
-                      provider: account.address,
-                      marketAddress: market!.market.marketAddress,
-                      quoteAmount: liquidity ?? 0,
-                      typeTags: [emojicoin, emojicoinLP],
-                      minLpCoinsOut: 1n,
-                    });
-                } else {
-                  builderLambda = () =>
-                    RemoveLiquidity.builder({
-                      aptosConfig: aptos.config,
-                      provider: account.address,
-                      marketAddress: market!.market.marketAddress,
-                      lpCoinAmount: lp,
-                      typeTags: [emojicoin, emojicoinLP],
-                      minQuoteOut: 1n,
-                    });
-                }
-                await submit(builderLambda);
+                await submit(transactionBuilder);
               }}
             >
               {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}

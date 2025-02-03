@@ -1,13 +1,10 @@
 "use client";
 
-import {
-  MarketMetadataByMarketAddress,
-  MarketProperties,
-  SetMarketProperties,
-} from "@/contract-apis";
+import { MarketMetadataByMarketAddress, MarketProperties } from "@/contract-apis";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useMarketMetadataTransactionBuilder } from "lib/hooks/transaction-builders/use-market-metadata-builder";
 import {
   type ChangeEventHandler,
   type MouseEventHandler,
@@ -151,8 +148,20 @@ const MetadataPage = () => {
         }
       })
       .catch((e) => console.error("Could not get existing market metadata.", e));
-    /* eslint-disable react-hooks/exhaustive-deps */
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [marketAddress]);
+
+  const memoizedFilledFields = useMemo(
+    () => Array.from(fields.entries().filter(([_, value]) => value !== "")),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    [Array.from(fields.entries()).toString()]
+  );
+
+  const transactionBuilder = useMarketMetadataTransactionBuilder(
+    marketAddress,
+    isSubmitEnabled,
+    memoizedFilledFields
+  );
 
   return (
     <div className="w-[100%] h-[100%] flex flex-col gap-[10px] text-xl place-content-center">
@@ -241,20 +250,7 @@ const MetadataPage = () => {
           tabIndex={3}
           className={`${BUTTON_CLASS_NAME} ${!isSubmitEnabled ? "!border-dark-gray" : ""} col-span-full`}
           onClick={async () => {
-            if (!isSubmitEnabled) {
-              return;
-            }
-            const filledFields = Array.from(fields.entries().filter(([_, value]) => value !== ""));
-            const builderLambda = () => {
-              return SetMarketProperties.builder({
-                aptosConfig: aptos.config,
-                admin: account!.address,
-                market: marketAddress,
-                keys: filledFields.map(([key, _]) => key),
-                values: filledFields.map(([_, value]) => value),
-              });
-            };
-            const res = await submit(builderLambda);
+            const res = await submit(transactionBuilder);
             if (!res || res.error) {
               console.error(res);
             }
