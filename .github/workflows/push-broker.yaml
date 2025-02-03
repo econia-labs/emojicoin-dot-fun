@@ -59,9 +59,9 @@ jobs:
         DOCKER_ORG="econialabs"
         REPO_NAME="emojicoin-dot-fun-indexer-broker"
         BASE_URL="https://hub.docker.com/v2/repositories/\
-          ${DOCKER_ORG}/\
-          ${REPO_NAME}/\
-          tags"
+        ${DOCKER_ORG}/\
+        ${REPO_NAME}/\
+        tags"
         BASE_URL=$(echo "$BASE_URL" | tr -d ' ')
         echo "url=$BASE_URL" >> "$GITHUB_OUTPUT"
     - name: 'Append ARM images to AMD manifest, remove old ARM images'
