@@ -6,8 +6,8 @@ env:
 jobs:
   build:
     outputs:
-      digest-amd64: '${{ steps.build-amd64.outputs.digest || "" }}'
-      digest-arm64: '${{ steps.build-arm64.outputs.digest || "" }}'
+      digest-amd64: '${{ steps.build-amd64.outputs.digest || '''' }}'
+      digest-arm64: '${{ steps.build-arm64.outputs.digest || '''' }}'
     runs-on: '${{ matrix.runner }}'
     steps:
     - uses: 'actions/checkout@v4'
