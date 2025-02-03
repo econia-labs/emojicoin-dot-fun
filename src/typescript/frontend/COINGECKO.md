@@ -61,7 +61,7 @@ in an inclusive search (gte for `start_time`, lte for `end_time`).
 `type` can be `buy` or `sell`.
 
 `ticker_id` must the the same format as the `ticker_id` field returned by
-`/tickers`.
+`/coingecko/tickers`.
 
 `limit` can be up to 500 (and is 500 by default).
 
