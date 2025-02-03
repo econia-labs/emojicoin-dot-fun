@@ -61,7 +61,7 @@ export const createWebSocketClientStore = (
         set((state) => {
           state.received += 1;
         });
-        get().pushEventFromClient(e);
+        get().pushEventsFromClient([e]);
       },
       onConnect: () => {
         set((state) => {

@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@aptos-labs/ts-sdk": "1.27.1",
-    "@econia-labs/emojicoin-sdk": "0.3.0-rc.7",
     "@keyvhq/core": "^2.1.1",
     "@noble/hashes": "^1.5.0",
     "@supabase/postgrest-js": "^1.16.2",

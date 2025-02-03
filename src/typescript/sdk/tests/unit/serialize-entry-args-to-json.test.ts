@@ -12,7 +12,7 @@ import {
   U64,
   U8,
 } from "@aptos-labs/ts-sdk";
-import { type AnyPrimitive, serializeArgsToJSON, toAccountAddress } from "../../src";
+import { serializeEntryArgsToJsonArray, toAccountAddress, type AnyPrimitive } from "../../src";
 
 const MAX_U8 = 2 ** 8 - 1;
 const MAX_U16 = 2 ** 16 - 1;
@@ -71,7 +71,7 @@ describe("ensures all BCS-serializable values can be serialized to JSON-serializ
   };
 
   it("serializes each non-option BCS-serializable type correctly", () => {
-    const serialized = serializeArgsToJSON(bcsArgs);
+    const serialized = serializeEntryArgsToJsonArray(bcsArgs);
     const expectedJSON = [
       true,
       false,
@@ -108,7 +108,7 @@ describe("ensures all BCS-serializable values can be serialized to JSON-serializ
       return res;
     })();
 
-    const serialized = serializeArgsToJSON(optionArgs);
+    const serialized = serializeEntryArgsToJsonArray(optionArgs);
     const expectedJSON = [
       [true],
       [false],
@@ -137,7 +137,7 @@ describe("ensures all BCS-serializable values can be serialized to JSON-serializ
   });
 
   it("serializes non-option BCS-serializable vector types correctly", () => {
-    const serialized = serializeArgsToJSON(bcsArrayArgs);
+    const serialized = serializeEntryArgsToJsonArray(bcsArrayArgs);
     const expectedJSON = [
       [true, false, false, true, true, true, false, true],
       [0, 1, 2, 3, MAX_U8 - 3, MAX_U8 - 2, MAX_U8 - 1, MAX_U8],
@@ -193,7 +193,7 @@ describe("ensures all BCS-serializable values can be serialized to JSON-serializ
         [[5, 6, 7, 8], [9]].map((v) => v.map(String)),
       ],
     ];
-    const serialized = serializeArgsToJSON(moveValues);
+    const serialized = serializeEntryArgsToJsonArray(moveValues);
     expect(serialized).toEqual(expectedJSON);
     expect(() => JSON.stringify(serialized)).not.toThrow();
     expectIdempotency(serialized);

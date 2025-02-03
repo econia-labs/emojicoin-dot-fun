@@ -65,4 +65,8 @@ export const parseJSONWithBigInts = <T>(msg: string): T => {
   });
 };
 
-export const stringifyJSONWithBigInts = (msg: any): string => JSON_BIGINT.stringify(msg);
+export const stringifyJSONWithBigInts = (
+  msg: any,
+  replacer?: (this: any, key: string, value: any) => any,
+  space?: string | number
+): string => JSON_BIGINT.stringify(msg, replacer, space);

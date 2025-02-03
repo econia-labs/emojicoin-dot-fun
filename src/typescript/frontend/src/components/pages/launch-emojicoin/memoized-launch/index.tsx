@@ -16,6 +16,7 @@ import Info from "components/info";
 import { Emoji } from "utils/emoji";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
+import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -25,9 +26,10 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   const setIsLoadingRegisteredMarket = useEmojiPicker(
     (state) => state.setIsLoadingRegisteredMarket
   );
-  const { aptBalance, refetchIfStale } = useAptos();
+  const { aptBalance, refetchIfStale, aptos, account } = useAptos();
+  const { sequenceNumber } = useAccountSequenceNumber(aptos, account);
 
-  const { registerMarket, cost } = useRegisterMarket();
+  const { registerMarket, cost } = useRegisterMarket(sequenceNumber);
   const { invalid, registered } = useIsMarketRegistered();
 
   useEffect(() => {

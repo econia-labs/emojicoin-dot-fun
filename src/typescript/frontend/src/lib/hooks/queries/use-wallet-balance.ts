@@ -1,9 +1,10 @@
-import { type AccountAddressInput, type Aptos } from "@aptos-labs/ts-sdk";
+import { type Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { withResponseError } from "./client";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { Balance } from "@/contract-apis";
+import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 
 /**
  * __NOTE: If you're using this for a connected user's APT balance, you should use__
@@ -25,17 +26,18 @@ import { Balance } from "@/contract-apis";
  */
 export const useWalletBalance = ({
   aptos,
-  accountAddress,
+  account,
   coinType,
   staleTime = 10000,
   refetchInterval,
 }: {
   aptos: Aptos;
-  accountAddress?: AccountAddressInput;
+  account: AccountInfo | null;
   coinType?: TypeTagInput;
   staleTime?: number;
   refetchInterval?: number;
 }) => {
+  const accountAddress = account?.address;
   // We use a nonce here because invalidateQuery for some reason does not work.
   const [nonce, setNonce] = useState(0);
   const manualBalance = useRef<bigint | null>(null);
