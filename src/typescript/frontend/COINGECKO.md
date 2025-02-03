@@ -76,10 +76,10 @@ multiple trades with the same ID can exist.
 ### Example
 
 Get the 51st trade for ticker `TICKER` after `TIME` unix timestamp :
-`/historical_trades?ticker_id=TICKER&start_time=TIME&limit=1&skip=50`.
+`/coingecko/historical_trades?ticker_id=TICKER&start_time=TIME&limit=1&skip=50`.
 
 Get the first 100 trades for ticker `TICKER` :
-`/historical_trades?ticker_id=TICKER&limit=100`.
+`/coingecko/historical_trades?ticker_id=TICKER&limit=100`.
 
 ### Example return data
 
