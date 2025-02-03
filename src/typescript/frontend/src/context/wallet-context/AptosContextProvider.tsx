@@ -196,7 +196,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
       return { response, error };
     },
-    [pushEventsFromClient, parseChangesAndSetBalances, aptos, network]
+    [markSequenceNumberStale, pushEventsFromClient, parseChangesAndSetBalances, aptos, network]
   );
 
   const submit: AptosContextState["submit"] = useCallback(
