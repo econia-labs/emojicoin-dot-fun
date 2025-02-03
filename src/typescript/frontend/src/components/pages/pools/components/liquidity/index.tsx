@@ -26,7 +26,7 @@ import { type PoolsData } from "../../ClientPoolsPage";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useMatchBreakpoints } from "@hooks/index";
-import { useLiquidityTransactionBuilder } from "lib/hooks/transaction-builders/use-liquidity-transaction-builder";
+import { useLiquidityTransactionBuilder } from "lib/hooks/transaction-builders/use-liquidity-builder";
 
 type LiquidityProps = {
   market: PoolsData | undefined;

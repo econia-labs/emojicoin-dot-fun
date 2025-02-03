@@ -12,7 +12,7 @@ import { getRankFromEvent } from "lib/utils/get-user-rank";
 import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { motion } from "framer-motion";
-import { useChatTransactionBuilder } from "lib/hooks/transaction-builders/use-chat-transaction-builder";
+import { useChatTransactionBuilder } from "lib/hooks/transaction-builders/use-chat-builder";
 
 const HARD_LIMIT = 500;
 

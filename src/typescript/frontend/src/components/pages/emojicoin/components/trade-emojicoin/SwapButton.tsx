@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
-import { useSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-swap-transaction-builder";
+import { useSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-swap-builder";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
