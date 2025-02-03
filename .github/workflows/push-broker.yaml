@@ -1,7 +1,11 @@
 # cspell:word imagetools
 ---
 env:
-  DOCKER_REPO: econialabs/emojicoin-dot-fun-indexer-broker
+  BUILD_ARGS: 'FEATURES=ws'
+  BUILD_CONTEXT: 'src/rust'
+  BUILD_FILE: 'src/rust/broker/Dockerfile'
+  DOCKER_REPO: 'econialabs/emojicoin-dot-fun-indexer-broker'
+  GIT_TAG_PREFIX: 'broker'
 jobs:
   build:
     outputs:
@@ -23,11 +27,11 @@ jobs:
       id: 'build'
       uses: 'docker/build-push-action@v6'
       with:
-        build-args: 'FEATURES=ws'
+        build-args: '${{ env.BUILD_ARGS }}'
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
-        context: 'src/rust'
-        file: 'src/rust/broker/Dockerfile'
+        context: '${{ env.BUILD_CONTEXT }}'
+        file: '${{ env.BUILD_FILE }}'
         outputs: 'name=${{ env.DOCKER_REPO }},push-by-digest=true,type=image'
         platforms: 'linux/${{ matrix.arch }}'
         push: true
@@ -51,7 +55,7 @@ jobs:
       uses: 'docker/metadata-action@v5'
       with:
         images: '${{ env.DOCKER_REPO }}'
-        tags: 'type=match,pattern=broker-v(.*),group=1'
+        tags: 'type=match,pattern=${{ env.GIT_TAG_PREFIX }}-v(.*),group=1'
     - name: 'Create multi-architecture image manifest on Docker Hub'
       run: |
         TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' \
