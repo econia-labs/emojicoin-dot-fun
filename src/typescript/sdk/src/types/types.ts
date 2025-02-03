@@ -17,7 +17,7 @@ import {
 } from "./json-types";
 import { type STRUCT_STRINGS } from "../utils";
 import { type Flatten } from ".";
-import { type SymbolEmoji } from "../emoji_data";
+import type { SymbolEmoji } from "../emoji_data";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);

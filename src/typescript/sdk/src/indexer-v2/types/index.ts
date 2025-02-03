@@ -732,6 +732,20 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
+export const toArenaLeaderboardHistoryWithArenaInfo = (data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]) => ({
+  meleeId: BigInt(data.melee_id),
+  profits: BigInt(data.profits),
+  losses: BigInt(data.losses),
+  emojicoin0Symbols: data.emojicoin_0_symbols,
+  emojicoin1Symbols: data.emojicoin_1_symbols,
+  emojicoin0MarketAddress: data.emojicoin_0_market_address,
+  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  emojicoin0MarketId: BigInt(data.emojicoin_0_market_id),
+  emojicoin1MarketId: BigInt(data.emojicoin_1_market_id),
+  startTime: new Date(data.start_time),
+  duration: BigInt(data.duration),
+});
+
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaMeleeData(data),
@@ -823,6 +837,7 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
   [DatabaseRpc.AggregateMarketState]: toAggregateMarketState,
+  [DatabaseRpc.ArenaLeaderboardHistoryWithArenaInfo]: toArenaLeaderboardHistoryWithArenaInfo,
 };
 
 export type DatabaseModels = {
