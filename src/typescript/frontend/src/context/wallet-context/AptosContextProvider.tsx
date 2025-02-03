@@ -39,6 +39,7 @@ import {
   setBalancesFromWriteset,
   setCoinTypeHelper,
 } from "./utils";
+import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -111,6 +112,8 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     return getAptosClient();
   }, [network]);
 
+  const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
+
   const aptHelper = useWalletBalance({ aptos, account, coinType: APTOS_COIN });
   const emojicoinHelper = useWalletBalance({ aptos, account, coinType: emojicoin });
   const emojicoinLPHelper = useWalletBalance({ aptos, account, coinType: emojicoinLP });
@@ -152,6 +155,8 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         response = res;
         setStatus("pending");
         try {
+          // If the transaction submission succeeds, mark the account's sequence number as stale.
+          markSequenceNumberStale();
           const awaitedResponse = (await aptos.waitForTransaction({
             transactionHash: res.hash,
           })) as UserTransactionResponse;

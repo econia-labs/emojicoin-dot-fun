@@ -16,7 +16,6 @@ import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import { useCallback, useMemo } from "react";
 import { useMarketRegisterTransactionBuilder } from "lib/hooks/transaction-builders/use-market-register-builder";
 
@@ -95,7 +94,6 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
     unitPrice = 100;
   }
 
-  const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
   const transactionBuilder = useMarketRegisterTransactionBuilder(sequenceNumber, amount, unitPrice);
 
   const registerMarket = useCallback(async () => {
@@ -109,8 +107,6 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
     });
 
     if (res && isUserTransactionResponse(res)) {
-      // If the transaction is successful, manually bump the sequence number in react-query state.
-      markSequenceNumberStale();
       clear();
       // The event is parsed and added as a registered market in `event-store.ts`,
       // we don't need to do anything here other than set the loading state.
@@ -125,7 +121,6 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
       setIsLoadingRegisteredMarket(false);
     }
   }, [
-    markSequenceNumberStale,
     signThenSubmit,
     account,
     transactionBuilder,
