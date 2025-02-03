@@ -26,7 +26,7 @@ import { type PoolsData } from "../../ClientPoolsPage";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useMatchBreakpoints } from "@hooks/index";
-import { useLiquidityTransactionBuilder } from "lib/hooks/use-liquidity-transaction-builder";
+import { useLiquidityTransactionBuilder } from "lib/hooks/transaction-builders/use-liquidity-transaction-builder";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -100,15 +100,17 @@ const Liquidity = ({ market }: LiquidityProps) => {
     emojicoinLPBalance,
   } = useAptos();
 
+  const marketAddress = useMemo(() => market?.market.marketAddress, [market?.market.marketAddress]);
+
   const provideLiquidityResult = useSimulateProvideLiquidity({
-    marketAddress: market?.market.marketAddress,
+    marketAddress,
     quoteAmount: liquidity ?? 0n,
   });
 
-  const { emojicoin } = market ? toCoinTypes(market?.market.marketAddress) : { emojicoin: "" };
+  const { emojicoin } = marketAddress ? toCoinTypes(marketAddress) : { emojicoin: "" };
 
   const removeLiquidityResult = useSimulateRemoveLiquidity({
-    marketAddress: market?.market.marketAddress,
+    marketAddress,
     lpCoinAmount: lp ?? 0n,
     typeTags: [emojicoin ?? ""],
   });
@@ -154,8 +156,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
   }, [t]);
 
   const transactionBuilder = useLiquidityTransactionBuilder(
-    account?.address,
-    market?.market.marketAddress,
+    marketAddress,
     direction,
     liquidity,
     lp

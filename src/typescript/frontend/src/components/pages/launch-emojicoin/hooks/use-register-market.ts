@@ -18,7 +18,7 @@ import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
-import { useTransactionBuilderWithOptions } from "lib/hooks/use-transaction-builder";
+import { useTransactionBuilderWithOptions } from "lib/hooks/transaction-builders/use-transaction-builder";
 import { useCallback, useEffect, useMemo } from "react";
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {

@@ -5,26 +5,21 @@ import { Flex, Column } from "@containers";
 import { MessageContainer } from "./components";
 import { type ChatProps } from "../../types";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { toCoinTypes } from "@sdk/markets/utils";
-import { Chat } from "@/contract-apis/emojicoin-dot-fun";
 import { useEventStore } from "context/event-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromEvent } from "lib/utils/get-user-rank";
 import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
-import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
-import { isUserTransactionResponse, type TypeTag } from "@aptos-labs/ts-sdk";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { motion } from "framer-motion";
-import { toChatMessageEntryFunctionArgs } from "@sdk/emoji_data/chat-message";
-import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
+import { useChatTransactionBuilder } from "lib/hooks/transaction-builders/use-chat-transaction-builder";
 
 const HARD_LIMIT = 500;
 
 const ChatBox = (props: ChatProps) => {
-  const { account, submit } = useAptos();
+  const { submit } = useAptos();
   const clear = useEmojiPicker((state) => state.clear);
   const setMode = useEmojiPicker((state) => state.setMode);
-  const emojis = useEmojiPicker((state) => state.emojis);
   const chats = useEventStore((s) => s.getMarket(props.data.symbolEmojis)?.chatEvents ?? []);
   const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
 
@@ -33,24 +28,7 @@ const ChatBox = (props: ChatProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const memoizedArgs = useMemo(() => {
-    if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS) {
-      return null;
-    }
-    const emojiText = emojis.join("");
-    const { marketAddress } = props.data.marketView.metadata;
-    const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-    const { emojiBytes, emojiIndicesSequence } = toChatMessageEntryFunctionArgs(emojiText);
-    return {
-      user: account.address,
-      marketAddress,
-      emojiBytes,
-      emojiIndicesSequence,
-      typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
-    };
-  }, [account, emojis, props.data.marketView.metadata]);
-
-  const transactionBuilder = useTransactionBuilder(memoizedArgs, Chat);
+  const transactionBuilder = useChatTransactionBuilder(props.data.marketAddress);
 
   const sendChatMessage = async () => {
     // Set the picker invisible while the transaction is being processed.

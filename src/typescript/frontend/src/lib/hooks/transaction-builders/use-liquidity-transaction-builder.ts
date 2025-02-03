@@ -1,14 +1,14 @@
 import { ProvideLiquidity, RemoveLiquidity } from "@/contract-apis";
-import { toCoinTypeTags } from "@sdk/markets";
+import { toCoinTypesForEntry } from "@sdk/markets";
 import { useMemo } from "react";
 import { useTransactionBuilder } from "./use-transaction-builder";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 
 /**
  * The individual args here must be passed to avoid re-renders due to a new object of args being
  * passed on re-renders.
  */
 export const useLiquidityTransactionBuilder = (
-  accountAddress: string | undefined,
   marketAddress: string | undefined,
   direction: "add" | "remove",
   quoteAmount: bigint,
@@ -16,8 +16,11 @@ export const useLiquidityTransactionBuilder = (
   minLpCoinsOut: bigint = 1n,
   minQuoteOut: bigint = 1n
 ) => {
+  const { account } = useAptos();
+
   const { memoizedArgs, ProvideOrRemove } = useMemo(() => {
     const ProvideOrRemove = direction === "add" ? ProvideLiquidity : RemoveLiquidity;
+    const accountAddress = account?.address;
     if (!accountAddress || !marketAddress) {
       return {
         memoizedArgs: null,
@@ -27,7 +30,7 @@ export const useLiquidityTransactionBuilder = (
     const sharedArgs = {
       provider: accountAddress,
       marketAddress,
-      typeTags: toCoinTypeTags(marketAddress),
+      typeTags: toCoinTypesForEntry(marketAddress),
     };
     const otherArgs =
       direction === "add"
@@ -47,7 +50,7 @@ export const useLiquidityTransactionBuilder = (
       },
     };
   }, [
-    accountAddress,
+    account?.address,
     direction,
     lpCoinAmount,
     marketAddress,

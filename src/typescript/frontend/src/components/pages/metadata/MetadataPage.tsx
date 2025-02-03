@@ -8,7 +8,7 @@ import {
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
+import { useTransactionBuilder } from "lib/hooks/transaction-builders/use-transaction-builder";
 import {
   type ChangeEventHandler,
   type MouseEventHandler,
