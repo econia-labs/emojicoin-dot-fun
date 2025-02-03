@@ -85,6 +85,7 @@ export default function CultClientPage() {
 
 //Fix text overflowing from header
 const StyledAlert = styled(Alert)`
+  font-family: MSSansSerif;
   & > .draggable {
     height: auto;
   }
