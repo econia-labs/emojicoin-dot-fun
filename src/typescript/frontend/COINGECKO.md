@@ -21,11 +21,11 @@ Tickers are ordered by time of market creation ascending.
 
 ### Example
 
-Get all tickers from 150 to 200: `/tickers?limit=50&skip=150`.
+Get all tickers from 150 to 200: `/coingecko/tickers?limit=50&skip=150`.
 
-Get all tickers from 0 to 100: `/tickers`.
+Get all tickers from 0 to 100: `/coingecko/tickers`.
 
-Get all tickers from 100 to 200: `/tickers?skip=100`.
+Get all tickers from 100 to 200: `/coingecko/tickers?skip=100`.
 
 ### Example return data
 
