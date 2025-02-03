@@ -69,6 +69,18 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
 }
 
 /**
+ * Helper function to return the types for the necessary entry function inputs, rather than as
+ * separate fields.
+ *
+ * @param inputAddress the market address
+ * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
+ */
+export function toCoinTypeTags(inputAddress: AccountAddressInput): [TypeTag, TypeTag] {
+  const { emojicoin, emojicoinLP } = toCoinTypes(inputAddress);
+  return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
+}
+
+/**
  * Get the derived market address and TypeTags for the given registry address and symbol bytes.
  *
  * @param registryAddress The contract's registry address.

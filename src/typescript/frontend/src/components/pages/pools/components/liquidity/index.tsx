@@ -5,7 +5,6 @@ import { translationFunction } from "context/language-context";
 import { Flex, Column, FlexGap } from "@containers";
 import { Text, Button, InputNumeric } from "components";
 import { StyledAddLiquidityWrapper } from "./styled";
-import { ProvideLiquidity, RemoveLiquidity } from "@/contract-apis/emojicoin-dot-fun";
 import {
   AptosInputLabel,
   EmojiInputLabel,
@@ -27,7 +26,7 @@ import { type PoolsData } from "../../ClientPoolsPage";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useMatchBreakpoints } from "@hooks/index";
-import { useTransactionBuilder } from "lib/hooks/use-transaction-builder";
+import { useLiquidityTransactionBuilder } from "lib/hooks/use-liquidity-transaction-builder";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -154,39 +153,13 @@ const Liquidity = ({ market }: LiquidityProps) => {
     return ` (${t("Balance")}: `;
   }, [t]);
 
-  const { memoizedArgs, ProvideOrRemove } = useMemo(() => {
-    const ProvideOrRemove = direction === "add" ? ProvideLiquidity : RemoveLiquidity;
-    if (!account || !market?.market.marketAddress) {
-      return {
-        memoizedArgs: null,
-        ProvideOrRemove,
-      };
-    }
-    const marketAddress = market.market.marketAddress;
-    const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-    const sharedArgs = {
-      provider: account.address,
-      marketAddress,
-      typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
-    };
-    return {
-      ProvideOrRemove,
-      memoizedArgs: {
-        ...sharedArgs,
-        ...(direction === "add"
-          ? {
-              quoteAmount: liquidity,
-              minLpCoinsOut: 1n,
-            }
-          : {
-              lpCoinAmount: lp,
-              minQuoteOut: 1n,
-            }),
-      },
-    };
-  }, [account, direction, liquidity, lp, market?.market.marketAddress]);
-
-  const transactionBuilder = useTransactionBuilder(memoizedArgs, ProvideOrRemove);
+  const transactionBuilder = useLiquidityTransactionBuilder(
+    account?.address,
+    market?.market.marketAddress,
+    direction,
+    liquidity,
+    lp
+  );
 
   const aptInput = (
     <InnerWrapper id="apt" className="liquidity-input">
