@@ -6,8 +6,10 @@ env:
 jobs:
   build:
     outputs:
-      digest-amd64: '${{ steps.build-amd64.outputs.digest || '''' }}'
-      digest-arm64: '${{ steps.build-arm64.outputs.digest || '''' }}'
+      digest-amd64: >-
+        ${{ matrix.arch == 'amd64' && steps.build.outputs.digest || '' }}
+      digest-arm64: >-
+        ${{ matrix.arch == 'arm64' && steps.build.outputs.digest || '' }}
     runs-on: '${{ matrix.runner }}'
     steps:
     - uses: 'actions/checkout@v4'
@@ -19,7 +21,7 @@ jobs:
     - name: 'Check out processor submodule'
       run: 'git submodule update --init --recursive src/rust/processor'
     - name: 'Build and push untagged ${{ matrix.arch }} digest to Docker Hub'
-      id: 'build-${{ matrix.arch }}'
+      id: 'build'
       uses: 'docker/build-push-action@v6'
       with:
         build-args: 'FEATURES=ws'
@@ -37,11 +39,8 @@ jobs:
       matrix:
         include:
         - arch: 'amd64'
-          flavor: null
           runner: 'ubuntu-latest'
         - arch: 'arm64'
-          flavor: |
-            suffix=-arm64,onlatest=true
           runner: 'ubuntu-24.04-arm'
   create-manifest:
     needs: 'build'
