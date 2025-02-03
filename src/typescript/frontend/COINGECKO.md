@@ -9,7 +9,7 @@ with a few necessary changes in order to fit our product.
 
 ## `/tickers`
 
-`/tickers` is implemented as required, but it is paginated. As
+`/coingecko/tickers` is implemented as required, but it is paginated. As
 `emojicoin-dot-fun` can have up to 10 000 000 markets, pagination needs to be
 present.
 
