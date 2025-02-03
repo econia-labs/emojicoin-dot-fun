@@ -63,6 +63,14 @@ jobs:
         echo "  arm64: ${{ needs.build.outputs.digest-arm64 }}"
     - name: 'Print metadata'
       run: 'echo "${{ steps.metadata.outputs.json }}"'
+    - name: 'Create and push manifest'
+      run: |
+        TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< '${{ steps.metadata.outputs.json }}')
+        docker buildx imagetools create \
+          ${TAG_ARGS} \
+          ${{ env.DOCKER_HUB_REPOSITORY }}@${{ needs.build.outputs.digest-amd64 }} \
+          ${{ env.DOCKER_HUB_REPOSITORY }}@${{ needs.build.outputs.digest-arm64 }}
+
 name: 'Push multi-platform broker image to Docker Hub'
 'on':
   push:
