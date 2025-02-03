@@ -21,7 +21,7 @@ const MAX_U64 = 2n ** 64n - 1n;
 const MAX_U128 = 2n ** 128n - 1n;
 const MAX_U256 = 2n ** 256n - 1n;
 
-// Ensure that stringifying and then parsing with default JSON functions results in the same
+// Ensure that stringify-ing and then parsing with default JSON functions results in the same
 // exact value input to the first stringify.
 const expectIdempotency = (v: AnyPrimitive[]) => expect(JSON.parse(JSON.stringify(v))).toEqual(v);
 
