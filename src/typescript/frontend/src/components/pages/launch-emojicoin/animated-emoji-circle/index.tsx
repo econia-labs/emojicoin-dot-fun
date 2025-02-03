@@ -35,21 +35,12 @@ export const AnimatedEmojiCircle = ({
               transform: `translateX(-50%) translateY(-50%) rotate(${degrees * i}deg)`,
             }}
           >
-            <Emoji emojis={emoji.emoji} />
-          </div>
-          <div
-            className="z-[1] absolute top-0 left-0 w-[30px] h-[160px]"
-            style={{
-              transform: `translateX(-50%) translateY(-50%) rotate(${degrees * i}deg)`,
-            }}
-          >
             <motion.div
-              className="w-[30px] h-[30px] bg-black"
               initial={{
                 opacity: 1,
               }}
               animate={{
-                opacity: [null, 0, 1],
+                opacity: [0, 1, 0],
               }}
               transition={{
                 delay: (1 / numEmojis) * i,
@@ -57,7 +48,9 @@ export const AnimatedEmojiCircle = ({
                 ease: "circIn",
                 repeat: Infinity,
               }}
-            ></motion.div>
+            >
+              <Emoji emojis={emoji.emoji} />
+            </motion.div>
           </div>
         </div>
       ))}
