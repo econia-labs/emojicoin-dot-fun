@@ -29,7 +29,7 @@ Get all tickers from 100 to 200: `/coingecko/tickers?skip=100`.
 
 ### Example return data
 
-`/tickers?limit=1`
+`/coingecko/tickers?limit=1`
 
 ```json
 [
