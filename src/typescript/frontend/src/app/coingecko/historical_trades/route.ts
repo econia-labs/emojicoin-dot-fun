@@ -10,12 +10,13 @@ import { stringifyJSON } from "utils";
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
 
-  const { tickerId, type, startTime, endTime, limit } = {
+  const { tickerId, type, startTime, endTime, limit, skip } = {
     tickerId: searchParams.get("ticker_id"),
     type: searchParams.get("type"),
     startTime: searchParams.get("start_time"),
     endTime: searchParams.get("end_time"),
     limit: Number(searchParams.get("limit") ?? 500),
+    skip: Number(searchParams.get("skip") ?? 0),
   };
 
   if (type && type !== "buy" && type !== "sell")
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     return new Response("Start time is not a valid unix timestamp.", { status: 400 });
   if (endTime && (isNaN(Number(endTime)) || Number(endTime) < 1))
     return new Response("End time is not a valid unix timestamp.", { status: 400 });
+  if (skip < 0) return new Response("Min skip is 0.", { status: 400 });
 
   let query = postgrest
     .from(TableName.SwapEvents)
@@ -35,7 +37,7 @@ export async function GET(request: NextRequest) {
   if (type) query = query.eq("is_sell", type === "sell");
   if (startTime) query = query.gte("bump_time", new Date(Number(startTime) * 1000).toISOString());
   if (endTime) query = query.lte("bump_time", new Date(Number(endTime) * 1000).toISOString());
-  query = query.limit(limit);
+  query = query.range(skip, skip + limit - 1);
   query = query.order("block_number, transaction_version, event_index");
 
   const swaps = await query;
