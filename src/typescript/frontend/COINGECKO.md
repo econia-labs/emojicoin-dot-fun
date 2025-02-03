@@ -7,7 +7,7 @@ requirements available
 [here](https://docs.google.com/document/d/1v27QFoQq1SKT3Priq3aqPgB70Xd_PnDzbOCiuoCyixw/edit?usp=sharing),
 with a few necessary changes in order to fit our product.
 
-## `/tickers`
+## `/coingecko/tickers`
 
 `/coingecko/tickers` is implemented as required, but it is paginated. As
 `emojicoin-dot-fun` can have up to 10 000 000 markets, pagination needs to be
