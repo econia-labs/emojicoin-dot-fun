@@ -55,7 +55,8 @@ const serializeToJSON = (
     }
     return typeof value.value === "bigint" ? value.value.toString() : value.value;
   }
-  // Fixed bytes. Treat them like a normal Move vector, although this may be incorrect.
+  // Fixed bytes. Treat them like a normal Move vector, although this may be incorrect, but they
+  // shouldn't be used for this purpose anyway.
   return normalizeHex(value.value);
 };
 
