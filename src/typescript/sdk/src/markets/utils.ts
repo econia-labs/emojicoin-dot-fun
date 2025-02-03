@@ -75,7 +75,7 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
  * @param inputAddress the market address
  * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
  */
-export function toCoinTypeTags(inputAddress: AccountAddressInput): [TypeTag, TypeTag] {
+export function toCoinTypesForEntry(inputAddress: AccountAddressInput): [TypeTag, TypeTag] {
   const { emojicoin, emojicoinLP } = toCoinTypes(inputAddress);
   return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
 }
