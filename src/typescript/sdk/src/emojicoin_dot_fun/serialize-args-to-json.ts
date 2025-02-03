@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  type SimpleEntryFunctionArgumentTypes,
-  MoveVector,
   Bool,
   U8,
   U16,
@@ -12,80 +10,57 @@ import {
   MoveString,
   AccountAddress,
   MoveOption,
+  type EntryFunctionArgumentTypes,
+  MoveVector,
 } from "@aptos-labs/ts-sdk";
+import { normalizeHex } from "../utils";
 
-// TODO: Clean this up later and make it more composable.
-const serializeArgsToJSON = (args: any): Array<SimpleEntryFunctionArgumentTypes> => {
-  const res = Object.keys(args).map((key) => {
-    const value = args[key as keyof typeof args];
-    if (value instanceof MoveVector) {
-      if (value.values[0] instanceof MoveVector) {
-        return value.values.flatMap((v) => serializeArgsToJSON(v));
-      }
-      if (
-        value.values[0] instanceof Bool ||
-        value.values[0] instanceof U8 ||
-        value.values[0] instanceof U16 ||
-        value.values[0] instanceof U32 ||
-        value.values[0] instanceof U64 ||
-        value.values[0] instanceof U128 ||
-        value.values[0] instanceof U256 ||
-        value.values[0] instanceof MoveString
-      ) {
-        return value.values.map((v) =>
-          typeof v.value === "bigint" ? v.value.toString() : v.value
-        );
-      }
-      return value.values.map((v: any) => serializeArgsToJSON(v));
+export type Primitive = boolean | number | string | bigint | undefined | null;
+export type AnyPrimitive = Primitive | Array<AnyPrimitive> | Uint8Array;
+
+type EntryFunctionOptionArg = MoveOption<
+  Bool | U8 | U16 | U32 | U64 | U128 | U256 | MoveString | AccountAddress
+>;
+
+const isSingleValue = (
+  v: any
+): v is Bool | U8 | U16 | U32 | U64 | U128 | U256 | MoveString | AccountAddress =>
+  v instanceof Bool ||
+  v instanceof U8 ||
+  v instanceof U16 ||
+  v instanceof U32 ||
+  v instanceof U64 ||
+  v instanceof U128 ||
+  v instanceof U256 ||
+  v instanceof MoveString ||
+  v instanceof AccountAddress;
+
+const serializeToJSON = (
+  value: EntryFunctionArgumentTypes | EntryFunctionOptionArg
+): AnyPrimitive => {
+  if (value instanceof MoveVector) {
+    return value.values.map((v) => serializeToJSON(v));
+  }
+  if (value instanceof MoveOption) {
+    const inner = value.value;
+    if (typeof inner === "undefined") {
+      return [];
     }
-    if (Array.isArray(value)) {
-      if (value[0] instanceof MoveVector) {
-        return value.flatMap((v) => serializeArgsToJSON(v));
-      }
-      if (
-        value[0] instanceof Bool ||
-        value[0] instanceof U8 ||
-        value[0] instanceof U16 ||
-        value[0] instanceof U32 ||
-        value[0] instanceof U64 ||
-        value[0] instanceof U128 ||
-        value[0] instanceof U256 ||
-        value[0] instanceof MoveString
-      ) {
-        return value.map((v) => (typeof v.value === "bigint" ? v.value.toString() : v.value));
-      }
-      return value.map((v: any) => serializeArgsToJSON(v));
-    }
+    return [serializeToJSON(inner)];
+  }
+  // A single serializable value.
+  if (isSingleValue(value)) {
     if (value instanceof AccountAddress) {
       return value.toString();
     }
-    if (value instanceof Uint8Array) {
-      return `0x${Buffer.from(value).toString("hex")}`;
-    }
-    if (typeof value === "bigint") {
-      return value.toString();
-    }
-    if (value instanceof MoveOption) {
-      return value.value ? serializeArgsToJSON(value.value) : null;
-    }
-    if (
-      value instanceof Bool ||
-      value instanceof U8 ||
-      value instanceof U16 ||
-      value instanceof U32 ||
-      value instanceof U64 ||
-      value instanceof U128 ||
-      value instanceof U256 ||
-      value instanceof MoveString
-    ) {
-      return typeof value.value === "bigint" ? value.value.toString() : value.value;
-    }
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      return value;
-    }
-    throw new Error(`Unsupported type ${typeof value} => ${value}`);
-  });
-  return res;
+    return typeof value.value === "bigint" ? value.value.toString() : value.value;
+  }
+  // Fixed bytes. Treat them like a normal Move vector, although this may be incorrect.
+  return normalizeHex(value.value);
 };
+
+export const serializeArgsToJSON = (
+  args: Record<string, EntryFunctionArgumentTypes | EntryFunctionOptionArg>
+) => Object.values(args).map((v) => serializeToJSON(v));
 
 export default serializeArgsToJSON;
