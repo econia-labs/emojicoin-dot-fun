@@ -28,7 +28,7 @@ import {
   type InputEntryFunctionData,
 } from "@aptos-labs/ts-sdk";
 import { toConfig } from "../utils/aptos-utils";
-import serializeArgsToJSON from "./serialize-args-to-json";
+import serializeEntryArgsToJsonArray from "./serialize-entry-args-to-json";
 import { type StructTagString } from "../utils/type-tags";
 
 export class EntryFunctionTransactionBuilder {
@@ -174,7 +174,7 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
         ...multiSigData,
         function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,
         typeArguments: this.typeTags.map((t) => t.toString()),
-        functionArguments: serializeArgsToJSON(this.args),
+        functionArguments: serializeEntryArgsToJsonArray(this.args),
         // abi: undefined, // TODO: Add pre-defined ABIs.
       },
       // options are ignored here by the wallet adapter, so there's no need to pretend it's possible
