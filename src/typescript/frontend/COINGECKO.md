@@ -50,7 +50,7 @@ Get all tickers from 100 to 200: `/coingecko/tickers?skip=100`.
 
 As an AMM DEX, this is N/A.
 
-## `/historical_trades`
+## `/coingecko/historical_trades`
 
 `/coingecko/historical_trades` is implemented according to the Coingecko supplied
 specification, with the addition of the `skip` field.
