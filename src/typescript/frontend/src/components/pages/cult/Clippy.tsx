@@ -17,6 +17,7 @@ export const Clippy = ({ monologue }: { monologue: string[] }) => {
   };
 
   useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
     clippy.load({
       name: "Clippy",
       successCb: (agent: Agent) => {
@@ -25,7 +26,7 @@ export const Clippy = ({ monologue }: { monologue: string[] }) => {
           clippyRef.current.show(false);
 
           renderNextText();
-          setInterval(() => {
+          interval = setInterval(() => {
             renderNextText();
           }, 6000);
         }
@@ -33,6 +34,7 @@ export const Clippy = ({ monologue }: { monologue: string[] }) => {
     });
 
     return () => {
+      clearInterval(interval);
       clippyRef.current?.hide(true, () => null);
       //No function to detroy it. We can destroy by classname
       document.querySelectorAll(".clippy, .clippy-balloon").forEach((item) => item.remove());

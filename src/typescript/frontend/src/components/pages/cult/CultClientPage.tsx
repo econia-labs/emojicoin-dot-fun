@@ -10,6 +10,7 @@ import { Clippy } from "./Clippy";
 import styled from "styled-components";
 import Button from "components/button";
 import { useMatchBreakpoints } from "@hooks/index";
+import { useWindowSize } from "react-use";
 
 const PARAM_KEY = "project";
 const JSON_FILE_GITHUB_URL =
@@ -21,6 +22,8 @@ export default function CultClientPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isMobile } = useMatchBreakpoints();
+
+  const { height, width } = useWindowSize();
 
   const project = searchParams.get(PARAM_KEY);
   const selectedProject = communityProjects.find((proj) => proj.id === project);
@@ -39,7 +42,7 @@ export default function CultClientPage() {
           message={selectedProject.description}
           dragOptions={{
             disabled: true,
-            defaultPosition: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+            defaultPosition: { x: width / 2, y: height / 2 },
           }}
           type="info"
           className="max-w-[700px] -translate-x-1/2 -translate-y-1/2"
