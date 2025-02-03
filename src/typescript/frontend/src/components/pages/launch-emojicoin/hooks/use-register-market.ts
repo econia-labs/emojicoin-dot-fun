@@ -6,7 +6,6 @@ import {
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { INTEGRATOR_ADDRESS } from "lib/env";
 import {
   MARKET_REGISTRATION_FEE,
   MARKET_REGISTRATION_GAS_ESTIMATION_FIRST,
@@ -18,8 +17,8 @@ import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
-import { useTransactionBuilderWithOptions } from "lib/hooks/transaction-builders/use-transaction-builder";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { useMarketRegisterTransactionBuilder } from "lib/hooks/transaction-builders/use-market-register-builder";
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {
@@ -97,32 +96,7 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
   }
 
   const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
-
-  const { memoizedArgs, options } = useMemo(() => {
-    return {
-      memoizedArgs: account
-        ? {
-            registrant: account.address,
-            emojis: emojiBytes,
-            integrator: INTEGRATOR_ADDRESS,
-          }
-        : null,
-      options:
-        sequenceNumber !== null
-          ? {
-              maxGasAmount: Math.round(amount * 1.2),
-              gasUnitPrice: unitPrice,
-              accountSequenceNumber: sequenceNumber,
-            }
-          : undefined,
-    };
-  }, [sequenceNumber, emojiBytes, account, amount, unitPrice]);
-
-  const transactionBuilder = useTransactionBuilderWithOptions(
-    memoizedArgs,
-    RegisterMarket,
-    options
-  );
+  const transactionBuilder = useMarketRegisterTransactionBuilder(sequenceNumber, amount, unitPrice);
 
   const registerMarket = useCallback(async () => {
     if (!account) return;

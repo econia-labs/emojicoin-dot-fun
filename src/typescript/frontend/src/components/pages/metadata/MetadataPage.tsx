@@ -8,7 +8,9 @@ import {
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useMarketMetadataTransactionBuilder } from "lib/hooks/transaction-builders/use-market-metadata-transaction-builder";
 import { useTransactionBuilder } from "lib/hooks/transaction-builders/use-transaction-builder";
+import { map } from "lodash";
 import {
   type ChangeEventHandler,
   type MouseEventHandler,
@@ -74,7 +76,7 @@ const FormEntry = ({
 
 const MetadataPage = () => {
   const [fields, setFields] = useState<Map<string, string>>(DEFAULT_FIELDS);
-  const [marketAddress, setMarketAddress] = useState<string>("");
+  const [marketAddress, setMarketAddress] = useState<`0x${string}` | "">("");
   const [addFieldName, setAddFieldName] = useState<string>("");
   const [pasted, setPasted] = useState(false);
 
@@ -155,20 +157,17 @@ const MetadataPage = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [marketAddress]);
 
-  const memoizedArgs = useMemo(() => {
-    if (!account || !isSubmitEnabled) {
-      return null;
-    }
-    const filledFields = Array.from(fields.entries().filter(([_, value]) => value !== ""));
-    return {
-      admin: account.address,
-      market: marketAddress,
-      keys: filledFields.map(([key, _]) => key),
-      values: filledFields.map(([_, value]) => value),
-    };
-  }, [account, isSubmitEnabled, fields, marketAddress]);
+  const memoizedFilledFields = useMemo(
+    () => Array.from(fields.entries().filter(([_, value]) => value !== "")),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    [Array.from(fields.entries()).toString()]
+  );
 
-  const transactionBuilder = useTransactionBuilder(memoizedArgs, SetMarketProperties);
+  const transactionBuilder = useMarketMetadataTransactionBuilder(
+    marketAddress,
+    isSubmitEnabled,
+    memoizedFilledFields
+  );
 
   return (
     <div className="w-[100%] h-[100%] flex flex-col gap-[10px] text-xl place-content-center">
