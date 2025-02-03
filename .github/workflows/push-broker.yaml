@@ -67,6 +67,7 @@ jobs:
     - name: 'Append ARM images to AMD manifest, remove old ARM images'
       # Loop over all the AMD64 tags and append the ARM64 tags to the manifest,
       # then delete the old ARM64 tags from Docker Hub.
+      # Foo
       run: |
         echo "${{ needs.build.outputs.amd64-tags }}" | while read -r tag; do
         if [ ! -z "$tag" ]; then
