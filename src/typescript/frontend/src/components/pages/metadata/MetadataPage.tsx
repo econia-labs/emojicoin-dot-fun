@@ -1,16 +1,10 @@
 "use client";
 
-import {
-  MarketMetadataByMarketAddress,
-  MarketProperties,
-  SetMarketProperties,
-} from "@/contract-apis";
+import { MarketMetadataByMarketAddress, MarketProperties } from "@/contract-apis";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useMarketMetadataTransactionBuilder } from "lib/hooks/transaction-builders/use-market-metadata-transaction-builder";
-import { useTransactionBuilder } from "lib/hooks/transaction-builders/use-transaction-builder";
-import { map } from "lodash";
+import { useMarketMetadataTransactionBuilder } from "lib/hooks/transaction-builders/use-market-metadata-builder";
 import {
   type ChangeEventHandler,
   type MouseEventHandler,
@@ -76,7 +70,7 @@ const FormEntry = ({
 
 const MetadataPage = () => {
   const [fields, setFields] = useState<Map<string, string>>(DEFAULT_FIELDS);
-  const [marketAddress, setMarketAddress] = useState<`0x${string}` | "">("");
+  const [marketAddress, setMarketAddress] = useState<string>("");
   const [addFieldName, setAddFieldName] = useState<string>("");
   const [pasted, setPasted] = useState(false);
 
