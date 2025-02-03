@@ -1,8 +1,7 @@
 # cspell:word imagetools
-# cspell:word onlatest
 ---
 env:
-  DOCKER_HUB_REPOSITORY: econialabs/emojicoin-dot-fun-indexer-broker
+  DOCKER_REPO: econialabs/emojicoin-dot-fun-indexer-broker
 jobs:
   build:
     outputs:
@@ -29,10 +28,7 @@ jobs:
         cache-to: 'type=gha,mode=max'
         context: 'src/rust'
         file: 'src/rust/broker/Dockerfile'
-        outputs: >-
-          type=image,
-          name=${{ env.DOCKER_HUB_REPOSITORY }},
-          push-by-digest=true
+        outputs: 'name=${{ env.DOCKER_REPO }},push-by-digest=true,type=image'
         platforms: 'linux/${{ matrix.arch }}'
         push: true
     strategy:
@@ -54,23 +50,16 @@ jobs:
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
-        images: '${{ env.DOCKER_HUB_REPOSITORY }}'
+        images: '${{ env.DOCKER_REPO }}'
         tags: 'type=match,pattern=broker-v(.*),group=1'
-    - name: 'Print digests'
+    - name: 'Create multi-architecture image manifest on Docker Hub'
       run: |
-        echo "Digests:"
-        echo "  amd64: ${{ needs.build.outputs.digest-amd64 }}"
-        echo "  arm64: ${{ needs.build.outputs.digest-arm64 }}"
-    - name: 'Print metadata'
-      run: 'echo "${{ steps.metadata.outputs.json }}"'
-    - name: 'Create and push manifest'
-      run: |
-        TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< '${{ steps.metadata.outputs.json }}')
+        TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' \
+          <<< '${{ steps.metadata.outputs.json }}')
         docker buildx imagetools create \
           ${TAG_ARGS} \
-          ${{ env.DOCKER_HUB_REPOSITORY }}@${{ needs.build.outputs.digest-amd64 }} \
-          ${{ env.DOCKER_HUB_REPOSITORY }}@${{ needs.build.outputs.digest-arm64 }}
-
+          ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-amd64 }} \
+          ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-arm64 }}
 name: 'Push multi-platform broker image to Docker Hub'
 'on':
   push:
