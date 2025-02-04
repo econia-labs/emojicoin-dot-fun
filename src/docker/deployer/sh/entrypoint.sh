@@ -79,6 +79,31 @@ fund_and_publish() {
 		--gas-unit-price $gas_unit_price \
 		--profile $profile
 
+    water_bytes="f09f92a7" # For 💧.
+	fire_bytes="f09f94a5" # For 🔥.
+    # Alternatively, you could pass "raw:0104f09f92a7" to properly serialize
+	# a vector<vector<u8>> like [[ 0xf09f92a7 ]]
+	water_vec_vec_u8_arg="hex:[\"$water_bytes\"]" 
+	fire_vec_vec_u8_arg="hex:[\"$fire_bytes\"]" 
+	
+	# Register two markets so it's possible to publish the arena module.
+	# Otherwise `init_module` loops infinitely and times out.
+	aptos move run \
+	  --assume-yes \
+	  --function-id "$profile::emojicoin_dot_fun::register_market" \
+	  --args $water_vec_vec_u8_arg address:$profile \
+	  --max-gas 2000000 \
+	  --gas-unit-price $gas_unit_price \
+	  --profile $profile
+	
+	aptos move run \
+	  --assume-yes \
+	  --function-id "$profile::emojicoin_dot_fun::register_market" \
+	  --args $fire_vec_vec_u8_arg address:$profile \
+	  --max-gas 2000000 \
+	  --gas-unit-price $gas_unit_price \
+	  --profile $profile
+
 	aptos move run \
 		--assume-yes \
 		--json-file /app/json/emojicoin_arena.json \
