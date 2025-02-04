@@ -5,15 +5,18 @@ import { translationFunction } from "context/language-context";
 import Link from "next/link";
 import path from "path";
 import { ROUTES } from "router/routes";
+import { useMemo } from "react";
 
 export const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,
   registered,
   invalid,
+  insufficientBalance,
 }: {
   onWalletButtonClick: () => void;
   registered?: boolean;
   invalid: boolean;
+  insufficientBalance: boolean;
 }) => {
   const emojis = useEmojiPicker((state) => state.emojis);
   const { t } = translationFunction();
@@ -22,6 +25,11 @@ export const LaunchButtonOrGoToMarketLink = ({
     overdrive: true,
     overflow: true,
   };
+
+  const disableRegister = useMemo(
+    () => invalid || insufficientBalance || typeof registered === "undefined",
+    [invalid, insufficientBalance, registered]
+  );
 
   return (
     <>
@@ -39,13 +47,19 @@ export const LaunchButtonOrGoToMarketLink = ({
           </Link>
         ) : (
           <Button
-            disabled={invalid || typeof registered === "undefined"}
+            disabled={disableRegister}
             onClick={onWalletButtonClick}
             scale="lg"
-            style={{ cursor: invalid ? "not-allowed" : "pointer" }}
+            style={{ cursor: disableRegister ? "not-allowed" : "pointer" }}
             scrambleProps={scrambleProps}
           >
-            {t(invalid ? "Invalid input" : "Launch Emojicoin")}
+            {t(
+              insufficientBalance
+                ? "Insufficient balance"
+                : invalid
+                  ? "Invalid input"
+                  : "Launch Emojicoin"
+            )}
           </Button>
         )}
       </ButtonWithConnectWalletFallback>
