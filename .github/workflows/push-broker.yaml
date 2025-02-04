@@ -60,8 +60,7 @@ jobs:
       run: |
         TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' \
         <<< '${{ steps.metadata.outputs.json }}')
-        docker buildx imagetools create \
-        ${TAG_ARGS} \
+        docker buildx imagetools create ${TAG_ARGS} \
         ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-amd64 }} \
         ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-arm64 }}
 name: 'Push multi-platform broker image to Docker Hub'
