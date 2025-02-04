@@ -32,7 +32,7 @@ aptos move build-publish-payload \
 	--move-2
 
 aptos move build-publish-payload \
-    --assume-yes \
+	--assume-yes \
 	--named-addresses \
 	emojicoin_dot_fun=$profile,market_metadata=$profile \
 	--package-dir $move_dir/market_metadata/ \
