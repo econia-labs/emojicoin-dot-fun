@@ -186,6 +186,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           >
             <LaunchButtonOrGoToMarketLink
               invalid={invalid}
+              insufficientBalance={!sufficientBalance}
               registered={registered}
               onWalletButtonClick={() => {
                 registerMarket();
