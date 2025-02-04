@@ -61,5 +61,6 @@
   "Cost to deploy": "Cost to deploy",
   "Your balance": "Your balance",
   "Your transaction may fail due to gas costs.": "Your transaction may fail due to gas costs.",
-  "Balance": "Balance"
+  "Balance": "Balance",
+  "Insufficient balance": "Insufficient balance"
 }
