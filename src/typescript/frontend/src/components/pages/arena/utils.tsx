@@ -1,12 +1,14 @@
 import { useMatchBreakpoints } from "@hooks/index";
 import {
+  type ArenaLeaderboardHistoryWithArenaInfoModel,
+  type ArenaPositionsModel,
   type ArenaInfoModel,
   type MarketStateModel,
   type PeriodicStateEventModel,
 } from "@sdk/indexer-v2/types";
 import { type CSSProperties, useState } from "react";
 import darkTheme from "theme/dark";
-import { Emoji } from "utils/emoji";
+import { GlowingEmoji } from "utils/emoji";
 
 export type Props = {
   arenaInfo: ArenaInfoModel;
@@ -14,6 +16,11 @@ export type Props = {
   market1: MarketStateModel;
   candlesticksMarket0: PeriodicStateEventModel[];
   candlesticksMarket1: PeriodicStateEventModel[];
+};
+
+export type PropsWithPositionAndHistory = Props & {
+  position?: ArenaPositionsModel;
+  history: ArenaLeaderboardHistoryWithArenaInfoModel[];
 };
 
 export const Box: React.FC<
@@ -69,7 +76,7 @@ export const EmojiTitle = ({
         onMouseEnter={() => setHover0(true)}
         onMouseLeave={() => setHover0(false)}
       >
-        <Emoji emojis={market0Symbols.join("")} />{" "}
+        <GlowingEmoji emojis={market0Symbols.join("")} />{" "}
         {onClicks !== undefined && hover0 ? (
           <>
             <div
@@ -99,7 +106,7 @@ export const EmojiTitle = ({
         onMouseEnter={() => setHover1(true)}
         onMouseLeave={() => setHover1(false)}
       >
-        <Emoji emojis={market1Symbols.join("")} />
+        <GlowingEmoji emojis={market1Symbols.join("")} />
         {onClicks !== undefined && hover1 ? (
           <>
             <div

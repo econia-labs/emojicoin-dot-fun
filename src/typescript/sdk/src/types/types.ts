@@ -429,6 +429,7 @@ export type Types = {
     emojicoin1Balance: bigint;
     withdrawals: bigint;
     deposits: bigint;
+    lastExit: string | undefined;
   };
 
   ArenaLeaderboardHistory: {
@@ -436,6 +437,8 @@ export type Types = {
     meleeId: bigint;
     profits: bigint;
     losses: bigint;
+    lastExit: string | undefined;
+    exited: boolean;
   };
 
   ArenaLeaderboard: {

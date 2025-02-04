@@ -5,7 +5,7 @@ import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import { Emoji } from "utils/emoji";
+import { GlowingEmoji } from "utils/emoji";
 import "./module.css";
 import { useMatchBreakpoints } from "@hooks/index";
 import { getEmojisInString } from "@sdk/emoji_data";
@@ -20,17 +20,6 @@ type ArenaCardProps = {
   startTime: bigint;
   duration: bigint;
 };
-
-const GlowingEmoji = ({ emoji }: { emoji: string }) => (
-  <div
-    className={`relative grid items-center place-items-center symbol-${getEmojisInString(emoji).length}`}
-  >
-    <div className="absolute z-[-1]" style={{ filter: "blur(15px)" }}>
-      <Emoji className="flex flex-nowrap text-nowrap" emojis={emoji} />
-    </div>
-    <Emoji className="flex flex-nowrap text-nowrap" emojis={emoji} />
-  </div>
-);
 
 export const ArenaCard = ({
   market0Symbol,
@@ -58,9 +47,17 @@ export const ArenaCard = ({
         gridTemplateColumns: "1fr auto 1fr",
       }}
     >
-      <GlowingEmoji emoji={market0Symbol} />
+      <div
+        className={`relative grid items-center place-items-center symbol-${getEmojisInString(market0Symbol).length}`}
+      >
+        <GlowingEmoji className="flex flex-row text-nowrap" emojis={market0Symbol} />
+      </div>
       <span className="vs text-light-gray uppercase m-auto text-[.8em]">vs</span>
-      <GlowingEmoji emoji={market1Symbol} />
+      <div
+        className={`relative grid items-center place-items-center symbol-${getEmojisInString(market1Symbol).length}`}
+      >
+        <GlowingEmoji className="flex flex-row text-nowrap" emojis={market1Symbol} />
+      </div>
     </div>
   );
 

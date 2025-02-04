@@ -94,21 +94,12 @@ export default async function Home({ searchParams }: HomePageParams) {
   })();
 
   const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
-    priceFeedPromise,
-    marketsPromise,
-    numMarketsPromise,
-    aptPricePromise,
-    meleeDataPromise,
-  ]).catch((e) => {
-    console.error(e);
-    return [
-      [] as DatabaseModels["price_feed"][],
-      [] as DatabaseModels["market_state"][],
-      0,
-      undefined,
-      null,
-    ] as const;
-  });
+    priceFeedPromise.catch(() => []),
+    marketsPromise.catch(() => []),
+    numMarketsPromise.catch(() => 0),
+    aptPricePromise.catch(() => undefined),
+    meleeDataPromise.catch(() => null),
+  ]);
 
   return (
     <AptPriceContextProvider aptPrice={aptPrice}>
