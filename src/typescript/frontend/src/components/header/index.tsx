@@ -24,7 +24,6 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
   const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
   const searchParams = useSearchParams();
-  const linksForCurrentPage = NAVIGATE_LINKS;
   const clear = useEmojiPicker((s) => s.clear);
 
   const [offsetHeight, setOffsetHeight] = useState(0);
@@ -84,14 +83,14 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
 
           {isDesktop && (
             <FlexGap marginRight="50px" gap="24px" alignItems="center">
-              {linksForCurrentPage.map(({ title, path, width }) => {
+              {NAVIGATE_LINKS.map(({ title, path }) => {
                 return (
                   <Link
                     key={title}
                     href={path}
                     target={path.startsWith("https://") ? "_blank" : undefined}
                   >
-                    <MenuItem width={width} title={title} />
+                    <MenuItem title={title} />
                   </Link>
                 );
               })}
@@ -108,7 +107,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
           )}
         </Flex>
       </Container>
-      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
+      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={NAVIGATE_LINKS} />
     </StyledContainer>
   );
 };
