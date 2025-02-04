@@ -1,5 +1,7 @@
 {
-  "dictionaries": ["project-words"],
+  "dictionaries": [
+    "project-words"
+  ],
   "dictionaryDefinitions": [
     {
       "addWords": true,
@@ -27,7 +29,9 @@
   ],
   "overrides": [
     {
-      "dictionaries": ["frontend-words"],
+      "dictionaries": [
+        "frontend-words"
+      ],
       "filename": "**/src/typescript/frontend/**/*.{css,html,ts,tsx,js,jsx,json}"
     }
   ]
