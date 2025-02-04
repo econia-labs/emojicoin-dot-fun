@@ -100,7 +100,6 @@ const waitForEventProcessed = async (
  */
 export class EmojicoinClient {
   public aptos: Aptos;
-  public alwaysWaitForIndexer: boolean;
 
   public register = this.registerInternal.bind(this);
   public chat = this.chatInternal.bind(this);
@@ -145,6 +144,8 @@ export class EmojicoinClient {
     registry: this.registryView.bind(this),
     market: this.marketView.bind(this),
   };
+
+  private alwaysWaitForIndexer: boolean;
 
   private integrator: AccountAddress;
 
