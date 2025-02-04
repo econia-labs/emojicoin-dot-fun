@@ -1,5 +1,7 @@
 import { type fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
+import type { SymbolEmoji } from "@sdk/emoji_data";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
+import { emoji } from "utils";
 //import { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 //import { redirect } from "next/navigation";
 //import { parseJSON } from "utils";
@@ -21,16 +23,20 @@ export default async function Arena() {
     maxMatchAmount: 5n * 10n ** 8n,
     rewardsRemaining: 12345n * 10n ** 6n,
     maxMatchPercentage: 50n,
-    emojicoin0MarketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
-    emojicoin1MarketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
+    emojicoin0MarketAddress: "0x9efc3e9aa9b5921fdffc8e7ac21452319902130603083351fc7c961d8ab97d6a",
+    emojicoin1MarketAddress: "0x3a26d1a4b37877e56bd7cbc8af5e8c0a26d876025bc02e67ca7b96c8bdd2fc26",
+    emojicoin0Symbols: [emoji("butterfly") as SymbolEmoji],
+    emojicoin1Symbols: [emoji("ribbon") as SymbolEmoji],
+    emojicoin0MarketId: 1n,
+    emojicoin1MarketId: 2n,
   };
 
   const [market0, market1] = await Promise.all([
     fetchMarketStateByAddress({
-      address: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
+      address: arenaInfo.emojicoin0MarketAddress,
     }),
     fetchMarketStateByAddress({
-      address: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
+      address: arenaInfo.emojicoin1MarketAddress,
     }),
   ]);
   /* */

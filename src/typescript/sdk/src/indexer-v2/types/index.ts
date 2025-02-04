@@ -189,6 +189,7 @@ const toArenaPositionsFromDatabase = (
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
   withdrawals: BigInt(data.withdrawals),
   deposits: BigInt(data.deposits),
+  lastExit: data.last_exit,
 });
 
 const toArenaLeaderboardFromDatabase = (
@@ -228,6 +229,8 @@ const toArenaLeaderboardHistoryFromDatabase = (
   meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
+  lastExit: data.last_exit,
+  exited: data.exited,
 });
 
 type GlobalStateEventData = {
@@ -461,6 +464,9 @@ export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardH
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
+export type ArenaLeaderboardHistoryWithArenaInfoModel = ReturnType<
+  typeof toArenaLeaderboardHistoryWithArenaInfo
+>;
 
 /**
  * Converts a function that converts a type to another type into a function that converts the type
@@ -803,7 +809,9 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
-export const toArenaLeaderboardHistoryWithArenaInfo = (data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]) => ({
+export const toArenaLeaderboardHistoryWithArenaInfo = (
+  data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]
+) => ({
   meleeId: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
@@ -815,6 +823,11 @@ export const toArenaLeaderboardHistoryWithArenaInfo = (data: DatabaseJsonType["a
   emojicoin1MarketId: BigInt(data.emojicoin_1_market_id),
   startTime: new Date(data.start_time),
   duration: BigInt(data.duration),
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
+  lastExit: data.last_exit,
+  endHolding: BigInt(data.end_holding),
+  exited: data.exited,
 });
 
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({

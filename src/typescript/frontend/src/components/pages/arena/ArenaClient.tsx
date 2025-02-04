@@ -3,16 +3,17 @@
 import { useMatchBreakpoints } from "@hooks/index";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { emoji } from "utils";
-import { Box, EmojiTitle, type Props } from "./utils";
+import { parseJSON } from "utils";
+import { Box, EmojiTitle, type PropsWithPositionAndHistory, type Props } from "./utils";
 import { BottomNavigation, TabContainer } from "./tabs";
-import { EnterTab } from "./tabs/EnterTab";
 import { PriceChartDesktopBox } from "./PriceChart";
-import { ProfileTab } from "./tabs/ProfileTab";
-import { ChatTab } from "./tabs/ChatTab";
-import { InfoTab } from "./tabs/InfoTab";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import {
+  type ArenaLeaderboardHistoryWithArenaInfoModel,
+  type ArenaPositionsModel,
+} from "@sdk/indexer-v2/types";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -39,50 +40,15 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
   );
 };
 
-const Desktop: React.FC<Props> = ({
-  arenaInfo,
-  market0,
-  market1,
-  candlesticksMarket0,
-  candlesticksMarket1,
-}) => {
-  const tabs = [
-    {
-      name: "Position",
-      emoji: emoji("smiling face with horns"),
-      element: <EnterTab {...{ market0, market1 }} />,
-    },
-    {
-      name: "Profile",
-      emoji: emoji("ninja"),
-      element: <ProfileTab positions={[{
-          user: "",
-          meleeId: 0n,
-          open: true,
-          emojicoin0Balance: 100000000n,
-          emojicoin1Balance: 0n,
-          withdrawals: 0n,
-          deposits: 10000n
-      }]} {...{market0, market1}} />,
-    },
-    {
-      name: "Chat",
-      emoji: emoji("left speech bubble"),
-      element: <ChatTab />,
-    },
-    {
-      name: "Info",
-      emoji: emoji("books"),
-      element: <InfoTab />,
-    },
-  ];
+const Desktop: React.FC<PropsWithPositionAndHistory> = (props) => {
+  const { arenaInfo, market0, market1 } = props;
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateRows: "1fr 3fr",
+        gridTemplateRows: "1fr minmax(0, 3.5fr)",
         gridTemplateColumns: "1fr 0.65fr 0.85fr 1fr",
-        height: "100%",
+        height: "90%",
         width: "100%",
         padding: "2em",
         gap: "2em",
@@ -101,39 +67,16 @@ const Desktop: React.FC<Props> = ({
         />
       </Box>
       <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
-      <PriceChartDesktopBox
-        {...{ arenaInfo, market0, market1, candlesticksMarket0, candlesticksMarket1 }}
-      />
-      <Box className="col-start-3 col-end-5">
-        <TabContainer tabs={tabs} />
+      <PriceChartDesktopBox {...props} />
+      <Box className="col-start-3 col-end-5 h-[100%]">
+        <TabContainer {...props} />
       </Box>
     </div>
   );
 };
 
-const Mobile: React.FC<Props> = ({ arenaInfo, market0, market1 }) => {
-  const tabs = [
-    {
-      name: "Position",
-      emoji: emoji("smiling face with horns"),
-      element: <EnterTab {...{ market0, market1 }} />,
-    },
-    {
-      name: "Profile",
-      emoji: emoji("ninja"),
-      element: <div className="text-ec-blue">tab number two</div>,
-    },
-    {
-      name: "Chat",
-      emoji: emoji("left speech bubble"),
-      element: <div className="text-ec-blue">tab number three</div>,
-    },
-    {
-      name: "Info",
-      emoji: emoji("books"),
-      element: <div className="text-ec-blue">tab number four</div>,
-    },
-  ];
+const Mobile: React.FC<PropsWithPositionAndHistory> = (props) => {
+  const { arenaInfo, market0, market1 } = props;
   return (
     <>
       <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
@@ -153,12 +96,33 @@ const Mobile: React.FC<Props> = ({ arenaInfo, market0, market1 }) => {
         <Box className="h-[500px]"></Box>
         <Box className="h-[500px]"></Box>
       </div>
-      {createPortal(<BottomNavigation tabs={tabs} />, document.body)}
+      {createPortal(<BottomNavigation {...props} />, document.body)}
     </>
   );
 };
 
 export const ArenaClient = (props: Props) => {
   const { isMobile } = useMatchBreakpoints();
-  return isMobile ? <Mobile {...props} /> : <Desktop {...props} />;
+  const { account } = useAptos();
+  const [position, setPosition] = useState<ArenaPositionsModel | undefined>();
+  const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
+
+  useEffect(() => {
+    if (account) {
+      fetch(`/arena/position/${account.address}`)
+        .then((r) => r.text())
+        .then(parseJSON<ArenaPositionsModel | null>)
+        .then((r) => setPosition(r ?? undefined));
+      fetch(`/arena/positions/${account.address}`)
+        .then((r) => r.text())
+        .then(parseJSON<ArenaLeaderboardHistoryWithArenaInfoModel[]>)
+        .then((r) => setHistory(r));
+    }
+  }, [account]);
+
+  return isMobile ? (
+    <Mobile {...props} {...{ position, history }} />
+  ) : (
+    <Desktop {...props} {...{ position, history }} />
+  );
 };

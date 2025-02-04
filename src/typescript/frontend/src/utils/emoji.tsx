@@ -81,3 +81,12 @@ export const EmojiAsImage = ({
   }
   return <span {...props}>{data}</span>;
 };
+
+export const GlowingEmoji = ({ emojis, className }: { emojis: string; className?: string }) => (
+  <div className="relative z-[0]">
+    <div className="absolute z-[-1]" style={{ filter: "blur(15px)" }}>
+      <Emoji className={className} emojis={emojis} />
+    </div>
+    <Emoji className={className} emojis={emojis} />
+  </div>
+);

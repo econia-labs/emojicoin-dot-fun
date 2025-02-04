@@ -285,6 +285,7 @@ type ArenaPositionsData = {
   emojicoin_1_balance: Uint64String;
   withdrawals: Uint64String;
   deposits: Uint64String;
+  last_exit: string | undefined;
 };
 
 type ArenaInfoData = {
@@ -309,12 +310,18 @@ type ArenaLeaderboardHistoryData = {
   melee_id: Uint64String;
   profits: Uint64String;
   losses: Uint64String;
+  last_exit: string | undefined;
+  end_holding: string;
+  exited: boolean;
 };
 
 type ArenaLeaderboardHistoryWithArenaInfoData = {
   melee_id: Uint64String;
   profits: Uint64String;
   losses: Uint64String;
+  last_exit: string | undefined;
+  end_holding: Uint64String;
+  exited: boolean;
 
   emojicoin_0_market_address: string;
   emojicoin_1_market_address: string;
@@ -322,9 +329,11 @@ type ArenaLeaderboardHistoryWithArenaInfoData = {
   emojicoin_1_market_id: Uint64String;
   emojicoin_0_symbols: SymbolEmoji[];
   emojicoin_1_symbols: SymbolEmoji[];
+  emojicoin_0_balance: bigint;
+  emojicoin_1_balance: bigint;
   start_time: string;
   duration: Uint64String;
-}
+};
 
 type ArenaLeaderboardData = {
   user: AccountAddressString;
