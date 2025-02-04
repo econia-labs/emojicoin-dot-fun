@@ -1,6 +1,7 @@
 import translations from "../../../public/locales/en-US.json";
+import { type TranslationKey } from "./types";
 
-export const simpleTranslation = (s: keyof typeof translations) => translations[s];
+export const simpleTranslation = (s: TranslationKey) => translations[s];
 
 /**
  * There is no reason to pollute the entire codebase with useContext(LanguageContext) when we only have
@@ -15,7 +16,7 @@ export const simpleTranslation = (s: keyof typeof translations) => translations[
  *
  * @returns a translated string, not a function.
  */
-export const translationFunction = (): { t: (s: keyof typeof translations) => string | null } => {
+export const translationFunction = (): { t: (s: TranslationKey) => string } => {
   /*
   const languageContext = useContext(LanguageContext);
 
@@ -27,6 +28,7 @@ export const translationFunction = (): { t: (s: keyof typeof translations) => st
   */
 
   return {
-    t: (s: keyof typeof translations) => translations[s] ?? s,
+    //If S is a key in translations, return the value of that key, otherwise return S
+    t: (s: TranslationKey) => (s in translations ? translations[s] : s),
   };
 };
