@@ -45,13 +45,13 @@ export default function CultClientPage() {
             defaultPosition: { x: width / 2, y: height / 2 },
           }}
           type="info"
-          className="max-w-[700px] -translate-x-1/2 -translate-y-1/2"
+          className="max-w-[700px] -translate-x-1/2 -translate-y-1/2 [&>*]:!pl-2 !font-pixelar !lowercase [&>div>button]:lowercase"
           titleBarOptions={
             <TitleBar.Close className="!h-[90%]" key="close" onClick={() => setSelectedProject()} />
           }
           buttons={[
             {
-              value: "Visit",
+              value: "Take me there",
               onClick: () => {
                 window.open(selectedProject.url, "_blank");
               },
@@ -85,7 +85,7 @@ export default function CultClientPage() {
 
 //Fix text overflowing from header
 const StyledAlert = styled(Alert)`
-  font-family: MSSansSerif;
+  font-family: var(--font-pixelar);
   & > .draggable {
     height: auto;
   }

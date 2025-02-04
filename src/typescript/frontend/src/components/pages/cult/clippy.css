@@ -2,3 +2,9 @@
 .clippy-balloon.clippy-top-left {
   transform: translate(-50%, -100%);
 }
+
+div.clippy-content {
+  font-family: var(--font-pixelar) !important;
+  text-transform: lowercase !important;
+  font-size: 1em;
+}

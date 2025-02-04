@@ -1,3 +1,5 @@
+// cspell:word textfile
+
 import Text from "components/text";
 import Image from "next/image";
 import { type FC } from "react";
