@@ -55,7 +55,7 @@ export default function CultClientPage() {
               onClick: () => {
                 window.open(selectedProject.url, "_blank");
               },
-            }
+            },
           ]}
         />
       )}
