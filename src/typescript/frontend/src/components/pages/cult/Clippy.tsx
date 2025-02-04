@@ -51,7 +51,7 @@ export const Clippy = ({ monologue }: { monologue: string[] }) => {
     return () => {
       clearInterval(interval);
       clippyRef.current?.hide(true, () => null);
-      //No function to destroy it. We can destroy by classname
+      // No function to destroy it. We can destroy by class name.
       document.querySelectorAll(".clippy, .clippy-balloon").forEach((item) => item.remove());
       clippyRef.current = undefined;
     };
