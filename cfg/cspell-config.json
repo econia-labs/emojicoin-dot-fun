@@ -1,7 +1,5 @@
 {
-  "dictionaries": [
-    "project-words"
-  ],
+  "dictionaries": ["project-words"],
   "dictionaryDefinitions": [
     {
       "addWords": true,
@@ -23,13 +21,13 @@
     "../src/typescript/sdk/src/emoji_data/chat-emojis.json",
     "../src/typescript/sdk/tests/unit/event-parser/json/bonding-curve-states.json",
     "../src/typescript/sdk/tests/unit/event-parser/event-models.test.ts",
-    "../src/typescript/sdk/tsconfig.json"
+    "../src/typescript/sdk/tsconfig.json",
+    "../src/typescript/frontend/public/images/*.svg",
+    "../src/typescript/frontend/public/community-projects.json"
   ],
   "overrides": [
     {
-      "dictionaries": [
-        "frontend-words"
-      ],
+      "dictionaries": ["frontend-words"],
       "filename": "**/src/typescript/frontend/**/*.{css,html,ts,tsx,js,jsx,json}"
     }
   ]
