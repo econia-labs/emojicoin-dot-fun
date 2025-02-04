@@ -23,8 +23,8 @@ jobs:
         username: '${{ secrets.DOCKERHUB_USERNAME }}'
     - name: 'Check out processor submodule'
       run: 'git submodule update --init --recursive src/rust/processor'
-    - name: 'Build and push untagged ${{ matrix.arch }} digest to Docker Hub'
-      id: 'build'
+    - id: 'build'
+      name: 'Build and push untagged ${{ matrix.arch }} digest to Docker Hub'
       uses: 'docker/build-push-action@v6'
       with:
         build-args: '${{ env.BUILD_ARGS }}'
@@ -59,11 +59,11 @@ jobs:
     - name: 'Create multi-architecture image manifest on Docker Hub'
       run: |
         TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' \
-          <<< '${{ steps.metadata.outputs.json }}')
+        <<< '${{ steps.metadata.outputs.json }}')
         docker buildx imagetools create \
-          ${TAG_ARGS} \
-          ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-amd64 }} \
-          ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-arm64 }}
+        ${TAG_ARGS} \
+        ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-amd64 }} \
+        ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-arm64 }}
 name: 'Push multi-platform broker image to Docker Hub'
 'on':
   push:
