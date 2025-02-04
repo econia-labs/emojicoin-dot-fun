@@ -4,14 +4,17 @@ if (process.env.NODE_ENV !== "test") {
 
 import { TableName } from "../../types/json-types";
 import { postgrest } from "../client";
-import { queryHelperSingle } from "../utils";
+import { queryHelper, queryHelperSingle } from "../utils";
 import {
+  DatabaseRpc,
   toArenaInfoModel,
+  toArenaLeaderboardHistoryWithArenaInfo,
   toArenaMeleeModel,
   toArenaPositionsModel,
   toMarketStateModel,
 } from "../../types";
 import { ORDER_BY } from "../../const";
+import { toAccountAddressString } from "../../../utils";
 
 const selectMelee = () =>
   postgrest
@@ -31,11 +34,29 @@ const selectArenaInfo = () =>
 
 const selectPosition = ({ user, meleeID }: { user: string; meleeID: bigint }) =>
   postgrest
-    .from(TableName.ChatEvents)
+    .from(TableName.ArenaPositions)
     .select("*")
     .eq("user", user)
     .eq("melee_id", meleeID)
     .maybeSingle();
+
+const selectLatestPosition = ({ user }: { user: string }) =>
+  postgrest
+    .from(TableName.ArenaPositions)
+    .select("*")
+    .eq("user", user)
+    .order("melee_id", ORDER_BY.DESC)
+    .limit(1)
+    .maybeSingle();
+
+const callArenaLeaderboardHistoryWithArenaInfo = ({ user, skip }: { user: string; skip: bigint }) =>
+  postgrest
+    .rpc(
+      DatabaseRpc.ArenaLeaderboardHistoryWithArenaInfo,
+      { user: toAccountAddressString(user), skip },
+      { get: true }
+    )
+    .select("*");
 
 const selectMarketStateByAddress = ({ address }: { address: string }) =>
   postgrest
@@ -48,6 +69,11 @@ const selectMarketStateByAddress = ({ address }: { address: string }) =>
 export const fetchMelee = queryHelperSingle(selectMelee, toArenaMeleeModel);
 export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoModel);
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionsModel);
+export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionsModel);
+export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
+  callArenaLeaderboardHistoryWithArenaInfo,
+  toArenaLeaderboardHistoryWithArenaInfo
+);
 export const fetchMarketStateByAddress = queryHelperSingle(
   selectMarketStateByAddress,
   toMarketStateModel
