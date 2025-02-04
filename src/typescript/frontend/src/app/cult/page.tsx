@@ -1,6 +1,5 @@
 import { type Metadata } from "next";
 import CultClientPage from "components/pages/cult/CultClientPage";
-import { VERCEL_TARGET_ENV } from "@sdk/const";
 import LaunchingPage from "app/launching/page";
 
 export const dynamic = "force-static";
@@ -11,6 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default function CultPage() {
-  // Temporarily disable in production and show the Coming Soon page instead.
-  VERCEL_TARGET_ENV === "production" ? <LaunchingPage /> : <CultClientPage />;
+  // Add the ability to temporarily disable the page with a Coming Soon page.
+  process.env.ENABLE_CULT_PAGE ? <LaunchingPage /> : <CultClientPage />;
 }
