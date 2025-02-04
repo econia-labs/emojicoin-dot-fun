@@ -8,7 +8,7 @@ import MatrixRain from "./matrix";
 
 export default function Maintenance() {
   const { t } = translationFunction();
-  const { ref } = useScramble({ text: `{ ${t("maintenance")} }` });
+  const { ref } = useScramble({ text: `{ ${t("Maintenance")} }` });
   return (
     <div className="relative">
       <MatrixRain />

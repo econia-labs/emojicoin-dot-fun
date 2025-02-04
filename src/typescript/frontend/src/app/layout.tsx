@@ -7,6 +7,7 @@ import "../app/global.css";
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
 import { headers } from "next/headers";
+import "@react95/core/themes/win95.css";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
