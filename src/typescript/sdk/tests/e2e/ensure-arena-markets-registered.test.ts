@@ -7,7 +7,7 @@ describe("ensures the two arena markets and the arena module are on-chain", () =
   it("verifies that the arena module is already published on-chain", async () => {
     const res = await aptos.getAccountModule({
       accountAddress: ARENA_MODULE_ADDRESS,
-      moduleName: EmojicoinArena.Enter.prototype.moduleName,
+      moduleName: EmojicoinArena.Enter.prototype.moduleName ?? "emojicoin_arena",
     });
     expect(res.bytecode).toBeTruthy();
   });
