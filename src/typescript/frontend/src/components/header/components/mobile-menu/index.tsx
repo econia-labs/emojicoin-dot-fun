@@ -95,7 +95,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
         <MobileMenuInner>
           {!geoblocked && (
             <ButtonWithConnectWalletFallback
-              className={"w-full !px-0"}
+              className={"w-full pl-0"}
               mobile={true}
               onClick={subMenuOnClick}
               arrow

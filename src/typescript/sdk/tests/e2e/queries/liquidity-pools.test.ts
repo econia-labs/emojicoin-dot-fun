@@ -4,12 +4,11 @@ import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { maxBigInt, type SymbolEmoji } from "../../../src";
 import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
-
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../utils";
 import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
-import { LIMIT } from "../../../src/queries";
+import { LIMIT } from "../../../src/indexer-v2/const";
 
 jest.setTimeout(20000);
 

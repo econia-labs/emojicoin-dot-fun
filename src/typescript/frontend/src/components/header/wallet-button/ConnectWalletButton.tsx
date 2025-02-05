@@ -16,6 +16,8 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
   onClick?: () => void;
   arrow?: boolean;
   forceAllowConnect?: boolean;
+  /** Display the button's children regardless of whether or not the user is connected. */
+  forceDisplayChildren?: boolean;
 }
 
 const CONNECT_WALLET = "Connect Wallet";
@@ -27,6 +29,7 @@ export const ButtonWithConnectWalletFallback = ({
   onClick,
   arrow = false,
   forceAllowConnect,
+  forceDisplayChildren,
 }: ConnectWalletProps) => {
   const { connected } = useWallet();
   const { openWalletModal } = useWalletModal();
@@ -76,7 +79,10 @@ export const ButtonWithConnectWalletFallback = ({
   // This component is used to display the `Connect Wallet` button and text with a scramble effect.
   // We use it in both mobile and desktop components.
   const inner =
-    !connected || !children || geoblocked ? (
+    // If the user is not connected, there's no children, or the user is geoblocked, display
+    // the "Connect Wallet" button. However, if `forceDisplayChildren === true`, display them
+    // regardless of the other parameters.
+    (!connected || !children || geoblocked) && !forceDisplayChildren ? (
       <Button
         className={
           className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")

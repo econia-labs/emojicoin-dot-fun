@@ -1,4 +1,4 @@
-import { toOrderBy } from "@sdk/queries/const";
+import { toOrderBy } from "@sdk/indexer-v2/const";
 import { type HomePageSearchParams } from "lib/queries/sorting/query-params";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 

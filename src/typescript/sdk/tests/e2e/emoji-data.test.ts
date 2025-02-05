@@ -19,7 +19,7 @@ import { getFundedAccount } from "../utils/test-accounts";
 import TestHelpers from "../utils/helpers";
 import { waitForEmojicoinIndexer } from "../../src/indexer-v2/queries";
 import { fetchMarketRegistrationEvents } from "./queries";
-import { ORDER_BY } from "../../src/queries";
+import { ORDER_BY } from "../../src/indexer-v2/const";
 
 jest.setTimeout(10000);
 

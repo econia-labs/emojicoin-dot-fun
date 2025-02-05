@@ -1,5 +1,5 @@
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import { LIMIT, ORDER_BY, type OrderBy } from "../../../queries";
+import { LIMIT, ORDER_BY, type OrderBy } from "../../const";
 import { type AnyNumberString } from "../../../types";
 import {
   toChatEventModel,

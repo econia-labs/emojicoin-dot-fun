@@ -1,4 +1,4 @@
-ARG BUILDER_VERSION=1.0.0
+ARG BUILDER_VERSION=1.1.0
 
 # Configure base image with buildtime dependencies.
 FROM econialabs/rust-builder:$BUILDER_VERSION AS base

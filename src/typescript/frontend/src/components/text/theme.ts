@@ -11,6 +11,11 @@ export const textStyles = (k: keyof typeof scales) => {
       font-size: 128px;
       line-height: 160px;
     `,
+    [scales.pixelDisplay2]: `
+      font-family: var(--font-pixelar);
+      font-size: 120px;
+      line-height: 85px;
+    `,
     [scales.display1]: `
       font-size: 95px;
       line-height: 96px;
@@ -64,6 +69,21 @@ export const textStyles = (k: keyof typeof scales) => {
     [scales.pixelHeading4]: `
       font-size: 20px;
       line-height: 25px;
+      font-family: var(--font-pixelar);
+    `,
+    [scales.pixelBodyLarge]: `
+      font-size: 16px;
+      line-height: 18px;
+      font-family: var(--font-pixelar);
+    `,
+    [scales.pixelBodySmall]: `
+      font-size: 12px;
+      line-height: 18px;
+      font-family: var(--font-pixelar);
+    `,
+    [scales.pixelBodyXSmall]: `
+      font-size: 10px;
+      line-height: 18px;
       font-family: var(--font-pixelar);
     `,
     [scales.heading1]: `

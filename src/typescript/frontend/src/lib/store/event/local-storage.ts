@@ -19,7 +19,12 @@ const shouldKeep = (e: AnyEventModel) => {
   return e.transaction.timestamp > staleTimeBoundary;
 };
 
-export const updateLocalStorage = (key: EventLocalStorageKey, event: AnyEventModel) => {
+export const maybeUpdateLocalStorage = (
+  update: boolean,
+  key: EventLocalStorageKey,
+  event: AnyEventModel
+) => {
+  if (!update) return;
   const str = localStorage.getItem(key) ?? "[]";
   const data: AnyEventModel[] = parseJSON(str);
   data.unshift(event);

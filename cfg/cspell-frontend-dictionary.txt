@@ -55,3 +55,4 @@ ADBEEF
 bytea
 nominalize
 dexscreener
+clippyts

@@ -5,15 +5,18 @@ import { translationFunction } from "context/language-context";
 import Link from "next/link";
 import path from "path";
 import { ROUTES } from "router/routes";
+import { useMemo } from "react";
 
 export const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,
   registered,
   invalid,
+  insufficientBalance,
 }: {
   onWalletButtonClick: () => void;
   registered?: boolean;
   invalid: boolean;
+  insufficientBalance: boolean;
 }) => {
   const emojis = useEmojiPicker((state) => state.emojis);
   const { t } = translationFunction();
@@ -23,9 +26,16 @@ export const LaunchButtonOrGoToMarketLink = ({
     overflow: true,
   };
 
+  const disableRegister = useMemo(
+    () => invalid || insufficientBalance || typeof registered === "undefined",
+    [invalid, insufficientBalance, registered]
+  );
+
   return (
     <>
-      <ButtonWithConnectWalletFallback>
+      {/* Force displaying the "Go to emojicoin market" link if the market is already registered,
+          regardless of whether or not the user is connected. */}
+      <ButtonWithConnectWalletFallback forceDisplayChildren={registered}>
         {registered ? (
           <Link
             className="font-pixelar text-lg uppercase text-ec-blue"
@@ -37,13 +47,19 @@ export const LaunchButtonOrGoToMarketLink = ({
           </Link>
         ) : (
           <Button
-            disabled={invalid || typeof registered === "undefined"}
+            disabled={disableRegister}
             onClick={onWalletButtonClick}
             scale="lg"
-            style={{ cursor: invalid ? "not-allowed" : "pointer" }}
+            style={{ cursor: disableRegister ? "not-allowed" : "pointer" }}
             scrambleProps={scrambleProps}
           >
-            {t(invalid ? "Invalid input" : "Launch Emojicoin")}
+            {t(
+              insufficientBalance
+                ? "Insufficient balance"
+                : invalid
+                  ? "Invalid input"
+                  : "Launch Emojicoin"
+            )}
           </Button>
         )}
       </ButtonWithConnectWalletFallback>
