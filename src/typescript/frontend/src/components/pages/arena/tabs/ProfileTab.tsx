@@ -1,4 +1,5 @@
 import {
+  type ArenaInfoModel,
   type ArenaLeaderboardHistoryWithArenaInfoModel,
   type ArenaPositionsModel,
   type MarketStateModel,
@@ -16,6 +17,7 @@ export type ProfileTabProps = {
   market0: MarketStateModel;
   market1: MarketStateModel;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
+  arenaInfo: ArenaInfoModel;
 };
 
 const History = ({
@@ -26,6 +28,7 @@ const History = ({
   selectedRow,
   setSelectedRow,
   setHistoryHidden,
+  arenaInfo,
 }: ProfileTabProps & {
   selectedRow: number | undefined;
   setSelectedRow: (selectedRow: number) => void;
@@ -43,7 +46,7 @@ const History = ({
         </div>
       </div>
       <table className={styles["history-table"]}>
-        {position && (
+        {position && position.meleeId === arenaInfo.meleeId && (
           <tr
             className={selectedRow === -1 ? styles["selected-row"] : ""}
             onClick={() => setSelectedRow(-1)}
@@ -137,7 +140,7 @@ const MeleeBreakdownInner = ({
       </div>
       <div className={smallCellClass}>
         <div className={smallCellTextClass}>End holdings</div>
-        {endHolding ? (
+        {endHolding !== undefined ? (
           <FormattedNumber
             className={smallCellValueClass}
             value={endHolding}
@@ -220,7 +223,7 @@ const HistoricMeleeBreakdown = ({
     <MeleeBreakdownInner
       deposit={melee.losses}
       withdrawn={melee.profits}
-      endHolding={melee.endHolding}
+      endHolding={melee.profits - melee.withdrawals}
       {...{ historyHidden, pnl, lastHeld }}
     />
   );
@@ -348,35 +351,40 @@ export const ProfileTab = ({
   market1,
   history,
   goToEnter,
+  arenaInfo,
 }: ProfileTabProps & { goToEnter: () => void }) => {
   const [selectedRow, setSelectedRow] = useState<number>();
   const [historyHidden, setHistoryHidden] = useState<boolean>(false);
 
   // TODO: doublecheck the calculation below
-  const locked = position
-    ? BigInt(
-        q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
-          .mul(position.emojicoin0Balance.toString())
-          .add(
-            q64ToBig(market1.lastSwap.avgExecutionPriceQ64).mul(
-              position.emojicoin1Balance.toString()
+  const locked =
+    position && position.meleeId === arenaInfo.meleeId
+      ? BigInt(
+          q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
+            .mul(position.emojicoin0Balance.toString())
+            .add(
+              q64ToBig(market1.lastSwap.avgExecutionPriceQ64).mul(
+                position.emojicoin1Balance.toString()
+              )
             )
-          )
-          .round()
-          .toString()
-      )
-    : undefined;
-  const profits = position ? locked! + position.withdrawals : undefined;
-  const pnl = position
-    ? Big(profits!.toString()).div(position.deposits.toString()).sub(1).mul(100).toNumber()
-    : undefined;
-  const pnlOctas = position
-    ? BigInt(
-        Big(position.deposits.toString())
-          .mul(pnl! / 100)
-          .toString()
-      )
-    : undefined;
+            .round()
+            .toString()
+        )
+      : undefined;
+  const profits =
+    position && position.meleeId === arenaInfo.meleeId ? locked! + position.withdrawals : undefined;
+  const pnl =
+    position && position.meleeId === arenaInfo.meleeId
+      ? Big(profits!.toString()).div(position.deposits.toString()).sub(1).mul(100).toNumber()
+      : undefined;
+  const pnlOctas =
+    position && position.meleeId === arenaInfo.meleeId
+      ? BigInt(
+          Big(position.deposits.toString())
+            .mul(pnl! / 100)
+            .toString()
+        )
+      : undefined;
 
   const meleeBreakdown = useMemo(
     () => (
@@ -397,7 +405,9 @@ export const ProfileTab = ({
       }}
     >
       <Header
-        netDeposits={position?.deposits}
+        netDeposits={
+          position && position.meleeId === arenaInfo.meleeId ? position.deposits : undefined
+        }
         currentLockedValue={locked}
         pnl={pnl}
         pnlOctas={pnlOctas}
@@ -452,6 +462,7 @@ export const ProfileTab = ({
                 selectedRow,
                 setSelectedRow,
                 setHistoryHidden,
+                arenaInfo,
               }}
             />
           </div>
