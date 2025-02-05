@@ -1014,7 +1014,7 @@ export class ExchangeRate extends ViewFunctionPayloadBuilder<[MoveValue]> {
 export type MatchAmountPayloadMoveArguments = {
   participant: AccountAddress;
   inputAmount: U64;
-  meleeId: U64;
+  meleeID: U64;
 };
 
 /**
@@ -1042,16 +1042,16 @@ export class MatchAmount extends ViewFunctionPayloadBuilder<[Uint64String]> {
   constructor(args: {
     participant: AccountAddressInput; // address
     inputAmount: Uint64; // u64
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput, TypeTagInput, TypeTagInput]; // [Coin0, LP0, Coin1, LP1]
   }) {
     super();
-    const { participant, inputAmount, meleeId, typeTags } = args;
+    const { participant, inputAmount, meleeID, typeTags } = args;
 
     this.args = {
       participant: AccountAddress.from(participant),
       inputAmount: new U64(inputAmount),
-      meleeId: new U64(meleeId),
+      meleeID: new U64(meleeID),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -1062,7 +1062,7 @@ export class MatchAmount extends ViewFunctionPayloadBuilder<[Uint64String]> {
     aptos: Aptos | AptosConfig;
     participant: AccountAddressInput; // address
     inputAmount: Uint64; // u64
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput, TypeTagInput, TypeTagInput]; // [Coin0, LP0, Coin1, LP1]
     options?: LedgerVersionArg;
   }): Promise<Uint64String> {
@@ -1072,7 +1072,7 @@ export class MatchAmount extends ViewFunctionPayloadBuilder<[Uint64String]> {
 }
 
 export type MeleePayloadMoveArguments = {
-  meleeId: U64;
+  meleeID: U64;
 };
 
 /**
@@ -1096,19 +1096,19 @@ export class Melee extends ViewFunctionPayloadBuilder<[MoveValue]> {
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
   }) {
     super();
-    const { meleeId } = args;
+    const { meleeID } = args;
 
     this.args = {
-      meleeId: new U64(meleeId),
+      meleeID: new U64(meleeID),
     };
   }
 
   static async view(args: {
     aptos: Aptos | AptosConfig;
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
     options?: LedgerVersionArg;
   }): Promise<MoveValue> {
     const [res] = await new Melee(args).view(args);

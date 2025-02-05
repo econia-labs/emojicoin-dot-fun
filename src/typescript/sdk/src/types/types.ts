@@ -17,7 +17,7 @@ import {
 } from "./json-types";
 import { type STRUCT_STRINGS } from "../utils";
 import { type Flatten } from ".";
-import { type SymbolEmoji } from "../emoji_data";
+import { type ArenaTypes } from "./arena-types";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);
@@ -40,7 +40,7 @@ export type WithMarketID = {
   marketID: bigint;
 };
 
-export type Types = {
+export type Types = ArenaTypes & {
   EmojicoinInfo: {
     marketAddress: AccountAddress;
     emojicoin: TypeTag;
@@ -364,106 +364,6 @@ export type Types = {
   EmojicoinDotFunRewards: {
     swap: Types["SwapEvent"];
     octasRewardAmount: bigint;
-  };
-
-  ArenaMelee: {
-    meleeId: bigint;
-    emojicoin0MarketAddress: AccountAddressString;
-    emojicoin1MarketAddress: AccountAddressString;
-    startTime: bigint;
-    duration: bigint;
-    maxMatchPercentage: bigint;
-    maxMatchAmount: bigint;
-    availableRewards: bigint;
-  };
-
-  ArenaEnter: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    inputAmount: bigint;
-    quoteVolume: bigint;
-    integratorFee: bigint;
-    matchAmount: bigint;
-    emojicoin0Proceeds: bigint;
-    emojicoin1Proceeds: bigint;
-    emojicoin0ExchangeRateBase: bigint;
-    emojicoin0ExchangeRateQuote: bigint;
-    emojicoin1ExchangeRateBase: bigint;
-    emojicoin1ExchangeRateQuote: bigint;
-  };
-
-  ArenaExit: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    tapOutFee: bigint;
-    emojicoin0Proceeds: bigint;
-    emojicoin1Proceeds: bigint;
-    emojicoin0ExchangeRateBase: bigint;
-    emojicoin0ExchangeRateQuote: bigint;
-    emojicoin1ExchangeRateBase: bigint;
-    emojicoin1ExchangeRateQuote: bigint;
-  };
-
-  ArenaSwap: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    quoteVolume: bigint;
-    integratorFee: bigint;
-    emojicoin0Proceeds: bigint;
-    emojicoin1Proceeds: bigint;
-    emojicoin0ExchangeRateBase: bigint;
-    emojicoin0ExchangeRateQuote: bigint;
-    emojicoin1ExchangeRateBase: bigint;
-    emojicoin1ExchangeRateQuote: bigint;
-  };
-
-  ArenaVaultBalanceUpdate: {
-    newBalance: bigint;
-  };
-
-  ArenaPositions: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    open: boolean;
-    emojicoin0Balance: bigint;
-    emojicoin1Balance: bigint;
-    withdrawals: bigint;
-    deposits: bigint;
-  };
-
-  ArenaLeaderboardHistory: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    profits: bigint;
-    losses: bigint;
-  };
-
-  ArenaLeaderboard: {
-    user: AccountAddressString;
-    open: boolean;
-    emojicoin0Balance: bigint;
-    emojicoin1Balance: bigint;
-    profits: bigint;
-    losses: bigint;
-    pnlPercent: number;
-    pnlOctas: number;
-  };
-
-  ArenaInfo: {
-    meleeId: bigint;
-    volume: bigint;
-    rewardsRemaining: bigint;
-    aptLocked: bigint;
-    emojicoin0MarketAddress: AccountAddressString;
-    emojicoin0Symbols: SymbolEmoji[];
-    emojicoin0MarketID: bigint;
-    emojicoin1MarketAddress: AccountAddressString;
-    emojicoin1Symbols: SymbolEmoji[];
-    emojicoin1MarketID: bigint;
-    startTime: bigint;
-    duration: bigint;
-    maxMatchPercentage: bigint;
-    maxMatchAmount: bigint;
   };
 };
 
@@ -916,17 +816,6 @@ export function toEventWithTime<T extends AnyEmojicoinEvent>(e: T): T & WithTime
     ...e,
     time: getEmojicoinEventTime(e),
   };
-}
-
-export function getEventTypeName(e: AnyEmojicoinEvent): EventName {
-  if (isSwapEvent(e)) return "Swap";
-  if (isChatEvent(e)) return "Chat";
-  if (isMarketRegistrationEvent(e)) return "MarketRegistration";
-  if (isPeriodicStateEvent(e)) return "PeriodicState";
-  if (isStateEvent(e)) return "State";
-  if (isGlobalStateEvent(e)) return "GlobalState";
-  if (isLiquidityEvent(e)) return "Liquidity";
-  throw new Error(`Unknown event type: ${e}`);
 }
 
 export interface WithTime {

@@ -28,6 +28,7 @@ import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
+import { type ArenaEventName } from "../../types/arena-types";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -107,8 +108,15 @@ const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types
     time: postgresTimestampToMicroseconds(data.last_swap_time).toString(),
   });
 
-const toArenaMeleeFromDatabase = (data: DatabaseStructType["ArenaMelee"]): Types["ArenaMelee"] => ({
-  meleeId: BigInt(data.melee_id),
+type WithoutEventNameIndexAndVersion<T extends ArenaEventName> = Omit<
+  Types[`${T}Event`],
+  "eventName" | "eventIndex" | "version"
+>;
+
+const toArenaMeleeFromDatabase = (
+  data: DatabaseStructType["ArenaMelee"]
+): WithoutEventNameIndexAndVersion<"ArenaMelee"> => ({
+  meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
   startTime: postgresTimestampToMicroseconds(data.start_time),
@@ -118,9 +126,11 @@ const toArenaMeleeFromDatabase = (data: DatabaseStructType["ArenaMelee"]): Types
   availableRewards: BigInt(data.available_rewards),
 });
 
-const toArenaEnterFromDatabase = (data: DatabaseStructType["ArenaEnter"]): Types["ArenaEnter"] => ({
-  meleeId: BigInt(data.melee_id),
+const toArenaEnterFromDatabase = (
+  data: DatabaseStructType["ArenaEnter"]
+): WithoutEventNameIndexAndVersion<"ArenaEnter"> => ({
   user: toAccountAddressString(data.user),
+  meleeID: BigInt(data.melee_id),
   inputAmount: BigInt(data.input_amount),
   quoteVolume: BigInt(data.quote_volume),
   integratorFee: BigInt(data.integrator_fee),
@@ -133,9 +143,11 @@ const toArenaEnterFromDatabase = (data: DatabaseStructType["ArenaEnter"]): Types
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
 });
 
-const toArenaExitFromDatabase = (data: DatabaseStructType["ArenaExit"]): Types["ArenaExit"] => ({
-  meleeId: BigInt(data.melee_id),
+const toArenaExitFromDatabase = (
+  data: DatabaseStructType["ArenaExit"]
+): WithoutEventNameIndexAndVersion<"ArenaExit"> => ({
   user: toAccountAddressString(data.user),
+  meleeID: BigInt(data.melee_id),
   tapOutFee: BigInt(data.tap_out_fee),
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
@@ -145,8 +157,10 @@ const toArenaExitFromDatabase = (data: DatabaseStructType["ArenaExit"]): Types["
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
 });
 
-const toArenaSwapFromDatabase = (data: DatabaseStructType["ArenaSwap"]): Types["ArenaSwap"] => ({
-  meleeId: BigInt(data.melee_id),
+const toArenaSwapFromDatabase = (
+  data: DatabaseStructType["ArenaSwap"]
+): WithoutEventNameIndexAndVersion<"ArenaSwap"> => ({
+  meleeID: BigInt(data.melee_id),
   user: toAccountAddressString(data.user),
   quoteVolume: BigInt(data.quote_volume),
   integratorFee: BigInt(data.integrator_fee),
@@ -160,15 +174,15 @@ const toArenaSwapFromDatabase = (data: DatabaseStructType["ArenaSwap"]): Types["
 
 const toArenaVaultBalanceUpdateFromDatabase = (
   data: DatabaseStructType["ArenaVaultBalanceUpdate"]
-): Types["ArenaVaultBalanceUpdate"] => ({
+): WithoutEventNameIndexAndVersion<"ArenaVaultBalanceUpdate"> => ({
   newBalance: BigInt(data.new_balance),
 });
 
 const toArenaPositionsFromDatabase = (
   data: DatabaseStructType["ArenaPositions"]
 ): Types["ArenaPositions"] => ({
+  meleeID: BigInt(data.melee_id),
   user: toAccountAddressString(data.user),
-  meleeId: BigInt(data.melee_id),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
@@ -190,7 +204,7 @@ const toArenaLeaderboardFromDatabase = (
 });
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
-  meleeId: BigInt(data.melee_id),
+  meleeID: BigInt(data.melee_id),
   volume: BigInt(data.volume),
   rewardsRemaining: BigInt(data.rewards_remaining),
   aptLocked: BigInt(data.apt_locked),
@@ -210,7 +224,7 @@ const toArenaLeaderboardHistoryFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboardHistory"]
 ): Types["ArenaLeaderboardHistory"] => ({
   user: toAccountAddressString(data.user),
-  meleeId: BigInt(data.melee_id),
+  meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
 });

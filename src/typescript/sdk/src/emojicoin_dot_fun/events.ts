@@ -32,12 +32,13 @@ const fullEventNames = {
 const eventNamesSet = new Set(Object.keys(fullEventNames));
 export const isAnEmojicoinStructName = (s: string): s is FullEventName => eventNamesSet.has(s);
 
-type RemovePlurality<T extends string> = T extends `${infer R}s` ? R : T;
-type PascalToCamelCase<S extends string> = S extends `${infer F}${infer R}`
+export type RemovePlurality<T extends string> = T extends `${infer R}s` ? R : T;
+export type PascalToCamelCase<S extends string> = S extends `${infer F}${infer R}`
   ? `${Lowercase<F>}${R}`
   : S;
+export type Capitalize<S extends string> = S extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : S;
+
 type CamelCaseEventNames = `${PascalToCamelCase<FullEventName>}s`;
-type Capitalize<S extends string> = S extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : S;
 
 export const toCamelCaseEventName = <T extends FullEventName>(s: T): PascalToCamelCase<T> => {
   return `${s.charAt(0).toLowerCase()}${s.slice(1)}` as PascalToCamelCase<T>;

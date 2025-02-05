@@ -301,6 +301,60 @@ type JsonTypes = {
     swap: JsonTypes["SwapEvent"];
     octas_reward_amount: Uint64String;
   };
+
+  ArenaExchangeRate: {
+    emojicoin_0_exchange_rate: {
+      base: Uint64String;
+      quote: Uint64String;
+    };
+    emojicoin_1_exchange_rate: {
+      base: Uint64String;
+      quote: Uint64String;
+    };
+  };
+
+  ArenaMeleeEvent: {
+    melee_id: Uint64String;
+    emojicoin_0_market_address: AccountAddressString;
+    emojicoin_1_market_address: AccountAddressString;
+    start_time: Uint64String;
+    duration: Uint64String;
+    max_match_percentage: Uint64String;
+    max_match_amount: Uint64String;
+    available_rewards: Uint64String;
+  };
+
+  ArenaEnterEvent: {
+    user: AccountAddressString;
+    melee_id: Uint64String;
+    input_amount: Uint64String;
+    quote_volume: Uint64String;
+    integrator_fee: Uint64String;
+    match_amount: Uint64String;
+    emojicoin_0_proceeds: Uint64String;
+    emojicoin_1_proceeds: Uint64String;
+  } & JsonTypes["ArenaExchangeRate"];
+
+  ArenaExitEvent: {
+    user: AccountAddressString;
+    melee_id: Uint64String;
+    tap_out_fee: Uint64String;
+    emojicoin_0_proceeds: Uint64String;
+    emojicoin_1_proceeds: Uint64String;
+  } & JsonTypes["ArenaExchangeRate"];
+
+  ArenaSwapEvent: {
+    user: AccountAddressString;
+    melee_id: Uint64String;
+    quote_volume: Uint64String;
+    integrator_fee: Uint64String;
+    emojicoin_0_proceeds: Uint64String;
+    emojicoin_1_proceeds: Uint64String;
+  } & JsonTypes["ArenaExchangeRate"];
+
+  ArenaVaultBalanceUpdateEvent: {
+    new_balance: Uint64String;
+  };
 };
 
 export default JsonTypes;
