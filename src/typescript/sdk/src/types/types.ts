@@ -440,6 +440,9 @@ export type Types = {
     losses: bigint;
     lastExit: string | undefined;
     exited: boolean;
+    emojicoin0Balance: bigint;
+    emojicoin1Balance: bigint;
+    withdrawals: bigint;
   };
 
   ArenaLeaderboard: {
@@ -451,6 +454,7 @@ export type Types = {
     losses: bigint;
     pnlPercent: number;
     pnlOctas: number;
+    withdrawals: bigint;
   };
 
   ArenaInfo: {

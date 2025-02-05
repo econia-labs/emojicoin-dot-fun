@@ -175,7 +175,7 @@ const toArenaPositionsFromDatabase = (
   withdrawals: BigInt(data.withdrawals),
   deposits: BigInt(data.deposits),
   lastExit: data.last_exit,
-  matchAmount: data.match_amount,
+  matchAmount: BigInt(data.match_amount),
 });
 
 const toArenaLeaderboardFromDatabase = (
@@ -189,6 +189,7 @@ const toArenaLeaderboardFromDatabase = (
   losses: BigInt(data.losses),
   pnlPercent: data.pnl_percent,
   pnlOctas: data.pnl_octas,
+  withdrawals: BigInt(data.withdrawals),
 });
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
@@ -217,6 +218,9 @@ const toArenaLeaderboardHistoryFromDatabase = (
   losses: BigInt(data.losses),
   lastExit: data.last_exit,
   exited: data.exited,
+  withdrawals: BigInt(data.withdrawals),
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
 });
 
 type GlobalStateEventData = {
@@ -756,8 +760,8 @@ export const toArenaLeaderboardHistoryWithArenaInfo = (
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
   lastExit: data.last_exit,
-  endHolding: BigInt(data.end_holding),
   exited: data.exited,
+  withdrawals: BigInt(data.withdrawals),
 });
 
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({

@@ -10,7 +10,6 @@ import { Period } from "@sdk/const";
 
 export const revalidate = 2;
 
-
 export default async function Arena() {
   let arenaInfo: Awaited<ReturnType<typeof fetchArenaInfo>> = null;
 
