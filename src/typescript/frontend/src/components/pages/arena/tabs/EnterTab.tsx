@@ -1,5 +1,5 @@
 import type { ArenaPositionsModel, MarketStateModel } from "@sdk/indexer-v2/types";
-import { EmojiTitle } from "../utils";
+import { EmojiTitle, lockedTernary, marketTernary } from "../utils";
 import { type PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { AptosInputLabel } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
 import { InputNumeric } from "components/inputs";
@@ -234,7 +234,7 @@ const EnterTabLockPhase: React.FC<{
                       (e) => e.type === `${ARENA_MODULE_ADDRESS}::emojicoin_arena::Enter`
                     )!;
 
-                    if (position) {
+                    if (position && position.open) {
                       setPosition({
                         ...position,
                         deposits: position.deposits + BigInt(enterEvent.data.input_amount),
@@ -296,20 +296,21 @@ const EnterTabSummary: React.FC<{
     market0.market.marketAddress,
     market1.market.marketAddress
   );
-  const amount =
-    position.emojicoin0Balance > 0n
-      ? BigInt(
-          q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
-            .mul(position.emojicoin0Balance.toString())
-            .round()
-            .toString()
-        )
-      : BigInt(
-          q64ToBig(market1.lastSwap.avgExecutionPriceQ64)
-            .mul(position.emojicoin1Balance.toString())
-            .round()
-            .toString()
-        );
+  const amount = marketTernary(
+    position,
+    BigInt(
+      q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
+        .mul(position.emojicoin0Balance.toString())
+        .round()
+        .toString()
+    ),
+    BigInt(
+      q64ToBig(market1.lastSwap.avgExecutionPriceQ64)
+        .mul(position.emojicoin1Balance.toString())
+        .round()
+        .toString()
+    )
+  );
 
   const onTapOut = useCallback(() => {
     if (!account) return;
@@ -353,11 +354,11 @@ const EnterTabSummary: React.FC<{
           <div className="flex flex-col justify-between items-center h-[100%] py-[3em]">
             <GlowingEmoji
               className="text-4xl xl:text-6xl pt-[1em]"
-              emojis={
-                market.market.marketAddress === market0.market.marketAddress
-                  ? market1.market.symbolEmojis.join("")
-                  : market0.market.symbolEmojis.join("")
-              }
+              emojis={marketTernary(
+                position,
+                market1.market.symbolEmojis.join(""),
+                market0.market.symbolEmojis.join("")
+              )}
             />
             <div className="flex flex-col justify-between items-center gap-[.5em]">
               <div className="text-light-gray uppercase text-2xl tracking-widest">
@@ -406,7 +407,7 @@ const EnterTabSummary: React.FC<{
         />
         <div className="flex flex-col justify-between items-center gap-[.5em]">
           <div className="text-light-gray uppercase text-2xl tracking-widest">
-            {position.matchAmount > 0 ? "Locked in" : "Deposited"}
+            {lockedTernary(position, "Locked in", "Deposited")}
           </div>
           <FormattedNumber
             className="font-forma text-6xl text-white"
@@ -435,14 +436,10 @@ const EnterTabSummary: React.FC<{
           <Button
             scale="lg"
             onClick={() => {
-              if (position.matchAmount > 0n) {
-                setIsTappingOut(true);
-              } else {
-                onTapOut();
-              }
+              lockedTernary(position, () => setIsTappingOut(true), onTapOut)();
             }}
           >
-            Tap out
+            {lockedTernary(position, "Tap out", "Exit")}
           </Button>
         </div>
       </div>
@@ -512,13 +509,16 @@ export const EnterTab: React.FC<{
   }, [position]);
 
   if (phase === "summary") {
-    if (!position) throw new Error("Position is undefined in summary phase");
+    if (!position) return <Loading />;
     return (
       <EnterTabSummary
-        market={position.emojicoin0Balance > 0n ? market0 : market1}
-        topOff={() => setPhase("amount")}
+        market={marketTernary(position, market0, market1)}
+        topOff={() => {
+          setPhase("amount");
+          setMarket(marketTernary(position, market0, market1));
+        }}
         tapOut={() => setPhase("pick")}
-        swap={() => setMarket(position.emojicoin0Balance > 0n ? market1 : market0)}
+        swap={() => setMarket(marketTernary(position, market1, market0))}
         {...{ market0, market1, setPosition, position }}
       />
     );
@@ -578,6 +578,5 @@ export const EnterTab: React.FC<{
       </Container>
     );
   }
-
   return <Loading />;
 };
