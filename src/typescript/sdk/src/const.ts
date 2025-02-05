@@ -11,11 +11,13 @@ import { type DatabaseStructType } from "./indexer-v2/types/json-types";
 import { type Types } from "./types";
 
 export const VERCEL = process.env.VERCEL === "1";
-let vercelTargetEnv: "production" | "preview" | "development";
+let vercelTargetEnv: "production" | "preview" | "development" | "release-preview";
 if (
   VERCEL &&
   process.env.VERCEL_TARGET_ENV &&
-  !["production", "preview", "development"].includes(process.env.VERCEL_TARGET_ENV)
+  !["production", "preview", "development", "release-preview"].includes(
+    process.env.VERCEL_TARGET_ENV
+  )
 ) {
   const val = process.env.VERCEL_TARGET_ENV;
   throw new Error(`Unexpected VERCEL_TARGET_ENV value "${val}". Please add it to sdk/src/const.ts`);
