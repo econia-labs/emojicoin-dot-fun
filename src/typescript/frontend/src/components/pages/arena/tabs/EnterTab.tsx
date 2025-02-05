@@ -1,6 +1,6 @@
 import type { ArenaPositionsModel, MarketStateModel } from "@sdk/indexer-v2/types";
 import { EmojiTitle } from "../utils";
-import { type PropsWithChildren, useMemo, useState } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
 import { AptosInputLabel } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
 import { InputNumeric } from "components/inputs";
 import Button from "components/button";
@@ -8,16 +8,17 @@ import { Switcher } from "components/switcher";
 import { GlowingEmoji } from "utils/emoji";
 import ProgressBar from "components/ProgressBar";
 import { FormattedNumber } from "components/FormattedNumber";
-import { Enter } from "@/contract-apis/emojicoin-arena";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { toCoinTypes } from "@sdk/markets";
 import { CloseIcon } from "components/svg";
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { ARENA_MODULE_ADDRESS } from "@sdk/const";
 import { emoji } from "utils";
 import { q64ToBig } from "@sdk/utils";
 import Loading from "components/loading";
+import { useEnterTransactionBuilder } from "lib/hooks/transaction-builders/use-enter-builder";
+import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
+import { useArenaSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-arena-swap-builder";
 
 const InnerWrapper = ({ children }: React.PropsWithChildren) => (
   <div
@@ -64,7 +65,8 @@ const EnterTabPickPhase: React.FC<{
   closeError: () => void;
   cranked: boolean;
   closeCranked: () => void;
-}> = ({ market0, market1, setMarket, error, closeError, cranked, closeCranked }) => {
+  nextPhase: () => void;
+}> = ({ market0, market1, setMarket, error, closeError, cranked, closeCranked, nextPhase }) => {
   return (
     <div className="relative grid gap-[3em] place-items-center h-[100%] w-[100%]">
       {error && (
@@ -112,9 +114,11 @@ const EnterTabPickPhase: React.FC<{
           onClicks={{
             emoji0: () => {
               setMarket(market0);
+              nextPhase();
             },
             emoji1: () => {
               setMarket(market1);
+              nextPhase();
             },
           }}
         />
@@ -126,7 +130,8 @@ const EnterTabPickPhase: React.FC<{
 const EnterTabAmountPhase: React.FC<{
   market: MarketStateModel;
   setAmount: (amount: bigint) => void;
-}> = ({ market, setAmount }) => {
+  nextPhase: () => void;
+}> = ({ market, setAmount, nextPhase }) => {
   const [innerAmount, setInnerAmount] = useState<bigint>(0n);
   return (
     <div className="grid place-items-center h-[100%]">
@@ -148,7 +153,14 @@ const EnterTabAmountPhase: React.FC<{
           </div>
           <AptosInputLabel />
         </InnerWrapper>
-        <Button scale="lg" onClick={() => setAmount(innerAmount)} disabled={innerAmount <= 0n}>
+        <Button
+          scale="lg"
+          onClick={() => {
+            setAmount(innerAmount);
+            nextPhase();
+          }}
+          disabled={innerAmount <= 0n}
+        >
           Next
         </Button>
       </div>
@@ -161,13 +173,22 @@ const EnterTabLockPhase: React.FC<{
   market0: MarketStateModel;
   market1: MarketStateModel;
   amount: bigint;
-  setLock: (lock: boolean) => void;
   errorOut: () => void;
   setCranked: () => void;
-}> = ({ market, market0, market1, amount, setLock, errorOut, setCranked }) => {
+  position?: ArenaPositionsModel | null;
+  setPosition: (position: ArenaPositionsModel | null) => void;
+}> = ({ market, market0, market1, amount, errorOut, setCranked, position, setPosition }) => {
   const [innerLock, setInnerLock] = useState<boolean>(false);
 
-  const { aptos, account, submit } = useAptos();
+  const { account, submit } = useAptos();
+
+  const transactionBuilder = useEnterTransactionBuilder(
+    amount,
+    innerLock,
+    market0.market.marketAddress,
+    market1.market.marketAddress,
+    market.market.marketAddress
+  );
 
   return (
     <div className="flex flex-col gap-[2em] m-auto items-center w-[100%]">
@@ -198,35 +219,46 @@ const EnterTabLockPhase: React.FC<{
             <Button
               scale="lg"
               onClick={() => {
-                //if (!account) return;
-                //const { emojicoin: emojicoin0, emojicoinLP: emojicoinLP0 } = toCoinTypes(
-                //  market0.market.marketAddress
-                //);
-                //const { emojicoin: emojicoin1, emojicoinLP: emojicoinLP1 } = toCoinTypes(
-                //  market1.market.marketAddress
-                //);
-                //const { emojicoin } = toCoinTypes(market.market.marketAddress);
-                //const payloadBuilder = () =>
-                //  Enter.builder({
-                //    aptosConfig: aptos.config,
-                //    entrant: account.address,
-                //    inputAmount: amount,
-                //    lockIn: innerLock,
-                //    typeTags: [emojicoin0, emojicoinLP0, emojicoin1, emojicoinLP1, emojicoin],
-                //  });
-                //submit(payloadBuilder).then((r) => {
-                //  if (!r || r?.error) {
-                //    errorOut();
-                //  } else if (
-                //    (r.response as UserTransactionResponse).events.find(
-                //      (e) => e.type === `${ARENA_MODULE_ADDRESS}::emojicoin_arena::Melee`
-                //    )
-                //  ) {
-                //    setCranked();
-                //  } else {
-                //    setLock(innerLock);
-                //  }
-                //});
+                if (!account) return;
+                submit(transactionBuilder).then((r) => {
+                  if (!r || r?.error) {
+                    errorOut();
+                  } else if (
+                    (r.response as UserTransactionResponse).events.find(
+                      (e) => e.type === `${ARENA_MODULE_ADDRESS}::emojicoin_arena::Melee`
+                    )
+                  ) {
+                    setCranked();
+                  } else {
+                    const enterEvent = (r.response as UserTransactionResponse).events.find(
+                      (e) => e.type === `${ARENA_MODULE_ADDRESS}::emojicoin_arena::Enter`
+                    )!;
+
+                    if (position) {
+                      setPosition({
+                        ...position,
+                        deposits: position.deposits + BigInt(enterEvent.data.input_amount),
+                        matchAmount: position.matchAmount + BigInt(enterEvent.data.match_amount),
+                        emojicoin0Balance:
+                          position.emojicoin0Balance + BigInt(enterEvent.data.emojicoin_0_proceeds),
+                        emojicoin1Balance:
+                          position.emojicoin1Balance + BigInt(enterEvent.data.emojicoin_1_proceeds),
+                      });
+                    } else {
+                      setPosition({
+                        open: true,
+                        user: account.address as `0x${string}`,
+                        meleeId: BigInt(enterEvent.data.melee_id),
+                        deposits: BigInt(enterEvent.data.input_amount),
+                        lastExit: undefined,
+                        matchAmount: BigInt(enterEvent.data.match_amount),
+                        withdrawals: 0n,
+                        emojicoin0Balance: BigInt(enterEvent.data.emojicoin_0_proceeds),
+                        emojicoin1Balance: BigInt(enterEvent.data.emojicoin_1_proceeds),
+                      });
+                    }
+                  }
+                });
               }}
             >
               Enter
@@ -239,17 +271,45 @@ const EnterTabLockPhase: React.FC<{
 };
 
 const EnterTabSummary: React.FC<{
+  market0: MarketStateModel;
+  market1: MarketStateModel;
   market: MarketStateModel;
-  amount: bigint;
-  lock: boolean;
-  matchAmount: bigint;
-}> = ({ market, amount, matchAmount }) => {
+  position: ArenaPositionsModel;
+  setPosition: (position: ArenaPositionsModel | null) => void;
+  topOff: () => void;
+  tapOut: () => void;
+  swap: () => void;
+}> = ({ market, market0, market1, position, setPosition, topOff, tapOut, swap }) => {
   const [isTappingOut, setIsTappingOut] = useState<boolean>(false);
+  const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const formatter = new Intl.NumberFormat("en-US", {
     maximumSignificantDigits: 2,
   });
-  const matchNumberText = formatter.format(Number(matchAmount) / 10 ** 8);
+  const matchNumberText = formatter.format(Number(position.matchAmount) / 10 ** 8);
   const tapOutButtonText = `Accept and exit, incurring a ${matchNumberText} APT tap out fee`;
+  const { account, submit } = useAptos();
+  const exitTransactionBuilder = useExitTransactionBuilder(
+    market0.market.marketAddress,
+    market1.market.marketAddress
+  );
+  const swapTransactionBuilder = useArenaSwapTransactionBuilder(
+    market0.market.marketAddress,
+    market1.market.marketAddress
+  );
+  const amount =
+    position.emojicoin0Balance > 0n
+      ? BigInt(
+          q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
+            .mul(position.emojicoin0Balance.toString())
+            .round()
+            .toString()
+        )
+      : BigInt(
+          q64ToBig(market1.lastSwap.avgExecutionPriceQ64)
+            .mul(position.emojicoin1Balance.toString())
+            .round()
+            .toString()
+        );
   return (
     <div className="relative h-[100%]">
       {isTappingOut && (
@@ -268,7 +328,72 @@ const EnterTabSummary: React.FC<{
               ended and then you&apos;ll be able to keep all matched deposits.
             </div>
           </div>
-          <Button scale="lg">{tapOutButtonText}</Button>
+          <ButtonWithConnectWalletFallback>
+            <Button
+              scale="lg"
+              onClick={() => {
+                if (!account) return;
+                submit(exitTransactionBuilder).then((r) => {
+                  if (!r || r?.error) {
+                    console.error("Could not exit", { error: r?.error });
+                  } else {
+                    setPosition(null);
+                    setIsTappingOut(false);
+                    tapOut();
+                  }
+                });
+              }}
+            >
+              {tapOutButtonText}
+            </Button>
+          </ButtonWithConnectWalletFallback>
+        </BlurModal>
+      )}
+      {isSwapping && (
+        <BlurModal close={() => setIsSwapping(false)}>
+          <div className="flex flex-col justify-between items-center h-[100%] pt-[3em]">
+            <GlowingEmoji
+              className="text-4xl xl:text-6xl pt-[1em]"
+              emojis={market.market.symbolEmojis.join("")}
+            />
+            <div className="flex flex-col justify-between items-center gap-[.5em]">
+              <div className="text-light-gray uppercase text-2xl tracking-widest">
+                Swapping holding
+              </div>
+              <FormattedNumber
+                className="font-forma text-6xl text-white"
+                value={amount}
+                nominalize
+                suffix=" APT"
+              />
+            </div>
+            <ButtonWithConnectWalletFallback>
+              <Button
+                scale="lg"
+                onClick={() => {
+                  if (!account) return;
+                  submit(swapTransactionBuilder).then((r) => {
+                    if (!r || r?.error) {
+                      console.error("Could not swap", { error: r?.error });
+                    } else {
+                      const swapEvent = (r.response as UserTransactionResponse).events.find(
+                        (e) => e.type === `${ARENA_MODULE_ADDRESS}::emojicoin_arena::Swap`
+                      )!;
+                      swap();
+                      setPosition({
+                        ...position,
+                        emojicoin0Balance: BigInt(swapEvent.data.emojicoin_0_proceeds),
+                        emojicoin1Balance: BigInt(swapEvent.data.emojicoin_1_proceeds),
+                      });
+                      setIsSwapping(false);
+                    }
+                  });
+                }}
+              >
+                Swap
+              </Button>
+            </ButtonWithConnectWalletFallback>
+          </div>
         </BlurModal>
       )}
       <div className="flex flex-col justify-between items-center h-[100%] pt-[3em]">
@@ -288,7 +413,7 @@ const EnterTabSummary: React.FC<{
             <div className="text-light-gray uppercase text-xl tracking-wider">Matched</div>
             <FormattedNumber
               className="font-forma text-white text-md"
-              value={matchAmount}
+              value={position.matchAmount}
               nominalize
               prefix="+"
               suffix=" APT"
@@ -296,8 +421,12 @@ const EnterTabSummary: React.FC<{
           </div>
         </div>
         <div className="flex justify-evenly w-[100%] pb-[2em]">
-          <Button scale="lg">Top off</Button>
-          <Button scale="lg">Swap</Button>
+          <Button scale="lg" onClick={topOff}>
+            Top off
+          </Button>
+          <Button scale="lg" onClick={() => setIsSwapping(true)}>
+            Swap
+          </Button>
           <Button scale="lg" onClick={() => setIsTappingOut(true)}>
             Tap out
           </Button>
@@ -307,125 +436,133 @@ const EnterTabSummary: React.FC<{
   );
 };
 
+type Phase = "pick" | "amount" | "lock" | "summary";
+
+const Container: React.FC<
+  PropsWithChildren & {
+    progress: number;
+    phase: Phase;
+    setPhase: (phase: Phase) => void;
+    position?: ArenaPositionsModel | null;
+  }
+> = ({ children, progress, phase, setPhase, position }) => (
+  <div className="relative flex flex-col h-[100%] gap-[3em]">
+    <div className="absolute left-0 w-[100%] text-white flex">
+      <div className="m-auto w-[33%] pt-[2em]">
+        <ProgressBar length={3} position={progress} />
+      </div>
+      {(phase === "amount" || phase === "lock") && (
+        <div className="absolute top-[1.5em] left-[1em]">
+          <Button
+            scale="lg"
+            onClick={() => {
+              if (phase === "amount") {
+                if (position) setPhase("summary");
+                else setPhase("pick");
+              } else if (phase === "lock") setPhase("amount");
+            }}
+          >
+            Back
+          </Button>
+        </div>
+      )}
+    </div>
+    {children}
+  </div>
+);
+
 export const EnterTab: React.FC<{
   market0: MarketStateModel;
   market1: MarketStateModel;
   position?: ArenaPositionsModel | null;
-}> = ({ market0, market1, position }) => {
+  setPosition: (position: ArenaPositionsModel | null) => void;
+}> = ({ market0, market1, position, setPosition }) => {
+  const [phase, setPhase] = useState<Phase>();
   const [market, setMarket] = useState<MarketStateModel>();
   const [amount, setAmount] = useState<bigint>();
-  const [lock, setLock] = useState<boolean>();
   const [error, setError] = useState<boolean>(false);
   const [cranked, setCranked] = useState<boolean>(false);
+  const { account } = useAptos();
 
-  // TODO: Fix this logic using the real one
-  const matchAmount = useMemo(
-    () =>
-      lock
-        ? amount !== undefined
-          ? BigInt(Math.floor(Math.min(5 * 10 ** 8, Number(amount / 2n))))
-          : 0n
-        : 0n,
-    [amount, lock]
-  );
+  useEffect(() => {
+    if (position !== undefined && position !== null && position.open) {
+      setPhase("summary");
+    } else if (
+      position === null ||
+      (position === undefined && account === undefined) ||
+      position?.open === false
+    ) {
+      setPhase("pick");
+    }
+  }, [position]);
 
-  if (market !== undefined && amount !== undefined && lock !== undefined) {
-    return <EnterTabSummary {...{ market, amount, lock, matchAmount }} />;
-  }
-
-  console.log({position})
-
-  if (position?.open) {
+  if (phase === "summary") {
+    if (!position) throw new Error("Position is undefined in summary phase");
     return (
       <EnterTabSummary
         market={position.emojicoin0Balance > 0n ? market0 : market1}
-        amount={
-          position.emojicoin0Balance > 0n
-            ? BigInt(
-                q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
-                  .mul(position.emojicoin0Balance.toString())
-                  .round()
-                  .toString()
-              )
-            : BigInt(
-                q64ToBig(market1.lastSwap.avgExecutionPriceQ64)
-                  .mul(position.emojicoin1Balance.toString())
-                  .round()
-                  .toString()
-              )
-        }
-        lock={position.matchAmount > 0n}
-        matchAmount={0n}
+        topOff={() => setPhase("amount")}
+        tapOut={() => setPhase("pick")}
+        swap={() => setMarket(position.emojicoin0Balance > 0n ? market1 : market0)}
+        {...{ market0, market1, setPosition, position }}
       />
     );
   }
 
-  return (
-    <div className="relative flex flex-col h-[100%] gap-[3em]">
-      {position === undefined ? (
-        <Loading />
-      ) : (
-        <>
-          <div className="absolute left-0 w-[100%] text-white flex">
-            <div className="m-auto w-[33%] pt-[2em]">
-              <ProgressBar
-                length={3}
-                position={amount !== undefined ? 3 : market !== undefined ? 2 : 1}
-              />
-            </div>
-            {market !== undefined && (
-              <div className="absolute top-[1.5em] left-[1em]">
-                <Button
-                  scale="lg"
-                  onClick={() => {
-                    if (amount === undefined) setMarket(undefined);
-                    else setAmount(undefined);
-                  }}
-                >
-                  Back
-                </Button>
-              </div>
-            )}
-          </div>
-          {market === undefined ? (
-            <EnterTabPickPhase
-              {...{
-                market0,
-                market1,
-                setMarket,
-                error,
-                closeError: () => setError(false),
-                cranked,
-                closeCranked: () => setCranked(false),
-              }}
-            />
-          ) : amount === undefined ? (
-            <EnterTabAmountPhase {...{ market, setAmount }} />
-          ) : (
-            <EnterTabLockPhase
-              {...{
-                market,
-                market0,
-                market1,
-                amount,
-                setLock,
-                errorOut: () => {
-                  setError(true);
-                  setAmount(undefined);
-                  setMarket(undefined);
-                  setLock(undefined);
-                },
-                setCranked: () => {
-                  setAmount(undefined);
-                  setMarket(undefined);
-                  setLock(undefined);
-                  setCranked(true);
-                },
-              }}
-            />
-          )}
-        </>
-      )}
-    </div>
-  );
+  if (phase === "pick") {
+    return (
+      <Container progress={1} {...{ phase, position, setPhase }}>
+        <EnterTabPickPhase
+          {...{
+            market0,
+            market1,
+            setMarket,
+            error,
+            closeError: () => setError(false),
+            cranked,
+            closeCranked: () => setCranked(false),
+            nextPhase: () => setPhase("amount"),
+          }}
+        />
+      </Container>
+    );
+  }
+
+  if (phase === "amount") {
+    if (!market) throw new Error("Market is undefined in amount phase");
+    return (
+      <Container progress={2} {...{ phase, position, setPhase }}>
+        <EnterTabAmountPhase {...{ market, setAmount, nextPhase: () => setPhase("lock") }} />
+      </Container>
+    );
+  }
+
+  if (phase === "lock") {
+    if (!market || amount === undefined)
+      throw new Error("Market or amount is undefined in lock phase");
+    return (
+      <Container progress={3} {...{ phase, position, setPhase }}>
+        <EnterTabLockPhase
+          {...{
+            market,
+            market0,
+            market1,
+            amount,
+            errorOut: () => {
+              setPhase("pick");
+              setError(true);
+            },
+            setCranked: () => {
+              setPhase("pick");
+              setCranked(true);
+            },
+            position,
+            setPosition,
+          }}
+        />
+      </Container>
+    );
+  }
+
+  return <Loading />;
 };

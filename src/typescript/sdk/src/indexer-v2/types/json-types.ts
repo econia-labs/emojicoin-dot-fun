@@ -286,7 +286,7 @@ type ArenaPositionsData = {
   withdrawals: Uint64String;
   deposits: Uint64String;
   last_exit: string | undefined;
-  match_amount: bigint;
+  match_amount: Uint64String;
 };
 
 type ArenaInfoData = {
@@ -312,8 +312,10 @@ type ArenaLeaderboardHistoryData = {
   profits: Uint64String;
   losses: Uint64String;
   last_exit: string | undefined;
-  end_holding: string;
+  emojicoin_0_balance: Uint64String;
+  emojicoin_1_balance: Uint64String;
   exited: boolean;
+  withdrawals: Uint64String;
 };
 
 type ArenaLeaderboardHistoryWithArenaInfoData = {
@@ -321,8 +323,10 @@ type ArenaLeaderboardHistoryWithArenaInfoData = {
   profits: Uint64String;
   losses: Uint64String;
   last_exit: string | undefined;
-  end_holding: Uint64String;
+  emojicoin_0_balance: Uint64String;
+  emojicoin_1_balance: Uint64String;
   exited: boolean;
+  withdrawals: Uint64String;
 
   emojicoin_0_market_address: string;
   emojicoin_1_market_address: string;
@@ -330,8 +334,6 @@ type ArenaLeaderboardHistoryWithArenaInfoData = {
   emojicoin_1_market_id: Uint64String;
   emojicoin_0_symbols: SymbolEmoji[];
   emojicoin_1_symbols: SymbolEmoji[];
-  emojicoin_0_balance: bigint;
-  emojicoin_1_balance: bigint;
   start_time: string;
   duration: Uint64String;
 };
@@ -345,6 +347,7 @@ type ArenaLeaderboardData = {
   losses: Uint64String;
   pnl_percent: number;
   pnl_octas: number;
+  withdrawals: Uint64String;
 };
 
 export type DatabaseStructType = {

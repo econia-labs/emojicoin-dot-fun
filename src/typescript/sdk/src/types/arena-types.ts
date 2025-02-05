@@ -87,6 +87,8 @@ export type ArenaTypes = {
     emojicoin1Balance: bigint;
     withdrawals: bigint;
     deposits: bigint;
+    lastExit: string | undefined;
+    matchAmount: bigint;
   };
 
   ArenaLeaderboardHistory: {
@@ -94,6 +96,11 @@ export type ArenaTypes = {
     meleeID: bigint;
     profits: bigint;
     losses: bigint;
+    lastExit: string | undefined;
+    exited: boolean;
+    emojicoin0Balance: bigint;
+    emojicoin1Balance: bigint;
+    withdrawals: bigint;
   };
 
   ArenaLeaderboard: {
@@ -105,6 +112,7 @@ export type ArenaTypes = {
     losses: bigint;
     pnlPercent: number;
     pnlOctas: number;
+    withdrawals: bigint;
   };
 
   ArenaInfo: {

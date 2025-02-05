@@ -2,6 +2,7 @@
 
 import { fetchArenaLeaderboardHistoryWithArenaInfo } from "@/queries/arena";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
+import { cookies } from "next/headers";
 import { type NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
 
@@ -10,6 +11,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ address: string }> }
 ) {
+  cookies();
   const address = (await params).address;
   let skip: bigint;
   try {

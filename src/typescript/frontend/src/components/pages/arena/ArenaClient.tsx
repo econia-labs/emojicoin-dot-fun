@@ -101,11 +101,13 @@ const Mobile: React.FC<PropsWithPositionAndHistory> = (props) => {
 export const ArenaClient = (props: Props) => {
   const { isMobile } = useMatchBreakpoints();
   const { account } = useAptos();
+
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionsModel | undefined | null>();
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
 
   useEffect(() => {
+    // This is done because account refreshes often and we don't want to refetch
     if (account) {
       fetch(`/arena/position/${account.address}`)
         .then((r) => r.text())
@@ -115,14 +117,12 @@ export const ArenaClient = (props: Props) => {
         .then((r) => r.text())
         .then(parseJSON<ArenaLeaderboardHistoryWithArenaInfoModel[]>)
         .then((r) => setHistory(r));
-    } else {
-      setPosition(null);
     }
   }, [account]);
 
   return isMobile ? (
-    <Mobile {...props} {...{ position, history }} />
+    <Mobile {...props} {...{ position, setPosition, history }} />
   ) : (
-    <Desktop {...props} {...{ position, history }} />
+    <Desktop {...props} {...{ position, setPosition, history }} />
   );
 };

@@ -8,20 +8,27 @@ import { ChatTab } from "./ChatTab";
 import { useEffect, useMemo, useState } from "react";
 
 const getTabs = (
-  { market0, market1, history, position }: PropsWithPositionAndHistory,
+  { market0, market1, history, position, setPosition, arenaInfo }: PropsWithPositionAndHistory,
   setSelectedTab: (tab: string) => void
 ) => [
   {
     name: "Position",
     emoji: emoji("smiling face with horns"),
-    element: <EnterTab {...{ market0, market1, position }} />,
+    element: <EnterTab {...{ market0, market1, position, setPosition }} />,
   },
   {
     name: "Profile",
     emoji: emoji("ninja"),
     element: (
       <ProfileTab
-        {...{ market0, market1, history, position, goToEnter: () => setSelectedTab("Position") }}
+        {...{
+          market0,
+          market1,
+          history,
+          position,
+          goToEnter: () => setSelectedTab("Position"),
+          arenaInfo,
+        }}
       />
     ),
   },
