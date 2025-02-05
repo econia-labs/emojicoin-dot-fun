@@ -9,20 +9,26 @@ build the processor, otherwise you will get errors.
 git submodule update --init --recursive
 ```
 
-Ensure that your environment variables are set, typically with an `.env`
-file that mirrors the `example.local.env` or `example.testnet.env`, depending on
-which environment you're running in.
-
-Then you can follow the simple examples below showing how to run the processor
-with and without an Aptos local fullnode.
-
-## Run the indexer processor by itself
+## Run the indexer processor by itself for `mainnet` or `testnet`
 
 ```shell
-docker compose -f compose.yaml up
+docker compose -f compose.yaml up --env-file example.testnet.env up -d
 ```
 
-## Run a local Aptos fullnode as well
+To run `mainnet` instead of `testnet` just pass `example.mainnet.env` as the
+`--env-file` arg.
+
+Note that you must change the `GRPC_AUTH_TOKEN` in `example.mainnet.env` and
+`example.testnet.env` to a valid authentication token if you are going to run
+those networks.
+
+You can get a token at the [Aptos Labs developer portal].
+
+Once the services are up, you have a functional emojicoin events indexer
+processor and WebSockets broker, both at their respective ports specified in
+each one's example.\*.env file.
+
+## Run a local Aptos fullnode on the `local` network
 
 Before you run the local testnet, ensure that your Docker Desktop settings are
 correct. In your Docker Desktop settings, you must have enabled:
@@ -36,25 +42,13 @@ If you're using WSL 2, you must also enable both of these settings:
 Now your container can run the localnet on the host network:
 
 ```shell
-docker compose -f compose.local.yaml up
+docker compose -f compose.local.yaml up -d
 ```
 
-The `compose.local.yaml` file `include`s the `compose.yaml` file and
-overwrites some settings like the order of dependencies for the services.
-
-Note the order of the `include:` items in `compose.local.yaml` and where
-the config overrides are placed.
-
-## Running the frontend container
-
-If you want to include the `frontend` container to run the frontend in a
-`docker` container, without running a local testnet:
-
-```shell
-docker compose -f compose.yaml up --profile frontend
-```
-
-Note that the frontend is *not* included in the default services.
+Once all the services are up, you not only have a functional emojicoin events
+indexer processor and WebSockets broker, but you also have an Aptos localnet
+fullnode running, with an indexer processor for all the default indexer
+processors as well!
 
 ## Force restart the localnet
 
@@ -94,4 +88,5 @@ there's no reason we need to run `--force-restart` at runtime, the best way to
 handle a restart is by removing the localnet test data directory prior to each
 run as well as pruning all the related volumes, which is what [prune.sh] does.
 
+[aptos labs developer portal]: https://developers.aptoslabs.com/
 [prune.sh]: ./utils/prune.sh

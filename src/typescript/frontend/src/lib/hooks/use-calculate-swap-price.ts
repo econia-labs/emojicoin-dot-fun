@@ -18,18 +18,18 @@ import { type AnyNumberString } from "@sdk/types/types";
  * zero error, we don't return, since that is due to invalid input amount.
  */
 export const useCalculateSwapPrice = ({
-  lastSwapEvent,
+  latestMarketState,
   isSell,
   inputAmount,
   userEmojicoinBalance,
 }: {
-  lastSwapEvent?: DatabaseModels["swap_events"];
+  latestMarketState?: DatabaseModels["market_latest_state_event"];
   isSell: boolean;
   inputAmount: AnyNumberString;
   userEmojicoinBalance: AnyNumberString;
 }) => {
   const args: SwapNetProceedsArgs = {
-    ...getReservesAndBondingCurveStateWithDefault(lastSwapEvent),
+    ...getReservesAndBondingCurveStateWithDefault(latestMarketState),
     isSell,
     inputAmount,
     userEmojicoinBalance,
@@ -55,13 +55,13 @@ export const useCalculateSwapPrice = ({
 };
 
 const getReservesAndBondingCurveStateWithDefault = (
-  lastSwapEvent?: DatabaseModels["swap_events"]
+  latestMarketState?: DatabaseModels["market_latest_state_event"]
 ) => {
-  if (lastSwapEvent) {
+  if (latestMarketState) {
     return {
-      clammVirtualReserves: lastSwapEvent.state.clammVirtualReserves,
-      cpammRealReserves: lastSwapEvent.state.cpammRealReserves,
-      startsInBondingCurve: lastSwapEvent.swap.startsInBondingCurve,
+      clammVirtualReserves: latestMarketState.state.clammVirtualReserves,
+      cpammRealReserves: latestMarketState.state.cpammRealReserves,
+      startsInBondingCurve: latestMarketState.inBondingCurve,
     };
   }
   return {

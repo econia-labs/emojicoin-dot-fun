@@ -1,5 +1,5 @@
 import { type AccountAddressInput, type Account } from "@aptos-labs/ts-sdk";
-import { LIMIT, ORDER_BY } from "../../../queries";
+import { LIMIT, ORDER_BY } from "../../const";
 import { toAccountAddressString } from "../../../utils";
 import { toUserPoolsRPCResponse } from "../../types";
 import { postgrest } from "../client";

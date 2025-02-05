@@ -13,9 +13,9 @@ import { parseJSON, stringifyJSON } from "utils";
 import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
 import { type DatabaseJsonType } from "@sdk/indexer-v2/types/json-types";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import { ORDER_BY } from "@sdk/queries";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
+import { ORDER_BY } from "@sdk/indexer-v2/const";
 
 export const revalidate = 2;
 

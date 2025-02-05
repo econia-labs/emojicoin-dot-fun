@@ -9,6 +9,7 @@ fi
 
 source /app/sh/cli-profile.sh
 source /app/sh/colors.sh
+source /app/sh/compare-addresses.sh
 
 current_key=$(get_publisher_private_key)
 if [ "$current_key" == "$PUBLISHER_PRIVATE_KEY" ]; then
@@ -43,8 +44,11 @@ if [ -n "$result" ]; then
 	# Only throw an error if the profile wasn't initialized with the
 	# correct private key, since that's all we care about.
 	current_key=$(get_publisher_private_key)
-	if [ "$current_key" != "$PUBLISHER_PRIVATE_KEY" ]; then
+	if ! compare_addresses "$PUBLISHER_PRIVATE_KEY" "$current_key"; then
 		log_error "Failed to initialize profile \"$profile\""
+		log_error "Publisher private keys don't match."
+		log_error "Env var publisher private key: $PUBLISHER_PRIVATE_KEY"
+		log_error "Expected private key:          $current_key"
 		log_error $(echo $result | jq -r '.Error')
 		exit 1
 	fi

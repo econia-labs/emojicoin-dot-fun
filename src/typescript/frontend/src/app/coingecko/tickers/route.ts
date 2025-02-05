@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       "market_address, symbol_emojis, lp_coin_supply, last_swap_avg_execution_price_q64, daily_volume, daily_base_volume, clamm_virtual_reserves_base, clamm_virtual_reserves_quote, cpamm_real_reserves_base, cpamm_real_reserves_quote"
     )
     .order("market_id")
-    .range(skip, skip + limit);
+    .range(skip, skip + limit - 1);
 
   const APTOS_COIN = APTOS_COIN_TYPE_TAG.toString();
 

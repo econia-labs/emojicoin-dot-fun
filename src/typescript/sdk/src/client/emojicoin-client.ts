@@ -8,6 +8,7 @@ import {
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
   AptosConfig,
+  type LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
 import { EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
@@ -29,7 +30,7 @@ import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../cons
 import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
-import { toSwapEvent, type AnyNumberString } from "../types";
+import { toMarketView, toRegistryView, toSwapEvent, type AnyNumberString } from "../types";
 
 const { expect, Expect } = customExpect;
 
@@ -99,7 +100,6 @@ const waitForEventProcessed = async (
  */
 export class EmojicoinClient {
   public aptos: Aptos;
-  public alwaysWaitForIndexer: boolean;
 
   public register = this.registerInternal.bind(this);
   public chat = this.chatInternal.bind(this);
@@ -135,11 +135,17 @@ export class EmojicoinClient {
     marketExists: typeof EmojicoinClient.prototype.isMarketRegisteredView;
     simulateBuy: typeof EmojicoinClient.prototype.simulateBuy;
     simulateSell: typeof EmojicoinClient.prototype.simulateSell;
+    registry: typeof EmojicoinClient.prototype.registryView;
+    market: typeof EmojicoinClient.prototype.marketView;
   } = {
     marketExists: this.isMarketRegisteredView.bind(this),
     simulateBuy: this.simulateBuy.bind(this),
     simulateSell: this.simulateSell.bind(this),
+    registry: this.registryView.bind(this),
+    market: this.marketView.bind(this),
   };
+
+  private alwaysWaitForIndexer: boolean;
 
   private integrator: AccountAddress;
 
@@ -149,6 +155,7 @@ export class EmojicoinClient {
 
   constructor(args?: {
     aptos?: Aptos;
+    aptosApiKey?: string;
     integrator?: AccountAddressInput;
     integratorFeeRateBPs?: bigint | number;
     minOutputAmount?: bigint | number;
@@ -160,13 +167,24 @@ export class EmojicoinClient {
       integratorFeeRateBPs = 0,
       minOutputAmount = 1n,
       alwaysWaitForIndexer = false,
+      aptosApiKey,
     } = args ?? {};
+    const clientConfig = {
+      ...aptos.config.clientConfig,
+      // If the Aptos API key is passed in, use it, otherwise, use the default one set by
+      // environment variables.
+      ...(aptosApiKey
+        ? {
+            API_KEY: aptosApiKey,
+          }
+        : APTOS_CONFIG),
+    };
     // Create a client that always uses the static API_KEY config options.
-    const hardCodedConfig = new AptosConfig({
+    const aptosConfig = new AptosConfig({
       ...aptos.config,
-      clientConfig: { ...aptos.config.clientConfig, ...APTOS_CONFIG },
+      clientConfig,
     });
-    this.aptos = new Aptos(hardCodedConfig);
+    this.aptos = new Aptos(aptosConfig);
     this.integrator = AccountAddress.from(integrator);
     this.integratorFeeRateBPs = Number(integratorFeeRateBPs);
     this.minOutputAmount = BigInt(minOutputAmount);
@@ -336,6 +354,21 @@ export class EmojicoinClient {
       ...(ledgerVersion ? { options: { ledgerVersion: BigInt(ledgerVersion) } } : {}),
     });
     return typeof res.vec.pop() !== "undefined";
+  }
+
+  private async registryView(options?: LedgerVersionArg) {
+    return await EmojicoinDotFun.RegistryView.view({
+      aptos: this.aptos,
+      options,
+    }).then(toRegistryView);
+  }
+
+  private async marketView(marketAddress: AccountAddressInput, options?: LedgerVersionArg) {
+    return await EmojicoinDotFun.MarketView.view({
+      marketAddress,
+      aptos: this.aptos,
+      options,
+    }).then(toMarketView);
   }
 
   private async swap(

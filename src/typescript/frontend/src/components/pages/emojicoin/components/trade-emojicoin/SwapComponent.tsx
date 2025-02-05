@@ -90,12 +90,12 @@ export default function SwapComponent({
     (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
   );
 
-  const lastSwapEvent = useEventStore((s) => s.getMarket(marketEmojis)?.swapEvents?.at(0));
+  const latestMarketState = useEventStore((s) => s.getMarket(marketEmojis)?.stateEvents?.at(0));
 
   const gasCost = useGetGasWithDefault({ marketAddress, inputAmount, isSell, numSwaps });
 
   const { netProceeds, error } = useCalculateSwapPrice({
-    lastSwapEvent,
+    latestMarketState,
     isSell,
     inputAmount,
     userEmojicoinBalance: emojicoinBalance,

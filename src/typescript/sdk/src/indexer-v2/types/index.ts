@@ -107,6 +107,110 @@ const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types
     time: postgresTimestampToMicroseconds(data.last_swap_time).toString(),
   });
 
+const toArenaMeleeFromDatabase = (data: DatabaseStructType["ArenaMelee"]): Types["ArenaMelee"] => ({
+  meleeId: BigInt(data.melee_id),
+  emojicoin0MarketAddress: data.emojicoin_0_market_address,
+  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  startTime: postgresTimestampToMicroseconds(data.start_time),
+  duration: BigInt(data.duration),
+  maxMatchPercentage: BigInt(data.max_match_percentage),
+  maxMatchAmount: BigInt(data.max_match_amount),
+  availableRewards: BigInt(data.available_rewards),
+});
+
+const toArenaEnterFromDatabase = (data: DatabaseStructType["ArenaEnter"]): Types["ArenaEnter"] => ({
+  meleeId: BigInt(data.melee_id),
+  user: data.user,
+  inputAmount: BigInt(data.input_amount),
+  quoteVolume: BigInt(data.quote_volume),
+  integratorFee: BigInt(data.integrator_fee),
+  matchAmount: BigInt(data.match_amount),
+  emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
+  emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
+  emojicoin0ExchangeRateBase: BigInt(data.emojicoin_0_exchange_rate_base),
+  emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
+  emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
+  emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+});
+
+const toArenaExitFromDatabase = (data: DatabaseStructType["ArenaExit"]): Types["ArenaExit"] => ({
+  meleeId: BigInt(data.melee_id),
+  user: data.user,
+  tapOutFee: BigInt(data.tap_out_fee),
+  emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
+  emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
+  emojicoin0ExchangeRateBase: BigInt(data.emojicoin_0_exchange_rate_base),
+  emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
+  emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
+  emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+});
+
+const toArenaSwapFromDatabase = (data: DatabaseStructType["ArenaSwap"]): Types["ArenaSwap"] => ({
+  meleeId: BigInt(data.melee_id),
+  user: data.user,
+  quoteVolume: BigInt(data.quote_volume),
+  integratorFee: BigInt(data.integrator_fee),
+  emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
+  emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
+  emojicoin0ExchangeRateBase: BigInt(data.emojicoin_0_exchange_rate_base),
+  emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
+  emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
+  emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+});
+
+const toArenaVaultBalanceUpdateFromDatabase = (
+  data: DatabaseStructType["ArenaVaultBalanceUpdate"]
+): Types["ArenaVaultBalanceUpdate"] => ({
+  newBalance: BigInt(data.new_balance),
+});
+
+const toArenaPositionsFromDatabase = (
+  data: DatabaseStructType["ArenaPositions"]
+): Types["ArenaPositions"] => ({
+  user: data.user,
+  meleeId: BigInt(data.melee_id),
+  open: data.open,
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
+  withdrawals: BigInt(data.withdrawals),
+  deposits: BigInt(data.deposits),
+});
+
+const toArenaLeaderboardFromDatabase = (
+  data: DatabaseStructType["ArenaLeaderboard"]
+): Types["ArenaLeaderboard"] => ({
+  user: data.user,
+  open: data.open,
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
+  profits: BigInt(data.profits),
+  losses: BigInt(data.losses),
+  pnl_percent: data.pnl_percent,
+  pnl_octas: data.pnl_octas,
+});
+
+const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
+  meleeId: BigInt(data.melee_id),
+  volume: BigInt(data.volume),
+  rewardsRemaining: BigInt(data.rewards_remaining),
+  aptLocked: BigInt(data.apt_locked),
+  emojicoin0MarketAddress: data.emojicoin_0_market_address,
+  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  startTime: postgresTimestampToMicroseconds(data.start_time),
+  duration: BigInt(data.duration),
+  maxMatchPercentage: BigInt(data.max_match_percentage),
+  maxMatchAmount: BigInt(data.max_match_amount),
+});
+
+const toArenaLeaderboardHistoryFromDatabase = (
+  data: DatabaseStructType["ArenaLeaderboardHistory"]
+): Types["ArenaLeaderboardHistory"] => ({
+  user: toAccountAddressString(data.user),
+  meleeId: BigInt(data.melee_id),
+  profits: BigInt(data.profits),
+  losses: BigInt(data.losses),
+});
+
 type GlobalStateEventData = {
   emitTime: bigint;
   registryNonce: bigint;
@@ -327,7 +431,17 @@ export type Market1MPeriodsInLastDayModel = ReturnType<typeof toMarket1MPeriodsI
 export type MarketStateModel = ReturnType<typeof toMarketStateModel>;
 export type ProcessorStatusModel = ReturnType<typeof toProcessorStatus>;
 export type PriceFeedModel = ReturnType<typeof toPriceFeed>;
+export type ArenaMeleeModel = ReturnType<typeof toArenaMeleeModel>;
+export type ArenaEnterModel = ReturnType<typeof toArenaEnterModel>;
+export type ArenaExitModel = ReturnType<typeof toArenaExitModel>;
+export type ArenaSwapModel = ReturnType<typeof toArenaSwapModel>;
+export type ArenaVaultBalanceUpdateModel = ReturnType<typeof toArenaVaultBalanceUpdateModel>;
+export type ArenaPositionsModel = ReturnType<typeof toArenaPositionsModel>;
+export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
+export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
+export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
+export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
 
 /**
  * Converts a function that converts a type to another type into a function that converts the type
@@ -381,6 +495,14 @@ export const withChatEventData = curryToNamedType(toChatEventData, "chat");
 export const withLiquidityEventData = curryToNamedType(toLiquidityEventData, "liquidity");
 export const withStateEventData = curryToNamedType(toStateEventData, "state");
 export const withLastSwapData = curryToNamedType(toLastSwapFromDatabase, "lastSwap");
+export const withArenaMeleeData = curryToNamedType(toArenaMeleeFromDatabase, "arenaMelee");
+export const withArenaEnterData = curryToNamedType(toArenaEnterFromDatabase, "arenaEnter");
+export const withArenaExitData = curryToNamedType(toArenaExitFromDatabase, "arenaExit");
+export const withArenaSwapData = curryToNamedType(toArenaSwapFromDatabase, "arenaSwap");
+export const withArenaVaultBalanceUpdateData = curryToNamedType(
+  toArenaVaultBalanceUpdateFromDatabase,
+  "arenaVaultBalanceUpdate"
+);
 
 const EVENT_NAMES = {
   GlobalState: "GlobalState",
@@ -606,6 +728,38 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
+export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({
+  ...withTransactionMetadata(data),
+  ...withArenaMeleeData(data),
+});
+
+export const toArenaEnterModel = (data: DatabaseJsonType["arena_enter_events"]) => ({
+  ...withTransactionMetadata(data),
+  ...withArenaEnterData(data),
+});
+
+export const toArenaExitModel = (data: DatabaseJsonType["arena_exit_events"]) => ({
+  ...withTransactionMetadata(data),
+  ...withArenaExitData(data),
+});
+
+export const toArenaSwapModel = (data: DatabaseJsonType["arena_swap_events"]) => ({
+  ...withTransactionMetadata(data),
+  ...withArenaSwapData(data),
+});
+
+export const toArenaVaultBalanceUpdateModel = (
+  data: DatabaseJsonType["arena_vault_balance_update_events"]
+) => ({
+  ...withTransactionMetadata(data),
+  ...withArenaVaultBalanceUpdateData(data),
+});
+
+export const toArenaPositionsModel = toArenaPositionsFromDatabase;
+export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
+export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
+export const toArenaInfoModel = toArenaInfoFromDatabase;
+
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
@@ -617,6 +771,28 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
     deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
   };
 };
+
+export const toAggregateMarketState = (data: DatabaseJsonType["aggregate_market_state"]) => ({
+  lastEmojicoinTransactionVersion: BigInt(data.last_emojicoin_transaction_version),
+  cumulativeChatMessages: BigInt(data.cumulative_chat_messages),
+  cumulativeIntegratorFees: BigInt(data.cumulative_integrator_fees),
+  cumulativeQuoteVolume: BigInt(data.cumulative_quote_volume),
+  cumulativeSwaps: BigInt(data.cumulative_swaps),
+  fullyDilutedValue: BigInt(data.fully_diluted_value),
+  lastBumpTime: postgresTimestampToMicroseconds(data.last_bump_time),
+  marketCap: BigInt(data.market_cap),
+  numMarkets: BigInt(data.n_markets),
+  nonce: BigInt(data.nonce),
+  totalQuoteLocked: BigInt(data.total_quote_locked),
+  totalValueLocked: BigInt(data.total_value_locked),
+  numMarketsInBondingCurve: BigInt(data.n_markets_in_bonding_curve),
+  numMarketsPostBondingCurve: BigInt(data.n_markets_post_bonding_curve),
+  numGlobalStateEvents: BigInt(data.n_global_state_events),
+  numMarketRegistrationEvents: BigInt(data.n_market_registration_events),
+  numSwapEvents: BigInt(data.n_swap_events),
+  numChatEvents: BigInt(data.n_chat_events),
+  numLiquidityEvents: BigInt(data.n_liquidity_events),
+});
 
 export const DatabaseTypeConverter = {
   [TableName.GlobalStateEvents]: toGlobalStateEventModel,
@@ -632,7 +808,17 @@ export const DatabaseTypeConverter = {
   [TableName.MarketState]: toMarketStateModel,
   [TableName.ProcessorStatus]: toProcessorStatus,
   [TableName.PriceFeed]: toPriceFeed,
+  [TableName.ArenaEnterEvents]: toArenaEnterModel,
+  [TableName.ArenaMeleeEvents]: toArenaMeleeModel,
+  [TableName.ArenaExitEvents]: toArenaExitModel,
+  [TableName.ArenaSwapEvents]: toArenaSwapModel,
+  [TableName.ArenaInfo]: toArenaInfoModel,
+  [TableName.ArenaPositions]: toArenaPositionsModel,
+  [TableName.ArenaVaultBalanceUpdateEvents]: toArenaVaultBalanceUpdateModel,
+  [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
+  [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
+  [DatabaseRpc.AggregateMarketState]: toAggregateMarketState,
 };
 
 export type DatabaseModels = {
@@ -649,7 +835,17 @@ export type DatabaseModels = {
   [TableName.MarketState]: MarketStateModel;
   [TableName.ProcessorStatus]: ProcessorStatusModel;
   [TableName.PriceFeed]: PriceFeedModel;
+  [TableName.ArenaMeleeEvents]: ArenaMeleeModel;
+  [TableName.ArenaEnterEvents]: ArenaEnterModel;
+  [TableName.ArenaExitEvents]: ArenaExitModel;
+  [TableName.ArenaSwapEvents]: ArenaSwapModel;
+  [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
+  [TableName.ArenaPositions]: ArenaPositionsModel;
+  [TableName.ArenaInfo]: ArenaInfoModel;
+  [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
+  [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
+  [DatabaseRpc.AggregateMarketState]: AggregateMarketStateModel;
 };
 
 export type AnyEventTable =

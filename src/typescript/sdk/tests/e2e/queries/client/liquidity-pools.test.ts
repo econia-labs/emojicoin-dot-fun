@@ -6,8 +6,8 @@ import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
 import { getFundedAccounts } from "../../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { fetchMarkets, fetchUserLiquidityPools } from "../../../../src/indexer-v2/queries";
-import { LIMIT } from "../../../../src/queries";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
+import { LIMIT } from "../../../../src/indexer-v2/const";
 
 jest.setTimeout(20000);
 

@@ -53,7 +53,12 @@ if (process.env.NEXT_PUBLIC_BROKER_URL) {
 if (process.env.NEXT_PUBLIC_CDN_URL) {
   CDN_URL = process.env.NEXT_PUBLIC_CDN_URL;
 } else {
-  throw new Error("Environment variable NEXT_PUBLIC_CDN_URL is undefined.");
+  // The CDN_URL can be blank if it's a local development environment. Also must not be in Vercel.
+  if (process.env.NODE_ENV === "development" && !process.env.VERCEL) {
+    CDN_URL = "";
+  } else {
+    throw new Error("Environment variable NEXT_PUBLIC_CDN_URL is undefined.");
+  }
 }
 
 const VERSION = parse(packageInfo.version);

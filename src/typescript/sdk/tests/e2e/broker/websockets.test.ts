@@ -392,7 +392,10 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
     const MARKET_INDEX = 5;
 
-    subscribe(client, [], []);
+    // Don't subscribe to PeriodicStateEvents, or the test will possibly fail.
+    // It's unreliable knowing whether or not one will be emitted, since it depends on when the
+    // first market is registered in relation to 1-minute period boundaries.
+    subscribe(client, [], ["MarketRegistration", "MarketLatestState", "Swap", "Chat"]);
 
     const market_1 = marketsRegistered[MARKET_INDEX];
     const registerResponse = await RegisterMarket.submit({
