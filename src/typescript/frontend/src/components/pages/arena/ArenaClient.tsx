@@ -121,8 +121,8 @@ export const ArenaClient = (props: Props) => {
   }, [account]);
 
   return isMobile ? (
-    <Mobile {...props} {...{ position, setPosition, history }} />
+    <Mobile {...props} {...{ position, setPosition, history, setHistory }} />
   ) : (
-    <Desktop {...props} {...{ position, setPosition, history }} />
+    <Desktop {...props} {...{ position, setPosition, history, setHistory }} />
   );
 };

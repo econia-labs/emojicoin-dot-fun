@@ -22,6 +22,7 @@ export type PropsWithPositionAndHistory = Props & {
   position?: ArenaPositionsModel | null;
   setPosition: (position: ArenaPositionsModel | null) => void;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
+  setHistory: (position: ArenaLeaderboardHistoryWithArenaInfoModel[]) => void;
 };
 
 export const Box: React.FC<

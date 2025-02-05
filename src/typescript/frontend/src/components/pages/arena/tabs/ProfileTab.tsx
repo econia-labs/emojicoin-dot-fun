@@ -11,13 +11,64 @@ import { FormattedNumber } from "components/FormattedNumber";
 import styles from "./ProfileTab.module.css";
 import { useMemo, useState } from "react";
 import { Emoji } from "utils/emoji";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 
 export type ProfileTabProps = {
   position?: ArenaPositionsModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
+  setHistory: (history: ArenaLeaderboardHistoryWithArenaInfoModel[]) => void;
   arenaInfo: ArenaInfoModel;
+};
+
+const HistoryRow = ({
+  row,
+  isSelected,
+  select,
+}: {
+  row: ArenaLeaderboardHistoryWithArenaInfoModel;
+  isSelected: boolean;
+  select: () => void;
+}) => {
+  const exitTransactionBuilder = useExitTransactionBuilder(
+    row.emojicoin0MarketAddress as `0x${string}`,
+    row.emojicoin1MarketAddress as `0x${string}`
+  );
+  const { submit } = useAptos();
+  return (
+    <tr className={isSelected ? styles["selected-row"] : ""} onClick={select}>
+      <td className={styles["emoji"]}>
+        <Emoji emojis={row.emojicoin0Symbols.join("")} />
+      </td>
+      <td className={styles["text"]}>vs</td>
+      <td className={styles["emoji"]}>
+        <Emoji emojis={row.emojicoin1Symbols.join("")} />
+      </td>
+      <td className={styles["text"]}>{row.exited ? "Exited" : "Complete"}</td>
+      <td>
+        {!row.exited ? (
+          <ButtonWithConnectWalletFallback>
+            <Button
+              onClick={() => {
+                submit(exitTransactionBuilder).then((r) => {
+                  if (r && !r.error) {
+                    row.exited = true;
+                  }
+                });
+              }}
+            >
+              Exit
+            </Button>
+          </ButtonWithConnectWalletFallback>
+        ) : (
+          ""
+        )}
+      </td>
+    </tr>
+  );
 };
 
 const History = ({
@@ -62,25 +113,14 @@ const History = ({
             <td></td>
           </tr>
         )}
-        {history.toReversed().map((m, i) => {
-          return (
-            <tr
-              key={`history-table-row-${i}`}
-              className={selectedRow === i ? styles["selected-row"] : ""}
-              onClick={() => setSelectedRow(i)}
-            >
-              <td className={styles["emoji"]}>
-                <Emoji emojis={m.emojicoin0Symbols.join("")} />
-              </td>
-              <td className={styles["text"]}>vs</td>
-              <td className={styles["emoji"]}>
-                <Emoji emojis={m.emojicoin1Symbols.join("")} />
-              </td>
-              <td className={styles["text"]}>{m.exited ? "Exited" : "Complete"}</td>
-              <td>{!m.exited ? <Button>Exit</Button> : ""}</td>
-            </tr>
-          );
-        })}
+        {history.toReversed().map((m, i) => (
+          <HistoryRow
+            key={`history-table-row-${i}`}
+            row={m}
+            isSelected={selectedRow === i}
+            select={() => setSelectedRow(i)}
+          />
+        ))}
       </table>
     </>
   );
@@ -350,6 +390,7 @@ export const ProfileTab = ({
   market0,
   market1,
   history,
+  setHistory,
   goToEnter,
   arenaInfo,
 }: ProfileTabProps & { goToEnter: () => void }) => {
@@ -463,6 +504,7 @@ export const ProfileTab = ({
                 setSelectedRow,
                 setHistoryHidden,
                 arenaInfo,
+                setHistory,
               }}
             />
           </div>

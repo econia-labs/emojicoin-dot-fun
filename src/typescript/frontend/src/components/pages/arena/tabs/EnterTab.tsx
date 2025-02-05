@@ -1,6 +1,6 @@
 import type { ArenaPositionsModel, MarketStateModel } from "@sdk/indexer-v2/types";
 import { EmojiTitle } from "../utils";
-import { type PropsWithChildren, useEffect, useState } from "react";
+import { type PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { AptosInputLabel } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
 import { InputNumeric } from "components/inputs";
 import Button from "components/button";
@@ -310,6 +310,19 @@ const EnterTabSummary: React.FC<{
             .round()
             .toString()
         );
+
+  const onTapOut = useCallback(() => {
+    if (!account) return;
+    submit(exitTransactionBuilder).then((r) => {
+      if (!r || r?.error) {
+        console.error("Could not exit", { error: r?.error });
+      } else {
+        tapOut();
+        setPosition(null);
+      }
+    });
+  }, [account, exitTransactionBuilder, tapOut, setPosition, submit]);
+
   return (
     <div className="relative h-[100%]">
       {isTappingOut && (
@@ -329,21 +342,7 @@ const EnterTabSummary: React.FC<{
             </div>
           </div>
           <ButtonWithConnectWalletFallback>
-            <Button
-              scale="lg"
-              onClick={() => {
-                if (!account) return;
-                submit(exitTransactionBuilder).then((r) => {
-                  if (!r || r?.error) {
-                    console.error("Could not exit", { error: r?.error });
-                  } else {
-                    setPosition(null);
-                    setIsTappingOut(false);
-                    tapOut();
-                  }
-                });
-              }}
-            >
+            <Button scale="lg" onClick={onTapOut}>
               {tapOutButtonText}
             </Button>
           </ButtonWithConnectWalletFallback>
@@ -351,10 +350,14 @@ const EnterTabSummary: React.FC<{
       )}
       {isSwapping && (
         <BlurModal close={() => setIsSwapping(false)}>
-          <div className="flex flex-col justify-between items-center h-[100%] pt-[3em]">
+          <div className="flex flex-col justify-between items-center h-[100%] py-[3em]">
             <GlowingEmoji
               className="text-4xl xl:text-6xl pt-[1em]"
-              emojis={market.market.symbolEmojis.join("")}
+              emojis={
+                market.market.marketAddress === market0.market.marketAddress
+                  ? market1.market.symbolEmojis.join("")
+                  : market0.market.symbolEmojis.join("")
+              }
             />
             <div className="flex flex-col justify-between items-center gap-[.5em]">
               <div className="text-light-gray uppercase text-2xl tracking-widest">
@@ -402,7 +405,9 @@ const EnterTabSummary: React.FC<{
           emojis={market.market.symbolEmojis.join("")}
         />
         <div className="flex flex-col justify-between items-center gap-[.5em]">
-          <div className="text-light-gray uppercase text-2xl tracking-widest">Locked in</div>
+          <div className="text-light-gray uppercase text-2xl tracking-widest">
+            {position.matchAmount > 0 ? "Locked in" : "Deposited"}
+          </div>
           <FormattedNumber
             className="font-forma text-6xl text-white"
             value={amount}
@@ -427,7 +432,16 @@ const EnterTabSummary: React.FC<{
           <Button scale="lg" onClick={() => setIsSwapping(true)}>
             Swap
           </Button>
-          <Button scale="lg" onClick={() => setIsTappingOut(true)}>
+          <Button
+            scale="lg"
+            onClick={() => {
+              if (position.matchAmount > 0n) {
+                setIsTappingOut(true);
+              } else {
+                onTapOut();
+              }
+            }}
+          >
             Tap out
           </Button>
         </div>
@@ -494,6 +508,7 @@ export const EnterTab: React.FC<{
     ) {
       setPhase("pick");
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [position]);
 
   if (phase === "summary") {
