@@ -21,8 +21,7 @@ module.exports = {
         "forma-thin": ["var(--font-formaDR)", ...fontFamily.sans],
       },
       screens: {
-        tall: { raw: "(min-height: 960px)" },
-        "mobile-sm": "320px",
+        "mobile-sm": "0px",
         "mobile-md": "375px",
         "mobile-lg": "425px",
         sm: "640.1px",

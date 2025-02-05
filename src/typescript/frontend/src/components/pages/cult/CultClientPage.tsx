@@ -7,8 +7,7 @@ import { Clippy } from "./Clippy";
 import styled from "styled-components";
 import { useWindowSize } from "react-use";
 import { WinDesktopItem, WinIcons } from "./WinDesktopItem";
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import AnimatedLoadingBoxes from "../launch-emojicoin/animated-loading-boxes";
+import { useState, useMemo } from "react";
 import { shuffle } from "lodash";
 
 const JSON_FILE_GITHUB_URL =
@@ -29,19 +28,21 @@ export default function CultClientPage() {
   const [randomPositions, minHeight] = useMemo(() => {
     const CELL_SIZE = 200;
     const width = containerRef?.clientWidth || 0;
-    const MAX_COLS = Math.max(1, Math.floor(width / CELL_SIZE));
-    const MAX_ROWS = Math.max(2, Math.ceil(communityProjects.length / MAX_COLS));
+    const max_cols = Math.max(1, Math.floor(width / CELL_SIZE));
+    const max_rows = Math.max(2, Math.ceil(communityProjects.length / max_cols));
     const OFFSET_RANGE = 40;
 
+    const leftoverWidth = width - max_cols * CELL_SIZE;
+
     //Generate every possible position on the grid:
-    const allPositions = Array.from({ length: MAX_ROWS }, (_, y) =>
-      Array.from({ length: MAX_COLS }, (_, x) => ({
-        x: x * CELL_SIZE + Math.random() * OFFSET_RANGE,
+    const allPositions = Array.from({ length: max_rows }, (_, y) =>
+      Array.from({ length: max_cols }, (_, x) => ({
+        x: x * CELL_SIZE + Math.random() * OFFSET_RANGE + leftoverWidth / 2,
         y: y * CELL_SIZE + Math.random() * OFFSET_RANGE,
       }))
     ).flat();
 
-    return [shuffle(allPositions), MAX_ROWS * CELL_SIZE] as const;
+    return [shuffle(allPositions), max_rows * CELL_SIZE] as const;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, width]);
 
@@ -80,7 +81,7 @@ export default function CultClientPage() {
       )}
       <Clippy monologue={clippyMonologue} />
 
-      <div className="grid grid-cols-4 gap4 grow mobile-sm:p-5 sm:p-10 lg:p-20 align-start">
+      <div className="grid mobile-sm:self-center mobile-lg:self-start mobile-sm:grid-cols-1 mobile-lg:grid-cols-4 gap4 grow mobile-sm:p-2 sm:p-10 md:p-20 align-start gap-12">
         <div className="flex flex-col gap-12">
           <WinDesktopItem
             icon={WinIcons.MY_COMPUTER}
@@ -104,27 +105,36 @@ export default function CultClientPage() {
         </div>
         <div
           ref={(ref) => setContainerRef(ref || undefined)}
-          className={`col-span-3 relative`}
+          className={`flex flex-col mobile-lg:col-span-3 relative gap-12`}
           style={{ minHeight }}
         >
           {communityProjects.map((proj, i) => {
             const pos = randomPositions[i];
-            if (!pos) return <AnimatedLoadingBoxes key={proj.id} />;
             return (
-              <div
-                key={proj.id}
-                className="absolute"
-                style={{
-                  left: pos.x,
-                  top: pos.y,
-                }}
-              >
-                <WinDesktopItem
-                  icon={WinIcons.TEXT_FILE}
-                  label={proj.name + ".txt"}
-                  onClick={() => setSelectedProject(proj.id)}
-                />
-              </div>
+              <>
+                {/* useMatchBreakpoints seems to be unreliable. Need to duplicate this component and rely on tailwind for the breakpoints */}
+                <div className={"mobile-sm:block mobile-lg:hidden"}>
+                  <WinDesktopItem
+                    icon={WinIcons.TEXT_FILE}
+                    label={proj.name + ".txt"}
+                    onClick={() => setSelectedProject(proj.id)}
+                  />
+                </div>
+                <div
+                  key={proj.id}
+                  className={"mobile-sm:hidden mobile-lg:block absolute"}
+                  style={{
+                    left: pos.x,
+                    top: pos.y,
+                  }}
+                >
+                  <WinDesktopItem
+                    icon={WinIcons.TEXT_FILE}
+                    label={proj.name + ".txt"}
+                    onClick={() => setSelectedProject(proj.id)}
+                  />
+                </div>
+              </>
             );
           })}
         </div>
