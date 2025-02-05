@@ -6,6 +6,8 @@ import { emoji } from "utils";
 import { InfoTab } from "./InfoTab";
 import { ChatTab } from "./ChatTab";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { CloseIcon } from "components/svg";
 
 const getTabs = (
   {
@@ -132,22 +134,74 @@ const BottomNavigationItem = ({
 };
 
 export const BottomNavigation: React.FC<PropsWithPositionAndHistory> = (props) => {
-  const [_selectedTab, setSelectedTab] = useState<string>();
+  const [selectedTab, setSelectedTab] = useState<string>();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
 
+  const tab = useMemo(
+    () => (selectedTab === undefined ? undefined : tabs.find((t) => t.name === selectedTab)!),
+    [selectedTab, tabs]
+  );
+
   return (
-    <div
-      className="fixed bottom-0 w-[100%] border-solid border-t-[1px] border-dark-gray h-[4em] bg-black/50"
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr 1fr",
-        placeItems: "center",
-      }}
-    >
-      {tabs.map((t) => (
-        <BottomNavigationItem emoji={t.emoji} text={t.name} key={`navigation-item-${t.name}`} />
-      ))}
-    </div>
+    <>
+      <div
+        className="fixed bottom-0 w-[100%] border-solid border-t-[1px] border-dark-gray h-[4em] bg-black/50"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr 1fr",
+          placeItems: "center",
+        }}
+      >
+        {tabs.map((t) => (
+          <BottomNavigationItem
+            onClick={() => setSelectedTab(t.name)}
+            emoji={t.emoji}
+            text={t.name}
+            key={`navigation-item-${t.name}`}
+          />
+        ))}
+      </div>
+      {!!tab &&
+        createPortal(
+          <div className="bg-black top-[0] left-[0] absolute h-[100vh] w-[100vw] z-[100]">
+            <div className="flex flex-row">
+              <div className="relative flex flex-row mt-[.5em] w-[100%]">
+                <div className="w-[1em] border-solid border-b-[2px] border-dark-gray"></div>
+                <div className="flex flex-col">
+                  <div
+                    className="flex flex-row gap-[.2em] uppercase pixel-heading-3 border-solid cursor-pointer select-none rounded-t-[6px] border-t-dark-gray border-x-dark-gray border-x-[2px] border-t-[2px] text-white"
+                    style={
+                      tab.name !== selectedTab
+                        ? {
+                            paddingLeft: "calc(.5em + 2px)",
+                            paddingRight: "calc(.5em + 2px)",
+                          }
+                        : {
+                            paddingLeft: ".5em",
+                            paddingRight: ".5em",
+                          }
+                    }
+                  >
+                    <div>{tab.name}</div> <Emoji className="text-[.75em]" emojis={tab.emoji} />
+                  </div>
+                  <div className="flex flex-row justify-between">
+                    <div className="w-[2px] bg-dark-gray h-[2px]"></div>
+                    <div className="w-[2px] bg-dark-gray h-[2px]"></div>
+                  </div>
+                </div>
+                <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
+              </div>
+            </div>
+            {tab.element}
+            <CloseIcon
+              className="absolute right-[1em] top-[1em] h-[1em] w-[1em]"
+              color="econiaBlue"
+              onClick={() => setSelectedTab(undefined)}
+            />
+          </div>,
+          document.body
+        )}
+    </>
   );
 };
