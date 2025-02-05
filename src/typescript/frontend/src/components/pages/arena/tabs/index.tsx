@@ -5,69 +5,23 @@ import { ProfileTab } from "./ProfileTab";
 import { emoji } from "utils";
 import { InfoTab } from "./InfoTab";
 import { ChatTab } from "./ChatTab";
-import { useMemo, useState } from "react";
-import type { SymbolEmoji } from "@sdk/emoji_data";
+import { useEffect, useMemo, useState } from "react";
 
-const getTabs = ({ market0, market1 }: PropsWithPositionAndHistory) => [
+const getTabs = (
+  { market0, market1, history, position }: PropsWithPositionAndHistory,
+  setSelectedTab: (tab: string) => void
+) => [
   {
     name: "Position",
     emoji: emoji("smiling face with horns"),
-    element: <EnterTab {...{ market0, market1 }} />,
+    element: <EnterTab {...{ market0, market1, position }} />,
   },
   {
     name: "Profile",
     emoji: emoji("ninja"),
     element: (
       <ProfileTab
-        history={[
-          {
-            meleeId: 1n,
-            profits: 100000000n,
-            losses: 50000000n,
-            lastExit: "0x2",
-            endHolding: 100000000n / 2n,
-            exited: true,
-            emojicoin0Symbols: [emoji("cat") as SymbolEmoji],
-            emojicoin1Symbols: [emoji("dog") as SymbolEmoji],
-            emojicoin0MarketAddress: "0x2",
-            emojicoin1MarketAddress: "0x3",
-            emojicoin0MarketId: 1n,
-            emojicoin1MarketId: 2n,
-            emojicoin0Balance: 0n,
-            emojicoin1Balance: 0n,
-            startTime: new Date("2025-01-30"),
-            duration: 24n * 60n * 60n * 1000n * 1000n,
-          },
-          {
-            meleeId: 2n,
-            profits: 40000000n,
-            losses: 100000000n,
-            lastExit: "0x5",
-            endHolding: 100000000n,
-            exited: false,
-            emojicoin0Symbols: [emoji("ant") as SymbolEmoji],
-            emojicoin1Symbols: [emoji("taco") as SymbolEmoji],
-            emojicoin0MarketAddress: "0x4",
-            emojicoin1MarketAddress: "0x5",
-            emojicoin0MarketId: 1n,
-            emojicoin1MarketId: 2n,
-            emojicoin0Balance: 1000000n,
-            emojicoin1Balance: 0n,
-            startTime: new Date("2025-01-30"),
-            duration: 24n * 60n * 60n * 1000n * 1000n,
-          },
-        ]}
-        {...{ market0, market1 }}
-        position={{
-          meleeId: 3n,
-          user: "",
-          open: true,
-          emojicoin0Balance: 1000n,
-          emojicoin1Balance: 0n,
-          withdrawals: 0n,
-          deposits: 50000000n,
-          lastExit: undefined,
-        }}
+        {...{ market0, market1, history, position, goToEnter: () => setSelectedTab("Position") }}
       />
     ),
   },
@@ -84,9 +38,14 @@ const getTabs = ({ market0, market1 }: PropsWithPositionAndHistory) => [
 ];
 
 export const TabContainer: React.FC<PropsWithPositionAndHistory> = (props) => {
-  const tabs = useMemo(() => getTabs(props), [props]);
+  const [selectedTab, setSelectedTab] = useState<string>();
 
-  const [selectedTab, setSelectedTab] = useState(tabs[0].name);
+  const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
+
+  useEffect(() => {
+    setSelectedTab(tabs[0].name);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   return (
     <div
@@ -157,7 +116,9 @@ const BottomNavigationItem = ({
 };
 
 export const BottomNavigation: React.FC<PropsWithPositionAndHistory> = (props) => {
-  const tabs = useMemo(() => getTabs(props), [props]);
+  const [_selectedTab, setSelectedTab] = useState<string>();
+
+  const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
 
   return (
     <div

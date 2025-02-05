@@ -17,7 +17,7 @@ type ArenaCardProps = {
   rewardsRemaining: bigint;
   meleeVolume: bigint;
   aptLocked: bigint;
-  startTime: bigint;
+  startTime: Date;
   duration: bigint;
 };
 

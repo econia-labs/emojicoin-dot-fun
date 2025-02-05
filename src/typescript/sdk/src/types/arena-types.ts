@@ -7,6 +7,7 @@ import {
   type ArenaMeleeModel,
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
+  postgresTimestampToDate,
 } from "../indexer-v2";
 import { toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
@@ -22,7 +23,7 @@ export type ArenaTypes = {
     meleeID: bigint;
     emojicoin0MarketAddress: AccountAddressString;
     emojicoin1MarketAddress: AccountAddressString;
-    startTime: bigint;
+    startTime: Date;
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
@@ -117,7 +118,7 @@ export type ArenaTypes = {
     emojicoin1MarketAddress: AccountAddressString;
     emojicoin1Symbols: SymbolEmoji[];
     emojicoin1MarketID: bigint;
-    startTime: bigint;
+    startTime: Date;
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
@@ -147,7 +148,7 @@ export const toArenaMeleeEvent = (
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
-  startTime: BigInt(data.start_time),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),

@@ -120,6 +120,7 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "volume",
   "rewards_remaining",
   "apt_locked",
+
 ]);
 
 /**

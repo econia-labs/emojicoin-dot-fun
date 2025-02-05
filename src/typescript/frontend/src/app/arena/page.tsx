@@ -1,19 +1,20 @@
-import { type fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
-import type { SymbolEmoji } from "@sdk/emoji_data";
+import { fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
-import { emoji } from "utils";
-//import { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
-//import { redirect } from "next/navigation";
-//import { parseJSON } from "utils";
-//import { GET as getCandlesticks, getCandlesticksRoute } from "../candlesticks/route";
-//import { Period } from "@sdk/const";
+// import { emoji } from "utils";
+// import type { SymbolEmoji } from "@sdk/emoji_data";
+import type { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
+import { redirect } from "next/navigation";
+import { parseJSON } from "utils";
+import { getCandlesticksRoute } from "../candlesticks/utils";
+import { Period } from "@sdk/const";
 
 export const revalidate = 2;
+
 
 export default async function Arena() {
   let arenaInfo: Awaited<ReturnType<typeof fetchArenaInfo>> = null;
 
-  /* Uncomment to use fake data */
+  /* Uncomment to use fake data
   arenaInfo = {
     duration: 120n * 1000n * 1000n,
     startTime: BigInt(new Date().getTime() * 1000 - 1000 * 1000 * 60),
@@ -41,9 +42,9 @@ export default async function Arena() {
   ]);
   /* */
 
-  /* Uncomment to use real data
+  /* Uncomment to use real data */
   try {
-     arenaInfo = await fetchArenaInfo({});
+    arenaInfo = await fetchArenaInfo({});
   } catch (e) {
     console.warn(
       "Could not get melee data. This probably means that the backend is running an outdated version of the processor, without the arena processing. Please update."
@@ -69,20 +70,12 @@ export default async function Arena() {
   const period = Period.Period1M;
 
   const [candlesticksMarket0, candlesticksMarket1] = await Promise.all([
-    getCandlesticksRoute(
-      Number(market0!.market.marketID),
-      to,
-      period,
-      countBack,
-    )
-      .then(res => parseJSON<PeriodicStateEventModel[]>(res)),
-    getCandlesticksRoute(
-      Number(market1!.market.marketID),
-      to,
-      period,
-      countBack,
-    )
-      .then(res => parseJSON<PeriodicStateEventModel[]>(res)),
+    getCandlesticksRoute(Number(market0!.market.marketID), to, period, countBack).then((res) =>
+      parseJSON<PeriodicStateEventModel[]>(res)
+    ),
+    getCandlesticksRoute(Number(market1!.market.marketID), to, period, countBack).then((res) =>
+      parseJSON<PeriodicStateEventModel[]>(res)
+    ),
   ]);
   /* */
 
@@ -91,10 +84,10 @@ export default async function Arena() {
       arenaInfo={arenaInfo}
       market0={market0!}
       market1={market1!}
-      candlesticksMarket0={[]}
-      candlesticksMarket1={[]}
-      //candlesticksMarket0={candlesticksMarket0}
-      //candlesticksMarket1={candlesticksMarket1}
+      //candlesticksMarket0={[]}
+      //candlesticksMarket1={[]}
+      candlesticksMarket0={candlesticksMarket0}
+      candlesticksMarket1={candlesticksMarket1}
     />
   );
 }

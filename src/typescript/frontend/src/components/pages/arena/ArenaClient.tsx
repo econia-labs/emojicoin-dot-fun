@@ -61,10 +61,7 @@ const Desktop: React.FC<PropsWithPositionAndHistory> = (props) => {
         />
       </Box>
       <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
-        <Countdown
-          startTime={arenaInfo.startTime / 1000n / 1000n}
-          duration={arenaInfo.duration / 1000n / 1000n}
-        />
+        <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
       <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
       <PriceChartDesktopBox {...props} />
@@ -87,7 +84,7 @@ const Mobile: React.FC<PropsWithPositionAndHistory> = (props) => {
           />
           <div className="text-4xl">
             <Countdown
-              startTime={arenaInfo.startTime / 1000n / 1000n}
+              startTime={arenaInfo.startTime}
               duration={arenaInfo.duration / 1000n / 1000n}
             />
           </div>
@@ -104,7 +101,8 @@ const Mobile: React.FC<PropsWithPositionAndHistory> = (props) => {
 export const ArenaClient = (props: Props) => {
   const { isMobile } = useMatchBreakpoints();
   const { account } = useAptos();
-  const [position, setPosition] = useState<ArenaPositionsModel | undefined>();
+  // Undefined while loading. Null means no position
+  const [position, setPosition] = useState<ArenaPositionsModel | undefined | null>();
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
 
   useEffect(() => {
@@ -112,11 +110,13 @@ export const ArenaClient = (props: Props) => {
       fetch(`/arena/position/${account.address}`)
         .then((r) => r.text())
         .then(parseJSON<ArenaPositionsModel | null>)
-        .then((r) => setPosition(r ?? undefined));
+        .then((r) => setPosition(r));
       fetch(`/arena/positions/${account.address}`)
         .then((r) => r.text())
         .then(parseJSON<ArenaLeaderboardHistoryWithArenaInfoModel[]>)
         .then((r) => setHistory(r));
+    } else {
+      setPosition(null);
     }
   }, [account]);
 
