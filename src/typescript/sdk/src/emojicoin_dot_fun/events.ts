@@ -36,7 +36,9 @@ export type RemovePlurality<T extends string> = T extends `${infer R}s` ? R : T;
 export type PascalToCamelCase<S extends string> = S extends `${infer F}${infer R}`
   ? `${Lowercase<F>}${R}`
   : S;
-export type Capitalize<S extends string> = S extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : S;
+export type Capitalize<S extends string> = S extends `${infer F}${infer R}`
+  ? `${Uppercase<F>}${R}`
+  : S;
 
 type CamelCaseEventNames = `${PascalToCamelCase<FullEventName>}s`;
 
