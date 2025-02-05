@@ -8,7 +8,15 @@ import { ChatTab } from "./ChatTab";
 import { useEffect, useMemo, useState } from "react";
 
 const getTabs = (
-  { market0, market1, history, position, setPosition, arenaInfo }: PropsWithPositionAndHistory,
+  {
+    market0,
+    market1,
+    history,
+    position,
+    setPosition,
+    setHistory,
+    arenaInfo,
+  }: PropsWithPositionAndHistory,
   setSelectedTab: (tab: string) => void
 ) => [
   {
@@ -25,6 +33,7 @@ const getTabs = (
           market0,
           market1,
           history,
+          setHistory,
           position,
           goToEnter: () => setSelectedTab("Position"),
           arenaInfo,
