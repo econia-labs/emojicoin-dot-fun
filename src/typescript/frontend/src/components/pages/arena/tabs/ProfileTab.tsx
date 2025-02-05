@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 import { Emoji } from "utils/emoji";
 
 export type ProfileTabProps = {
-  position?: ArenaPositionsModel;
+  position?: ArenaPositionsModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
@@ -233,16 +233,24 @@ const MeleeBreakdown = ({
   market0,
   market1,
   historyHidden,
+  goToEnter,
 }: {
-  position: ArenaPositionsModel | undefined;
+  position?: ArenaPositionsModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
   selectedRow: number | undefined;
   historyHidden: boolean;
+  goToEnter: () => void;
 }) => {
   if (!position && selectedRow === undefined) {
-    return <Button>Enter now</Button>;
+    return (
+      <div className="grid place-items-center h-[100%] w-[100%]">
+        <Button scale="lg" onClick={goToEnter}>
+          Enter now
+        </Button>
+      </div>
+    );
   }
   if (selectedRow === undefined) {
     return <></>;
@@ -334,7 +342,13 @@ const Header = ({
   </div>
 );
 
-export const ProfileTab = ({ position, market0, market1, history }: ProfileTabProps) => {
+export const ProfileTab = ({
+  position,
+  market0,
+  market1,
+  history,
+  goToEnter,
+}: ProfileTabProps & { goToEnter: () => void }) => {
   const [selectedRow, setSelectedRow] = useState<number>();
   const [historyHidden, setHistoryHidden] = useState<boolean>(false);
 
@@ -366,9 +380,11 @@ export const ProfileTab = ({ position, market0, market1, history }: ProfileTabPr
 
   const meleeBreakdown = useMemo(
     () => (
-      <MeleeBreakdown {...{ position, market0, market1, history, selectedRow, historyHidden }} />
+      <MeleeBreakdown
+        {...{ position, market0, market1, history, selectedRow, historyHidden, goToEnter }}
+      />
     ),
-    [position, market0, market1, history, selectedRow, historyHidden]
+    [position, market0, market1, history, selectedRow, historyHidden, goToEnter]
   );
 
   return (
@@ -376,7 +392,8 @@ export const ProfileTab = ({ position, market0, market1, history }: ProfileTabPr
       className="grid h-[100%] w-[100%]"
       style={{
         gridTemplateRows: "1fr 2fr",
-        gridTemplateColumns: history.length > 0 && historyHidden ? "3em 1fr" : "1fr 1fr",
+        gridTemplateColumns:
+          (history.length > 0 || position) && historyHidden ? "3em 1fr" : "1fr 1fr",
       }}
     >
       <Header
@@ -385,7 +402,7 @@ export const ProfileTab = ({ position, market0, market1, history }: ProfileTabPr
         pnl={pnl}
         pnlOctas={pnlOctas}
       />
-      {history.length === 0 ? (
+      {history.length === 0 && !position ? (
         <div
           className="border-solid border-dark-gray broder-[1px] border-t-[0px] text-ec-blue"
           style={{

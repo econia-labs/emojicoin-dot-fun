@@ -19,7 +19,7 @@ export type Props = {
 };
 
 export type PropsWithPositionAndHistory = Props & {
-  position?: ArenaPositionsModel;
+  position?: ArenaPositionsModel | null;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
 };
 
@@ -67,8 +67,11 @@ export const EmojiTitle = ({
 
   return (
     <div
-      className="flex flex-row justify-evenly uppercase w-[100%]"
-      style={{ fontSize: baseFontSize + "px" }}
+      className="grid place-items-center uppercase w-[100%]"
+      style={{
+        fontSize: baseFontSize + "px",
+        gridTemplateColumns: "1fr auto 1fr",
+      }}
     >
       <span
         className={`relative z-[2] ${onClicks !== undefined ? "cursor-pointer" : ""}`}

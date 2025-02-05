@@ -286,6 +286,7 @@ type ArenaPositionsData = {
   withdrawals: Uint64String;
   deposits: Uint64String;
   last_exit: string | undefined;
+  match_amount: bigint;
 };
 
 type ArenaInfoData = {

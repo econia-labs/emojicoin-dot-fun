@@ -19,8 +19,9 @@ const CountdownNumber = ({ n }: { n: string }) => (
   </div>
 );
 
-export const Countdown = ({ startTime, duration }: { startTime: bigint; duration: bigint }) => {
-  const getRemaining = () => Number(duration) - (new Date().getTime() / 1000 - Number(startTime));
+export const Countdown = ({ startTime, duration }: { startTime: Date; duration: bigint }) => {
+  const getRemaining = () =>
+    Number(duration) - (new Date().getTime() / 1000 - startTime.getTime() / 1000);
   const [remaining, setRemaining] = useState<number>(getRemaining());
   useInterval(() => {
     setRemaining(getRemaining());

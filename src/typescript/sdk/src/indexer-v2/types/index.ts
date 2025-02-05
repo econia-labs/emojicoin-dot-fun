@@ -120,7 +120,7 @@ const toArenaMeleeFromDatabase = (
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
-  startTime: postgresTimestampToMicroseconds(data.start_time),
+  startTime: new Date(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
@@ -190,6 +190,7 @@ const toArenaPositionsFromDatabase = (
   withdrawals: BigInt(data.withdrawals),
   deposits: BigInt(data.deposits),
   lastExit: data.last_exit,
+  matchAmount: data.match_amount,
 });
 
 const toArenaLeaderboardFromDatabase = (
@@ -216,7 +217,7 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
   emojicoin1Symbols: data.emojicoin_1_symbols,
   emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
-  startTime: postgresTimestampToMicroseconds(data.start_time),
+  startTime: new Date(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
