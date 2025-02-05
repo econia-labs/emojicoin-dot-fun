@@ -370,7 +370,7 @@ export type Types = {
     meleeId: bigint;
     emojicoin0MarketAddress: AccountAddressString;
     emojicoin1MarketAddress: AccountAddressString;
-    startTime: bigint;
+    startTime: Date;
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
@@ -430,6 +430,7 @@ export type Types = {
     withdrawals: bigint;
     deposits: bigint;
     lastExit: string | undefined;
+    matchAmount: bigint;
   };
 
   ArenaLeaderboardHistory: {
@@ -463,7 +464,7 @@ export type Types = {
     emojicoin1MarketAddress: AccountAddressString;
     emojicoin1Symbols: SymbolEmoji[];
     emojicoin1MarketID: bigint;
-    startTime: bigint;
+    startTime: Date;
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
