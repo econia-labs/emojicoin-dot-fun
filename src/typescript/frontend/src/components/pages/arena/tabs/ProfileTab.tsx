@@ -423,6 +423,7 @@ export const ProfileTab = ({
       ? BigInt(
           Big(position.deposits.toString())
             .mul(pnl! / 100)
+            .round()
             .toString()
         )
       : undefined;

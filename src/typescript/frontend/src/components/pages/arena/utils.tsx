@@ -135,3 +135,13 @@ export const EmojiTitle = ({
     </div>
   );
 };
+
+/** If the position is on market0, return option0, else return option1 */
+export function marketTernary<T>(position: ArenaPositionsModel, option0: T, option1: T) {
+  return position.emojicoin0Balance > 0n ? option0 : option1;
+}
+
+/** If the position is locked, return option0, else return option1 */
+export function lockedTernary<T>(position: ArenaPositionsModel, option0: T, option1: T) {
+  return position.matchAmount > 0n ? option0 : option1;
+}
