@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 
 export default function CultPage() {
   // Add the ability to temporarily disable the page with a Coming Soon page.
-  process.env.ENABLE_CULT_PAGE ? <LaunchingPage /> : <CultClientPage />;
+  process.env.ENABLE_CULT_PAGE === "true" ? <CultClientPage/> : <LaunchingPage />;
 }
