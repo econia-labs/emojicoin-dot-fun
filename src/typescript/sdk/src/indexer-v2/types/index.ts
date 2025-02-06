@@ -530,6 +530,11 @@ const EVENT_NAMES = {
   Chat: "Chat",
   Liquidity: "Liquidity",
   State: "State",
+  ArenaEnter: "ArenaEnter",
+  ArenaExit: "ArenaExit",
+  ArenaMelee: "ArenaMelee",
+  ArenaSwap: "ArenaSwap",
+  ArenaVaultBalanceUpdate: "ArenaVaultBalanceUpdate",
 } as const;
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
@@ -594,6 +599,46 @@ export const GuidGetters = {
   ) => ({
     eventName: EVENT_NAMES.State,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
+  }),
+  arenaEnterEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: DatabaseJsonType["arena_enter_events"]) => ({
+    eventName: EVENT_NAMES.ArenaEnter,
+    guid: `${EVENT_NAMES.ArenaEnter}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaExitEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: DatabaseJsonType["arena_exit_events"]) => ({
+    eventName: EVENT_NAMES.ArenaExit,
+    guid: `${EVENT_NAMES.ArenaExit}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaMeleeEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: DatabaseJsonType["arena_melee_events"]) => ({
+    eventName: EVENT_NAMES.ArenaMelee,
+    guid: `${EVENT_NAMES.ArenaMelee}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaSwapEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: DatabaseJsonType["arena_swap_events"]) => ({
+    eventName: EVENT_NAMES.ArenaSwap,
+    guid: `${EVENT_NAMES.ArenaSwap}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaVaultBalanceUpdate: ({
+    sender,
+    transaction_version: version,
+    event_index,
+  }: DatabaseJsonType["arena_vault_balance_update_events"]) => ({
+    eventName: EVENT_NAMES.ArenaVaultBalanceUpdate,
+    guid: `${EVENT_NAMES.ArenaVaultBalanceUpdate}::${sender}::${version}::${event_index}`,
   }),
 };
 
@@ -749,21 +794,25 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaMeleeData(data),
+  ...GuidGetters.arenaMeleeEvent(data),
 });
 
 export const toArenaEnterModel = (data: DatabaseJsonType["arena_enter_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaEnterData(data),
+  ...GuidGetters.arenaEnterEvent(data),
 });
 
 export const toArenaExitModel = (data: DatabaseJsonType["arena_exit_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaExitData(data),
+  ...GuidGetters.arenaExitEvent(data),
 });
 
 export const toArenaSwapModel = (data: DatabaseJsonType["arena_swap_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaSwapData(data),
+  ...GuidGetters.arenaSwapEvent(data),
 });
 
 export const toArenaVaultBalanceUpdateModel = (
@@ -771,6 +820,7 @@ export const toArenaVaultBalanceUpdateModel = (
 ) => ({
   ...withTransactionMetadata(data),
   ...withArenaVaultBalanceUpdateData(data),
+  ...GuidGetters.arenaVaultBalanceUpdate(data),
 });
 
 export const toArenaPositionsModel = toArenaPositionsFromDatabase;
@@ -875,14 +925,19 @@ export type AnyEventTable =
   | TableName.LiquidityEvents
   | TableName.GlobalStateEvents;
 
-export type AnyEventModel =
+export type BrokerModelTypes =
   | DatabaseModels[TableName.SwapEvents]
   | DatabaseModels[TableName.ChatEvents]
   | DatabaseModels[TableName.MarketRegistrationEvents]
   | DatabaseModels[TableName.PeriodicStateEvents]
   | DatabaseModels[TableName.MarketLatestStateEvent]
   | DatabaseModels[TableName.LiquidityEvents]
-  | DatabaseModels[TableName.GlobalStateEvents];
+  | DatabaseModels[TableName.GlobalStateEvents]
+  | DatabaseModels[TableName.ArenaEnterEvents]
+  | DatabaseModels[TableName.ArenaMeleeEvents]
+  | DatabaseModels[TableName.ArenaExitEvents]
+  | DatabaseModels[TableName.ArenaSwapEvents]
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
 
 export type EventModelWithMarket =
   | DatabaseModels[TableName.SwapEvents]
@@ -903,35 +958,35 @@ const eventTypeMatches = (
 ) => extractEventType(guid) === eventType;
 
 export const isSwapEventModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.SwapEvents] => eventTypeMatches(data.guid, "Swap");
 export const isChatEventModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.ChatEvents] => eventTypeMatches(data.guid, "Chat");
 export const isMarketRegistrationEventModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.MarketRegistrationEvents] =>
   eventTypeMatches(data.guid, "MarketRegistration");
 export const isPeriodicStateEventModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.PeriodicStateEvents] =>
   eventTypeMatches(data.guid, "PeriodicState");
 export const isMarketLatestStateEventModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.MarketLatestStateEvent] => eventTypeMatches(data.guid, "State");
 export const isMarketStateModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.MarketState] =>
   isMarketLatestStateEventModel(data) && "dailyVolume" in data;
 export const isLiquidityEventModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.LiquidityEvents] => eventTypeMatches(data.guid, "Liquidity");
 export const isGlobalStateEventModel = (
-  data: AnyEventModel
+  data: BrokerModelTypes
 ): data is DatabaseModels[TableName.GlobalStateEvents] =>
   eventTypeMatches(data.guid, "GlobalState");
 
-export const isEventModelWithMarket = (data: AnyEventModel): data is EventModelWithMarket =>
+export const isEventModelWithMarket = (data: BrokerModelTypes): data is EventModelWithMarket =>
   !isGlobalStateEventModel(data);
 
 export * from "./common";

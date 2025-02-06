@@ -33,7 +33,7 @@ import { connectNewClient, compareParsedData, subscribe } from "./utils";
 
 jest.setTimeout(20000);
 
-const customWaitFor = async (condition: () => boolean) =>
+export const customWaitFor = async (condition: () => boolean) =>
   waitFor({
     condition,
     interval: 10,

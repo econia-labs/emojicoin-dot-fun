@@ -378,14 +378,19 @@ export type DatabaseStructType = {
   ArenaInfo: ArenaInfoData;
 };
 
-export type AnyEventDatabaseRow =
+export type BrokerJsonTypes =
   | DatabaseJsonType["global_state_events"]
   | DatabaseJsonType["periodic_state_events"]
   | DatabaseJsonType["market_registration_events"]
   | DatabaseJsonType["swap_events"]
   | DatabaseJsonType["chat_events"]
   | DatabaseJsonType["liquidity_events"]
-  | DatabaseJsonType["market_latest_state_event"];
+  | DatabaseJsonType["market_latest_state_event"]
+  | DatabaseJsonType["arena_enter_events"]
+  | DatabaseJsonType["arena_melee_events"]
+  | DatabaseJsonType["arena_exit_events"]
+  | DatabaseJsonType["arena_swap_events"]
+  | DatabaseJsonType["arena_vault_balance_update_events"];
 
 // Technically some of these are views, but may as well be tables in the context of the indexer.
 export enum TableName {

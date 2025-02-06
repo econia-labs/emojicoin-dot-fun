@@ -1,12 +1,13 @@
 import { parseJSONWithBigInts } from "../indexer-v2/json-bigint";
-import { type AnyEventModel } from "../indexer-v2/types";
-import { type AnyEventDatabaseRow } from "../indexer-v2/types/json-types";
+import { type BrokerModelTypes } from "../indexer-v2/types";
+import { type BrokerJsonTypes } from "../indexer-v2/types/json-types";
 import { type AnyNumberString } from "../types";
 import { ensureArray } from "../utils/misc";
 import {
   type BrokerEvent,
   type BrokerMessage,
   brokerMessageConverter,
+  type SubscribableBrokerEvents,
   type SubscriptionMessage,
   type WebSocketSubscriptions,
 } from "./types";
@@ -24,13 +25,13 @@ const SendToBroker = (_target: unknown, _propertyKey: string, descriptor: Proper
 
 export const convertWebSocketMessageToBrokerEvent = <T extends string>(e: MessageEvent<T>) => {
   const response = parseJSONWithBigInts<BrokerMessage>(e.data);
-  const [brokerEvent, message] = Object.entries(response)[0] as [BrokerEvent, AnyEventDatabaseRow];
+  const [brokerEvent, message] = Object.entries(response)[0] as [BrokerEvent, BrokerJsonTypes];
   const event = brokerMessageConverter[brokerEvent](message);
   return event;
 };
 
 type WebSocketClientEventListeners = {
-  onMessage: (e: AnyEventModel) => void;
+  onMessage: (e: BrokerModelTypes) => void;
   onConnect?: (e: Event) => void;
   onClose?: (e: CloseEvent) => void;
   onError?: (e: Event) => void;
@@ -53,7 +54,7 @@ export class WebSocketClient {
 
   public subscribedTo: {
     allMarkets: boolean;
-    allEvents: boolean;
+    allBaseEvents: boolean;
   };
 
   constructor({
@@ -65,11 +66,12 @@ export class WebSocketClient {
     this.permanentlySubscribeToMarketRegistrations = permanentlySubscribeToMarketRegistrations;
     this.subscribedTo = {
       allMarkets: false,
-      allEvents: false,
+      allBaseEvents: false,
     };
     this.subscriptions = {
       marketIDs: new Set(),
       eventTypes: new Set(),
+      arena: false,
     };
     this.client = new WebSocket(new URL(url));
 
@@ -112,12 +114,17 @@ export class WebSocketClient {
   }
 
   @SendToBroker
-  public subscribeEvents(input: BrokerEvent | BrokerEvent[]) {
+  public subscribeEvents(input: SubscribableBrokerEvents[]) {
     const newTypes = new Set(ensureArray(input));
     newTypes.forEach((e) => this.subscriptions.eventTypes.add(e));
     if (this.permanentlySubscribeToMarketRegistrations) {
       this.subscriptions.eventTypes.add("MarketRegistration");
     }
+  }
+
+  @SendToBroker
+  public subscribeArena() {
+    this.subscriptions.arena = true;
   }
 
   @SendToBroker
@@ -127,12 +134,17 @@ export class WebSocketClient {
   }
 
   @SendToBroker
-  public unsubscribeEvents(input: BrokerEvent | BrokerEvent[]) {
+  public unsubscribeEvents(input: SubscribableBrokerEvents) {
     const newTypes = new Set(ensureArray(input));
     if (this.permanentlySubscribeToMarketRegistrations) {
       newTypes.delete("MarketRegistration");
     }
     newTypes.forEach((e) => this.subscriptions.eventTypes.delete(e));
+  }
+
+  @SendToBroker
+  public unsubscribeArena() {
+    this.subscriptions.arena = false;
   }
 
   public sendToBroker() {
@@ -143,7 +155,8 @@ export class WebSocketClient {
       markets: this.subscribedTo.allMarkets
         ? []
         : Array.from(this.subscriptions.marketIDs).map(Number),
-      event_types: this.subscribedTo.allEvents ? [] : Array.from(this.subscriptions.eventTypes),
+      event_types: this.subscribedTo.allBaseEvents ? [] : Array.from(this.subscriptions.eventTypes),
+      arena: this.subscriptions.arena,
     };
     const msg = JSON.stringify(subscriptionMessage);
     this.client.send(msg);

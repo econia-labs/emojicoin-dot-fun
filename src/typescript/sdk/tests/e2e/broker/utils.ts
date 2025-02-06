@@ -5,10 +5,10 @@ import {
   brokerMessageConverter,
   type SubscriptionMessage,
 } from "../../../src/broker-v2/types";
-import { type AnyEventDatabaseRow } from "../../../src/indexer-v2/types/json-types";
+import { type BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
 import {
-  type AnyEventModel,
+  type BrokerModelTypes,
   type ChatEventModel,
   type GlobalStateEventModel,
   type LiquidityEventModel,
@@ -28,7 +28,7 @@ export const connectNewClient = async () => {
   const client = new WebSocket(new URL(BROKER_URL));
   const messageEvents: MessageEvent<string>[] = [];
   const brokerMessages: BrokerMessage[] = [];
-  const events: AnyEventModel[] = [];
+  const events: BrokerModelTypes[] = [];
 
   /**
    * Copy the functionality in the parser function so we have more granular access to the data.
@@ -37,7 +37,7 @@ export const connectNewClient = async () => {
   client.onmessage = (e: MessageEvent<string>) => {
     messageEvents.push(e);
     const parsed = parseJSONWithBigInts<BrokerMessage>(e.data);
-    const [brokerEvent, message] = Object.entries(parsed)[0] as [BrokerEvent, AnyEventDatabaseRow];
+    const [brokerEvent, message] = Object.entries(parsed)[0] as [BrokerEvent, BrokerJsonTypes];
     brokerMessages.push({
       [brokerEvent]: message,
     } as BrokerMessage);
@@ -61,7 +61,7 @@ export const connectNewClient = async () => {
   };
 };
 
-export const compareParsedData = <T extends AnyEventModel>({
+export const compareParsedData = <T extends BrokerModelTypes>({
   messageEvent,
   brokerMessage,
   event,
@@ -121,11 +121,13 @@ export const compareParsedData = <T extends AnyEventModel>({
 export const subscribe = (
   client: WebSocket,
   markets: AnyNumberString[],
-  eventTypes: BrokerEvent[]
+  eventTypes: BrokerEvent[],
+  arena: boolean = false,
 ) => {
   const outgoingMessage: SubscriptionMessage = {
     markets: markets.map((n) => Number(n)),
     event_types: eventTypes,
+    arena,
   };
   const json = JSON.stringify(outgoingMessage);
   client.send(json);
