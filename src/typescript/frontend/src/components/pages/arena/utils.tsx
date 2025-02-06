@@ -38,6 +38,10 @@ export const Box: React.FC<
   );
 };
 
+export const getFontMultiplier = (emojis: number) => {
+  return 1 - (emojis * 5) / 6 / 10;
+};
+
 export const EmojiTitle = ({
   market0Symbols,
   market1Symbols,
@@ -59,7 +63,7 @@ export const EmojiTitle = ({
     (isMobile ? 0.75 : 1) *
     (isTablet ? 0.6 : 1) *
     (isLaptop ? 0.69 : 1) *
-    (1 - (emojiCount * 5) / 6 / 10);
+    getFontMultiplier(emojiCount);
 
   const [hover0, setHover0] = useState<boolean>(false);
   const [hover1, setHover1] = useState<boolean>(false);

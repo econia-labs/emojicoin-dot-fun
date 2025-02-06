@@ -14,6 +14,7 @@ import { Emoji } from "utils/emoji";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useMatchBreakpoints } from "@hooks/index";
 
 export type ProfileTabProps = {
   position?: ArenaPositionsModel | null;
@@ -28,46 +29,58 @@ const HistoryRow = ({
   row,
   isSelected,
   select,
+  close,
 }: {
   row: ArenaLeaderboardHistoryWithArenaInfoModel;
   isSelected: boolean;
   select: () => void;
+  close: () => void;
 }) => {
+  const { isMobile } = useMatchBreakpoints();
   const exitTransactionBuilder = useExitTransactionBuilder(
     row.emojicoin0MarketAddress as `0x${string}`,
     row.emojicoin1MarketAddress as `0x${string}`
   );
   const { submit } = useAptos();
   return (
-    <tr className={isSelected ? styles["selected-row"] : ""} onClick={select}>
-      <td className={styles["emoji"]}>
-        <Emoji emojis={row.emojicoin0Symbols.join("")} />
-      </td>
-      <td className={styles["text"]}>vs</td>
-      <td className={styles["emoji"]}>
-        <Emoji emojis={row.emojicoin1Symbols.join("")} />
-      </td>
-      <td className={styles["text"]}>{row.exited ? "Exited" : "Complete"}</td>
-      <td>
-        {!row.exited ? (
-          <ButtonWithConnectWalletFallback>
-            <Button
-              onClick={() => {
-                submit(exitTransactionBuilder).then((r) => {
-                  if (r && !r.error) {
-                    row.exited = true;
-                  }
-                });
-              }}
-            >
-              Exit
-            </Button>
-          </ButtonWithConnectWalletFallback>
-        ) : (
-          ""
-        )}
-      </td>
-    </tr>
+    <>
+      <tr className={isSelected ? styles["selected-row"] : ""} onClick={select}>
+        <td className={styles["emoji"]}>
+          <Emoji emojis={row.emojicoin0Symbols.join("")} />
+        </td>
+        <td className={styles["text"]}>vs</td>
+        <td className={styles["emoji"]}>
+          <Emoji emojis={row.emojicoin1Symbols.join("")} />
+        </td>
+        <td className={styles["text"]}>{row.exited ? "Exited" : "Complete"}</td>
+        <td>
+          {!row.exited ? (
+            <ButtonWithConnectWalletFallback>
+              <Button
+                onClick={() => {
+                  submit(exitTransactionBuilder).then((r) => {
+                    if (r && !r.error) {
+                      row.exited = true;
+                    }
+                  });
+                }}
+              >
+                Exit
+              </Button>
+            </ButtonWithConnectWalletFallback>
+          ) : (
+            ""
+          )}
+        </td>
+      </tr>
+      {isSelected && isMobile && (
+        <tr>
+          <td colSpan={5}>
+            <HistoricMeleeBreakdown melee={row} historyHidden={false} close={close} />
+          </td>
+        </tr>
+      )}
+    </>
   );
 };
 
@@ -82,47 +95,67 @@ const History = ({
   arenaInfo,
 }: ProfileTabProps & {
   selectedRow: number | undefined;
-  setSelectedRow: (selectedRow: number) => void;
+  setSelectedRow: (selectedRow: number | undefined) => void;
   setHistoryHidden: (historyHidden: boolean) => void;
 }) => {
+  const { isMobile } = useMatchBreakpoints();
   return (
-    <>
+    <div className="h-[100%] overflow-auto">
       <div className="flex justify-between px-[1em] h-[3em] items-center border-dark-gray border-b-[1px] border-solid">
         <div className="uppercase text-md font-forma">History</div>
-        <div
-          className="uppercase text-xl text-light-gray cursor-pointer"
-          onClick={() => setHistoryHidden(true)}
-        >
-          &lt;&lt; Hide
-        </div>
+        {!isMobile && (
+          <div
+            className="uppercase text-xl text-light-gray cursor-pointer"
+            onClick={() => setHistoryHidden(true)}
+          >
+            &lt;&lt; Hide
+          </div>
+        )}
       </div>
       <table className={styles["history-table"]}>
-        {position && position.meleeId === arenaInfo.meleeId && (
-          <tr
-            className={selectedRow === -1 ? styles["selected-row"] : ""}
-            onClick={() => setSelectedRow(-1)}
-          >
-            <td className={styles["emoji"]}>
-              <Emoji emojis={market0.market.symbolEmojis.join("")} />
-            </td>
-            <td className={styles["text"]}>vs</td>
-            <td className={styles["emoji"]}>
-              <Emoji emojis={market1.market.symbolEmojis.join("")} />
-            </td>
-            <td className={styles["text"]}>Active</td>
-            <td></td>
-          </tr>
-        )}
-        {history.toReversed().map((m, i) => (
-          <HistoryRow
-            key={`history-table-row-${i}`}
-            row={m}
-            isSelected={selectedRow === i}
-            select={() => setSelectedRow(i)}
-          />
-        ))}
+        <tbody>
+          {position && position.meleeId === arenaInfo.meleeId && (
+            <>
+              <tr
+                className={selectedRow === -1 ? styles["selected-row"] : ""}
+                onClick={() => setSelectedRow(-1)}
+              >
+                <td className={styles["emoji"]}>
+                  <Emoji emojis={market0.market.symbolEmojis.join("")} />
+                </td>
+                <td className={styles["text"]}>vs</td>
+                <td className={styles["emoji"]}>
+                  <Emoji emojis={market1.market.symbolEmojis.join("")} />
+                </td>
+                <td className={styles["text"]}>Active</td>
+                <td></td>
+              </tr>
+              {selectedRow === -1 && isMobile && (
+                <tr>
+                  <td colSpan={5}>
+                    <CurrentMeleeBreakdown
+                      melee={position}
+                      historyHidden={false}
+                      close={() => setSelectedRow(undefined)}
+                      {...{ market0, market1 }}
+                    />
+                  </td>
+                </tr>
+              )}
+            </>
+          )}
+          {history.toReversed().map((m, i) => (
+            <HistoryRow
+              key={`history-table-row-${i}`}
+              row={m}
+              isSelected={selectedRow === i}
+              select={() => setSelectedRow(i)}
+              close={() => setSelectedRow(undefined)}
+            />
+          ))}
+        </tbody>
       </table>
-    </>
+    </div>
   );
 };
 
@@ -133,6 +166,7 @@ const MeleeBreakdownInner = ({
   pnl,
   lastHeld,
   historyHidden,
+  close,
 }: {
   deposit: bigint;
   endHolding: bigint | undefined;
@@ -140,14 +174,16 @@ const MeleeBreakdownInner = ({
   pnl: number;
   lastHeld: string;
   historyHidden: boolean;
+  close: () => void;
 }) => {
+  const { isMobile } = useMatchBreakpoints();
   const smallCellClass = "flex flex-col gap-[.2em]";
   const smallCellTextClass = "uppercase text-light-gray text-1xl";
   const smallCellValueClass = "text-white font-forma text-2xl";
 
   return (
     <div
-      className="h-[100%] w-[100%] grid gap-[1em]"
+      className="h-[100%] w-[100%] grid gap-[1em] relative"
       style={{
         gridTemplateRows: historyHidden ? "1fr 1fr" : "1fr 0.6fr 0.6fr",
         gridTemplateColumns: historyHidden ? "repeat(4, 1fr)" : "1fr 1fr",
@@ -200,6 +236,14 @@ const MeleeBreakdownInner = ({
           suffix="%"
         />
       </div>
+      {isMobile && (
+        <div
+          className="absolute right-0 top-0 uppercase text-xl text-light-gray cursor-pointer"
+          onClick={close}
+        >
+          &lt;&lt; Hide
+        </div>
+      )}
     </div>
   );
 };
@@ -209,11 +253,13 @@ const CurrentMeleeBreakdown = ({
   market0,
   market1,
   historyHidden,
+  close,
 }: {
   melee: ArenaPositionsModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
   historyHidden: boolean;
+  close: () => void;
 }) => {
   const emojicoin0BalanceInApt = q64ToBig(market0.lastSwap.avgExecutionPriceQ64).mul(
     melee.emojicoin0Balance.toString()
@@ -238,7 +284,7 @@ const CurrentMeleeBreakdown = ({
       deposit={melee.deposits}
       withdrawn={melee.withdrawals}
       endHolding={undefined}
-      {...{ historyHidden, pnl, lastHeld }}
+      {...{ historyHidden, pnl, lastHeld, close }}
     />
   );
 };
@@ -246,9 +292,11 @@ const CurrentMeleeBreakdown = ({
 const HistoricMeleeBreakdown = ({
   melee,
   historyHidden,
+  close,
 }: {
   melee: ArenaLeaderboardHistoryWithArenaInfoModel;
   historyHidden: boolean;
+  close: () => void;
 }) => {
   const lastHeld =
     melee.lastExit === melee.emojicoin0MarketAddress || melee.emojicoin0Balance > 0
@@ -264,7 +312,7 @@ const HistoricMeleeBreakdown = ({
       deposit={melee.losses}
       withdrawn={melee.profits}
       endHolding={melee.profits - melee.withdrawals}
-      {...{ historyHidden, pnl, lastHeld }}
+      {...{ historyHidden, pnl, lastHeld, close }}
     />
   );
 };
@@ -277,6 +325,7 @@ const MeleeBreakdown = ({
   market1,
   historyHidden,
   goToEnter,
+  close,
 }: {
   position?: ArenaPositionsModel | null;
   market0: MarketStateModel;
@@ -284,7 +333,8 @@ const MeleeBreakdown = ({
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
   selectedRow: number | undefined;
   historyHidden: boolean;
-  goToEnter: () => void;
+  goToEnter?: () => void;
+  close: () => void;
 }) => {
   if (!position && selectedRow === undefined) {
     return (
@@ -299,17 +349,19 @@ const MeleeBreakdown = ({
     return <></>;
   }
   if (selectedRow === -1) {
-    return <CurrentMeleeBreakdown melee={position!} {...{ market0, market1, historyHidden }} />;
+    return (
+      <CurrentMeleeBreakdown melee={position!} {...{ market0, market1, historyHidden, close }} />
+    );
   }
   return (
     <HistoricMeleeBreakdown
       melee={history[history.length - selectedRow - 1]}
-      {...{ historyHidden }}
+      {...{ historyHidden, close }}
     />
   );
 };
 
-const headerFlexColClass = "flex flex-col h-[100%] justify-evenly";
+const headerFlexColClass = "flex flex-col justify-evenly";
 const headerTitleClass = "text-light-gray text-xl uppercase text-nowrap";
 const headerValueClass = "text-white text-4xl font-forma uppercase";
 
@@ -323,67 +375,194 @@ const Header = ({
   currentLockedValue?: bigint;
   pnl?: number;
   pnlOctas?: bigint;
-}) => (
-  <div
-    className="border-b border-solid border-dark-gray text-ec-blue flex p-[2em] gap-[2em]"
-    style={{
-      gridRow: "1",
-      gridColumn: "1 / 3",
-    }}
-  >
-    <div className={headerFlexColClass}>
-      <div className={headerTitleClass}>Net deposits</div>
-      {netDeposits !== undefined ? (
-        <FormattedNumber
-          className={headerValueClass}
-          value={netDeposits}
-          decimals={2}
-          nominalize
-          suffix=" APT"
-        />
-      ) : (
-        <div className={headerValueClass}>--</div>
-      )}
-    </div>
-    <div className={headerFlexColClass}>
-      <div className={headerTitleClass}>Current locked value</div>
-      {currentLockedValue !== undefined ? (
-        <FormattedNumber
-          className={headerValueClass}
-          value={currentLockedValue}
-          decimals={2}
-          nominalize
-          suffix=" APT"
-        />
-      ) : (
-        <div className={headerValueClass}>--</div>
-      )}
-    </div>
-    <div className={headerFlexColClass}>
-      <div className={headerTitleClass}>Pnl</div>
-      {pnl !== undefined && pnlOctas !== undefined ? (
-        <span>
+}) => {
+  const { isMobile } = useMatchBreakpoints();
+  return (
+    <div
+      className={`border-b border-solid border-dark-gray text-ec-blue flex ${isMobile ? "flex-wrap" : ""} p-[2em] gap-[2em]`}
+      style={
+        isMobile
+          ? {}
+          : {
+              gridRow: "1",
+              gridColumn: "1 / 3",
+            }
+      }
+    >
+      <div className={headerFlexColClass + isMobile ? "" : " h-[100%]"}>
+        <div className={headerTitleClass}>Net deposits</div>
+        {netDeposits !== undefined ? (
           <FormattedNumber
-            className={headerValueClass + " " + ((pnl ?? 0) >= 0 ? "!text-green" : "!text-pink")}
-            value={pnl!}
-            suffix="%"
-          />
-          <span className={headerValueClass}> </span>
-          <FormattedNumber
-            className={headerValueClass + " !text-2xl text-nowrap"}
-            value={pnlOctas}
+            className={headerValueClass}
+            value={netDeposits}
             decimals={2}
             nominalize
-            prefix="("
-            suffix=" APT)"
+            suffix=" APT"
           />
-        </span>
-      ) : (
-        <div className={headerValueClass}>--</div>
-      )}
+        ) : (
+          <div className={headerValueClass}>--</div>
+        )}
+      </div>
+      <div className={headerFlexColClass + isMobile ? "" : " h-[100%]"}>
+        <div className={headerTitleClass}>Current locked value</div>
+        {currentLockedValue !== undefined ? (
+          <FormattedNumber
+            className={headerValueClass}
+            value={currentLockedValue}
+            decimals={2}
+            nominalize
+            suffix=" APT"
+          />
+        ) : (
+          <div className={headerValueClass}>--</div>
+        )}
+      </div>
+      <div className={headerFlexColClass + isMobile ? "" : " h-[100%]"}>
+        <div className={headerTitleClass}>Pnl</div>
+        {pnl !== undefined && pnlOctas !== undefined ? (
+          <span>
+            <FormattedNumber
+              className={headerValueClass + " " + ((pnl ?? 0) >= 0 ? "!text-green" : "!text-pink")}
+              value={pnl!}
+              suffix="%"
+            />
+            <span className={headerValueClass}> </span>
+            <FormattedNumber
+              className={headerValueClass + " !text-2xl text-nowrap"}
+              value={pnlOctas}
+              decimals={2}
+              nominalize
+              prefix="("
+              suffix=" APT)"
+            />
+          </span>
+        ) : (
+          <div className={headerValueClass}>--</div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
+const Inner: React.FC<
+  ProfileTabProps & {
+    historyHidden: boolean;
+    setHistoryHidden: (historyHidden: boolean) => void;
+    goToEnter: () => void;
+    setHistory: (history: ArenaLeaderboardHistoryWithArenaInfoModel[]) => void;
+  }
+> = ({
+  history,
+  setHistory,
+  position,
+  historyHidden,
+  setHistoryHidden,
+  arenaInfo,
+  market0,
+  market1,
+  goToEnter,
+}) => {
+  const { isMobile } = useMatchBreakpoints();
+
+  const [selectedRow, setSelectedRow] = useState<number>();
+  const meleeBreakdown = useMemo(
+    () => (
+      <MeleeBreakdown
+        {...{
+          position,
+          market0,
+          market1,
+          history,
+          selectedRow,
+          historyHidden,
+          goToEnter,
+          close: () => setSelectedRow(undefined),
+        }}
+      />
+    ),
+    [position, market0, market1, history, selectedRow, setSelectedRow, historyHidden, goToEnter]
+  );
+
+  if (isMobile) {
+    return (
+      <History
+        {...{
+          history,
+          position,
+          market0,
+          market1,
+          selectedRow,
+          setSelectedRow,
+          setHistoryHidden,
+          arenaInfo,
+          setHistory,
+        }}
+      />
+    );
+  }
+
+  if (history.length === 0 && !position) {
+    return (
+      <div
+        className="border-solid border-dark-gray broder-[1px] border-t-[0px] text-ec-blue"
+        style={{
+          gridRow: "2",
+          gridColumn: "1 / 3",
+        }}
+      >
+        {meleeBreakdown}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
+        className="text-ec-blue overflow-hidden"
+        style={{
+          gridRow: "2",
+          gridColumn: "1",
+        }}
+      >
+        {historyHidden ? (
+          <div
+            className="text-ec-blue cursor-pointer h-[100%] bg-dark-gray/25 text-light-gray grid place-items-center"
+            style={{
+              gridRow: "2",
+              gridColumn: "1",
+            }}
+            onClick={() => setHistoryHidden(false)}
+          >
+            <div>&gt;&gt;</div>
+          </div>
+        ) : (
+          <History
+            {...{
+              history,
+              position,
+              market0,
+              market1,
+              selectedRow,
+              setSelectedRow,
+              setHistoryHidden,
+              arenaInfo,
+              setHistory,
+            }}
+          />
+        )}
+      </div>
+      <div
+        className="border-solid border-dark-gray border-[0] border-l-[1px] text-ec-blue"
+        style={{
+          gridRow: "2",
+          gridColumn: "2",
+        }}
+      >
+        {meleeBreakdown}
+      </div>
+    </>
+  );
+};
 
 export const ProfileTab = ({
   position,
@@ -394,7 +573,6 @@ export const ProfileTab = ({
   goToEnter,
   arenaInfo,
 }: ProfileTabProps & { goToEnter: () => void }) => {
-  const [selectedRow, setSelectedRow] = useState<number>();
   const [historyHidden, setHistoryHidden] = useState<boolean>(false);
 
   // TODO: doublecheck the calculation below
@@ -428,18 +606,11 @@ export const ProfileTab = ({
         )
       : undefined;
 
-  const meleeBreakdown = useMemo(
-    () => (
-      <MeleeBreakdown
-        {...{ position, market0, market1, history, selectedRow, historyHidden, goToEnter }}
-      />
-    ),
-    [position, market0, market1, history, selectedRow, historyHidden, goToEnter]
-  );
+  const { isMobile } = useMatchBreakpoints();
 
   return (
     <div
-      className="grid h-[100%] w-[100%]"
+      className={isMobile ? "flex flex-col w-[100%]" : "grid h-[100%] w-[100%]"}
       style={{
         gridTemplateRows: "1fr 2fr",
         gridTemplateColumns:
@@ -454,72 +625,22 @@ export const ProfileTab = ({
         pnl={pnl}
         pnlOctas={pnlOctas}
       />
-      {history.length === 0 && !position ? (
-        <div
-          className="border-solid border-dark-gray broder-[1px] border-t-[0px] text-ec-blue"
-          style={{
-            gridRow: "2",
-            gridColumn: "1 / 3",
-          }}
-        >
-          {meleeBreakdown}
-        </div>
-      ) : historyHidden ? (
-        <>
-          <div
-            className="text-ec-blue cursor-pointer h-[100%] bg-dark-gray/25 text-light-gray grid place-items-center"
-            style={{
-              gridRow: "2",
-              gridColumn: "1",
-            }}
-            onClick={() => setHistoryHidden(false)}
-          >
-            <div>&gt;&gt;</div>
-          </div>
-          <div
-            className="border-solid border-dark-gray border-[0] border-l-[1px] text-ec-blue"
-            style={{
-              gridRow: "2",
-              gridColumn: "2",
-            }}
-          >
-            {meleeBreakdown}
-          </div>
-        </>
-      ) : (
-        <>
-          <div
-            className="text-ec-blue"
-            style={{
-              gridRow: "2",
-              gridColumn: "1",
-            }}
-          >
-            <History
-              {...{
-                history,
-                position,
-                market0,
-                market1,
-                selectedRow,
-                setSelectedRow,
-                setHistoryHidden,
-                arenaInfo,
-                setHistory,
-              }}
-            />
-          </div>
-          <div
-            className="border-solid border-dark-gray border-[0] border-l-[1px] text-ec-blue"
-            style={{
-              gridRow: "2",
-              gridColumn: "2",
-            }}
-          >
-            {meleeBreakdown}
-          </div>
-        </>
-      )}
+      <Inner
+        {...{
+          history,
+          setHistory,
+          historyHidden,
+          setHistoryHidden,
+          position,
+          locked,
+          pnl,
+          pnlOctas,
+          arenaInfo,
+          goToEnter,
+          market0,
+          market1,
+        }}
+      />
     </div>
   );
 };

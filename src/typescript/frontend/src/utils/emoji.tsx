@@ -1,6 +1,7 @@
 import { type AnyEmojiData, getEmojisInString } from "@sdk/index";
 import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
 import { useMemo, type DetailedHTMLProps, type HTMLAttributes } from "react";
+import { type CSSProperties } from "styled-components";
 
 /**
  * Displays emoji as a simple span element containing text representing one or more emojis.
@@ -31,7 +32,7 @@ export const Emoji = ({
       <span
         {...props}
         className={emojiFontClassName}
-        style={{ fontVariantEmoji: "emoji", display: "inline" }}
+        style={{ fontVariantEmoji: "emoji", display: "inline", ...props.style }}
       >
         {data}
       </span>
@@ -82,11 +83,19 @@ export const EmojiAsImage = ({
   return <span {...props}>{data}</span>;
 };
 
-export const GlowingEmoji = ({ emojis, className }: { emojis: string; className?: string }) => (
+export const GlowingEmoji = ({
+  emojis,
+  className,
+  style,
+}: {
+  emojis: string;
+  className?: string;
+  style?: CSSProperties;
+}) => (
   <div className="relative z-[0]">
     <div className="absolute z-[-1]" style={{ filter: "blur(15px)" }}>
-      <Emoji className={className} emojis={emojis} />
+      <Emoji className={className} emojis={emojis} style={style} />
     </div>
-    <Emoji className={className} emojis={emojis} />
+    <Emoji className={className} emojis={emojis} style={style} />
   </div>
 );
