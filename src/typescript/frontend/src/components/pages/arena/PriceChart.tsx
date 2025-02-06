@@ -4,18 +4,15 @@ import { Box, type Props } from "./utils";
 import darkTheme from "theme/dark";
 import { Line } from "react-chartjs-2";
 import { FormattedNumber } from "components/FormattedNumber";
-import { useRef } from "react";
-import useNodeDimensions from "@hooks/use-node-dimensions";
 import { q64ToBig } from "@sdk/utils";
-import { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
+import { type PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 
-const PriceChart: React.FC<Props & { height: number; width: number }> = ({
+const PriceChart: React.FC<Props & { axis: boolean }> = ({
   market0,
   market1,
-  height,
-  width,
   candlesticksMarket0,
   candlesticksMarket1,
+  axis,
 }) => {
   const now = Math.floor(new Date().getTime() / 1000 / 60);
   const size = 15;
@@ -30,7 +27,7 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
   const color0 = darkTheme.colors.econiaBlue;
   const color1 = darkTheme.colors.pink;
   const toLatestCandlestick = (p: Date, candlesticks: PeriodicStateEventModel[]) => {
-    let c = candlesticks.findLast(
+    const c = candlesticks.findLast(
       (c) => Number(c.periodicMetadata.startTime / 1000n) <= p.getTime()
     );
     return c ? q64ToBig(c.periodicState.openPriceQ64).toNumber() : 0;
@@ -79,7 +76,6 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
               maximumFractionDigits: 8,
             };
             const formatter = new Intl.NumberFormat("en-US", format);
-            console.log(context)
             return `${formatter.format(context.raw)} ${context.dataset.label}`;
           },
         },
@@ -92,6 +88,7 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
           color: "#00000000",
         },
         ticks: {
+          display: axis,
           color: color0,
           /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           callback: (value: any) => {
@@ -106,6 +103,7 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
       "1": {
         position: "right",
         ticks: {
+          display: axis,
           color: color1,
           /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           callback: (value: any) => {
@@ -128,10 +126,7 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   return <Line data={data} options={options as any} />;
 };
-
-export const PriceChartDesktopBox: React.FC<Props> = (props) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { height, width } = useNodeDimensions(ref);
+export const PriceChartMobile: React.FC<Props> = (props) => {
   return (
     <Box className="relative w-[100%] h-[100%] col-start-1 col-end-3">
       <div className="absolute top-[1em] left-[2em]">
@@ -143,8 +138,27 @@ export const PriceChartDesktopBox: React.FC<Props> = (props) => {
           suffix=" APT"
         />
       </div>
-      <div className="relative h-[100%]" ref={ref}>
-        <PriceChart {...{ height, width }} {...props} />
+      <div className="relative h-[100%]">
+        <PriceChart {...props} axis={false} />
+      </div>
+    </Box>
+  );
+};
+
+export const PriceChartDesktopBox: React.FC<Props> = (props) => {
+  return (
+    <Box className="relative w-[100%] h-[100%] col-start-1 col-end-3">
+      <div className="absolute top-[1em] left-[2em]">
+        <div className="text-light-gray tracking-wider uppercase text-xl">Total volume</div>
+        <FormattedNumber
+          className="font-forma text-white text-4xl"
+          value={props.arenaInfo.volume}
+          nominalize
+          suffix=" APT"
+        />
+      </div>
+      <div className="relative h-[100%]">
+        <PriceChart {...props} axis={false} />
       </div>
     </Box>
   );
