@@ -73,9 +73,7 @@ export default function CultClientPage() {
           }}
           type="info"
           className="max-w-[700px] -translate-x-1/2 -translate-y-1/2 [&>*]:!pl-2 !font-pixelar !lowercase [&>div>button]:lowercase text-[27px]"
-          titleBarOptions={
-            <TitleBar.Close key="close" onClick={() => setModalContent(undefined)} />
-          }
+          titleBarOptions={<TitleBar.Close onClick={() => setModalContent(undefined)} />}
           buttons={modalContent.buttons || []}
         />
       )}
@@ -132,9 +130,16 @@ const StyledAlert = styled(Alert)`
     flex-direction: row;
     white-space: pre-wrap;
     padding: 30px 40px 30px 40px !important;
+    @media (max-width: 640px) {
+      padding: 10px 10px 10px 10px !important;
+    }
     & > div:first-child > svg {
       width: 50px;
       height: 50px;
+
+      @media (max-width: 320px) {
+        display: none;
+      }
     }
   }
   & > div > button {
@@ -161,9 +166,13 @@ const StyledAlert = styled(Alert)`
     display: flex;
     align-items: center;
     & button {
+      &::before {
+        transform: translate(0px, 1px);
+        content: url("images/close.svg");
+        scale: 2.5;
+      }
       & > img {
-        width: 16px;
-        height: 16px;
+        display: none;
       }
       margin-right: 8px;
       height: 32px;
