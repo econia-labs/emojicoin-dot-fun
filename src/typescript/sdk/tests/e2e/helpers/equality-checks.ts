@@ -51,7 +51,7 @@ type Indexer = {
   StateEventData: ReturnType<typeof withStateEventData>;
 };
 
-const checkTuples = (args: [string, JsonValue | undefined, JsonValue | undefined][]) => {
+export const checkTuples = (args: [string, JsonValue | undefined, JsonValue | undefined][]) => {
   const [rows, responses] = args.reduce(
     (acc, [path, row, response]) => {
       acc[0].push(`${path}: ${row?.toString()}`);
@@ -74,7 +74,7 @@ const checkEventIndex = (
 ) => {
   const events = getEventsWithIndices(response);
   const flattenedGuidsToEventIndices = Object.values(events).flatMap((v) =>
-    v.map(({ guid, eventIndex }) => [guid, eventIndex] as const)
+    v.filter((vv) => "guid" in vv).map(({ guid, eventIndex }) => [guid, eventIndex] as const)
   );
   const eventsAndIndices = new Map(flattenedGuidsToEventIndices);
   const eventIndex = eventsAndIndices.get(eventGuid)!;

@@ -28,7 +28,7 @@ import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
-import { type ArenaEventName } from "../../types/arena-types";
+import { type AnyArenaEvent } from "../../types/arena-types";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -108,14 +108,14 @@ const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types
     time: postgresTimestampToMicroseconds(data.last_swap_time).toString(),
   });
 
-type WithoutEventNameIndexAndVersion<T extends ArenaEventName> = Omit<
-  Types[`${T}Event`],
+type WithoutEventNameIndexAndVersion<T extends AnyArenaEvent> = Omit<
+  T,
   "eventName" | "eventIndex" | "version"
 >;
 
 const toArenaMeleeFromDatabase = (
   data: DatabaseStructType["ArenaMelee"]
-): WithoutEventNameIndexAndVersion<"ArenaMelee"> => ({
+): WithoutEventNameIndexAndVersion<Types["ArenaMeleeEvent"]> => ({
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
@@ -128,7 +128,7 @@ const toArenaMeleeFromDatabase = (
 
 const toArenaEnterFromDatabase = (
   data: DatabaseStructType["ArenaEnter"]
-): WithoutEventNameIndexAndVersion<"ArenaEnter"> => ({
+): WithoutEventNameIndexAndVersion<Types["ArenaEnterEvent"]> => ({
   user: toAccountAddressString(data.user),
   meleeID: BigInt(data.melee_id),
   inputAmount: BigInt(data.input_amount),
@@ -145,7 +145,7 @@ const toArenaEnterFromDatabase = (
 
 const toArenaExitFromDatabase = (
   data: DatabaseStructType["ArenaExit"]
-): WithoutEventNameIndexAndVersion<"ArenaExit"> => ({
+): WithoutEventNameIndexAndVersion<Types["ArenaExitEvent"]> => ({
   user: toAccountAddressString(data.user),
   meleeID: BigInt(data.melee_id),
   tapOutFee: BigInt(data.tap_out_fee),
@@ -159,7 +159,7 @@ const toArenaExitFromDatabase = (
 
 const toArenaSwapFromDatabase = (
   data: DatabaseStructType["ArenaSwap"]
-): WithoutEventNameIndexAndVersion<"ArenaSwap"> => ({
+): WithoutEventNameIndexAndVersion<Types["ArenaSwapEvent"]> => ({
   meleeID: BigInt(data.melee_id),
   user: toAccountAddressString(data.user),
   quoteVolume: BigInt(data.quote_volume),
@@ -174,7 +174,7 @@ const toArenaSwapFromDatabase = (
 
 const toArenaVaultBalanceUpdateFromDatabase = (
   data: DatabaseStructType["ArenaVaultBalanceUpdate"]
-): WithoutEventNameIndexAndVersion<"ArenaVaultBalanceUpdate"> => ({
+): WithoutEventNameIndexAndVersion<Types["ArenaVaultBalanceUpdateEvent"]> => ({
   newBalance: BigInt(data.new_balance),
 });
 
@@ -513,10 +513,10 @@ export const withChatEventData = curryToNamedType(toChatEventData, "chat");
 export const withLiquidityEventData = curryToNamedType(toLiquidityEventData, "liquidity");
 export const withStateEventData = curryToNamedType(toStateEventData, "state");
 export const withLastSwapData = curryToNamedType(toLastSwapFromDatabase, "lastSwap");
-export const withArenaMeleeData = curryToNamedType(toArenaMeleeFromDatabase, "arenaMelee");
-export const withArenaEnterData = curryToNamedType(toArenaEnterFromDatabase, "arenaEnter");
-export const withArenaExitData = curryToNamedType(toArenaExitFromDatabase, "arenaExit");
-export const withArenaSwapData = curryToNamedType(toArenaSwapFromDatabase, "arenaSwap");
+export const withArenaMeleeData = curryToNamedType(toArenaMeleeFromDatabase, "melee");
+export const withArenaEnterData = curryToNamedType(toArenaEnterFromDatabase, "enter");
+export const withArenaExitData = curryToNamedType(toArenaExitFromDatabase, "exit");
+export const withArenaSwapData = curryToNamedType(toArenaSwapFromDatabase, "swap");
 export const withArenaVaultBalanceUpdateData = curryToNamedType(
   toArenaVaultBalanceUpdateFromDatabase,
   "arenaVaultBalanceUpdate"
@@ -554,6 +554,14 @@ const getMarketNonce = <T extends { market_nonce: string } | { marketNonce: bigi
   }
   return data.marketNonce;
 };
+
+type TxnVersionAndIndex<
+  T extends
+    | TableName.ArenaEnterEvents
+    | TableName.ArenaExitEvents
+    | TableName.ArenaMeleeEvents
+    | TableName.ArenaSwapEvents,
+> = Pick<DatabaseJsonType[T], "transaction_version" | "event_index" | "melee_id">;
 
 export const GuidGetters = {
   globalStateEvent: (data: DatabaseJsonType["global_state_events"] | GlobalStateEventData) => {
@@ -604,7 +612,7 @@ export const GuidGetters = {
     melee_id,
     transaction_version: version,
     event_index,
-  }: DatabaseJsonType["arena_enter_events"]) => ({
+  }: TxnVersionAndIndex<TableName.ArenaEnterEvents>) => ({
     eventName: EVENT_NAMES.ArenaEnter,
     guid: `${EVENT_NAMES.ArenaEnter}::${melee_id}::${version}::${event_index}`,
   }),
@@ -612,7 +620,7 @@ export const GuidGetters = {
     melee_id,
     transaction_version: version,
     event_index,
-  }: DatabaseJsonType["arena_exit_events"]) => ({
+  }: TxnVersionAndIndex<TableName.ArenaExitEvents>) => ({
     eventName: EVENT_NAMES.ArenaExit,
     guid: `${EVENT_NAMES.ArenaExit}::${melee_id}::${version}::${event_index}`,
   }),
@@ -620,7 +628,7 @@ export const GuidGetters = {
     melee_id,
     transaction_version: version,
     event_index,
-  }: DatabaseJsonType["arena_melee_events"]) => ({
+  }: TxnVersionAndIndex<TableName.ArenaMeleeEvents>) => ({
     eventName: EVENT_NAMES.ArenaMelee,
     guid: `${EVENT_NAMES.ArenaMelee}::${melee_id}::${version}::${event_index}`,
   }),
@@ -628,7 +636,7 @@ export const GuidGetters = {
     melee_id,
     transaction_version: version,
     event_index,
-  }: DatabaseJsonType["arena_swap_events"]) => ({
+  }: TxnVersionAndIndex<TableName.ArenaSwapEvents>) => ({
     eventName: EVENT_NAMES.ArenaSwap,
     guid: `${EVENT_NAMES.ArenaSwap}::${melee_id}::${version}::${event_index}`,
   }),
@@ -636,7 +644,10 @@ export const GuidGetters = {
     sender,
     transaction_version: version,
     event_index,
-  }: DatabaseJsonType["arena_vault_balance_update_events"]) => ({
+  }: Pick<
+    DatabaseJsonType["arena_vault_balance_update_events"],
+    "sender" | "transaction_version" | "event_index"
+  >) => ({
     eventName: EVENT_NAMES.ArenaVaultBalanceUpdate,
     guid: `${EVENT_NAMES.ArenaVaultBalanceUpdate}::${sender}::${version}::${event_index}`,
   }),

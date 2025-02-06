@@ -8,7 +8,7 @@ import type {
   Uint128String,
   Uint64String,
 } from "../../emojicoin_dot_fun/types";
-import { type Flatten } from "../../types";
+import { type JsonTypes, type Flatten } from "../../types";
 
 export type PeriodTypeFromDatabase =
   | "period_1m"
@@ -250,60 +250,27 @@ type GlobalStateEventData = {
   cumulative_chat_messages: Uint64String;
 };
 
-type ArenaMeleeEventData = {
-  event_index: Uint64String;
-  melee_id: Uint64String;
-  emojicoin_0_market_address: string;
-  emojicoin_1_market_address: string;
-  start_time: PostgresTimestamp;
-  duration: Uint64String;
-  max_match_percentage: Uint64String;
-  max_match_amount: Uint64String;
-  available_rewards: Uint64String;
-};
+// Utility type for converting the fullnode JSON type data to flattened Database JSON type data.
+type FlattenedExchangeRateWithEventIndex<T extends keyof JsonTypes> = Flatten<
+  Omit<JsonTypes[T], keyof JsonTypes["ExchangeRate"]> & {
+    event_index: Uint64String;
+    emojicoin_0_exchange_rate_base: Uint64String;
+    emojicoin_0_exchange_rate_quote: Uint64String;
+    emojicoin_1_exchange_rate_base: Uint64String;
+    emojicoin_1_exchange_rate_quote: Uint64String;
+  }
+>;
 
-type ArenaEnterEventData = {
-  event_index: Uint64String;
-  user: string;
-  melee_id: Uint64String;
-  input_amount: Uint64String;
-  quote_volume: Uint64String;
-  integrator_fee: Uint64String;
-  match_amount: Uint64String;
-  emojicoin_0_proceeds: Uint64String;
-  emojicoin_1_proceeds: Uint64String;
-  emojicoin_0_exchange_rate_base: Uint64String;
-  emojicoin_0_exchange_rate_quote: Uint64String;
-  emojicoin_1_exchange_rate_base: Uint64String;
-  emojicoin_1_exchange_rate_quote: Uint64String;
-};
+type ArenaMeleeEventData = Flatten<
+  Omit<JsonTypes["ArenaMeleeEvent"], "start_time"> & {
+    event_index: Uint64String;
+    start_time: PostgresTimestamp;
+  }
+>;
 
-type ArenaExitEventData = {
-  event_index: Uint64String;
-  user: string;
-  melee_id: Uint64String;
-  tap_out_fee: Uint64String;
-  emojicoin_0_proceeds: Uint64String;
-  emojicoin_1_proceeds: Uint64String;
-  emojicoin_0_exchange_rate_base: Uint64String;
-  emojicoin_0_exchange_rate_quote: Uint64String;
-  emojicoin_1_exchange_rate_base: Uint64String;
-  emojicoin_1_exchange_rate_quote: Uint64String;
-};
-
-type ArenaSwapEventData = {
-  event_index: Uint64String;
-  user: string;
-  melee_id: Uint64String;
-  quote_volume: Uint64String;
-  integrator_fee: Uint64String;
-  emojicoin_0_proceeds: Uint64String;
-  emojicoin_1_proceeds: Uint64String;
-  emojicoin_0_exchange_rate_base: Uint64String;
-  emojicoin_0_exchange_rate_quote: Uint64String;
-  emojicoin_1_exchange_rate_base: Uint64String;
-  emojicoin_1_exchange_rate_quote: Uint64String;
-};
+type ArenaEnterEventData = FlattenedExchangeRateWithEventIndex<"ArenaEnterEvent">;
+type ArenaExitEventData = FlattenedExchangeRateWithEventIndex<"ArenaExitEvent">;
+type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent">;
 
 type ArenaVaultBalanceUpdateEventData = {
   event_index: Uint64String;
@@ -311,7 +278,7 @@ type ArenaVaultBalanceUpdateEventData = {
 };
 
 type ArenaPositionsData = {
-  user: string;
+  user: AccountAddressString;
   melee_id: Uint64String;
   open: boolean;
   emojicoin_0_balance: Uint64String;
@@ -338,14 +305,14 @@ type ArenaInfoData = {
 };
 
 type ArenaLeaderboardHistoryData = {
-  user: string;
+  user: AccountAddressString;
   melee_id: Uint64String;
   profits: Uint64String;
   losses: Uint64String;
 };
 
 type ArenaLeaderboardData = {
-  user: string;
+  user: AccountAddressString;
   open: boolean;
   emojicoin_0_balance: Uint64String;
   emojicoin_1_balance: Uint64String;

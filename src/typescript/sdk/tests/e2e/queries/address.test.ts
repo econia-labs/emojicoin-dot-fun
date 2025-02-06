@@ -2,7 +2,7 @@ import { getEvents } from "../../../src";
 import { Chat } from "@/contract-apis/emojicoin-dot-fun";
 import { fetchChatEvents } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
-import RowEqualityChecks from "./equality-checks";
+import RowEqualityChecks from "../helpers/equality-checks";
 import { getFundedAccount } from "../../utils/test-accounts";
 import TestHelpers from "../../utils/helpers";
 

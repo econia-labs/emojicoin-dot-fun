@@ -7,7 +7,7 @@ import {
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
-import RowEqualityChecks from "./equality-checks";
+import RowEqualityChecks from "../helpers/equality-checks";
 import { queryHelper } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/json-types";
 import { getFundedAccounts } from "../../utils/test-accounts";

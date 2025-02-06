@@ -67,12 +67,6 @@ export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => Brok
 
 /**
  * Note that this is primarily here to indicate the structure of the message.
- *
- * Due to the nature of `json-bigint` and how we default to parsing everything as a bigint,
- * technically the types for `AnyEventModel` will differ from the actual message that's parsed.
- *
- * This ultimately doesn't matter, because we process and convert each incoming message with the
- * corresponding `TableConverter` functions after parsing the initial JSON message.
  */
 export type BrokerMessage = {
   [K in BrokerEvent]: BrokerJsonTypes;

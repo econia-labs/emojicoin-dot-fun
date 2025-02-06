@@ -3,11 +3,17 @@ import {
   type BrokerEvent,
   type BrokerMessage,
   brokerMessageConverter,
+  type SubscribableBrokerEvents,
   type SubscriptionMessage,
 } from "../../../src/broker-v2/types";
 import { type BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
 import {
+  type ArenaExitModel,
+  type ArenaMeleeModel,
+  type ArenaSwapModel,
+  type ArenaVaultBalanceUpdateModel,
+  type ArenaEnterModel,
   type BrokerModelTypes,
   type ChatEventModel,
   type GlobalStateEventModel,
@@ -17,8 +23,9 @@ import {
   type PeriodicStateEventModel,
   type SwapEventModel,
 } from "../../../src/indexer-v2/types";
-import RowEqualityChecks from "../queries/equality-checks";
+import RowEqualityChecks from "../helpers/equality-checks";
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import ArenaRowEqualityChecks from "../helpers/arena-equality-checks";
 
 const MAX_WAIT_TIME = 5000;
 
@@ -113,6 +120,27 @@ export const compareParsedData = <T extends BrokerModelTypes>({
       RowEqualityChecks["MarketRegistration"](model as MarketRegistrationEventModel, response);
       RowEqualityChecks["MarketRegistration"](event as MarketRegistrationEventModel, response);
       break;
+    case "ArenaEnter":
+      ArenaRowEqualityChecks["ArenaEnter"](model as ArenaEnterModel, response);
+      ArenaRowEqualityChecks["ArenaEnter"](event as ArenaEnterModel, response);
+    case "ArenaExit":
+      ArenaRowEqualityChecks["ArenaExit"](model as ArenaExitModel, response);
+      ArenaRowEqualityChecks["ArenaExit"](event as ArenaExitModel, response);
+    case "ArenaMelee":
+      ArenaRowEqualityChecks["ArenaMelee"](model as ArenaMeleeModel, response);
+      ArenaRowEqualityChecks["ArenaMelee"](event as ArenaMeleeModel, response);
+    case "ArenaSwap":
+      ArenaRowEqualityChecks["ArenaSwap"](model as ArenaSwapModel, response);
+      ArenaRowEqualityChecks["ArenaSwap"](event as ArenaSwapModel, response);
+    case "ArenaVaultBalanceUpdate":
+      ArenaRowEqualityChecks["ArenaVaultBalanceUpdate"](
+        model as ArenaVaultBalanceUpdateModel,
+        response
+      );
+      ArenaRowEqualityChecks["ArenaVaultBalanceUpdate"](
+        event as ArenaVaultBalanceUpdateModel,
+        response
+      );
     default:
       throw new Error("Will never happen.");
   }
@@ -121,8 +149,8 @@ export const compareParsedData = <T extends BrokerModelTypes>({
 export const subscribe = (
   client: WebSocket,
   markets: AnyNumberString[],
-  eventTypes: BrokerEvent[],
-  arena: boolean = false,
+  eventTypes: SubscribableBrokerEvents[],
+  arena: boolean = false
 ) => {
   const outgoingMessage: SubscriptionMessage = {
     markets: markets.map((n) => Number(n)),

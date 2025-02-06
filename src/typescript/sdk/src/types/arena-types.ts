@@ -1,17 +1,19 @@
 import { type SymbolEmoji } from "../emoji_data";
 import { type AccountAddressString } from "../emojicoin_dot_fun";
+import {
+  type BrokerModelTypes,
+  type ArenaEnterModel,
+  type ArenaExitModel,
+  type ArenaMeleeModel,
+  type ArenaSwapModel,
+  type ArenaVaultBalanceUpdateModel,
+} from "../indexer-v2";
 import { toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
-import { type WithVersionAndGUID, type AnyNumberString, type Types } from "./types";
+import { type AnyNumberString, type Types } from "./types";
 
-export type ArenaEventName =
-  | "ArenaMelee"
-  | "ArenaEnter"
-  | "ArenaExit"
-  | "ArenaSwap"
-  | "ArenaVaultBalanceUpdate";
-
-type WithVersionAndEventIndex = Omit<WithVersionAndGUID, "guid"> & {
+type WithVersionAndEventIndex = {
+  version: number | string;
   eventIndex: number;
 };
 
@@ -122,7 +124,7 @@ export type ArenaTypes = {
   };
 };
 
-const toExchangeRate = (data: JsonTypes["ArenaExchangeRate"]) => ({
+const toExchangeRate = (data: JsonTypes["BothEmojicoinExchangeRates"]) => ({
   emojicoin0ExchangeRateBase: BigInt(data.emojicoin_0_exchange_rate.base),
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate.quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate.base),
@@ -141,7 +143,7 @@ export const toArenaMeleeEvent = (
   data: JsonTypes["ArenaMeleeEvent"],
   version: AnyNumberString,
   eventIndex: AnyNumberString
-): Types["ArenaMeleeEvent"] => ({
+) => ({
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
@@ -150,7 +152,7 @@ export const toArenaMeleeEvent = (
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
   availableRewards: BigInt(data.available_rewards),
-  eventName: "ArenaMelee",
+  eventName: "ArenaMelee" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
 });
 
@@ -158,7 +160,7 @@ export const toArenaEnterEvent = (
   data: JsonTypes["ArenaEnterEvent"],
   version: AnyNumberString,
   eventIndex: AnyNumberString
-): Types["ArenaEnterEvent"] => ({
+) => ({
   user: toAccountAddressString(data.user),
   meleeID: BigInt(data.melee_id),
   inputAmount: BigInt(data.input_amount),
@@ -168,7 +170,7 @@ export const toArenaEnterEvent = (
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
   ...toExchangeRate(data),
-  eventName: "ArenaEnter",
+  eventName: "ArenaEnter" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
 });
 
@@ -176,14 +178,14 @@ export const toArenaExitEvent = (
   data: JsonTypes["ArenaExitEvent"],
   version: AnyNumberString,
   eventIndex: AnyNumberString
-): Types["ArenaExitEvent"] => ({
+) => ({
   user: toAccountAddressString(data.user),
   meleeID: BigInt(data.melee_id),
   tapOutFee: BigInt(data.tap_out_fee),
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
   ...toExchangeRate(data),
-  eventName: "ArenaExit",
+  eventName: "ArenaExit" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
 });
 
@@ -191,7 +193,7 @@ export const toArenaSwapEvent = (
   data: JsonTypes["ArenaSwapEvent"],
   version: AnyNumberString,
   eventIndex: AnyNumberString
-): Types["ArenaSwapEvent"] => ({
+) => ({
   user: toAccountAddressString(data.user),
   meleeID: BigInt(data.melee_id),
   quoteVolume: BigInt(data.quote_volume),
@@ -199,7 +201,7 @@ export const toArenaSwapEvent = (
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
   ...toExchangeRate(data),
-  eventName: "ArenaSwap",
+  eventName: "ArenaSwap" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
 });
 
@@ -207,8 +209,60 @@ export const toArenaVaultBalanceUpdateEvent = (
   data: JsonTypes["ArenaVaultBalanceUpdateEvent"],
   version: AnyNumberString,
   eventIndex: AnyNumberString
-): Types["ArenaVaultBalanceUpdateEvent"] => ({
+) => ({
   newBalance: BigInt(data.new_balance),
-  eventName: "ArenaVaultBalanceUpdate",
+  eventName: "ArenaVaultBalanceUpdate" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
 });
+
+export const toArenaRegistry = (data: JsonTypes["ArenaRegistry"]) => ({
+  /**
+   * Note that the number of melees is also the exact meleeID of the current melee.
+   */
+  numMelees: BigInt(data.n_melees),
+  vaultAddress: toAccountAddressString(data.vault_address),
+  vaultBalance: BigInt(data.vault_address),
+  nextMeleeDuration: BigInt(data.next_melee_duration),
+  nextMeleeAvailableRewards: BigInt(data.next_melee_available_rewards),
+  nextMeleeMaxMatchPercentage: BigInt(data.next_melee_max_match_percentage),
+  nextMeleeMaxMatchAmount: BigInt(data.next_melee_max_match_amount),
+});
+
+export type AnyArenaEvent =
+  | Types["ArenaEnterEvent"]
+  | Types["ArenaExitEvent"]
+  | Types["ArenaMeleeEvent"]
+  | Types["ArenaSwapEvent"]
+  | Types["ArenaVaultBalanceUpdateEvent"];
+
+export const isArenaEnterEvent = (e: AnyArenaEvent): e is Types["ArenaEnterEvent"] =>
+  e.eventName === "ArenaEnter";
+
+export const isArenaExitEvent = (e: AnyArenaEvent): e is Types["ArenaExitEvent"] =>
+  e.eventName === "ArenaExit";
+
+export const isArenaMeleeEvent = (e: AnyArenaEvent): e is Types["ArenaMeleeEvent"] =>
+  e.eventName === "ArenaMelee";
+
+export const isArenaSwapEvent = (e: AnyArenaEvent): e is Types["ArenaSwapEvent"] =>
+  e.eventName === "ArenaSwap";
+
+export const isArenaVaultBalanceUpdateEvent = (
+  e: AnyArenaEvent
+): e is Types["ArenaVaultBalanceUpdateEvent"] => e.eventName === "ArenaVaultBalanceUpdate";
+
+export const isArenaEnterModel = (e: BrokerModelTypes): e is ArenaEnterModel =>
+  e.eventName === "ArenaEnter";
+
+export const isArenaExitModel = (e: BrokerModelTypes): e is ArenaExitModel =>
+  e.eventName === "ArenaExit";
+
+export const isArenaMeleeModel = (e: BrokerModelTypes): e is ArenaMeleeModel =>
+  e.eventName === "ArenaMelee";
+
+export const isArenaSwapModel = (e: BrokerModelTypes): e is ArenaSwapModel =>
+  e.eventName === "ArenaSwap";
+
+export const isArenaVaultBalanceUpdateModel = (
+  e: BrokerModelTypes
+): e is ArenaVaultBalanceUpdateModel => e.eventName === "ArenaVaultBalanceUpdate";
