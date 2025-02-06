@@ -3,12 +3,12 @@
 import { useMatchBreakpoints } from "@hooks/index";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { parseJSON } from "utils";
 import { Box, EmojiTitle, type PropsWithPositionAndHistory, type Props } from "./utils";
 import { BottomNavigation, TabContainer } from "./tabs";
-import { PriceChartDesktopBox } from "./PriceChart";
+import { PriceChartDesktopBox, PriceChartMobile } from "./PriceChart";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
@@ -90,8 +90,9 @@ const Mobile: React.FC<PropsWithPositionAndHistory> = (props) => {
           </div>
         </Box>
         <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
-        <Box className="h-[500px]"></Box>
-        <Box className="h-[500px]"></Box>
+        <Box className="h-[500px]">
+          <PriceChartMobile {...props} />
+        </Box>
       </div>
       {createPortal(<BottomNavigation {...props} />, document.body)}
     </>
@@ -103,12 +104,23 @@ export const ArenaClient = (props: Props) => {
   const { account } = useAptos();
 
   // Undefined while loading. Null means no position
-  const [position, setPosition] = useState<ArenaPositionsModel | undefined | null>();
+  const [position, setPosition] = useState<ArenaPositionsModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
+
+  const r = useMemo(
+    () =>
+      isMobile ? (
+        <Mobile {...props} {...{ position, setPosition, history, setHistory }} />
+      ) : (
+        <Desktop {...props} {...{ position, setPosition, history, setHistory }} />
+      ),
+    [isMobile, props, position, setPosition, history, setHistory]
+  );
 
   useEffect(() => {
     // This is done because account refreshes often and we don't want to refetch
     if (account) {
+      setPosition(undefined);
       fetch(`/arena/position/${account.address}`)
         .then((r) => r.text())
         .then(parseJSON<ArenaPositionsModel | null>)
@@ -120,9 +132,5 @@ export const ArenaClient = (props: Props) => {
     }
   }, [account]);
 
-  return isMobile ? (
-    <Mobile {...props} {...{ position, setPosition, history, setHistory }} />
-  ) : (
-    <Desktop {...props} {...{ position, setPosition, history, setHistory }} />
-  );
+  return r;
 };

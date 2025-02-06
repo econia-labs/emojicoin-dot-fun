@@ -126,7 +126,7 @@ const BottomNavigationItem = ({
   onClick?: () => void;
 }) => {
   return (
-    <div onClick={onClick} className="flex flex-col place-items-center">
+    <div onClick={onClick} className="flex flex-col place-items-center cursor-pointer">
       <Emoji emojis={emoji} />
       <div className="uppercase tracking-widest text-light-gray">{text}</div>
     </div>
@@ -145,26 +145,33 @@ export const BottomNavigation: React.FC<PropsWithPositionAndHistory> = (props) =
 
   return (
     <>
-      <div
-        className="fixed bottom-0 w-[100%] border-solid border-t-[1px] border-dark-gray h-[4em] bg-black/50"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr 1fr",
-          placeItems: "center",
-        }}
-      >
-        {tabs.map((t) => (
-          <BottomNavigationItem
-            onClick={() => setSelectedTab(t.name)}
-            emoji={t.emoji}
-            text={t.name}
-            key={`navigation-item-${t.name}`}
-          />
-        ))}
-      </div>
+      {!tab && (
+        <div
+          className="fixed bottom-0 w-[100%] border-solid border-t-[1px] border-dark-gray h-[4em] bg-black"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr 1fr",
+            placeItems: "center",
+          }}
+        >
+          {tabs.map((t) => (
+            <BottomNavigationItem
+              onClick={() => setSelectedTab(t.name)}
+              emoji={t.emoji}
+              text={t.name}
+              key={`navigation-item-${t.name}`}
+            />
+          ))}
+        </div>
+      )}
       {!!tab &&
         createPortal(
-          <div className="bg-black top-[0] left-[0] absolute h-[100vh] w-[100vw] z-[100]">
+          <div
+            className="bg-black top-[0] left-[0] absolute h-[100vh] w-[100vw] z-[100] grid"
+            style={{
+              gridTemplateRows: "auto 1fr",
+            }}
+          >
             <div className="flex flex-row">
               <div className="relative flex flex-row mt-[.5em] w-[100%]">
                 <div className="w-[1em] border-solid border-b-[2px] border-dark-gray"></div>
@@ -184,6 +191,11 @@ export const BottomNavigation: React.FC<PropsWithPositionAndHistory> = (props) =
                     }
                   >
                     <div>{tab.name}</div> <Emoji className="text-[.75em]" emojis={tab.emoji} />
+                    <CloseIcon
+                      className="h-[.5em] w-[.5em]"
+                      color="econiaBlue"
+                      onClick={() => setSelectedTab(undefined)}
+                    />
                   </div>
                   <div className="flex flex-row justify-between">
                     <div className="w-[2px] bg-dark-gray h-[2px]"></div>
@@ -194,11 +206,6 @@ export const BottomNavigation: React.FC<PropsWithPositionAndHistory> = (props) =
               </div>
             </div>
             {tab.element}
-            <CloseIcon
-              className="absolute right-[1em] top-[1em] h-[1em] w-[1em]"
-              color="econiaBlue"
-              onClick={() => setSelectedTab(undefined)}
-            />
           </div>,
           document.body
         )}

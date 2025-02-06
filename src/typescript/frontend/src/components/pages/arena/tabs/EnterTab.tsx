@@ -42,7 +42,7 @@ const grayLabel = `
 
 const BlurModal: React.FC<PropsWithChildren & { close: () => void }> = ({ children, close }) => (
   <div
-    className="absolute w-[100%] h-[100%] z-[10] grid place-items-center"
+    className="absolute w-[100%] h-[100%] z-[10] p-[1em] grid place-items-center"
     style={{
       background: "#00000050",
       backdropFilter: "blur(8px)",
@@ -136,7 +136,7 @@ const EnterTabAmountPhase: React.FC<{
   return (
     <div className="grid place-items-center h-[100%]">
       <div className="flex flex-col gap-[2em] items-center">
-        <div className="m-auto text-4xl xl:text-6xl">
+        <div className="m-auto text-6xl">
           <GlowingEmoji emojis={market.market.symbolEmojis.join("")} />
         </div>
         <div className="font-forma text-xl uppercase text-white text-center">Deposit amount</div>
@@ -353,7 +353,7 @@ const EnterTabSummary: React.FC<{
         <BlurModal close={() => setIsSwapping(false)}>
           <div className="flex flex-col justify-between items-center h-[100%] py-[3em]">
             <GlowingEmoji
-              className="text-4xl xl:text-6xl pt-[1em]"
+              className="text-6xl mt-[1em]"
               emojis={marketTernary(
                 position,
                 market1.market.symbolEmojis.join(""),
@@ -401,10 +401,7 @@ const EnterTabSummary: React.FC<{
         </BlurModal>
       )}
       <div className="flex flex-col justify-between items-center h-[100%] pt-[3em]">
-        <GlowingEmoji
-          className="text-4xl xl:text-6xl pt-[1em]"
-          emojis={market.market.symbolEmojis.join("")}
-        />
+        <GlowingEmoji className="text-6xl mt-[1em]" emojis={market.market.symbolEmojis.join("")} />
         <div className="flex flex-col justify-between items-center gap-[.5em]">
           <div className="text-light-gray uppercase text-2xl tracking-widest">
             {lockedTernary(position, "Locked in", "Deposited")}
@@ -468,7 +465,7 @@ const Container: React.FC<
             scale="lg"
             onClick={() => {
               if (phase === "amount") {
-                if (position) setPhase("summary");
+                if (position?.open) setPhase("summary");
                 else setPhase("pick");
               } else if (phase === "lock") setPhase("amount");
             }}
@@ -493,16 +490,11 @@ export const EnterTab: React.FC<{
   const [amount, setAmount] = useState<bigint>();
   const [error, setError] = useState<boolean>(false);
   const [cranked, setCranked] = useState<boolean>(false);
-  const { account } = useAptos();
 
   useEffect(() => {
     if (position !== undefined && position !== null && position.open) {
       setPhase("summary");
-    } else if (
-      position === null ||
-      (position === undefined && !account) ||
-      position?.open === false
-    ) {
+    } else if (position === null || position?.open === false) {
       setPhase("pick");
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
