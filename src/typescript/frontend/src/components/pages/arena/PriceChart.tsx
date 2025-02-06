@@ -7,6 +7,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { useRef } from "react";
 import useNodeDimensions from "@hooks/use-node-dimensions";
 import { q64ToBig } from "@sdk/utils";
+import { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 
 const PriceChart: React.FC<Props & { height: number; width: number }> = ({
   market0,
@@ -28,20 +29,14 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
   });
   const color0 = darkTheme.colors.econiaBlue;
   const color1 = darkTheme.colors.pink;
-  const dataset0 = points
-    .map((p) => {
-      return candlesticksMarket0.findLast(
-        (c) => Number(c.periodicMetadata.startTime / 1000n) <= p.getTime()
-      );
-    })
-    .map((c) => (c ? q64ToBig(c.periodicState.openPriceQ64).toNumber() : 0));
-  const dataset1 = points
-    .map((p) => {
-      return candlesticksMarket1.findLast(
-        (c) => Number(c.periodicMetadata.startTime / 1000n) <= p.getTime()
-      );
-    })
-    .map((c) => (c ? q64ToBig(c.periodicState.openPriceQ64).toNumber() : 0));
+  const toLatestCandlestick = (p: Date, candlesticks: PeriodicStateEventModel[]) => {
+    let c = candlesticks.findLast(
+      (c) => Number(c.periodicMetadata.startTime / 1000n) <= p.getTime()
+    );
+    return c ? q64ToBig(c.periodicState.openPriceQ64).toNumber() : 0;
+  };
+  const dataset0 = points.map((p) => toLatestCandlestick(p, candlesticksMarket0));
+  const dataset1 = points.map((p) => toLatestCandlestick(p, candlesticksMarket1));
   const data: ChartData<"line", (number | null)[], string> = {
     labels,
     datasets: [
@@ -66,6 +61,8 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
     xLabels: ["xAxis"],
   };
   const options = {
+    responsive: true,
+    maintainAspectRatio: false,
     interaction: {
       intersect: false,
       mode: "index",
@@ -82,7 +79,8 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
               maximumFractionDigits: 8,
             };
             const formatter = new Intl.NumberFormat("en-US", format);
-            return formatter.format(context.raw);
+            console.log(context)
+            return `${formatter.format(context.raw)} ${context.dataset.label}`;
           },
         },
       },
@@ -128,7 +126,7 @@ const PriceChart: React.FC<Props & { height: number; width: number }> = ({
   };
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  return <Line data={data} options={options as any} height={height} width={width} />;
+  return <Line data={data} options={options as any} />;
 };
 
 export const PriceChartDesktopBox: React.FC<Props> = (props) => {
@@ -145,7 +143,7 @@ export const PriceChartDesktopBox: React.FC<Props> = (props) => {
           suffix=" APT"
         />
       </div>
-      <div className="h-[100%]" ref={ref}>
+      <div className="relative h-[100%]" ref={ref}>
         <PriceChart {...{ height, width }} {...props} />
       </div>
     </Box>
