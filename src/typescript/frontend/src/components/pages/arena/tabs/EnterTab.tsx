@@ -500,7 +500,7 @@ export const EnterTab: React.FC<{
       setPhase("summary");
     } else if (
       position === null ||
-      (position === undefined && account === undefined) ||
+      (position === undefined && !account) ||
       position?.open === false
     ) {
       setPhase("pick");
