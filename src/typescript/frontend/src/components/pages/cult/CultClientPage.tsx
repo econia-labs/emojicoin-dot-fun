@@ -6,7 +6,7 @@ import { Alert, TitleBar } from "@react95/core";
 import { Clippy } from "./Clippy";
 import styled from "styled-components";
 import { useWindowSize } from "react-use";
-import { WinDesktopItem, WinIcons } from "./WinDesktopItem";
+import { CommunityCreationWinDesktopItem, WinDesktopItem, WinIcons } from "./WinDesktopItem";
 import { useState, useMemo } from "react";
 import { shuffle } from "lodash";
 
@@ -34,7 +34,7 @@ export default function CultClientPage() {
 
     const leftoverWidth = width - max_cols * CELL_SIZE;
 
-    //Generate every possible position on the grid:
+    // Generate every possible position on the grid:
     const allPositions = Array.from({ length: max_rows }, (_, y) =>
       Array.from({ length: max_cols }, (_, x) => ({
         x: x * CELL_SIZE + Math.random() * OFFSET_RANGE + leftoverWidth / 2,
@@ -108,42 +108,22 @@ export default function CultClientPage() {
           className={`flex flex-col mobile-lg:col-span-3 relative gap-12`}
           style={{ minHeight }}
         >
-          {communityProjects.map((proj, i) => {
-            const pos = randomPositions[i];
-            return (
-              <>
-                {/* useMatchBreakpoints seems to be unreliable. Need to duplicate this component and rely on tailwind for the breakpoints */}
-                <div className={"mobile-sm:block mobile-lg:hidden"}>
-                  <WinDesktopItem
-                    icon={WinIcons.TEXT_FILE}
-                    label={proj.name + ".txt"}
-                    onClick={() => setSelectedProject(proj.id)}
-                  />
-                </div>
-                <div
-                  key={proj.id}
-                  className={"mobile-sm:hidden mobile-lg:block absolute"}
-                  style={{
-                    left: pos.x,
-                    top: pos.y,
-                  }}
-                >
-                  <WinDesktopItem
-                    icon={WinIcons.TEXT_FILE}
-                    label={proj.name + ".txt"}
-                    onClick={() => setSelectedProject(proj.id)}
-                  />
-                </div>
-              </>
-            );
-          })}
+          {communityProjects.map((proj, i) => (
+            <CommunityCreationWinDesktopItem
+              key={proj.id}
+              icon={WinIcons.TEXT_FILE}
+              label={proj.name + ".txt"}
+              onClick={() => setSelectedProject(proj.id)}
+              pos={randomPositions[i]}
+            />
+          ))}
         </div>
       </div>
     </>
   );
 }
 
-//Since there are so much customization, having styled-components is not so bad. Tailwind is good for smaller changes
+// Since there are so much customization, having styled-components is not so bad. Tailwind is good for smaller changes.
 const StyledAlert = styled(Alert)`
   font-family: var(--font-pixelar);
   z-index: 2000;

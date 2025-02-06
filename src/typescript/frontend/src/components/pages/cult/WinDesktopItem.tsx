@@ -32,3 +32,26 @@ export const WinDesktopItem: FC<Props> = ({ icon, label, onClick }) => {
     </div>
   );
 };
+
+export const CommunityCreationWinDesktopItem: FC<Props & { pos: { x: number; y: number } }> = ({
+  pos,
+  ...rest
+}) => {
+  return (
+    <>
+      {/* useMatchBreakpoints seems to be unreliable. Need to duplicate this component and rely on tailwind for the breakpoints */}
+      <div className={"mobile-sm:block mobile-lg:hidden"}>
+        <WinDesktopItem {...rest} />
+      </div>
+      <div
+        className={"mobile-sm:hidden mobile-lg:block absolute"}
+        style={{
+          left: pos.x,
+          top: pos.y,
+        }}
+      >
+        <WinDesktopItem {...rest} />
+      </div>
+    </>
+  );
+};
