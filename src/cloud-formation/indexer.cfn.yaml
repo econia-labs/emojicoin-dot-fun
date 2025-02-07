@@ -181,11 +181,6 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
-  DeployStack:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
   DeployWaf:
     AllowedValues:
     - 'false'
