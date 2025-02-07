@@ -76,7 +76,7 @@ export type ArenaJsonTypes = {
   };
 
   /**
-   * #[event]
+   * Resource/struct
    * ___::emojicoin_arena::Registry
    */
   ArenaRegistry: {
