@@ -236,6 +236,8 @@ export type AnyArenaEvent =
   | Types["ArenaSwapEvent"]
   | Types["ArenaVaultBalanceUpdateEvent"];
 
+/* eslint-disable import/no-unused-modules */
+
 export const isArenaEnterEvent = (e: AnyArenaEvent): e is Types["ArenaEnterEvent"] =>
   e.eventName === "ArenaEnter";
 
@@ -267,3 +269,5 @@ export const isArenaSwapModel = (e: BrokerModelTypes): e is ArenaSwapModel =>
 export const isArenaVaultBalanceUpdateModel = (
   e: BrokerModelTypes
 ): e is ArenaVaultBalanceUpdateModel => e.eventName === "ArenaVaultBalanceUpdate";
+
+/* eslint-enable import/no-unused-modules */

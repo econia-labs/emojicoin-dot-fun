@@ -1,6 +1,5 @@
 import {
   type BrokerModelTypes,
-  type EventModelWithMarket,
   isChatEventModel,
   isEventModelWithMarket,
   isGlobalStateEventModel,
@@ -71,7 +70,9 @@ export const createEventStore = () => {
           state.globalStateEvents.push(...extractFilter(events, isGlobalStateEventModel));
           state.marketRegistrations.push(...extractFilter(events, isMarketRegistrationEventModel));
           DEBUG_ASSERT(() => !events.some(isGlobalStateEventModel));
-          const map = toMappedMarketEvents(events as Array<EventModelWithMarket>);
+
+          const eventsWithMarket = events.filter(isEventModelWithMarket);
+          const map = toMappedMarketEvents(eventsWithMarket);
           Array.from(map.entries()).forEach(([marketSymbol, marketEvents]) => {
             ensureMarketInStore(state, marketEvents[0].market);
             const market = state.markets.get(marketSymbol)!;

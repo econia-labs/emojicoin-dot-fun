@@ -141,10 +141,13 @@ describe("tests to ensure that arena websocket events work as expected", () => {
     // Wait for the websocket client to receive it.
     await customWaitFor(() => !!events.find(isArenaVaultBalanceUpdateModel));
 
+    const idx = events.find(isArenaVaultBalanceUpdateModel);
+    expect(idx).toEqual(0);
+
     compareParsedData({
-      messageEvent: messageEvents.pop(),
-      brokerMessage: brokerMessages.pop(),
-      event: events.pop(),
+      messageEvent: messageEvents.at(0),
+      brokerMessage: brokerMessages.at(0),
+      event: events.at(0),
       eventName: "ArenaVaultBalanceUpdate",
       response: res,
     });

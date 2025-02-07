@@ -853,10 +853,7 @@ export class Registry extends ViewFunctionPayloadBuilder<[JsonTypes["ArenaRegist
     this.args = {};
   }
 
-  static async view(args: {
-    aptos: Aptos | AptosConfig;
-    options?: LedgerVersionArg;
-  }) {
+  static async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }) {
     const [res] = await new Registry().view(args);
     return res;
   }

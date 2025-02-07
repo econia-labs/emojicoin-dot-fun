@@ -1,8 +1,4 @@
-import {
-  ARENA_MODULE_ADDRESS,
-  EmojicoinArena,
-  getAptosClient,
-} from "../../src";
+import { ARENA_MODULE_ADDRESS, EmojicoinArena, getAptosClient } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { fetchArenaMeleeView } from "../../src/markets/arena-utils";
 

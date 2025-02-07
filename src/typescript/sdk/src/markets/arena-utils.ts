@@ -103,4 +103,3 @@ export const fetchMeleeEmojiData = async (
 };
 
 export type MeleeEmojiData = Awaited<ReturnType<typeof fetchMeleeEmojiData>>;
-
