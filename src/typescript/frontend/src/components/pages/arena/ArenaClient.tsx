@@ -15,7 +15,7 @@ export const ArenaClient = ({
     <div className="flex flex-col gap-[1em] text-ec-blue">
       <div>ID: {melee.melee.meleeID.toString()}</div>
       <div>
-        {market0.market.symbolEmojis.join("")} vs {market1.market.symbolEmojis.join("")}
+        {market0.market.symbolData.symbol} vs {market1.market.symbolData.symbol}
       </div>
     </div>
   );

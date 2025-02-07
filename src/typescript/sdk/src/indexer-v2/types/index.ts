@@ -998,8 +998,17 @@ export const isGlobalStateEventModel = (
 ): data is DatabaseModels[TableName.GlobalStateEvents] =>
   eventTypeMatches(data.guid, "GlobalState");
 
+/**
+ * Non-arena event models with markets.
+ */
 export const isEventModelWithMarket = (data: BrokerModelTypes): data is EventModelWithMarket =>
-  !isGlobalStateEventModel(data);
+  isSwapEventModel(data) ||
+  isChatEventModel(data) ||
+  isMarketRegistrationEventModel(data) ||
+  isPeriodicStateEventModel(data) ||
+  isMarketLatestStateEventModel(data) ||
+  isMarketStateModel(data) ||
+  isLiquidityEventModel(data);
 
 export * from "./common";
 export * from "./json-types";
