@@ -1,7 +1,7 @@
 import { type SymbolEmoji } from "../emoji_data";
 import { type AccountAddressString } from "../emojicoin_dot_fun";
 import {
-  type BrokerModelTypes,
+  type BrokerEventModels,
   type ArenaEnterModel,
   type ArenaExitModel,
   type ArenaMeleeModel,
@@ -254,20 +254,20 @@ export const isArenaVaultBalanceUpdateEvent = (
   e: AnyArenaEvent
 ): e is Types["ArenaVaultBalanceUpdateEvent"] => e.eventName === "ArenaVaultBalanceUpdate";
 
-export const isArenaEnterModel = (e: BrokerModelTypes): e is ArenaEnterModel =>
+export const isArenaEnterModel = (e: BrokerEventModels): e is ArenaEnterModel =>
   e.eventName === "ArenaEnter";
 
-export const isArenaExitModel = (e: BrokerModelTypes): e is ArenaExitModel =>
+export const isArenaExitModel = (e: BrokerEventModels): e is ArenaExitModel =>
   e.eventName === "ArenaExit";
 
-export const isArenaMeleeModel = (e: BrokerModelTypes): e is ArenaMeleeModel =>
+export const isArenaMeleeModel = (e: BrokerEventModels): e is ArenaMeleeModel =>
   e.eventName === "ArenaMelee";
 
-export const isArenaSwapModel = (e: BrokerModelTypes): e is ArenaSwapModel =>
+export const isArenaSwapModel = (e: BrokerEventModels): e is ArenaSwapModel =>
   e.eventName === "ArenaSwap";
 
 export const isArenaVaultBalanceUpdateModel = (
-  e: BrokerModelTypes
+  e: BrokerEventModels
 ): e is ArenaVaultBalanceUpdateModel => e.eventName === "ArenaVaultBalanceUpdate";
 
 /* eslint-enable import/no-unused-modules */

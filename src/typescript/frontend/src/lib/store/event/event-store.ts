@@ -1,5 +1,5 @@
 import {
-  type BrokerModelTypes,
+  type BrokerEventModels,
   isChatEventModel,
   isEventModelWithMarket,
   isGlobalStateEventModel,
@@ -57,7 +57,7 @@ export const createEventStore = () => {
           });
         });
       },
-      loadEventsFromServer: (eventsIn: BrokerModelTypes[]) => {
+      loadEventsFromServer: (eventsIn: BrokerEventModels[]) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
         if (!events.length) return;
@@ -85,7 +85,7 @@ export const createEventStore = () => {
           });
         });
       },
-      pushEventsFromClient: (eventsIn: BrokerModelTypes[], pushToLocalStorage = false) => {
+      pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
         if (!events.length) return;

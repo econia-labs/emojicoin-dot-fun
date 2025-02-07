@@ -1,5 +1,5 @@
 import { parseJSONWithBigInts } from "../indexer-v2/json-bigint";
-import { type BrokerModelTypes } from "../indexer-v2/types";
+import { type BrokerEventModels } from "../indexer-v2/types";
 import { type BrokerJsonTypes } from "../indexer-v2/types/json-types";
 import { type AnyNumberString } from "../types";
 import { ensureArray } from "../utils/misc";
@@ -31,7 +31,7 @@ export const convertWebSocketMessageToBrokerEvent = <T extends string>(e: Messag
 };
 
 type WebSocketClientEventListeners = {
-  onMessage: (e: BrokerModelTypes) => void;
+  onMessage: (e: BrokerEventModels) => void;
   onConnect?: (e: Event) => void;
   onClose?: (e: CloseEvent) => void;
   onError?: (e: Event) => void;

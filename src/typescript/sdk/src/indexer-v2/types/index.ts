@@ -937,7 +937,7 @@ export type AnyEventTable =
   | TableName.LiquidityEvents
   | TableName.GlobalStateEvents;
 
-export type BrokerModelTypes =
+export type BrokerEventModels =
   | DatabaseModels[TableName.SwapEvents]
   | DatabaseModels[TableName.ChatEvents]
   | DatabaseModels[TableName.MarketRegistrationEvents]
@@ -970,38 +970,38 @@ const eventTypeMatches = (
 ) => extractEventType(guid) === eventType;
 
 export const isSwapEventModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.SwapEvents] => eventTypeMatches(data.guid, "Swap");
 export const isChatEventModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.ChatEvents] => eventTypeMatches(data.guid, "Chat");
 export const isMarketRegistrationEventModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.MarketRegistrationEvents] =>
   eventTypeMatches(data.guid, "MarketRegistration");
 export const isPeriodicStateEventModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.PeriodicStateEvents] =>
   eventTypeMatches(data.guid, "PeriodicState");
 export const isMarketLatestStateEventModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.MarketLatestStateEvent] => eventTypeMatches(data.guid, "State");
 export const isMarketStateModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.MarketState] =>
   isMarketLatestStateEventModel(data) && "dailyVolume" in data;
 export const isLiquidityEventModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.LiquidityEvents] => eventTypeMatches(data.guid, "Liquidity");
 export const isGlobalStateEventModel = (
-  data: BrokerModelTypes
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.GlobalStateEvents] =>
   eventTypeMatches(data.guid, "GlobalState");
 
 /**
  * Non-arena event models with markets.
  */
-export const isEventModelWithMarket = (data: BrokerModelTypes): data is EventModelWithMarket =>
+export const isEventModelWithMarket = (data: BrokerEventModels): data is EventModelWithMarket =>
   isSwapEventModel(data) ||
   isChatEventModel(data) ||
   isMarketRegistrationEventModel(data) ||

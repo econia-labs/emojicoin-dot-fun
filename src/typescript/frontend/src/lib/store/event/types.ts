@@ -3,7 +3,7 @@ import { type SymbolEmoji } from "@sdk/emoji_data";
 import {
   type MarketMetadataModel,
   type DatabaseModels,
-  type BrokerModelTypes,
+  type BrokerEventModels,
 } from "@sdk/indexer-v2/types";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type LatestBar } from "./candlestick-bars";
@@ -67,8 +67,8 @@ export type EventActions = {
   getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
   loadMarketStateFromServer: (states: DatabaseModels["market_state"][]) => void;
-  loadEventsFromServer: (events: BrokerModelTypes[]) => void;
-  pushEventsFromClient: (event: BrokerModelTypes[], pushToLocalStorage?: boolean) => void;
+  loadEventsFromServer: (events: BrokerEventModels[]) => void;
+  pushEventsFromClient: (event: BrokerEventModels[], pushToLocalStorage?: boolean) => void;
   setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => void;
   subscribeToPeriod: ({ marketEmojis, period, cb }: PeriodSubscription) => void;
   unsubscribeFromPeriod: ({ marketEmojis, period }: Omit<PeriodSubscription, "cb">) => void;

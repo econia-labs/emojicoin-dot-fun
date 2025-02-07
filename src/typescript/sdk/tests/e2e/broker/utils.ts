@@ -8,7 +8,7 @@ import {
 } from "../../../src/broker-v2/types";
 import { type BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
-import { type BrokerModelTypes } from "../../../src/indexer-v2/types";
+import { type BrokerEventModels } from "../../../src/indexer-v2/types";
 import checkRows from "../helpers/equality-checks";
 import { Account, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
@@ -28,7 +28,7 @@ export const connectNewClient = async () => {
   const client = new WebSocket(new URL(BROKER_URL));
   const messageEvents: MessageEvent<string>[] = [];
   const brokerMessages: BrokerMessage[] = [];
-  const events: BrokerModelTypes[] = [];
+  const events: BrokerEventModels[] = [];
 
   /**
    * Copy the functionality in the parser function so we have more granular access to the data.
@@ -61,7 +61,7 @@ export const connectNewClient = async () => {
   };
 };
 
-export const compareParsedData = <T extends BrokerModelTypes>({
+export const compareParsedData = <T extends BrokerEventModels>({
   messageEvent,
   brokerMessage,
   event,

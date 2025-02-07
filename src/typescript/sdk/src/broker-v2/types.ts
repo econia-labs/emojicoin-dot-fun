@@ -1,4 +1,4 @@
-import { type BrokerModelTypes, DatabaseTypeConverter } from "../indexer-v2/types";
+import { type BrokerEventModels, DatabaseTypeConverter } from "../indexer-v2/types";
 import {
   type BrokerJsonTypes,
   type DatabaseJsonType,
@@ -49,7 +49,7 @@ type ArenaMeleeType = DatabaseJsonType[typeof ArenaMelee];
 type ArenaSwapType = DatabaseJsonType[typeof ArenaSwap];
 type ArenaVaultBalanceUpdateType = DatabaseJsonType[typeof ArenaVaultBalanceUpdate];
 
-export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => BrokerModelTypes> = {
+export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => BrokerEventModels> = {
   Chat: (d) => DatabaseTypeConverter[Chat](d as ChatType),
   Swap: (d) => DatabaseTypeConverter[Swap](d as SwapType),
   Liquidity: (d) => DatabaseTypeConverter[Liquidity](d as LiquidityType),
