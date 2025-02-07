@@ -1,7 +1,7 @@
 ---
 parameters:
   BrokerCpu: 1024
-  BrokerImageVersion: '5.0.0'
+  BrokerImageVersion: '4.0.2'
   BrokerMemory: 2048
   DbMaxCapacity: 8
   DeployAlb: 'true'
@@ -22,7 +22,7 @@ parameters:
   EnableWafRulesWebSocket: 'false'
   Environment: 'production'
   Network: 'mainnet'
-  ProcessorImageVersion: '5.0.0'
+  ProcessorImageVersion: '4.0.2'
   VpcStackName: 'emoji-vpc'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
