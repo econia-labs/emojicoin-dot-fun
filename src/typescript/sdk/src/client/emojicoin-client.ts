@@ -632,7 +632,6 @@ export class EmojicoinClient {
         model: expect(res.models.arenaEnterEvents.at(0), Expect.ArenaEnter.Model),
       },
     };
-    // const { meleeID, version, eventIndex } =
   }
 
   private async arenaExit(
