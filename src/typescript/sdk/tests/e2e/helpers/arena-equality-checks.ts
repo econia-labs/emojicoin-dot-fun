@@ -10,6 +10,8 @@ import { getEvents } from "../../../src";
 import { checkTuples, compareTransactionMetadata } from "./equality-checks";
 import { type JsonValue } from "../../../src/types/json-types";
 
+// Map keys and values to a readable string so that any test failures in jest
+// are clear in what value is actually failing the equality checks.
 const expandAsTuple = <T>(label: string, k: keyof T, row: T, event: T) =>
   [`${label}.${String(k)}`, row[k], event[k]] as [
     string,
