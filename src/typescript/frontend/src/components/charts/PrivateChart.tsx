@@ -190,13 +190,11 @@ export const Chart = (props: ChartContainerProps) => {
             // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
             const latestBars = marketToLatestBars(marketResource);
             const marketEmojiData = toMarketEmojiData(marketResource.metadata.emojiBytes);
-            const symbolEmojis = marketEmojiData.emojis.map((e) => e.emoji);
             const marketMetadata: MarketMetadataModel = {
               marketID: marketResource.metadata.marketID,
               time: 0n,
               marketNonce: marketResource.sequenceInfo.nonce,
               trigger: Trigger.PackagePublication, // Make up some bunk trigger, since it should be clear it's made up.
-              symbolEmojis,
               marketAddress: marketResource.metadata.marketAddress,
               ...marketEmojiData,
             };
