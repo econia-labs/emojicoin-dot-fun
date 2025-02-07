@@ -1,27 +1,3 @@
----
-parameters:
-  BrokerImageVersion: '5.0.0'
-  DeployAlb: 'true'
-  DeployAlbDnsRecord: 'true'
-  DeployBastionHost: 'true'
-  DeployBroker: 'true'
-  DeployContainers: 'true'
-  DeployDb: 'true'
-  DeployNlb: 'true'
-  DeployNlbVpcLink: 'true'
-  DeployPostgrest: 'true'
-  DeployProcessor: 'true'
-  DeployRestApi: 'true'
-  DeployRestApiDnsRecord: 'true'
-  DeployWaf: 'false'
-  EnableWafRulesGeneral: 'false'
-  EnableWafRulesRestApi: 'false'
-  EnableWafRulesWebSocket: 'false'
-  Environment: 'alpha'
-  Network: 'testnet'
-  ProcessorHealthCheckStartPeriod: 300
-  ProcessorImageVersion: '5.0.0'
-  VpcStackName: 'emoji-vpc'
-tags: null
-template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
-...
+template-file-path: src/cloud-formation/indexer.cfn.yaml
+parameters: {}
+tags: {}
