@@ -10,6 +10,8 @@ import {
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   REWARDS_MODULE_NAME,
   REWARDS_MODULE_ADDRESS,
+  ARENA_MODULE_ADDRESS,
+  ARENA_MODULE_NAME,
 } from "../const";
 import { type TypeTagInput } from "../emojicoin_dot_fun";
 
@@ -46,6 +48,14 @@ export const toEmojicoinRewardsStructTag = (structName: string): TypeTagStruct =
   return res;
 };
 
+export const toArenaStructTag = (structName: string): TypeTagStruct => {
+  const res = toTypeTag(ARENA_MODULE_ADDRESS, ARENA_MODULE_NAME, structName);
+  if (!res.isStruct()) {
+    throw new Error(`Unexpected non-struct type tag: ${res}`);
+  }
+  return res;
+};
+
 export type EmojicoinStructName =
   | "SwapEvent"
   | "ChatEvent"
@@ -59,9 +69,18 @@ export type EmojicoinStructName =
   | "RegistrantGracePeriodFlag"
   | "EmojicoinDotFunRewards";
 
+export type ArenaStructName =
+  | "ArenaMeleeEvent"
+  | "ArenaEnterEvent"
+  | "ArenaExitEvent"
+  | "ArenaSwapEvent"
+  | "ArenaVaultBalanceUpdateEvent";
+
 export type StructTagString = `0x${string}::${string}::${string}`;
 
-export const TYPE_TAGS: { [K in EmojicoinStructName]: TypeTag } = {
+type AnyEmojicoinDotFunStructName = EmojicoinStructName | ArenaStructName;
+
+export const TYPE_TAGS: { [K in AnyEmojicoinDotFunStructName]: TypeTag } = {
   SwapEvent: toEmojicoinStructTag("Swap"),
   ChatEvent: toEmojicoinStructTag("Chat"),
   MarketRegistrationEvent: toEmojicoinStructTag("MarketRegistration"),
@@ -73,9 +92,14 @@ export const TYPE_TAGS: { [K in EmojicoinStructName]: TypeTag } = {
   Registry: toEmojicoinStructTag("Registry"),
   RegistrantGracePeriodFlag: toEmojicoinStructTag("RegistrantGracePeriodFlag"),
   EmojicoinDotFunRewards: toEmojicoinRewardsStructTag("EmojicoinDotFunRewards"),
+  ArenaMeleeEvent: toArenaStructTag("Melee"),
+  ArenaEnterEvent: toArenaStructTag("Enter"),
+  ArenaExitEvent: toArenaStructTag("Exit"),
+  ArenaSwapEvent: toArenaStructTag("Swap"),
+  ArenaVaultBalanceUpdateEvent: toArenaStructTag("VaultBalanceUpdate"),
 };
 
-export const STRUCT_STRINGS: { [K in EmojicoinStructName]: StructTagString } = {
+export const STRUCT_STRINGS: { [K in AnyEmojicoinDotFunStructName]: StructTagString } = {
   SwapEvent: TYPE_TAGS.SwapEvent.toString() as StructTagString,
   ChatEvent: TYPE_TAGS.ChatEvent.toString() as StructTagString,
   MarketRegistrationEvent: TYPE_TAGS.MarketRegistrationEvent.toString() as StructTagString,
@@ -87,13 +111,21 @@ export const STRUCT_STRINGS: { [K in EmojicoinStructName]: StructTagString } = {
   Registry: TYPE_TAGS.Registry.toString() as StructTagString,
   RegistrantGracePeriodFlag: TYPE_TAGS.RegistrantGracePeriodFlag.toString() as StructTagString,
   EmojicoinDotFunRewards: TYPE_TAGS.EmojicoinDotFunRewards.toString() as StructTagString,
+  ArenaMeleeEvent: TYPE_TAGS.ArenaMeleeEvent.toString() as StructTagString,
+  ArenaEnterEvent: TYPE_TAGS.ArenaEnterEvent.toString() as StructTagString,
+  ArenaExitEvent: TYPE_TAGS.ArenaExitEvent.toString() as StructTagString,
+  ArenaSwapEvent: TYPE_TAGS.ArenaSwapEvent.toString() as StructTagString,
+  ArenaVaultBalanceUpdateEvent:
+    TYPE_TAGS.ArenaVaultBalanceUpdateEvent.toString() as StructTagString,
 };
 
 const structStringToName = new Map(
   Array.from(new Map(Object.entries(STRUCT_STRINGS)).entries()).map(([key, value]) => {
-    return [value, key as EmojicoinStructName] as const;
+    return [value, key as AnyEmojicoinDotFunStructName] as const;
   })
 );
 
-export const typeTagInputToStructName = (typeTag: TypeTagInput): EmojicoinStructName | undefined =>
+export const typeTagInputToStructName = (
+  typeTag: TypeTagInput
+): AnyEmojicoinDotFunStructName | undefined =>
   structStringToName.get(typeTag.toString() as StructTagString);

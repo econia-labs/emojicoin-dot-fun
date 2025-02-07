@@ -1,0 +1,135 @@
+---
+env:
+  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+  MAX_LINES_ADDED: 300
+  MAX_LINES_REMOVED: 500
+  OVERRIDE_N_APPROVALS: 2
+jobs:
+  check-n-lines-changed:
+    env:
+      # If run from a merge group, the action should not run. However there is
+      # no way to exit early in GitHub actions per
+      # https://github.com/actions/runner/issues/662, so using a conditional
+      # check for each step serves as a workaround.
+      IS_MERGE_GROUP: '${{ github.event_name == ''merge_group'' }}'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v4'
+      with:
+        fetch-depth: 0
+    - id: 'get-pr-number'
+      if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
+      name: 'Get PR number'
+      # yamllint disable rule:indentation
+      run: |
+        PR_NUMBER=$(
+          if [ "${{ github.event_name }}" = "pull_request_review" ]; then
+            echo "${{ github.event.pull_request.number }}"
+          else
+            echo "${{ github.event.pull_request.number }}"
+          fi
+        )
+        if [ -z "$PR_NUMBER" ]; then
+          echo "No PR number found. Exiting."
+          exit 1
+        fi
+        echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+    # yamllint enable rule:indentation
+    - id: 'get-base-branch'
+      if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
+      name: 'Get PR base branch'
+      run: |
+        PR_NUMBER="${{ steps.get-pr-number.outputs.number }}"
+        BASE=$(gh pr view "$PR_NUMBER" --json baseRefName -q '.baseRefName')
+        echo "Base branch: $BASE"
+        echo "base_branch=$BASE" >> $GITHUB_OUTPUT
+    - id: 'get-insertions'
+      if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
+      name: 'Get number of lines added'
+      # yamllint disable rule:indentation
+      run: |
+        BASE_BRANCH="${{ steps.get-base-branch.outputs.base_branch }}"
+        git fetch origin $BASE_BRANCH
+        INSERTIONS=$(
+          git diff --stat origin/$BASE_BRANCH | \
+          tail -n1 | grep -oP '\d+(?= insertion)' || echo "0"
+        )
+        echo "Number of lines added: $INSERTIONS"
+        echo "insertions=$INSERTIONS" >> $GITHUB_OUTPUT
+    # yamllint enable rule:indentation
+    - id: 'get-deletions'
+      if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
+      name: 'Get number of lines removed'
+      # yamllint disable rule:indentation
+      run: |
+        BASE_BRANCH="${{ steps.get-base-branch.outputs.base_branch }}"
+        git fetch origin $BASE_BRANCH
+        DELETIONS=$(
+          git diff --stat origin/$BASE_BRANCH | \
+          tail -n1 | grep -oP '\d+(?= deletion)' || echo "0"
+        )
+        echo "Number of lines removed: $DELETIONS"
+        echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
+    # yamllint enable rule:indentation
+    - id: 'get-approvals'
+      if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
+      name: 'Get number of active approving reviews'
+      # Sum up the number of approvals across all reviewers, only counting a
+      # review as approving if it is the last review by that reviewer.
+      # yamllint disable rule:indentation
+      run: |
+        APPROVALS=$(
+          gh pr view ${{ steps.get-pr-number.outputs.number }} \
+            --json reviews | \
+            jq '
+              .reviews
+              | group_by(.user.login)
+              | map(last)
+              | map(select(.state == "APPROVED"))
+              | length
+            '
+        )
+        echo "Number of approvals: $APPROVALS"
+        echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
+    # yamllint enable rule:indentation
+    - if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
+      name: 'Check size versus approvals'
+      # yamllint disable rule:indentation
+      run: |
+        INSERTIONS="${{ steps.get-insertions.outputs.insertions }}"
+        DELETIONS="${{ steps.get-deletions.outputs.deletions }}"
+        echo "$INSERTIONS lines added (max ${{ env.MAX_LINES_ADDED }})"
+        echo "$DELETIONS lines removed (max ${{ env.MAX_LINES_REMOVED }})"
+        NEEDS_OVERRIDE="false"
+        if [ "$INSERTIONS" -gt "${{ env.MAX_LINES_ADDED }}" ]; then
+          NEEDS_OVERRIDE="true"
+        fi
+        if [ "$DELETIONS" -gt "${{ env.MAX_LINES_REMOVED }}" ]; then
+          NEEDS_OVERRIDE="true"
+        fi
+        if [ "$NEEDS_OVERRIDE" = "true" ]; then
+          APPROVALS="${{ steps.get-approvals.outputs.approvals }}"
+          OVERRIDE_N_APPROVALS="${{ env.OVERRIDE_N_APPROVALS }}"
+          if [ "$APPROVALS" -ge "$OVERRIDE_N_APPROVALS" ]; then
+            echo "✅ Changes exceeded limits but have required approvals"
+          else
+            echo "❌ Too many changes. Need $OVERRIDE_N_APPROVALS approvals"
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "If the PR author hasn't updated this PR since enough"
+              echo "approvals were left, you must manually trigger a re-run"
+            fi
+            exit 1
+          fi
+        else
+          echo "✅ Changes within limits"
+        fi
+# yamllint enable rule:indentation
+name: 'Check number of lines changed'
+'on':
+  merge_group: null
+  pull_request:
+    branches-ignore:
+    - 'production'
+    - 'fallback'
+  pull_request_review: null
+...

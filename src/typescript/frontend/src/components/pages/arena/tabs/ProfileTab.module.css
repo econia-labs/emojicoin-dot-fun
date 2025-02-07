@@ -1,0 +1,38 @@
+.history-table {
+  width: 100%;
+}
+
+.history-table tr {
+  height: 3em;
+  border-bottom: 1px solid var(--dark-gray);
+}
+
+.history-table td {
+  vertical-align: middle;
+  padding: 0.2em;
+}
+
+.history-table td.text {
+  text-align: left;
+  vertical-align: middle;
+  text-transform: uppercase;
+  font-size: 1.3em;
+}
+.history-table td.text {
+  color: var(--light-gray);
+}
+.history-table td:first-child {
+  padding-left: 1em;
+}
+.history-table td:last-child {
+  padding-right: 1em;
+}
+.history-table tr:hover {
+  background: #33343d50;
+}
+.history-table tr.selected-row {
+  background: #33343d50;
+}
+.history-table tr.selected-row:hover {
+  background: #33343da0;
+}

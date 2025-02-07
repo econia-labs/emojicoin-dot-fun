@@ -119,7 +119,13 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "losses",
   "volume",
   "rewards_remaining",
-  "apt_locked",
+  "emojicoin_0_locked",
+  "emojicoin_1_locked",
+  "apt_proceeds",
+  "open_price",
+  "close_price",
+  "high_price",
+  "low_price",
 ]);
 
 /**
@@ -133,6 +139,7 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
   "block_number",
   "event_index",
   "last_success_version",
+  "last_transaction_version",
   "transaction_version",
 ]);
 

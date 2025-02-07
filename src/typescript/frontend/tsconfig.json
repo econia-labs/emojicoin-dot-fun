@@ -25,6 +25,9 @@
       "@/broker/*": [
         "../../sdk/src/broker-v2/*"
       ],
+      "@/components/*": [
+        "components/*"
+      ],
       "@/contract-apis": [
         "../../sdk/src/emojicoin_dot_fun/contract-apis"
       ],
