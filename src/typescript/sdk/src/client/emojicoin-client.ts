@@ -595,8 +595,8 @@ export class EmojicoinClient {
     return {
       ...res,
       arena: {
-        event: expect(res.models.arenaSwapEvents.at(0), Expect.ArenaSwap.Event),
-        model: expect(res.events.arenaSwapEvents.at(0), Expect.ArenaSwap.Model),
+        event: expect(res.events.arenaSwapEvents.at(0), Expect.ArenaSwap.Event),
+        model: expect(res.models.arenaSwapEvents.at(0), Expect.ArenaSwap.Model),
       },
     };
   }
@@ -628,8 +628,8 @@ export class EmojicoinClient {
     return {
       ...res,
       arena: {
-        event: expect(res.models.arenaEnterEvents.at(0), Expect.ArenaEnter.Event),
-        model: expect(res.events.arenaEnterEvents.at(0), Expect.ArenaEnter.Model),
+        event: expect(res.events.arenaEnterEvents.at(0), Expect.ArenaEnter.Event),
+        model: expect(res.models.arenaEnterEvents.at(0), Expect.ArenaEnter.Model),
       },
     };
     // const { meleeID, version, eventIndex } =
@@ -656,8 +656,8 @@ export class EmojicoinClient {
     return {
       ...res,
       arena: {
-        event: expect(res.models.arenaExitEvents.at(0), Expect.ArenaExit.Event),
-        model: expect(res.events.arenaExitEvents.at(0), Expect.ArenaExit.Model),
+        event: expect(res.events.arenaExitEvents.at(0), Expect.ArenaExit.Event),
+        model: expect(res.models.arenaExitEvents.at(0), Expect.ArenaExit.Model),
       },
     };
   }

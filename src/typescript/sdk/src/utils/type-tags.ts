@@ -92,11 +92,11 @@ export const TYPE_TAGS: { [K in AnyEmojicoinDotFunStructName]: TypeTag } = {
   Registry: toEmojicoinStructTag("Registry"),
   RegistrantGracePeriodFlag: toEmojicoinStructTag("RegistrantGracePeriodFlag"),
   EmojicoinDotFunRewards: toEmojicoinRewardsStructTag("EmojicoinDotFunRewards"),
-  ArenaMeleeEvent: toArenaStructTag("ArenaMeleeEvent"),
-  ArenaEnterEvent: toArenaStructTag("ArenaEnterEvent"),
-  ArenaExitEvent: toArenaStructTag("ArenaExitEvent"),
-  ArenaSwapEvent: toArenaStructTag("ArenaSwapEvent"),
-  ArenaVaultBalanceUpdateEvent: toArenaStructTag("ArenaVaultBalanceUpdateEvent"),
+  ArenaMeleeEvent: toArenaStructTag("Melee"),
+  ArenaEnterEvent: toArenaStructTag("Enter"),
+  ArenaExitEvent: toArenaStructTag("Exit"),
+  ArenaSwapEvent: toArenaStructTag("Swap"),
+  ArenaVaultBalanceUpdateEvent: toArenaStructTag("VaultBalanceUpdate"),
 };
 
 export const STRUCT_STRINGS: { [K in AnyEmojicoinDotFunStructName]: StructTagString } = {

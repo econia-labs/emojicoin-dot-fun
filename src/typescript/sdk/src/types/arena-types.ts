@@ -216,10 +216,11 @@ export const toArenaVaultBalanceUpdateEvent = (
 });
 
 export const toArenaRegistry = (data: JsonTypes["ArenaRegistry"]) => ({
+  numMelees: BigInt(data.n_melees),
   /**
    * Note that the number of melees is also the exact meleeID of the current melee.
    */
-  numMelees: BigInt(data.n_melees),
+  currentMeleeID: BigInt(data.n_melees),
   vaultAddress: toAccountAddressString(data.vault_address),
   vaultBalance: BigInt(data.vault_address),
   nextMeleeDuration: BigInt(data.next_melee_duration),

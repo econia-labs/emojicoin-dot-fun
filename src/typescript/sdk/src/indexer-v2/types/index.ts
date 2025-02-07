@@ -6,6 +6,7 @@ import {
 } from "../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
+  type Flatten,
   toCumulativeStats,
   toInstantaneousStats,
   toLastSwap,
@@ -69,14 +70,15 @@ const deserializeSymbolBytes = (symbolBytes: HexString | Array<AnyNumberString>)
     ? new Uint8Array(symbolBytes.map(Number))
     : hexToBytes(symbolBytes.replace(/\\x/g, ""));
 
-export type MarketMetadataModel = {
-  marketID: bigint;
-  time: bigint;
-  marketNonce: bigint;
-  trigger: Trigger;
-  symbolEmojis: Array<SymbolEmoji>;
-  marketAddress: AccountAddressString;
-} & MarketEmojiData;
+export type MarketMetadataModel = Flatten<
+  {
+    marketID: bigint;
+    time: bigint;
+    marketNonce: bigint;
+    trigger: Trigger;
+    marketAddress: AccountAddressString;
+  } & MarketEmojiData
+>;
 
 // To make things simpler, convert bumpTime and emitTime to `time`, and add the symbol data
 // to the metadata.
@@ -92,7 +94,6 @@ const toMarketMetadataModel = (
     time: postgresTimestampToMicroseconds("bump_time" in data ? data.bump_time : data.emit_time),
     marketNonce: BigInt(data.market_nonce),
     trigger: toTrigger(data.trigger),
-    symbolEmojis: data.symbol_emojis,
     marketAddress: toAccountAddressString(data.market_address),
     ...toMarketEmojiData(symbolBytes),
   };
