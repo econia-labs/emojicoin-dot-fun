@@ -1,6 +1,8 @@
-if ! command -v yq > /dev/null 2>&1; then
-    echo "Error: yq is not installed"
-    exit 1
+#!/bin/sh
+# cspell:word strenv
+if ! command -v yq >/dev/null 2>&1; then
+	echo "Error: yq is not installed"
+	exit 1
 fi
 
 FILES="
@@ -23,17 +25,17 @@ EXPRESSION='.parameters.DeployAlb = strenv(value) |
   .parameters.DeployRestApiDnsRecord = strenv(value)'
 
 case $1 in
-    "kill") value="false" ;;
-    "revive") value="true" ;;
-    *)
-        echo "Usage: $0 [kill|revive]"
-        exit 1
-        ;;
+"kill") value="false" ;;
+"revive") value="true" ;;
+*)
+	echo "Usage: $0 [kill|revive]"
+	exit 1
+	;;
 esac
 
 for file in $FILES; do
-    export value
-    yq eval -i "$EXPRESSION" "$file"
-    echo "..." >> "$file"
+	export value
+	yq eval -i "$EXPRESSION" "$file"
+	echo "..." >>"$file"
 done
 echo "Applicable deploy file parameters set to $value"
