@@ -12,7 +12,6 @@ import {
   type SymbolEmoji,
   toMarketEmojiData,
   type Types,
-  waitFor,
   zip,
 } from "../../../src";
 import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/contract-apis";
@@ -28,18 +27,9 @@ import {
 import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
-
-import { connectNewClient, compareParsedData, subscribe } from "./utils";
+import { connectNewClient, compareParsedData, subscribe, customWaitFor } from "./utils";
 
 jest.setTimeout(20000);
-
-const customWaitFor = async (condition: () => boolean) =>
-  waitFor({
-    condition,
-    interval: 10,
-    maxWaitTime: 5000,
-    errorMessage: `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
-  });
 
 describe("tests to ensure that websocket event subscriptions work as expected", () => {
   const registrants = getFundedAccounts("040", "041", "042", "043", "044", "045");
