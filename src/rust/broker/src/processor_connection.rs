@@ -4,7 +4,7 @@ use std::{
 };
 
 use futures_util::StreamExt;
-use log::{error, info, log_enabled, warn, Level};
+use log::{error, info, warn};
 use processor::emojicoin_dot_fun::EmojicoinDbEvent;
 use tokio::sync::{broadcast::Sender, RwLock};
 use tokio_tungstenite::connect_async;
@@ -64,7 +64,7 @@ pub async fn start(
             retries = 0;
         }
 
-        // If this is the first connection and it was unsuccessful, do not try to retry.
+        // If this is the first connection and it was unsuccessful, do not retry.
         if first_time && !connection_successful {
             break;
         }
@@ -132,16 +132,15 @@ async fn processor_connection(
             );
             continue;
         }
-        let msg = res.unwrap();
         if is_sick {
             *processor_connection_health.write().await = HealthStatus::Ok;
         }
-        if log_enabled!(Level::Debug) {
-            info!("Got message from processor: {msg:?}.");
-        } else {
-            info!("Got message from processor: {msg}.");
-        }
-        let _ = tx.send(msg);
+        // Log the JSON string.
+        info!("Got message from processor: {msg}.");
+
+        // And send the actual db model event.
+        let db_msg = res.unwrap();
+        let _ = tx.send(db_msg);
     }
     info!("Connection to the processor terminated.");
     *processor_connection_health.write().await = HealthStatus::Dead;

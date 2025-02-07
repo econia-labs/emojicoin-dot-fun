@@ -30,28 +30,36 @@ pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
 /// Returns true if the given subscription should receive the given event.
 #[allow(dead_code)]
 pub fn is_match(subscription: &Subscription, event: &EmojicoinDbEvent) -> bool {
-    // If all fields of a subscription are empty, all events should be sent there.
-    if subscription.markets.is_empty() && subscription.event_types.is_empty() {
-        return true;
-    }
-
     let event_type: EmojicoinDbEventType = event.into();
+    match event_type {
+        EmojicoinDbEventType::ArenaEnter => subscription.arena,
+        EmojicoinDbEventType::ArenaExit => subscription.arena,
+        EmojicoinDbEventType::ArenaMelee => subscription.arena,
+        EmojicoinDbEventType::ArenaSwap => subscription.arena,
+        EmojicoinDbEventType::ArenaVaultBalanceUpdate => subscription.arena,
+        EmojicoinDbEventType::GlobalState => {
+            subscription.event_types.is_empty() || subscription.event_types.contains(&event_type)
+        }
+        _ => {
+            let markets_is_empty = subscription.markets.is_empty();
+            let event_types_is_empty = subscription.event_types.is_empty();
+            if !event_types_is_empty && !subscription.event_types.contains(&event_type) {
+                return false;
+            }
 
-    if !subscription.event_types.is_empty() && !subscription.event_types.contains(&event_type) {
-        return false;
-    }
-    if subscription.markets.is_empty() {
-        return true;
-    }
-    if event_type == EmojicoinDbEventType::GlobalState {
-        return true;
-    }
+            // At this point, event_types is either empty or it contains the event type.
+            // Now just check if the market matches.
+            if markets_is_empty {
+                return true;
+            }
 
-    match get_market_id(event) {
-        Ok(market_id) => subscription.markets.contains(&market_id),
-        Err(msg) => {
-            error!("{msg}");
-            false
+            match get_market_id(event) {
+                Ok(market_id) => subscription.markets.contains(&market_id),
+                Err(msg) => {
+                    error!("{msg}");
+                    false
+                }
+            }
         }
     }
 }
