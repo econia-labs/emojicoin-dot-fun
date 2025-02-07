@@ -13,12 +13,11 @@ parameters:
   DeployProcessor: 'true'
   DeployRestApi: 'true'
   DeployRestApiDnsRecord: 'true'
-  DeployStack: 'true'
   DeployWaf: 'false'
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'main'
+  Environment: 'alpha'
   Network: 'testnet'
   ProcessorHealthCheckStartPeriod: 300
   ProcessorImageVersion: '5.0.0'
