@@ -1,3 +1,5 @@
+// cspell:word funder
+
 import { type AnyNumberString, EmojicoinArena, getAptosClient, waitFor } from "../../../src";
 import {
   type BrokerEvent,

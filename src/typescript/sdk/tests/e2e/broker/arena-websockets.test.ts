@@ -1,3 +1,5 @@
+// cspell:word funder
+
 import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {

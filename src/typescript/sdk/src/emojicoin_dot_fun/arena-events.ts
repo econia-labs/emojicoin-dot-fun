@@ -20,8 +20,6 @@ const fullArenaEventNames = {
 };
 type CamelCaseArenaEventNames = `${PascalToCamelCase<FullArenaEventName>}s`;
 
-/* eslint-disable*/
-
 const arenaEventNamesSet = new Set(Object.keys(fullArenaEventNames));
 export const isAnArenaStructName = (s: string): s is FullArenaEventName =>
   arenaEventNamesSet.has(s);
