@@ -7,6 +7,7 @@ import {
   type HexString,
 } from "../emojicoin_dot_fun/types";
 import { type EventJSON, type AggregatorSnapshot } from "./core";
+import { type ArenaJsonTypes } from "./arena-json-types";
 
 export type JsonValue =
   | string
@@ -17,7 +18,7 @@ export type JsonValue =
   | { [key: string]: JsonValue }
   | bigint;
 
-type JsonTypes = {
+type JsonTypes = ArenaJsonTypes & {
   ExtendRef: {
     self: AccountAddressString;
   };
