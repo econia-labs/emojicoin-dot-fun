@@ -83,17 +83,14 @@ describe("tests to ensure that arena websocket events work as expected", () => {
         return response;
       });
 
-    // Because the user exited early, the vault balance should have updated.
-
-    // Find the models in the broker events.
-    const foundAllThreeModels = () =>
+    const findAllThreeModels = () =>
       !!(
         events.find(isArenaEnterModel) &&
         events.find(isArenaSwapModel) &&
         events.find(isArenaExitModel)
       );
 
-    await customWaitFor(() => foundAllThreeModels());
+    await customWaitFor(() => findAllThreeModels());
 
     const enterIndex = events.findIndex(isArenaEnterModel);
     const swapIndex = events.findIndex(isArenaSwapModel);
