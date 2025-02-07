@@ -129,7 +129,7 @@ describe("tests for parsing event data", () => {
       "Chat",
       "Liquidity",
       "State",
-    ] as EventName[];
+    ] as const;
 
     for (const name of eventNames) {
       const data = eventData[name] as (typeof eventData)[typeof name];
