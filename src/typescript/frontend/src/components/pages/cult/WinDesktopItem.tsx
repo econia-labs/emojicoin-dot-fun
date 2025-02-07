@@ -1,4 +1,7 @@
 // cspell:word textfile
+// cspell:word mycomputer
+// cspell:word recyclebin
+// cspell:word desktopapp
 
 import Text from "components/text";
 import Image from "next/image";
