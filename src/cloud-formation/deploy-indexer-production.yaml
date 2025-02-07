@@ -16,7 +16,6 @@ parameters:
   DeployProcessor: 'true'
   DeployRestApi: 'true'
   DeployRestApiDnsRecord: 'true'
-  DeployStack: 'true'
   DeployWaf: 'false'
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
