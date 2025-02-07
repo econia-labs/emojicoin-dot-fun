@@ -125,7 +125,7 @@ export default function CultClientPage() {
   );
 }
 
-// Since there are so much customization, having styled-components is not so bad. Tailwind is good for smaller changes.
+// Since there is so much customization, having styled-components is not so bad. Tailwind is good for smaller changes.
 const StyledAlert = styled(Alert)`
   font-family: var(--font-pixelar);
   z-index: 2000;
