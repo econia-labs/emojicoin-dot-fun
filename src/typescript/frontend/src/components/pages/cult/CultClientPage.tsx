@@ -1,9 +1,5 @@
 "use client";
 
-// cspell:word mycomputer
-// cspell:word recyclebin
-// cspell:word desktopapp
-
 import { translationFunction } from "context/language-context";
 import communityProjects from "../../../../public/community-projects.json";
 import { Alert, TitleBar } from "@react95/core";
