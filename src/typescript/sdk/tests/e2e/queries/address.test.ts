@@ -2,7 +2,7 @@ import { getEvents } from "../../../src";
 import { Chat } from "@/contract-apis/emojicoin-dot-fun";
 import { fetchChatEvents } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
-import RowEqualityChecks from "../helpers/equality-checks";
+import checkRows from "../helpers/equality-checks";
 import { getFundedAccount } from "../../utils/test-accounts";
 import TestHelpers from "../../utils/helpers";
 
@@ -31,6 +31,6 @@ describe("address standardization tests", () => {
     const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
-    RowEqualityChecks.Chat(row, res);
+    checkRows.Chat(row, res);
   });
 });

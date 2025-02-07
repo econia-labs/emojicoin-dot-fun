@@ -1,47 +1,48 @@
-import { maxBigInt, ONE_APT_BIGINT, sleep, zip } from "../../../src";
+import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import { type SymbolEmoji } from "../../../src/emoji_data/types";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 import {
   fetchArenaMeleeView,
   fetchArenaRegistryView,
   fetchMeleeEmojiData,
   type MeleeEmojiData,
 } from "../../../src/markets/arena-utils";
-import { isArenaEnterModel } from "../../../src/types/arena-types";
-import { getFundedAccount, getFundedAccounts } from "../../utils/test-accounts";
-import { compareParsedData, connectNewClient, subscribe } from "./utils";
-import { customWaitFor } from "./websockets.test";
+import {
+  isArenaEnterModel,
+  isArenaExitModel,
+  isArenaSwapModel,
+  isArenaVaultBalanceUpdateModel,
+} from "../../../src/types/arena-types";
+import { getFundedAccount } from "../../utils/test-accounts";
+import {
+  compareParsedData,
+  connectNewClient,
+  customWaitFor,
+  depositToVault,
+  subscribe,
+  unlockInitialMarkets,
+} from "./utils";
 
 describe("tests to ensure that arena websocket events work as expected", () => {
-  const users = getFundedAccounts("085", "086", "087", "088");
-  const initialCranker = getFundedAccount("089");
-  const symbols: SymbolEmoji[][] = [["🦈"], ["🐟"], ["🦭"], ["🐙"]];
-  const emojicoin = new EmojicoinClient();
-  const markets: { marketID: bigint; symbol: SymbolEmoji[] }[] = [];
+  const user = getFundedAccount("085");
   let melee: MeleeEmojiData;
+  const emojicoin = new EmojicoinClient();
+  let symbol1: SymbolEmoji[];
+  let symbol2: SymbolEmoji[];
 
   beforeAll(async () => {
-    const versions = await Promise.all(
-      zip(users, symbols).map(async ([registrant, symbol]) =>
-        emojicoin.register(registrant, symbol).then(({ registration }) => {
-          const { market } = registration.model;
-          markets.push({ marketID: market.marketID, symbol: market.symbolEmojis });
-          return registration.model.transaction.version;
-        })
-      )
-    );
-    const highestVersion = maxBigInt(...versions);
-    await waitForEmojicoinIndexer(highestVersion, 10000);
-    // Ensure the broker has emitted all events to ensure they don't interfere with the following tests.
-    await sleep(2000);
+    await fetchArenaRegistryView()
+      .then(({ currentMeleeID }) => currentMeleeID)
+      .then(fetchArenaMeleeView)
+      .then(fetchMeleeEmojiData)
+      .then((res) => (melee = res));
 
-    // The markets are chosen at random, so pull the crank to start the melee and retrieve the
-    // markets being used in the arena. Use bunk data in `enter` here- we're just pulling the crank.
-    await emojicoin.arena.enter(initialCranker, 0n, false, [], [], "symbol1");
-    const { numMelees: latestMeleeID } = await fetchArenaRegistryView();
-
-    melee = await fetchArenaMeleeView(latestMeleeID).then(fetchMeleeEmojiData);
+    // The first two markets registered are registered in the docker deployer service.
+    // See `src/docker/deployer`.
+    expect(melee.market1.symbolData.symbol).toEqual("💧");
+    expect(melee.market2.symbolData.symbol).toEqual("🔥");
+    await unlockInitialMarkets();
+    symbol1 = melee.market1.symbolEmojis;
+    symbol2 = melee.market2.symbolEmojis;
     return true;
   });
 
@@ -53,33 +54,102 @@ describe("tests to ensure that arena websocket events work as expected", () => {
     expect(brokerMessages.length).toEqual(0);
   });
 
-  it("receives an arena event within two seconds of the event being submitted", async () => {
+  it("receives enter, swap, and exit arena events within 2 seconds", async () => {
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
-    const user = users[0];
     subscribe(client, [melee.market1.marketID, melee.market2.marketID], [], true);
 
-    const res = await emojicoin.arena.enter(
-      user,
-      ONE_APT_BIGINT,
-      false,
-      melee.market1.emojis.map(({ emoji }) => emoji),
-      melee.market2.emojis.map(({ emoji }) => emoji),
-      "symbol1"
-    );
+    const enterResponse = await emojicoin.arena
+      // Do not lock in, otherwise vault balance updates are emitted.
+      .enter(user, ONE_APT_BIGINT, false, symbol1, symbol2, "symbol1")
+      .then(({ arena, response }) => {
+        expect(arena.model.enter.meleeID).toEqual(melee.view.meleeID);
+        expect(arena.model.enter.user).toEqual(user.accountAddress.toString());
+        return response;
+      });
 
-    const findEnterModel = () => events.find(isArenaEnterModel);
-    const idx = events.findIndex(isArenaEnterModel);
-    await customWaitFor(() => !!findEnterModel());
-    const model = findEnterModel()!;
-    expect(model).toBeDefined();
-    expect(model.enter.meleeID).toEqual(melee.view.meleeID);
-    expect(model.enter.user).toEqual(user.accountAddress.toString());
+    const swapResponse = await emojicoin.arena
+      .swap(user, symbol1, symbol2)
+      .then(({ arena, response }) => {
+        expect(arena.model.swap.meleeID).toEqual(melee.view.meleeID);
+        expect(arena.model.swap.user).toEqual(user.accountAddress.toString());
+        return response;
+      });
+
+    const exitResponse = await emojicoin.arena
+      .exit(user, symbol1, symbol2)
+      .then(({ arena, response }) => {
+        expect(arena.model.exit.meleeID).toEqual(melee.view.meleeID);
+        expect(arena.model.exit.user).toEqual(user.accountAddress.toString());
+        return response;
+      });
+
+    // Because the user exited early, the vault balance should have updated.
+
+    // Find the models in the broker events.
+    const foundAllThreeModels = () =>
+      !!(
+        events.find(isArenaEnterModel) &&
+        events.find(isArenaSwapModel) &&
+        events.find(isArenaExitModel)
+      );
+
+    await customWaitFor(() => foundAllThreeModels());
+
+    const enterIndex = events.findIndex(isArenaEnterModel);
+    const swapIndex = events.findIndex(isArenaSwapModel);
+    const exitIndex = events.findIndex(isArenaExitModel);
+
+    const indices = [enterIndex, swapIndex, exitIndex];
+    expect(indices.every((v) => v !== -1)).toBe(true);
+    expect(new Set(indices).size).toEqual(3);
+
     compareParsedData({
-      messageEvent: messageEvents[idx],
-      brokerMessage: brokerMessages[idx],
-      event: events[idx],
+      messageEvent: messageEvents[enterIndex],
+      brokerMessage: brokerMessages[enterIndex],
+      event: events[enterIndex],
       eventName: "ArenaEnter",
-      response: res.response,
+      response: enterResponse,
+    });
+
+    compareParsedData({
+      messageEvent: messageEvents[swapIndex],
+      brokerMessage: brokerMessages[swapIndex],
+      event: events[swapIndex],
+      eventName: "ArenaSwap",
+      response: swapResponse,
+    });
+
+    compareParsedData({
+      messageEvent: messageEvents[exitIndex],
+      brokerMessage: brokerMessages[exitIndex],
+      event: events[exitIndex],
+      eventName: "ArenaExit",
+      response: exitResponse,
+    });
+  });
+
+  it("receives a vault update balance event within 2 seconds", async () => {
+    const { client, events, messageEvents, brokerMessages } = await connectNewClient();
+    subscribe(client, [melee.market1.marketID, melee.market2.marketID], [], true);
+
+    const funder = user;
+    const amount = 1n;
+    const res = await depositToVault(funder, amount);
+    expect(res.success).toBe(true);
+    const parsedEvents = getEvents(res);
+    const vaultBalanceUpdateEvent = parsedEvents.arenaVaultBalanceUpdateEvents.at(0)!;
+    expect(vaultBalanceUpdateEvent).toBeDefined();
+    expect(vaultBalanceUpdateEvent.newBalance).toBeGreaterThanOrEqual(amount);
+
+    // Wait for the websocket client to receive it.
+    await customWaitFor(() => !!events.find(isArenaVaultBalanceUpdateModel));
+
+    compareParsedData({
+      messageEvent: messageEvents.pop(),
+      brokerMessage: brokerMessages.pop(),
+      event: events.pop(),
+      eventName: "ArenaVaultBalanceUpdate",
+      response: res,
     });
   });
 });

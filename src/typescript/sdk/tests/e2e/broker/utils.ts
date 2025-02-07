@@ -1,4 +1,4 @@
-import { type AnyNumberString, waitFor } from "../../../src";
+import { type AnyNumberString, EmojicoinArena, getAptosClient, waitFor } from "../../../src";
 import {
   type BrokerEvent,
   type BrokerMessage,
@@ -8,24 +8,17 @@ import {
 } from "../../../src/broker-v2/types";
 import { type BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
+import { type BrokerModelTypes } from "../../../src/indexer-v2/types";
+import checkRows from "../helpers/equality-checks";
+import { Account, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
-  type ArenaExitModel,
-  type ArenaMeleeModel,
-  type ArenaSwapModel,
-  type ArenaVaultBalanceUpdateModel,
-  type ArenaEnterModel,
-  type BrokerModelTypes,
-  type ChatEventModel,
-  type GlobalStateEventModel,
-  type LiquidityEventModel,
-  type MarketLatestStateEventModel,
-  type MarketRegistrationEventModel,
-  type PeriodicStateEventModel,
-  type SwapEventModel,
-} from "../../../src/indexer-v2/types";
-import RowEqualityChecks from "../helpers/equality-checks";
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import ArenaRowEqualityChecks from "../helpers/arena-equality-checks";
+  fetchArenaRegistryView,
+  fetchArenaMeleeView,
+  fetchMeleeEmojiData,
+} from "../../../src/markets/arena-utils";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+import { getPublisherPrivateKey } from "../../utils";
+import checkArenaRows from "../helpers/arena-equality-checks";
 
 const MAX_WAIT_TIME = 5000;
 
@@ -91,59 +84,20 @@ export const compareParsedData = <T extends BrokerModelTypes>({
   expect(parsed).toEqual(brokerMessage);
   const row = parsed[eventName];
   const model = brokerMessageConverter[eventName](row) as T;
-  switch (eventName) {
-    case "Chat":
-      RowEqualityChecks["Chat"](model as ChatEventModel, response);
-      RowEqualityChecks["Chat"](event as ChatEventModel, response);
-      break;
-    case "Swap":
-      RowEqualityChecks["Swap"](model as SwapEventModel, response);
-      RowEqualityChecks["Swap"](event as SwapEventModel, response);
-      break;
-    case "Liquidity":
-      RowEqualityChecks["Liquidity"](model as LiquidityEventModel, response);
-      RowEqualityChecks["Liquidity"](event as LiquidityEventModel, response);
-      break;
-    case "MarketLatestState":
-      RowEqualityChecks["MarketLatestState"](model as MarketLatestStateEventModel, response);
-      RowEqualityChecks["MarketLatestState"](event as MarketLatestStateEventModel, response);
-      break;
-    case "GlobalState":
-      RowEqualityChecks["GlobalState"](model as GlobalStateEventModel, response);
-      RowEqualityChecks["GlobalState"](event as GlobalStateEventModel, response);
-      break;
-    case "PeriodicState":
-      RowEqualityChecks["PeriodicState"](model as PeriodicStateEventModel, response);
-      RowEqualityChecks["PeriodicState"](event as PeriodicStateEventModel, response);
-      break;
-    case "MarketRegistration":
-      RowEqualityChecks["MarketRegistration"](model as MarketRegistrationEventModel, response);
-      RowEqualityChecks["MarketRegistration"](event as MarketRegistrationEventModel, response);
-      break;
-    case "ArenaEnter":
-      ArenaRowEqualityChecks["ArenaEnter"](model as ArenaEnterModel, response);
-      ArenaRowEqualityChecks["ArenaEnter"](event as ArenaEnterModel, response);
-    case "ArenaExit":
-      ArenaRowEqualityChecks["ArenaExit"](model as ArenaExitModel, response);
-      ArenaRowEqualityChecks["ArenaExit"](event as ArenaExitModel, response);
-    case "ArenaMelee":
-      ArenaRowEqualityChecks["ArenaMelee"](model as ArenaMeleeModel, response);
-      ArenaRowEqualityChecks["ArenaMelee"](event as ArenaMeleeModel, response);
-    case "ArenaSwap":
-      ArenaRowEqualityChecks["ArenaSwap"](model as ArenaSwapModel, response);
-      ArenaRowEqualityChecks["ArenaSwap"](event as ArenaSwapModel, response);
-    case "ArenaVaultBalanceUpdate":
-      ArenaRowEqualityChecks["ArenaVaultBalanceUpdate"](
-        model as ArenaVaultBalanceUpdateModel,
-        response
-      );
-      ArenaRowEqualityChecks["ArenaVaultBalanceUpdate"](
-        event as ArenaVaultBalanceUpdateModel,
-        response
-      );
-    default:
-      throw new Error("Will never happen.");
-  }
+
+  const checkRowFunction =
+    checkRows[eventName as keyof typeof checkRows] ??
+    checkArenaRows[eventName as keyof typeof checkArenaRows];
+  expect(checkRowFunction).toBeDefined();
+
+  // To avoid duplicated code, cast as `any` but it's definitely the proper type.
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const res1 = checkRowFunction(event as any, response);
+  const res2 = checkRowFunction(model as any, response);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
+  expect(res1).toBe(true);
+  expect(res2).toBe(true);
 };
 
 export const subscribe = (
@@ -160,3 +114,37 @@ export const subscribe = (
   const json = JSON.stringify(outgoingMessage);
   client.send(json);
 };
+
+export const customWaitFor = async (condition: () => boolean) =>
+  waitFor({
+    condition,
+    interval: 10,
+    maxWaitTime: 5000,
+    errorMessage: `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
+  });
+
+/**
+ * Have the publisher trade on both markets it registered to unlock them by ending the grace period.
+ */
+export const unlockInitialMarkets = async () => {
+  const { currentMeleeID } = await fetchArenaRegistryView();
+  const melee = await fetchArenaMeleeView(currentMeleeID).then(fetchMeleeEmojiData);
+  const emojicoin = new EmojicoinClient();
+  const publisher = Account.fromPrivateKey({
+    privateKey: getPublisherPrivateKey(),
+  });
+  const res1 = await emojicoin.buy(publisher, melee.market1.symbolEmojis, 1n);
+  const res2 = await emojicoin.buy(publisher, melee.market2.symbolEmojis, 1n);
+  expect(res1.response.success).toBe(true);
+  expect(res2.response.success).toBe(true);
+};
+
+/**
+ * Send APT to the vault so user's entering can be matched.
+ */
+export const depositToVault = async (funder: Account, amount: bigint) =>
+  await EmojicoinArena.FundVault.submit({
+    aptosConfig: getAptosClient().config,
+    funder,
+    amount,
+  });

@@ -27,6 +27,7 @@ const ArenaEnter = (row: ArenaEnterModel, response: UserTransactionResponse) => 
     .map((k) => k as keyof typeof row.enter)
     .map((k) => expandAsTuple("arenaEnter", k, row.enter, enter));
   checkTuples(tuples);
+  return true;
 };
 
 const ArenaExit = (row: ArenaExitModel, response: UserTransactionResponse) => {
@@ -39,6 +40,7 @@ const ArenaExit = (row: ArenaExitModel, response: UserTransactionResponse) => {
     .map((k) => k as keyof typeof row.exit)
     .map((k) => expandAsTuple("arenaExit", k, row.exit, exit));
   checkTuples(tuples);
+  return true;
 };
 
 const ArenaMelee = (row: ArenaMeleeModel, response: UserTransactionResponse) => {
@@ -51,6 +53,7 @@ const ArenaMelee = (row: ArenaMeleeModel, response: UserTransactionResponse) => 
     .map((k) => k as keyof typeof row.melee)
     .map((k) => expandAsTuple("arenaMelee", k, row.melee, melee));
   checkTuples(tuples);
+  return true;
 };
 
 const ArenaSwap = (row: ArenaSwapModel, response: UserTransactionResponse) => {
@@ -63,6 +66,7 @@ const ArenaSwap = (row: ArenaSwapModel, response: UserTransactionResponse) => {
     .map((k) => k as keyof typeof row.swap)
     .map((k) => expandAsTuple("arenaSwap", k, row.swap, swap));
   checkTuples(tuples);
+  return true;
 };
 
 const ArenaVaultBalanceUpdate = (
@@ -78,9 +82,10 @@ const ArenaVaultBalanceUpdate = (
     .map((k) => k as keyof typeof row.arenaVaultBalanceUpdate)
     .map((k) => expandAsTuple("arenaVaultBalanceUpdate", k, row.arenaVaultBalanceUpdate, update));
   checkTuples(tuples);
+  return true;
 };
 
-const ArenaRowEqualityChecks = {
+const checkArenaRows = {
   ArenaEnter,
   ArenaExit,
   ArenaMelee,
@@ -88,4 +93,4 @@ const ArenaRowEqualityChecks = {
   ArenaVaultBalanceUpdate,
 };
 
-export default ArenaRowEqualityChecks;
+export default checkArenaRows;
