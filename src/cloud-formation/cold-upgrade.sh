@@ -4,8 +4,8 @@ if ! command -v yq > /dev/null 2>&1; then
 fi
 
 FILES="
+    deploy-indexer-alpha.yaml
     deploy-indexer-fallback.yaml
-    deploy-indexer-main.yaml
     deploy-indexer-production.yaml
 "
 
