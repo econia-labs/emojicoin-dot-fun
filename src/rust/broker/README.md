@@ -37,12 +37,29 @@ Note that they're typed *exactly* as shown below. If you try to send the JSON
 payload over multiple lines through `websocat`, it will error out and parse
 the JSON payload incorrectly.
 
-### All markets, all event types
+### Arena events
+
+Arena events don't follow the same rules as the other subscriptions.
+
+To subscribe to arena events, simply pass `{ "arena": true }`. The default value
+is `false`; i.e., no subscription to arena events.
+
+```json5
+// Subscribe to every single event type.
+{ "arena": true, "markets": [], "event_types": [] }
+
+// Subscribe to all non-arena event types.
+// Both of the JSON objects below are equivalent.
+{ "markets": [], "event_types": [] }
+{ "arena": false, "markets": [], "event_types": [] }
+```
+
+### All markets, all non-arena event types
 
 ```json5
 // All of the below are equivalent.
 // Remember, with `websocat`, your message should be exactly one line.
-// This is four different ways to subscribe to all markets and event types.
+// This is four different ways to subscribe to all markets and non-arena events.
 {}
 { "markets": [] }
 { "event_types": [] }
@@ -51,7 +68,7 @@ the JSON payload incorrectly.
 
 ### Specific markets, all event types
 
-To subscribe to markets 4 and 5 for all event types:
+To subscribe to markets 4 and 5 for all non-arena event types:
 
 ```json
 { "markets": [4, 5] }
