@@ -9,10 +9,10 @@ import { type EmojicoinProps } from "./types";
 import { useEventStore } from "context/event-store-context";
 import MainInfo from "./components/main-info/MainInfo";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
-import { type BrokerEvent } from "@/broker/types";
+import { type SubscribableBrokerEvents } from "@/broker/types";
 import { marketToLatestBars } from "@/store/event/candlestick-bars";
 
-const EVENT_TYPES: BrokerEvent[] = ["Chat", "PeriodicState", "Swap"];
+const EVENT_TYPES: SubscribableBrokerEvents[] = ["Chat", "PeriodicState", "Swap"];
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isTablet, isMobile } = useMatchBreakpoints();

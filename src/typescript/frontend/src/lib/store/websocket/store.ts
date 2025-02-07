@@ -7,8 +7,7 @@ import {
   type ImmerSetEventAndClientStore,
 } from "@/store/event/types";
 import { WebSocketClient, type WebSocketClientArgs } from "@/broker/client";
-import { type WebSocketSubscriptions } from "@/broker/types";
-import { type BrokerEvent } from "@/broker/types";
+import { type SubscribableBrokerEvents, type WebSocketSubscriptions } from "@/broker/types";
 import { immerable } from "immer";
 
 export type ClientState = {
@@ -20,8 +19,10 @@ export type ClientState = {
 
 export type ClientActions = {
   close: () => void;
-  subscribeEvents: (events: BrokerEvent[]) => void;
-  unsubscribeEvents: (events: BrokerEvent[]) => void;
+  subscribeEvents: (events: SubscribableBrokerEvents[]) => void;
+  unsubscribeEvents: (events: SubscribableBrokerEvents[]) => void;
+  subscribeArena: () => void;
+  unsubscribeArena: () => void;
 };
 
 export type WebSocketClientStore = ClientState & ClientActions;
@@ -52,6 +53,7 @@ export const createWebSocketClientStore = (
   subscriptions: {
     marketIDs: new Set(),
     eventTypes: new Set(),
+    arena: false,
   },
   received: 0,
   client: getSingletonClient({
@@ -91,6 +93,18 @@ export const createWebSocketClientStore = (
     set((state) => {
       state.client.unsubscribeEvents(e);
       state.subscriptions = state.client.subscriptions;
+    });
+  },
+  subscribeArena: () => {
+    set((state) => {
+      state.client.subscribeArena();
+      state.subscriptions.arena = true;
+    });
+  },
+  unsubscribeArena: () => {
+    set((state) => {
+      state.client.unsubscribeArena();
+      state.subscriptions.arena = false;
     });
   },
 });

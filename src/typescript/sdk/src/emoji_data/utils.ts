@@ -151,6 +151,7 @@ export const encodeEmojis = (emojis: string[] | SymbolEmojiData[]) =>
 export type MarketEmojiData = {
   emojis: SymbolEmojiData[];
   symbolData: SymbolData;
+  symbolEmojis: SymbolEmoji[];
 };
 
 /**
@@ -171,6 +172,7 @@ export const toMarketEmojiData = (
   return {
     emojis,
     symbolData,
+    symbolEmojis: emojis.map((e) => e.emoji),
   };
 };
 
