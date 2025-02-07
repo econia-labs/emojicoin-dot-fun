@@ -336,15 +336,14 @@ export const Chart = (props: ChartContainerProps) => {
 
       tvWidget.current.onChartReady(() => {
         const chart = tvWidget.current!.activeChart();
-        const now = new Date();
-        const endDaysAgo = 0;
-        const endMilliseconds = now.getTime() - endDaysAgo * MS_IN_ONE_DAY;
-        const endTimestamp = Math.floor(new Date(endMilliseconds).getTime()) / 1000;
+        const to = Date.now() / 1000;
+        // Subtract 100h so that 100 1h candles are shown by default.
+        const from = to - 100 * 60 * 60;
 
         chart
           .setVisibleRange({
-            from: endTimestamp - (24 * 60 * 60) / 6,
-            to: endTimestamp,
+            from,
+            to,
           })
           .catch((error) => {
             console.error("Error applying visible range:", error);
