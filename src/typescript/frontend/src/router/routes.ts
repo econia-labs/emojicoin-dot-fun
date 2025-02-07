@@ -14,4 +14,8 @@ export const ROUTES = {
   notFound: "/not-found",
   pools: "/pools",
   verify: "/verify",
+  stats: {
+    ".": "/stats",
+    global: "/stats/global",
+  },
 } as const;

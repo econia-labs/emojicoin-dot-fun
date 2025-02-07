@@ -9,11 +9,16 @@ import { notoColorEmoji } from "styles/fonts";
  */
 export const useEmojiFontConfig = () => {
   const userAgent = useUserSettings((s) => s.userAgent);
-  const { isIOS, isMacOs, emojiFontClassName } = useMemo(() => {
-    const { isIOS, isMacOs } = getBooleanUserAgentSelectors(userAgent);
-    const emojiFontClassName = isIOS || isMacOs ? "" : notoColorEmoji.className;
-    return { isIOS, isMacOs, emojiFontClassName };
-  }, [userAgent]);
+  const { isIOS, isMacOs, emojiFontClassName } = useMemo(
+    () => getEmojiFontFromUserAgent(userAgent),
+    [userAgent]
+  );
 
+  return { isIOS, isMacOs, emojiFontClassName };
+};
+
+export const getEmojiFontFromUserAgent = (userAgent: string) => {
+  const { isIOS, isMacOs } = getBooleanUserAgentSelectors(userAgent);
+  const emojiFontClassName = isIOS || isMacOs ? "" : notoColorEmoji.className;
   return { isIOS, isMacOs, emojiFontClassName };
 };

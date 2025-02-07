@@ -11,7 +11,7 @@ import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { ORDER_BY } from "@sdk/indexer-v2/const";
-import { getCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 
 export const revalidate = 2;
 
@@ -64,7 +64,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       searchEmojis,
       pageSize: MARKETS_PER_PAGE,
     });
-    numMarketsPromise = getCachedNumMarketsFromAptosNode();
+    numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
   }
 
   const aptPricePromise = getAptPrice();
