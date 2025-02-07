@@ -56,6 +56,4 @@ bytea
 nominalize
 dexscreener
 clippyts
-mycomputer
-recyclebin
-desktopapp
+rebranded
