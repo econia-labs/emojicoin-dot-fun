@@ -20,6 +20,14 @@ import { typeTagInputToStructName } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
 import type JsonTypes from "../types/json-types";
 import { encodeEmojis, type SymbolEmoji } from "../emoji_data";
+import {
+  arenaConverter,
+  createEmptyArenaEvents,
+  isAnArenaStructName,
+  toCamelCaseArenaEventName,
+  type ArenaEvents,
+  type ArenaEventsWithIndices,
+} from "./arena-events";
 
 // Note that the conversion to string bytes below doesn't work if the length of the string is > 255.
 const registryNameBytes = new MoveString("Registry").bcsToBytes().slice(1);
@@ -77,32 +85,44 @@ export const getEventsWithIndices = (
 function getEventsMaybeWithIndices(
   response: UserTransactionResponse | PendingTransactionResponse | null | undefined,
   withIndices?: false | undefined
-): Events;
+): Events & ArenaEvents;
 function getEventsMaybeWithIndices(
   response: UserTransactionResponse | PendingTransactionResponse | null | undefined,
   withIndices: true
-): EventsWithIndices;
+): EventsWithIndices & ArenaEventsWithIndices;
 function getEventsMaybeWithIndices(
   response: UserTransactionResponse | PendingTransactionResponse | null | undefined,
   withIndices: boolean = false
-): Events | EventsWithIndices {
-  const events = createEmptyEvents() as EventsWithIndices;
+): (Events | EventsWithIndices) & (ArenaEvents | ArenaEventsWithIndices) {
+  const events = {
+    ...(createEmptyEvents() as EventsWithIndices),
+    ...(createEmptyArenaEvents() as ArenaEventsWithIndices),
+  };
+
   if (!response || !isUserTransactionResponse(response)) {
     return events;
   }
 
   response.events.forEach((event, eventIndex): void => {
     const structName = typeTagInputToStructName(event.type);
-    if (!structName || !isAnEmojicoinStructName(structName)) {
+    if (!structName || (!isAnEmojicoinStructName(structName) && !isAnArenaStructName(structName))) {
       return;
     }
-    const data = converter[structName](event.data, response.version);
-    const camelCasedAndPlural = `${toCamelCaseEventName(structName)}s` as const;
-    const eventData = withIndices ? { ...data, eventIndex } : data;
-    // TypeScript can't infer or narrow the type. It's too difficult to figure out how to get it to
-    // do it properly so we must use `as any` here, although we know for sure its type is correct.
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    events[camelCasedAndPlural].push(eventData as any);
+
+    // TypeScript can't infer or narrow the types properly below, but they're correct.
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    if (isAnEmojicoinStructName(structName)) {
+      const data = converter[structName](event.data, response.version);
+      const camelCasedAndPlural = `${toCamelCaseEventName(structName)}s` as const;
+      const eventData = withIndices ? { ...data, eventIndex } : data;
+      events[camelCasedAndPlural].push(eventData as any);
+    } else {
+      const data = arenaConverter[structName](event.data, response.version, eventIndex);
+      const camelCasedAndPlural = `${toCamelCaseArenaEventName(structName)}s` as const;
+      const eventData = withIndices ? { ...data, eventIndex } : data;
+      events[camelCasedAndPlural].push(eventData as any);
+    }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   });
   return events;
 }
