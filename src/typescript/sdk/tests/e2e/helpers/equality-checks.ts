@@ -51,7 +51,7 @@ type Indexer = {
   StateEventData: ReturnType<typeof withStateEventData>;
 };
 
-const checkTuples = (args: [string, JsonValue | undefined, JsonValue | undefined][]) => {
+export const checkTuples = (args: [string, JsonValue | undefined, JsonValue | undefined][]) => {
   const [rows, responses] = args.reduce(
     (acc, [path, row, response]) => {
       acc[0].push(`${path}: ${row?.toString()}`);
@@ -74,7 +74,7 @@ const checkEventIndex = (
 ) => {
   const events = getEventsWithIndices(response);
   const flattenedGuidsToEventIndices = Object.values(events).flatMap((v) =>
-    v.map(({ guid, eventIndex }) => [guid, eventIndex] as const)
+    v.filter((vv) => "guid" in vv).map(({ guid, eventIndex }) => [guid, eventIndex] as const)
   );
   const eventsAndIndices = new Map(flattenedGuidsToEventIndices);
   const eventIndex = eventsAndIndices.get(eventGuid)!;
@@ -427,6 +427,7 @@ const PeriodicState = (row: PeriodicStateEventModel, response: UserTransactionRe
   compareLastSwap(row, stateEvent);
   comparePeriodicStateEvent(row, periodicStateEvent);
   comparePeriodicStateMetadata(row, periodicStateEvent);
+  return true;
 };
 
 const MarketRegistration = <T extends MarketRegistrationEventModel>(
@@ -440,6 +441,7 @@ const MarketRegistration = <T extends MarketRegistrationEventModel>(
   compareTransactionMetadata(row, response);
   compareMarketAndStateMetadata(row, stateEvent);
   compareMarketRegistrationEvent(row, registerEvent);
+  return true;
 };
 
 const Swap = (row: SwapEventModel, response: UserTransactionResponse) => {
@@ -452,6 +454,7 @@ const Swap = (row: SwapEventModel, response: UserTransactionResponse) => {
   compareStateEvents(row, stateEvent);
   compareSwapEvents(row, swapEvent);
   checkEventIndex(row, swapEvent.guid, response);
+  return true;
 };
 
 const Chat = (row: ChatEventModel, response: UserTransactionResponse) => {
@@ -463,6 +466,7 @@ const Chat = (row: ChatEventModel, response: UserTransactionResponse) => {
   compareMarketAndStateMetadata(row, stateEvent);
   compareLastSwap(row, stateEvent);
   compareChatEvents(row, chatEvent);
+  return true;
 };
 
 const Liquidity = (row: LiquidityEventModel, response: UserTransactionResponse) => {
@@ -475,6 +479,7 @@ const Liquidity = (row: LiquidityEventModel, response: UserTransactionResponse) 
   compareLastSwap(row, stateEvent);
   compareLiquidityEvents(row, liquidityEvent);
   checkEventIndex(row, liquidityEvent.guid, response);
+  return true;
 };
 
 const MarketLatestState = (row: MarketLatestStateEventModel, response: UserTransactionResponse) => {
@@ -510,9 +515,10 @@ const MarketLatestState = (row: MarketLatestStateEventModel, response: UserTrans
   expect(row.inBondingCurve).toEqual(stateEvent.lpCoinSupply === BigInt(0));
   expect(row.volumeIn1MStateTracker).toEqual(volumeInStateTrackerFromWriteSet);
   expect(row.baseVolumeIn1MStateTracker).toEqual(baseVolumeInStateTrackerFromWriteSet);
+  return true;
 };
 
-const RowEqualityChecks = {
+const checkRows = {
   GlobalState,
   PeriodicState,
   MarketRegistration,
@@ -522,4 +528,4 @@ const RowEqualityChecks = {
   MarketLatestState,
 };
 
-export default RowEqualityChecks;
+export default checkRows;
