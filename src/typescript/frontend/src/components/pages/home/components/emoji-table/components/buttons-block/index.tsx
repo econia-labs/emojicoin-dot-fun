@@ -1,7 +1,5 @@
 import React from "react";
-
 import { FlexGap } from "@containers";
-
 import { Arrow } from "components/svg";
 import { StyledBtn } from "./styled";
 import { useMatchBreakpoints } from "@hooks/index";
@@ -17,12 +15,7 @@ const ButtonText = ({ text }: { text: number | string }) => (
   <p className="med-pixel-text font-[48px] text-dark-gray">{text}</p>
 );
 
-export const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
-  value,
-  numPages,
-  onChange,
-  className,
-}: ButtonsBlockProps) => {
+export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBlockProps) => {
   const { isMobile } = useMatchBreakpoints();
   const gap = isMobile ? "12px" : "17px";
   return (
