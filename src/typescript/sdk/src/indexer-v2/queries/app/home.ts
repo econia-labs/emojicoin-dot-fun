@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
-import { LIMIT, ORDER_BY } from "../../const";
+import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
 import { DEFAULT_SORT_BY, type MarketStateQueryArgs } from "../../types/common";
 import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
@@ -100,14 +100,15 @@ export const fetchNumRegisteredMarkets = async () => {
     }).then((r) => toRegistryView(r).numMarkets);
     return Number(numRegisteredMarkets);
   } catch (e: unknown) {
-    // If the view function fails, our NextJS backend is probably rate-limited by the Aptos rest API
-    // and we should just find the count ourselves. Since this is a costly operation, this should
-    // primarily be a fallback to avoid defaulting to "0" in the UI. In practice, we should never
-    // get rate-limited, since we'll cache the query results and add a proper revalidation time.
-    return postgrest
-      .from(TableName.MarketState)
-      .select("", { count: "exact", head: true })
-      .then((r) => r.count ?? 0);
+    // If the view function fails for some reason, find the largest market id in the database for a
+    // cheap fetch of the number of registered markets. Also because `count: exact` does not work.
+    await postgrest
+      .from(TableName.MarketRegistrationEvents)
+      .select("market_id")
+      .order("market_id", toOrderBy("desc"))
+      .limit(1)
+      .single()
+      .then((r) => Number(r.data?.market_id) ?? 0);
   }
 };
 
