@@ -2,7 +2,6 @@
 export const ROUTES = {
   root: "/",
   // Alphabetized after this.
-  arena: "/arena",
   api: "/api",
   arena: "/arena",
   cult: "/cult",
