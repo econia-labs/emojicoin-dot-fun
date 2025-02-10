@@ -11,6 +11,12 @@ import MainInfo from "./components/main-info/MainInfo";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { type SubscribableBrokerEvents } from "@/broker/types";
 import { marketToLatestBars } from "@/store/event/candlestick-bars";
+import Carousel from "components/carousel";
+import { Text } from "components";
+import { GlobeIcon } from "lucide-react";
+import Link from "next/link";
+import { ROUTES } from "router/routes";
+import { darkColors } from "theme";
 
 const EVENT_TYPES: SubscribableBrokerEvents[] = ["Chat", "PeriodicState", "Swap"];
 
@@ -34,6 +40,23 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
 
   return (
     <Box>
+      {props.isInMelee && (
+        <Carousel gap={16}>
+          <div className="flex flex-row items-center gap-[16px]">
+            <Link href={ROUTES.arena}>
+              <Text
+                textScale="pixelHeading3"
+                color="econiaBlue"
+                className="w-max"
+                textTransform="uppercase"
+              >
+                To trade this inside the melee, go to arena
+              </Text>
+            </Link>
+            <GlobeIcon color={darkColors.econiaBlue} />
+          </div>
+        </Carousel>
+      )}
       <MainInfo data={props.data} />
       {isTablet || isMobile ? <MobileGrid data={props.data} /> : <DesktopGrid data={props.data} />}
     </Box>

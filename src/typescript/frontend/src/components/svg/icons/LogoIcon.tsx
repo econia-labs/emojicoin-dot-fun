@@ -4,25 +4,8 @@ import Svg from "components/svg/Svg";
 import { VERSION } from "lib/env";
 import { type SvgProps } from "../types";
 import { useThemeContext } from "context";
-import Text from "components/text";
 import type { Colors } from "theme/types";
-
-const Badge: React.FC<React.PropsWithChildren<{ color: keyof Colors }>> = ({ children, color }) => {
-  const { theme } = useThemeContext();
-
-  return (
-    <Text
-      style={{
-        border: `1px solid ${theme.colors[color]}`,
-        borderRadius: "8px",
-        color: theme.colors[color],
-      }}
-      className="!pixel-heading-4 px-[.4rem] text-[15px]"
-    >
-      {children}
-    </Text>
-  );
-};
+import { Badge } from "components/Badge";
 
 const VersionBadge: React.FC<{ color: keyof Colors }> = ({ color }) =>
   // prettier-ignore
