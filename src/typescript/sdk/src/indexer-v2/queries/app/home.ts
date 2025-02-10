@@ -82,7 +82,7 @@ export const fetchMarketsWithCount = queryHelperWithCount(
  * This is necessary to use because for some reason, { count: "exact", head: "true" } in the
  * postgrest-js API doesn't work when there are no rows returned and it's only counting the total
  * number of rows.
- * 
+ *
  * This is used instead of the market registration events table because `market_latest_state_event`
  * has an index on `market_id`.
  *
