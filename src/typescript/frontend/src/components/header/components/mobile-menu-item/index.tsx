@@ -8,6 +8,7 @@ import Arrow from "components/svg/icons/Arrow";
 
 import { type MobileMenuItemProps } from "./types";
 import { StyledItemWrapper } from "./styled";
+import { cn } from "lib/utils/class-name";
 
 const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
   withIcon,
@@ -26,7 +27,7 @@ const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
 
   return (
     <StyledItemWrapper onMouseOver={replay} onClick={onClick} borderBottom={borderBottom}>
-      <div className={`${withIcon?.className} ${pill?.className}`}>
+      <div className={cn(withIcon?.className, pill?.className)}>
         {withIcon?.icon}
         <Text
           textScale={withIcon ? "pixelHeading4" : "pixelHeading3"}
