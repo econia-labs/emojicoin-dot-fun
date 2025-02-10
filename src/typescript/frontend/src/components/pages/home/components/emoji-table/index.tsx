@@ -36,7 +36,7 @@ import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { Emoji } from "utils/emoji";
 
 export interface EmojiTableProps
-  extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
+  extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();

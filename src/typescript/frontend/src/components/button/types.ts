@@ -13,6 +13,7 @@ export const variants = {
 export const scales = {
   SMALL: "sm",
   LARGE: "lg",
+  XLARGE: "xl",
 } as const;
 
 export type Scale = (typeof scales)[keyof typeof scales];

@@ -5,6 +5,7 @@ export const ROUTES = {
   api: {
     trending: "/api/trending",
   },
+  arena: "/arena",
   candlesticks: "/candlesticks",
   cult: "/cult",
   dexscreener: "/dexscreener",
