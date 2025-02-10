@@ -120,7 +120,7 @@ const toArenaMeleeFromDatabase = (
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
-  startTime: new Date(data.start_time + "+00:00"),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
@@ -218,7 +218,7 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
   emojicoin1Symbols: data.emojicoin_1_symbols,
   emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
-  startTime: new Date(data.start_time + "+00:00"),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
@@ -795,7 +795,7 @@ export const toMarket1MPeriodsInLastDay = (
   nonce: BigInt(data.nonce),
   volume: BigInt(data.volume),
   baseVolume: BigInt(data.base_volume),
-  startTime: data.start_time,
+  startTime: postgresTimestampToDate(data.start_time),
 });
 
 export const toProcessorStatus = (data: DatabaseJsonType["processor_status"]) => ({
@@ -826,7 +826,7 @@ export const toArenaLeaderboardHistoryWithArenaInfo = (
   emojicoin1MarketAddress: data.emojicoin_1_market_address,
   emojicoin0MarketId: BigInt(data.emojicoin_0_market_id),
   emojicoin1MarketId: BigInt(data.emojicoin_1_market_id),
-  startTime: new Date(data.start_time + "+00:00"),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
