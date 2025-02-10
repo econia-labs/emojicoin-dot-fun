@@ -7,6 +7,7 @@ export const ROUTES = {
     candlesticks: "/api/candlesticks",
     pools: "/api/pools",
   },
+  arena: "/arena",
   cult: "/cult",
   dexscreener: "/dexscreener",
   docs: "https://docs.emojicoin.fun/category/--start-here",
