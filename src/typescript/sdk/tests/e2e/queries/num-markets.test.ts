@@ -4,6 +4,12 @@ import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../../src/utils/aptos-client";
 import TestHelpers from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
+import {
+  fetchLargestMarketID,
+  postgrest,
+  TableName,
+  toMarketRegistrationEventModel,
+} from "../../../src/indexer-v2";
 
 jest.setTimeout(20000);
 
@@ -50,10 +56,37 @@ describe("fetches the number of registered markets based on the latest processed
         options: {
           ledgerVersion: Number(version),
         },
-      }).then((r) => toRegistryView(r).numMarkets);
+      })
+        .then(toRegistryView)
+        .then((r) => r.numMarkets);
       expect(res).toBe(expected);
     });
 
     await Promise.all(verifyAll);
+  });
+
+  it("gets the number of registered markets by selecting the largest market ID", async () => {
+    const largestMarketID = await fetchLargestMarketID();
+    // Now manually select the market registration event, in case the market has had activity since
+    // being registered.
+    const marketRegistrationModel = await postgrest
+      .from(TableName.MarketRegistrationEvents)
+      .select("*")
+      .eq("market_id", largestMarketID)
+      .single()
+      .then((res) => res.data)
+      .then(toMarketRegistrationEventModel);
+
+    const { version } = marketRegistrationModel.transaction;
+    const numMarketsAtVersion = await RegistryView.view({
+      aptos,
+      options: {
+        ledgerVersion: version,
+      },
+    })
+      .then(toRegistryView)
+      .then((res) => res.numMarkets)
+      .then(Number);
+    expect(largestMarketID).toBe(numMarketsAtVersion);
   });
 });
