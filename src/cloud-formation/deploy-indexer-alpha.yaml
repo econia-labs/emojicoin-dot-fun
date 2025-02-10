@@ -1,6 +1,6 @@
 ---
 parameters:
-  BrokerImageVersion: '5.0.0'
+  BrokerImageVersion: '5.0.1'
   DeployAlb: 'true'
   DeployAlbDnsRecord: 'true'
   DeployBastionHost: 'true'
