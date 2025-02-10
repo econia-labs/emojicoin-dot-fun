@@ -8,12 +8,6 @@ const withBundleAnalyzer = analyzer({
 });
 
 const DEBUG = process.env.BUILD_DEBUG === "true";
-const styledComponentsConfig = {
-  displayName: true,
-  ssr: true,
-  fileName: true,
-  minify: false,
-};
 /** @type {import('next').NextConfig} */
 const debugConfigOptions = {
   productionBrowserSourceMaps: true,
@@ -38,7 +32,7 @@ const nextConfig = {
     ignoreBuildErrors: process.env.IGNORE_BUILD_ERRORS === "true",
   },
   compiler: {
-    styledComponents: DEBUG ? styledComponentsConfig : true,
+    styledComponents: true,
   },
   ...(DEBUG ? debugConfigOptions : {}),
   // Log full fetch URLs if we're in a specific environment.
