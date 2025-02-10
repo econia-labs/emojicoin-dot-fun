@@ -9,6 +9,7 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
+import { fetchMelee } from "@/queries/arena";
 
 export const revalidate = 2;
 
@@ -78,13 +79,19 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const { marketID } = state.market;
     const marketAddress = getMarketAddress(emojis).toString();
 
-    const [chats, swaps, marketView, aptPrice, holders] = await Promise.all([
+    const [chats, swaps, marketView, aptPrice, holders, melee] = await Promise.all([
       fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       wrappedCachedContractMarketView(marketAddress),
       getAptPrice(),
       fetchCachedTopHolders(marketAddress),
+      fetchMelee({}).then((res) => (res ? res.melee : null)),
     ]);
+
+    const isInMelee =
+      !!melee &&
+      (melee.emojicoin0MarketAddress === state.market.marketAddress ||
+        melee.emojicoin1MarketAddress === state.market.marketAddress);
 
     return (
       <AptPriceContextProvider aptPrice={aptPrice}>
@@ -98,6 +105,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
             holders,
             ...state.market,
           }}
+          isInMelee={isInMelee}
         />
       </AptPriceContextProvider>
     );
