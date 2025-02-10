@@ -102,8 +102,8 @@ export const fetchNumRegisteredMarkets = async () => {
   } catch (e: unknown) {
     // If the view function fails for some reason, find the largest market id in the database for a
     // cheap fetch of the number of registered markets. Also because `count: exact` does not work.
-    await postgrest
-      .from(TableName.MarketRegistrationEvents)
+    return await postgrest
+      .from(TableName.MarketLatestStateEvent)
       .select("market_id")
       .order("market_id", toOrderBy("desc"))
       .limit(1)
