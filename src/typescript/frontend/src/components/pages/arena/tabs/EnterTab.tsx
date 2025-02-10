@@ -248,7 +248,7 @@ const EnterTabLockPhase: React.FC<{
                       setPosition({
                         open: true,
                         user: account.address as `0x${string}`,
-                        meleeId: BigInt(enterEvent.data.melee_id),
+                        meleeID: BigInt(enterEvent.data.melee_id),
                         deposits: BigInt(enterEvent.data.input_amount),
                         lastExit: undefined,
                         matchAmount: BigInt(enterEvent.data.match_amount),

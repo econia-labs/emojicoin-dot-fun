@@ -817,7 +817,7 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
 export const toArenaLeaderboardHistoryWithArenaInfo = (
   data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]
 ) => ({
-  meleeId: BigInt(data.melee_id),
+  meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
   emojicoin0Symbols: data.emojicoin_0_symbols,

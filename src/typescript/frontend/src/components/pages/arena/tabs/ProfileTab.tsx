@@ -114,7 +114,7 @@ const History = ({
       </div>
       <table className={styles["history-table"]}>
         <tbody>
-          {position && position.meleeId === arenaInfo.meleeId && (
+          {position && position.meleeID === arenaInfo.meleeID && (
             <>
               <tr
                 className={selectedRow === -1 ? styles["selected-row"] : ""}
@@ -577,7 +577,7 @@ export const ProfileTab = ({
 
   // TODO: doublecheck the calculation below
   const locked =
-    position && position.meleeId === arenaInfo.meleeId
+    position && position.meleeID === arenaInfo.meleeID
       ? BigInt(
           q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
             .mul(position.emojicoin0Balance.toString())
@@ -591,13 +591,13 @@ export const ProfileTab = ({
         )
       : undefined;
   const profits =
-    position && position.meleeId === arenaInfo.meleeId ? locked! + position.withdrawals : undefined;
+    position && position.meleeID === arenaInfo.meleeID ? locked! + position.withdrawals : undefined;
   const pnl =
-    position && position.meleeId === arenaInfo.meleeId
+    position && position.meleeID === arenaInfo.meleeID
       ? Big(profits!.toString()).div(position.deposits.toString()).sub(1).mul(100).toNumber()
       : undefined;
   const pnlOctas =
-    position && position.meleeId === arenaInfo.meleeId
+    position && position.meleeID === arenaInfo.meleeID
       ? BigInt(
           Big(position.deposits.toString())
             .mul(pnl! / 100)
@@ -619,7 +619,7 @@ export const ProfileTab = ({
     >
       <Header
         netDeposits={
-          position && position.meleeId === arenaInfo.meleeId ? position.deposits : undefined
+          position && position.meleeID === arenaInfo.meleeID ? position.deposits : undefined
         }
         currentLockedValue={locked}
         pnl={pnl}

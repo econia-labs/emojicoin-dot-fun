@@ -18,7 +18,7 @@ export default async function Arena() {
     duration: 120n * 1000n * 1000n,
     startTime: BigInt(new Date().getTime() * 1000 - 1000 * 1000 * 60),
     volume: 123n * 10n ** 8n,
-    meleeId: 2n,
+    meleeID: 2n,
     aptLocked: 12n * 10n ** 8n,
     maxMatchAmount: 5n * 10n ** 8n,
     rewardsRemaining: 12345n * 10n ** 6n,
