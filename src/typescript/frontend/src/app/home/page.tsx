@@ -16,6 +16,8 @@ import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { ORDER_BY } from "@sdk/indexer-v2/const";
+import { ARENA_MODULE_ADDRESS } from "@sdk/const";
+import { fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
 
 export const revalidate = 2;
 
@@ -79,11 +81,34 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   const aptPricePromise = getAptPrice();
 
-  const [priceFeedData, markets, numMarkets, aptPrice] = await Promise.all([
+  const meleeDataPromise = (async () => {
+    if (ARENA_MODULE_ADDRESS) {
+      const melee = await fetchArenaInfo({});
+      if (!melee) {
+        console.error("Arena is enabled, but arena info couldn't be fetched from the database.");
+        return null;
+      }
+      const [market0, market1] = await Promise.all([
+        fetchMarketStateByAddress({ address: melee.emojicoin0MarketAddress }),
+        fetchMarketStateByAddress({ address: melee.emojicoin1MarketAddress }),
+      ]);
+      if (!market0 || !market1) {
+        console.error(
+          "Arena info found, but one or both of the arena markets aren't in the market state table."
+        );
+        return null;
+      }
+      return { melee, market0, market1 };
+    }
+    return null;
+  })();
+
+  const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
     priceFeedPromise,
     marketsPromise,
     numMarketsPromise,
     aptPricePromise,
+    meleeDataPromise,
   ]).catch((e) => {
     console.error(e);
     return [
@@ -91,6 +116,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       [] as DatabaseModels["market_state"][],
       0,
       undefined,
+      null,
     ] as const;
   });
 
@@ -103,6 +129,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         sortBy={sortBy}
         searchBytes={q}
         priceFeed={priceFeedData}
+        meleeData={meleeData}
       />
     </AptPriceContextProvider>
   );
