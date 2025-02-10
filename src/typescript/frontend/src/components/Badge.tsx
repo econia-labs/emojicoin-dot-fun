@@ -1,20 +1,20 @@
-import { useThemeContext } from "context";
+import { darkColors } from "theme";
 import type { Colors } from "theme/types";
 
-export const Badge: React.FC<React.PropsWithChildren<{ color: keyof Colors }>> = ({
-  children,
+export const Badge = ({
   color,
-}) => {
-  const { theme } = useThemeContext();
-
+  children,
+}: {
+  color: keyof Colors;
+} & React.PropsWithChildren) => {
   return (
     <div
       style={{
-        border: `1px solid ${theme.colors[color]}`,
+        border: `1px solid ${darkColors[color]}`,
         borderRadius: "8px",
-        color: theme.colors[color],
+        color: darkColors[color],
       }}
-      className="pixel-heading-4 px-[.4rem] h-min h-min"
+      className="pixel-heading-4 px-[.4rem] h-min"
     >
       {children}
     </div>
