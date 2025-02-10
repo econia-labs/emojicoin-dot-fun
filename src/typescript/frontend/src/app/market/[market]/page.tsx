@@ -83,12 +83,13 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       wrappedCachedContractMarketView(marketAddress.toString()),
       getAptPrice(),
-      fetchMelee({}),
+      fetchMelee({}).then((res) => (res ? res.melee : null)),
     ]);
 
     const isInMelee =
-      melee?.arenaMelee.emojicoin0MarketAddress === state.market.marketAddress ||
-      melee?.arenaMelee.emojicoin1MarketAddress === state.market.marketAddress;
+      !!melee &&
+      (melee.emojicoin0MarketAddress === state.market.marketAddress ||
+        melee.emojicoin1MarketAddress === state.market.marketAddress);
 
     return (
       <AptPriceContextProvider aptPrice={aptPrice}>
