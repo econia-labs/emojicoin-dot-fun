@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
-import { LIMIT, ORDER_BY } from "../../const";
+import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
 import { DEFAULT_SORT_BY, type MarketStateQueryArgs } from "../../types/common";
 import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
@@ -76,6 +76,29 @@ export const fetchMarketsWithCount = queryHelperWithCount(
 );
 
 /**
+ * A manual query to get the largest market ID and thus the total number of markets registered
+ * on-chain, according to the indexer thus far.
+ *
+ * This is necessary to use because for some reason, { count: "exact", head: "true" } in the
+ * postgrest-js API doesn't work when there are no rows returned and it's only counting the total
+ * number of rows.
+ *
+ * This is used instead of the market registration events table because `market_latest_state_event`
+ * has an index on `market_id`.
+ *
+ * @returns the largest market ID, aka the total number of markets registered
+ */
+export const fetchLargestMarketID = async () => {
+  return await postgrest
+    .from(TableName.MarketLatestStateEvent)
+    .select("market_id")
+    .order("market_id", toOrderBy("desc"))
+    .limit(1)
+    .single()
+    .then((r) => Number(r.data?.market_id) ?? 0);
+};
+
+/**
  * Retrieves the number of markets by querying the view function in the registry contract on-chain.
  * The ledger (transaction) version is specified in order to reflect the exact total number of
  * unique markets the `emojicoin-dot-fun` processor will have processed up to that version.
@@ -100,14 +123,9 @@ export const fetchNumRegisteredMarkets = async () => {
     }).then((r) => toRegistryView(r).numMarkets);
     return Number(numRegisteredMarkets);
   } catch (e: unknown) {
-    // If the view function fails, our NextJS backend is probably rate-limited by the Aptos rest API
-    // and we should just find the count ourselves. Since this is a costly operation, this should
-    // primarily be a fallback to avoid defaulting to "0" in the UI. In practice, we should never
-    // get rate-limited, since we'll cache the query results and add a proper revalidation time.
-    return postgrest
-      .from(TableName.MarketState)
-      .select("", { count: "exact", head: true })
-      .then((r) => r.count ?? 0);
+    // If the view function fails for some reason, find the largest market id in the database for a
+    // cheap fetch of the number of registered markets. Also because `count: exact` does not work.
+    return await fetchLargestMarketID();
   }
 };
 
