@@ -84,11 +84,21 @@ export default async function Home({ searchParams }: HomePageParams) {
   const meleeDataPromise = (async () => {
     if (ARENA_MODULE_ADDRESS) {
       const melee = await fetchArenaInfo({});
+      if (!melee) {
+        console.error("Arena is enabled, but arena info couldn't be fetched from the database.");
+        return null;
+      }
       const [market0, market1] = await Promise.all([
-        fetchMarketStateByAddress({ address: melee!.emojicoin0MarketAddress }),
-        fetchMarketStateByAddress({ address: melee!.emojicoin1MarketAddress }),
+        fetchMarketStateByAddress({ address: melee.emojicoin0MarketAddress }),
+        fetchMarketStateByAddress({ address: melee.emojicoin1MarketAddress }),
       ]);
-      return { melee: melee!, market0: market0!, market1: market1! };
+      if (!market0 || !market1) {
+        console.error(
+          "Arena info found, but one or both of the arena markets aren't in the market state table."
+        );
+        return null;
+      }
+      return { melee, market0, market1 };
     }
     return null;
   })();
