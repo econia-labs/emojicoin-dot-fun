@@ -7,8 +7,8 @@ import {
   type ArenaMeleeModel,
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
-  postgresTimestampToDate,
 } from "../indexer-v2";
+import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
 import { type AnyNumberString, type Types } from "./types";
