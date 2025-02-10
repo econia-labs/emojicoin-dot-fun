@@ -67,21 +67,21 @@ describe("fetches the number of registered markets based on the latest processed
 
   it("gets the number of registered markets by selecting the largest market ID", async () => {
     const largestMarketID = await fetchLargestMarketID();
-    // Now manually select the market registration event, in case the market has had activity since
-    // being registered.
-    const marketRegistrationModel = await postgrest
+    // Now manually select the market registration event's transaction version, to be specified
+    // explicitly in a `registry_view` call below to check the number of markets at that version.
+    const ledgerVersion = await postgrest
       .from(TableName.MarketRegistrationEvents)
       .select("*")
       .eq("market_id", largestMarketID)
       .single()
       .then((res) => res.data)
-      .then(toMarketRegistrationEventModel);
+      .then(toMarketRegistrationEventModel)
+      .then((res) => res.transaction.version);
 
-    const { version } = marketRegistrationModel.transaction;
     const numMarketsAtVersion = await RegistryView.view({
       aptos,
       options: {
-        ledgerVersion: version,
+        ledgerVersion,
       },
     })
       .then(toRegistryView)
