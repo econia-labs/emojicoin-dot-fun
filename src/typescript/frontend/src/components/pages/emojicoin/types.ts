@@ -19,6 +19,7 @@ type DataProps = MarketMetadataModel & {
 
 export interface EmojicoinProps {
   data: DataProps;
+  isInMelee: boolean;
 }
 
 export interface MainInfoProps {

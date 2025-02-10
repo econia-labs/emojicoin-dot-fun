@@ -19,6 +19,7 @@ import AnimatedDropdownItem from "./components/animated-dropdown-item";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { ROUTES } from "router/routes";
 import { useRouter } from "next/navigation";
+import { Badge } from "components/Badge";
 
 const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-black";
 
@@ -157,7 +158,18 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 onClick={handleCloseMobileMenu}
                 width="100%"
               >
-                <MobileMenuItem title={title} borderBottom={i !== linksForCurrentPage.length - 1} />
+                <MobileMenuItem
+                  title={title}
+                  borderBottom={i !== linksForCurrentPage.length - 1}
+                  pill={
+                    title === "arena"
+                      ? {
+                          className: "flex flex-row items-center gap-[.5em]",
+                          pill: <Badge color="black">NEW</Badge>,
+                        }
+                      : undefined
+                  }
+                />
               </Link>
             );
           })}
