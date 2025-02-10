@@ -14,9 +14,9 @@ import { marketToLatestBars } from "@/store/event/candlestick-bars";
 import Carousel from "components/carousel";
 import { Text } from "components";
 import { GlobeIcon } from "lucide-react";
-import { useThemeContext } from "context";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
+import { darkColors } from "theme";
 
 const EVENT_TYPES: SubscribableBrokerEvents[] = ["Chat", "PeriodicState", "Swap"];
 
@@ -38,8 +38,6 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
 
   useReliableSubscribe({ eventTypes: EVENT_TYPES });
 
-  const { theme } = useThemeContext();
-
   return (
     <Box>
       {props.isInMelee && (
@@ -55,7 +53,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
                 To trade this inside the melee, go to arena
               </Text>
             </Link>
-            <GlobeIcon color={theme.colors.econiaBlue} />
+            <GlobeIcon color={darkColors.econiaBlue} />
           </div>
         </Carousel>
       )}
