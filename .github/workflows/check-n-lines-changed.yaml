@@ -339,6 +339,8 @@ jobs:
       run: |
     - id: 'get-approvals'
       name: 'Get number of approving reviews'
+      # Sum up the number of approvals across all reviewers, only counting a
+      # review as approving if it is the last review by that reviewer.
       run: |
         APPROVALS=$(
           gh pr view ${{ github.event.pull_request.number }} \
@@ -387,5 +389,6 @@ name: 'Check number of lines changed'
     branches-ignore:
     - 'production'
     - 'fallback'
+    types: null
   pull_request_review: null
 ...
