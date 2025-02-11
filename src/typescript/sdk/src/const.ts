@@ -11,9 +11,20 @@ import { type DatabaseStructType } from "./indexer-v2/types/json-types";
 import { type Types } from "./types";
 
 export const VERCEL = process.env.VERCEL === "1";
+let vercelTargetEnv: "production" | "preview" | "development";
+if (
+  VERCEL &&
+  process.env.VERCEL_TARGET_ENV &&
+  !["production", "preview", "development"].includes(process.env.VERCEL_TARGET_ENV)
+) {
+  const val = process.env.VERCEL_TARGET_ENV;
+  throw new Error(`Unexpected VERCEL_TARGET_ENV value "${val}". Please add it to sdk/src/const.ts`);
+}
+export const VERCEL_TARGET_ENV = process.env.VERCEL_TARGET_ENV as typeof vercelTargetEnv;
 if (
   !process.env.NEXT_PUBLIC_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS ||
+  !process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS ||
   !process.env.NEXT_PUBLIC_APTOS_NETWORK
@@ -21,6 +32,7 @@ if (
   const missing = [
     ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
     ["NEXT_PUBLIC_REWARDS_MODULE_ADDRESS", process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS],
+    ["NEXT_PUBLIC_ARENA_MODULE_ADDRESS", process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
     ["NEXT_PUBLIC_APTOS_NETWORK", process.env.NEXT_PUBLIC_APTOS_NETWORK],
@@ -42,7 +54,7 @@ if (!APTOS_NETWORK) {
 }
 
 const clientKeys: Record<Network, string | undefined> = {
-  [Network.LOCAL]: process.env.NEXT_PUBLIC_LOCAL_APTOS_API_KEY,
+  [Network.LOCAL]: undefined,
   [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
   [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
   [Network.TESTNET]: process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY,
@@ -50,7 +62,7 @@ const clientKeys: Record<Network, string | undefined> = {
 };
 
 const serverKeys: Record<Network, string | undefined> = {
-  [Network.LOCAL]: process.env.SERVER_LOCAL_APTOS_API_KEY,
+  [Network.LOCAL]: undefined,
   [Network.CUSTOM]: process.env.SERVER_CUSTOM_APTOS_API_KEY,
   [Network.DEVNET]: process.env.SERVER_DEVNET_APTOS_API_KEY,
   [Network.TESTNET]: process.env.SERVER_TESTNET_APTOS_API_KEY,
@@ -60,12 +72,16 @@ const serverKeys: Record<Network, string | undefined> = {
 const clientApiKey = clientKeys[APTOS_NETWORK];
 const serverApiKey = serverKeys[APTOS_NETWORK];
 
+// If the server api key is available, use it. If it's not available, that means the runtime
+// is in a client-side context, and it should use the API key for client-side queries.
 export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
 
 // Select the API key from the list of env API keys. This means we don't have to change the env
 // var for API keys when changing environments- we just need to provide them all every time, which
 // is much simpler.
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
+export const ARENA_MODULE_ADDRESS = (() =>
+  AccountAddress.from(process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 export const INTEGRATOR_ADDRESS = (() =>

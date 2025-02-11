@@ -12,7 +12,7 @@ import { HEADERS, MOBILE_HEADERS } from "./constants";
 
 import { getEmptyListTr } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
-import type { OrderByStrings } from "@sdk/queries/const";
+import type { OrderByStrings } from "@sdk/indexer-v2/const";
 import useElementDimensions from "@hooks/use-element-dimensions";
 import { type PoolsData } from "../../ClientPoolsPage";
 

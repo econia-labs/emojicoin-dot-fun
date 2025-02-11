@@ -4,7 +4,7 @@ import {
   toMarketRegistrationEventModel,
   toSwapEventModel,
 } from "../../types";
-import { LIMIT } from "../../../queries";
+import { LIMIT } from "../../const";
 import type { MarketStateQueryArgs } from "../../types/common";
 import { postgrest, toQueryArray } from "../client";
 import { TableName } from "../../types/json-types";

@@ -1,5 +1,5 @@
 import { type Period } from "../../const";
-import { type OrderBy } from "../../queries/const";
+import { type OrderBy } from "../const";
 import { type AnyNumberString } from "../../types";
 
 export enum SortMarketsBy {

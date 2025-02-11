@@ -13,7 +13,7 @@ import {
 } from "../../../src";
 import { calculateDeltaPercentageForQ64s, toPriceFeed } from "../../../src/indexer-v2/types";
 import { SortMarketsBy } from "../../../src/indexer-v2/types/common";
-import { ORDER_BY } from "../../../src/queries";
+import { ORDER_BY } from "../../../src/indexer-v2/const";
 import Big from "big.js";
 
 jest.setTimeout(30000);
