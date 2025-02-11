@@ -38,7 +38,7 @@ jobs:
             grep -c "APPROVED" || echo "0"
         )
         echo "Number of approvals: $APPROVALS"
-        echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
+        echo "approvals=$APPROVALS" >> "$GITHUB_OUTPUT"
     - name: 'Check size versus approvals'
       run: |
         TOTAL=$((
