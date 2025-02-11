@@ -28,6 +28,7 @@ import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
 import { connectNewClient, compareParsedData, subscribe, customWaitFor } from "./utils";
+import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
 
 jest.setTimeout(20000);
 
@@ -72,6 +73,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     // Register a market for use in the following tests.
     const registrationsOutOfOrder = await Promise.all(
       zip(senderArgs, marketData).map(async ([args, market], originalIndex) => {
+        console.warn("registering market" + String(market.symbolData.symbol));
         return RegisterMarket.submit({
           ...args,
           emojis: market.emojis.map((e) => e.bytes),
@@ -482,12 +484,9 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     // Wait for the broker to send all 10 messages:
     // 1 registration, 2 swaps, 2 chats, and 5 state event models.
     await customWaitFor(
-      () => {
-        console.debug();
-        return messageEvents.length === 10;
-      },
+      () => messageEvents.length === 10,
       () =>
-        JSON.stringify(
+        stringifyJSONWithBigInts(
           events.map((v) => ({
             event: v.eventName,
             txn: v.transaction.version,

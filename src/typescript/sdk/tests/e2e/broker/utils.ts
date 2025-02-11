@@ -192,7 +192,9 @@ export const setNextMeleeDurationAndEnsureCrank = async (
   const publisher = getPublisher();
   // End the first melee by cranking with `enter` and set the next melee's duration.
   await emojicoin.arena.setNextMeleeDuration(publisher, nextDuration);
+  console.warn("right before first enter");
   await emojicoin.arena.enter(publisher, 1n, false, symbol1, symbol2, "symbol1");
+  console.warn("right after first enter");
   const { currentMeleeID: newMeleeID } = await fetchArenaRegistryView();
   const newMelee = await fetchArenaMeleeView(newMeleeID).then(fetchMeleeEmojiData);
   const [newSymbol1, newSymbol2] = [newMelee.market1.symbolEmojis, newMelee.market2.symbolEmojis];
