@@ -21,10 +21,18 @@ export default async function preTest() {
     // --------------------------------------------------------------------------------------
     //                             Start the docker containers.
     // --------------------------------------------------------------------------------------
+    const CI = !!process.env.CI;
+    const showTestLogsInDevelopment = process.env.SHOW_TEST_LOGS_IN_DEVELOPMENT;
+
     // Start the Docker test harness.
     await DockerTestHarness.run({
-      filterLogsFrom:
-        process.env.FILTER_TEST_LOGS === "true" ? ["broker", "processor", "postgres"] : [],
+      filterLogsFrom: CI
+        ? []
+        : showTestLogsInDevelopment
+          ? []
+          : // By default, filter most logs in local development. They make it difficult to see
+            // jest errors and warnings.
+            ["broker", "processor", "postgres"],
     });
   }
 }
