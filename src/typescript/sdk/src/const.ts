@@ -119,6 +119,20 @@ export const MARKET_REGISTRATION_DEPOSIT = 1n * ONE_APT_BIGINT;
 export const MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST = ONE_APT * 0.005;
 export const MARKET_REGISTRATION_GAS_ESTIMATION_FIRST = ONE_APT * 0.6;
 export const BASIS_POINTS_PER_UNIT = 10_000n;
+
+// Arena constants.
+export const ARENA_CONSTANTS = {
+  /**
+   * Note that the duration here reflects the contract when deployed on public networks.
+   * In test/CI environments, the `deployer` service may alter this to be much smaller to
+   * facilitate reasonable test durations. See `src/docker/deployer/sh`.
+   */
+  DEFAULT_DURATION: 20n * 3_600_000_000n,
+  DEFAULT_AVAILABLE_REWARDS: 1000n * 100_000_000n,
+  DEFAULT_MAX_MATCH_PERCENTAGE: 50,
+  DEFAULT_MAX_MATCH_AMOUNT: 5n * 100_000_000n,
+};
+
 /**
  * A market's virtual reserves upon creation. Used to calculate the swap price
  * of a market when no swaps exist yet.

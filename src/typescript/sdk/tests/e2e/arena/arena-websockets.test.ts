@@ -2,12 +2,7 @@
 
 import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import {
-  fetchArenaMeleeView,
-  fetchArenaRegistryView,
-  fetchMeleeEmojiData,
-  type MeleeEmojiData,
-} from "../../../src/markets/arena-utils";
+import { type MeleeEmojiData } from "../../../src/markets/arena-utils";
 import {
   isArenaEnterModel,
   isArenaExitModel,
@@ -20,31 +15,30 @@ import {
   connectNewClient,
   customWaitFor,
   depositToVault,
+  ONE_MINUTE_MICROSECONDS,
+  registerAndUnlockInitialMarketsForArenaTest,
+  setNextMeleeDurationAndEnsureCrank,
   subscribe,
-  unlockInitialMarkets,
-} from "./utils";
+} from "../broker/utils";
 
 describe("tests to ensure that arena websocket events work as expected", () => {
   const user = getFundedAccount("085");
   let melee: MeleeEmojiData;
   const emojicoin = new EmojicoinClient();
+
+  // The next arena markets.
   let symbol1: SymbolEmoji[];
   let symbol2: SymbolEmoji[];
 
   beforeAll(async () => {
-    await fetchArenaRegistryView()
-      .then(({ currentMeleeID }) => currentMeleeID)
-      .then(fetchArenaMeleeView)
-      .then(fetchMeleeEmojiData)
-      .then((res) => (melee = res));
+    // Prepare the on-chain state for the arena contract to immediately exit the initial arena.
+    await registerAndUnlockInitialMarketsForArenaTest();
+    await setNextMeleeDurationAndEnsureCrank(ONE_MINUTE_MICROSECONDS).then((res) => {
+      symbol1 = res.symbol1;
+      symbol2 = res.symbol2;
+      melee = res.melee;
+    });
 
-    // The first two markets registered are registered in the docker deployer service.
-    // See `src/docker/deployer`.
-    expect(melee.market1.symbolData.symbol).toEqual("💧");
-    expect(melee.market2.symbolData.symbol).toEqual("🔥");
-    await unlockInitialMarkets();
-    symbol1 = melee.market1.symbolEmojis;
-    symbol2 = melee.market2.symbolEmojis;
     return true;
   });
 
@@ -64,6 +58,9 @@ describe("tests to ensure that arena websocket events work as expected", () => {
       // Do not lock in, otherwise vault balance updates are emitted.
       .enter(user, ONE_APT_BIGINT, false, symbol1, symbol2, "symbol1")
       .then(({ arena, response }) => {
+        if ("melee" in arena.model) {
+          throw new Error("The crank for a new melee shouldn't have been pulled here.");
+        }
         expect(arena.model.enter.meleeID).toEqual(melee.view.meleeID);
         expect(arena.model.enter.user).toEqual(user.accountAddress.toString());
         return response;

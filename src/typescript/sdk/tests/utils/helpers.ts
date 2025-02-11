@@ -36,6 +36,8 @@ export const getPublisherPrivateKey = () => {
   return privateKey;
 };
 
+export const getPublisher = () => Account.fromPrivateKey({ privateKey: getPublisherPrivateKey() });
+
 /**
  * Facilitates the usage of a constant Aptos Account and client for testing the publishing
  * flow. Instead of having to republish every account for every test that needs it, we can
@@ -53,18 +55,9 @@ export function getPublishHelpers() {
     );
   }
 
-  const aptos = getAptosClient();
-
-  const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
-  if (!privateKeyString) {
-    throw new Error("process.env.PUBLISHER_PRIVATE_KEY must be set.");
-  }
-  const privateKey = getPublisherPrivateKey();
-  const publisher = Account.fromPrivateKey({ privateKey });
-
   return {
-    aptos,
-    publisher,
+    aptos: getAptosClient(),
+    publisher: getPublisher(),
   };
 }
 
