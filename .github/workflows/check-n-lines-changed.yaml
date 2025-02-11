@@ -334,7 +334,7 @@ jobs:
         echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
     - id: 'get-approvals'
-      name: 'Get number of approving reviews'
+      name: 'Get number of active approving reviews'
       # Sum up the number of approvals across all reviewers, only counting a
       # review as approving if it is the last review by that reviewer.
       # yamllint disable rule:indentation
