@@ -1,14 +1,8 @@
 [
   {
-    "description": "Get ready to engage in a magical conversation with draco8, where your words could lead to exciting rewards \ud83c\udf1f\nEngage in meaningful and favorable conversations with draco8 to earn additional \ud83c\udf51",
+    "description": "Get ready to have some fun with emojis. This is a recursive example!",
     "id": "0",
-    "name": "draco8",
-    "url": "https://waifus-jade.vercel.app/"
-  },
-  {
-    "description": "Receive \ud83e\udde7 by interacting with the community on hongbao chat. Most prosperous holders are ranked on a leaderboard!",
-    "id": "1",
-    "name": "hongbao chat",
-    "url": "https://hongbao-chat.vercel.app/"
+    "name": "emojicoin",
+    "url": "https://emojicoin.fun"
   }
 ]

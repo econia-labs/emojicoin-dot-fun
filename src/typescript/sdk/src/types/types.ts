@@ -17,6 +17,7 @@ import {
 } from "./json-types";
 import { type STRUCT_STRINGS } from "../utils";
 import { type Flatten } from ".";
+import { type SymbolEmoji } from "../emoji_data";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);
@@ -367,8 +368,8 @@ export type Types = {
 
   ArenaMelee: {
     meleeId: bigint;
-    emojicoin0MarketAddress: string;
-    emojicoin1MarketAddress: string;
+    emojicoin0MarketAddress: AccountAddressString;
+    emojicoin1MarketAddress: AccountAddressString;
     startTime: bigint;
     duration: bigint;
     maxMatchPercentage: bigint;
@@ -377,7 +378,7 @@ export type Types = {
   };
 
   ArenaEnter: {
-    user: string;
+    user: AccountAddressString;
     meleeId: bigint;
     inputAmount: bigint;
     quoteVolume: bigint;
@@ -392,7 +393,7 @@ export type Types = {
   };
 
   ArenaExit: {
-    user: string;
+    user: AccountAddressString;
     meleeId: bigint;
     tapOutFee: bigint;
     emojicoin0Proceeds: bigint;
@@ -404,7 +405,7 @@ export type Types = {
   };
 
   ArenaSwap: {
-    user: string;
+    user: AccountAddressString;
     meleeId: bigint;
     quoteVolume: bigint;
     integratorFee: bigint;
@@ -421,7 +422,7 @@ export type Types = {
   };
 
   ArenaPositions: {
-    user: string;
+    user: AccountAddressString;
     meleeId: bigint;
     open: boolean;
     emojicoin0Balance: bigint;
@@ -438,14 +439,14 @@ export type Types = {
   };
 
   ArenaLeaderboard: {
-    user: string;
+    user: AccountAddressString;
     open: boolean;
     emojicoin0Balance: bigint;
     emojicoin1Balance: bigint;
     profits: bigint;
     losses: bigint;
-    pnl_percent: number;
-    pnl_octas: number;
+    pnlPercent: number;
+    pnlOctas: number;
   };
 
   ArenaInfo: {
@@ -453,8 +454,12 @@ export type Types = {
     volume: bigint;
     rewardsRemaining: bigint;
     aptLocked: bigint;
-    emojicoin0MarketAddress: string;
-    emojicoin1MarketAddress: string;
+    emojicoin0MarketAddress: AccountAddressString;
+    emojicoin0Symbols: SymbolEmoji[];
+    emojicoin0MarketID: bigint;
+    emojicoin1MarketAddress: AccountAddressString;
+    emojicoin1Symbols: SymbolEmoji[];
+    emojicoin1MarketID: bigint;
     startTime: bigint;
     duration: bigint;
     maxMatchPercentage: bigint;

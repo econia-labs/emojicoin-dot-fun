@@ -104,7 +104,7 @@ const MainCard = (props: MainCardProps) => {
               className={`flex flex-row styled-emoji ${featured?.market.emojis.length === 1 ? "styled-single-emoji" : "styled-double-emoji"} z-[-1]`}
             >
               <motion.div
-                className="flex relative"
+                className="flex relative items-center h-[120px]"
                 initial={{
                   right: -300,
                   opacity: 0,

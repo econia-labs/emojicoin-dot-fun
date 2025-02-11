@@ -109,8 +109,8 @@ const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types
 
 const toArenaMeleeFromDatabase = (data: DatabaseStructType["ArenaMelee"]): Types["ArenaMelee"] => ({
   meleeId: BigInt(data.melee_id),
-  emojicoin0MarketAddress: data.emojicoin_0_market_address,
-  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
+  emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
   startTime: postgresTimestampToMicroseconds(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
@@ -120,7 +120,7 @@ const toArenaMeleeFromDatabase = (data: DatabaseStructType["ArenaMelee"]): Types
 
 const toArenaEnterFromDatabase = (data: DatabaseStructType["ArenaEnter"]): Types["ArenaEnter"] => ({
   meleeId: BigInt(data.melee_id),
-  user: data.user,
+  user: toAccountAddressString(data.user),
   inputAmount: BigInt(data.input_amount),
   quoteVolume: BigInt(data.quote_volume),
   integratorFee: BigInt(data.integrator_fee),
@@ -135,7 +135,7 @@ const toArenaEnterFromDatabase = (data: DatabaseStructType["ArenaEnter"]): Types
 
 const toArenaExitFromDatabase = (data: DatabaseStructType["ArenaExit"]): Types["ArenaExit"] => ({
   meleeId: BigInt(data.melee_id),
-  user: data.user,
+  user: toAccountAddressString(data.user),
   tapOutFee: BigInt(data.tap_out_fee),
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
@@ -147,7 +147,7 @@ const toArenaExitFromDatabase = (data: DatabaseStructType["ArenaExit"]): Types["
 
 const toArenaSwapFromDatabase = (data: DatabaseStructType["ArenaSwap"]): Types["ArenaSwap"] => ({
   meleeId: BigInt(data.melee_id),
-  user: data.user,
+  user: toAccountAddressString(data.user),
   quoteVolume: BigInt(data.quote_volume),
   integratorFee: BigInt(data.integrator_fee),
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
@@ -167,7 +167,7 @@ const toArenaVaultBalanceUpdateFromDatabase = (
 const toArenaPositionsFromDatabase = (
   data: DatabaseStructType["ArenaPositions"]
 ): Types["ArenaPositions"] => ({
-  user: data.user,
+  user: toAccountAddressString(data.user),
   meleeId: BigInt(data.melee_id),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
@@ -179,14 +179,14 @@ const toArenaPositionsFromDatabase = (
 const toArenaLeaderboardFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboard"]
 ): Types["ArenaLeaderboard"] => ({
-  user: data.user,
+  user: toAccountAddressString(data.user),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
-  pnl_percent: data.pnl_percent,
-  pnl_octas: data.pnl_octas,
+  pnlPercent: data.pnl_percent,
+  pnlOctas: data.pnl_octas,
 });
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
@@ -194,8 +194,12 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   volume: BigInt(data.volume),
   rewardsRemaining: BigInt(data.rewards_remaining),
   aptLocked: BigInt(data.apt_locked),
-  emojicoin0MarketAddress: data.emojicoin_0_market_address,
-  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
+  emojicoin0Symbols: data.emojicoin_0_symbols,
+  emojicoin0MarketID: BigInt(data.emojicoin_0_market_id),
+  emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
+  emojicoin1Symbols: data.emojicoin_1_symbols,
+  emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
   startTime: postgresTimestampToMicroseconds(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
@@ -374,7 +378,7 @@ type ChatEventData = {
 };
 
 const toChatEventData = (data: DatabaseStructType["ChatEventData"]): ChatEventData => ({
-  user: data.user,
+  user: toAccountAddressString(data.user),
   message: data.message,
   userEmojicoinBalance: BigInt(data.user_emojicoin_balance),
   circulatingSupply: BigInt(data.circulating_supply),

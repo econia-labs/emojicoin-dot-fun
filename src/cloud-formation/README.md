@@ -237,6 +237,23 @@ indexer deployments.
    > character count limits, for example the
    > [load balancer target group name 32 character limit].
 
+## Performing a cold upgrade
+
+If you need to deploy an indexer after there have been breaking changes to the
+database you'll need to perform a "cold upgrade": first you'll need to
+de-provision the entire stack, then re-provision it and let it backfill. You can
+use `cold-upgrade.sh` to modify the [stack deployment file] `parameters`:
+
+```sh
+sh cold-upgrade.sh kill
+```
+
+then
+
+```sh
+sh cold-upgrade.sh revive
+```
+
 ## Querying endpoints
 
 ### Public endpoints

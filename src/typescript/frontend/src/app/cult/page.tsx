@@ -8,6 +8,6 @@ export const metadata: Metadata = {
   description: `Explore the emojicoin cult`,
 };
 
-export default function LaunchEmojicoinPage() {
+export default function CultPage() {
   return <CultClientPage />;
 }

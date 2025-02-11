@@ -1,8 +1,5 @@
 import React from "react";
-
 import { FlexGap } from "@containers";
-import { Text } from "components/text";
-
 import { Arrow } from "components/svg";
 import { StyledBtn } from "./styled";
 import { useMatchBreakpoints } from "@hooks/index";
@@ -14,29 +11,20 @@ export type ButtonsBlockProps = {
   className?: string;
 };
 
-export const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
-  value,
-  numPages,
-  onChange,
-  className,
-}: ButtonsBlockProps) => {
+const ButtonText = ({ text }: { text: number | string }) => (
+  <p className="med-pixel-text font-[48px] text-dark-gray">{text}</p>
+);
+
+export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBlockProps) => {
   const { isMobile } = useMatchBreakpoints();
   const gap = isMobile ? "12px" : "17px";
   return (
     <FlexGap className={className} gap={gap} justifyContent="center">
       {/* First */}
       <StyledBtn onClick={() => onChange(1)}>
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"{"}
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"<<"}
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"}"}
-        </Text>
+        <ButtonText text={"{"} />
+        <ButtonText text={"<<"} />
+        <ButtonText text={"}"} />
       </StyledBtn>
 
       {/* Left */}
@@ -47,42 +35,17 @@ export const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           }
         }}
       >
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"{"}
-        </Text>
-
+        <ButtonText text={"{"} />
         <Arrow className="med-pixel-search-arrows" rotate="180deg" />
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"}"}
-        </Text>
+        <ButtonText text={"}"} />
       </StyledBtn>
 
-      <FlexGap
-        style={{
-          height: "fit-content",
-        }}
-        gap="12px"
-      >
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"{"}
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {value}
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          /
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {numPages}
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"}"}
-        </Text>
+      <FlexGap style={{ height: "fit-content" }} gap="12px">
+        <ButtonText text={"{"} />
+        <ButtonText text={value} />
+        <ButtonText text={"/"} />
+        <ButtonText text={numPages} />
+        <ButtonText text={"}"} />
       </FlexGap>
 
       {/* Right */}
@@ -93,30 +56,16 @@ export const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           }
         }}
       >
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"{"}
-        </Text>
-
+        <ButtonText text={"{"} />
         <Arrow className="med-pixel-search-arrows" />
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"}"}
-        </Text>
+        <ButtonText text={"}"} />
       </StyledBtn>
 
       {/* Last */}
       <StyledBtn onClick={() => onChange(numPages)}>
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"{"}
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {">>"}
-        </Text>
-
-        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {"}"}
-        </Text>
+        <ButtonText text={"{"} />
+        <ButtonText text={">>"} />
+        <ButtonText text={"}"} />
       </StyledBtn>
     </FlexGap>
   );
