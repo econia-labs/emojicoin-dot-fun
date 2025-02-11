@@ -32,10 +32,13 @@ jobs:
     - id: 'get-approvals'
       name: 'Get number of approving reviews'
       run: |
-        echo $(
+        APPROVALS=$(
           gh pr view ${{ github.event.pull_request.number }} \
-            --json reviews
+            --json reviews | \
+            jq '.reviews | map(select(.state == "APPROVED")) | length'
         )
+        echo "Number of approvals: $APPROVALS"
+        echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
     - name: 'Check size versus approvals'
       run: |
         TOTAL=$((
