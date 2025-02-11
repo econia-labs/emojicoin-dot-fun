@@ -1,0 +1,53 @@
+---
+env:
+  MAX_LINES: 300
+  OVERRIDE_APPROVING_REVIEWS: 2
+jobs:
+  check-pr-size:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v4'
+      with:
+        fetch-depth: 0
+    - id: 'n-lines-changed'
+      name: 'Get number of lines changed'
+      run: |
+        git fetch origin ${{ github.base_ref }}
+        CHANGES=$(git diff --stat origin/${{ github.base_ref }} | tail -n1)
+        INSERTIONS=$(echo $CHANGES | grep -oP '\d+(?= insertion)')
+        DELETIONS=$(echo $CHANGES | grep -oP '\d+(?= deletion)')
+        TOTAL=$((${INSERTIONS:-0} + ${DELETIONS:-0}))
+        echo "total=$TOTAL" >> $GITHUB_OUTPUT
+    - env:
+        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      name: 'Check Size and Reviews'
+      # yamllint disable rule:indentation
+      run: |
+        TOTAL_CHANGES="${{ steps.n-lines-changed.outputs.total }}"
+        APPROVALS=$(
+          gh pr view ${{ github.event.pull_request.number }} \
+            --json reviews -q '.reviews[].state' \
+            | grep -c "APPROVED" || echo "0"
+        )
+        if [ $TOTAL_CHANGES -gt ${{ env.MAX_LINES }} ] && \
+            [ $APPROVALS -lt ${{ env.OVERRIDE_APPROVING_REVIEWS }} ]; then
+          echo "❌ Big PR ($TOTAL_CHANGES lines changed) needs" \
+            "${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
+          exit 1
+        elif [ $TOTAL_CHANGES -gt ${{ env.MAX_LINES }} ]; then
+          echo "✅ Big PR ($TOTAL_CHANGES lines changed) has enough approvals"
+        else
+          echo "✅ Small PR ($TOTAL_CHANGES lines changed)"
+        fi
+# yamllint enable rule:indentation
+name: 'PR size check'
+'on':
+  pull_request:
+    branches-ignore:
+    - 'production'
+    - 'fallback'
+    types:
+    - 'opened'
+    - 'reopened'
+    - 'synchronize'
+...
