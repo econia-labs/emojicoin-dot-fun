@@ -312,7 +312,7 @@ jobs:
         fetch-depth: 0
     - id: 'get-insertions'
       name: 'Get number of lines added'
-      # yamllint:disable rule:indentation
+      # yamllint disable rule:indentation
       run: |
         git fetch origin ${{ github.base_ref }}
         INSERTIONS=$(
@@ -321,10 +321,10 @@ jobs:
         )
         echo "Number of lines added: $INSERTIONS"
         echo "insertions=$INSERTIONS" >> $GITHUB_OUTPUT
-    # yamllint:enable rule:indentation
+    # yamllint enable rule:indentation
     - id: 'get-deletions'
       name: 'Get number of lines removed'
-      # yamllint:disable rule:indentation
+      # yamllint disable rule:indentation
       run: |
         DELETIONS=$(
           git diff --stat origin/${{ github.base_ref }} | \
@@ -332,10 +332,10 @@ jobs:
         )
         echo "Number of lines removed: $DELETIONS"
         echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
-    # yamllint:enable rule:indentation
+    # yamllint enable rule:indentation
     - id: 'get-approvals'
       name: 'Get number of approving reviews'
-      # yamllint:disable rule:indentation
+      # yamllint disable rule:indentation
       run: |
         APPROVALS=$(
           gh pr view ${{ github.event.pull_request.number }} \
@@ -344,9 +344,9 @@ jobs:
         )
         echo "Number of approvals: $APPROVALS"
         echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
-    # yamllint:enable rule:indentation
+    # yamllint enable rule:indentation
     - name: 'Check size versus approvals'
-      # yamllint:disable rule:indentation
+      # yamllint disable rule:indentation
       run: |
         TOTAL=$((
           ${{ steps.get-insertions.outputs.insertions }} + \
@@ -371,7 +371,7 @@ jobs:
         else
           echo "✅ Small PR ($TOTAL lines)"
         fi
-# yamllint:enable rule:indentation
+# yamllint enable rule:indentation
 name: 'Check number of lines changed'
 'on':
   pull_request:
@@ -382,4 +382,7 @@ name: 'Check number of lines changed'
     - 'opened'
     - 'reopened'
     - 'synchronize'
+  pull_request_review:
+    types:
+    - 'submitted'
 ...
