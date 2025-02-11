@@ -1,10 +1,10 @@
-import { ARENA_MODULE_ADDRESS, EmojicoinArena, getAptosClient } from "../../../src";
-import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+import { ARENA_MODULE_ADDRESS, EmojicoinArena, getAptosClient } from "../../src";
+import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
   fetchArenaMeleeView,
   fetchArenaRegistryView,
   fetchMeleeEmojiData,
-} from "../../../src/markets/arena-utils";
+} from "../../src/markets/arena-utils";
 
 /**
  * Because this test checks the details of the very first arena it must run separately from other
