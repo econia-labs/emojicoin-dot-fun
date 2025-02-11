@@ -43,7 +43,7 @@ describe("ensures the two arena markets and the arena module are on-chain as exp
         // The first two markets registered are registered in the docker deployer service.
         // See `src/docker/deployer`.
         expect(melee.market1.symbolData.symbol).toEqual("💧");
-        expect(melee.market2.symbolData.symbol).toEqual("🔥")
+        expect(melee.market2.symbolData.symbol).toEqual("🔥");
       });
   });
 });
