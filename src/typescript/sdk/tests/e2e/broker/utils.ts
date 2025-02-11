@@ -147,30 +147,29 @@ export const customWaitFor = async (condition: () => boolean) =>
  *
  * @throws if called twice in the same jest test instance
  */
-export const registerAndUnlockInitialMarketsForArenaTest = async (newSymbol: SymbolEmoji[]) => {
+export const registerAndUnlockInitialMarketsForArenaTest = async () => {
   const emojicoin = new EmojicoinClient();
   const publisher = getPublisher();
-  const numMarkets = await fetchNumRegisteredMarkets();
-  if (numMarkets !== 2) {
-    throw new Error("This function should only be called once per jest test instance.");
+
+  const voltageSymbol: SymbolEmoji[] = ["⚡"];
+  const exists = await emojicoin.view.marketExists(voltageSymbol);
+  if (exists) {
+    throw new Error(`The voltage market "⚡" is reserved for initializing arena state in tests.`);
   }
-  expect(numMarkets).toEqual(2);
 
-  // Register the market passed in.
-  await emojicoin.register(publisher, newSymbol);
+  const res1 = await emojicoin.register(publisher, voltageSymbol);
+  const res2 = await emojicoin.buy(publisher, voltageSymbol, 1n);
 
-  await fetchArenaRegistryView().then((res) =>
+  const { res3, res4 } = await fetchArenaRegistryView().then((res) =>
     fetchArenaMeleeView(res.currentMeleeID)
       .then(fetchMeleeEmojiData)
-      .then(async ({ market1, market2 }) => {
-        await emojicoin.buy(publisher, market1.symbolEmojis, 1n);
-        await emojicoin.buy(publisher, market2.symbolEmojis, 1n);
-      })
+      .then(async ({ market1, market2 }) => ({
+        res3: await emojicoin.buy(publisher, market1.symbolEmojis, 1n),
+        res4: await emojicoin.buy(publisher, market2.symbolEmojis, 1n),
+      }))
   );
 
-  // And unlock it- aka, end its grace period.
-  const res = await emojicoin.buy(publisher, newSymbol, 1n);
-  expect(res.response.success).toBe(true);
+  expect([res1, res2, res3, res4].every((v) => v.response.success)).toBe(true);
 };
 
 export const ONE_MINUTE_MICROSECONDS = 1n * 60n * 1000n * 1000n;
