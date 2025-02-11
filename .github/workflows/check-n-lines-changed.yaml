@@ -12,6 +12,7 @@ jobs:
         fetch-depth: 0
     - id: 'get-insertions'
       name: 'Get number of lines added'
+      # yamllint:disable rule:indentation
       run: |
         git fetch origin ${{ github.base_ref }}
         INSERTIONS=$(
@@ -20,8 +21,10 @@ jobs:
         )
         echo "Number of lines added: $INSERTIONS"
         echo "insertions=$INSERTIONS" >> $GITHUB_OUTPUT
+    # yamllint:enable rule:indentation
     - id: 'get-deletions'
       name: 'Get number of lines removed'
+      # yamllint:disable rule:indentation
       run: |
         DELETIONS=$(
           git diff --stat origin/${{ github.base_ref }} | \
@@ -29,8 +32,10 @@ jobs:
         )
         echo "Number of lines removed: $DELETIONS"
         echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
+    # yamllint:enable rule:indentation
     - id: 'get-approvals'
       name: 'Get number of approving reviews'
+      # yamllint:disable rule:indentation
       run: |
         APPROVALS=$(
           gh pr view ${{ github.event.pull_request.number }} \
@@ -39,23 +44,34 @@ jobs:
         )
         echo "Number of approvals: $APPROVALS"
         echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
+    # yamllint:enable rule:indentation
     - name: 'Check size versus approvals'
+      # yamllint:disable rule:indentation
       run: |
         TOTAL=$((
           ${{ steps.get-insertions.outputs.insertions }} + \
           ${{ steps.get-deletions.outputs.deletions }}
         ))
         echo "Total lines changed: $TOTAL"
-        if [ "$TOTAL" -gt "${{ env.MAX_LINES }}" ] && \
-            [ "${{ steps.get-approvals.outputs.approvals }}" -lt \
-              "${{ env.OVERRIDE_APPROVING_REVIEWS }}" ]; then
-          echo "❌ Large PR ($TOTAL lines) needs ${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
+        NEEDS_APPROVAL=0
+        if [ "$TOTAL" -gt "${{ env.MAX_LINES }}" ]; then
+          NEEDS_APPROVAL=1
+        fi
+        HAS_APPROVALS=0
+        if [ "${{ steps.get-approvals.outputs.approvals }}" -ge \
+            "${{ env.OVERRIDE_APPROVING_REVIEWS }}" ]; then
+          HAS_APPROVALS=1
+        fi
+        if [ "$NEEDS_APPROVAL" = "1" ] && [ "$HAS_APPROVALS" = "0" ]; then
+          echo "❌ Large PR ($TOTAL lines) needs" \
+              "${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
           exit 1
-        elif [ "$TOTAL" -gt "${{ env.MAX_LINES }}" ]; then
+        elif [ "$NEEDS_APPROVAL" = "1" ]; then
           echo "✅ Large PR ($TOTAL lines) has enough approvals"
         else
           echo "✅ Small PR ($TOTAL lines)"
         fi
+# yamllint:enable rule:indentation
 name: 'Check number of lines changed'
 'on':
   pull_request:
