@@ -13,10 +13,10 @@ jobs:
       name: 'Get number of lines changed'
       run: |
         git fetch origin ${{ github.base_ref }}
-        CHANGES=$(git diff --stat origin/${{ github.base_ref }} | tail -n1)
-        INSERTIONS=$(echo $CHANGES | grep -oP '\d+(?= insertion)')
-        DELETIONS=$(echo $CHANGES | grep -oP '\d+(?= deletion)')
-        TOTAL=$((${INSERTIONS:-0} + ${DELETIONS:-0}))
+        CHANGES=$(git diff --stat origin/${{ github.base_ref }})
+        INSERTIONS=$(echo "$CHANGES" | tail -n1 | grep -oP '\d+(?= insertion)' || echo "0")
+        DELETIONS=$(echo "$CHANGES" | tail -n1 | grep -oP '\d+(?= deletion)' || echo "0")
+        TOTAL=$((INSERTIONS + DELETIONS))
         echo "total=$TOTAL" >> $GITHUB_OUTPUT
     - env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
