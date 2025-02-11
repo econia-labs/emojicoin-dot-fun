@@ -326,7 +326,11 @@ type ArenaInfoData = {
   rewards_remaining: Uint64String;
   apt_locked: Uint64String;
   emojicoin_0_market_address: string;
+  emojicoin_0_symbols: SymbolEmoji[];
+  emojicoin_0_market_id: Uint64String;
   emojicoin_1_market_address: string;
+  emojicoin_1_symbols: SymbolEmoji[];
+  emojicoin_1_market_id: Uint64String;
   start_time: PostgresTimestamp;
   duration: Uint64String;
   max_match_percentage: Uint64String;
