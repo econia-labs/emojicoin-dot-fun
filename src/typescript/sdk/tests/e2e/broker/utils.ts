@@ -123,12 +123,14 @@ export const subscribe = (
   client.send(json);
 };
 
-export const customWaitFor = async (condition: () => boolean) =>
+export const customWaitFor = async (condition: () => boolean, messageOnFailure?: () => string) =>
   waitFor({
     condition,
     interval: 10,
     maxWaitTime: 5000,
-    errorMessage: `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
+    errorMessage: messageOnFailure
+      ? messageOnFailure()
+      : `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
   });
 
 /**
