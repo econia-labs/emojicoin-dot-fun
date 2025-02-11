@@ -133,7 +133,8 @@ export const customWaitFor = async (condition: () => boolean) =>
   });
 
 /**
- * Have the publisher register and trade on a market to unlock it by ending the grace period.
+ * Have the publisher register a third market and trade on all three markets to unlock them for
+ * tests. The other two markets are determined in the deployer in `src/docker/deployer/sh`.
  *
  * This facilitates beginning a new arena, since the new arena must have a new unique combination
  * of market IDs.
@@ -146,7 +147,7 @@ export const customWaitFor = async (condition: () => boolean) =>
  *
  * @throws if called twice in the same jest test instance
  */
-export const registerAndUnlockMarketForArenaTest = async (newSymbol: SymbolEmoji[]) => {
+export const registerAndUnlockInitialMarketsForArenaTest = async (newSymbol: SymbolEmoji[]) => {
   const emojicoin = new EmojicoinClient();
   const publisher = getPublisher();
   const numMarkets = await fetchNumRegisteredMarkets();
