@@ -337,10 +337,19 @@ jobs:
       name: 'Get number of approving reviews'
       # yamllint disable rule:indentation
       run: |
+    - id: 'get-approvals'
+      name: 'Get number of approving reviews'
+      run: |
         APPROVALS=$(
           gh pr view ${{ github.event.pull_request.number }} \
             --json reviews | \
-            jq '.reviews | map(select(.state == "APPROVED")) | length'
+            jq '
+              .reviews
+              | group_by(.user.login)
+              | map(last)
+              | map(select(.state == "APPROVED"))
+              | length
+            '
         )
         echo "Number of approvals: $APPROVALS"
         echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
