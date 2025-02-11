@@ -28,6 +28,7 @@ import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
 import { connectNewClient, compareParsedData, subscribe, customWaitFor } from "./utils";
+import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
 
 jest.setTimeout(20000);
 
@@ -481,7 +482,17 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     await waitForEmojicoinIndexer(highestVersion);
     // Wait for the broker to send all 10 messages:
     // 1 registration, 2 swaps, 2 chats, and 5 state event models.
-    await customWaitFor(() => messageEvents.length === 10);
+    await customWaitFor(
+      () => messageEvents.length === 10,
+      () =>
+        stringifyJSONWithBigInts(
+          events.map((v) => ({
+            event: v.eventName,
+            txn: v.transaction.version,
+            guid: v.guid,
+          }))
+        )
+    );
     expect(messageEvents.length === 10);
     expect(brokerMessages.length === 10);
     expect(events.length === 10);

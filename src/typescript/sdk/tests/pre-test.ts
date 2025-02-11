@@ -2,8 +2,8 @@
 import WebSocket from "ws";
 import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 
-// process.env.NO_TEST_SETUP => to skip the docker container test setup, like for unit tests.
-// process.env.FILTER_TEST_LOGS => quiet mode, don't output logs that print to the console a lot.
+// If you'd like to see the processor, broker, and postgres logs while the tests are running,
+// set `process.env.SHOW_TEST_LOGS_IN_DEVELOPMENT="true"` before/while running the tests.
 
 // Please note that prior to the tests, the `deployer` Docker service registers two markets, ["💧"],
 // and ["🔥"], to ensure that it's possible to publish the emojicoin arena module.
@@ -21,10 +21,18 @@ export default async function preTest() {
     // --------------------------------------------------------------------------------------
     //                             Start the docker containers.
     // --------------------------------------------------------------------------------------
+    const CI = !!process.env.CI;
+    const showTestLogsInDevelopment = process.env.SHOW_TEST_LOGS_IN_DEVELOPMENT === "true";
+
     // Start the Docker test harness.
     await DockerTestHarness.run({
-      filterLogsFrom:
-        process.env.FILTER_TEST_LOGS === "true" ? ["broker", "processor", "postgres"] : [],
+      filterLogsFrom: CI
+        ? ["processor"]
+        : showTestLogsInDevelopment
+          ? []
+          : // By default, filter most logs in local development. They make it difficult to see
+            // jest errors and warnings.
+            ["broker", "processor", "postgres"],
     });
   }
 }

@@ -160,10 +160,15 @@ export class EmojicoinClient {
     enter: typeof EmojicoinClient.prototype.arenaEnter;
     exit: typeof EmojicoinClient.prototype.arenaExit;
     swap: typeof EmojicoinClient.prototype.arenaSwap;
+    /**
+     * Note that `duration` is in microseconds.
+     */
+    setNextMeleeDuration: typeof EmojicoinClient.prototype.arenaSetNextMeleeDuration;
   } = {
     enter: this.arenaEnter.bind(this),
     exit: this.arenaExit.bind(this),
     swap: this.arenaSwap.bind(this),
+    setNextMeleeDuration: this.arenaSetNextMeleeDuration.bind(this),
   };
 
   public utils: {
@@ -621,16 +626,36 @@ export class EmojicoinClient {
       ...options,
     });
     const res = this.getTransactionEventData(response);
-    const { version, eventIndex } = res.events.arenaEnterEvents[0];
+
+    // Sometimes, the arena enter event only pulls the crank to end the current melee and start a
+    // new one. In that case, there will be a `Melee` event, not an `Enter` event.
+    const arena = res.events.arenaMeleeEvents.at(0)
+      ? {
+          event: expect(res.events.arenaMeleeEvents.at(0), Expect.ArenaMelee.Event),
+          model: expect(res.models.arenaMeleeEvents.at(0), Expect.ArenaMelee.Model),
+        }
+      : {
+          event: expect(res.events.arenaEnterEvents.at(0), Expect.ArenaEnter.Event),
+          model: expect(res.models.arenaEnterEvents.at(0), Expect.ArenaEnter.Model),
+        };
+
+    const { version, eventIndex } = arena.event;
     if (this.alwaysWaitForIndexer) {
-      await waitForArenaEventProcessed(version, eventIndex, TableName.ArenaEnterEvents);
+      if (arena.event.eventName === "ArenaMelee") {
+        await waitForArenaEventProcessed(
+          version,
+          eventIndex,
+          TableName.ArenaMeleeEvents,
+          arena.event.meleeID
+        );
+      } else {
+        await waitForArenaEventProcessed(version, eventIndex, TableName.ArenaEnterEvents);
+      }
     }
+
     return {
       ...res,
-      arena: {
-        event: expect(res.events.arenaEnterEvents.at(0), Expect.ArenaEnter.Event),
-        model: expect(res.models.arenaEnterEvents.at(0), Expect.ArenaEnter.Model),
-      },
+      arena,
     };
   }
 
@@ -659,6 +684,14 @@ export class EmojicoinClient {
         model: expect(res.models.arenaExitEvents.at(0), Expect.ArenaExit.Model),
       },
     };
+  }
+
+  private async arenaSetNextMeleeDuration(arenaPublisher: Account, duration: bigint) {
+    return await EmojicoinArena.SetNextMeleeDuration.submit({
+      aptosConfig: this.aptos.config,
+      emojicoinArena: arenaPublisher,
+      duration,
+    });
   }
 
   private emojisToHexStrings(symbolEmojis: SymbolEmoji[]) {
