@@ -19,7 +19,7 @@ import {
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
   subscribe,
-} from "./utils";
+} from "../broker/utils";
 
 describe("tests to ensure that arena websocket events work as expected", () => {
   const user = getFundedAccount("085");
