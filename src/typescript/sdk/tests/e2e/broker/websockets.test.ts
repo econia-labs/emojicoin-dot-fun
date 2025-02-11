@@ -73,7 +73,6 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     // Register a market for use in the following tests.
     const registrationsOutOfOrder = await Promise.all(
       zip(senderArgs, marketData).map(async ([args, market], originalIndex) => {
-        console.warn("registering market" + String(market.symbolData.symbol));
         return RegisterMarket.submit({
           ...args,
           emojis: market.emojis.map((e) => e.bytes),
