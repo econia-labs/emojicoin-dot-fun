@@ -1,6 +1,6 @@
 ---
 parameters:
-  BrokerImageVersion: '4.0.2'
+  BrokerImageVersion: '5.0.0'
   DeployAlb: 'true'
   DeployAlbDnsRecord: 'true'
   DeployBastionHost: 'true'
@@ -13,15 +13,14 @@ parameters:
   DeployProcessor: 'true'
   DeployRestApi: 'true'
   DeployRestApiDnsRecord: 'true'
-  DeployStack: 'true'
   DeployWaf: 'false'
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'main'
+  Environment: 'alpha'
   Network: 'testnet'
   ProcessorHealthCheckStartPeriod: 300
-  ProcessorImageVersion: '4.0.2'
+  ProcessorImageVersion: '5.0.0'
   VpcStackName: 'emoji-vpc'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
