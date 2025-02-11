@@ -11,13 +11,19 @@ jobs:
         fetch-depth: 0
     - id: 'n-lines-changed'
       name: 'Get number of lines changed'
+      # yamllint disable rule:indentation
       run: |
         git fetch origin ${{ github.base_ref }}
-        CHANGES=$(git diff --stat origin/${{ github.base_ref }})
-        INSERTIONS=$(echo "$CHANGES" | tail -n1 | grep -oP '\d+(?= insertion)' || echo "0")
-        DELETIONS=$(echo "$CHANGES" | tail -n1 | grep -oP '\d+(?= deletion)' || echo "0")
+        DIFF=$(git diff --stat origin/${{ github.base_ref }})
+        INSERTIONS=$(
+          echo "$DIFF" | tail -n1 | grep -oP '\d+(?= insertion)' || echo "0"
+        )
+        DELETIONS=$(
+          echo "$DIFF" | tail -n1 | grep -oP '\d+(?= deletion)' || echo "0"
+        )
         TOTAL=$((INSERTIONS + DELETIONS))
         echo "total=$TOTAL" >> $GITHUB_OUTPUT
+    # yamllint enable rule:indentation
     - env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
       name: 'Check Size and Reviews'
