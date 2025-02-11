@@ -3,7 +3,7 @@ env:
   MAX_LINES: 300
   OVERRIDE_APPROVING_REVIEWS: 2
 jobs:
-  check-pr-size:
+  check-n-lines-changed:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
