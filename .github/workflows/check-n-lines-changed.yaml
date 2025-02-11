@@ -1,305 +1,6 @@
 ---
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
-# foo
 env:
+  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   MAX_LINES: 300
   OVERRIDE_APPROVING_REVIEWS: 2
 jobs:
@@ -309,45 +10,52 @@ jobs:
     - uses: 'actions/checkout@v4'
       with:
         fetch-depth: 0
-    - id: 'n-lines-changed'
-      name: 'Get number of lines changed'
-      # yamllint disable rule:indentation
+    - id: 'get-insertions'
+      name: 'Get number of lines added'
       run: |
         git fetch origin ${{ github.base_ref }}
-        DIFF=$(git diff --stat origin/${{ github.base_ref }})
         INSERTIONS=$(
-          echo "$DIFF" | tail -n1 | grep -oP '\d+(?= insertion)' || echo "0"
+          git diff --stat origin/${{ github.base_ref }} | \
+          tail -n1 | grep -oP '\d+(?= insertion)' || echo "0"
         )
-        DELETIONS=$(
-          echo "$DIFF" | tail -n1 | grep -oP '\d+(?= deletion)' || echo "0"
-        )
-        TOTAL=$((INSERTIONS + DELETIONS))
-        echo "total=$TOTAL" >> $GITHUB_OUTPUT
-    # yamllint enable rule:indentation
-    - env:
-        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-      name: 'Check number of lines changed versus approvals'
-      # yamllint disable rule:indentation
+        echo "Number of lines added: $INSERTIONS"
+        echo "insertions=$INSERTIONS" >> $GITHUB_OUTPUT
+    - id: 'get-deletions'
+      name: 'Get number of lines removed'
       run: |
-        TOTAL_CHANGES="${{ steps.n-lines-changed.outputs.total }}"
-        REVIEWS=$(gh pr view ${{ github.event.pull_request.number }} \
-                 --json reviews -q '.reviews[].state' | \
-                 grep -c "APPROVED" || echo "0")
-        if ! [[ "$TOTAL_CHANGES" =~ ^[0-9]+$ ]]; then
-          echo "❌ Error: Invalid line count"
+        DELETIONS=$(
+          git diff --stat origin/${{ github.base_ref }} | \
+          tail -n1 | grep -oP '\d+(?= deletion)' || echo "0"
+        )
+        echo "Number of lines removed: $DELETIONS"
+        echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
+    - id: 'get-approvals'
+      name: 'Get number of approving reviews'
+      run: |
+        APPROVALS=$(
+          gh pr view ${{ github.event.pull_request.number }} \
+            --json reviews -q '.reviews[].state' | \
+            grep -c "APPROVED" || echo "0"
+        )
+        echo "Number of approvals: $APPROVALS"
+        echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
+    - name: 'Check size versus approvals'
+      run: |
+        TOTAL=$((
+          ${{ steps.get-insertions.outputs.insertions }} + \
+          ${{ steps.get-deletions.outputs.deletions }}
+        ))
+        echo "Total lines changed: $TOTAL"
+        if [ "$TOTAL" -gt "${{ env.MAX_LINES }}" ] && \
+            [ "${{ steps.get-approvals.outputs.approvals }}" -lt \
+              "${{ env.OVERRIDE_APPROVING_REVIEWS }}" ]; then
+          echo "❌ Large PR ($TOTAL lines) needs ${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
           exit 1
-        fi
-        if [ "$TOTAL_CHANGES" -gt "${{ env.MAX_LINES }}" ] && \
-            [ "$REVIEWS" -lt "${{ env.OVERRIDE_APPROVING_REVIEWS }}" ]; then
-          echo "❌ Large PR ($TOTAL_CHANGES lines) needs" \
-               "${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
-          exit 1
-        elif [ "$TOTAL_CHANGES" -gt "${{ env.MAX_LINES }}" ]; then
-          echo "✅ Large PR ($TOTAL_CHANGES lines) with sufficient approvals"
+        elif [ "$TOTAL" -gt "${{ env.MAX_LINES }}" ]; then
+          echo "✅ Large PR ($TOTAL lines) has enough approvals"
         else
-          echo "✅ PR within size limit ($TOTAL_CHANGES lines)"
+          echo "✅ Small PR ($TOTAL lines)"
         fi
-# yamllint enable rule:indentation
 name: 'Check number of lines changed'
 'on':
   pull_request:
