@@ -28,7 +28,7 @@ describe("tests to ensure that arena websocket events work as expected", () => {
   // To facilitate starting a new arena with a new unique combo of existing markets 1, 2, and 3.
   const thirdSymbol: SymbolEmoji[] = ["⚡"];
 
-  // The new arena markets.
+  // The next arena markets.
   let symbol1: SymbolEmoji[];
   let symbol2: SymbolEmoji[];
 

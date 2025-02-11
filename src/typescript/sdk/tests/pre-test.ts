@@ -22,7 +22,7 @@ export default async function preTest() {
     //                             Start the docker containers.
     // --------------------------------------------------------------------------------------
     const CI = !!process.env.CI;
-    const showTestLogsInDevelopment = process.env.SHOW_TEST_LOGS_IN_DEVELOPMENT;
+    const showTestLogsInDevelopment = process.env.SHOW_TEST_LOGS_IN_DEVELOPMENT === "true";
 
     // Start the Docker test harness.
     await DockerTestHarness.run({
