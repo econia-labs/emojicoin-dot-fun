@@ -40,7 +40,7 @@ jobs:
           echo "✅ Small PR ($TOTAL_CHANGES lines changed)"
         fi
 # yamllint enable rule:indentation
-name: 'PR size check'
+name: 'Check number of lines changed'
 'on':
   pull_request:
     branches-ignore:
