@@ -27,7 +27,7 @@ export default async function preTest() {
     // Start the Docker test harness.
     await DockerTestHarness.run({
       filterLogsFrom: CI
-        ? []
+        ? ["processor"]
         : showTestLogsInDevelopment
           ? []
           : // By default, filter most logs in local development. They make it difficult to see

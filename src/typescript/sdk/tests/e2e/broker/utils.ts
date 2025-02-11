@@ -27,7 +27,6 @@ import {
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { getPublisher } from "../../utils";
 import checkArenaRows from "../helpers/arena-equality-checks";
-import { fetchNumRegisteredMarkets } from "../../../src/indexer-v2";
 
 const MAX_WAIT_TIME = 5000;
 
