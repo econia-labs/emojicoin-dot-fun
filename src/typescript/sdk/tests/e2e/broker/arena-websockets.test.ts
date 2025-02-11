@@ -16,6 +16,7 @@ import {
   customWaitFor,
   depositToVault,
   ONE_MINUTE_MICROSECONDS,
+  registerAndUnlockMarketForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
   subscribe,
 } from "./utils";
@@ -30,6 +31,8 @@ describe("tests to ensure that arena websocket events work as expected", () => {
   let symbol2: SymbolEmoji[];
 
   beforeAll(async () => {
+    // Prepare the on-chain state for the arena contract to immediately exit the initial arena.
+    await registerAndUnlockMarketForArenaTest(["⚡"]);
     await setNextMeleeDurationAndEnsureCrank(ONE_MINUTE_MICROSECONDS).then((res) => {
       symbol1 = res.symbol1;
       symbol2 = res.symbol2;

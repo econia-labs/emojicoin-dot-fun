@@ -35,8 +35,5 @@ export default async function preTest() {
             // jest errors and warnings.
             ["broker", "processor", "postgres"],
     });
-
-    // Prepare the on-chain state for the arena contract to immediately exit the initial arena.
-    await registerAndUnlockMarketForArenaTest(["⚡"]);
   }
 }
