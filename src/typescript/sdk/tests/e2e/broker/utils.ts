@@ -1,6 +1,12 @@
 // cspell:word funder
 
-import { type AnyNumberString, EmojicoinArena, getAptosClient, waitFor } from "../../../src";
+import {
+  type AnyNumberString,
+  EmojicoinArena,
+  getAptosClient,
+  type SymbolEmoji,
+  waitFor,
+} from "../../../src";
 import {
   type BrokerEvent,
   type BrokerMessage,
@@ -12,15 +18,16 @@ import { type BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
 import { type BrokerEventModels } from "../../../src/indexer-v2/types";
 import checkRows from "../helpers/equality-checks";
-import { Account, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { type Account, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   fetchArenaRegistryView,
   fetchArenaMeleeView,
   fetchMeleeEmojiData,
 } from "../../../src/markets/arena-utils";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import { getPublisherPrivateKey } from "../../utils";
+import { getPublisher } from "../../utils";
 import checkArenaRows from "../helpers/arena-equality-checks";
+import { fetchNumRegisteredMarkets } from "../../../src/indexer-v2";
 
 const MAX_WAIT_TIME = 5000;
 
@@ -126,19 +133,73 @@ export const customWaitFor = async (condition: () => boolean) =>
   });
 
 /**
- * Have the publisher trade on both markets it registered to unlock them by ending the grace period.
+ * Have the publisher register and trade on a market to unlock it by ending the grace period.
+ *
+ * This facilitates beginning a new arena, since the new arena must have a new unique combination
+ * of market IDs.
+ *
+ * This function can/should only be called *ONCE* during the entire jest test suite, since it makes
+ * assumptions about the initial state on-chain.
  */
-export const unlockInitialMarkets = async () => {
+export const registerAndUnlockMarketForTestSuite = async (newSymbol: SymbolEmoji[]) => {
+  const emojicoin = new EmojicoinClient();
+  const publisher = getPublisher();
+  const numMarkets = await fetchNumRegisteredMarkets();
+  // This function should only be called at the very beginning of the test suite initialization,
+  // meaning the number of markets should be exactly only 2.
+  if (numMarkets !== 2) {
+    throw new Error("Number of markets should be 2. This function should only be called once.");
+  }
+  expect(numMarkets).toEqual(2);
+
+  // Register the market passed in.
+  await emojicoin.register(publisher, newSymbol);
+
+  await fetchArenaRegistryView().then((res) =>
+    fetchArenaMeleeView(res.currentMeleeID)
+      .then(fetchMeleeEmojiData)
+      .then(async ({ market1, market2 }) => {
+        await emojicoin.buy(publisher, market1.symbolEmojis, 1n);
+        await emojicoin.buy(publisher, market2.symbolEmojis, 1n);
+      })
+  );
+
+  // And unlock it- aka, end its grace period.
+  const res = await emojicoin.buy(publisher, newSymbol, 1n);
+  expect(res.response.success).toBe(true);
+};
+
+export const ONE_MINUTE_MICROSECONDS = 1n * 60n * 1000n * 1000n;
+
+/**
+ * Have the publisher set the next melee duration and end the current melee.
+ *
+ * Fails if the crank schedule isn't called.
+ *
+ * @returns the new market symbols for the next melee, the next melee view, and the next melee ID
+ */
+export const setNextMeleeDurationAndCrank = async (
+  nextDuration: bigint = ONE_MINUTE_MICROSECONDS
+) => {
   const { currentMeleeID } = await fetchArenaRegistryView();
   const melee = await fetchArenaMeleeView(currentMeleeID).then(fetchMeleeEmojiData);
+  const [symbol1, symbol2] = [melee.market1.symbolEmojis, melee.market2.symbolEmojis];
   const emojicoin = new EmojicoinClient();
-  const publisher = Account.fromPrivateKey({
-    privateKey: getPublisherPrivateKey(),
-  });
-  const res1 = await emojicoin.buy(publisher, melee.market1.symbolEmojis, 1n);
-  const res2 = await emojicoin.buy(publisher, melee.market2.symbolEmojis, 1n);
-  expect(res1.response.success).toBe(true);
-  expect(res2.response.success).toBe(true);
+  const publisher = getPublisher();
+  // End the first melee by cranking with `enter` and set the next melee duration.
+  await emojicoin.arena.setNextMeleeDuration(publisher, nextDuration);
+  await emojicoin.arena.enter(publisher, 1n, false, symbol1, symbol2, "symbol1");
+  const { currentMeleeID: newMeleeID } = await fetchArenaRegistryView();
+  const newMelee = await fetchArenaMeleeView(newMeleeID).then(fetchMeleeEmojiData);
+  const [newSymbol1, newSymbol2] = [newMelee.market1.symbolEmojis, newMelee.market2.symbolEmojis];
+  expect(newMeleeID).toEqual(currentMeleeID + 1n);
+  expect(newMelee.view.duration).toEqual(nextDuration);
+  return {
+    melee: newMelee,
+    meleeID: newMeleeID,
+    symbol1: newSymbol1,
+    symbol2: newSymbol2,
+  };
 };
 
 /**
