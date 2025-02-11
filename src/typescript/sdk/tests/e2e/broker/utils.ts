@@ -138,17 +138,20 @@ export const customWaitFor = async (condition: () => boolean) =>
  * This facilitates beginning a new arena, since the new arena must have a new unique combination
  * of market IDs.
  *
- * This function can/should only be called *ONCE* during the entire jest test suite, since it makes
+ * This function's intended usage is in local/test environments, to be called a single time for the
+ * lifetime of the local network.
+ *
+ * In jest, it should only be called once during the entire jest test suite, since it makes
  * assumptions about the initial state on-chain.
+ *
+ * @throws if called twice in the same jest test instance
  */
-export const registerAndUnlockMarketForTestSuite = async (newSymbol: SymbolEmoji[]) => {
+export const registerAndUnlockMarketForArenaTest = async (newSymbol: SymbolEmoji[]) => {
   const emojicoin = new EmojicoinClient();
   const publisher = getPublisher();
   const numMarkets = await fetchNumRegisteredMarkets();
-  // This function should only be called at the very beginning of the test suite initialization,
-  // meaning the number of markets should be exactly only 2.
   if (numMarkets !== 2) {
-    throw new Error("Number of markets should be 2. This function should only be called once.");
+    throw new Error("This function should only be called once per jest test instance.");
   }
   expect(numMarkets).toEqual(2);
 
@@ -178,7 +181,7 @@ export const ONE_MINUTE_MICROSECONDS = 1n * 60n * 1000n * 1000n;
  *
  * @returns the new market symbols for the next melee, the next melee view, and the next melee ID
  */
-export const setNextMeleeDurationAndCrank = async (
+export const setNextMeleeDurationAndEnsureCrank = async (
   nextDuration: bigint = ONE_MINUTE_MICROSECONDS
 ) => {
   const { currentMeleeID } = await fetchArenaRegistryView();

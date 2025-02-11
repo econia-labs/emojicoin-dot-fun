@@ -16,8 +16,7 @@ import {
   customWaitFor,
   depositToVault,
   ONE_MINUTE_MICROSECONDS,
-  registerAndUnlockMarketForTestSuite,
-  setNextMeleeDurationAndCrank,
+  setNextMeleeDurationAndEnsureCrank,
   subscribe,
 } from "./utils";
 
@@ -25,16 +24,13 @@ describe("tests to ensure that arena websocket events work as expected", () => {
   const user = getFundedAccount("085");
   let melee: MeleeEmojiData;
   const emojicoin = new EmojicoinClient();
-  // To facilitate starting a new arena with a new unique combo of existing markets 1, 2, and 3.
-  const thirdSymbol: SymbolEmoji[] = ["⚡"];
 
   // The next arena markets.
   let symbol1: SymbolEmoji[];
   let symbol2: SymbolEmoji[];
 
   beforeAll(async () => {
-    await registerAndUnlockMarketForTestSuite(thirdSymbol);
-    await setNextMeleeDurationAndCrank(ONE_MINUTE_MICROSECONDS).then((res) => {
+    await setNextMeleeDurationAndEnsureCrank(ONE_MINUTE_MICROSECONDS).then((res) => {
       symbol1 = res.symbol1;
       symbol2 = res.symbol2;
       melee = res.melee;
