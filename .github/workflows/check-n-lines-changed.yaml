@@ -378,11 +378,5 @@ name: 'Check number of lines changed'
     branches-ignore:
     - 'production'
     - 'fallback'
-    types:
-    - 'opened'
-    - 'reopened'
-    - 'synchronize'
-  pull_request_review:
-    types:
-    - 'submitted'
+  pull_request_review: null
 ...
