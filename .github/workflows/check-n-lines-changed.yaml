@@ -302,7 +302,7 @@
 env:
   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   MAX_LINES: 300
-  OVERRIDE_APPROVING_REVIEWS: 2
+  OVERRIDE_APPROVING_REVIEWS: 1
 jobs:
   check-n-lines-changed:
     runs-on: 'ubuntu-latest'
