@@ -173,7 +173,24 @@ export const registerAndUnlockInitialMarketsForArenaTest = async () => {
   expect([res1, res2, res3, res4].every((v) => v.response.success)).toBe(true);
 };
 
-export const ONE_MINUTE_MICROSECONDS = 1n * 60n * 1000n * 1000n;
+export const currentMeleeEnded = async () => {
+  const arenaRegistry = await fetchArenaRegistryView();
+  const melee = await fetchArenaMeleeView(arenaRegistry.currentMeleeID);
+
+  const res = new Promise((resolve, _) => {
+    const now = new Date().getTime();
+    const end = Number(melee.duration / 1000n) + melee.startTime.getTime();
+    if (end - now <= 0) {
+      resolve(null);
+    }
+    setTimeout(() => resolve(null), end - now);
+  });
+
+  return res;
+};
+
+export const ONE_MINUTE_MICROSECONDS = 60n * 1000n * 1000n;
+export const ONE_SECOND_MICROSECONDS = 1000n * 1000n;
 
 /**
  * Have the publisher set the next melee duration and end the current melee.
@@ -192,7 +209,8 @@ export const setNextMeleeDurationAndEnsureCrank = async (
   const publisher = getPublisher();
   // End the first melee by cranking with `enter` and set the next melee's duration.
   await emojicoin.arena.setNextMeleeDuration(publisher, nextDuration);
-  await emojicoin.arena.enter(publisher, 1n, false, symbol1, symbol2, "symbol1");
+  await currentMeleeEnded();
+  const res = await emojicoin.arena.enter(publisher, 1n, false, symbol1, symbol2, "symbol1");
   const { currentMeleeID: newMeleeID } = await fetchArenaRegistryView();
   const newMelee = await fetchArenaMeleeView(newMeleeID).then(fetchMeleeEmojiData);
   const [newSymbol1, newSymbol2] = [newMelee.market1.symbolEmojis, newMelee.market2.symbolEmojis];
@@ -203,6 +221,7 @@ export const setNextMeleeDurationAndEnsureCrank = async (
     meleeID: newMeleeID,
     symbol1: newSymbol1,
     symbol2: newSymbol2,
+    version: res.response.version,
   };
 };
 
