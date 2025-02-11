@@ -299,6 +299,8 @@
 # foo
 # foo
 # foo
+concurrency:
+  cancel-in-progress: true
 env:
   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   MAX_LINES: 300
@@ -310,6 +312,19 @@ jobs:
     - uses: 'actions/checkout@v4'
       with:
         fetch-depth: 0
+    - id: 'get-pr-number'
+      name: 'Get PR number'
+      # yamllint disable rule:indentation
+      run: |
+        PR_NUMBER=$(
+          if [ "${{ github.event_name }}" = "pull_request_review" ]; then
+            echo "${{ github.event.pull_request_review.pull_request.number }}"
+          else
+            echo "${{ github.event.pull_request.number }}"
+          fi
+        )
+        echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+    # yamllint disable rule:indentation
     - id: 'get-insertions'
       name: 'Get number of lines added'
       # yamllint disable rule:indentation
@@ -340,7 +355,7 @@ jobs:
       # yamllint disable rule:indentation
       run: |
         APPROVALS=$(
-          gh pr view ${{ github.event.pull_request.number }} \
+          gh pr view ${{ steps.get-pr-number.outputs.number }} \
             --json reviews | \
             jq '
               .reviews
