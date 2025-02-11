@@ -329,21 +329,19 @@ jobs:
       name: 'Check Size and Reviews'
       # yamllint disable rule:indentation
       run: |
-        TOTAL_CHANGES="${{ steps.n-lines-changed.outputs.total }}"
-        APPROVALS=$(
-          gh pr view ${{ github.event.pull_request.number }} \
-            --json reviews -q '.reviews[].state' \
-            | grep -c "APPROVED" || echo "0"
-        )
+        TOTAL_CHANGES="${{ steps.pr-changes.outputs.total }}"
+        REVIEWS=$(gh pr view ${{ github.event.pull_request.number }} \
+                 --json reviews -q '.reviews[].state' | \
+                 grep -c "APPROVED" || echo "0")
         if [ $TOTAL_CHANGES -gt ${{ env.MAX_LINES }} ] && \
-            [ $APPROVALS -lt ${{ env.OVERRIDE_APPROVING_REVIEWS }} ]; then
-          echo "❌ Big PR ($TOTAL_CHANGES lines changed) needs" \
-            "${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
+            [ $REVIEWS -lt ${{ env.OVERRIDE_APPROVING_REVIEWS }} ]; then
+          echo "❌ Large PR ($TOTAL_CHANGES lines) needs" \
+               "${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
           exit 1
         elif [ $TOTAL_CHANGES -gt ${{ env.MAX_LINES }} ]; then
-          echo "✅ Big PR ($TOTAL_CHANGES lines changed) has enough approvals"
+          echo "✅ Large PR ($TOTAL_CHANGES lines) with sufficient approvals"
         else
-          echo "✅ Small PR ($TOTAL_CHANGES lines changed)"
+          echo "✅ PR within size limit ($TOTAL_CHANGES lines)"
         fi
 # yamllint enable rule:indentation
 name: 'Check number of lines changed'
