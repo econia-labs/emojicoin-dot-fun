@@ -407,7 +407,7 @@ export enum TableName {
   ArenaExitEvents = "arena_exit_events",
   ArenaSwapEvents = "arena_swap_events",
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
-  ArenaPositions = "arena_positions",
+  ArenaPosition = "arena_position",
   ArenaInfo = "arena_info",
   // The view for the current arena leaderboard, all users.
   ArenaLeaderboard = "arena_leaderboard",
@@ -507,7 +507,7 @@ export type DatabaseJsonType = {
   [TableName.ArenaVaultBalanceUpdateEvents]: Flatten<
     TransactionMetadata & ArenaVaultBalanceUpdateEventData
   >;
-  [TableName.ArenaPositions]: ArenaPositionsData;
+  [TableName.ArenaPosition]: ArenaPositionsData;
   [TableName.ArenaInfo]: ArenaInfoData;
 
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
@@ -561,7 +561,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaExitEvents] &
   DatabaseJsonType[TableName.ArenaSwapEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
-  DatabaseJsonType[TableName.ArenaPositions] &
+  DatabaseJsonType[TableName.ArenaPosition] &
   DatabaseJsonType[TableName.ArenaInfo] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &

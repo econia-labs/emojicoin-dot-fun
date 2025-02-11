@@ -925,7 +925,7 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaExitEvents]: toArenaExitModel,
   [TableName.ArenaSwapEvents]: toArenaSwapModel,
   [TableName.ArenaInfo]: toArenaInfoModel,
-  [TableName.ArenaPositions]: toArenaPositionsModel,
+  [TableName.ArenaPosition]: toArenaPositionsModel,
   [TableName.ArenaVaultBalanceUpdateEvents]: toArenaVaultBalanceUpdateModel,
   [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
   [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
@@ -953,7 +953,7 @@ export type DatabaseModels = {
   [TableName.ArenaExitEvents]: ArenaExitModel;
   [TableName.ArenaSwapEvents]: ArenaSwapModel;
   [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
-  [TableName.ArenaPositions]: ArenaPositionsModel;
+  [TableName.ArenaPosition]: ArenaPositionsModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;

@@ -34,7 +34,7 @@ const selectArenaInfo = () =>
 
 const selectPosition = ({ user, meleeID }: { user: string; meleeID: bigint }) =>
   postgrest
-    .from(TableName.ArenaPositions)
+    .from(TableName.ArenaPosition)
     .select("*")
     .eq("user", user)
     .eq("melee_id", meleeID)
@@ -42,7 +42,7 @@ const selectPosition = ({ user, meleeID }: { user: string; meleeID: bigint }) =>
 
 const selectLatestPosition = ({ user }: { user: string }) =>
   postgrest
-    .from(TableName.ArenaPositions)
+    .from(TableName.ArenaPosition)
     .select("*")
     .eq("user", user)
     .order("melee_id", ORDER_BY.DESC)
