@@ -6,6 +6,10 @@ import {
   fetchMeleeEmojiData,
 } from "../../../src/markets/arena-utils";
 
+/**
+ * Because this test checks the details of the very first arena it must run separately from other
+ * arena tests.
+ */
 describe("ensures the two arena markets and the arena module are on-chain as expected", () => {
   const emojicoin = new EmojicoinClient();
   const aptos = getAptosClient();
@@ -36,10 +40,10 @@ describe("ensures the two arena markets and the arena module are on-chain as exp
       .then(fetchArenaMeleeView)
       .then(fetchMeleeEmojiData)
       .then((melee) => {
-        // the first two markets registered are registered in the docker deployer service.
+        // The first two markets registered are registered in the docker deployer service.
         // See `src/docker/deployer`.
         expect(melee.market1.symbolData.symbol).toEqual("💧");
-        expect(melee.market2.symbolData.symbol).toEqual("🔥");
+        expect(melee.market2.symbolData.symbol).toEqual("🔥")
       });
   });
 });
