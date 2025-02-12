@@ -200,5 +200,3 @@ git submodule update --init --recursive
 [uploading environment variables with vercel's ui]: https://github.com/user-attachments/assets/d613725d-82ed-4a4e-a467-a89b2cf57d91
 [vercel cli]: https://vercel.com/docs/cli
 [`move-v1.0.1-audited`]: https://github.com/econia-labs/emojicoin-dot-fun/releases/tag/move-v1.0.1-audited
-
-foo

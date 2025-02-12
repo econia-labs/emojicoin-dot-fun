@@ -32,7 +32,6 @@ dockerenv
 dockerhub
 econia
 econialabs
-elif
 emojicoin
 emojicoins
 eswatini
