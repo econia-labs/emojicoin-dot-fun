@@ -104,10 +104,7 @@ jobs:
             echo "❌ Too many changes. Need $OVERRIDE_N_APPROVALS approvals"
             if [ "${{ github.event_name }}" = "pull_request" ]; then
               echo "If the PR author hasn't updated this PR since enough"
-              echo "approvals were left, trigger a re-run by:"
-              echo " - Converting to draft"
-              echo " - Marking the PR as ready for review"
-              echo " - (Re-)requesting review"
+              echo "approvals were left, you must manually trigger a re-run"
             fi
             exit 1
           fi
@@ -121,11 +118,5 @@ name: 'Check number of lines changed'
     branches-ignore:
     - 'production'
     - 'fallback'
-    type:
-    - 'converted_to_draft'
-    - 'opened'
-    - 'synchronize'
-    - 'ready_for_review'
-    - 'reopened'
   pull_request_review: null
 ...
