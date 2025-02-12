@@ -1,3 +1,5 @@
+// cspell:word timespan
+
 import {
   type AnyNumberString,
   getPeriodStartTimeFromTime,

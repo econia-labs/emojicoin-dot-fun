@@ -74,7 +74,7 @@ const EnterTabPickPhase: React.FC<{
           <div className="flex flex-col gap-[3em] max-w-[58ch]">
             <div className="text-4xl uppercase text-white text-center">Entry cancel or error</div>
             <div className="font-forma text-light-gray leading-6 uppercase">
-              We have detected that the entry was either cancelled or an error occured during the
+              We have detected that the entry was either cancelled or an error occurred during the
               entry process. No funds were moved and you did not enter the melee.
             </div>
           </div>

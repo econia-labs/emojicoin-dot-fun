@@ -1,3 +1,5 @@
+// cspell:word chartjs
+
 import { type ChartData } from "chart.js";
 import "chart.js/auto";
 import { Box, type Props } from "./utils";

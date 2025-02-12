@@ -504,7 +504,7 @@ const Inner: React.FC<
   if (history.length === 0 && !position) {
     return (
       <div
-        className="border-solid border-dark-gray broder-[1px] border-t-[0px] text-ec-blue"
+        className="border-solid border-dark-gray border-[1px] border-t-[0px] text-ec-blue"
         style={{
           gridRow: "2",
           gridColumn: "1 / 3",
@@ -575,7 +575,6 @@ export const ProfileTab = ({
 }: ProfileTabProps & { goToEnter: () => void }) => {
   const [historyHidden, setHistoryHidden] = useState<boolean>(false);
 
-  // TODO: doublecheck the calculation below
   const locked =
     position && position.meleeID === arenaInfo.meleeID
       ? BigInt(
