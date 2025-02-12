@@ -4,40 +4,13 @@ env:
   MAX_LINES_ADDED: 300
   MAX_LINES_REMOVED: 500
   OVERRIDE_N_APPROVALS: 1
-  RECHECK_COMMAND: '/recheck-n-lines'
 jobs:
   check-n-lines-changed:
-    # yamllint disable rule:indentation
-    if: |
-      github.event_name != 'issue_comment' ||
-      (
-        contains(
-          github.event.comment.body,
-          '/recheck-n-lines'
-        ) &&
-        github.event.issue.pull_request
-      )
-    # yamllint enable rule:indentation
-    name: 'Check number of lines changed'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
       with:
         fetch-depth: 0
-    # Verify the keyword used to trigger the action from a comment, since the
-    # above `if` check requires a hard-coded value.
-    - id: 'verify-keyword'
-      # yamllint disable rule:indentation
-      run: |
-        if [ "${{ github.event_name }}" = "issue_comment" ]; then
-          BODY="${{ github.event.comment.body }}"
-          COMMAND="${{ env.RECHECK_COMMAND }}"
-          if ! echo "$BODY" | grep -q "$COMMAND"; then
-            echo "Invalid keyword trigger. Should be $COMMAND"
-            exit 1
-          fi
-        fi
-    # yamllint enable rule:indentation
     - id: 'get-pr-number'
       name: 'Get PR number'
       # yamllint disable rule:indentation
@@ -115,7 +88,13 @@ jobs:
             echo "✅ Changes exceeded limits but have required approvals"
           else
             echo "❌ Too many changes. Need $OVERRIDE_N_APPROVALS approvals"
-            echo "Trigger a recheck by commenting '$RECHECK_COMMAND'"
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "If the PR author hasn't updated this PR since enough"
+              echo "approvals were left, trigger a re-run by:"
+              echo " - Converting to draft"
+              echo " - Marking the PR as ready for review"
+              echo " - (Re-)requesting review"
+            fi
             exit 1
           fi
         else
@@ -128,6 +107,12 @@ name: 'Check number of lines changed'
     branches-ignore:
     - 'production'
     - 'fallback'
+    type:
+    - 'converted_to_draft'
+    - 'opened'
+    - 'synchronize'
+    - 'ready_for_review'
+    - 'reopened'
   pull_request_review: null
   issue_comment:
     types:
