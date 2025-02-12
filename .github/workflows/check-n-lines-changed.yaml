@@ -310,8 +310,9 @@ concurrency:
   cancel-in-progress: true
 env:
   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-  MAX_LINES: 300
-  OVERRIDE_APPROVING_REVIEWS: 1
+  MAX_LINES_ADDED: 300
+  MAX_LINES_REMOVED: 500
+  OVERRIDE_N_APPROVALS: 1
 jobs:
   check-n-lines-changed:
     runs-on: 'ubuntu-latest'
@@ -376,30 +377,30 @@ jobs:
         echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
     - name: 'Check size versus approvals'
-      # yamllint disable rule:indentation
+     # yamllint disable rule:indentation
       run: |
-        TOTAL=$((
-          ${{ steps.get-insertions.outputs.insertions }} + \
-          ${{ steps.get-deletions.outputs.deletions }}
-        ))
-        echo "Total lines changed: $TOTAL"
-        NEEDS_APPROVAL=0
-        if [ "$TOTAL" -gt "${{ env.MAX_LINES }}" ]; then
-          NEEDS_APPROVAL=1
+        INSERTIONS="${{ steps.get-insertions.outputs.insertions }}"
+        DELETIONS="${{ steps.get-deletions.outputs.deletions }}"
+        echo "$INSERTIONS lines added (max ${{ env.MAX_LINES_ADDED }})"
+        echo "$DELETIONS lines removed (max ${{ env.MAX_LINES_REMOVED }})"
+        NEEDS_OVERRIDE="false"
+        if [ "$INSERTIONS" -gt "${{ env.MAX_LINES_ADDED }}" ]; then
+          NEEDS_OVERRIDE="true"
         fi
-        HAS_APPROVALS=0
-        if [ "${{ steps.get-approvals.outputs.approvals }}" -ge \
-            "${{ env.OVERRIDE_APPROVING_REVIEWS }}" ]; then
-          HAS_APPROVALS=1
+        if [ "$DELETIONS" -gt "${{ env.MAX_LINES_REMOVED }}" ]; then
+          NEEDS_OVERRIDE="true"
         fi
-        if [ "$NEEDS_APPROVAL" = "1" ] && [ "$HAS_APPROVALS" = "0" ]; then
-          echo "❌ Large PR ($TOTAL lines) needs" \
-              "${{ env.OVERRIDE_APPROVING_REVIEWS }} approvals"
-          exit 1
-        elif [ "$NEEDS_APPROVAL" = "1" ]; then
-          echo "✅ Large PR ($TOTAL lines) has enough approvals"
+        if [ "$NEEDS_OVERRIDE" = "true" ]; then
+          APPROVALS="${{ steps.get-approvals.outputs.approvals }}"
+          OVERRIDE_N_APPROVALS="${{ env.OVERRIDE_N_APPROVALS }}"
+          if [ "$APPROVALS" -ge "$OVERRIDE_N_APPROVALS" ]; then
+            echo "✅ Changes exceeded limits but have required approvals"
+          else
+            echo "❌ Too many changes. Need $OVERRIDE_N_APPROVALS approvals"
+            exit 1
+          fi
         else
-          echo "✅ Small PR ($TOTAL lines)"
+          echo "✅ Changes within limits"
         fi
 # yamllint enable rule:indentation
 name: 'Check number of lines changed'
