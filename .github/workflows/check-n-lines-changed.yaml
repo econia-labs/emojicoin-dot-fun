@@ -300,11 +300,13 @@
 # foo
 # foo
 concurrency:
+  # yamllint disable rule:indentation
   group: >-
     ${{ github.workflow }}-${{
       github.event.pull_request.number ||
       github.event.pull_request_review.pull_request.number
     }}
+  # yamllint enable rule:indentation
   cancel-in-progress: true
 env:
   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
@@ -329,7 +331,7 @@ jobs:
           fi
         )
         echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
-    # yamllint disable rule:indentation
+    # yamllint enable rule:indentation
     - id: 'get-insertions'
       name: 'Get number of lines added'
       # yamllint disable rule:indentation
