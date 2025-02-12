@@ -76,7 +76,7 @@
       "cache": false,
       "outputs": []
     },
-    "test:e2e:arena": {
+    "test:sdk:arena": {
       "cache": false,
       "outputs": []
     },
