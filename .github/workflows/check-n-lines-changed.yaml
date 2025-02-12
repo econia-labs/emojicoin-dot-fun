@@ -18,8 +18,6 @@ jobs:
         PR_NUMBER=$(
           if [ "${{ github.event_name }}" = "pull_request_review" ]; then
             echo "${{ github.event.pull_request_review.pull_request.number }}"
-          elif [ "${{ github.event_name }}" = "issue_comment" ]; then
-            echo "${{ github.event.issue.pull_request.url }}" | grep -oP '\d+$'
           else
             echo "${{ github.event.pull_request.number }}"
           fi
@@ -130,7 +128,4 @@ name: 'Check number of lines changed'
     - 'ready_for_review'
     - 'reopened'
   pull_request_review: null
-  issue_comment:
-    types:
-    - 'created'
 ...
