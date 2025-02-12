@@ -4,7 +4,6 @@ env:
   MAX_LINES_ADDED: 300
   MAX_LINES_REMOVED: 500
   OVERRIDE_N_APPROVALS: 2
-  RECHECK_COMMAND: 'recheck-n-lines'
 jobs:
   check-n-lines-changed:
     # yamllint disable rule:indentation
@@ -13,7 +12,7 @@ jobs:
       (
         contains(
           github.event.comment.body,
-          format('/recheck {0}', env.RECHECK_COMMAND)
+          '/recheck-n-lines'
         ) &&
         github.event.issue.pull_request
       )
@@ -101,7 +100,7 @@ jobs:
             echo "✅ Changes exceeded limits but have required approvals"
           else
             echo "❌ Too many changes. Need $OVERRIDE_N_APPROVALS approvals"
-            echo "Trigger a recheck by commenting '/recheck $RECHECK_COMMAND'"
+            echo "Trigger a recheck by commenting '/recheck-n-lines'"
             exit 1
           fi
         else
