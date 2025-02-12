@@ -18,19 +18,33 @@ jobs:
         PR_NUMBER=$(
           if [ "${{ github.event_name }}" = "pull_request_review" ]; then
             echo "${{ github.event.pull_request_review.pull_request.number }}"
+          elif [ "${{ github.event_name }}" = "issue_comment" ]; then
+            echo "${{ github.event.issue.pull_request.url }}" | grep -oP '\d+$'
           else
             echo "${{ github.event.pull_request.number }}"
           fi
         )
+        if [ -z "$PR_NUMBER" ]; then
+          echo "No PR number found. Exiting."
+          exit 1
+        fi
         echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
+    - id: 'get-base-branch'
+      name: 'Get PR base branch'
+      run: |
+        PR_NUMBER="${{ steps.get-pr-number.outputs.number }}"
+        BASE=$(gh pr view "$PR_NUMBER" --json baseRefName -q '.baseRefName')
+        echo "Base branch: $BASE"
+        echo "base_branch=$BASE" >> $GITHUB_OUTPUT
     - id: 'get-insertions'
       name: 'Get number of lines added'
       # yamllint disable rule:indentation
       run: |
-        git fetch origin ${{ github.base_ref }}
+        BASE_BRANCH="${{ steps.get-base-branch.outputs.base_branch }}"
+        git fetch origin $BASE_BRANCH
         INSERTIONS=$(
-          git diff --stat origin/${{ github.base_ref }} | \
+          git diff --stat origin/$BASE_BRANCH | \
           tail -n1 | grep -oP '\d+(?= insertion)' || echo "0"
         )
         echo "Number of lines added: $INSERTIONS"
@@ -40,8 +54,10 @@ jobs:
       name: 'Get number of lines removed'
       # yamllint disable rule:indentation
       run: |
+        BASE_BRANCH="${{ steps.get-base-branch.outputs.base_branch }}"
+        git fetch origin $BASE_BRANCH
         DELETIONS=$(
-          git diff --stat origin/${{ github.base_ref }} | \
+          git diff --stat origin/$BASE_BRANCH | \
           tail -n1 | grep -oP '\d+(?= deletion)' || echo "0"
         )
         echo "Number of lines removed: $DELETIONS"
