@@ -82,7 +82,7 @@ jobs:
         echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
     - name: 'Check size versus approvals'
-     # yamllint disable rule:indentation
+      # yamllint disable rule:indentation
       run: |
         INSERTIONS="${{ steps.get-insertions.outputs.insertions }}"
         DELETIONS="${{ steps.get-deletions.outputs.deletions }}"
