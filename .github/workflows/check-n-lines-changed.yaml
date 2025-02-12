@@ -17,7 +17,7 @@ jobs:
       run: |
         PR_NUMBER=$(
           if [ "${{ github.event_name }}" = "pull_request_review" ]; then
-            echo "${{ github.event.pull_request_review.pull_request.number }}"
+            echo "${{ github.event.pull_request.number }}"
           else
             echo "${{ github.event.pull_request.number }}"
           fi
