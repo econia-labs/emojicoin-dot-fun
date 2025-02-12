@@ -300,7 +300,6 @@
 # foo
 # foo
 concurrency:
-  name: 'Check number of lines changed'
   group: >-
     ${{ github.workflow }}-${{
       github.event.pull_request.number ||
