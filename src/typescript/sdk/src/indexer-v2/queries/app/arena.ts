@@ -13,6 +13,7 @@ import {
   toMarketStateModel,
 } from "../../types";
 import { ORDER_BY } from "../../const";
+import { toAccountAddressString } from "../../../utils/account-address";
 
 const selectMelee = () =>
   postgrest
@@ -47,21 +48,22 @@ const selectLatestPosition = ({ user }: { user: string }) =>
     .limit(1)
     .maybeSingle();
 
-const callArenaLeaderboardHistoryWithArenaInfo = ({
+const selectArenaLeaderboardHistoryWithInfo = ({
   user,
-  skip,
-  amount,
+  page = 1,
+  pageSize,
 }: {
   user: string;
-  skip: number;
-  amount: number;
+  page: number;
+  pageSize: number;
 }) =>
   postgrest
     .from(TableName.ArenaLeaderboardHistoryWithArenaInfo)
     .select("*")
-    .eq("user", user)
-    .range(skip, skip + amount)
-    .order("melee_id", ORDER_BY.DESC);
+    .eq("user", toAccountAddressString(user))
+    .order("melee_id", ORDER_BY.DESC)
+    .limit(pageSize)
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
 const selectMarketStateByAddress = ({ address }: { address: string }) =>
   postgrest
@@ -76,7 +78,7 @@ export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoMode
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
 export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionModel);
 export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
-  callArenaLeaderboardHistoryWithArenaInfo,
+  selectArenaLeaderboardHistoryWithInfo,
   toArenaLeaderboardHistoryWithArenaInfo
 );
 export const fetchMarketStateByAddress = queryHelperSingle(
