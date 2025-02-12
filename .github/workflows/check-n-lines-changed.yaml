@@ -1,20 +1,23 @@
 ---
-concurrency:
-  # yamllint disable rule:indentation
-  group: >-
-    ${{ github.workflow }}-${{
-      github.event.pull_request.number ||
-      github.event.pull_request_review.pull_request.number
-    }}
-  # yamllint enable rule:indentation
-  cancel-in-progress: true
 env:
   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   MAX_LINES_ADDED: 300
   MAX_LINES_REMOVED: 500
   OVERRIDE_N_APPROVALS: 2
+  RECHECK_COMMAND: 'recheck-n-lines'
 jobs:
   check-n-lines-changed:
+    # yamllint disable rule:indentation
+    if: |
+      github.event_name != 'issue_comment' ||
+      (
+        contains(
+          github.event.comment.body,
+          format('/recheck {0}', env.RECHECK_COMMAND)
+        ) &&
+        github.event.issue.pull_request
+      )
+    # yamllint enable rule:indentation
     name: 'Check number of lines changed'
     runs-on: 'ubuntu-latest'
     steps:
@@ -98,6 +101,7 @@ jobs:
             echo "✅ Changes exceeded limits but have required approvals"
           else
             echo "❌ Too many changes. Need $OVERRIDE_N_APPROVALS approvals"
+            echo "Trigger a recheck by commenting '/recheck $RECHECK_COMMAND'"
             exit 1
           fi
         else
@@ -111,4 +115,7 @@ name: 'Check number of lines changed'
     - 'production'
     - 'fallback'
   pull_request_review: null
+  issue_comment:
+    types:
+    - 'created'
 ...
