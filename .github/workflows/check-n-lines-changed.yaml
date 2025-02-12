@@ -12,9 +12,10 @@ env:
   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   MAX_LINES_ADDED: 300
   MAX_LINES_REMOVED: 500
-  OVERRIDE_N_APPROVALS: 1
+  OVERRIDE_N_APPROVALS: 2
 jobs:
   check-n-lines-changed:
+    name: 'Check number of lines changed'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
