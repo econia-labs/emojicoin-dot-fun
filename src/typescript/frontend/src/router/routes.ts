@@ -16,5 +16,6 @@ export const ROUTES = {
   market: "/market",
   notFound: "/not-found",
   pools: "/pools",
+  "test-utils": "/test-utils",
   verify: "/verify",
 } as const;
