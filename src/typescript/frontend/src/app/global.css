@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+  color: white;
   .Toastify__toast-container > * {
     font-family: var(--font-forma) !important;
     line-height: 1.4rem;

@@ -1,6 +1,7 @@
-import { getAptosClient } from "@sdk/utils";
+import { formatDisplayName, getAptosClient } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { type Metadata } from "next";
+import { getDisplayName } from "next/dist/shared/lib/utils";
 
 export const metadata: Metadata = {
   title: "Explore the cult",
@@ -44,6 +45,10 @@ export default async function WalletPage({ params }: { params: { address: string
     },
   });
 
-  //const filtered = ownedTokens.filter(token => token.metadata?.asset_type === '0xcf8a6a2f3c139c25a8953304402c735703d5039d16b9dac57840c802f3448afc::coin_factory::Emojicoin');
-  return <WalletClientPage ownedCoins={ownedTokens.current_coin_balances} />;
+  return (
+    <div className="max-w-[1000px] mx-auto">
+      <span className="display-4">Emojicoins of {formatDisplayName(params.address)}</span>
+      <WalletClientPage ownedCoins={ownedTokens.current_coin_balances} />
+    </div>
+  );
 }
