@@ -1,7 +1,7 @@
 import {
   type ArenaInfoModel,
   type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionsModel,
+  type ArenaPositionModel,
   type MarketStateModel,
 } from "@sdk/indexer-v2/types";
 import { q64ToBig } from "@sdk/utils";
@@ -17,7 +17,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMatchBreakpoints } from "@hooks/index";
 
 export type ProfileTabProps = {
-  position?: ArenaPositionsModel | null;
+  position?: ArenaPositionModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
@@ -255,7 +255,7 @@ const CurrentMeleeBreakdown = ({
   historyHidden,
   close,
 }: {
-  melee: ArenaPositionsModel;
+  melee: ArenaPositionModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
   historyHidden: boolean;
@@ -276,7 +276,7 @@ const CurrentMeleeBreakdown = ({
     .sub(100)
     .toNumber();
   const lastHeld =
-    melee.lastExit === market0.market.marketAddress || emojicoin0BalanceInApt.gt(0)
+    melee.lastExit0 || emojicoin0BalanceInApt.gt(0)
       ? market0.market.symbolEmojis.join("")
       : market1.market.symbolEmojis.join("");
   return (
@@ -299,7 +299,7 @@ const HistoricMeleeBreakdown = ({
   close: () => void;
 }) => {
   const lastHeld =
-    melee.lastExit === melee.emojicoin0MarketAddress || melee.emojicoin0Balance > 0
+    melee.lastExit0 || melee.emojicoin0Balance > 0
       ? melee.emojicoin0Symbols.join("")
       : melee.emojicoin1Symbols.join("");
   const pnl = Big(melee.profits.toString())
@@ -327,7 +327,7 @@ const MeleeBreakdown = ({
   goToEnter,
   close,
 }: {
-  position?: ArenaPositionsModel | null;
+  position?: ArenaPositionModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
