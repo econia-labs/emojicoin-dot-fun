@@ -1,7 +1,7 @@
 import { useMatchBreakpoints } from "@hooks/index";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionsModel,
+  type ArenaPositionModel,
   type ArenaInfoModel,
   type MarketStateModel,
   type PeriodicStateEventModel,
@@ -19,8 +19,8 @@ export type Props = {
 };
 
 export type PropsWithPositionAndHistory = Props & {
-  position?: ArenaPositionsModel | null;
-  setPosition: (position: ArenaPositionsModel | null) => void;
+  position?: ArenaPositionModel | null;
+  setPosition: (position: ArenaPositionModel | null) => void;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
   setHistory: (position: ArenaLeaderboardHistoryWithArenaInfoModel[]) => void;
 };
@@ -141,11 +141,11 @@ export const EmojiTitle = ({
 };
 
 /** If the position is on market0, return option0, else return option1 */
-export function marketTernary<T>(position: ArenaPositionsModel, option0: T, option1: T) {
+export function marketTernary<T>(position: ArenaPositionModel, option0: T, option1: T) {
   return position.emojicoin0Balance > 0n ? option0 : option1;
 }
 
 /** If the position is locked, return option0, else return option1 */
-export function lockedTernary<T>(position: ArenaPositionsModel, option0: T, option1: T) {
+export function lockedTernary<T>(position: ArenaPositionModel, option0: T, option1: T) {
   return position.matchAmount > 0n ? option0 : option1;
 }
