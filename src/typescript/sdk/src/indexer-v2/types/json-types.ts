@@ -328,7 +328,6 @@ type ArenaLeaderboardHistoryWithArenaInfoData = {
   emojicoin_1_balance: Uint64String;
   exited: boolean;
   last_exit_0: boolean | null;
-
   emojicoin_0_market_address: AccountAddressString;
   emojicoin_1_market_address: AccountAddressString;
   emojicoin_0_market_id: Uint64String;
@@ -414,6 +413,7 @@ export enum TableName {
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.
   ArenaLeaderboardHistory = "arena_leaderboard_history",
+  // A user's leaderboard history combined with the arena info.
   ArenaLeaderboardHistoryWithArenaInfo = "arena_leaderboard_history_with_arena_info",
 }
 
@@ -513,7 +513,7 @@ export type DatabaseJsonType = {
 
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
-  [TableName.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoData;
+  [TableName.ArenaLeaderboardHistoryWithArenaInfo]: Flatten<ArenaLeaderboardHistoryWithArenaInfoData>;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
