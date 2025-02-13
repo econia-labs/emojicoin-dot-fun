@@ -14,6 +14,7 @@ import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
   type ArenaPositionModel,
 } from "@sdk/indexer-v2/types";
+import { ROUTES } from "router/routes";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -121,11 +122,11 @@ export const ArenaClient = (props: Props) => {
     // This is done because account refreshes often and we don't want to refetch
     if (account) {
       setPosition(undefined);
-      fetch(`/arena/position/${account.address}`)
+      fetch(`${ROUTES.arena.position}/${account.address}`)
         .then((r) => r.text())
         .then(parseJSON<ArenaPositionModel | null>)
         .then((r) => setPosition(r));
-      fetch(`/arena/positions/${account.address}`)
+      fetch(`${ROUTES.arena.historicalPositions}/${account.address}`)
         .then((r) => r.text())
         .then(parseJSON<ArenaLeaderboardHistoryWithArenaInfoModel[]>)
         .then((r) => setHistory(r));
