@@ -183,7 +183,7 @@ export const currentMeleeEnded = async () => {
     if (end - now <= 0) {
       resolve(null);
     }
-    setTimeout(() => resolve(null), end - now);
+    setTimeout(() => resolve(null), end - now + 1000);
   });
 
   return res;
