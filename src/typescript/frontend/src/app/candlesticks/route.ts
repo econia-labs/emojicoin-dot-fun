@@ -1,5 +1,3 @@
-// cspell:word timespan
-
 import { toPeriod } from "@sdk/index";
 import { parseInt } from "lodash";
 import { type NextRequest } from "next/server";

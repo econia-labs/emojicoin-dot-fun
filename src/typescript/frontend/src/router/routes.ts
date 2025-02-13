@@ -6,7 +6,12 @@ export const ROUTES = {
     trending: "/api/trending",
   },
   arena: "/arena",
+<<<<<<< HEAD
   candlesticks: "/candlesticks",
+=======
+  arenaHistoricalPositions: "/arena/historical-positions",
+  arenaPosition: "/arena/position",
+>>>>>>> 394c4db9 ([ECO-2811] Bump processor submodule; add/separate SDK test commands for arena; change skip to page; add arena routes to `ROUTES` (#585))
   cult: "/cult",
   dexscreener: "/dexscreener",
   docs: "https://docs.emojicoin.fun/category/--start-here",

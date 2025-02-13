@@ -71,7 +71,7 @@ export const ArenaCard = ({
           gridTemplateRows: !isMobile ? "1fr" : "1fr 1fr",
         }}
       >
-        <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena}>
+        <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena["."]}>
           {isMobile && headerText}
           {arenaVs}
           {!isMobile && (
