@@ -25,7 +25,7 @@ interface NominalPriceDisplayProps extends HTMLAttributes<HTMLSpanElement> {
 export const NominalPriceDisplay = ({
   price,
   q64 = false,
-  decimals = 9,
+  decimals = 8,
   colorFor = "neutral",
   className,
 }: NominalPriceDisplayProps) => {
