@@ -287,6 +287,8 @@ type ArenaPositionsData = {
   emojicoin_1_balance: Uint64String;
   withdrawals: Uint64String;
   deposits: Uint64String;
+  last_exit: string | undefined;
+  match_amount: Uint64String;
 };
 
 type ArenaInfoData = {
@@ -311,6 +313,31 @@ type ArenaLeaderboardHistoryData = {
   melee_id: Uint64String;
   profits: Uint64String;
   losses: Uint64String;
+  last_exit: string | undefined;
+  emojicoin_0_balance: Uint64String;
+  emojicoin_1_balance: Uint64String;
+  exited: boolean;
+  withdrawals: Uint64String;
+};
+
+type ArenaLeaderboardHistoryWithArenaInfoData = {
+  melee_id: Uint64String;
+  profits: Uint64String;
+  losses: Uint64String;
+  last_exit: string | undefined;
+  emojicoin_0_balance: Uint64String;
+  emojicoin_1_balance: Uint64String;
+  exited: boolean;
+  withdrawals: Uint64String;
+
+  emojicoin_0_market_address: string;
+  emojicoin_1_market_address: string;
+  emojicoin_0_market_id: Uint64String;
+  emojicoin_1_market_id: Uint64String;
+  emojicoin_0_symbols: SymbolEmoji[];
+  emojicoin_1_symbols: SymbolEmoji[];
+  start_time: string;
+  duration: Uint64String;
 };
 
 type ArenaLeaderboardData = {
@@ -322,6 +349,7 @@ type ArenaLeaderboardData = {
   losses: Uint64String;
   pnl_percent: number;
   pnl_octas: number;
+  withdrawals: Uint64String;
 };
 
 export type DatabaseStructType = {
@@ -392,6 +420,7 @@ export enum TableName {
 export enum DatabaseRpc {
   UserPools = "user_pools",
   AggregateMarketState = "aggregate_market_state",
+  ArenaLeaderboardHistoryWithArenaInfo = "arena_leaderboard_history_with_arena_info",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -513,6 +542,7 @@ export type DatabaseJsonType = {
     n_chat_events: Uint64String;
     n_liquidity_events: Uint64String;
   }>;
+  [DatabaseRpc.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoData;
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
