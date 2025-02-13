@@ -3,12 +3,12 @@ import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { EXTERNAL_LINK_PROPS } from "components/link/const";
 import { PriceDelta } from "components/price-feed/inner";
 import { ROUTES } from "router/routes";
-import { NominalPriceDisplay } from "./NominalPriceDisplay";
 import { toNominal } from "lib/utils/decimals";
 import { toNominalPrice } from "@sdk/utils/nominal-price";
 import { StatsColumn } from "./params";
 import { cn } from "lib/utils/class-name";
 import { ServerSideEmoji } from "./ServerSideEmoji";
+import { NominalPriceDisplay } from "components/misc/NominalPriceDisplay";
 
 export interface TableRowData {
   symbol: string;
@@ -68,7 +68,7 @@ export const MarketTableRow = ({
       <td className={getCN(sort, StatsColumn.Tvl)}>{fmt(totalValueLocked)}</td>
       <td className={getCN(sort, StatsColumn.LastAvgPrice)}>
         <ExplorerLink className="hover:underline" value={transactionVersion} type="txn">
-          <NominalPriceDisplay price={toNominalPrice(lastAvgPriceQ64)} />
+          <NominalPriceDisplay price={lastAvgPriceQ64} q64 />
         </ExplorerLink>
       </td>
       <td className={getCN(sort, StatsColumn.MarketCap)}>{fmt(marketCap)}</td>
