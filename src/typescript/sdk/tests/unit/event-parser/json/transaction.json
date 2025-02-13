@@ -169,7 +169,7 @@
         "creation_number": "3"
       },
       "sequence_number": "49177",
-      "type": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::Swap"
+      "type": "0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::Swap"
     },
     {
       "data": {
@@ -221,7 +221,7 @@
         "creation_number": "4"
       },
       "sequence_number": "49178",
-      "type": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::State"
+      "type": "0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::State"
     },
     {
       "data": {
@@ -257,7 +257,7 @@
         "creation_number": "5"
       },
       "sequence_number": "49179",
-      "type": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::PeriodicState"
+      "type": "0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::PeriodicState"
     },
     {
       "data": {
@@ -277,7 +277,7 @@
         "creation_number": "6"
       },
       "sequence_number": "49180",
-      "type": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::Liquidity"
+      "type": "0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::Liquidity"
     },
     {
       "data": {
@@ -296,7 +296,7 @@
         "creation_number": "7"
       },
       "sequence_number": "49181",
-      "type": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::MarketRegistration"
+      "type": "0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::MarketRegistration"
     },
     {
       "data": {
@@ -335,7 +335,7 @@
         "creation_number": "8"
       },
       "sequence_number": "49182",
-      "type": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::GlobalState"
+      "type": "0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::GlobalState"
     },
     {
       "data": {
@@ -357,7 +357,7 @@
         "creation_number": "9"
       },
       "sequence_number": "49183",
-      "type": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::Chat"
+      "type": "0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::Chat"
     }
   ],
   "expiration_timestamp_secs": "1727851404",
@@ -372,7 +372,7 @@
       false,
       "1"
     ],
-    "function": "0x22227920701e36651a6649be2067cd7eebf3fabb94717ff3b256e3ada58b2222::emojicoin_dot_fun_rewards::swap_with_rewards",
+    "function": "0x2e51979739db25dc987bd24e1a968e45cca0e0daea7cae9121f68af93e8884c9::emojicoin_dot_fun_rewards::swap_with_rewards",
     "type": "entry_function_payload",
     "type_arguments": [
       "0x3482d7ec914c86e9e898d40bf88a5d31afb3fb43ce73b3d58f0b888c70f7356f::coin_factory::Emojicoin",
