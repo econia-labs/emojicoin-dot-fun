@@ -8,7 +8,8 @@ import {
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
 } from "../indexer-v2";
-import { toAccountAddressString } from "../utils";
+import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
+import { dateFromMicroseconds, toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
 import { type AnyNumberString, type Types } from "./types";
 
@@ -22,7 +23,7 @@ export type ArenaTypes = {
     meleeID: bigint;
     emojicoin0MarketAddress: AccountAddressString;
     emojicoin1MarketAddress: AccountAddressString;
-    startTime: bigint;
+    startTime: Date;
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
@@ -86,6 +87,8 @@ export type ArenaTypes = {
     emojicoin1Balance: bigint;
     withdrawals: bigint;
     deposits: bigint;
+    lastExit: string | undefined;
+    matchAmount: bigint;
   };
 
   ArenaLeaderboardHistory: {
@@ -93,6 +96,11 @@ export type ArenaTypes = {
     meleeID: bigint;
     profits: bigint;
     losses: bigint;
+    lastExit: string | undefined;
+    exited: boolean;
+    emojicoin0Balance: bigint;
+    emojicoin1Balance: bigint;
+    withdrawals: bigint;
   };
 
   ArenaLeaderboard: {
@@ -104,6 +112,7 @@ export type ArenaTypes = {
     losses: bigint;
     pnlPercent: number;
     pnlOctas: number;
+    withdrawals: bigint;
   };
 
   ArenaInfo: {
@@ -117,7 +126,7 @@ export type ArenaTypes = {
     emojicoin1MarketAddress: AccountAddressString;
     emojicoin1Symbols: SymbolEmoji[];
     emojicoin1MarketID: bigint;
-    startTime: bigint;
+    startTime: Date;
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
@@ -139,6 +148,37 @@ const withVersionAndEventIndex = (data: {
   eventIndex: Number(data.eventIndex),
 });
 
+/**
+ * Regex test for a valid bigint string.
+ *
+ * Only succeeds if every character in a string is a number 0-9.
+ *
+ * Accepts leading zeroes.
+ */
+const isValidBigIntString = (str: string) => /^\d+$/.test(str);
+
+/**
+ * Since we've coalesced the types for the database and emitted contract event data, it's helpful
+ * to have a function that can handle either an incoming bigint string or a postgres timestamp.
+ *
+ * NOTE: This function returns `new Date(0)` if all attempts at parsing fail. Explanation below.
+ */
+export const safeParseBigIntOrPostgresTimestamp = (anyInput: AnyNumberString) => {
+  const input = anyInput.toString();
+  if (isValidBigIntString(input)) {
+    const bigInput = BigInt(input);
+    return dateFromMicroseconds(bigInput);
+  }
+  try {
+    return postgresTimestampToDate(input);
+  } catch {
+    // If all else fails, return a null-like date. Generally, parsing these dates isn't a set of
+    // critical functions, so it's okay if the data is slightly invalid. Ensuring the parsing
+    // functions don't fail is more important than the validity of timestamp data.
+    return new Date(0);
+  }
+};
+
 export const toArenaMeleeEvent = (
   data: JsonTypes["ArenaMeleeEvent"],
   version: AnyNumberString,
@@ -147,7 +187,7 @@ export const toArenaMeleeEvent = (
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
-  startTime: BigInt(data.start_time),
+  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
