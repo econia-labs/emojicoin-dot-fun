@@ -25,5 +25,5 @@ If you are a developer, see below for emojicoin.fun Move package addresses!
 
 <!-- markdownlint-enable MD013 -->
 
-[`0x1111...1111`]: https://explorer.aptoslabs.com/account/0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4?network=testnet
+[`0x1abf...73b4`]: https://explorer.aptoslabs.com/account/0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4?network=testnet
 [`0xface...cafe`]: https://explorer.aptoslabs.com/account/0xface729284ae5729100b3a9ad7f7cc025ea09739cd6e7252aff0beb53619cafe?network=mainnet
