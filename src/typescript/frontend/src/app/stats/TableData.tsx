@@ -75,14 +75,14 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
       </td>
       <td>{row.market.marketID.toString()}</td>
       <td className={getCN(Column.Price)}>
-        <NominalPriceDisplay priceQ64={cells.price(row)} />
+        <NominalPriceDisplay price={cells.price(row)} />
       </td>
       <td className={getCN(Column.AllTimeVolume)}>{cells.allTimeVolume(row)}</td>
       <td className={getCN(Column.DailyVolume)}>{cells.dailyVolume(row)}</td>
       <td className={getCN(Column.Tvl)}>{cells.tvl(row)}</td>
       <td className={getCN(Column.LastAvgExecutionPrice)}>
         <ExplorerLink className="hover:underline" value={row.transaction.version} type="txn">
-          <NominalPriceDisplay priceQ64={cells.lastAvgPrice(row)} />
+          <NominalPriceDisplay price={cells.lastAvgPrice(row)} />
         </ExplorerLink>
       </td>
       <td className={getCN(Column.MarketCap)}>{cells.marketCap(row)}</td>

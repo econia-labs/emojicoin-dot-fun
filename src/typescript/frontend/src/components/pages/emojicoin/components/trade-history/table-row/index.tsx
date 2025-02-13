@@ -121,10 +121,11 @@ const TableRow = ({
         color={item.type === "sell" ? darkColors.pink : darkColors.green}
       >
         <NominalPriceDisplay
-          priceQ64={item.priceQ64}
+          price={item.priceQ64}
           decimals={8}
           colorFor={item.type}
           className="ellipses"
+          q64
         />
       </TableRowTextItem>
       <td className={`group/explorer w-[22%] md:w-[18%] border-r-[1px] z-[2] ${Height}`}>

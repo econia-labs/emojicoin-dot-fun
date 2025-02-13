@@ -11,7 +11,8 @@ export const PriceColors: { [key in PriceColors]: string } = {
 };
 
 interface NominalPriceDisplayProps extends HTMLAttributes<HTMLSpanElement> {
-  priceQ64: AnyNumber;
+  price: AnyNumber;
+  q64?: boolean;
   decimals?: number;
   colorFor?: PriceColors;
 }
@@ -22,20 +23,21 @@ interface NominalPriceDisplayProps extends HTMLAttributes<HTMLSpanElement> {
  * Visually mutes the insignificant figures and highlights the significant ones.
  */
 export const NominalPriceDisplay = ({
-  priceQ64,
+  price,
+  q64 = false,
   decimals = 9,
   colorFor = "neutral",
   className,
 }: NominalPriceDisplayProps) => {
-  const price = toNominalPrice(priceQ64);
-  const fixed = price.toFixed(decimals);
+  const priceOut = q64 ? toNominalPrice(price) : Number(price);
+  const fixed = priceOut.toFixed(decimals);
   const firstSigFigOnwards = fixed.match(/[1-9].*/)?.at(0) ?? "";
   const beforeSigFig = fixed.slice(0, fixed.length - firstSigFigOnwards.length);
   const color = PriceColors[colorFor];
   return (
     <>
-      <span className={cn(color, "brightness-[0.4]", className)}>{beforeSigFig}</span>
-      <span className={cn(color, "brightness-125", className)}>{firstSigFigOnwards}</span>
+      <span className={cn(color, "brightness-[0.35]", className)}>{beforeSigFig}</span>
+      <span className={cn(color, "brightness-100", className)}>{firstSigFigOnwards}</span>
     </>
   );
 };
