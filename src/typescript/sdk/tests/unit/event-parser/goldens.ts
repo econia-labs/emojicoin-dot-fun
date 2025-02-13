@@ -207,7 +207,7 @@ const BondingCurveStates: {
         version: 6084169932n,
         sender: "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
         entryFunction:
-          `0x22227920701e36651a6649be2067cd7eebf3fabb94717ff3b256e3ada58b2222::emojicoin_dot_fun_rew
+          `0x2e51979739db25dc987bd24e1a968e45cca0e0daea7cae9121f68af93e8884c9::emojicoin_dot_fun_rew
           ards::swap_with_rewards`.replaceAll(/\s/g, ""),
         time: 1728034178690850n,
         timestamp: new Date("2024-10-04T09:29:38.69085Z"),
@@ -266,7 +266,7 @@ const BondingCurveStates: {
         version: 6080639845n,
         sender: "0xc9b6bbf05e807d8935676c95ef00d694365ba5ff15b31cea6fc057cf6f9b6aa7",
         entryFunction:
-          `0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::
+          `0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4::emojicoin_dot_fun::
           provide_liquidity`.replaceAll(/\s/g, ""),
         time: 1727970932080509n,
         timestamp: new Date("2024-10-03T15:55:32.080509Z"),
