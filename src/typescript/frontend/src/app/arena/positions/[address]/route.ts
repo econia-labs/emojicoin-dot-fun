@@ -13,13 +13,13 @@ export async function GET(
 ) {
   cookies();
   const address = (await params).address;
-  let skip: bigint;
+  let skip: number;
   try {
-    skip = BigInt(request.nextUrl.searchParams.get("skip") ?? "0");
+    skip = Number(request.nextUrl.searchParams.get("skip") ?? "0");
   } catch {
     return new Response("Invalid skip.", { status: 400 });
   }
-  if (skip < 0n) {
+  if (Number.isNaN(skip) || skip < 0 || skip != Math.round(skip)) {
     return new Response("Invalid skip.", { status: 400 });
   }
 
@@ -27,7 +27,11 @@ export async function GET(
     return new Response("Invalid address.", { status: 400 });
   }
 
-  const position = await fetchArenaLeaderboardHistoryWithArenaInfo({ user: address, skip });
+  const position = await fetchArenaLeaderboardHistoryWithArenaInfo({
+    user: address,
+    skip,
+    amount: 25,
+  });
 
   return new Response(stringifyJSON(position ?? undefined));
 }

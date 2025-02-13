@@ -12,7 +12,7 @@ import { PriceChartDesktopBox, PriceChartMobile } from "./PriceChart";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionsModel,
+  type ArenaPositionModel,
 } from "@sdk/indexer-v2/types";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
@@ -104,7 +104,7 @@ export const ArenaClient = (props: Props) => {
   const { account } = useAptos();
 
   // Undefined while loading. Null means no position
-  const [position, setPosition] = useState<ArenaPositionsModel | undefined | null>(null);
+  const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
 
   const r = useMemo(
@@ -123,7 +123,7 @@ export const ArenaClient = (props: Props) => {
       setPosition(undefined);
       fetch(`/arena/position/${account.address}`)
         .then((r) => r.text())
-        .then(parseJSON<ArenaPositionsModel | null>)
+        .then(parseJSON<ArenaPositionModel | null>)
         .then((r) => setPosition(r));
       fetch(`/arena/positions/${account.address}`)
         .then((r) => r.text())
