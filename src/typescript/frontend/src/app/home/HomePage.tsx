@@ -44,7 +44,7 @@ export default async function HomePageComponent({
               rewardsRemaining={meleeData.melee.rewardsRemaining}
               meleeVolume={meleeData.melee.volume}
               aptLocked={meleeData.melee.aptLocked}
-              startTime={meleeData.melee.startTime / 1000n / 1000n}
+              startTime={meleeData.melee.startTime}
               duration={meleeData.melee.duration / 1000n / 1000n}
             />
           ) : (
