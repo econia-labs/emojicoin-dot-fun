@@ -2,7 +2,6 @@
 
 import React, { useMemo, type PropsWithChildren } from "react";
 import { type TableRowDesktopProps } from "./types";
-import { toNominalPrice } from "@sdk/utils/nominal-price";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { darkColors } from "theme";
 import { formatDisplayName } from "@sdk/utils";
@@ -12,6 +11,7 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { useNameResolver } from "@hooks/use-name-resolver";
 import { FormattedNumber } from "components/FormattedNumber";
+import { NominalPriceDisplay } from "components/misc/NominalPriceDisplay";
 
 type TableRowTextItemProps = {
   className: string;
@@ -120,11 +120,11 @@ const TableRow = ({
         className={`w-[22%] md:w-[18%] ${Height} md:ml-[3ch] xl:ml-[0.5ch] xl:mr-[-0.5ch]`}
         color={item.type === "sell" ? darkColors.pink : darkColors.green}
       >
-        <FormattedNumber
-          value={toNominalPrice(item.priceQ64)}
+        <NominalPriceDisplay
+          priceQ64={item.priceQ64}
+          decimals={8}
+          colorFor={item.type}
           className="ellipses"
-          decimals={9}
-          style="fixed"
         />
       </TableRowTextItem>
       <td className={`group/explorer w-[22%] md:w-[18%] border-r-[1px] z-[2] ${Height}`}>
