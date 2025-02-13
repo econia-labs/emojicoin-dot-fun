@@ -110,7 +110,7 @@ const toArenaMeleeFromDatabase = (
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
-  startTime: postgresTimestampToMicroseconds(data.start_time),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
@@ -179,6 +179,8 @@ const toArenaPositionsFromDatabase = (
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
   withdrawals: BigInt(data.withdrawals),
   deposits: BigInt(data.deposits),
+  lastExit: data.last_exit,
+  matchAmount: BigInt(data.match_amount),
 });
 
 const toArenaLeaderboardFromDatabase = (
@@ -192,6 +194,7 @@ const toArenaLeaderboardFromDatabase = (
   losses: BigInt(data.losses),
   pnlPercent: data.pnl_percent,
   pnlOctas: data.pnl_octas,
+  withdrawals: BigInt(data.withdrawals),
 });
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
@@ -205,7 +208,7 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
   emojicoin1Symbols: data.emojicoin_1_symbols,
   emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
-  startTime: postgresTimestampToMicroseconds(data.start_time),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
@@ -218,6 +221,11 @@ const toArenaLeaderboardHistoryFromDatabase = (
   meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
+  lastExit: data.last_exit,
+  exited: data.exited,
+  withdrawals: BigInt(data.withdrawals),
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
 });
 
 type GlobalStateEventData = {
@@ -451,6 +459,9 @@ export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardH
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
+export type ArenaLeaderboardHistoryWithArenaInfoModel = ReturnType<
+  typeof toArenaLeaderboardHistoryWithArenaInfo
+>;
 
 /**
  * Converts a function that converts a type to another type into a function that converts the type
@@ -751,7 +762,7 @@ export const toMarket1MPeriodsInLastDay = (
   nonce: BigInt(data.nonce),
   volume: BigInt(data.volume),
   baseVolume: BigInt(data.base_volume),
-  startTime: data.start_time,
+  startTime: postgresTimestampToDate(data.start_time),
 });
 
 export const toProcessorStatus = (data: DatabaseJsonType["processor_status"]) => ({
@@ -768,6 +779,27 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   ...toProcessedData(data),
   ...withLPCoinBalance(data),
   dailyVolume: BigInt(data.daily_volume),
+});
+
+export const toArenaLeaderboardHistoryWithArenaInfo = (
+  data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]
+) => ({
+  meleeID: BigInt(data.melee_id),
+  profits: BigInt(data.profits),
+  losses: BigInt(data.losses),
+  emojicoin0Symbols: data.emojicoin_0_symbols,
+  emojicoin1Symbols: data.emojicoin_1_symbols,
+  emojicoin0MarketAddress: data.emojicoin_0_market_address,
+  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  emojicoin0MarketId: BigInt(data.emojicoin_0_market_id),
+  emojicoin1MarketId: BigInt(data.emojicoin_1_market_id),
+  startTime: postgresTimestampToDate(data.start_time),
+  duration: BigInt(data.duration),
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
+  lastExit: data.last_exit,
+  exited: data.exited,
+  withdrawals: BigInt(data.withdrawals),
 });
 
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({
@@ -870,6 +902,7 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
   [DatabaseRpc.AggregateMarketState]: toAggregateMarketState,
+  [DatabaseRpc.ArenaLeaderboardHistoryWithArenaInfo]: toArenaLeaderboardHistoryWithArenaInfo,
 };
 
 export type DatabaseModels = {
