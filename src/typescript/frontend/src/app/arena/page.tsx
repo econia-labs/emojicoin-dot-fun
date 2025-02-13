@@ -13,40 +13,12 @@ export const revalidate = 2;
 export default async function Arena() {
   let arenaInfo: Awaited<ReturnType<typeof fetchArenaInfo>> = null;
 
-  /* Uncomment to use fake data
-  arenaInfo = {
-    duration: 120n * 1000n * 1000n,
-    startTime: BigInt(new Date().getTime() * 1000 - 1000 * 1000 * 60),
-    volume: 123n * 10n ** 8n,
-    meleeID: 2n,
-    aptLocked: 12n * 10n ** 8n,
-    maxMatchAmount: 5n * 10n ** 8n,
-    rewardsRemaining: 12345n * 10n ** 6n,
-    maxMatchPercentage: 50n,
-    emojicoin0MarketAddress: "0x9efc3e9aa9b5921fdffc8e7ac21452319902130603083351fc7c961d8ab97d6a",
-    emojicoin1MarketAddress: "0x3a26d1a4b37877e56bd7cbc8af5e8c0a26d876025bc02e67ca7b96c8bdd2fc26",
-    emojicoin0Symbols: [emoji("butterfly") as SymbolEmoji],
-    emojicoin1Symbols: [emoji("ribbon") as SymbolEmoji],
-    emojicoin0MarketId: 1n,
-    emojicoin1MarketId: 2n,
-  };
-
-  const [market0, market1] = await Promise.all([
-    fetchMarketStateByAddress({
-      address: arenaInfo.emojicoin0MarketAddress,
-    }),
-    fetchMarketStateByAddress({
-      address: arenaInfo.emojicoin1MarketAddress,
-    }),
-  ]);
-  /* */
-
-  /* Uncomment to use real data */
   try {
     arenaInfo = await fetchArenaInfo({});
   } catch (e) {
     console.warn(
-      "Could not get melee data. This probably means that the backend is running an outdated version of the processor, without the arena processing. Please update."
+      "Could not get melee data. This probably means that the backend is running an outdated version of the processor" +
+        " without the arena processing. Please update."
     );
     redirect("/home");
   }
@@ -83,8 +55,6 @@ export default async function Arena() {
       arenaInfo={arenaInfo}
       market0={market0!}
       market1={market1!}
-      //candlesticksMarket0={[]}
-      //candlesticksMarket1={[]}
       candlesticksMarket0={candlesticksMarket0}
       candlesticksMarket1={candlesticksMarket1}
     />
