@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cn } from "lib/utils";
+import * as React from "react";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
@@ -17,7 +17,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "text-ec-blue display-4 bg-black z-1 uppercase text-center mt-[2px] border-solid border-b-[1px] border-b-dark-gray",
+      "text-ec-blue display-4 bg-black uppercase text-center mt-[2px] border-solid border-b-[1px] border-b-dark-gray",
       className
     )}
     {...props}
@@ -47,12 +47,12 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
       <tr
         ref={ref}
         className={cn(
-          "relative w-full body-sm border-solid border-b border-dark-gray h-[33px]",
+          "relative w-full body-md border-solid border-b border-dark-gray h-[33px]",
           className
         )}
         {...props}
       >
-        {/* <tr className="absolute w-full border-solid hover:border-[1px] hover:border-ec-blue z-1" /> */}
+        <div className="w-full h-full absolute border-solid hover:border-2 hover:border-ec-blue" />
         {props.children}
       </tr>
     );
@@ -98,4 +98,4 @@ const TableCaption = React.forwardRef<
 ));
 TableCaption.displayName = "TableCaption";
 
-export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };
+export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };

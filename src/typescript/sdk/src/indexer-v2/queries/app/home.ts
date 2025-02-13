@@ -2,17 +2,17 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
+import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
+import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import { toRegistryView } from "../../../types";
+import { getAptosClient } from "../../../utils/aptos-client";
 import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
+import { DatabaseTypeConverter } from "../../types";
 import { DEFAULT_SORT_BY, type MarketStateQueryArgs } from "../../types/common";
 import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
-import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
-import { DatabaseTypeConverter } from "../../types";
-import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../../utils/aptos-client";
-import { toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
-import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
 
 // A helper function to abstract the logic for fetching rows that contain market state.
 const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({
@@ -21,6 +21,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
   searchEmojis,
+  filterEmojis,
   sortBy = DEFAULT_SORT_BY,
   inBondingCurve,
   count,
@@ -47,6 +48,13 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
 
   if (searchEmojis && searchEmojis.length) {
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
+  }
+
+  if (filterEmojis && filterEmojis.length) {
+    const filterString = filterEmojis
+      .map((emojis) => `symbol_emojis.eq.${toQueryArray(emojis)}`)
+      .join(",");
+    query = query.or(filterString);
   }
 
   if (typeof inBondingCurve === "boolean") {

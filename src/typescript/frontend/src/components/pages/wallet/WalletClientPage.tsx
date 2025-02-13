@@ -1,12 +1,12 @@
 "use client";
 
-import { type CoinData } from "app/wallet/[address]/page";
+import { type FullCoinData } from "app/wallet/[address]/page";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "components/ui/table";
 import { type FC } from "react";
 import { EmojiCard } from "./EmojiCard";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "components/ui/table";
 
 interface Props {
-  ownedCoins: CoinData[];
+  ownedCoins: FullCoinData[];
 }
 
 export const WalletClientPage: FC<Props> = ({ ownedCoins }) => {
@@ -18,13 +18,13 @@ export const WalletClientPage: FC<Props> = ({ ownedCoins }) => {
             <TableRow>
               <TableHead>Emoji</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Value</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Value</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {ownedCoins.map((coin) => (
-              <EmojiCard key={coin.coin_type} coinData={coin} />
+              <EmojiCard key={coin.symbol} coinData={coin} />
             ))}
           </TableBody>
         </Table>
