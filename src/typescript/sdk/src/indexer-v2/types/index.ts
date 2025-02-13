@@ -761,14 +761,18 @@ export const toArenaInfoModel = toArenaInfoFromDatabase;
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
-export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
-  return {
-    ...toMarketStateModel(data),
-    openPrice: q64ToBig(data.open_price_q64).toNumber(),
-    closePrice: q64ToBig(data.close_price_q64).toNumber(),
-    deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
-  };
-};
+export const toPriceFeedData = (
+  data: Pick<DatabaseJsonType["price_feed"], "open_price_q64" | "close_price_q64">
+) => ({
+  openPrice: q64ToBig(data.open_price_q64).toNumber(),
+  closePrice: q64ToBig(data.close_price_q64).toNumber(),
+  deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
+});
+
+export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
+  ...toMarketStateModel(data),
+  ...toPriceFeedData(data),
+});
 
 export const toAggregateMarketState = (data: DatabaseJsonType["aggregate_market_state"]) => ({
   lastEmojicoinTransactionVersion: BigInt(data.last_emojicoin_transaction_version),
