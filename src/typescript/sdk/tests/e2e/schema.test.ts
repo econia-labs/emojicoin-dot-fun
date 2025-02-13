@@ -60,6 +60,8 @@ describe("verifies the schema is what's expected", () => {
     const floats: Set<AnyColumnName> = new Set();
     const integers: Set<AnyColumnName> = new Set();
     for (const table of tables) {
+      expect(definitions[table]).toBeDefined();
+      expect(definitions[table].properties).toBeDefined();
       type PropertyType = (typeof definitions)[typeof table]["properties"][AnyColumnName];
       const entries = Object.entries(definitions[table].properties) as [
         AnyColumnName,
