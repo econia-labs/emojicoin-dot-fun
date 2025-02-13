@@ -8,5 +8,12 @@ import { toNominal } from "lib/utils/decimals";
  */
 export function useUsdMarketCap(marketCapInOctas: bigint): number | undefined {
   const aptPrice = useAptPrice();
-  return aptPrice ? toNominal(marketCapInOctas) * aptPrice : undefined;
+  const aptInUsd = aptPrice ? toNominal(marketCapInOctas) * aptPrice : undefined;
+
+  // Remove decimals if market cap is over 1 million
+  if (aptInUsd && aptInUsd >= 1_000_000) {
+    return Math.floor(aptInUsd);
+  }
+
+  return aptInUsd;
 }
