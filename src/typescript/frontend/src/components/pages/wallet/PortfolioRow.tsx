@@ -8,9 +8,12 @@ import { Emoji } from "utils/emoji";
 
 interface Props {
   coinData: FullCoinData;
+  walletStats: {
+    totalValue: number;
+  };
 }
 
-export const EmojiCard: FC<Props> = ({ coinData }) => {
+export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
   const router = useRouter();
   return (
     <TableRow
@@ -24,6 +27,13 @@ export const EmojiCard: FC<Props> = ({ coinData }) => {
         />
       </TableCell>
       <TableCell>{coinData.emojiName}</TableCell>
+      <TableCell className="text-center">
+        <FormattedNumber
+          value={(coinData.ownedValue / walletStats.totalValue) * 100}
+          suffix="%"
+          style={"fixed"}
+        />
+      </TableCell>
       <TableCell className="text-right">
         <FormattedNumber value={coinData.amount} style={"fixed"} />
       </TableCell>

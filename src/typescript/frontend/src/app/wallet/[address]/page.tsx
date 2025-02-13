@@ -1,7 +1,6 @@
 import { fetchMarkets } from "@/queries/home";
-import AptosIconBlack from "@icons/AptosBlack";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { formatDisplayName, getAptosClient, toNominalPrice } from "@sdk/utils";
+import { getAptosClient, toNominalPrice } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { toNominal } from "lib/utils/decimals";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
@@ -106,14 +105,11 @@ export default async function WalletPage({ params }: { params: { address: string
 
   return (
     <div className="max-w-[1000px] mx-auto">
-      <span className="display-4">Emojicoins of {formatDisplayName(params.address)}</span>
-      <div>
-        <span className="display-5">
-          Total value: {walletStats.totalValue.toFixed(2)}{" "}
-          <AptosIconBlack className="icon-inline" />
-        </span>
-      </div>
-      <WalletClientPage ownedCoins={coinsWithData} />
+      <WalletClientPage
+        address={params.address}
+        ownedCoins={coinsWithData}
+        walletStats={walletStats}
+      />
     </div>
   );
 }
