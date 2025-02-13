@@ -76,6 +76,10 @@
       "cache": false,
       "outputs": []
     },
+    "test:sdk:arena": {
+      "cache": false,
+      "outputs": []
+    },
     "test:sdk:parallel": {
       "cache": false,
       "outputs": []
