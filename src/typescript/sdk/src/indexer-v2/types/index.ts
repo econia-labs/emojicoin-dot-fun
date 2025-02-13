@@ -179,9 +179,9 @@ const toArenaVaultBalanceUpdateFromDatabase = (
   newBalance: BigInt(data.new_balance),
 });
 
-const toArenaPositionsFromDatabase = (
-  data: DatabaseStructType["ArenaPositions"]
-): Types["ArenaPositions"] => ({
+const toArenaPositionFromDatabase = (
+  data: DatabaseStructType["ArenaPosition"]
+): Types["ArenaPosition"] => ({
   meleeID: BigInt(data.melee_id),
   user: toAccountAddressString(data.user),
   open: data.open,
@@ -189,7 +189,7 @@ const toArenaPositionsFromDatabase = (
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
   withdrawals: BigInt(data.withdrawals),
   deposits: BigInt(data.deposits),
-  lastExit: data.last_exit,
+  lastExit0: data.last_exit_0,
   matchAmount: BigInt(data.match_amount),
 });
 
@@ -231,7 +231,7 @@ const toArenaLeaderboardHistoryFromDatabase = (
   meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
-  lastExit: data.last_exit,
+  lastExit0: data.last_exit_0,
   exited: data.exited,
   withdrawals: BigInt(data.withdrawals),
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
@@ -463,7 +463,7 @@ export type ArenaEnterModel = ReturnType<typeof toArenaEnterModel>;
 export type ArenaExitModel = ReturnType<typeof toArenaExitModel>;
 export type ArenaSwapModel = ReturnType<typeof toArenaSwapModel>;
 export type ArenaVaultBalanceUpdateModel = ReturnType<typeof toArenaVaultBalanceUpdateModel>;
-export type ArenaPositionsModel = ReturnType<typeof toArenaPositionsModel>;
+export type ArenaPositionModel = ReturnType<typeof toArenaPositionModel>;
 export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
 export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
@@ -816,23 +816,25 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
 
 export const toArenaLeaderboardHistoryWithArenaInfo = (
   data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]
-) => ({
+): Types["ArenaLeaderboardHistoryWithArenaInfo"] => ({
+  user: data.user,
   meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
+  withdrawals: BigInt(data.withdrawals),
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
+  lastExit0: data.last_exit_0,
+  exited: data.exited,
+
   emojicoin0Symbols: data.emojicoin_0_symbols,
   emojicoin1Symbols: data.emojicoin_1_symbols,
   emojicoin0MarketAddress: data.emojicoin_0_market_address,
   emojicoin1MarketAddress: data.emojicoin_1_market_address,
-  emojicoin0MarketId: BigInt(data.emojicoin_0_market_id),
-  emojicoin1MarketId: BigInt(data.emojicoin_1_market_id),
+  emojicoin0MarketID: BigInt(data.emojicoin_0_market_id),
+  emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
   startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
-  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
-  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
-  lastExit: data.last_exit,
-  exited: data.exited,
-  withdrawals: BigInt(data.withdrawals),
 });
 
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({
@@ -867,7 +869,7 @@ export const toArenaVaultBalanceUpdateModel = (
   ...GuidGetters.arenaVaultBalanceUpdate(data),
 });
 
-export const toArenaPositionsModel = toArenaPositionsFromDatabase;
+export const toArenaPositionModel = toArenaPositionFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
 export const toArenaInfoModel = toArenaInfoFromDatabase;
@@ -925,13 +927,13 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaExitEvents]: toArenaExitModel,
   [TableName.ArenaSwapEvents]: toArenaSwapModel,
   [TableName.ArenaInfo]: toArenaInfoModel,
-  [TableName.ArenaPositions]: toArenaPositionsModel,
+  [TableName.ArenaPosition]: toArenaPositionModel,
   [TableName.ArenaVaultBalanceUpdateEvents]: toArenaVaultBalanceUpdateModel,
   [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
   [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
+  [TableName.ArenaLeaderboardHistoryWithArenaInfo]: toArenaLeaderboardHistoryWithArenaInfo,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
   [DatabaseRpc.AggregateMarketState]: toAggregateMarketState,
-  [DatabaseRpc.ArenaLeaderboardHistoryWithArenaInfo]: toArenaLeaderboardHistoryWithArenaInfo,
 };
 
 export type DatabaseModels = {
@@ -953,10 +955,11 @@ export type DatabaseModels = {
   [TableName.ArenaExitEvents]: ArenaExitModel;
   [TableName.ArenaSwapEvents]: ArenaSwapModel;
   [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
-  [TableName.ArenaPositions]: ArenaPositionsModel;
+  [TableName.ArenaPosition]: ArenaPositionModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
+  [TableName.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
   [DatabaseRpc.AggregateMarketState]: AggregateMarketStateModel;
 };
