@@ -26,6 +26,7 @@
     "test:frontend": "pnpm --prefix src/typescript run test:frontend",
     "test:frontend:e2e": "pnpm --prefix src/typescript run test:frontend:e2e",
     "test:sdk": "pnpm --prefix src/typescript run test:sdk",
+    "test:sdk:arena": "pnpm --prefix src/typescript run test:sdk:arena",
     "test:sdk:e2e": "pnpm --prefix src/typescript run test:sdk:e2e",
     "test:sdk:unit": "pnpm --prefix src/typescript run test:sdk:unit",
     "test:verbose": "pnpm --prefix src/typescript run test:verbose",
