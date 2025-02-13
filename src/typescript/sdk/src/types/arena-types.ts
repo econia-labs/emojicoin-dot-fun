@@ -79,7 +79,7 @@ export type ArenaTypes = {
     eventName: "ArenaVaultBalanceUpdate";
   } & WithVersionAndEventIndex;
 
-  ArenaPositions: {
+  ArenaPosition: {
     user: AccountAddressString;
     meleeID: bigint;
     open: boolean;
@@ -87,7 +87,7 @@ export type ArenaTypes = {
     emojicoin1Balance: bigint;
     withdrawals: bigint;
     deposits: bigint;
-    lastExit: string | undefined;
+    lastExit0: string | null;
     matchAmount: bigint;
   };
 
@@ -96,11 +96,32 @@ export type ArenaTypes = {
     meleeID: bigint;
     profits: bigint;
     losses: bigint;
-    lastExit: string | undefined;
+    lastExit0: boolean | null;
     exited: boolean;
     emojicoin0Balance: bigint;
     emojicoin1Balance: bigint;
     withdrawals: bigint;
+  };
+
+  ArenaLeaderboardHistoryWithArenaInfo: {
+    user: AccountAddressString;
+    meleeID: bigint;
+    profits: bigint;
+    losses: bigint;
+    withdrawals: bigint;
+    emojicoin0Balance: bigint;
+    emojicoin1Balance: bigint;
+    lastExit0: boolean | null;
+    exited: boolean;
+
+    emojicoin0MarketAddress: AccountAddressString;
+    emojicoin0Symbols: SymbolEmoji[];
+    emojicoin0MarketID: bigint;
+    emojicoin1MarketAddress: AccountAddressString;
+    emojicoin1Symbols: SymbolEmoji[];
+    emojicoin1MarketID: bigint;
+    startTime: Date;
+    duration: bigint;
   };
 
   ArenaLeaderboard: {

@@ -6,15 +6,13 @@ import { TableName } from "../../types/json-types";
 import { postgrest } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
 import {
-  DatabaseRpc,
   toArenaInfoModel,
   toArenaLeaderboardHistoryWithArenaInfo,
   toArenaMeleeModel,
-  toArenaPositionsModel,
+  toArenaPositionModel,
   toMarketStateModel,
 } from "../../types";
 import { ORDER_BY } from "../../const";
-import { toAccountAddressString } from "../../../utils";
 
 const selectMelee = () =>
   postgrest
@@ -34,7 +32,7 @@ const selectArenaInfo = () =>
 
 const selectPosition = ({ user, meleeID }: { user: string; meleeID: bigint }) =>
   postgrest
-    .from(TableName.ArenaPositions)
+    .from(TableName.ArenaPosition)
     .select("*")
     .eq("user", user)
     .eq("melee_id", meleeID)
@@ -42,21 +40,28 @@ const selectPosition = ({ user, meleeID }: { user: string; meleeID: bigint }) =>
 
 const selectLatestPosition = ({ user }: { user: string }) =>
   postgrest
-    .from(TableName.ArenaPositions)
+    .from(TableName.ArenaPosition)
     .select("*")
     .eq("user", user)
     .order("melee_id", ORDER_BY.DESC)
     .limit(1)
     .maybeSingle();
 
-const callArenaLeaderboardHistoryWithArenaInfo = ({ user, skip }: { user: string; skip: bigint }) =>
+const callArenaLeaderboardHistoryWithArenaInfo = ({
+  user,
+  skip,
+  amount,
+}: {
+  user: string;
+  skip: number;
+  amount: number;
+}) =>
   postgrest
-    .rpc(
-      DatabaseRpc.ArenaLeaderboardHistoryWithArenaInfo,
-      { user: toAccountAddressString(user), skip },
-      { get: true }
-    )
-    .select("*");
+    .from(TableName.ArenaLeaderboardHistoryWithArenaInfo)
+    .select("*")
+    .eq("user", user)
+    .range(skip, skip + amount)
+    .order("melee_id", ORDER_BY.DESC);
 
 const selectMarketStateByAddress = ({ address }: { address: string }) =>
   postgrest
@@ -68,8 +73,8 @@ const selectMarketStateByAddress = ({ address }: { address: string }) =>
 
 export const fetchMelee = queryHelperSingle(selectMelee, toArenaMeleeModel);
 export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoModel);
-export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionsModel);
-export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionsModel);
+export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
+export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionModel);
 export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
   callArenaLeaderboardHistoryWithArenaInfo,
   toArenaLeaderboardHistoryWithArenaInfo

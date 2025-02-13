@@ -1,4 +1,4 @@
-import type { ArenaPositionsModel, MarketStateModel } from "@sdk/indexer-v2/types";
+import type { ArenaPositionModel, MarketStateModel } from "@sdk/indexer-v2/types";
 import { EmojiTitle, lockedTernary, marketTernary } from "../utils";
 import { type PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { AptosInputLabel } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
@@ -175,8 +175,8 @@ const EnterTabLockPhase: React.FC<{
   amount: bigint;
   errorOut: () => void;
   setCranked: () => void;
-  position?: ArenaPositionsModel | null;
-  setPosition: (position: ArenaPositionsModel | null) => void;
+  position?: ArenaPositionModel | null;
+  setPosition: (position: ArenaPositionModel | null) => void;
 }> = ({ market, market0, market1, amount, errorOut, setCranked, position, setPosition }) => {
   const [innerLock, setInnerLock] = useState<boolean>(false);
 
@@ -250,7 +250,7 @@ const EnterTabLockPhase: React.FC<{
                         user: account.address as `0x${string}`,
                         meleeID: BigInt(enterEvent.data.melee_id),
                         deposits: BigInt(enterEvent.data.input_amount),
-                        lastExit: undefined,
+                        lastExit0: null,
                         matchAmount: BigInt(enterEvent.data.match_amount),
                         withdrawals: 0n,
                         emojicoin0Balance: BigInt(enterEvent.data.emojicoin_0_proceeds),
@@ -274,8 +274,8 @@ const EnterTabSummary: React.FC<{
   market0: MarketStateModel;
   market1: MarketStateModel;
   market: MarketStateModel;
-  position: ArenaPositionsModel;
-  setPosition: (position: ArenaPositionsModel | null) => void;
+  position: ArenaPositionModel;
+  setPosition: (position: ArenaPositionModel | null) => void;
   topOff: () => void;
   tapOut: () => void;
   swap: () => void;
@@ -451,7 +451,7 @@ const Container: React.FC<
     progress: number;
     phase: Phase;
     setPhase: (phase: Phase) => void;
-    position?: ArenaPositionsModel | null;
+    position?: ArenaPositionModel | null;
   }
 > = ({ children, progress, phase, setPhase, position }) => (
   <div className="relative flex flex-col h-[100%] gap-[3em]">
@@ -482,8 +482,8 @@ const Container: React.FC<
 export const EnterTab: React.FC<{
   market0: MarketStateModel;
   market1: MarketStateModel;
-  position?: ArenaPositionsModel | null;
-  setPosition: (position: ArenaPositionsModel | null) => void;
+  position?: ArenaPositionModel | null;
+  setPosition: (position: ArenaPositionModel | null) => void;
 }> = ({ market0, market1, position, setPosition }) => {
   const [phase, setPhase] = useState<Phase>();
   const [market, setMarket] = useState<MarketStateModel>();
