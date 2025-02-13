@@ -1,7 +1,6 @@
 import { formatDisplayName, getAptosClient } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { type Metadata } from "next";
-import { getDisplayName } from "next/dist/shared/lib/utils";
 
 export const metadata: Metadata = {
   title: "Explore the cult",
@@ -44,6 +43,8 @@ export default async function WalletPage({ params }: { params: { address: string
       variables: { address: params.address },
     },
   });
+
+  // Calculate price for each token. Use helper functions in src/typescript/sdk/src/indexer-v2/queries/app/home.ts to fetch market data. AI!
 
   return (
     <div className="max-w-[1000px] mx-auto">
