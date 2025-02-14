@@ -19,7 +19,7 @@ jobs:
         subjectPatternError: 'The subject must be `[ECO-XXX] Do something`.'
         validateSingleCommit: true
         validateSingleCommitMatchesPrTitle: true
-name: 'conventional-commits'
+name: 'Verify conventional commit PR title'
 'on':
   pull_request: null
 ...
