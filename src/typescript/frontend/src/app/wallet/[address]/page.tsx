@@ -1,7 +1,8 @@
 import { fetchMarkets } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { getAptosClient, toNominalPrice } from "@sdk/utils";
+import { toNominalPrice } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
+import { fetchAllTokens, type TokenData } from "lib/aptos-indexer/fungible-assets";
 import { toNominal } from "lib/utils/decimals";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { type Metadata } from "next";
@@ -12,16 +13,7 @@ export const metadata: Metadata = {
   description: `Explore the emojicoin cult`,
 };
 
-export type CoinData = {
-  amount: string;
-  asset_type: string;
-  metadata: {
-    symbol: string;
-    decimals: number;
-  };
-};
-
-export type FullCoinData = Omit<CoinData, "amount"> &
+export type FullCoinData = Omit<TokenData, "amount"> &
   Awaited<ReturnType<typeof fetchMarkets>>[number] & {
     symbol: string;
     marketCap: number;
@@ -34,31 +26,8 @@ export type FullCoinData = Omit<CoinData, "amount"> &
     percentage?: number;
   };
 
-export type FetchEmojicoinBalancesResponse = {
-  current_fungible_asset_balances: CoinData[];
-};
-
-const aptosClient = getAptosClient();
-
 export default async function WalletPage({ params }: { params: { address: string } }) {
-  const ownedTokens: FetchEmojicoinBalancesResponse = await aptosClient.queryIndexer({
-    query: {
-      query: `query CoinsData($address: String) {
-                current_fungible_asset_balances(
-                  where: {owner_address: {_eq: $address}, metadata: {token_standard: {_eq: "v1"}}, amount: {_gt: "0"}, asset_type: {_ilike: "%coin_factory::Emojicoin%"}}
-                ) {
-                  amount
-                  asset_type
-                  metadata {
-                    decimals
-                    symbol
-                  }
-                }
-              }
-              `,
-      variables: { address: params.address },
-    },
-  });
+  const ownedTokens = await fetchAllTokens(params.address);
 
   // Fetch market data and create map for O(1) lookup.
   const marketDataMap: Record<string, Awaited<ReturnType<typeof fetchMarkets>>[number]> = (
@@ -110,7 +79,7 @@ export default async function WalletPage({ params }: { params: { address: string
   });
 
   return (
-    <div className="max-w-[1000px] mx-auto">
+    <div className="mx-auto">
       <WalletClientPage
         address={params.address}
         ownedCoins={coinsWithData}

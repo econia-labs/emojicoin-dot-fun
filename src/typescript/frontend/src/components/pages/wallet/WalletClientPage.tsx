@@ -7,7 +7,7 @@ import { type FullCoinData } from "app/wallet/[address]/page";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { Table, TableBody, TableHeader, TableRow } from "components/ui/table";
 import _ from "lodash";
-import { useCallback, useMemo, useState, type FC } from "react";
+import { useMemo, useState, type FC } from "react";
 import { PortfolioHeader } from "./PortfolioHeader";
 import { PortfolioRow } from "./PortfolioRow";
 
@@ -66,23 +66,25 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
     direction: "desc",
   });
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 25;
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const itemsPerPage = 25;
 
   const sorted = useMemo(() => {
     const sortCallback = _.find(COLUMNS, { key: sort.column })?.sortCallback;
     return _.orderBy(ownedCoins, sortCallback, sort.direction);
   }, [sort.column, sort.direction, ownedCoins]);
 
-  const totalPages = Math.ceil(sorted.length / itemsPerPage);
-  const paginatedCoins = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(startIndex, startIndex + itemsPerPage);
-  }, [sorted, currentPage]);
+  // Scrollable array instead of pagination might look better. Will update after feedback.
 
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
+  // const totalPages = Math.ceil(sorted.length / itemsPerPage);
+  // const paginatedCoins = useMemo(() => {
+  //   const startIndex = (currentPage - 1) * itemsPerPage;
+  //   return sorted.slice(startIndex, startIndex + itemsPerPage);
+  // }, [sorted, currentPage]);
+
+  // const handlePageChange = useCallback((page: number) => {
+  //   setCurrentPage(page);
+  // }, []);
 
   return (
     <>
@@ -100,7 +102,7 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
         <span className="pixel-heading-3b">Unique owned: {ownedCoins.length}</span>
       </div>
       <div className="w-full overflow-x-auto">
-        <div className="min-w-[900px]">
+        <div className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] max-h-[calc(100vh-300px)] m-auto overflow-auto mt-4 mb-4 shadow-[0_0_0_1px_var(--dark-gray)]">
           <Table className="border-solid border-[1px] border-dark-gray">
             <TableHeader>
               <TableRow isHeader>
@@ -117,13 +119,15 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedCoins.map((coin) => (
+              {sorted.map((coin) => (
                 <PortfolioRow key={coin.symbol} coinData={coin} walletStats={walletStats} />
               ))}
             </TableBody>
           </Table>
         </div>
       </div>
+
+      {/* Scrollable array instead of pagination might look better. Will update after feedback.
       <div className="flex justify-center items-center gap-2 mt-4">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
@@ -142,7 +146,7 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
         >
           Next
         </button>
-      </div>
+      </div> */}
     </>
   );
 };

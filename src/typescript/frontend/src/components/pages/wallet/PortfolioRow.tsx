@@ -5,6 +5,7 @@ import { TableCell, TableRow } from "components/ui/table";
 import { useAptPrice } from "context/AptPrice";
 import { useRouter } from "next/navigation";
 import { useMemo, type FC } from "react";
+import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
 interface Props {
@@ -27,10 +28,19 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
       className="cursor-pointer"
     >
       <TableCell className="px-6 text-center">
-        <Emoji
-          className={`${coinData.symbol.length <= 2 ? "text-[24px]" : "text-[20px]"} text-nowrap`}
-          emojis={coinData.symbol}
-        />
+        {!coinData.inBondingCurve ? (
+          <a className="hover:underline" href={`${ROUTES.pools}?pool=${coinData.symbol}`}>
+            <Emoji
+              className={`${coinData.symbol.length <= 2 ? "text-[24px]" : "text-[20px]"} text-nowrap`}
+              emojis={coinData.symbol}
+            />
+          </a>
+        ) : (
+          <Emoji
+            className={`${coinData.symbol.length <= 2 ? "text-[24px]" : "text-[20px]"} text-nowrap`}
+            emojis={coinData.symbol}
+          />
+        )}
       </TableCell>
       <TableCell className="text-center">
         <FormattedNumber
