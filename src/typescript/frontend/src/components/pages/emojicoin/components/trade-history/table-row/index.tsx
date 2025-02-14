@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useMemo, type PropsWithChildren } from "react";
-import { type TableRowDesktopProps } from "./types";
-import { ExplorerLink } from "components/explorer-link/ExplorerLink";
-import { darkColors } from "theme";
-import { formatDisplayName } from "@sdk/utils";
-import Popup from "components/popup";
-import { motion } from "framer-motion";
-import { emoji } from "utils";
-import { Emoji } from "utils/emoji";
 import { useNameResolver } from "@hooks/use-name-resolver";
+import { formatDisplayName } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
+import Popup from "components/popup";
+import { motion } from "framer-motion";
+import { useMemo, type PropsWithChildren } from "react";
+import { ROUTES } from "router/routes";
+import { darkColors } from "theme";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+import { type TableRowDesktopProps } from "./types";
 
 type TableRowTextItemProps = {
   className: string;
@@ -129,7 +129,7 @@ const TableRow = ({
         />
       </TableRowTextItem>
       <td className={`group/explorer w-[22%] md:w-[18%] border-r-[1px] z-[2] ${Height}`}>
-        <ExplorerLink className="flex w-full h-full" value={item.version} type="txn">
+        <a href={`${ROUTES.wallet}/${item.swapper}`} className="flex h-full">
           <span
             className={
               `${isANSName ? "brightness-[1.4] contrast-[1.4]" : ""}` +
@@ -139,7 +139,7 @@ const TableRow = ({
           >
             {displayName}
           </span>
-        </ExplorerLink>
+        </a>
       </td>
     </motion.tr>
   );

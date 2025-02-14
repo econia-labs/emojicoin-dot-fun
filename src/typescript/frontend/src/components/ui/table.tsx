@@ -41,23 +41,24 @@ const TableFooter = React.forwardRef<
 ));
 TableFooter.displayName = "TableFooter";
 
-const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
-  ({ className, ...props }, ref) => {
-    return (
-      <tr
-        ref={ref}
-        className={cn(
-          "relative w-full body-md border-solid border-b border-dark-gray h-[33px]",
-          className
-        )}
-        {...props}
-      >
-        <div className="w-full h-full absolute border-solid hover:border-2 hover:border-ec-blue" />
-        {props.children}
-      </tr>
-    );
-  }
-);
+const TableRow = React.forwardRef<
+  HTMLTableRowElement,
+  React.HTMLAttributes<HTMLTableRowElement> & { isHeader?: boolean }
+>(({ className, ...props }, ref) => {
+  return (
+    <tr
+      ref={ref}
+      className={cn(
+        "relative w-full body-md border-solid border-b border-dark-gray h-[33px]",
+        className,
+        props.isHeader ? "" : "hover:border-2 hover:border-ec-blue"
+      )}
+      {...props}
+    >
+      {props.children}
+    </tr>
+  );
+});
 TableRow.displayName = "TableRow";
 
 const TableHead = React.forwardRef<
@@ -67,7 +68,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-2 text-left align-middle font-forma body-lg [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "h-10 px-2 text-left align-middle font-forma body-lg [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] sticky",
       className
     )}
     {...props}
@@ -82,7 +83,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "px-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "px-2 text-lighter-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props}

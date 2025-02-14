@@ -24,6 +24,7 @@ export type CoinData = {
 export type FullCoinData = Omit<CoinData, "amount"> &
   Awaited<ReturnType<typeof fetchMarkets>>[number] & {
     symbol: string;
+    marketCap: number;
     emojiData: ReturnType<typeof symbolBytesToEmojis>;
     emojiName: string;
     emojiPath: string;
@@ -39,7 +40,6 @@ export type FetchEmojicoinBalancesResponse = {
 const aptosClient = getAptosClient();
 
 export default async function WalletPage({ params }: { params: { address: string } }) {
-  //const ownedTokens = await aptosClient.getAccountCoinsData({accountAddress: params.address, options: {limit: 100}});
   const ownedTokens: FetchEmojicoinBalancesResponse = await aptosClient.queryIndexer({
     query: {
       query: `query CoinsData($address: String) {
@@ -71,29 +71,28 @@ export default async function WalletPage({ params }: { params: { address: string
     return acc;
   }, {});
 
-  const coinsWithData = ownedTokens.current_fungible_asset_balances
-    .map((coin) => {
-      const marketData = marketDataMap[coin.metadata.symbol];
-      const emojiData = symbolBytesToEmojis(coin.metadata.symbol);
-      const emojiName = emojisToName(emojiData.emojis);
-      const emojiPath = emojiNamesToPath(emojiData.emojis.map((x) => x.name));
-      const price = marketData ? toNominalPrice(marketData.lastSwap.avgExecutionPriceQ64) : 0;
-      const amount = toNominal(BigInt(coin.amount));
-      const ownedValue = amount * price;
-
-      return {
-        ...coin,
-        ...marketData,
-        emojiName,
-        symbol: coin.metadata.symbol,
-        emojiData,
-        emojiPath,
-        amount,
-        price,
-        ownedValue,
-      };
-    })
-    .sort((a, b) => b.ownedValue - a.ownedValue);
+  const coinsWithData = ownedTokens.current_fungible_asset_balances.map((coin) => {
+    const marketData = marketDataMap[coin.metadata.symbol];
+    const emojiData = symbolBytesToEmojis(coin.metadata.symbol);
+    const emojiName = emojisToName(emojiData.emojis);
+    const emojiPath = emojiNamesToPath(emojiData.emojis.map((x) => x.name));
+    const price = marketData ? toNominalPrice(marketData.lastSwap.avgExecutionPriceQ64) : 0;
+    const amount = toNominal(BigInt(coin.amount));
+    const ownedValue = amount * price;
+    const marketCap = marketData ? toNominal(marketData.state.instantaneousStats.marketCap) : 0;
+    return {
+      ...coin,
+      ...marketData,
+      marketCap,
+      emojiName,
+      symbol: coin.metadata.symbol,
+      emojiData,
+      emojiPath,
+      amount,
+      price,
+      ownedValue,
+    };
+  });
 
   const walletStats = coinsWithData.reduce(
     (acc, coin) => {
