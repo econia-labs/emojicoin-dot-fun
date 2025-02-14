@@ -18,7 +18,9 @@ jobs:
       # yamllint enable rule:indentation
 name: 'Ensure correct version of processor submodule'
 'on':
-  pull_request: null
+  pull_request:
+    branches:
+    - 'main'
   push:
     branches:
     - 'main'
