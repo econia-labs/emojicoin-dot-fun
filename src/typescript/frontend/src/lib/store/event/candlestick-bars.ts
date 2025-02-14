@@ -3,6 +3,7 @@ import { type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/cons
 import { type SwapEventModel, type PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { q64ToBig } from "@sdk/utils/nominal-price";
+import { CallTracker } from "assert";
 import Big from "big.js";
 import { toNominal } from "lib/utils/decimals";
 
@@ -20,6 +21,17 @@ export type LatestBar = Bar & {
   marketNonce: bigint;
 };
 
+const toNominalVolume = <
+  T extends
+    | { volumeBase: bigint; volumeQuote: bigint }
+    | { baseVolume: bigint; quoteVolume: bigint },
+>(
+  args: T
+) =>
+  "quoteVolume" in args
+    ? toNominal(args.baseVolume + args.quoteVolume)
+    : toNominal(args.volumeBase + args.volumeQuote);
+
 export const periodicStateTrackerToLatestBar = (
   tracker: Types["PeriodicStateTracker"],
   marketNonce: bigint
@@ -31,7 +43,7 @@ export const periodicStateTrackerToLatestBar = (
     high: q64ToBig(tracker.highPriceQ64).toNumber(),
     low: q64ToBig(tracker.lowPriceQ64).toNumber(),
     close: q64ToBig(tracker.closePriceQ64).toNumber(),
-    volume: toNominal(tracker.volumeQuote),
+    volume: toNominalVolume(tracker),
     period: rawPeriodToEnum(tracker.period),
     marketNonce,
   };
@@ -60,7 +72,7 @@ export const toBar = (event: PeriodicStateEventModel): Bar => ({
   high: q64ToBig(event.periodicState.highPriceQ64).toNumber(),
   low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
   close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
-  volume: toNominal(event.periodicState.volumeQuote),
+  volume: toNominalVolume(event.periodicState),
 });
 
 export const toBars = (events: PeriodicStateEventModel | PeriodicStateEventModel[]) =>
@@ -82,7 +94,7 @@ export const createBarFromSwap = (
     high: price,
     low: price,
     close: price,
-    volume: toNominal(swap.quoteVolume),
+    volume: toNominalVolume(swap),
     period,
     marketNonce: market.marketNonce,
   };
