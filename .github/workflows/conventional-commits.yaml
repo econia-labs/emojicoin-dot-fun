@@ -1,0 +1,25 @@
+# cspell:word amannn
+---
+env:
+  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+jobs:
+  conventional-commits:
+    name: 'Verify PR title uses a conventional commit message'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'amannn/action-semantic-pull-request@v5'
+      env:
+        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      with:
+        requireScope: true
+        scope: |
+          arena
+          ci
+        subjectPattern: '^\[ECO-[0-9]+\] [A-Z].*$'
+        subjectPatternError: 'The subject must be `[ECO-XXX] Do something`.'
+        validateSingleCommit: true
+        validateSingleCommitMatchesPrTitle: true
+name: 'conventional-commits'
+'on':
+  pull_request: null
+...
