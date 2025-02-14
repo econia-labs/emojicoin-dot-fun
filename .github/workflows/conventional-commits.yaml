@@ -20,5 +20,10 @@ jobs:
         validateSingleCommitMatchesPrTitle: true
 name: 'Verify conventional commit PR title'
 'on':
-  pull_request: null
+  pull_request:
+    types:
+    - 'opened'
+    - 'edited'
+    - 'synchronize'
+    - 'reopened'
 ...
