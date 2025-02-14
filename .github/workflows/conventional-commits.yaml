@@ -6,9 +6,9 @@ jobs:
   conventional-commit:
     runs-on: 'ubuntu-latest'
     steps:
-    - uses: 'amannn/action-semantic-pull-request@v5'
-      env:
+    - env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      uses: 'amannn/action-semantic-pull-request@v5'
       with:
         requireScope: true
         scopes: '^ECO-[0-9]+$'
@@ -19,8 +19,8 @@ name: 'Verify conventional commit PR title'
 'on':
   pull_request:
     types:
-    - 'opened'
     - 'edited'
-    - 'synchronize'
+    - 'opened'
     - 'reopened'
+    - 'synchronize'
 ...
