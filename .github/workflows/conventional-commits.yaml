@@ -11,11 +11,10 @@ jobs:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
       with:
         requireScope: true
-        scope: |
-          arena
-          ci
-        subjectPattern: '^\[ECO-[0-9]+\] [A-Z].*$'
-        subjectPatternError: 'The subject must be `[ECO-XXX] Do something`.'
+        scopePattern: '^ECO-[0-9]+$'
+        scopePatternError: 'Scope must be an ECO tag (e.g., ECO-2840)'
+        subjectPattern: '^[A-Z].*$'
+        subjectPatternError: 'Subject must start with a capital letter'
         validateSingleCommit: true
         validateSingleCommitMatchesPrTitle: true
 name: 'Verify conventional commit PR title'
