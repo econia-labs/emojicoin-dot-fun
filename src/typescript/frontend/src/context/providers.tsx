@@ -36,6 +36,7 @@ import { GeoblockedBanner } from "components/geoblocking";
 import { completePickerData } from "utils/picker-data/complete-picker-data";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { init } from "emoji-mart";
+import { NewCoinInputProvider } from "./new-coin-input-context/NewCoinInputContextProvider";
 
 /**
  * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
@@ -86,6 +87,7 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
                       nativePicker: isMobile || isTablet,
                     }}
                   >
+                    <NewCoinInputProvider>
                     <GlobalStyle />
                     <ConnectToWebSockets />
                     <Suspense fallback={<Loader />}>
@@ -98,6 +100,7 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
                         <Footer />
                       </ContentWrapper>
                     </Suspense>
+                    </NewCoinInputProvider>
                   </EmojiPickerProvider>
                 </AptosContextProvider>
               </WalletModalContextProvider>

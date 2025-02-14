@@ -23,12 +23,7 @@ const DesktopGrid = (props: GridProps) => {
           <StyledBlock width="57%" className="bg-black z-10">
             <StyledBlockWrapper>
               <Suspense fallback={<Loading numEmojis={20} />}>
-                <ChartContainer
-                  symbol={props.data.symbolData.symbol}
-                  emojis={props.data.emojis}
-                  marketID={props.data.marketID.toString()}
-                  marketAddress={props.data.marketView.metadata.marketAddress}
-                />
+              <TradeHistory data={props.data} />
               </Suspense>
             </StyledBlockWrapper>
           </StyledBlock>
@@ -44,10 +39,10 @@ const DesktopGrid = (props: GridProps) => {
           </StyledBlock>
         </StyledContentColumn>
 
-        <StyledContentColumn>
+        {/* <StyledContentColumn>
           <StyledBlock width="57%">
             <StyledBlockWrapper>
-              <TradeHistory data={props.data} />
+             
             </StyledBlockWrapper>
           </StyledBlock>
 
@@ -56,7 +51,7 @@ const DesktopGrid = (props: GridProps) => {
               <ChatBox data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
-        </StyledContentColumn>
+        </StyledContentColumn> */}
       </StyledContentInner>
     </StyledContentWrapper>
   );

@@ -32,12 +32,12 @@ const MobileGrid = (props: GridProps) => {
         {DISPLAY_HEADER_ABOVE_CHART && <StyledMobileContentHeader></StyledMobileContentHeader>}
         <StyledMobileContentInner className={HEIGHT}>
           <Suspense fallback={<Loading />}>
-            <ChartContainer
+            {/* <ChartContainer
               symbol={props.data.symbol}
               emojis={props.data.emojis}
               marketID={props.data.marketID.toString()}
               marketAddress={props.data.marketAddress}
-            />
+            /> */}
           </Suspense>
         </StyledMobileContentInner>
       </StyledMobileContentBlock>
@@ -99,7 +99,6 @@ const MobileGrid = (props: GridProps) => {
           </>
         ) : (
           <StyledMobileContentInner>
-            <ChatBox data={props.data} />
           </StyledMobileContentInner>
         )}
       </StyledMobileContentBlock>

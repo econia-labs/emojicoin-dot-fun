@@ -50,11 +50,6 @@ if (process.env.NEXT_PUBLIC_BROKER_URL) {
   throw new Error("Environment variable NEXT_PUBLIC_BROKER_URL is undefined.");
 }
 
-if (process.env.NEXT_PUBLIC_CDN_URL) {
-  CDN_URL = process.env.NEXT_PUBLIC_CDN_URL;
-} else {
-  throw new Error("Environment variable NEXT_PUBLIC_CDN_URL is undefined.");
-}
 
 const VERSION = parse(packageInfo.version);
 
