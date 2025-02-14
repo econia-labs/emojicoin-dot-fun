@@ -11,8 +11,7 @@ jobs:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
       with:
         requireScope: true
-        scopePattern: '^ECO-[0-9]+$'
-        scopePatternError: 'Scope must be an ECO tag (e.g., ECO-2840)'
+        scopes: '^ECO-[0-9]+$'
         subjectPattern: '^[A-Z].*$'
         subjectPatternError: 'Subject must start with a capital letter'
         validateSingleCommit: true
