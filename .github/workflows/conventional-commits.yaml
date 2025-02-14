@@ -1,0 +1,26 @@
+# cspell:word amannn
+---
+env:
+  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+jobs:
+  conventional-commit:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - env:
+        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      uses: 'amannn/action-semantic-pull-request@v5'
+      with:
+        requireScope: true
+        scopes: '^ECO-[0-9]+$'
+        subjectPattern: '^[A-Z].*$'
+        validateSingleCommit: true
+        validateSingleCommitMatchesPrTitle: true
+name: 'Verify conventional commit PR title'
+'on':
+  pull_request:
+    types:
+    - 'edited'
+    - 'opened'
+    - 'reopened'
+    - 'synchronize'
+...
