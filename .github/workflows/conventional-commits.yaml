@@ -13,7 +13,6 @@ jobs:
         requireScope: true
         scopes: '^ECO-[0-9]+$'
         subjectPattern: '^[A-Z].*$'
-        subjectPatternError: 'Subject must start with a capital letter'
         validateSingleCommit: true
         validateSingleCommitMatchesPrTitle: true
 name: 'Verify conventional commit PR title'
