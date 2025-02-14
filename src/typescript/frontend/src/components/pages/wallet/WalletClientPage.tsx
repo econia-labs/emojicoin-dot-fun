@@ -6,7 +6,8 @@ import { formatDisplayName } from "@sdk/utils";
 import { type FullCoinData } from "app/wallet/[address]/page";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { Table, TableBody, TableHeader, TableRow } from "components/ui/table";
-import { useMemo, useState, type FC } from "react";
+import _ from "lodash";
+import { useCallback, useMemo, useState, type FC } from "react";
 import { PortfolioHeader } from "./PortfolioHeader";
 import { PortfolioRow } from "./PortfolioRow";
 
@@ -18,34 +19,70 @@ interface Props {
   };
 }
 
+const COLUMNS = [
+  { key: "emoji", text: "Emoji", sortable: false, className: "w-[160px] text-start justify-start" },
+  {
+    key: "percentage",
+    text: "Percentage",
+    sortable: true,
+    className: "w-[160px] text-center justify-center",
+    sortCallback: (coin: FullCoinData) => coin.percentage,
+  },
+  {
+    key: "amount",
+    text: "Amount",
+    sortable: true,
+    className: "w-[100px] text-right justify-end",
+    sortCallback: (coin: FullCoinData) => coin.amount,
+  },
+  {
+    key: "marketCap",
+    text: "Market cap",
+    sortable: true,
+    className: "w-[150px] text-right justify-end",
+    sortCallback: (coin: FullCoinData) => coin.marketCap,
+  },
+  {
+    key: "usdValue",
+    text: "USD Value",
+    sortable: true,
+    className: "w-[150px] text-right justify-end",
+    sortCallback: (coin: FullCoinData) => coin.ownedValue,
+  },
+  {
+    key: "ownedValue",
+    text: "Value",
+    sortable: true,
+    className: "w-[150px] text-right justify-end",
+    sortCallback: (coin: FullCoinData) => coin.ownedValue,
+  },
+];
+
 export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }) => {
   const resolvedName = useNameResolver(address);
 
   const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
-    column: "Value",
+    column: "ownedValue",
     direction: "desc",
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
+
   const sorted = useMemo(() => {
-    if (sort.column === "Value") {
-      return ownedCoins.sort(
-        (a, b) => (b.ownedValue - a.ownedValue) * (sort.direction === "asc" ? -1 : 1)
-      );
-    } else if (sort.column === "Amount") {
-      return ownedCoins.sort((a, b) => (b.amount - a.amount) * (sort.direction === "asc" ? -1 : 1));
-    } else if (sort.column === "Percentage") {
-      return ownedCoins.sort(
-        (a, b) =>
-          (b.ownedValue / walletStats.totalValue - a.ownedValue / walletStats.totalValue) *
-          (sort.direction === "asc" ? -1 : 1)
-      );
-    } else if (sort.column === "Market cap") {
-      return ownedCoins.sort(
-        (a, b) => (b.marketCap - a.marketCap) * (sort.direction === "asc" ? -1 : 1)
-      );
-    }
-    return ownedCoins;
-  }, [sort.column, sort.direction, ownedCoins, walletStats.totalValue]);
+    const sortCallback = _.find(COLUMNS, { key: sort.column })?.sortCallback;
+    return _.orderBy(ownedCoins, sortCallback, sort.direction);
+  }, [sort.column, sort.direction, ownedCoins]);
+
+  const totalPages = Math.ceil(sorted.length / itemsPerPage);
+  const paginatedCoins = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sorted.slice(startIndex, startIndex + itemsPerPage);
+  }, [sorted, currentPage]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
 
   return (
     <>
@@ -62,51 +99,49 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
         </span>
         <span className="pixel-heading-3b">Unique owned: {ownedCoins.length}</span>
       </div>
-      <div className="flex justify-center w-full">
-        <div>
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-[900px]">
           <Table className="border-solid border-[1px] border-dark-gray">
             <TableHeader>
               <TableRow isHeader>
-                <PortfolioHeader className="w-[100px] justify-center text-center" text={"Emoji"} />
-                <PortfolioHeader
-                  sort={sort}
-                  setSort={setSort}
-                  className="w-[160px] text-center justify-center"
-                  text="Percentage"
-                />
-                <PortfolioHeader
-                  sort={sort}
-                  setSort={setSort}
-                  className="w-[100px] text-right justify-end"
-                  text="Amount"
-                />
-                <PortfolioHeader
-                  sort={sort}
-                  setSort={setSort}
-                  className="w-[150px] text-right justify-end"
-                  text="Market cap"
-                />
-                <PortfolioHeader
-                  sort={sort}
-                  setSort={setSort}
-                  className="w-[150px] text-right justify-end"
-                  text="USD Value"
-                />
-                <PortfolioHeader
-                  sort={sort}
-                  setSort={setSort}
-                  className="w-[150px] text-right justify-end"
-                  text="Value"
-                />
+                {COLUMNS.map((column) => (
+                  <PortfolioHeader
+                    key={column.key}
+                    id={column.key}
+                    sort={sort}
+                    setSort={column.sortable ? setSort : undefined}
+                    className={column.className}
+                    text={column.text}
+                  />
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sorted.map((coin) => (
+              {paginatedCoins.map((coin) => (
                 <PortfolioRow key={coin.symbol} coinData={coin} walletStats={walletStats} />
               ))}
             </TableBody>
           </Table>
         </div>
+      </div>
+      <div className="flex justify-center items-center gap-2 mt-4">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 border border-dark-gray disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+        <span className="pixel-text">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 border border-dark-gray disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
       </div>
     </>
   );

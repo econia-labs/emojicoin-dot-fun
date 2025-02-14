@@ -31,6 +31,7 @@ export type FullCoinData = Omit<CoinData, "amount"> &
     amount: number;
     price: number;
     ownedValue: number;
+    percentage?: number;
   };
 
 export type FetchEmojicoinBalancesResponse = {
@@ -91,6 +92,8 @@ export default async function WalletPage({ params }: { params: { address: string
       amount,
       price,
       ownedValue,
+      // Will be calculated later.
+      percentage: 0,
     };
   });
 
@@ -101,6 +104,10 @@ export default async function WalletPage({ params }: { params: { address: string
     },
     { totalValue: 0 }
   );
+
+  coinsWithData.forEach((coin) => {
+    coin.percentage = (coin.ownedValue / walletStats.totalValue) * 100;
+  });
 
   return (
     <div className="max-w-[1000px] mx-auto">

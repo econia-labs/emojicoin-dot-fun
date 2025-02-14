@@ -7,26 +7,27 @@ import { useScramble } from "use-scramble";
 
 interface Props {
   text: string;
+  id: string;
   sort?: { column: string; direction: "asc" | "desc" };
   setSort?: (sort: { column: string; direction: "asc" | "desc" }) => void;
   className?: string;
   onClick?: () => void;
 }
-export const PortfolioHeader: FC<Props> = ({ text, className, sort, setSort }) => {
+export const PortfolioHeader: FC<Props> = ({ id, text, className, sort, setSort }) => {
   const { ref, replay } = useScramble({
     text: `${text}`,
     overdrive: false,
     speed: 0.5,
   });
 
-  const currDirection = sort?.column === text ? sort.direction : undefined;
+  const currDirection = sort?.column === id ? sort.direction : undefined;
 
   return (
     <TableHead
       className={cn(className, "cursor-pointer")}
       onClick={
         setSort
-          ? () => setSort({ column: text, direction: currDirection === "desc" ? "asc" : "desc" })
+          ? () => setSort({ column: id, direction: currDirection === "desc" ? "asc" : "desc" })
           : undefined
       }
     >
