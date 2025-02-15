@@ -8,7 +8,7 @@ import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
 import { headers } from "next/headers";
 import "@react95/core/themes/win95.css";
-import { RandomEmojiBg } from "components/RandomEmojiBg";
+import { BackgroundEmojis } from "@/components/misc/background-emojis/BackgroundEmojis";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -24,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <style dangerouslySetInnerHTML={{ __html: fontsStyle }} />
         <StyledComponentsRegistry>
           <Providers userAgent={userAgent}>
-            <RandomEmojiBg />
+            <BackgroundEmojis />
             <DisplayDebugData />
             {children}
           </Providers>

@@ -5,47 +5,19 @@ import { getRandomSymbolEmoji } from "@sdk/emoji_data";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Emoji } from "utils/emoji";
 
-function OneRandomEmoji({ emoji }: { emoji: string | undefined }) {
+function OneRandomEmoji({ emoji }: { emoji: string }) {
   const mt = useMemo(() => Math.random() * 100, []);
   const ml = useMemo(() => Math.random() * 100, []);
   const rotate = useMemo(() => Math.round(Math.random() * 50 - 25), []);
-  const [blur, setBlur] = useState(true);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const mouseenter = (e: MouseEvent) => {
-      const elements = document.elementsFromPoint(e.clientX, e.clientY);
-      if (elements.find((e) => e === ref.current)) {
-        setBlur(false);
-      }
-    };
-    const mouseleave = (e: MouseEvent) => {
-      const elements = document.elementsFromPoint(e.clientX, e.clientY);
-      if (!elements.find((e) => e === ref.current)) {
-        setBlur(true);
-      }
-    };
-
-    if (emoji) {
-      window.addEventListener("mousemove", mouseenter, { passive: true, capture: true });
-      window.addEventListener("mousemove", mouseleave, { passive: true, capture: true });
-
-      return () => {
-        window.removeEventListener("mousemove", mouseenter);
-        window.removeEventListener("mousemove", mouseleave);
-      };
-    }
-  }, [emoji]);
-  if (!emoji) return <div></div>;
   return (
     <div
-      ref={ref}
-      className="flex flex-col w-min h-min text-8xl grid place-items-center select-none transition-all"
+      className="flex flex-col w-min h-min text-8xl place-items-center select-none transition-all"
       style={{
         marginTop: `${mt}%`,
         marginLeft: `${ml}%`,
         transform: `rotate(${rotate}deg)`,
-        filter: blur ? "blur(15px)" : "",
-        opacity: blur ? "0.6" : "1",
+        filter: "blur(15px)",
+        opacity: "0.6",
       }}
     >
       <Emoji emojis={emoji} />
@@ -53,7 +25,7 @@ function OneRandomEmoji({ emoji }: { emoji: string | undefined }) {
   );
 }
 
-export function RandomEmojiBg() {
+export function BackgroundEmojis() {
   const ref = useRef<HTMLDivElement>(null);
   const { height, width } = useNodeDimensions(ref);
   const nRows = useMemo(() => Math.ceil(height / 150), [height]);
@@ -66,9 +38,11 @@ export function RandomEmojiBg() {
     [nRows, nCols]
   );
 
+  // The margin top value for the parallax effect- used on the overall background.
   const [mt, setMt] = useState<number>(0);
 
   useEffect(() => {
+    // The function that creates the parallax effect.
     const fn = (e: Event) => {
       setMt(((e.target as HTMLElement | null)?.scrollTop ?? 0) * -0.4);
     };
@@ -90,9 +64,13 @@ export function RandomEmojiBg() {
           top: mt,
         }}
       >
-        {rows.map((row, i) => (
-          <OneRandomEmoji key={`random-emoji-bg-${i}`} emoji={row?.emoji} />
-        ))}
+        {rows.map((row, i) =>
+          row ? (
+            <OneRandomEmoji key={`random-emoji-bg-${i}`} emoji={row.emoji} />
+          ) : (
+            <div key={`random-emoji-bg-${i}`} />
+          )
+        )}
       </div>
     </div>
   );
