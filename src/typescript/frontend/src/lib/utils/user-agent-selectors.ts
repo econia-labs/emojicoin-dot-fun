@@ -49,6 +49,9 @@ const booleanSelectors = new Set(Object.keys(booleanUserAgentSelectors) as Keys[
 
 export const getBooleanUserAgentSelectors = (userAgent: string): Selectors => {
   try {
+    if (!userAgent) {
+      return {};
+    }
     const selectors = getSelectorsByUserAgent(userAgent) ?? {};
     const res: Selectors = {};
     Object.keys(selectors)
@@ -59,7 +62,6 @@ export const getBooleanUserAgentSelectors = (userAgent: string): Selectors => {
       .forEach((k) => (res[k] = true));
     return res;
   } catch (e) {
-    console.error(e);
     return {};
   }
 };
