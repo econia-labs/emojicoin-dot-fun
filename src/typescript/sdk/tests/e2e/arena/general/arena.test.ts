@@ -1,11 +1,26 @@
+import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
+  type AnyNumberString,
   ARENA_MODULE_ADDRESS,
   EmojicoinArena,
   getAptosClient,
   type SymbolEmoji,
 } from "../../../../src";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
-import { fetchArenaInfo, waitForEmojicoinIndexer } from "../../../../src/indexer-v2";
+import {
+  type ArenaEnterModel,
+  type ArenaExitModel,
+  type ArenaPositionModel,
+  type ArenaSwapModel,
+  fetchArenaInfo,
+  postgrest,
+  TableName,
+  toArenaEnterModel,
+  toArenaExitModel,
+  toArenaPositionModel,
+  toArenaSwapModel,
+  waitForEmojicoinIndexer,
+} from "../../../../src/indexer-v2";
 import { type MeleeEmojiData } from "../../../../src/markets/arena-utils";
 import { getFundedAccount } from "../../../utils/test-accounts";
 import {
@@ -16,6 +31,15 @@ import {
 } from "../utils";
 
 const PROCESSING_WAIT_TIME = 2 * 1000;
+const waitForProcessor = <
+  T extends { version: AnyNumberString } | { response: UserTransactionResponse },
+>(
+  res: T
+) =>
+  waitForEmojicoinIndexer(
+    "version" in res ? res.version : res.response.version,
+    PROCESSING_WAIT_TIME
+  );
 
 /**
  * Because this test checks the details of the very first arena it must run separately from other
@@ -54,7 +78,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
       await waitUntilCurrentMeleeEnds();
       await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
         melee = res.melee;
-        return waitForEmojicoinIndexer(res.version, PROCESSING_WAIT_TIME);
+        return waitForProcessor(res);
       });
 
       return true;
