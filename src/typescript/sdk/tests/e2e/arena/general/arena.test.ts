@@ -1,4 +1,3 @@
-import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   ARENA_MODULE_ADDRESS,
   EmojicoinArena,
@@ -6,47 +5,23 @@ import {
   type SymbolEmoji,
 } from "../../../../src";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
-import {
-  type ArenaEnterModel,
-  type ArenaExitModel,
-  type ArenaLeaderboardHistoryModel,
-  type ArenaPositionModel,
-  type ArenaSwapModel,
-  fetchArenaInfo,
-  postgrest,
-  TableName,
-  toArenaEnterModel,
-  toArenaExitModel,
-  toArenaLeaderboardHistoryModel,
-  toArenaPositionModel,
-  toArenaSwapModel,
-  waitForEmojicoinIndexer,
-} from "../../../../src/indexer-v2";
-import {
-  fetchArenaMeleeView,
-  fetchMeleeEmojiData,
-  type MeleeEmojiData,
-} from "../../../../src/markets/arena-utils";
+import { fetchArenaInfo, waitForEmojicoinIndexer } from "../../../../src/indexer-v2";
+import { type MeleeEmojiData } from "../../../../src/markets/arena-utils";
 import { getFundedAccount } from "../../../utils/test-accounts";
 import {
-  currentMeleeEnded,
   ONE_SECOND_MICROSECONDS,
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
 } from "../../broker/utils";
-import { getPublisher } from "../../../utils";
 
 const PROCESSING_WAIT_TIME = 2 * 1000;
-
-const waitForProcessor = async (data: { response: UserTransactionResponse }) => {
-  await waitForEmojicoinIndexer(data.response.version, PROCESSING_WAIT_TIME);
-};
 
 /**
  * Because this test checks the details of the very first arena it must run separately from other
  * arena tests.
  */
 describe("ensures an arena correctly unfolds and the processor data is accurate", () => {
+  const aptos = getAptosClient();
   const emojicoin = new EmojicoinClient();
 
   // The next arena markets.
@@ -84,12 +59,6 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     },
     5 * 60 * 1000
   );
-
-  const aptos = getAptosClient();
-
-  const waitForProcessor = async (data: { response: UserTransactionResponse }) => {
-    await waitForEmojicoinIndexer(data.response.version, PROCESSING_WAIT_TIME);
-  };
 
   it("verifies that the arena module is already published on-chain", async () => {
     const res = await aptos.getAccountModule({
