@@ -103,3 +103,18 @@ export const fetchMeleeEmojiData = async (
 };
 
 export type MeleeEmojiData = Awaited<ReturnType<typeof fetchMeleeEmojiData>>;
+
+/**
+ * Helper function to fetch all current melee data in a single call.
+ */
+export const fetchAllCurrentMeleeData = async () => {
+  const registry = await fetchArenaRegistryView();
+  const melee = await fetchArenaMeleeView(registry.currentMeleeID);
+  const { market1, market2 } = await fetchMeleeEmojiData(melee);
+  return {
+    registry,
+    melee,
+    market1,
+    market2,
+  };
+};
