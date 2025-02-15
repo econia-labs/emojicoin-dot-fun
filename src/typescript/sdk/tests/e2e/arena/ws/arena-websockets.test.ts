@@ -10,16 +10,14 @@ import {
   isArenaVaultBalanceUpdateModel,
 } from "../../../../src/types/arena-types";
 import { getFundedAccount } from "../../../utils/test-accounts";
+import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../../broker/utils";
 import {
-  compareParsedData,
-  connectNewClient,
-  customWaitFor,
-  depositToVault,
-  ONE_SECOND_MICROSECONDS,
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
-  subscribe,
-} from "../../broker/utils";
+  ONE_SECOND_MICROSECONDS,
+  depositToVault,
+  waitUntilCurrentMeleeEnds,
+} from "../utils";
 
 describe("tests to ensure that arena websocket events work as expected", () => {
   const user = getFundedAccount("085");
@@ -33,6 +31,7 @@ describe("tests to ensure that arena websocket events work as expected", () => {
   beforeAll(async () => {
     // Prepare the on-chain state for the arena contract to immediately exit the initial arena.
     await registerAndUnlockInitialMarketsForArenaTest();
+    await waitUntilCurrentMeleeEnds();
     await setNextMeleeDurationAndEnsureCrank(ONE_SECOND_MICROSECONDS * 15n).then((res) => {
       symbol1 = res.symbol1;
       symbol2 = res.symbol2;

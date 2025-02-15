@@ -12,7 +12,8 @@ import {
   ONE_SECOND_MICROSECONDS,
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
-} from "../../broker/utils";
+  waitUntilCurrentMeleeEnds,
+} from "../utils";
 
 const PROCESSING_WAIT_TIME = 2 * 1000;
 
@@ -50,6 +51,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
         await emojicoin.register(getFundedAccount("667"), emoji);
         await emojicoin.buy(getFundedAccount("667"), emoji, 100000000n);
       }
+      await waitUntilCurrentMeleeEnds();
       await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
         melee = res.melee;
         return waitForEmojicoinIndexer(res.version, PROCESSING_WAIT_TIME);
