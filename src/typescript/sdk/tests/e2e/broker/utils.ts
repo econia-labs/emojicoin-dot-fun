@@ -1,12 +1,4 @@
-// cspell:word funder
-
-import {
-  type AnyNumberString,
-  EmojicoinArena,
-  getAptosClient,
-  type SymbolEmoji,
-  waitFor,
-} from "../../../src";
+import { type AnyNumberString, waitFor } from "../../../src";
 import {
   type BrokerEvent,
   type BrokerMessage,
@@ -18,14 +10,7 @@ import { type BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
 import { type BrokerEventModels } from "../../../src/indexer-v2/types";
 import checkRows from "../helpers/equality-checks";
-import { type Account, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import {
-  fetchArenaRegistryView,
-  fetchArenaMeleeView,
-  fetchMeleeEmojiData,
-} from "../../../src/markets/arena-utils";
-import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import { getPublisher } from "../../utils";
+import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import checkArenaRows from "../helpers/arena-equality-checks";
 
 const MAX_WAIT_TIME = 5000;
@@ -131,87 +116,4 @@ export const customWaitFor = async (condition: () => boolean, messageOnFailure?:
     errorMessage: messageOnFailure
       ? messageOnFailure()
       : `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
-  });
-
-/**
- * Have the publisher register a third market and trade on all three markets to unlock them for
- * tests. The other two markets are determined in the deployer in `src/docker/deployer/sh`.
- *
- * This facilitates beginning a new arena, since the new arena must have a new unique combination
- * of market IDs.
- *
- * This function's intended usage is in local/test environments, to be called a single time for the
- * lifetime of the local network.
- *
- * In jest, it should only be called once during the entire jest test suite, since it makes
- * assumptions about the initial state on-chain.
- *
- * @throws if called twice in the same jest test instance
- */
-export const registerAndUnlockInitialMarketsForArenaTest = async () => {
-  const emojicoin = new EmojicoinClient();
-  const publisher = getPublisher();
-
-  const voltageSymbol: SymbolEmoji[] = ["⚡"];
-  const exists = await emojicoin.view.marketExists(voltageSymbol);
-  if (exists) {
-    throw new Error(`The voltage market "⚡" is reserved for initializing arena state in tests.`);
-  }
-
-  const res1 = await emojicoin.register(publisher, voltageSymbol);
-  const res2 = await emojicoin.buy(publisher, voltageSymbol, 1n);
-
-  const { res3, res4 } = await fetchArenaRegistryView().then((res) =>
-    fetchArenaMeleeView(res.currentMeleeID)
-      .then(fetchMeleeEmojiData)
-      .then(async ({ market1, market2 }) => ({
-        res3: await emojicoin.buy(publisher, market1.symbolEmojis, 1n),
-        res4: await emojicoin.buy(publisher, market2.symbolEmojis, 1n),
-      }))
-  );
-
-  expect([res1, res2, res3, res4].every((v) => v.response.success)).toBe(true);
-};
-
-export const ONE_MINUTE_MICROSECONDS = 1n * 60n * 1000n * 1000n;
-
-/**
- * Have the publisher set the next melee duration and end the current melee.
- *
- * Fails if the crank schedule isn't called.
- *
- * @returns the new market symbols for the next melee, the next melee view, and the next melee ID
- */
-export const setNextMeleeDurationAndEnsureCrank = async (
-  nextDuration: bigint = ONE_MINUTE_MICROSECONDS
-) => {
-  const { currentMeleeID } = await fetchArenaRegistryView();
-  const melee = await fetchArenaMeleeView(currentMeleeID).then(fetchMeleeEmojiData);
-  const [symbol1, symbol2] = [melee.market1.symbolEmojis, melee.market2.symbolEmojis];
-  const emojicoin = new EmojicoinClient();
-  const publisher = getPublisher();
-  // End the first melee by cranking with `enter` and set the next melee's duration.
-  await emojicoin.arena.setNextMeleeDuration(publisher, nextDuration);
-  await emojicoin.arena.enter(publisher, 1n, false, symbol1, symbol2, "symbol1");
-  const { currentMeleeID: newMeleeID } = await fetchArenaRegistryView();
-  const newMelee = await fetchArenaMeleeView(newMeleeID).then(fetchMeleeEmojiData);
-  const [newSymbol1, newSymbol2] = [newMelee.market1.symbolEmojis, newMelee.market2.symbolEmojis];
-  expect(newMeleeID).toEqual(currentMeleeID + 1n);
-  expect(newMelee.view.duration).toEqual(nextDuration);
-  return {
-    melee: newMelee,
-    meleeID: newMeleeID,
-    symbol1: newSymbol1,
-    symbol2: newSymbol2,
-  };
-};
-
-/**
- * Send APT to the vault so user's entering can be matched.
- */
-export const depositToVault = async (funder: Account, amount: bigint) =>
-  await EmojicoinArena.FundVault.submit({
-    aptosConfig: getAptosClient().config,
-    funder,
-    amount,
   });

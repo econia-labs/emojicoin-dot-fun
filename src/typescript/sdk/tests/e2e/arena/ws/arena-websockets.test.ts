@@ -1,25 +1,23 @@
 // cspell:word funder
 
-import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
-import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import { type MeleeEmojiData } from "../../../src/markets/arena-utils";
+import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../../src";
+import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
+import { type MeleeEmojiData } from "../../../../src/markets/arena-utils";
 import {
   isArenaEnterModel,
   isArenaExitModel,
   isArenaSwapModel,
   isArenaVaultBalanceUpdateModel,
-} from "../../../src/types/arena-types";
-import { getFundedAccount } from "../../utils/test-accounts";
+} from "../../../../src/types/arena-types";
+import { getFundedAccount } from "../../../utils/test-accounts";
+import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../../broker/utils";
 import {
-  compareParsedData,
-  connectNewClient,
-  customWaitFor,
-  depositToVault,
-  ONE_MINUTE_MICROSECONDS,
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
-  subscribe,
-} from "../broker/utils";
+  ONE_SECOND_MICROSECONDS,
+  depositToVault,
+  waitUntilCurrentMeleeEnds,
+} from "../utils";
 
 describe("tests to ensure that arena websocket events work as expected", () => {
   const user = getFundedAccount("085");
@@ -33,7 +31,8 @@ describe("tests to ensure that arena websocket events work as expected", () => {
   beforeAll(async () => {
     // Prepare the on-chain state for the arena contract to immediately exit the initial arena.
     await registerAndUnlockInitialMarketsForArenaTest();
-    await setNextMeleeDurationAndEnsureCrank(ONE_MINUTE_MICROSECONDS).then((res) => {
+    await waitUntilCurrentMeleeEnds();
+    await setNextMeleeDurationAndEnsureCrank(ONE_SECOND_MICROSECONDS * 15n).then((res) => {
       symbol1 = res.symbol1;
       symbol2 = res.symbol2;
       melee = res.melee;
