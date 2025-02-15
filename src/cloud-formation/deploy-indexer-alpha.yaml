@@ -18,7 +18,6 @@ parameters:
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
   Environment: 'alpha'
-  IndexArena: 'false'
   Network: 'testnet'
   ProcessorHealthCheckStartPeriod: 300
   ProcessorImageVersion: '6.0.0-alpha'
