@@ -81,7 +81,7 @@ export const CoinHolders: FC<Props> = ({ holders, marketView }) => {
         const supplyPercentage = amount / maxSupply;
         const price = toNominalPrice(marketView.lastSwap.avgExecutionPriceQ64);
         const value = amount * price;
-        const usdValue = price * amount;
+        const usdValue = value * (aptPrice || 0);
         return { ...holder, amount, supplyPercentage, value, usdValue, rank: index + 1 };
       }),
     [holders, maxSupply]
