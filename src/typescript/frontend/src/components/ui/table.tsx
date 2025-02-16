@@ -17,7 +17,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "text-ec-blue display-4 bg-black uppercase text-center mt-[2px] border-solid border-b-[1px] border-b-dark-gray sticky top-0 z-10",
+      "text-ec-blue display-4 bg-black uppercase text-center border-solid border-b-[1px] border-b-dark-gray sticky -top-[2px] z-10",
       className
     )}
     {...props}
@@ -44,14 +44,14 @@ TableFooter.displayName = "TableFooter";
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement> & { isHeader?: boolean }
->(({ className, ...props }, ref) => {
+>(({ className, isHeader, ...props }, ref) => {
   return (
     <tr
       ref={ref}
       className={cn(
         "relative w-full body-md border-solid border-b border-dark-gray h-[33px]",
         className,
-        props.isHeader ? "" : "hover:border-2 hover:border-ec-blue"
+        isHeader ? "" : "hover:border-2 hover:border-ec-blue"
       )}
       {...props}
     >

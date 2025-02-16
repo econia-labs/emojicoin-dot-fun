@@ -44,28 +44,29 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
       </TableCell>
       <TableCell className="text-center">
         <FormattedNumber
+          scramble
           value={(coinData.ownedValue / walletStats.totalValue) * 100}
           suffix="%"
           style={"fixed"}
         />
       </TableCell>
       <TableCell className="text-right">
-        <FormattedNumber value={coinData.amount} style={"fixed"} />
+        <FormattedNumber scramble value={coinData.amount} style={"fixed"} />
       </TableCell>
       <TableCell className="text-right">
         <span className="flex items-center justify-end gap-1">
-          <FormattedNumber value={coinData.marketCap} style={"fixed"} />
+          <FormattedNumber scramble value={coinData.marketCap} style={"fixed"} />
           <AptosIconBlack className="icon-inline text-xl" />
         </span>
       </TableCell>
       <TableCell className="text-right">
         <span className="flex items-center justify-end gap-1">
-          <FormattedNumber value={usdOwnedValue} style={"fixed"} prefix="$" />
+          <FormattedNumber scramble value={usdOwnedValue} style={"fixed"} prefix="$" />
         </span>
       </TableCell>
       <TableCell className="text-right px-6">
         <span className="flex items-center justify-end gap-1">
-          <FormattedNumber value={coinData.ownedValue} />{" "}
+          <FormattedNumber scramble value={coinData.ownedValue} />{" "}
           <AptosIconBlack className="ml-1 icon-inline text-xl" />
         </span>
       </TableCell>

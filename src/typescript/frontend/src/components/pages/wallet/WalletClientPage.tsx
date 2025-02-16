@@ -10,6 +10,7 @@ import _ from "lodash";
 import { useMemo, useState, type FC } from "react";
 import { PortfolioHeader } from "./PortfolioHeader";
 import { PortfolioRow } from "./PortfolioRow";
+import { FormattedNumber } from "components/FormattedNumber";
 
 interface Props {
   address: string;
@@ -96,7 +97,8 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
       </span>
       <div className="flex justify-between w-full mb-4">
         <span className="pixel-heading-3b">
-          Total value: {walletStats.totalValue.toFixed(2)}{" "}
+          Total value:{" "}
+          <FormattedNumber scramble value={walletStats.totalValue} style="sliding-precision" />
           <AptosIconBlack className="icon-inline" />
         </span>
         <span className="pixel-heading-3b">Unique owned: {ownedCoins.length}</span>
