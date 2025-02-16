@@ -12,6 +12,8 @@ import { darkColors } from "theme";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { type TableRowDesktopProps } from "./types";
+import { useRouter } from "next/navigation";
+import { toExplorerLink } from "lib/utils/explorer-link";
 
 type TableRowTextItemProps = {
   className: string;
@@ -34,7 +36,7 @@ const TableRowTextItem = ({
   </td>
 );
 
-const TableRowStyles = "flex relative w-full font-forma body-sm group";
+const TableRowStyles = "flex relative w-full font-forma body-sm group cursor-pointer";
 const Height = "h-[33px]";
 
 const TableRow = ({
@@ -44,6 +46,7 @@ const TableRow = ({
   numSwapsDisplayed,
   shouldAnimateAsInsertion,
 }: TableRowDesktopProps) => {
+  const router = useRouter();
   const resolvedName = useNameResolver(item.swapper);
   const { displayName, isANSName } = useMemo(() => {
     return {
@@ -51,6 +54,11 @@ const TableRow = ({
       isANSName: item.swapper !== resolvedName,
     };
   }, [item.swapper, resolvedName]);
+
+  const explorerLink = toExplorerLink({
+    linkType: "txn",
+    value: `${item.version}`,
+  });
 
   return (
     <motion.tr
@@ -73,6 +81,7 @@ const TableRow = ({
           delay: shouldAnimateAsInsertion ? 0.2 : (numSwapsDisplayed - index) * 0.02,
         },
       }}
+      onClick={() => router.push(explorerLink)}
     >
       <td
         className={
@@ -129,7 +138,11 @@ const TableRow = ({
         />
       </TableRowTextItem>
       <td className={`group/explorer w-[22%] md:w-[18%] border-r-[1px] z-[2] ${Height}`}>
-        <a href={`${ROUTES.wallet}/${item.swapper}`} className="flex h-full">
+        <a
+          href={`${ROUTES.wallet}/${item.swapper}`}
+          className="flex h-full"
+          onClick={(e) => e.stopPropagation()}
+        >
           <span
             className={
               `${isANSName ? "brightness-[1.4] contrast-[1.4]" : ""}` +
