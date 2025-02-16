@@ -1,13 +1,19 @@
 import { useMemo, useState } from "react";
-import { SortableHead } from "./ecTableHead";
+import { EcTableHead } from "./ecTableHead";
 import { Table, TableHeader, TableRow } from "./table";
 import _ from "lodash";
 import { EcTableBody } from "./ecTableBody";
+import { cn } from "lib/utils";
 
 export interface EcTableColumn<T> {
   id: string;
   text: string;
+  // Common to head and body cell.
   className: string;
+  // Only for head.
+  headClassName?: string;
+  // Only for body cells.
+  cellClassName?: string;
   sortCallback?: (item: T) => unknown;
   // Can either render individual cells, or the whole row by using RenderRow TableProps
   renderCell?: (item: T) => React.ReactNode;
@@ -19,9 +25,16 @@ interface TableProps<T> {
   // Function to get the unique key for each item
   getId: (item: T) => string;
   renderRow?: (item: T) => React.ReactNode;
+  textFormat?: "body-md" | "body-sm" | string;
 }
 
-export const EcTable = <T,>({ items, columns, renderRow, getId }: TableProps<T>) => {
+export const EcTable = <T,>({
+  items,
+  columns,
+  renderRow,
+  getId,
+  textFormat = "body-md",
+}: TableProps<T>) => {
   const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
     column: "ownedValue",
     direction: "desc",
@@ -37,18 +50,24 @@ export const EcTable = <T,>({ items, columns, renderRow, getId }: TableProps<T>)
       <TableHeader>
         <TableRow isHeader>
           {columns.map((column) => (
-            <SortableHead
+            <EcTableHead
               key={column.id}
               id={column.id}
               sort={sort}
               setSort={column.sortCallback ? setSort : undefined}
-              className={column.className}
+              className={cn(column.className, column.headClassName)}
               text={column.text}
             />
           ))}
         </TableRow>
       </TableHeader>
-      <EcTableBody items={sorted} columns={columns} renderRow={renderRow} getKey={getId} />
+      <EcTableBody
+        className={textFormat}
+        items={sorted}
+        columns={columns}
+        renderRow={renderRow}
+        getKey={getId}
+      />
     </Table>
   );
 };

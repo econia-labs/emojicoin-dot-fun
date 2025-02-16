@@ -73,7 +73,7 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
         <span className="pixel-heading-3b">Unique owned: {ownedCoins.length}</span>
       </div>
       <div className="w-full overflow-x-auto">
-        <div className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] max-h-[calc(100vh-300px)] m-auto overflow-auto mt-4 mb-4 shadow-[0_0_0_1px_var(--dark-gray)]">
+        <div className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] max-h-[calc(100vh-300px)] m-auto overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]">
           <EcTable
             getId={(coin) => coin.asset_type}
             columns={COLUMNS}

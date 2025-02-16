@@ -4,26 +4,20 @@ import { TableCell, TableRow } from "./table";
 
 interface Props<T> {
   item: T;
+  className?: string;
   rowIndex: number;
-  renderCell: Array<NonNullable<EcTableColumn<T>["renderCell"]>>;
+  columns: EcTableColumn<T>[];
   onClick?: () => void;
 }
 
-const firstCelStyle = "pl-4";
-const lastCellStyle = "pr-4";
-
-export const EcTableDataRow = <T,>({ item, renderCell, onClick }: Props<T>) => {
+export const EcTableDataRow = <T,>({ className, item, columns, onClick }: Props<T>) => {
   return (
-    <TableRow onClick={onClick} className="cursor-pointer">
-      {renderCell.map((cell, cellIndex) => (
-        <TableCell
-          key={cellIndex}
-          className={cn(
-            cellIndex === 0 ? firstCelStyle : "",
-            cellIndex === renderCell.length - 1 ? lastCellStyle : ""
-          )}
-        >
-          {cell(item)}
+    <TableRow onClick={onClick} className="cursor-pointer group">
+      {columns.map((col, cellIndex) => (
+        <TableCell key={cellIndex}>
+          <span className={cn("flex", col.className, col.cellClassName)}>
+            {col.renderCell?.(item)}
+          </span>
         </TableCell>
       ))}
     </TableRow>

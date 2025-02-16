@@ -13,7 +13,7 @@ interface SortableHeadProps {
   setSort?: (sort: { column: string; direction: "asc" | "desc" }) => void;
   className?: string;
 }
-export const SortableHead: FC<SortableHeadProps> = ({ id, text, className, sort, setSort }) => {
+export const EcTableHead: FC<SortableHeadProps> = ({ id, text, className, sort, setSort }) => {
   const { ref, replay } = useScramble({
     text: `${text}`,
     overdrive: false,
@@ -32,7 +32,7 @@ export const SortableHead: FC<SortableHeadProps> = ({ id, text, className, sort,
           : undefined
       }
     >
-      <div className={cn("flex gap-2", className)}>
+      <div className={cn(className, "w-full flex gap-1")}>
         <span onMouseEnter={() => replay()} ref={ref}>
           {text}
         </span>
