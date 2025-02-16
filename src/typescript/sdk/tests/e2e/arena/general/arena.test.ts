@@ -51,7 +51,7 @@ const objectKeysWithoutEventIndexAndVersion = (v: object) => {
   return Object.fromEntries(entries);
 };
 
-const expectStringifiedObjectsToBeEqual = (a: object, b: object) => {
+const expectObjectEqualityExceptEventIndexAndVersion = (a: object, b: object) => {
   const newA = objectKeysWithoutEventIndexAndVersion(a);
   const newB = objectKeysWithoutEventIndexAndVersion(b);
   expect(stringifyJSONWithBigInts(newA)).toEqual(stringifyJSONWithBigInts(newB));
@@ -182,7 +182,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const dbEnterEvent = arenaEnters![0];
     let position = arenaPositions![0];
 
-    expectStringifiedObjectsToBeEqual(dbEnterEvent.enter, viewEnterEvent);
+    expectObjectEqualityExceptEventIndexAndVersion(dbEnterEvent.enter, viewEnterEvent);
 
     expect(position.user).toEqual(viewEnterEvent.user);
     expect(position.meleeID).toEqual(viewEnterEvent.meleeID);
@@ -233,7 +233,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const dbSwapEvent = arenaSwaps![0];
     position = arenaPositions![0];
 
-    expectStringifiedObjectsToBeEqual(dbSwapEvent.swap, viewArenaSwapEvent);
+    expectObjectEqualityExceptEventIndexAndVersion(dbSwapEvent.swap, viewArenaSwapEvent);
 
     expect(position.user).toEqual(viewArenaSwapEvent.user);
     expect(position.meleeID).toEqual(viewArenaSwapEvent.meleeID);
@@ -280,7 +280,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const dbExitEvent = arenaExits![0];
     position = arenaPositions![0];
 
-    expectStringifiedObjectsToBeEqual(dbExitEvent.exit, viewExitEvent);
+    expectObjectEqualityExceptEventIndexAndVersion(dbExitEvent.exit, viewExitEvent);
 
     expect(position.user).toEqual(viewExitEvent.user);
     expect(position.meleeID).toEqual(viewExitEvent.meleeID);
