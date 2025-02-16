@@ -109,21 +109,14 @@ export const Chart = (props: ChartContainerProps) => {
             }
           }
 
-          if (bars.length === 0) {
-            if (isFetchForMostRecentBars) {
-              // Create a single empty bar if there's no trading activity, otherwise the chart shows "No chart data".
-              const dummyBar = createDummyBar(periodDuration);
-              bars.push(dummyBar);
-            } else {
-              onHistoryCallback([], {
-                noData: true,
-              });
-              return;
-            }
+          const noData = bars.length === 0;
+          if (noData && isFetchForMostRecentBars) {
+            // Create a single empty bar if there's no trading activity, otherwise the chart shows "No chart data".
+            const dummyBar = createDummyBar(periodDuration);
+            bars.push(dummyBar);
           }
-          onHistoryCallback(bars, {
-            noData: bars.length === 0,
-          });
+
+          onHistoryCallback(bars, { noData });
         } catch (e) {
           if (e instanceof Error) {
             console.warn("[getBars]: Get error", e);
