@@ -16,6 +16,7 @@ import {
 import { ROUTES } from "router/routes";
 import ChartContainer from "@/components/charts/ChartContainer";
 import { type ClassValue } from "clsx";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -113,6 +114,8 @@ export const ArenaClient = (props: ArenaProps) => {
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
+
+  useReliableSubscribe({ eventTypes: ["Swap"], arena: true });
 
   const r = useMemo(
     () =>
