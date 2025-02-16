@@ -501,37 +501,14 @@ describe("ensures leaderboard history is working", () => {
     const account1 = getFundedAccount("420");
     const account2 = getFundedAccount("421");
     const account3 = getFundedAccount("422");
-    await emojicoin.arena.enter(
-      account1,
-      1n * 10n ** 8n,
-      false,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
-    );
-    await emojicoin.arena.enter(
-      account2,
-      1n * 10n ** 8n,
-      false,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol2"
-    );
-    await emojicoin.arena.exit(
-      account1,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-    );
+    await enterHelper(account1, "symbol1");
+    await enterHelper(account2, "symbol2");
 
-    await currentMeleeEnded();
-    let crankRes = await emojicoin.arena.enter(
-      account3,
-      1n * 10n ** 8n,
-      false,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol2"
-    );
+    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+
+    await waitUntilCurrentMeleeEnds();
+    const crankRes = await enterHelper(account3, "symbol2");
+
     await waitForProcessor(crankRes);
 
     let leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
@@ -556,7 +533,7 @@ describe("ensures leaderboard history is working", () => {
     const exitRes = await emojicoin.arena.exit(
       account2,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
+      melee.market2.symbolEmojis
     );
 
     await waitForProcessor(exitRes);
