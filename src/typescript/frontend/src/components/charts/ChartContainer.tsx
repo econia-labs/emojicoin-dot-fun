@@ -17,6 +17,7 @@ export const ChartContainer = (props: ChartContainerProps) => {
           <MemoizedChart
             symbol={props.symbol}
             secondarySymbol={props.secondarySymbol}
+            className={props.className}
           />
         </Suspense>
       )}

@@ -8,13 +8,14 @@ import { createPortal } from "react-dom";
 import { parseJSON } from "utils";
 import { Box, EmojiTitle, type ArenaPropsWithPositionAndHistory, type ArenaProps } from "./utils";
 import { BottomNavigation, TabContainer } from "./tabs";
-import { PriceChartDesktopBox, PriceChartMobile } from "./PriceChart";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
   type ArenaPositionModel,
 } from "@sdk/indexer-v2/types";
 import { ROUTES } from "router/routes";
+import ChartContainer from "@/components/charts/ChartContainer";
+import { type ClassValue } from "clsx";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -33,6 +34,8 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
     </Box>
   );
 };
+
+const chartBoxClassName: ClassValue = "relative w-full h-full col-start-1 col-end-3";
 
 const Desktop = (props: ArenaPropsWithPositionAndHistory) => {
   const { arenaInfo, market0, market1 } = props;
@@ -54,7 +57,14 @@ const Desktop = (props: ArenaPropsWithPositionAndHistory) => {
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
       <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
-      <PriceChartDesktopBox {...props} />
+      <Box className={chartBoxClassName}>
+        <ChartContainer
+          emojis={props.allSymbolEmojiData}
+          symbol={props.symbol0}
+          secondarySymbol={props.symbol1}
+          className="w-full h-full"
+        />
+      </Box>
       <Box className="col-start-3 col-end-5 h-[100%]">
         <TabContainer {...props} />
       </Box>
@@ -81,7 +91,14 @@ const Mobile = (props: ArenaPropsWithPositionAndHistory) => {
         </Box>
         <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
         <Box className="h-[500px]">
-          <PriceChartMobile {...props} />
+          <Box className={chartBoxClassName}>
+            <ChartContainer
+              emojis={props.allSymbolEmojiData}
+              symbol={props.symbol0}
+              secondarySymbol={props.symbol1}
+              className="w-full h-full"
+            />
+          </Box>
         </Box>
       </div>
       {createPortal(<BottomNavigation {...props} />, document.body)}
