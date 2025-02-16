@@ -14,6 +14,7 @@ import { Emoji } from "utils/emoji";
 import { type TableRowDesktopProps } from "./types";
 import { useRouter } from "next/navigation";
 import { toExplorerLink } from "lib/utils/explorer-link";
+import { WalletAddressCell } from "../../../../../ui/table-cells/wallet-address-cell";
 
 type TableRowTextItemProps = {
   className: string;
@@ -47,13 +48,6 @@ const TableRow = ({
   shouldAnimateAsInsertion,
 }: TableRowDesktopProps) => {
   const router = useRouter();
-  const resolvedName = useNameResolver(item.swapper);
-  const { displayName, isANSName } = useMemo(() => {
-    return {
-      displayName: formatDisplayName(resolvedName),
-      isANSName: item.swapper !== resolvedName,
-    };
-  }, [item.swapper, resolvedName]);
 
   const explorerLink = toExplorerLink({
     linkType: "txn",
@@ -138,21 +132,7 @@ const TableRow = ({
         />
       </TableRowTextItem>
       <td className={`group/explorer w-[22%] md:w-[18%] border-r-[1px] z-[2] ${Height}`}>
-        <a
-          href={`${ROUTES.wallet}/${item.swapper}`}
-          className="flex h-full"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span
-            className={
-              `${isANSName ? "brightness-[1.4] contrast-[1.4]" : ""}` +
-              " text-light-gray group-hover/explorer:text-blue group-hover/explorer:underline" +
-              " my-auto ml-auto mr-[20px]"
-            }
-          >
-            {displayName}
-          </span>
-        </a>
+        <WalletAddressCell address={item.swapper} />
       </td>
     </motion.tr>
   );
