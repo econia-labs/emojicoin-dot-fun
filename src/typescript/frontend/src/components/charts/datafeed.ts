@@ -20,7 +20,7 @@ import {
 import path from "path";
 import { ROUTES } from "router/routes";
 
-export const useDatafeed = (mainSeriesSymbol: string, navigateOnSearch?: boolean) => {
+export const useDatafeed = (mainSeriesSymbol: string, secondarySymbol?: string) => {
   const router = useRouter();
   const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
@@ -38,9 +38,9 @@ export const useDatafeed = (mainSeriesSymbol: string, navigateOnSearch?: boolean
         onResultReadyCallback(symbols);
       },
       resolveSymbol: async (symbolName, onSymbolResolvedCallback, _onErrorCallback) => {
-        const { symbol } = symbolToEmojis(symbolName);
-        if (navigateOnSearch && mainSeriesSymbol !== symbol) {
-          const newRoute = path.join(ROUTES.market, symbol);
+        const { symbol: newSymbol } = symbolToEmojis(symbolName);
+        if (mainSeriesSymbol !== newSymbol && secondarySymbol !== newSymbol) {
+          const newRoute = path.join(ROUTES.market, newSymbol);
           router.push(newRoute);
           router.refresh();
         }
@@ -136,7 +136,7 @@ export const useDatafeed = (mainSeriesSymbol: string, navigateOnSearch?: boolean
       subscribeToPeriod,      // Stable reference to a zustand function.
       unsubscribeFromPeriod,  // Stable reference to a zustand function.
       mainSeriesSymbol,
-      navigateOnSearch,
+      secondarySymbol,
       router,
     ]
   );

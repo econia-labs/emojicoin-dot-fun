@@ -17,14 +17,10 @@ import { useDatafeed } from "./datafeed";
  * for a more detailed explanation of the architectural data flow.
  * @returns
  */
-export const Chart = ({
-  symbol,
-  secondarySymbol,
-  navigateOnSearch = true,
-}: Omit<ChartContainerProps, "emojis">) => {
+export const Chart = ({ symbol, secondarySymbol = "" }: Omit<ChartContainerProps, "emojis">) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
-  const datafeed = useDatafeed(symbol, navigateOnSearch);
+  const datafeed = useDatafeed(symbol, secondarySymbol);
 
   useEffect(() => {
     if (ref.current) {
