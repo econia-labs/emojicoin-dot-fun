@@ -14,6 +14,7 @@ import {
   type ArenaSwapModel,
   fetchArenaInfo,
   postgrest,
+  stringifyJSONWithBigInts,
   TableName,
   toArenaEnterModel,
   toArenaExitModel,
@@ -40,6 +41,10 @@ const waitForProcessor = <
     "version" in res ? res.version : res.response.version,
     PROCESSING_WAIT_TIME
   );
+
+const expectStringifiedObjectsToBeEqual = <T>(a: T, b: T) => {
+  expect(stringifyJSONWithBigInts(a)).toEqual(stringifyJSONWithBigInts(b));
+};
 
 /**
  * Because this test checks the details of the very first arena it must run separately from other
@@ -166,26 +171,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const dbEnterEvent = arenaEnters![0];
     let position = arenaPositions![0];
 
-    expect(dbEnterEvent.enter.meleeID).toEqual(viewEnterEvent.meleeID);
-    expect(dbEnterEvent.enter.user).toEqual(viewEnterEvent.user);
-    expect(dbEnterEvent.enter.inputAmount).toEqual(viewEnterEvent.inputAmount);
-    expect(dbEnterEvent.enter.matchAmount).toEqual(viewEnterEvent.matchAmount);
-    expect(dbEnterEvent.enter.quoteVolume).toEqual(viewEnterEvent.quoteVolume);
-    expect(dbEnterEvent.enter.integratorFee).toEqual(viewEnterEvent.integratorFee);
-    expect(dbEnterEvent.enter.emojicoin0Proceeds).toEqual(viewEnterEvent.emojicoin0Proceeds);
-    expect(dbEnterEvent.enter.emojicoin1Proceeds).toEqual(viewEnterEvent.emojicoin1Proceeds);
-    expect(dbEnterEvent.enter.emojicoin0ExchangeRateBase).toEqual(
-      viewEnterEvent.emojicoin0ExchangeRateBase
-    );
-    expect(dbEnterEvent.enter.emojicoin0ExchangeRateQuote).toEqual(
-      viewEnterEvent.emojicoin0ExchangeRateQuote
-    );
-    expect(dbEnterEvent.enter.emojicoin1ExchangeRateBase).toEqual(
-      viewEnterEvent.emojicoin1ExchangeRateBase
-    );
-    expect(dbEnterEvent.enter.emojicoin1ExchangeRateQuote).toEqual(
-      viewEnterEvent.emojicoin1ExchangeRateQuote
-    );
+    expectStringifiedObjectsToBeEqual(dbEnterEvent.enter, viewEnterEvent);
 
     expect(position.user).toEqual(viewEnterEvent.user);
     expect(position.meleeID).toEqual(viewEnterEvent.meleeID);
@@ -236,24 +222,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const dbSwapEvent = arenaSwaps![0];
     position = arenaPositions![0];
 
-    expect(dbSwapEvent.swap.meleeID).toEqual(viewArenaSwapEvent.meleeID);
-    expect(dbSwapEvent.swap.user).toEqual(viewArenaSwapEvent.user);
-    expect(dbSwapEvent.swap.quoteVolume).toEqual(viewArenaSwapEvent.quoteVolume);
-    expect(dbSwapEvent.swap.integratorFee).toEqual(viewArenaSwapEvent.integratorFee);
-    expect(dbSwapEvent.swap.emojicoin0Proceeds).toEqual(viewArenaSwapEvent.emojicoin0Proceeds);
-    expect(dbSwapEvent.swap.emojicoin1Proceeds).toEqual(viewArenaSwapEvent.emojicoin1Proceeds);
-    expect(dbSwapEvent.swap.emojicoin0ExchangeRateBase).toEqual(
-      viewArenaSwapEvent.emojicoin0ExchangeRateBase
-    );
-    expect(dbSwapEvent.swap.emojicoin0ExchangeRateQuote).toEqual(
-      viewArenaSwapEvent.emojicoin0ExchangeRateQuote
-    );
-    expect(dbSwapEvent.swap.emojicoin1ExchangeRateBase).toEqual(
-      viewArenaSwapEvent.emojicoin1ExchangeRateBase
-    );
-    expect(dbSwapEvent.swap.emojicoin1ExchangeRateQuote).toEqual(
-      viewArenaSwapEvent.emojicoin1ExchangeRateQuote
-    );
+    expectStringifiedObjectsToBeEqual(dbSwapEvent.swap, viewArenaSwapEvent);
 
     expect(position.user).toEqual(viewArenaSwapEvent.user);
     expect(position.meleeID).toEqual(viewArenaSwapEvent.meleeID);
@@ -300,23 +269,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const dbExitEvent = arenaExits![0];
     position = arenaPositions![0];
 
-    expect(dbExitEvent.exit.meleeID).toEqual(viewExitEvent.meleeID);
-    expect(dbExitEvent.exit.user).toEqual(viewExitEvent.user);
-    expect(dbExitEvent.exit.emojicoin0Proceeds).toEqual(viewExitEvent.emojicoin0Proceeds);
-    expect(dbExitEvent.exit.emojicoin1Proceeds).toEqual(viewExitEvent.emojicoin1Proceeds);
-    expect(dbExitEvent.exit.emojicoin0ExchangeRateBase).toEqual(
-      viewExitEvent.emojicoin0ExchangeRateBase
-    );
-    expect(dbExitEvent.exit.emojicoin0ExchangeRateQuote).toEqual(
-      viewExitEvent.emojicoin0ExchangeRateQuote
-    );
-    expect(dbExitEvent.exit.emojicoin1ExchangeRateBase).toEqual(
-      viewExitEvent.emojicoin1ExchangeRateBase
-    );
-    expect(dbExitEvent.exit.emojicoin1ExchangeRateQuote).toEqual(
-      viewExitEvent.emojicoin1ExchangeRateQuote
-    );
-    expect(dbExitEvent.exit.tapOutFee).toEqual(viewExitEvent.tapOutFee);
+    expectStringifiedObjectsToBeEqual(dbExitEvent.exit, viewExitEvent);
 
     expect(position.user).toEqual(viewExitEvent.user);
     expect(position.meleeID).toEqual(viewExitEvent.meleeID);
