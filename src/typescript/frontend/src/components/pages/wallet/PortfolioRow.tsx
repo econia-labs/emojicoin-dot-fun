@@ -1,7 +1,7 @@
 import AptosIconBlack from "@icons/AptosBlack";
 import { type FullCoinData } from "app/wallet/[address]/page";
 import { FormattedNumber } from "components/FormattedNumber";
-import { TableCell, TableRow } from "components/ui/table";
+import { TableCell, TableRow } from "components/ui/table/table";
 import { useAptPrice } from "context/AptPrice";
 import { useRouter } from "next/navigation";
 import { useMemo, type FC } from "react";

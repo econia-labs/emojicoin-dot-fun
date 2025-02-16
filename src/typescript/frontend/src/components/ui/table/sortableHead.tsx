@@ -1,19 +1,19 @@
 import SortArrow from "@icons/SortArrow";
 import { Arrows } from "components/svg";
-import { TableHead } from "components/ui/table";
+import { TableHead } from "components/ui/table/table";
 import { cn } from "lib/utils";
 import { type FC } from "react";
 import { useScramble } from "use-scramble";
 
-interface Props {
+interface SortableHeadProps {
   text: string;
   id: string;
   sort?: { column: string; direction: "asc" | "desc" };
+  // Undefined if column is not sortable
   setSort?: (sort: { column: string; direction: "asc" | "desc" }) => void;
   className?: string;
-  onClick?: () => void;
 }
-export const PortfolioHeader: FC<Props> = ({ id, text, className, sort, setSort }) => {
+export const SortableHead: FC<SortableHeadProps> = ({ id, text, className, sort, setSort }) => {
   const { ref, replay } = useScramble({
     text: `${text}`,
     overdrive: false,
@@ -21,12 +21,13 @@ export const PortfolioHeader: FC<Props> = ({ id, text, className, sort, setSort 
   });
 
   const currDirection = sort?.column === id ? sort.direction : undefined;
+  const isSortable = setSort !== undefined;
 
   return (
     <TableHead
-      className={cn(className, "cursor-pointer")}
+      className={cn(className, setSort ? "cursor-pointer" : "")}
       onClick={
-        setSort
+        isSortable
           ? () => setSort({ column: id, direction: currDirection === "desc" ? "asc" : "desc" })
           : undefined
       }
@@ -45,7 +46,7 @@ export const PortfolioHeader: FC<Props> = ({ id, text, className, sort, setSort 
             }}
             color="econiaBlue"
           />
-        ) : setSort ? (
+        ) : isSortable ? (
           <Arrows />
         ) : undefined}
       </div>

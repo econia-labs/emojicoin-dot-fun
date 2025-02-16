@@ -95,6 +95,11 @@ export async function fetchAllFungibleAssetsBalance({
     }
   }
 
+  // If specific assetType provided, no need to filter out.
+  if (assetType) {
+    return allTokens;
+  }
+
   // Filter out non-emojicoin tokens.
   return allTokens.filter((token) => {
     const address = getEmojicoinMarketAddressAndTypeTags({
