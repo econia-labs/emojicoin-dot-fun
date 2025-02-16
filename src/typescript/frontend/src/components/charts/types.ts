@@ -4,5 +4,4 @@ export type ChartContainerProps = {
   symbol: string;
   emojis: SymbolEmojiData[];
   secondarySymbol?: string;
-  navigateOnSearch?: boolean;
 };
