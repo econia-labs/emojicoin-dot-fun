@@ -4,7 +4,10 @@ import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { toNominalPrice } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { AptPriceContextProvider } from "context/AptPrice";
-import { fetchAllFungibleAssetsBalance, type TokenData } from "lib/aptos-indexer/fungible-assets";
+import {
+  fetchAllFungibleAssetsBalance,
+  type TokenBalance,
+} from "lib/aptos-indexer/fungible-assets";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { toNominal } from "lib/utils/decimals";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
@@ -16,7 +19,7 @@ export const metadata: Metadata = {
   description: `Explore the emojicoin cult`,
 };
 
-export type FullCoinData = Omit<TokenData, "amount"> &
+export type FullCoinData = Omit<TokenBalance, "amount"> &
   Awaited<ReturnType<typeof fetchMarkets>>[number] & {
     symbol: string;
     marketCap: number;
@@ -34,19 +37,29 @@ export default async function WalletPage({ params }: { params: { address: string
     fetchAllFungibleAssetsBalance({ ownerAddress: params.address }),
     getAptPrice(),
   ]);
+
+  console.log(ownedTokens);
   // Convert emojis to market address to query from the indexer.
   // Querying with the emoji directly causes issues for composite emojis such as 🇺🇸 which is a combination of 🇺 and 🇸.
   const marketAddresses = ownedTokens.flatMap((coin) =>
     getMarketAddress([...coin.metadata.symbol] as SymbolEmoji[]).toString()
   );
 
-  // Fetch market data and create map for O(1) lookup.
+  // Split addresses into chunks to avoid URL length limits.
+  const chunkSize = 50;
+  const chunks = Array.from({ length: Math.ceil(marketAddresses.length / chunkSize) }, (_, i) =>
+    marketAddresses.slice(i * chunkSize, (i + 1) * chunkSize)
+  );
+
+  // Fetch market data in parallel for each chunk.
   const marketDataMap: Record<string, Awaited<ReturnType<typeof fetchMarkets>>[number]> = (
-    await fetchMarkets({ filterMarketAddresses: marketAddresses })
-  ).reduce((acc, market) => {
-    acc[market.market.symbolData.symbol] = market;
-    return acc;
-  }, {});
+    await Promise.all(chunks.map((chunk) => fetchMarkets({ filterMarketAddresses: chunk })))
+  )
+    .flat() // Flatten the array of arrays.
+    .reduce((acc, market) => {
+      acc[market.market.symbolData.symbol] = market;
+      return acc;
+    }, {});
 
   const coinsWithData = ownedTokens.map((coin) => {
     const marketData = marketDataMap[coin.metadata.symbol];

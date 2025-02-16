@@ -1,22 +1,27 @@
 import { useMemo, useState } from "react";
-import { SortableHead } from "./sortableHead";
-import { Table, TableBody, TableHeader, TableRow } from "./table";
+import { SortableHead } from "./ecTableHead";
+import { Table, TableHeader, TableRow } from "./table";
 import _ from "lodash";
+import { EcTableBody } from "./ecTableBody";
 
-interface ColumnProps<T> {
+export interface EcTableColumn<T> {
   id: string;
   text: string;
   className: string;
   sortCallback?: (item: T) => unknown;
+  // Can either render individual cells, or the whole row by using RenderRow TableProps
+  renderCell?: (item: T) => React.ReactNode;
 }
 
 interface TableProps<T> {
   items: T[];
-  columns: ColumnProps<T>[];
-  renderRow: (item: T) => React.ReactNode;
+  columns: EcTableColumn<T>[];
+  // Function to get the unique key for each item
+  getId: (item: T) => string;
+  renderRow?: (item: T) => React.ReactNode;
 }
 
-export const EcTable = <T,>({ items, columns, renderRow }: TableProps<T>) => {
+export const EcTable = <T,>({ items, columns, renderRow, getId }: TableProps<T>) => {
   const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
     column: "ownedValue",
     direction: "desc",
@@ -43,7 +48,7 @@ export const EcTable = <T,>({ items, columns, renderRow }: TableProps<T>) => {
           ))}
         </TableRow>
       </TableHeader>
-      <TableBody>{sorted.map((item) => renderRow(item))}</TableBody>
+      <EcTableBody items={sorted} columns={columns} renderRow={renderRow} getKey={getId} />
     </Table>
   );
 };

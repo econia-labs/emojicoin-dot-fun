@@ -1,14 +1,15 @@
 // cspell:word ilike
 
-import { encodeEmojis } from "@sdk/emoji_data";
+import { encodeEmojis, SYMBOL_EMOJIS } from "@sdk/emoji_data";
 import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
 import { getAptosClient } from "@sdk/utils";
 
 const aptosClient = getAptosClient();
 
-export type TokenData = {
+export type TokenBalance = {
   amount: string;
   asset_type: string;
+  owner_address: string;
   metadata: {
     symbol: string;
     decimals: number;
@@ -16,7 +17,7 @@ export type TokenData = {
 };
 
 export type FetchEmojicoinBalancesResponse = {
-  current_fungible_asset_balances: TokenData[];
+  current_fungible_asset_balances: TokenBalance[];
 };
 
 export type FetchFungibleAssetsParams = {
@@ -77,10 +78,12 @@ export async function fetchAllFungibleAssetsBalance({
   assetType,
   // Fetch at most 1000 by default, which corresponds to 10 requests.
   max = 1000,
-}: { max?: number } & Omit<FetchFungibleAssetsParams, "offset" | "limit">): Promise<TokenData[]> {
+}: { max?: number } & Omit<FetchFungibleAssetsParams, "offset" | "limit">): Promise<
+  TokenBalance[]
+> {
   const limit = 100;
   let offset = 0;
-  let allTokens: TokenData[] = [];
+  let allTokens: TokenBalance[] = [];
   let hasMore = true;
 
   while (hasMore && offset < max) {
@@ -102,6 +105,8 @@ export async function fetchAllFungibleAssetsBalance({
 
   // Filter out non-emojicoin tokens.
   return allTokens.filter((token) => {
+    // Return early if symbol is not existing emoji.
+    if (!(token.metadata.symbol in SYMBOL_EMOJIS)) return;
     const address = getEmojicoinMarketAddressAndTypeTags({
       symbolBytes: encodeEmojis([...token.metadata.symbol]),
     });
