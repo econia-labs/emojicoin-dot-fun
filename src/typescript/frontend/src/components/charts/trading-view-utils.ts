@@ -12,6 +12,8 @@ import {
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { EXCHANGE_NAME, TV_CHARTING_LIBRARY_RESOLUTIONS } from "./const";
 import { getClientTimezone } from "lib/chart-utils";
+import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
+import { getSymbolEmojisInString } from "@sdk/emoji_data";
 
 export const CONFIGURATION_DATA: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -57,24 +59,38 @@ export const searchSymbolsFromRegisteredMarketMap = ({
     []
   );
 
-export const constructLibrarySymbolInfo = (symbol: string): LibrarySymbolInfo => ({
-  ticker: symbol,
-  name: symbol,
-  description: symbol,
-  pricescale: 10 ** 9,
-  volume_precision: -Math.ceil(Math.log10(Number("0.00000100") * Number("100.00000000"))),
-  minmov: 1,
-  exchange: EXCHANGE_NAME,
-  listed_exchange: "",
-  session: "24x7",
-  // Note that `has_empty_bars` causes invalid `time order violation` errors if it's set to `true`.
-  // has_empty_bars: true,
-  has_seconds: false,
-  has_intraday: true,
-  has_daily: true,
-  has_weekly_and_monthly: false,
-  timezone: getClientTimezone() as Timezone,
-  type: "crypto",
-  supported_resolutions: CONFIGURATION_DATA.supported_resolutions,
-  format: "price",
-});
+export const constructLibrarySymbolInfo = (symbol: string): LibrarySymbolInfo => {
+  const emojis = getSymbolEmojisInString(symbol);
+  const marketAddress = getMarketAddress(emojis);
+  return {
+    ticker: symbol,
+    name: symbol,
+    description: marketAddress.toString(),
+    pricescale: 10 ** 9,
+    volume_precision: -Math.ceil(Math.log10(Number("0.00000100") * Number("100.00000000"))),
+    minmov: 1,
+    exchange: EXCHANGE_NAME,
+    listed_exchange: "",
+    session: "24x7",
+    // Note that `has_empty_bars` causes invalid `time order violation` errors if it's set to `true`.
+    // has_empty_bars: true,
+    has_seconds: false,
+    has_intraday: true,
+    has_daily: true,
+    has_weekly_and_monthly: false,
+    timezone: getClientTimezone() as Timezone,
+    type: "crypto",
+    supported_resolutions: CONFIGURATION_DATA.supported_resolutions,
+    format: "price",
+  };
+};
+
+export const symbolInfoToSymbol = (symbolInfo: LibrarySymbolInfo) => {
+  const ticker = symbolInfo.ticker;
+  if (!ticker) {
+    // This should never occur, because we always set the ticker when we construct the symbol info
+    // when the `resolveSymbol` datafeed API function is called.
+    throw new Error(`No ticker for symbol: ${symbolInfo}`);
+  }
+  return ticker;
+};
