@@ -1,5 +1,4 @@
 import {
-  type LatestBar,
   marketToLatestBars,
   periodicStateTrackerToLatestBar,
   toBar,
@@ -24,12 +23,11 @@ export const fetchCandlesticksForChart = async ({
   periodParams: PeriodParams;
   period: Period;
 }): Promise<Bar[]> => {
-  const { to, countBack } = periodParams;
   const params = new URLSearchParams({
     marketID,
     period: period.toString(),
-    countBack: countBack.toString(),
-    to: to.toString(),
+    countBack: periodParams.countBack.toString(),
+    to: periodParams.to.toString(),
   });
   return await fetch(`/candlesticks?${params.toString()}`)
     .then((res) => res.text())
@@ -38,22 +36,20 @@ export const fetchCandlesticksForChart = async ({
       res
         .sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime))
         .map(toBar)
-        .reduce(curriedBarsReducer(to), [])
+        .reduce(curriedBarsReducer(periodParams.to), [])
     );
 };
 
 /**
  * The curried reducer function to filter and update all bar data.
- *
  * - Filter the data so that all resulting bars are within the specified time range.
  * - Update the `open` price to the previous bar's `close` price if it exists.
  *
  * Only exclude bars that are after `to`.
  * @see {@link https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods#getbars}
  *
- * NOTE: Since `getBars` is called multiple times, this will result in several
- * bars having incorrect `open` values. This isn't a big deal but may result in
- * some visual inconsistencies in the chart.
+ * NOTE: Since `getBars` is called multiple times, this may result in minor visual inconsistencies
+ * where the first bar for each `getBars` call has an incorrect `open` value.
  * @param acc
  * @param event
  * @returns
@@ -72,26 +68,19 @@ const curriedBarsReducer = (to: number) => (acc: Bar[], bar: Bar) => {
 
 /**
  * Push the latest bar (the on-chain bar) to the bars array if it exists and update its `open` value
- * to be the previous bar's `close` if it's not the first/only bar.
+ * to be the previous bar's `close` if it's not the only bar.
  *
- * This logic mirrors what we use in `createBarFrom[Swap|PeriodicState]` but we need it here because
- * we need to update the latest bar based on the market view for the last call of `getBars`, not
- * just when a new event comes in.
+ * This logic is very similar to what's used in `createBarFrom[Swap|PeriodicState]`.
  */
 export const updateLastTwoBars = (bars: Bar[], onChainLatest: Bar) => {
   const emittedLatest = bars.at(-1);
   if (emittedLatest) {
-    // If the latest bar has no trading activity, set all of its fields to the previous bar's close.
     if (!hasTradingActivity(onChainLatest)) {
       onChainLatest.high = emittedLatest.close;
       onChainLatest.low = emittedLatest.close;
       onChainLatest.close = emittedLatest.close;
     }
-    if (emittedLatest.close !== 0) {
-      onChainLatest.open = emittedLatest.close;
-    } else {
-      onChainLatest.open = onChainLatest.close;
-    }
+    onChainLatest.open = emittedLatest.close !== 0 ? emittedLatest.close : onChainLatest.close;
   }
   bars.push(onChainLatest);
 };
@@ -113,56 +102,37 @@ export const createDummyBar = (periodDuration: PeriodDuration) => {
   };
 };
 
+/**
+ * Make an uncached client-side fetch for the current market resource from the Aptos fullnode.
+ */
 export const fetchLatestBarsFromMarketResource = async ({
   marketAddress,
   period,
 }: {
   marketAddress: `0x${string}`;
   period: Period;
-}): Promise<{
-  marketMetadata: MarketMetadataModel;
-  latestBar: LatestBar | undefined;
-  latestBars: LatestBar[];
-}> => {
-  // Fetch the current candlestick data from the Aptos fullnode. This fetch call should *never* be cached.
-  // Also, we specifically call this client-side because the server will get rate-limited if we call the
-  // fullnode from the server for each client.
-  const marketResource = await getMarketResource({
-    aptos: getAptosClient(),
-    marketAddress,
-  });
-
-  // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
-  const latestBars = marketToLatestBars(marketResource);
-  const marketMetadata = marketResourceToMarketMetadataModel(marketResource);
-  const latestBar = getLatestBarFromTracker(marketResource, period);
-
+}) => {
+  const marketResource = await getMarketResource({ aptos: getAptosClient(), marketAddress });
   return {
-    marketMetadata,
-    latestBar,
-    latestBars,
+    marketMetadata: marketResourceToMarketMetadataModel(marketResource),
+    latestBar: getLatestBarFromTracker(marketResource, period),
+    latestBars: marketToLatestBars(marketResource),
   };
 };
 
 const getLatestBarFromTracker = (marketResource: Types["Market"], period: Period) => {
   const periodDuration = periodEnumToRawDuration(period);
-  // Get the period-specific state tracker for the current resolution/period type.
-  const tracker = marketResource.periodicStateTrackers.find(
-    (p) => Number(p.period) === periodDuration
-  );
-  if (!tracker) {
-    return undefined;
-  }
-  const nonce = marketResource.sequenceInfo.nonce;
-  return periodicStateTrackerToLatestBar(tracker, nonce);
+  const { periodicStateTrackers, sequenceInfo } = marketResource;
+  const tracker = periodicStateTrackers.find((p) => Number(p.period) === periodDuration);
+  if (!tracker) return undefined;
+  return periodicStateTrackerToLatestBar(tracker, sequenceInfo.nonce);
 };
 
 const marketResourceToMarketMetadataModel = (market: Types["Market"]): MarketMetadataModel => ({
   marketID: market.metadata.marketID,
   time: 0n,
   marketNonce: market.sequenceInfo.nonce,
-  // Make up some bunk trigger, since it should be clear it's made up.
-  trigger: Trigger.PackagePublication,
+  trigger: Trigger.PackagePublication, // Make up a bunk trigger, since this field won't be used.
   marketAddress: market.metadata.marketAddress,
   ...toMarketEmojiData(market.metadata.emojiBytes),
 });

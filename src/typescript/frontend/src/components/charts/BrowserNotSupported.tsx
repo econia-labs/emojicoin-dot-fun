@@ -7,11 +7,10 @@ export const BrowserNotSupported = () => {
   const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setShowErrorMessage(true);
-    }, 3500);
+    const timeout = setTimeout(() => setShowErrorMessage(true), 3500);
     return () => clearTimeout(timeout);
   });
+
   return (
     <div
       className={cn(
