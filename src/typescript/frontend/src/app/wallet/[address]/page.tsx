@@ -32,16 +32,14 @@ export default async function WalletPage({ params }: { params: { address: string
   // Fetch market data and create map for O(1) lookup.
   const marketDataMap: Record<string, Awaited<ReturnType<typeof fetchMarkets>>[number]> = (
     await fetchMarkets({
-      filterEmojis: ownedTokens.current_fungible_asset_balances.map((coin) => [
-        ...coin.metadata.symbol,
-      ]),
+      filterEmojis: ownedTokens.map((coin) => [...coin.metadata.symbol]),
     })
   ).reduce((acc, market) => {
     acc[market.market.symbolData.symbol] = market;
     return acc;
   }, {});
 
-  const coinsWithData = ownedTokens.current_fungible_asset_balances.map((coin) => {
+  const coinsWithData = ownedTokens.map((coin) => {
     const marketData = marketDataMap[coin.metadata.symbol];
     const emojiData = symbolBytesToEmojis(coin.metadata.symbol);
     const emojiName = emojisToName(emojiData.emojis);

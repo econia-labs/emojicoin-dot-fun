@@ -1,5 +1,8 @@
 // cspell:word ilike
 
+import { INTEGRATOR_ADDRESS, MODULE_ADDRESS } from "@sdk/const";
+import { encodeEmojis, encodeToHexString } from "@sdk/emoji_data";
+import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
 import { getAptosClient } from "@sdk/utils";
 
 const aptosClient = getAptosClient();
@@ -44,7 +47,7 @@ export async function fetchTokensPage(
   });
 }
 
-export async function fetchAllTokens(address: string): Promise<FetchEmojicoinBalancesResponse> {
+export async function fetchAllTokens(address: string): Promise<TokenData[]> {
   const limit = 100;
   let offset = 0;
   let allTokens: TokenData[] = [];
@@ -62,5 +65,11 @@ export async function fetchAllTokens(address: string): Promise<FetchEmojicoinBal
     }
   }
 
-  return { current_fungible_asset_balances: allTokens };
+  // Filter out non-emojicoin tokens.
+  return allTokens.filter((token) => {
+    const address = getEmojicoinMarketAddressAndTypeTags({
+      symbolBytes: encodeEmojis([...token.metadata.symbol]),
+    });
+    return address.emojicoin.toString() === token.asset_type;
+  });
 }
