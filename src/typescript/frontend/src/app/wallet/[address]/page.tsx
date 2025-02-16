@@ -3,7 +3,7 @@ import { symbolBytesToEmojis, type SymbolEmoji } from "@sdk/emoji_data";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { toNominalPrice } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
-import { fetchAllTokens, type TokenData } from "lib/aptos-indexer/fungible-assets";
+import { fetchAllFungibleAssetsBalance, type TokenData } from "lib/aptos-indexer/fungible-assets";
 import { toNominal } from "lib/utils/decimals";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { type Metadata } from "next";
@@ -28,8 +28,7 @@ export type FullCoinData = Omit<TokenData, "amount"> &
   };
 
 export default async function WalletPage({ params }: { params: { address: string } }) {
-  const ownedTokens = await fetchAllTokens(params.address);
-
+  const ownedTokens = await fetchAllFungibleAssetsBalance({ ownerAddress: params.address });
   // Convert emojis to market address to query from the indexer.
   // Querying with the emoji directly causes issues for composite emojis such as 🇺🇸 which is a combination of 🇺 and 🇸.
   const marketAddresses = ownedTokens.flatMap((coin) =>
