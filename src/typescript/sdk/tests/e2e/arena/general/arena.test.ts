@@ -185,8 +185,6 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const dbEnterEvent = arenaEnters![0];
     let position = arenaPositions![0];
 
-    console.log(dbEnterEvent.enter);
-    console.log(viewEnterEvent);
     expectObjectEqualityExceptEventIndexAndVersion(dbEnterEvent.enter, viewEnterEvent);
 
     expect(position.user).toEqual(viewEnterEvent.user);
