@@ -31,10 +31,6 @@ import {
  * the `datafeed` API. It also handles resolving market symbols from user input with the market metadata passed down
  * from a server component/fetch in the form of the `EventStore["markets"]` registered market map data.
  *
- * TODO: We may want to periodically refresh the candlestick data and ensure it is valid/up to date
- * with the on-chain data by polling the `market_view` endpoint. This would ensure that in the case of a dropped
- * event or a broken websocket connection, the user would still generally have the most up-to-date data.
- *
  * Please see
  * {@link https://github.com/econia-labs/emojicoin-dot-fun/tree/main/src/typescript/frontend/src/components/charts/README.md}
  * for a more detailed explanation of the architectural data flow.
