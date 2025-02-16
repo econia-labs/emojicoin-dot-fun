@@ -496,4 +496,88 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard3.exited).toEqual(false);
     expect(leaderboard3.lastExit0).toBeNull();
   }, 15000);
+
+  it("verifies that exited is correctly set after a melee ends", async () => {
+    const account1 = getFundedAccount("420");
+    const account2 = getFundedAccount("421");
+    const account3 = getFundedAccount("422");
+    await emojicoin.arena.enter(
+      account1,
+      1n * 10n ** 8n,
+      false,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis,
+      "symbol1"
+    );
+    await emojicoin.arena.enter(
+      account2,
+      1n * 10n ** 8n,
+      false,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis,
+      "symbol2"
+    );
+    await emojicoin.arena.exit(
+      account1,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis,
+    );
+
+    await currentMeleeEnded();
+    let crankRes = await emojicoin.arena.enter(
+      account3,
+      1n * 10n ** 8n,
+      false,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis,
+      "symbol2"
+    );
+    await waitForProcessor(crankRes);
+
+    let leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
+      .from(TableName.ArenaLeaderboardHistory)
+      .select("*")
+      .eq("melee_id", melee.view.meleeID.toString())
+      .then((r) => r.data)
+      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+    expect(leaderboard).not.toBeNull();
+    expect(leaderboard).toHaveLength(2);
+
+    let leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+    let leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+
+    expect(leaderboard1.exited).toEqual(true);
+    expect(leaderboard1.lastExit0).toEqual(true);
+
+    expect(leaderboard2.exited).toEqual(false);
+    expect(leaderboard2.lastExit0).toBeNull();
+
+    const exitRes = await emojicoin.arena.exit(
+      account2,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis,
+    );
+
+    await waitForProcessor(exitRes);
+
+    leaderboard = await postgrest
+      .from(TableName.ArenaLeaderboardHistory)
+      .select("*")
+      .eq("melee_id", melee.view.meleeID.toString())
+      .then((r) => r.data)
+      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+    expect(leaderboard).not.toBeNull();
+    expect(leaderboard).toHaveLength(2);
+
+    leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+    leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+
+    expect(leaderboard1.exited).toEqual(true);
+    expect(leaderboard1.lastExit0).toEqual(true);
+
+    expect(leaderboard2.exited).toEqual(true);
+    expect(leaderboard2.lastExit0).toEqual(false);
+  }, 15000);
 });
