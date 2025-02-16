@@ -38,7 +38,6 @@ export default async function WalletPage({ params }: { params: { address: string
     getAptPrice(),
   ]);
 
-  console.log(ownedTokens);
   // Convert emojis to market address to query from the indexer.
   // Querying with the emoji directly causes issues for composite emojis such as 🇺🇸 which is a combination of 🇺 and 🇸.
   const marketAddresses = ownedTokens.flatMap((coin) =>
