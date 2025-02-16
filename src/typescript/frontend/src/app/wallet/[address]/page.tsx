@@ -1,5 +1,6 @@
 import { fetchMarkets } from "@/queries/home";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { symbolBytesToEmojis, type SymbolEmoji } from "@sdk/emoji_data";
+import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { toNominalPrice } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { fetchAllTokens, type TokenData } from "lib/aptos-indexer/fungible-assets";
@@ -28,12 +29,13 @@ export type FullCoinData = Omit<TokenData, "amount"> &
 
 export default async function WalletPage({ params }: { params: { address: string } }) {
   const ownedTokens = await fetchAllTokens(params.address);
+  const marketAddresses = ownedTokens.flatMap((coin) =>
+    getMarketAddress([...coin.metadata.symbol] as SymbolEmoji[]).toString()
+  );
 
   // Fetch market data and create map for O(1) lookup.
   const marketDataMap: Record<string, Awaited<ReturnType<typeof fetchMarkets>>[number]> = (
-    await fetchMarkets({
-      filterEmojis: ownedTokens.map((coin) => [...coin.metadata.symbol]),
-    })
+    await fetchMarkets({ filterMarketAddresses: marketAddresses })
   ).reduce((acc, market) => {
     acc[market.market.symbolData.symbol] = market;
     return acc;

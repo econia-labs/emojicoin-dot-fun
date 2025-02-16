@@ -29,7 +29,11 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
     >
       <TableCell className="px-6 text-center">
         {!coinData.inBondingCurve ? (
-          <a className="hover:underline" href={`${ROUTES.pools}?pool=${coinData.symbol}`}>
+          <a
+            className="hover:underline"
+            href={`${ROUTES.pools}?pool=${coinData.symbol}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Emoji
               className={`${coinData.symbol.length <= 2 ? "text-[24px]" : "text-[20px]"} text-nowrap`}
               emojis={coinData.symbol}

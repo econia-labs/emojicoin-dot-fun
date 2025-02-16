@@ -21,7 +21,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
   searchEmojis,
-  filterEmojis,
+  filterMarketAddresses,
   sortBy = DEFAULT_SORT_BY,
   inBondingCurve,
   count,
@@ -50,10 +50,8 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
   }
 
-  if (filterEmojis && filterEmojis.length) {
-    const filterString = filterEmojis
-      .map((emojis) => `symbol_emojis.eq.${toQueryArray(emojis)}`)
-      .join(",");
+  if (filterMarketAddresses && filterMarketAddresses.length) {
+    const filterString = filterMarketAddresses.map((add) => `market_address.eq.${add}`).join(",");
     query = query.or(filterString);
   }
 

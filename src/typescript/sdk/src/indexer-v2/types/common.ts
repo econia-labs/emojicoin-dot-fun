@@ -20,7 +20,7 @@ export type MarketStateQueryArgs = {
   pageSize?: number;
   orderBy?: OrderBy;
   searchEmojis?: string[];
-  filterEmojis?: string[][];
+  filterMarketAddresses?: string[];
   inBondingCurve?: boolean;
   count?: boolean;
 };
