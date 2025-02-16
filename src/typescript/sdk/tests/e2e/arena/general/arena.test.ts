@@ -42,8 +42,19 @@ const waitForProcessor = <
     PROCESSING_WAIT_TIME
   );
 
-const expectStringifiedObjectsToBeEqual = <T>(a: T, b: T) => {
-  expect(stringifyJSONWithBigInts(a)).toEqual(stringifyJSONWithBigInts(b));
+// Ignore `eventIndex` and `version`, since the db models don't have it but view models do.
+const objectKeysWithoutEventIndexAndVersion = (v: object) => {
+  const set = new Set(Object.keys(v));
+  set.delete("eventIndex");
+  set.delete("version");
+  const entries = Array.from(set).map((k) => [k, v[k as keyof typeof v]]);
+  return Object.fromEntries(entries);
+};
+
+const expectStringifiedObjectsToBeEqual = (a: object, b: object) => {
+  const newA = objectKeysWithoutEventIndexAndVersion(a);
+  const newB = objectKeysWithoutEventIndexAndVersion(b);
+  expect(stringifyJSONWithBigInts(newA)).toEqual(stringifyJSONWithBigInts(newB));
 };
 
 /**
