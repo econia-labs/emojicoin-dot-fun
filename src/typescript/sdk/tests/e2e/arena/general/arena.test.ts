@@ -397,7 +397,7 @@ describe("ensures leaderboard history is working", () => {
     expect(Number(leaderboard![2].profits) / Number(leaderboard![2].losses)).toBeLessThan(1);
   }, 15000);
 
-  it("verifies that the data during a melee with no activity", async () => {
+  it("verifies the data during a melee with no activity", async () => {
     await waitUntilCurrentMeleeEnds();
     const res = await emojicoin.arena.enter(
       getFundedAccount("667"),
@@ -419,7 +419,7 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).toHaveLength(0);
   }, 15000);
 
-  it("verifies that the data during a melee with no swaps", async () => {
+  it("verifies the data during a melee with no swaps", async () => {
     const account1 = getFundedAccount("420");
     const account2 = getFundedAccount("421");
     const account3 = getFundedAccount("422");
@@ -457,7 +457,7 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard3.lastExit0).toBeNull();
   }, 15000);
 
-  it("verifies that the data during a melee with no exits", async () => {
+  it("verifies the data during a melee with no exits", async () => {
     const account1 = getFundedAccount("420");
     const account2 = getFundedAccount("421");
     const account3 = getFundedAccount("422");
