@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
-import { MS_IN_ONE_DAY, WIDGET_OPTIONS } from "./const";
+import { MS_IN_ONE_DAY, SECONDARY_SERIES_OVERRIDES, WIDGET_OPTIONS } from "./const";
 import { type IChartingLibraryWidget, type Timezone, widget } from "@static/charting_library";
 import { type ChartContainerProps } from "./types";
 import { BrowserNotSupported } from "./BrowserNotSupported";
 import { useDatafeed } from "./datafeed";
+import { cn } from "lib/utils/class-name";
 
 /**
  * The TradingView Chart component. This component is responsible for rendering the TradingView chart with the usage of
@@ -17,7 +18,11 @@ import { useDatafeed } from "./datafeed";
  * for a more detailed explanation of the architectural data flow.
  * @returns
  */
-export const Chart = ({ symbol, secondarySymbol = "" }: Omit<ChartContainerProps, "emojis">) => {
+export const Chart = ({
+  symbol,
+  secondarySymbol = "",
+  className = "",
+}: Omit<ChartContainerProps, "emojis">) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const datafeed = useDatafeed(symbol, secondarySymbol);
@@ -49,7 +54,13 @@ export const Chart = ({ symbol, secondarySymbol = "" }: Omit<ChartContainerProps
           });
 
         if (secondarySymbol) {
-          chart.createStudy("Overlay", true, false, { symbol: secondarySymbol });
+          chart.createStudy(
+            "Overlay",
+            true,
+            false,
+            { symbol: secondarySymbol },
+            SECONDARY_SERIES_OVERRIDES
+          );
         }
       });
     }
@@ -63,7 +74,8 @@ export const Chart = ({ symbol, secondarySymbol = "" }: Omit<ChartContainerProps
   }, [datafeed, symbol, secondarySymbol]);
 
   return (
-    <div className="relative w-full h-[420px]">
+    // Parent must be relative for the visual fallback with `BrowserNotSupported` to work.
+    <div className={cn("relative", className)}>
       <BrowserNotSupported />
       <div ref={ref} className="relative h-full w-full"></div>
     </div>

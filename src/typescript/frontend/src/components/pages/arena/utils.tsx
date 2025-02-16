@@ -1,4 +1,5 @@
 import { useMatchBreakpoints } from "@hooks/index";
+import { type SymbolEmojiData } from "@sdk/emoji_data";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
   type ArenaPositionModel,
@@ -12,9 +13,12 @@ import darkTheme from "theme/dark";
 import { GlowingEmoji } from "utils/emoji";
 
 export type ArenaProps = {
+  allSymbolEmojiData: SymbolEmojiData[];
   arenaInfo: ArenaInfoModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
+  symbol0: string;
+  symbol1: string;
   candlesticksMarket0: PeriodicStateEventModel[];
   candlesticksMarket1: PeriodicStateEventModel[];
 };
