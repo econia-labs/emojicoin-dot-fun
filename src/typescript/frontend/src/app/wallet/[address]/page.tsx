@@ -29,6 +29,9 @@ export type FullCoinData = Omit<TokenData, "amount"> &
 
 export default async function WalletPage({ params }: { params: { address: string } }) {
   const ownedTokens = await fetchAllTokens(params.address);
+
+  // Convert emojis to market address to query from the indexer.
+  // Querying with the emoji directly causes issues for composite emojis such as 🇺🇸 which is a combination of 🇺 and 🇸.
   const marketAddresses = ownedTokens.flatMap((coin) =>
     getMarketAddress([...coin.metadata.symbol] as SymbolEmoji[]).toString()
   );

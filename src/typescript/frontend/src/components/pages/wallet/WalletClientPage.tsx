@@ -67,25 +67,10 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
     direction: "desc",
   });
 
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const itemsPerPage = 25;
-
   const sorted = useMemo(() => {
     const sortCallback = _.find(COLUMNS, { key: sort.column })?.sortCallback;
     return _.orderBy(ownedCoins, sortCallback, sort.direction);
   }, [sort.column, sort.direction, ownedCoins]);
-
-  // Scrollable array instead of pagination might look better. Will update after feedback.
-
-  // const totalPages = Math.ceil(sorted.length / itemsPerPage);
-  // const paginatedCoins = useMemo(() => {
-  //   const startIndex = (currentPage - 1) * itemsPerPage;
-  //   return sorted.slice(startIndex, startIndex + itemsPerPage);
-  // }, [sorted, currentPage]);
-
-  // const handlePageChange = useCallback((page: number) => {
-  //   setCurrentPage(page);
-  // }, []);
 
   return (
     <>
@@ -128,27 +113,6 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
           </Table>
         </div>
       </div>
-
-      {/* Scrollable array instead of pagination might look better. Will update after feedback.
-      <div className="flex justify-center items-center gap-2 mt-4">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-3 py-1 border border-dark-gray disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Previous
-        </button>
-        <span className="pixel-text">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 border border-dark-gray disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Next
-        </button>
-      </div> */}
     </>
   );
 };

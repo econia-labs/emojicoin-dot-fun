@@ -1,7 +1,6 @@
 // cspell:word ilike
 
-import { INTEGRATOR_ADDRESS, MODULE_ADDRESS } from "@sdk/const";
-import { encodeEmojis, encodeToHexString } from "@sdk/emoji_data";
+import { encodeEmojis } from "@sdk/emoji_data";
 import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
 import { getAptosClient } from "@sdk/utils";
 
