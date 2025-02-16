@@ -42,12 +42,15 @@ const waitForProcessor = <
     PROCESSING_WAIT_TIME
   );
 
-// Ignore `eventIndex` and `version`, since the db models don't have it but view models do.
 const objectKeysWithoutEventIndexAndVersion = (v: object) => {
   const set = new Set(Object.keys(v));
+  // Ignore `eventIndex`, `version`, and `eventName`. The db models don't have it but the views do.
   set.delete("eventIndex");
   set.delete("version");
-  const entries = Array.from(set).map((k) => [k, v[k as keyof typeof v]]);
+  set.delete("eventName");
+  const entries = Array.from(set)
+    .sort()
+    .map((k) => [k, v[k as keyof typeof v]]);
   return Object.fromEntries(entries);
 };
 
