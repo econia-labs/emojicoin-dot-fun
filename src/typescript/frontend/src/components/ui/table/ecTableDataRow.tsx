@@ -1,16 +1,15 @@
-import { cn } from "lib/utils";
+import { cn } from "lib/utils/class-name";
 import { type EcTableColumn } from "./ecTable";
 import { TableCell, TableRow } from "./table";
 
 interface Props<T> {
   item: T;
-  className?: string;
   rowIndex: number;
   columns: EcTableColumn<T>[];
   onClick?: () => void;
 }
 
-export const EcTableDataRow = <T,>({ className, item, columns, onClick }: Props<T>) => {
+export const EcTableDataRow = <T,>({ item, columns, onClick }: Props<T>) => {
   return (
     <TableRow onClick={onClick} className="cursor-pointer group">
       {columns.map((col, cellIndex) => (

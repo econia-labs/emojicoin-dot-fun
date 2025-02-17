@@ -4,7 +4,6 @@ export const ROUTES = {
   // Alphabetized after this.
   api: "/api",
   cult: "/cult",
-  wallet: "/wallet",
   dexscreener: "/dexscreener",
   docs: "https://docs.emojicoin.fun/category/--start-here",
   home: "/home",
@@ -15,4 +14,5 @@ export const ROUTES = {
   notFound: "/not-found",
   pools: "/pools",
   verify: "/verify",
+  wallet: "/wallet",
 } as const;

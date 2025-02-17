@@ -2,7 +2,6 @@ import { Fragment } from "react";
 import { type EcTableColumn } from "./ecTable";
 import { EcTableDataRow } from "./ecTableDataRow";
 import { TableBody } from "./table";
-import { cn } from "lib/utils";
 
 interface Props<T> {
   items: T[];

@@ -3,7 +3,7 @@ import { EcTableHead } from "./ecTableHead";
 import { Table, TableHeader, TableRow } from "./table";
 import _ from "lodash";
 import { EcTableBody } from "./ecTableBody";
-import { cn } from "lib/utils";
+import { cn } from "lib/utils/class-name";
 
 export interface EcTableColumn<T> {
   id: string;
