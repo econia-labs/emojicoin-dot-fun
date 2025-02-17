@@ -49,7 +49,7 @@ const TableRow = React.forwardRef<
     <tr
       ref={ref}
       className={cn(
-        "relative w-full h-[33px]",
+        "relative w-full h-[33px] group",
         !isHeader ? "border-solid border-b border-dark-gray" : "",
         className
       )}
@@ -59,9 +59,9 @@ const TableRow = React.forwardRef<
       {
         <div
           className={cn(
-            "absolute bg-transparent z-[1] inline-flex left-0 w-full h-full",
+            "absolute bg-transparent z-[1] inline-flex left-0 w-full h-full pointer-events-none",
             !isHeader
-              ? "hover:border-solid hover:border-ec-blue border-[2px]"
+              ? "group-hover:border-solid group-hover:border-ec-blue border-[2px]"
               : "border-solid border-[1px] border-dark-gray border-t"
           )}
         />
