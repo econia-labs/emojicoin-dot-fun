@@ -1,8 +1,10 @@
 // cspell:word ilike
 
-import { encodeEmojis, SYMBOL_EMOJIS } from "@sdk/emoji_data";
+import { parseTypeTag } from "@aptos-labs/ts-sdk";
+import { encodeEmojis, getSymbolEmojisInString, SYMBOL_EMOJIS } from "@sdk/emoji_data";
 import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
 import { getAptosClient } from "@sdk/utils";
+import { emoji } from "utils";
 
 const aptosClient = getAptosClient();
 
@@ -37,7 +39,7 @@ export async function fetchFungibleAssetsBalance({
   const conditions = ['{ metadata: {token_standard: {_eq: "v1"}} }', '{ amount: {_gt: "0"} }'];
 
   if (assetType) conditions.push("{ asset_type: {_eq: $assetType} }");
-  else conditions.push('{ asset_type: {_ilike: "%coin_factory::Emojicoin%"} }');
+  else conditions.push('{ asset_type: {_ilike: "%::coin_factory::Emojicoin"} }');
 
   if (ownerAddress) {
     conditions.push("{ owner_address: {_eq: $ownerAddress} }");
@@ -105,11 +107,12 @@ export async function fetchAllFungibleAssetsBalance({
 
   // Filter out non-emojicoin tokens.
   return allTokens.filter((token) => {
-    // Return early if symbol is not existing emoji.
-    if (!(token.metadata.symbol in SYMBOL_EMOJIS)) return;
+    // The purpose of this is just to make sure we're passing a valid value to getEmojicoinMarketAddressAndTypeTags
+    const symbolEmojis = getSymbolEmojisInString(token.metadata.symbol);
+    if (!symbolEmojis.length) return false;
     const address = getEmojicoinMarketAddressAndTypeTags({
-      symbolBytes: encodeEmojis([...token.metadata.symbol]),
+      symbolBytes: encodeEmojis(symbolEmojis),
     });
-    return address.emojicoin.toString() === token.asset_type;
+    return address.emojicoin.toString() === parseTypeTag(token.asset_type).toString();
   });
 }
