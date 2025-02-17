@@ -46,6 +46,7 @@ const parallelizedRegistrations = async (account: Account, symbols: SymbolEmoji[
 
 describe("ensures the fetch specific markets query works as expected", () => {
   const [acc0, acc1, acc2] = getFundedAccounts("085", "086", "087");
+
   it("fetches specific markets", async () => {
     const allSymbols: SymbolEmoji[][] = [["☝️"], ["☝🏻"], ["☝🏼"], ["☝🏽"], ["☝🏾"], ["☝🏿"]];
     await parallelizedRegistrations(acc0, allSymbols);
@@ -89,11 +90,15 @@ describe("ensures the fetch specific markets query works as expected", () => {
       .filter((v) => !!v)
       .filter((v) => v.bytes.length === 4)
       .map((v) => v.emoji);
+
     const s1: SymbolEmoji[] = ["⚽", "✨", "⚾"];
     const s2: SymbolEmoji[] = ["⚽", "✨", "⚾"];
     const s3: SymbolEmoji[] = ["⚽", "✨", "⚾"];
     expect(dedupe([s1, s2, s3])).toHaveLength(3);
+
+    // Register the three markets.
     await parallelizedRegistrations(acc2, [s1, s2, s3]);
+
     expect(fourByteEmojis.length).toBeGreaterThanOrEqual(MAX_SYMBOLS_PER_FETCH);
     // Create 300 unique symbols by appending a symbol to the end. These are invalid symbols,
     // but they're only used to create a really large set of unique symbols for the URL.
@@ -106,9 +111,13 @@ describe("ensures the fetch specific markets query works as expected", () => {
       .flat();
     expect(dedupe(inputs).length).toEqual(inputs.length);
     expect(inputs).toHaveLength(MAX_SYMBOLS_PER_FETCH * 3);
+
+    // Insert the registered markets at the beginning of each eventual chunk.
     inputs[MAX_SYMBOLS_PER_FETCH * 0] = s1;
     inputs[MAX_SYMBOLS_PER_FETCH * 1] = s2;
     inputs[MAX_SYMBOLS_PER_FETCH * 2] = s3;
+
+    // Verify that the query returns exactly the 3 markets.
     const res = await fetchSpecificMarkets(inputs);
     expect(res).toHaveLength(3);
   });
@@ -139,7 +148,15 @@ describe("ensures the fetch specific markets query works as expected", () => {
     ];
     const deduped = dedupe(symbols);
     expect(deduped.sort()).toEqual(
-      [["✨"], ["✨", "⚽"], ["✨", "⚽", "🌯"], ["✨", "✨"], ["⚽", "🌯", "✨"]].sort()
+      [
+        ["✨"],
+        ["✨", "⚽"],
+        ["✨", "⚽", "🌯"],
+        ["✨", "⚽", "🌯"],
+        ["✨", "✨"],
+        ["✨", "✨"],
+        ["⚽", "🌯", "✨"],
+      ].sort()
     );
   });
 });
