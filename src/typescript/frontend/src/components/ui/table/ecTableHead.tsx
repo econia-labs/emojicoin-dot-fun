@@ -38,16 +38,15 @@ export const EcTableHead: FC<SortableHeadProps> = ({ id, text, className, sort, 
         </span>
         {currDirection ? (
           <SortArrow
-            style={{
-              transform:
-                currDirection === "desc"
-                  ? `rotate(180deg) translate(5px, 5px)`
-                  : "translate(5px, 1px)",
-            }}
+            className={
+              currDirection === "desc"
+                ? "rotate-180 -translate-x-[5px] -translate-y-1"
+                : "translate-x-[6px]"
+            }
             color="econiaBlue"
           />
         ) : isSortable ? (
-          <Arrows />
+          <Arrows className="translate-x-1" />
         ) : undefined}
       </div>
     </TableHead>
