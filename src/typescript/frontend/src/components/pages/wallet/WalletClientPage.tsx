@@ -61,7 +61,7 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
       <span className="pixel-heading-2">
         Portfolio of{" "}
         <ExplorerLink className="text-ec-blue hover:underline" type="account" value={address}>
-          {formatDisplayName(resolvedName)}
+          {formatDisplayName(resolvedName, { noTruncateANSName: true })}
         </ExplorerLink>
       </span>
       <div className="flex justify-between w-full mb-4">
