@@ -92,8 +92,8 @@ describe("ensures the fetch specific markets query works as expected", () => {
       .map((v) => v.emoji);
 
     const s1: SymbolEmoji[] = ["⚽", "✨", "⚾"];
-    const s2: SymbolEmoji[] = ["⚽", "✨", "⚾"];
-    const s3: SymbolEmoji[] = ["⚽", "✨", "⚾"];
+    const s2: SymbolEmoji[] = ["✨", "⚾", "⚽"];
+    const s3: SymbolEmoji[] = ["⚾", "⚽", "✨"];
     expect(dedupe([s1, s2, s3])).toHaveLength(3);
 
     // Register the three markets.
@@ -128,7 +128,7 @@ describe("ensures the fetch specific markets query works as expected", () => {
   /**
    * The chunking and flattening logic used in {@link fetchSpecificMarkets}.
    */
-  it("unchunks a chunked array", () => {
+  it("un-chunks a chunked array", () => {
     const res = chunk([1, 2, 3, 4, 5, 6, 7], 2);
     expect(res).toEqual([[1, 2], [3, 4], [5, 6], [7]]);
     expect(res.flat()).toEqual([1, 2, 3, 4, 5, 6, 7]);
@@ -148,6 +148,8 @@ describe("ensures the fetch specific markets query works as expected", () => {
       ["✨", "✨"],
       ["⚽", "🌯", "✨"],
       ["⚽", "🌯", "✨"],
+      ["⚽", "✨"],
+      ["⚽", "✨"],
     ];
     const deduped = dedupe(symbols);
     expect(deduped.sort()).toEqual(
@@ -155,10 +157,9 @@ describe("ensures the fetch specific markets query works as expected", () => {
         ["✨"],
         ["✨", "⚽"],
         ["✨", "⚽", "🌯"],
-        ["✨", "⚽", "🌯"],
-        ["✨", "✨"],
         ["✨", "✨"],
         ["⚽", "🌯", "✨"],
+        ["⚽", "✨"],
       ].sort()
     );
   });
