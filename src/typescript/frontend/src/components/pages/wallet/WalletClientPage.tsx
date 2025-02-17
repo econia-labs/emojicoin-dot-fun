@@ -9,7 +9,7 @@ import _ from "lodash";
 import { type FC } from "react";
 import { PortfolioRow } from "./PortfolioRow";
 import { FormattedNumber } from "components/FormattedNumber";
-import { EcTable } from "components/ui/table/ecTable";
+import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 
 interface Props {
   address: string;
@@ -19,37 +19,37 @@ interface Props {
   };
 }
 
-const COLUMNS = [
-  { id: "emoji", text: "Emoji", className: "w-[160px] text-start justify-start" },
+const COLUMNS: EcTableColumn<FullCoinData>[] = [
+  { id: "emoji", text: "Emoji", width: 80, className: "!justify-center" },
   {
     id: "percentage",
     text: "Percentage",
-    className: "w-[160px] text-center justify-center",
-    sortCallback: (coin: FullCoinData) => coin.percentage,
+    width: 130,
+    sortCallback: (coin) => coin.percentage,
   },
   {
     id: "amount",
     text: "Amount",
-    className: "w-[100px] text-right justify-end",
-    sortCallback: (coin: FullCoinData) => coin.amount,
+    width: 110,
+    sortCallback: (coin) => coin.amount,
   },
   {
     id: "marketCap",
     text: "Market cap",
-    className: "w-[150px] text-right justify-end",
-    sortCallback: (coin: FullCoinData) => coin.marketCap,
+    width: 150,
+    sortCallback: (coin) => coin.marketCap,
   },
   {
     id: "usdValue",
     text: "USD Value",
-    className: "w-[150px] text-right justify-end",
-    sortCallback: (coin: FullCoinData) => coin.ownedValue,
+    width: 120,
+    sortCallback: (coin) => coin.ownedValue,
   },
   {
     id: "ownedValue",
     text: "Value",
-    className: "w-[150px] text-right justify-end",
-    sortCallback: (coin: FullCoinData) => coin.ownedValue,
+    width: 110,
+    sortCallback: (coin) => coin.ownedValue,
   },
 ];
 

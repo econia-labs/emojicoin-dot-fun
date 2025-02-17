@@ -9,11 +9,19 @@ interface SortableHeadProps {
   text: string;
   id: string;
   sort?: { column: string; direction: "asc" | "desc" };
+  width?: number;
   // Undefined if column is not sortable
   setSort?: (sort: { column: string; direction: "asc" | "desc" }) => void;
   className?: string;
 }
-export const EcTableHead: FC<SortableHeadProps> = ({ id, text, className, sort, setSort }) => {
+export const EcTableHead: FC<SortableHeadProps> = ({
+  id,
+  text,
+  width,
+  className,
+  sort,
+  setSort,
+}) => {
   const { ref, replay } = useScramble({
     text: `${text}`,
     overdrive: false,
@@ -25,14 +33,20 @@ export const EcTableHead: FC<SortableHeadProps> = ({ id, text, className, sort, 
 
   return (
     <TableHead
-      className={cn(className, setSort ? "cursor-pointer" : "")}
+      className={cn(setSort ? "cursor-pointer" : "", "group")}
       onClick={
         isSortable
           ? () => setSort({ column: id, direction: currDirection === "desc" ? "asc" : "desc" })
           : undefined
       }
     >
-      <div className={cn(className, "w-full flex gap-1")}>
+      <div
+        style={{ minWidth: width ? `${width}px` : undefined }}
+        className={cn(
+          "w-full flex gap-1 items-center group-first:justify-start justify-end",
+          className
+        )}
+      >
         <span onMouseEnter={() => replay()} ref={ref}>
           {text}
         </span>

@@ -8,8 +8,8 @@ import { cn } from "lib/utils/class-name";
 export interface EcTableColumn<T> {
   id: string;
   text: string;
-  // Common to head and body cell.
-  className: string;
+  width?: number;
+  className?: string;
   // Only for head.
   headClassName?: string;
   // Only for body cells.
@@ -54,6 +54,7 @@ export const EcTable = <T,>({
               key={column.id}
               id={column.id}
               sort={sort}
+              width={column.width}
               setSort={column.sortCallback ? setSort : undefined}
               className={cn(column.className, column.headClassName)}
               text={column.text}

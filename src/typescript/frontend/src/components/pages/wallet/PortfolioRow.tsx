@@ -27,7 +27,7 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
       onClick={() => router.push("/market/" + coinData.emojiPath)}
       className="cursor-pointer"
     >
-      <TableCell className="px-6 text-center">
+      <TableCell className="text-center">
         {!coinData.inBondingCurve ? (
           <a
             className="hover:underline"
@@ -46,7 +46,7 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
           />
         )}
       </TableCell>
-      <TableCell className="text-center">
+      <TableCell className="text-end">
         <FormattedNumber
           scramble
           value={(coinData.ownedValue / walletStats.totalValue) * 100}
