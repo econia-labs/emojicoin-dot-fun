@@ -48,14 +48,13 @@ const TableRow = React.forwardRef<
   return (
     <tr
       ref={ref}
-      className={cn(
-        "relative w-full border-solid border-b border-dark-gray h-[33px]",
-        className,
-        isHeader ? "" : "hover:border-2 hover:border-ec-blue"
-      )}
+      className={cn("relative w-full border-solid border-b border-dark-gray h-[33px]", className)}
       {...props}
     >
       {props.children}
+      {!isHeader && (
+        <div className="absolute bg-transparent hover:border-solid inline-flex left-0 w-full h-full border-[2px] hover:border-ec-blue z-[1]" />
+      )}
     </tr>
   );
 });
