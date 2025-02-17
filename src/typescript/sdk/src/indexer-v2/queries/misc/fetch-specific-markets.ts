@@ -56,7 +56,7 @@ const MAX_SYMBOLS_PER_FETCH = 100;
 export const fetchSpecificMarkets = async (symbols: SymbolEmoji[][]) => {
   // Log a console warning to note automatic pagination.
   if (symbols.length > MAX_SYMBOLS_PER_FETCH) {
-    console.warn(`More than ${MAX_SYMBOLS_PER_FETCH} were passed to fetchSpecificMarkets.`);
+    console.warn(`More than ${MAX_SYMBOLS_PER_FETCH} symbols were passed to fetchSpecificMarkets.`);
   }
   // Since the symbols are chunked, it's necessary to deduplicate input elements to avoid
   // erroneously returning multiple of the same row from different chunks.
