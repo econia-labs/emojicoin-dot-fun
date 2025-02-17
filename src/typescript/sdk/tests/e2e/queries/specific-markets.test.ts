@@ -120,6 +120,9 @@ describe("ensures the fetch specific markets query works as expected", () => {
     // Verify that the query returns exactly the 3 markets.
     const res = await fetchSpecificMarkets(inputs);
     expect(res).toHaveLength(3);
+    const uniqueSymbolsInput = dedupe([s1, s2, s3]);
+    const uniqueSymbolsReturned = dedupe(res.map((v) => v.market.symbolEmojis));
+    expect(uniqueSymbolsInput.sort()).toEqual(uniqueSymbolsReturned.sort());
   });
 
   /**
