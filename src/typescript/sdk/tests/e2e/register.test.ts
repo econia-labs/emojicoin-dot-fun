@@ -30,7 +30,7 @@ describe("registers a market successfully", () => {
     const randomIntegrator = Ed25519Account.generate();
 
     // As actual emojis: ["🦓", "🧟"];
-    const symbolBytes = ["0xf09fa693" as const, "0xf09fa79f" as const];
+    const symbolBytes = ["0x00000061","0x00000066","0x00000066","0x00000061","0x00000066","0x00000061","0x00000066","0x00000061","0x00000066","0x00000061","0x00000061","0x00000066"];
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,

@@ -1,6 +1,5 @@
 import { parseJSON, stringifyJSON } from "utils";
 import packages from "../../package.json";
-import { MS_IN_ONE_DAY } from "components/charts/const";
 import { satisfies, type SemVer, parse } from "semver";
 
 const LOCAL_STORAGE_KEYS = {
@@ -24,7 +23,7 @@ export const LOCAL_STORAGE_CACHE_TIME: {
 } = {
   theme: Infinity,
   language: Infinity,
-  geoblocking: MS_IN_ONE_DAY,
+  geoblocking: 1,
   settings: Infinity,
 };
 

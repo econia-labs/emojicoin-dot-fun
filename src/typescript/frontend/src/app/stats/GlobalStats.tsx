@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { compareBigInt, compareNumber, sum } from "@sdk/utils";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "@icons/AptosBlack";
-import { MS_IN_ONE_DAY } from "components/charts/const";
 import Big from "big.js";
 import { ONE_APT_BIGINT } from "@sdk/const";
 
@@ -92,12 +91,12 @@ export const GlobalStats = (
       numRecentlyActive: allTimeVolumeData.filter(({ transaction }) =>
         Big(transaction.time.toString())
           .div(1000)
-          .gt(new Date().getTime() - MS_IN_ONE_DAY)
+          .gt(new Date().getTime())
       ).length,
       numRecentlyTraded: allTimeVolumeData.filter(({ lastSwap }) =>
         Big(lastSwap.time.toString())
           .div(1000)
-          .gt(new Date().getTime() - MS_IN_ONE_DAY)
+          .gt(new Date().getTime())
       ).length,
       cumulativeQuoteVolume: normalizeCoinDecimal(registryResource.cumulativeQuoteVolume),
       cumulativeIntegratorFees: normalizeCoinDecimal(registryResource.cumulativeIntegratorFees),

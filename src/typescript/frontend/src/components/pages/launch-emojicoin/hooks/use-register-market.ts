@@ -71,7 +71,7 @@ function stringToHexArray(str: string): string[] {
 }
 
 // Example usage
-let emojiBytes = stringToHexArray(a);
+const emojiBytes = stringToHexArray(a);
 
   console.log('~~emojiBytes: ', emojiBytes);
 

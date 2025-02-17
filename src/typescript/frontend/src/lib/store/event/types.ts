@@ -5,7 +5,6 @@ import {
   type AnyEventModel,
   type DatabaseModels,
 } from "@sdk/indexer-v2/types";
-import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type LatestBar } from "./candlestick-bars";
 import { type WritableDraft } from "immer";
 import { type ClientState, type ClientActions } from "../websocket/store";
@@ -24,7 +23,7 @@ export type SymbolString = string;
 
 export type CandlestickData = {
   candlesticks: readonly PeriodicState[];
-  callback: SubscribeBarsCallback | undefined;
+  callback:  undefined;
   latestBar: LatestBar | undefined;
 };
 
@@ -55,7 +54,7 @@ export type EventState = {
 export type PeriodSubscription = {
   marketEmojis: SymbolEmoji[];
   period: Period;
-  cb: SubscribeBarsCallback;
+  cb: undefined;
 };
 
 export type SetLatestBarsArgs = {

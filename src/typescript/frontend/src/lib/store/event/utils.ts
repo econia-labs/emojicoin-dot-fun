@@ -1,5 +1,4 @@
 import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
-import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
 import { type EventState, type CandlestickData, type MarketEventStore } from "./types";
 import {
@@ -142,7 +141,7 @@ export const handleLatestBarForPeriodicStateEvent = (
  * only the fields that the callback needs, aka `Bar`, a subset of `LatestBar`.
  */
 export const callbackClonedLatestBarIfSubscribed = (
-  cb: SubscribeBarsCallback | undefined,
+  cb: any | undefined,
   latestBar: WritableDraft<LatestBar>
 ) => {
   if (cb) {

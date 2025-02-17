@@ -11,7 +11,6 @@ import {
 import ChatBox from "../chat/ChatBox";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
-import ChartContainer from "components/charts/ChartContainer";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
 import Loading from "components/loading";
 

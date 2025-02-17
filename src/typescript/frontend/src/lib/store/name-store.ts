@@ -1,7 +1,6 @@
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
 import { APTOS_NETWORK } from "lib/env";
-import { MS_IN_ONE_DAY } from "components/charts/const";
 
 export type ANSValue = { name: string | null; expiry: number };
 export type ANSMap = Map<string, ANSValue>;
@@ -22,10 +21,10 @@ export type NameStore = NameState & NameActions;
 
 export const LOCALSTORAGE_ANS_KEY = `${APTOS_NETWORK}-ans-names`;
 // Cache resolved names for one week.
-export const ANS_CACHE_TIME = MS_IN_ONE_DAY * 7;
+export const ANS_CACHE_TIME = 1 * 7;
 // Cache unresolved names for one day. Otherwise people who register new names wouldn't see them
 // get updated for a week.
-export const ANS_NULL_CACHE_TIME = MS_IN_ONE_DAY;
+export const ANS_NULL_CACHE_TIME = 1;
 export const MAX_ITEMS_IN_CACHE = 3000;
 
 /**

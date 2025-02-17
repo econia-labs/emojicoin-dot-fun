@@ -2266,7 +2266,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let verified_bytes = vector[];
         for (i in 0..vector::length(&emojis)) {
             let emoji = *vector::borrow(&emojis, i);
-            assert!(table::contains(coin_symbol_emojis_ref, emoji), E_NOT_SUPPORTED_SYMBOL_EMOJI);
             vector::append(&mut verified_bytes, emoji);
         };
         assert!(!vector::is_empty(&verified_bytes), E_EMOJI_BYTES_EMPTY);
