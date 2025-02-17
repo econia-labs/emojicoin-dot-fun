@@ -43,8 +43,10 @@ const MAX_SYMBOLS_PER_FETCH = 100;
  * NOTE: These markets are returned unsorted since they can be sorted post-fetch.
  *
  * NOTE: Due to limitations with the postgrest API, it's possible that an incorrect query value is
- * silently returned once the request URL exceed ~10-11,000 bytes. This query is automatically
- * paginated once the input symbol length exceeds 100.
+ * silently returned once the request URL exceed ~10-11,000 bytes.
+ *
+ * To avoid encountering silently incorrect query results, this function automatically paginates
+ * once the input symbol length exceeds 100.
  *
  * @see {@link toEqClause}
  * @see {@link joinEqClauses}
