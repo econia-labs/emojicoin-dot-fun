@@ -20,7 +20,7 @@ import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { ROUTES } from "router/routes";
 import { useRouter } from "next/navigation";
 
-const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch]";
+const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-black";
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
