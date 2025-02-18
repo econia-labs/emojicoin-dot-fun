@@ -17,8 +17,6 @@ import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import { useNewCoinInput } from "context/new-coin-input-context";
-
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {
@@ -41,39 +39,7 @@ export const useRegisterMarket = () => {
 
   const { data: numMarkets } = useNumMarkets();
 
-  const { name, description } = useNewCoinInput((s) => s)
-  console.log('~~description: ', description);
-console.log('~~name: ', name);
-
-class HexInput extends Uint8Array {
-  constructor(input: string | number[]) {
-    if (typeof input === "string") {
-      super([...input].map(char => char.charCodeAt(0))); // Convert string to Uint8Array
-    } else {
-      super(input); // Handle numeric byte array
-    }
-  }
-}
-
-// ✅ Convert a string to an array of HexInput elements (HexInput[])
-function stringToHexInputArray(str: string): HexInput[] {
-  return [...str].map(char => new HexInput([char.charCodeAt(0)])); 
-}
-
-// Example usage
-
-
-// Example usage:
-const a = name + description
-
-function stringToHexArray(str: string): string[] {
-  return [...str].map(char => `0x${char.codePointAt(0)?.toString(16).padStart(8, "0")}`);
-}
-
-// Example usage
-const emojiBytes = stringToHexArray(a);
-
-  console.log('~~emojiBytes: ', emojiBytes);
+  const emojiBytes = emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.bytes);
 
   const { data: gasResult } = useQuery({
     queryKey: ["register-market-cost", numMarkets, account?.address, emojiBytes],
