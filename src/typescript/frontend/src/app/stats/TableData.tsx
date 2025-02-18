@@ -8,7 +8,7 @@ import { ROUTES } from "router/routes";
 import { EXTERNAL_LINK_PROPS } from "components/link/const";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import { PriceDelta } from "components/price-feed/inner";
-import { NominalPriceDisplay } from "components/misc/NominalPriceDisplay";
+import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 
 export enum Column {
   Price,
@@ -75,14 +75,14 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
       </td>
       <td>{row.market.marketID.toString()}</td>
       <td className={getCN(Column.Price)}>
-        <NominalPriceDisplay price={cells.price(row)} />
+        <ColoredPriceDisplay price={cells.price(row)} />
       </td>
       <td className={getCN(Column.AllTimeVolume)}>{cells.allTimeVolume(row)}</td>
       <td className={getCN(Column.DailyVolume)}>{cells.dailyVolume(row)}</td>
       <td className={getCN(Column.Tvl)}>{cells.tvl(row)}</td>
       <td className={getCN(Column.LastAvgExecutionPrice)}>
         <ExplorerLink className="hover:underline" value={row.transaction.version} type="txn">
-          <NominalPriceDisplay price={cells.lastAvgPrice(row)} />
+          <ColoredPriceDisplay price={cells.lastAvgPrice(row)} />
         </ExplorerLink>
       </td>
       <td className={getCN(Column.MarketCap)}>{cells.marketCap(row)}</td>

@@ -9,7 +9,7 @@ import useEffectOnce from "react-use/lib/useEffectOnce";
 import { useEventStore } from "context/event-store-context/hooks";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import { FormattedNumber } from "components/FormattedNumber";
-import { PriceColors } from "components/misc/NominalPriceDisplay";
+import { PriceColors } from "components/misc/ColoredPriceDisplay";
 
 export const PriceDelta = ({ delta, className = "" }: { delta: number; className?: string }) => {
   const { prefix, suffix } = useMemo(
@@ -20,7 +20,7 @@ export const PriceDelta = ({ delta, className = "" }: { delta: number; className
     [delta]
   );
 
-  const color =
+  const { color } =
     delta === 0 ? PriceColors["neutral"] : delta >= 0 ? PriceColors["buy"] : PriceColors["sell"];
 
   return (
