@@ -64,6 +64,7 @@ jobs:
         extra_args: '--all-files --config cfg/pre-commit-config.yaml'
 name: 'pre-commit'
 'on':
+  merge_group: null
   pull_request: null
   push:
     branches:
