@@ -7,8 +7,10 @@ env:
 jobs:
   check-n-lines-changed:
     env:
-      # Do not need to run steps if in a merge queue. Note that this solution
-      # is because GitHub actions doesn't support early exit.
+      # If run from a merge group, the action should not run. However there is
+      # no way to exit early in GitHub actions per
+      # https://github.com/actions/runner/issues/662, so using a conditional
+      # check for each step serves as a workaround.
       IS_MERGE_GROUP: '${{ github.event_name == ''merge_group'' }}'
     runs-on: 'ubuntu-latest'
     steps:
