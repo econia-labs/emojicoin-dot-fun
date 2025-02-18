@@ -4,13 +4,15 @@ env:
   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 jobs:
   conventional-commit:
+    env:
+      # Do not need to run steps if in a merge queue. Note that this solution
+      # is because GitHub actions doesn't support early exit.
+      IS_MERGE_GROUP: '${{ github.event_name == ''merge_group'' }}'
     runs-on: 'ubuntu-latest'
     steps:
-    - if: '${{ github.event_name == ''merge_group'' }}'
-      name: 'Return early if PR made it to merge queue'
-      run: 'exit 0'
     - env:
         GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      if: '!env.IS_MERGE_GROUP'
       uses: 'amannn/action-semantic-pull-request@v5'
       with:
         requireScope: true

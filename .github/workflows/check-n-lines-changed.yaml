@@ -6,15 +6,17 @@ env:
   OVERRIDE_N_APPROVALS: 2
 jobs:
   check-n-lines-changed:
+    env:
+      # Do not need to run steps if in a merge queue. Note that this solution
+      # is because GitHub actions doesn't support early exit.
+      IS_MERGE_GROUP: '${{ github.event_name == ''merge_group'' }}'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
       with:
         fetch-depth: 0
-    - if: '${{ github.event_name == ''merge_group'' }}'
-      name: 'Return early if PR made it to merge queue'
-      run: 'exit 0'
     - id: 'get-pr-number'
+      if: '!env.IS_MERGE_GROUP'
       name: 'Get PR number'
       # yamllint disable rule:indentation
       run: |
@@ -32,6 +34,7 @@ jobs:
         echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
     - id: 'get-base-branch'
+      if: '!env.IS_MERGE_GROUP'
       name: 'Get PR base branch'
       run: |
         PR_NUMBER="${{ steps.get-pr-number.outputs.number }}"
@@ -39,6 +42,7 @@ jobs:
         echo "Base branch: $BASE"
         echo "base_branch=$BASE" >> $GITHUB_OUTPUT
     - id: 'get-insertions'
+      if: '!env.IS_MERGE_GROUP'
       name: 'Get number of lines added'
       # yamllint disable rule:indentation
       run: |
@@ -52,6 +56,7 @@ jobs:
         echo "insertions=$INSERTIONS" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
     - id: 'get-deletions'
+      if: '!env.IS_MERGE_GROUP'
       name: 'Get number of lines removed'
       # yamllint disable rule:indentation
       run: |
@@ -65,6 +70,7 @@ jobs:
         echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
     - id: 'get-approvals'
+      if: '!env.IS_MERGE_GROUP'
       name: 'Get number of active approving reviews'
       # Sum up the number of approvals across all reviewers, only counting a
       # review as approving if it is the last review by that reviewer.
@@ -84,7 +90,8 @@ jobs:
         echo "Number of approvals: $APPROVALS"
         echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
-    - name: 'Check size versus approvals'
+    - if: '!env.IS_MERGE_GROUP'
+      name: 'Check size versus approvals'
       # yamllint disable rule:indentation
       run: |
         INSERTIONS="${{ steps.get-insertions.outputs.insertions }}"
