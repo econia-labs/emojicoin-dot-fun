@@ -15,7 +15,7 @@ jobs:
     - run: 'pnpm build'
 name: 'Verify docs site build'
 'on':
-  merge_queue: null
+  merge_group: null
   pull_request:
     paths:
     - 'doc/doc-site/**'
