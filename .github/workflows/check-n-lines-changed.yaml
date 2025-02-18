@@ -90,7 +90,7 @@ jobs:
         echo "Number of approvals: $APPROVALS"
         echo "approvals=$APPROVALS" >> $GITHUB_OUTPUT
     # yamllint enable rule:indentation
-    - if: '!env.IS_MERGE_GROUP'
+    - if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
       name: 'Check size versus approvals'
       # yamllint disable rule:indentation
       run: |
