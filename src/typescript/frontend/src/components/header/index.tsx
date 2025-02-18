@@ -65,7 +65,6 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
       >
         <Link className="mt-[6px]" {...linkProps}>
           <StyledClickItem>
-            <LogoIcon width="170px" color="black" cursor="pointer" versionBadge={true} />
           </StyledClickItem>
         </Link>
 
@@ -78,7 +77,6 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
         <Flex my="30px" justifyContent="space-between" alignItems="center">
           <Link className="ml-[50px]" {...linkProps}>
             <StyledClickItem>
-              <LogoIcon width="170px" cursor="pointer" versionBadge={true} />
             </StyledClickItem>
           </Link>
 
