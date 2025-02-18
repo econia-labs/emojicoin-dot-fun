@@ -244,6 +244,19 @@ export function enumerate<T>(arr: T[]): Array<[T, number]> {
 }
 
 /**
+ * Simple utility function to chunk arrays.
+ *
+ * NOTE: This this mutates the array passed in.
+ */
+export function chunk<T>(arr: T[], size: number): T[][] {
+  const res: T[][] = [];
+  while (arr.length) {
+    res.push(arr.splice(0, size));
+  }
+  return res;
+}
+
+/**
  * Extracts elements from an array based on a type predicate and a type guard filter function.
  *
  * This function mutates the original array, removing elements that match
