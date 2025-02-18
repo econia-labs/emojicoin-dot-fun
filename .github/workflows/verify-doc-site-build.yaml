@@ -16,9 +16,6 @@ jobs:
 name: 'Verify docs site build'
 'on':
   merge_group: null
-  pull_request:
-    paths:
-    - 'doc/doc-site/**'
-    - '.github/workflows/verify-doc-site-build.yaml'
+  pull_request: null
   workflow_dispatch: null
 ...
