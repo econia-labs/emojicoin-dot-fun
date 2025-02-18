@@ -15,10 +15,8 @@ jobs:
     - run: 'pnpm build'
 name: 'Verify docs site build'
 'on':
+  merge_group: null
   pull_request:
-    branches:
-    - 'main'
-    - 'production'
     paths:
     - 'doc/doc-site/**'
     - '.github/workflows/verify-doc-site-build.yaml'
