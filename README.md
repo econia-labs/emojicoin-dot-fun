@@ -10,10 +10,11 @@
 
 *Sponsored by a grant from the Aptos Foundation*
 
-The emojicoin dot fun Move package is audited:
+The emojicoin dot fun and emojicoin arena Move packages are audited:
 
 - [PDF Report]
-- Corresponding `git` tag [`move-v1.0.1-audited`]
+- `git` tag [`move-v1.0.1-audited`]
+- `git` tag [`arena-move-v1.0.0-audited`]
 
 <!-- markdownlint-enable MD036 -->
 
@@ -199,4 +200,5 @@ git submodule update --init --recursive
 [pre-commit shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
 [uploading environment variables with vercel's ui]: https://github.com/user-attachments/assets/d613725d-82ed-4a4e-a467-a89b2cf57d91
 [vercel cli]: https://vercel.com/docs/cli
+[`arena-move-v1.0.0-audited`]: https://github.com/econia-labs/emojicoin-dot-fun/releases/tag/arena-move-v1.0.0-audited
 [`move-v1.0.1-audited`]: https://github.com/econia-labs/emojicoin-dot-fun/releases/tag/move-v1.0.1-audited
