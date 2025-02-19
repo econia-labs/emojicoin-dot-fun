@@ -1,5 +1,5 @@
 import { toTotalAptLocked } from "@sdk/indexer-v2/types";
-import { HomePageProps } from "./HomePage";
+import { type HomePageProps } from "./HomePage";
 
 export const toAptLockedFromProps = (meleeData: Exclude<HomePageProps["meleeData"], null>) =>
   toTotalAptLocked({
