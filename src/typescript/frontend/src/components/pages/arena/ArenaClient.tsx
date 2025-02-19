@@ -6,7 +6,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { parseJSON } from "utils";
-import { Box, EmojiTitle, type PropsWithPositionAndHistory, type Props } from "./utils";
+import { Box, EmojiTitle, type ArenaPropsWithPositionAndHistory, type ArenaProps } from "./utils";
 import { BottomNavigation, TabContainer } from "./tabs";
 import { PriceChartDesktopBox, PriceChartMobile } from "./PriceChart";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -19,18 +19,11 @@ import { ROUTES } from "router/routes";
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
   return (
-    <Box
-      style={{
-        display: "grid",
-        gridTemplateRows: "auto 1fr",
-        placeItems: "center",
-        padding: "1em",
-      }}
-    >
+    <Box className="grid grid-rows-[auto_1fr] place-items-center p-[1em]">
       <div
         className={`uppercase ${isMobile ? "text-2xl" : "text-3xl"} text-light-gray tracking-widest text-center`}
       >
-        Rewards remaining
+        {"Rewards remaining"}
       </div>
       <div
         className={`uppercase font-forma ${isMobile ? "text-4xl" : "text-6xl lg:text-7xl xl:text-8xl"} text-white`}
@@ -41,18 +34,14 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
   );
 };
 
-const Desktop: React.FC<PropsWithPositionAndHistory> = (props) => {
+const Desktop = (props: ArenaPropsWithPositionAndHistory) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <div
+      className="grid h-[90%] w-full p-[2em] gap-[2em]"
       style={{
-        display: "grid",
         gridTemplateRows: "1fr minmax(0, 3.5fr)",
         gridTemplateColumns: "1fr 0.65fr 0.85fr 1fr",
-        height: "90%",
-        width: "100%",
-        padding: "2em",
-        gap: "2em",
       }}
     >
       <Box className="grid place-items-center">
@@ -73,7 +62,7 @@ const Desktop: React.FC<PropsWithPositionAndHistory> = (props) => {
   );
 };
 
-const Mobile: React.FC<PropsWithPositionAndHistory> = (props) => {
+const Mobile = (props: ArenaPropsWithPositionAndHistory) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <>
@@ -100,7 +89,7 @@ const Mobile: React.FC<PropsWithPositionAndHistory> = (props) => {
   );
 };
 
-export const ArenaClient = (props: Props) => {
+export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
   const { account } = useAptos();
 
