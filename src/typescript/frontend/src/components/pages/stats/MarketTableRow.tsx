@@ -4,7 +4,6 @@ import { EXTERNAL_LINK_PROPS } from "components/link/const";
 import { PriceDelta } from "components/price-feed/inner";
 import { ROUTES } from "router/routes";
 import { toNominal } from "lib/utils/decimals";
-import { toNominalPrice } from "@sdk/utils/nominal-price";
 import { StatsColumn } from "./params";
 import { cn } from "lib/utils/class-name";
 import { ServerSideEmoji } from "./ServerSideEmoji";
