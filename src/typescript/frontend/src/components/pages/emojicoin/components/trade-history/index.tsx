@@ -22,7 +22,7 @@ const toTableItem = ({
     apt: swap.quoteVolume,
     emoji: swap.baseVolume,
     date: new Date(Number(transaction.time / 1000n)),
-    type: swap.isSell ? "sell" : "buy",
+    type: swap.isSell ? ("sell" as const) : ("buy" as const),
     priceQ64: swap.avgExecutionPriceQ64,
     swapper: swap.swapper,
     version: transaction.version,

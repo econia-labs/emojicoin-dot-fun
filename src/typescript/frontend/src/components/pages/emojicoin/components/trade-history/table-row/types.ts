@@ -6,7 +6,7 @@ export type TableRowDesktopProps = {
     rankName: string;
     apt: bigint;
     emoji: bigint;
-    type: string;
+    type: "buy" | "sell";
     priceQ64: bigint;
     date: Date;
     version: AnyNumberString;
