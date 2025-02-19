@@ -17,6 +17,8 @@ import { ROUTES } from "router/routes";
 import ChartContainer from "@/components/charts/ChartContainer";
 import { type ClassValue } from "clsx";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import { useRouter } from "next/navigation";
+import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -110,12 +112,21 @@ const Mobile = (props: ArenaPropsWithPositionAndHistory) => {
 export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
   const { account } = useAptos();
+  const router = useRouter();
 
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
 
   useReliableSubscribe({ eventTypes: ["Swap"], arena: true });
+
+  const latestMeleeID = useLatestMeleeID();
+
+  useEffect(() => {
+    if (latestMeleeID > props.arenaInfo.meleeID) {
+      router.refresh();
+    }
+  }, [latestMeleeID, props.arenaInfo.meleeID, router]);
 
   const r = useMemo(
     () =>
