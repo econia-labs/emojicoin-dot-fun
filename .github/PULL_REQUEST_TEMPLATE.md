@@ -12,12 +12,5 @@ this PR.
 
 # Checklist
 
-- [ ] Did you update relevant documentation?
-- [ ] Did you add tests to cover new code or a fixed issue?
-- [ ] Did you update the changelog?
-- [ ] Did you check all checkboxes from the linked Linear task?
-
-<!--
-    If a checklist item does not apply to your PR,
-    please delete the corresponding line.
--->
+- [ ] Did you check all checkboxes from the linked Linear task? (Ignore if you
+  are not a member of Econia Labs)
