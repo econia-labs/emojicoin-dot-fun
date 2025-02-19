@@ -1,11 +1,16 @@
 import { ARENA_MODULE_ADDRESS } from "@sdk/const";
-import type { ArenaInfoModel, MarketStateModel, DatabaseModels } from "@sdk/indexer-v2/types";
+import {
+  type ArenaInfoModel,
+  type MarketStateModel,
+  type DatabaseModels,
+} from "@sdk/indexer-v2/types";
 import { ArenaCard } from "components/pages/home/components/arena-card";
 import EmojiTable from "components/pages/home/components/emoji-table";
 import MainCard from "components/pages/home/components/main-card/MainCard";
 import { PriceFeed } from "components/price-feed";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import { toAptLockedFromProps } from "./utils";
 
 export interface HomePageProps {
   markets: Array<DatabaseModels["market_state"]>;
@@ -43,7 +48,7 @@ export default async function HomePageComponent({
               market1Symbol={meleeData.market1.market.symbolEmojis.join("")}
               rewardsRemaining={meleeData.melee.rewardsRemaining}
               meleeVolume={meleeData.melee.volume}
-              aptLocked={meleeData.melee.aptLocked}
+              aptLocked={toAptLockedFromProps(meleeData)}
               startTime={meleeData.melee.startTime}
               duration={meleeData.melee.duration / 1000n / 1000n}
             />
