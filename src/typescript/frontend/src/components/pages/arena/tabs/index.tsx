@@ -1,5 +1,5 @@
 import { Emoji } from "utils/emoji";
-import { type PropsWithPositionAndHistory } from "../utils";
+import { type ArenaPropsWithPositionAndHistory } from "../utils";
 import { EnterTab } from "./EnterTab";
 import { ProfileTab } from "./ProfileTab";
 import { emoji } from "utils";
@@ -18,7 +18,7 @@ const getTabs = (
     setPosition,
     setHistory,
     arenaInfo,
-  }: PropsWithPositionAndHistory,
+  }: ArenaPropsWithPositionAndHistory,
   setSelectedTab: (tab: string) => void
 ) => [
   {
@@ -55,7 +55,7 @@ const getTabs = (
   },
 ];
 
-export const TabContainer: React.FC<PropsWithPositionAndHistory> = (props) => {
+export const TabContainer = (props: ArenaPropsWithPositionAndHistory) => {
   const [selectedTab, setSelectedTab] = useState<string>();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
@@ -133,7 +133,7 @@ const BottomNavigationItem = ({
   );
 };
 
-export const BottomNavigation: React.FC<PropsWithPositionAndHistory> = (props) => {
+export const BottomNavigation = (props: ArenaPropsWithPositionAndHistory) => {
   const [selectedTab, setSelectedTab] = useState<string>();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
