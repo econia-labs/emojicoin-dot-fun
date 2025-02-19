@@ -1,6 +1,5 @@
-import { fetchMarkets } from "@/queries/home";
-import { symbolBytesToEmojis, type SymbolEmoji } from "@sdk/emoji_data";
-import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
+import { getSymbolEmojisInString, symbolBytesToEmojis } from "@sdk/emoji_data";
+import { fetchSpecificMarkets } from "@sdk/indexer-v2/queries";
 import { toNominalPrice } from "@sdk/utils";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { AptPriceContextProvider } from "context/AptPrice";
@@ -20,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export type FullCoinData = Omit<TokenBalance, "amount"> &
-  Awaited<ReturnType<typeof fetchMarkets>>[number] & {
+  Awaited<ReturnType<typeof fetchSpecificMarkets>>[number] & {
     symbol: string;
     marketCap: number;
     emojiData: ReturnType<typeof symbolBytesToEmojis>;
@@ -37,28 +36,13 @@ export default async function WalletPage({ params }: { params: { address: string
     fetchAllFungibleAssetsBalance({ ownerAddress: params.address }),
     getAptPrice(),
   ]);
-
-  // Convert emojis to market address to query from the indexer.
-  // Querying with the emoji directly causes issues for composite emojis such as 🇺🇸 which is a combination of 🇺 and 🇸.
-  const marketAddresses = ownedTokens.flatMap((coin) =>
-    getMarketAddress([...coin.metadata.symbol] as SymbolEmoji[]).toString()
+  const markets = await fetchSpecificMarkets(
+    ownedTokens.map((t) => getSymbolEmojisInString(t.metadata.symbol))
   );
-
-  // Split addresses into chunks to avoid URL length limits.
-  const chunkSize = 50;
-  const chunks = Array.from({ length: Math.ceil(marketAddresses.length / chunkSize) }, (_, i) =>
-    marketAddresses.slice(i * chunkSize, (i + 1) * chunkSize)
-  );
-
-  // Fetch market data in parallel for each chunk.
-  const marketDataMap: Record<string, Awaited<ReturnType<typeof fetchMarkets>>[number]> = (
-    await Promise.all(chunks.map((chunk) => fetchMarkets({ filterMarketAddresses: chunk })))
-  )
-    .flat() // Flatten the array of arrays.
-    .reduce((acc, market) => {
-      acc[market.market.symbolData.symbol] = market;
-      return acc;
-    }, {});
+  const marketDataMap: Record<string, (typeof markets)[number]> = markets.reduce((acc, market) => {
+    acc[market.market.symbolData.symbol] = market;
+    return acc;
+  }, {});
 
   const coinsWithData = ownedTokens.map((coin) => {
     const marketData = marketDataMap[coin.metadata.symbol];
