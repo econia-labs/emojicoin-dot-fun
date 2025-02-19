@@ -17,15 +17,12 @@ const debugConfigOptions = {
   experimental: {
     serverMinification: false,
     serverSourceMaps: true,
-    staleTimes: {
-      dynamic: 0, // Default is normally 30s.
-      static: 30, // Default is normally 180s.
-    },
   },
 };
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(DEBUG ? debugConfigOptions : {}),
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
@@ -34,7 +31,16 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  ...(DEBUG ? debugConfigOptions : {}),
+  /**
+   * Match the new default behavior in next 15, without opinionated caching for dynamic pages.
+   * @see {@link https://nextjs.org/docs/app/api-reference/config/next-config-js/staleTimes#version-history}
+   */
+  experimental: {
+    staleTimes: {
+      dynamic: 0, // Default is normally 30s.
+      static: 60, // Default is normally 180s.
+    },
+  },
   // Log full fetch URLs if we're in a specific environment.
   logging:
     process.env.NODE_ENV === "development" ||
