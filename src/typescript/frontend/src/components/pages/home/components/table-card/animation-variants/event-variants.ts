@@ -12,7 +12,6 @@ import {
   type SwapEventModel,
 } from "@sdk/indexer-v2/types";
 import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
-import { useScramble } from "use-scramble";
 
 export const transitionIn = {
   duration: 0,
@@ -114,40 +113,6 @@ export const onlyHoverVariant = {
     borderColor: ECONIA_BLUE,
     transition: transitionIn,
   },
-};
-
-export type RangeCharCodes = {
-  0: number;
-  1: number;
-} & Array<number>;
-
-export const scrambleConfig = {
-  // ASCII numbers only.
-  range: [48, 57] as RangeCharCodes,
-  overdrive: false,
-  overflow: true,
-  speed: 0.6,
-  playOnMount: true,
-};
-
-export const useLabelScrambler = (value: string, suffix: string = "", prefix: string = "") => {
-  // Ignore all characters in the prefix and the suffix, as long as they are not numbers.
-  const ignore = ["."];
-  const numberSet = new Set("0123456789");
-  const suffixesAndPrefixes = new Set(prefix + suffix);
-  for (const char of suffixesAndPrefixes) {
-    if (!numberSet.has(char)) {
-      ignore.push(char);
-    }
-  }
-
-  const scrambler = useScramble({
-    text: prefix + value + suffix,
-    ...scrambleConfig,
-    ignore,
-  });
-
-  return scrambler;
 };
 
 export const eventToVariant = (
