@@ -19,10 +19,8 @@ export type ClientState = {
 
 export type ClientActions = {
   close: () => void;
-  subscribeEvents: (events: SubscribableBrokerEvents[]) => void;
-  unsubscribeEvents: (events: SubscribableBrokerEvents[]) => void;
-  subscribeArena: () => void;
-  unsubscribeArena: () => void;
+  subscribeEvents: (events: SubscribableBrokerEvents[], arena?: boolean) => void;
+  unsubscribeEvents: (events: SubscribableBrokerEvents[], arena?: boolean) => void;
 };
 
 export type WebSocketClientStore = ClientState & ClientActions;
@@ -83,28 +81,18 @@ export const createWebSocketClientStore = (
   close: () => {
     get().client.client.close();
   },
-  subscribeEvents: (e) => {
+  subscribeEvents: (e, arena) => {
     set((state) => {
-      state.client.subscribeEvents(e);
+      state.client.subscribeEvents(e, arena);
+      state.subscriptions.arena = !!arena;
       state.subscriptions = state.client.subscriptions;
     });
   },
-  unsubscribeEvents: (e) => {
+  unsubscribeEvents: (e, arena) => {
     set((state) => {
-      state.client.unsubscribeEvents(e);
+      state.client.unsubscribeEvents(e, arena);
+      state.subscriptions.arena = !!arena;
       state.subscriptions = state.client.subscriptions;
-    });
-  },
-  subscribeArena: () => {
-    set((state) => {
-      state.client.subscribeArena();
-      state.subscriptions.arena = true;
-    });
-  },
-  unsubscribeArena: () => {
-    set((state) => {
-      state.client.unsubscribeArena();
-      state.subscriptions.arena = false;
     });
   },
 });

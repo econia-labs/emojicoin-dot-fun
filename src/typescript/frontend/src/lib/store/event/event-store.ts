@@ -19,6 +19,7 @@ import {
   pushPeriodicStateEvents,
   toMappedMarketEvents,
   initialState,
+  ensureMeleeInStore,
 } from "./utils";
 import { periodEnumToRawDuration } from "@sdk/const";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
@@ -29,14 +30,29 @@ import {
   clearLocalStorage,
   LOCAL_STORAGE_EVENT_TYPES,
 } from "./local-storage";
+import { initializeArenaStore } from "../arena/store";
+import {
+  isArenaEnterModel,
+  isArenaEventModelWithMeleeID,
+  isArenaExitModel,
+  isArenaMeleeModel,
+  isArenaSwapModel,
+} from "@sdk/types/arena-types";
+import { getMeleeIDFromArenaModel, toMappedMelees } from "../arena/utils";
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
       ...initialState(),
+      ...initializeArenaStore(),
       getMarket: (emojis) => get().markets.get(emojis.join("")),
       getRegisteredMarkets: () => {
         return get().markets;
+      },
+      loadArenaInfoFromServer: (info) => {
+        set((state) => {
+          state.arenaInfoFromServer = info;
+        });
       },
       loadMarketStateFromServer: (states) => {
         const filtered = states.filter((e) => {
@@ -83,6 +99,17 @@ export const createEventStore = () => {
             pushPeriodicStateEvents(market, extractFilter(marketEvents, isPeriodicStateEventModel));
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
+
+          const arenaEvents = events.filter(isArenaEventModelWithMeleeID);
+          const arenaMap = toMappedMelees(arenaEvents);
+          Array.from(arenaMap.entries()).forEach(([meleeID, events]) => {
+            ensureMeleeInStore(state, meleeID);
+            const melee = state.melees.get(meleeID)!;
+            melee.enters.push(...extractFilter(events, isArenaEnterModel));
+            melee.exits.push(...extractFilter(events, isArenaExitModel));
+            melee.swaps.push(...extractFilter(events, isArenaSwapModel));
+          });
+          state.meleeEvents.push(...extractFilter(arenaEvents, isArenaMeleeModel));
         });
       },
       pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {
@@ -121,8 +148,20 @@ export const createEventStore = () => {
                   maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
                 }
               } else {
-                // Arena events.
-                // TODO.
+                if (isArenaEventModelWithMeleeID(event)) {
+                  const meleeID = getMeleeIDFromArenaModel(event);
+                  ensureMeleeInStore(state, meleeID);
+                  const melee = state.melees.get(meleeID)!;
+                  if (isArenaMeleeModel(event)) {
+                    state.meleeEvents.unshift(event);
+                  } else if (isArenaEnterModel(event)) {
+                    melee.enters.unshift(event);
+                  } else if (isArenaExitModel(event)) {
+                    melee.exits.unshift(event);
+                  } else if (isArenaSwapModel(event)) {
+                    melee.swaps.unshift(event);
+                  }
+                }
               }
             }
           });

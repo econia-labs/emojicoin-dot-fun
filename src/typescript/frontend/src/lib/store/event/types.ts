@@ -9,6 +9,8 @@ import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-ap
 import { type LatestBar } from "./candlestick-bars";
 import { type WritableDraft } from "immer";
 import { type ClientState, type ClientActions } from "../websocket/store";
+import { type ArenaActions, type ArenaState } from "../arena/store";
+import { type Flatten } from "@sdk-types";
 
 // Aliased to avoid repeating the type names over and over.
 type Swap = DatabaseModels["swap_events"];
@@ -28,8 +30,12 @@ export type CandlestickData = {
   latestBar: LatestBar | undefined;
 };
 
+export type MarketStoreMetadata = Flatten<
+  Omit<MarketMetadataModel, "time" | "marketNonce" | "trigger">
+>;
+
 export type MarketEventStore = {
-  marketMetadata: MarketMetadataModel;
+  marketMetadata: MarketStoreMetadata;
   dailyVolume?: bigint;
   swapEvents: readonly Swap[];
   liquidityEvents: readonly Liquidity[];
@@ -59,7 +65,7 @@ export type PeriodSubscription = {
 };
 
 export type SetLatestBarsArgs = {
-  marketMetadata: MarketMetadataModel;
+  marketMetadata: MarketStoreMetadata;
   latestBars: readonly LatestBar[];
 };
 
@@ -74,9 +80,13 @@ export type EventActions = {
   unsubscribeFromPeriod: ({ marketEmojis, period }: Omit<PeriodSubscription, "cb">) => void;
 };
 
-export type EventStore = EventState & EventActions;
+export type EventStore = EventState & EventActions & ArenaState & ArenaActions;
 
-export type EventAndClientStore = EventState & EventActions & ClientState & ClientActions;
+export type EventAndClientStore = EventState &
+  EventActions &
+  ClientState &
+  ClientActions &
+  ArenaState;
 
 export type ImmerSetEventAndClientStore = (
   nextStateOrUpdater:
