@@ -271,7 +271,9 @@ type ArenaMeleeEventData = Flatten<
 >;
 
 type ArenaEnterEventData = FlattenedExchangeRateWithEventIndex<"ArenaEnterEvent">;
-type ArenaExitEventData = FlattenedExchangeRateWithEventIndex<"ArenaExitEvent">;
+type ArenaExitEventData = FlattenedExchangeRateWithEventIndex<"ArenaExitEvent"> & {
+  apt_proceeds: Uint64String;
+};
 type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent">;
 
 type ArenaVaultBalanceUpdateEventData = {
@@ -295,7 +297,8 @@ type ArenaInfoData = {
   melee_id: Uint64String;
   volume: Uint64String;
   rewards_remaining: Uint64String;
-  apt_locked: Uint64String;
+  emojicoin_0_locked: Uint64String;
+  emojicoin_1_locked: Uint64String;
   emojicoin_0_market_address: AccountAddressString;
   emojicoin_0_symbols: SymbolEmoji[];
   emojicoin_0_market_id: Uint64String;
