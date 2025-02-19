@@ -122,6 +122,10 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "emojicoin_0_locked",
   "emojicoin_1_locked",
   "apt_proceeds",
+  "open_price",
+  "close_price",
+  "high_price",
+  "low_price",
 ]);
 
 /**

@@ -1,3 +1,4 @@
+import type { Period } from "../const";
 import { type SymbolEmoji } from "../emoji_data";
 import { type AccountAddressString } from "../emojicoin_dot_fun";
 import {
@@ -153,6 +154,21 @@ export type ArenaTypes = {
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
+  };
+
+  ArenaCandlestick: {
+    meleeID: bigint;
+    period: Period;
+    startTime: Date;
+
+    openPrice: number | null;
+    closePrice: number | null;
+    highPrice: number | null;
+    lowPrice: number | null;
+
+    volume: bigint;
+    integratorFees: bigint;
+    nSwaps: bigint;
   };
 };
 

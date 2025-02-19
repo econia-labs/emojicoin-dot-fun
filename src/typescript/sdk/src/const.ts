@@ -156,6 +156,7 @@ export const INITIAL_REAL_RESERVES: Types["Reserves"] = {
 
 /// As defined in the database, aka the enum string.
 export enum Period {
+  Period15S = "period_15s",
   Period1M = "period_1m",
   Period5M = "period_5m",
   Period15M = "period_15m",
@@ -179,6 +180,7 @@ export enum Trigger {
 export const toPeriod = (s: DatabaseStructType["PeriodicStateMetadata"]["period"]) =>
   ({
     // From the database.
+    period_15s: Period.Period15S,
     period_1m: Period.Period1M,
     period_5m: Period.Period5M,
     period_15m: Period.Period15M,
