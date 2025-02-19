@@ -1,5 +1,5 @@
 import type { AnyNumberString } from "@sdk-types";
-import { useLabelScrambler } from "./pages/home/components/table-card/animation-variants/event-variants";
+import { useLabelScrambler } from "@hooks/use-label-scrambler";
 import { toNominal } from "lib/utils/decimals";
 import { useEffect, useMemo } from "react";
 
