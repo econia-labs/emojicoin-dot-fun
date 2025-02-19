@@ -1056,6 +1056,15 @@ export type EventModelWithMarket =
   | DatabaseModels[TableName.MarketLatestStateEvent]
   | DatabaseModels[TableName.LiquidityEvents];
 
+export type ArenaEventModels =
+  | DatabaseModels[TableName.ArenaEnterEvents]
+  | DatabaseModels[TableName.ArenaMeleeEvents]
+  | DatabaseModels[TableName.ArenaExitEvents]
+  | DatabaseModels[TableName.ArenaSwapEvents]
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
+
+export type ArenaEventModelWithMeleeID = Exclude<ArenaEventModels, ArenaVaultBalanceUpdateModel>;
+
 const extractEventType = (guid: string) => {
   const match = guid.match(/^.*::(\w+)::/u);
   return match ? match[1] : null;
