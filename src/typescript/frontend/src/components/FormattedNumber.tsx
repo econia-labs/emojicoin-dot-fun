@@ -1,15 +1,6 @@
-import type { AnyNumberString } from "@sdk-types";
+import { formatNumberString, type FormatNumberStringProps } from "lib/utils/format-number-string";
 import { useLabelScrambler } from "@hooks/use-label-scrambler";
-import { toNominal } from "lib/utils/decimals";
 import { useEffect, useMemo } from "react";
-
-/**
- * Sliding precision will show `decimals` decimals when Math.abs(number) is
- * above 1 and `decimals` significant digits when the number is below 1.
- *
- * Fixed will always show `decimals` digits.
- */
-export type FormattedNumberStyle = "sliding-precision" | "fixed";
 
 const ScrambledNumberLabel = ({
   value,
@@ -39,7 +30,7 @@ const ScrambledNumberLabel = ({
  * @param prefix the prefix that shouldn't be scrambled, if the value is scrambled
  * @param className the class name for the span wrapping the value
  * @param style the formatter style
- * @see {@link FormattedNumberStyle}
+ * @see {@link formatNumberString}
  * @returns a component for the formatted number
  */
 export const FormattedNumber = ({
@@ -51,37 +42,19 @@ export const FormattedNumber = ({
   prefix = "",
   className,
   style = "sliding-precision",
-}: (
-  | {
-      value: bigint;
-      nominalize: true;
-    }
-  | {
-      value: AnyNumberString;
-      nominalize?: undefined | false;
-    }
-) & {
-  decimals?: number;
+}: FormatNumberStringProps & {
   scramble?: boolean;
   suffix?: string;
   prefix?: string;
   className?: string;
-  style?: FormattedNumberStyle;
 }) => {
   const displayValue = useMemo(() => {
-    if (nominalize && typeof value !== "bigint") {
-      throw new Error("Input value needs to be a bigint.");
-    }
-    const num = nominalize ? toNominal(value as bigint) : Number(value);
-    const format =
-      style === "fixed" || Math.abs(num) >= 1
-        ? {
-            maximumFractionDigits: decimals,
-            minimumFractionDigits: style === "fixed" ? decimals : undefined,
-          }
-        : { maximumSignificantDigits: decimals };
-    const formatter = new Intl.NumberFormat("en-US", format);
-    return formatter.format(num);
+    return formatNumberString({
+      value,
+      decimals,
+      nominalize,
+      style,
+    } as FormatNumberStringProps);
   }, [value, decimals, nominalize, style]);
 
   return scramble ? (
