@@ -1,6 +1,6 @@
 import type { ArenaPositionModel, MarketStateModel } from "@sdk/indexer-v2/types";
 import { EmojiTitle, lockedTernary, marketTernary } from "../utils";
-import { type PropsWithChildren, useCallback, useEffect, useState } from "react";
+import React, { type PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { AptosInputLabel } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
 import { InputNumeric } from "components/inputs";
 import Button from "components/button";
@@ -40,7 +40,7 @@ const grayLabel = `
   pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
 `;
 
-const BlurModal: React.FC<PropsWithChildren & { close: () => void }> = ({ children, close }) => (
+const BlurModal = ({ children, close }: { close: () => void } & React.PropsWithChildren) => (
   <div
     className="absolute w-[100%] h-[100%] z-[10] p-[1em] grid place-items-center"
     style={{
