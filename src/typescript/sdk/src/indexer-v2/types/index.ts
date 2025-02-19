@@ -30,6 +30,7 @@ import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
 import { type AnyArenaEvent } from "../../types/arena-types";
+import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -207,6 +208,27 @@ const toArenaLeaderboardFromDatabase = (
   pnlOctas: data.pnl_octas,
   withdrawals: BigInt(data.withdrawals),
 });
+
+const toAptLocked = (reserves: ReservesAndBondingCurveState, locked: bigint) => {
+  const curvePrice = calculateCurvePrice(reserves);
+  const bigLocked = Big(locked.toString());
+  const roundedResult = curvePrice.mul(bigLocked).round(0, Big.roundHalfEven);
+  return BigInt(roundedResult.toString());
+};
+
+export const toTotalAptLocked = (args: {
+  market0: {
+    state: MarketStateModel["state"];
+    locked: ArenaInfoModel["emojicoin0Locked"];
+  };
+  market1: {
+    state: MarketStateModel["state"];
+    locked: ArenaInfoModel["emojicoin1Locked"];
+  };
+}): bigint => {
+  const { market0, market1 } = args;
+  return toAptLocked(market0.state, market0.locked) + toAptLocked(market1.state, market1.locked);
+};
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
   meleeID: BigInt(data.melee_id),
