@@ -7,7 +7,7 @@ import { toNominal } from "lib/utils/decimals";
 import { StatsColumn } from "./params";
 import { cn } from "lib/utils/class-name";
 import { ServerSideEmoji } from "./ServerSideEmoji";
-import { NominalPriceDisplay } from "components/misc/NominalPriceDisplay";
+import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 
 export interface TableRowData {
   symbol: string;
@@ -60,14 +60,14 @@ export const MarketTableRow = ({
         {priceDelta !== undefined ? <PriceDelta delta={priceDelta} /> : "-"}
       </td>
       <td>
-        <NominalPriceDisplay price={currentCurvePrice} />
+        <ColoredPriceDisplay price={currentCurvePrice} />
       </td>
       <td className={getCN(sort, StatsColumn.AllTimeVolume)}>{fmt(cumulativeQuoteVolume)}</td>
       <td className={getCN(sort, StatsColumn.DailyVolume)}>{fmt(dailyVolume)}</td>
       <td className={getCN(sort, StatsColumn.Tvl)}>{fmt(totalValueLocked)}</td>
       <td className={getCN(sort, StatsColumn.LastAvgPrice)}>
         <ExplorerLink className="hover:underline" value={transactionVersion} type="txn">
-          <NominalPriceDisplay price={lastAvgPriceQ64} q64 />
+          <ColoredPriceDisplay price={lastAvgPriceQ64} q64 />
         </ExplorerLink>
       </td>
       <td className={getCN(sort, StatsColumn.MarketCap)}>{fmt(marketCap)}</td>
