@@ -6,11 +6,12 @@ import {
   type MarketStateModel,
   type PeriodicStateEventModel,
 } from "@sdk/indexer-v2/types";
-import { type CSSProperties, useState } from "react";
+import { type ClassValue } from "clsx";
+import React, { useState } from "react";
 import darkTheme from "theme/dark";
 import { GlowingEmoji } from "utils/emoji";
 
-export type Props = {
+export type ArenaProps = {
   arenaInfo: ArenaInfoModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
@@ -18,25 +19,25 @@ export type Props = {
   candlesticksMarket1: PeriodicStateEventModel[];
 };
 
-export type PropsWithPositionAndHistory = Props & {
+export type ArenaPropsWithPositionAndHistory = ArenaProps & {
   position?: ArenaPositionModel | null;
   setPosition: (position: ArenaPositionModel | null) => void;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
   setHistory: (position: ArenaLeaderboardHistoryWithArenaInfoModel[]) => void;
 };
 
-export const Box: React.FC<
-  React.PropsWithChildren<{ className?: string; style?: CSSProperties }>
-> = ({ children, className, style }) => {
-  return (
-    <div
-      className={`border-solid border-[1px] border-dark-gray rounded-[3px] bg-black/75 ${className}`}
-      style={style}
-    >
-      {children}
-    </div>
-  );
-};
+export const Box = ({
+  className,
+  children,
+}: {
+  className?: ClassValue;
+} & React.PropsWithChildren) => (
+  <div
+    className={`border-solid border-[1px] border-dark-gray rounded-[3px] bg-black/75 ${className}`}
+  >
+    {children}
+  </div>
+);
 
 export const getFontMultiplier = (emojis: number) => {
   return 1 - (emojis * 5) / 6 / 10;
