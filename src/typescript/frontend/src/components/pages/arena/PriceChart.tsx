@@ -2,20 +2,20 @@
 
 import { type ChartData } from "chart.js";
 import "chart.js/auto";
-import { Box, type Props } from "./utils";
+import { Box, type ArenaProps } from "./utils";
 import darkTheme from "theme/dark";
 import { Line } from "react-chartjs-2";
 import { FormattedNumber } from "components/FormattedNumber";
 import { q64ToBig } from "@sdk/utils";
 import { type PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 
-const PriceChart: React.FC<Props & { axis: boolean }> = ({
+const PriceChart = ({
   market0,
   market1,
   candlesticksMarket0,
   candlesticksMarket1,
   axis,
-}) => {
+}: ArenaProps & { axis: boolean }) => {
   const now = Math.floor(new Date().getTime() / 1000 / 60);
   const size = 15;
   const points = Array.from({ length: size }).map((_, i) => {
@@ -128,7 +128,7 @@ const PriceChart: React.FC<Props & { axis: boolean }> = ({
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   return <Line data={data} options={options as any} />;
 };
-export const PriceChartMobile: React.FC<Props> = (props) => {
+export const PriceChartMobile = (props: ArenaProps) => {
   return (
     <Box className="relative w-[100%] h-[100%] col-start-1 col-end-3">
       <div className="absolute top-[1em] left-[2em]">
@@ -147,7 +147,7 @@ export const PriceChartMobile: React.FC<Props> = (props) => {
   );
 };
 
-export const PriceChartDesktopBox: React.FC<Props> = (props) => {
+export const PriceChartDesktopBox = (props: ArenaProps) => {
   return (
     <Box className="relative w-[100%] h-[100%] col-start-1 col-end-3">
       <div className="absolute top-[1em] left-[2em]">
