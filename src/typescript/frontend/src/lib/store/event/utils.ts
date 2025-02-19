@@ -1,9 +1,13 @@
 import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
-import { type EventState, type CandlestickData, type MarketEventStore } from "./types";
 import {
-  type MarketMetadataModel,
+  type EventState,
+  type CandlestickData,
+  type MarketEventStore,
+  type MarketStoreMetadata,
+} from "./types";
+import {
   type PeriodicStateEventModel,
   type SwapEventModel,
   type DatabaseModels,
@@ -11,8 +15,8 @@ import {
 } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
-import { q64ToBig } from "@sdk/utils/nominal-price";
-import { toNominal } from "@sdk/utils";
+import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
+import { type ArenaState, createInitialMeleeState } from "../arena/store";
 
 type PeriodicState = DatabaseModels["periodic_state_events"];
 
@@ -23,7 +27,7 @@ export const createInitialCandlestickData = (): WritableDraft<CandlestickData> =
 });
 
 export const createInitialMarketState = (
-  marketMetadata: MarketMetadataModel
+  marketMetadata: MarketStoreMetadata
 ): WritableDraft<MarketEventStore> => ({
   marketMetadata,
   swapEvents: [],
@@ -41,11 +45,17 @@ export const createInitialMarketState = (
 
 export const ensureMarketInStore = (
   state: WritableDraft<EventState>,
-  market: MarketMetadataModel
+  market: MarketStoreMetadata
 ) => {
   const key = market.symbolData.symbol;
   if (!state.markets.has(key)) {
     state.markets.set(key, createInitialMarketState(market));
+  }
+};
+
+export const ensureMeleeInStore = (state: WritableDraft<ArenaState>, meleeID: bigint) => {
+  if (!state.melees.has(meleeID)) {
+    state.melees.set(meleeID, createInitialMeleeState());
   }
 };
 
