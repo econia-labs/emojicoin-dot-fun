@@ -1,3 +1,4 @@
+import { SubscribeToHomePageEvents } from "@/components/pages/home/components/SubscribeToHomePageEvents";
 import { ARENA_MODULE_ADDRESS } from "@sdk/const";
 import type { ArenaInfoModel, MarketStateModel, DatabaseModels } from "@sdk/indexer-v2/types";
 import { calculateCurvePrice, type ReservesAndBondingCurveState } from "@sdk/markets";
@@ -35,6 +36,7 @@ export default async function HomePageComponent({
 }: HomePageProps) {
   const toAptLocked = (reserves: ReservesAndBondingCurveState, locked: bigint) =>
     BigInt(calculateCurvePrice(reserves).mul(locked.toString()).toString());
+
   return (
     <div className="relative">
       <div className="flex-col mb-[31px]">
@@ -68,6 +70,7 @@ export default async function HomePageComponent({
         sortBy={sortBy}
         searchBytes={searchBytes}
       />
+      <SubscribeToHomePageEvents info={meleeData?.melee} />
     </div>
   );
 }
