@@ -152,6 +152,7 @@ const toArenaExitFromDatabase = (
   tapOutFee: BigInt(data.tap_out_fee),
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
+  aptProceeds: BigInt(data.apt_proceeds),
   emojicoin0ExchangeRateBase: BigInt(data.emojicoin_0_exchange_rate_base),
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
@@ -211,7 +212,8 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   meleeID: BigInt(data.melee_id),
   volume: BigInt(data.volume),
   rewardsRemaining: BigInt(data.rewards_remaining),
-  aptLocked: BigInt(data.apt_locked),
+  emojicoin0Locked: BigInt(data.emojicoin_0_locked),
+  emojicoin1Locked: BigInt(data.emojicoin_1_locked),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin0Symbols: data.emojicoin_0_symbols,
   emojicoin0MarketID: BigInt(data.emojicoin_0_market_id),
@@ -994,6 +996,15 @@ export type EventModelWithMarket =
   | DatabaseModels[TableName.PeriodicStateEvents]
   | DatabaseModels[TableName.MarketLatestStateEvent]
   | DatabaseModels[TableName.LiquidityEvents];
+
+export type ArenaEventModels =
+  | DatabaseModels[TableName.ArenaEnterEvents]
+  | DatabaseModels[TableName.ArenaMeleeEvents]
+  | DatabaseModels[TableName.ArenaExitEvents]
+  | DatabaseModels[TableName.ArenaSwapEvents]
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
+
+export type ArenaEventModelWithMeleeID = Exclude<ArenaEventModels, ArenaVaultBalanceUpdateModel>;
 
 const extractEventType = (guid: string) => {
   const match = guid.match(/^.*::(\w+)::/u);

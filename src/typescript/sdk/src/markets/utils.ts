@@ -348,7 +348,7 @@ export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateT
   return b.mul(c).div(a.mul(d)).toString();
 }
 
-type ReservesAndBondingCurveState = Flatten<
+export type ReservesAndBondingCurveState = Flatten<
   AtLeastOne<{
     inBondingCurve: boolean;
     lpCoinSupply: bigint;

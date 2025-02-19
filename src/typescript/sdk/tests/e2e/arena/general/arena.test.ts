@@ -139,7 +139,8 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(arenaInfo?.duration).toEqual(melee.view.duration);
     expect(arenaInfo?.startTime).toEqual(melee.view.startTime);
     expect(arenaInfo?.volume).toEqual(0n);
-    expect(arenaInfo?.aptLocked).toEqual(0n);
+    expect(arenaInfo?.emojicoin0Locked).toEqual(0n);
+    expect(arenaInfo?.emojicoin1Locked).toEqual(0n);
     expect(arenaInfo?.maxMatchAmount).toEqual(melee.view.maxMatchAmount);
     expect(arenaInfo?.maxMatchPercentage).toEqual(melee.view.maxMatchPercentage);
     expect(arenaInfo?.rewardsRemaining).toEqual(melee.view.availableRewards);
@@ -204,7 +205,8 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(position.emojicoin1Balance).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
     expect(arenaInfo?.volume).toEqual(viewEnterEvent.quoteVolume);
-    expect(arenaInfo?.aptLocked).toEqual(viewEnterEvent.quoteVolume);
+    expect(arenaInfo?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
+    expect(arenaInfo?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
     const swapResponse = await emojicoin.arena.swap(
       account,

@@ -7,6 +7,8 @@ import {
   type ArenaMeleeModel,
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
+  type ArenaEventModels,
+  type ArenaEventModelWithMeleeID,
 } from "../indexer-v2";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
@@ -53,6 +55,7 @@ export type ArenaTypes = {
     tapOutFee: bigint;
     emojicoin0Proceeds: bigint;
     emojicoin1Proceeds: bigint;
+    aptProceeds: bigint;
     emojicoin0ExchangeRateBase: bigint;
     emojicoin0ExchangeRateQuote: bigint;
     emojicoin1ExchangeRateBase: bigint;
@@ -140,7 +143,8 @@ export type ArenaTypes = {
     meleeID: bigint;
     volume: bigint;
     rewardsRemaining: bigint;
-    aptLocked: bigint;
+    emojicoin0Locked: bigint;
+    emojicoin1Locked: bigint;
     emojicoin0MarketAddress: AccountAddressString;
     emojicoin0Symbols: SymbolEmoji[];
     emojicoin0MarketID: bigint;
@@ -245,6 +249,11 @@ export const toArenaExitEvent = (
   tapOutFee: BigInt(data.tap_out_fee),
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
+  aptProceeds:
+    (BigInt(data.emojicoin_0_proceeds) * BigInt(data.emojicoin_0_exchange_rate.quote)) /
+      BigInt(data.emojicoin_0_exchange_rate.base) +
+    (BigInt(data.emojicoin_1_proceeds) * BigInt(data.emojicoin_1_exchange_rate.quote)) /
+      BigInt(data.emojicoin_1_exchange_rate.base),
   ...toExchangeRate(data),
   eventName: "ArenaExit" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
@@ -332,3 +341,11 @@ export const isArenaVaultBalanceUpdateModel = (
 ): e is ArenaVaultBalanceUpdateModel => e.eventName === "ArenaVaultBalanceUpdate";
 
 /* eslint-enable import/no-unused-modules */
+
+export const isArenaEventModel = (e: BrokerEventModels): e is ArenaEventModels =>
+  isArenaEventModelWithMeleeID(e) || isArenaVaultBalanceUpdateModel(e);
+
+export const isArenaEventModelWithMeleeID = (
+  e: BrokerEventModels
+): e is ArenaEventModelWithMeleeID =>
+  isArenaEnterModel(e) || isArenaExitModel(e) || isArenaMeleeModel(e) || isArenaSwapModel(e);
