@@ -4,6 +4,7 @@ import { parseTypeTag } from "@aptos-labs/ts-sdk";
 import { encodeEmojis, getSymbolEmojisInString } from "@sdk/emoji_data";
 import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
 import { getAptosClient } from "@sdk/utils";
+import { unstable_cache } from "next/cache";
 
 const aptosClient = getAptosClient();
 
@@ -29,7 +30,7 @@ export type FetchFungibleAssetsParams = {
   limit?: number;
 };
 
-export async function fetchFungibleAssetsBalance({
+async function fetchFungibleAssetsBalance({
   ownerAddress,
   assetType,
   offset = 0,
@@ -76,7 +77,6 @@ export async function fetchFungibleAssetsBalance({
 
 export async function fetchAllFungibleAssetsBalance({
   ownerAddress,
-  assetType,
   // Fetch at most 1000 by default, which corresponds to 10 requests.
   max = 1000,
 }: { max?: number } & Omit<FetchFungibleAssetsParams, "offset" | "limit">): Promise<
@@ -88,7 +88,7 @@ export async function fetchAllFungibleAssetsBalance({
   let hasMore = true;
 
   while (hasMore && offset < max) {
-    const response = await fetchFungibleAssetsBalance({ ownerAddress, offset, limit, assetType });
+    const response = await fetchFungibleAssetsBalance({ ownerAddress, offset, limit });
     const tokens = response.current_fungible_asset_balances;
     allTokens = [...allTokens, ...tokens];
 
@@ -99,14 +99,9 @@ export async function fetchAllFungibleAssetsBalance({
     }
   }
 
-  // If specific assetType provided, no need to filter out.
-  if (assetType) {
-    return allTokens;
-  }
-
   // Filter out non-emojicoin tokens.
   return allTokens.filter((token) => {
-    // The purpose of this is just to make sure we're passing a valid value to getEmojicoinMarketAddressAndTypeTags
+    // The purpose of this is just to make sure we're passing a valid value to getEmojicoinMarketAddressAndTypeTags.
     const symbolEmojis = getSymbolEmojisInString(token.metadata.symbol);
     if (!symbolEmojis.length) return false;
     const address = getEmojicoinMarketAddressAndTypeTags({
@@ -115,3 +110,15 @@ export async function fetchAllFungibleAssetsBalance({
     return address.emojicoin.toString() === parseTypeTag(token.asset_type).toString();
   });
 }
+
+async function fetchHoldersInternal(coinAddress: string) {
+  const holders = await fetchFungibleAssetsBalance({ assetType: coinAddress });
+  // Exclude the factory address from the holders list.
+  return holders.current_fungible_asset_balances.filter(
+    (h) => h.owner_address !== coinAddress.replace("::coin_factory::Emojicoin", "")
+  );
+}
+
+export const fetchHolders = unstable_cache(fetchHoldersInternal, ["fetch-holders"], {
+  revalidate: 60,
+});
