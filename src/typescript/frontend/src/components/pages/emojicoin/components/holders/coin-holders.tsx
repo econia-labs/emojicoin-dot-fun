@@ -1,14 +1,16 @@
-import AptosIconBlack from "@icons/AptosBlack";
 import { type Types } from "@sdk-types";
 import { calculateCirculatingSupply } from "@sdk/markets";
 import { toNominalPrice } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
+import { AptCell } from "components/ui/table-cells/apt-cell";
 import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 import { useAptPrice } from "context/AptPrice";
 import { type TokenBalance } from "lib/aptos-indexer/fungible-assets";
 import { toNominal } from "lib/utils/decimals";
+import { useRouter } from "next/navigation";
 import { useMemo, type FC } from "react";
+import { ROUTES } from "router/routes";
 
 interface Props {
   holders: TokenBalance[];
@@ -27,43 +29,39 @@ const COLUMNS: EcTableColumn<
   {
     id: "rank",
     text: "Rank",
-    className: "w-[80px] justify-start",
+    width: 40,
+    cellClassName: "pl-10",
     sortCallback: (holder) => holder.amount,
-    renderCell: (holder) => <span className="flex pl-5 justify-start">{holder.rank}</span>,
+    renderCell: (holder) => holder.rank,
   },
   {
     id: "address",
     text: "Owner",
-    className: "w-[150px] justify-end",
+    width: 50,
     renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
   },
   {
     id: "balance",
     text: "Balance",
-    className: "w-[150px] justify-end",
+    width: 80,
     renderCell: (holder) => <FormattedNumber scramble value={holder.amount} style={"fixed"} />,
   },
   {
     id: "supply-percentage",
     text: "Supply %",
-    className: "w-[150px] justify-end",
+    width: 80,
     renderCell: (holder) => <FormattedNumber scramble value={holder.supplyPercentage} suffix="%" />,
   },
   {
     id: "value",
     text: "Value",
-    className: "justify-end",
-    renderCell: (holder) => (
-      <span className="flex gap-1 items-center justify-end">
-        <FormattedNumber scramble value={holder.value} style={"fixed"} />
-        <AptosIconBlack className="ml-1 icon-inline text-xl" />
-      </span>
-    ),
+    width: 80,
+    renderCell: (holder) => <AptCell value={holder.value} />,
   },
   {
     id: "usd-value",
-    text: "USD Value",
-    className: "justify-end",
+    text: "USD",
+    width: 80,
     renderCell: (holder) => (
       <FormattedNumber scramble value={holder.usdValue} style={"fixed"} prefix="$" />
     ),
@@ -73,6 +71,7 @@ const COLUMNS: EcTableColumn<
 export const CoinHolders: FC<Props> = ({ holders, marketView }) => {
   const aptPrice = useAptPrice();
   const maxSupply = useMemo(() => toNominal(calculateCirculatingSupply(marketView)), [marketView]);
+  const router = useRouter();
 
   const holdersWithRank = useMemo(
     () =>
@@ -84,16 +83,16 @@ export const CoinHolders: FC<Props> = ({ holders, marketView }) => {
         const usdValue = value * (aptPrice || 0);
         return { ...holder, amount, supplyPercentage, value, usdValue, rank: index + 1 };
       }),
-    [holders, maxSupply]
+    [aptPrice, holders, marketView.lastSwap.avgExecutionPriceQ64, maxSupply]
   );
   return (
-    <div className="m-auto overflow-auto w-[90vw] h-[400px]">
-      <EcTable
-        textFormat="body-sm"
-        columns={COLUMNS}
-        getId={(item) => item.owner_address}
-        items={holdersWithRank}
-      />
-    </div>
+    <EcTable
+      className="m-auto overflow-auto max-h-[330px]"
+      onClick={(item) => router.push(`${ROUTES.wallet}/${item.owner_address}`)}
+      textFormat="body-sm"
+      columns={COLUMNS}
+      getKey={(item) => item.owner_address}
+      items={holdersWithRank}
+    />
   );
 };
