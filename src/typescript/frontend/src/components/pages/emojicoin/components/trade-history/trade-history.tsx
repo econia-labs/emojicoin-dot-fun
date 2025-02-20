@@ -15,6 +15,7 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import { cn } from "lib/utils/class-name";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "lib/utils/decimals";
+import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 
 const toTableItem = ({ swap, transaction }) => ({
   ...getRankFromEvent(swap),
@@ -78,9 +79,10 @@ const COLUMNS: EcTableColumn<Omit<ReturnType<typeof toTableItem>, "amount">>[] =
     text: "Price",
     id: "price",
     renderCell: (item) => (
-      <FormattedNumber
-        value={toNominalPrice(item.priceQ64)}
-        className={cn("ellipses", item.type === "sell" ? "text-pink" : "text-green")}
+      <ColoredPriceDisplay
+        q64
+        price={item.priceQ64}
+        className={item.type === "sell" ? "text-pink" : "text-green"}
         decimals={9}
         style="fixed"
       />
