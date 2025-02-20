@@ -11,7 +11,6 @@ import MainInfo from "./components/main-info/MainInfo";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { type BrokerEvent } from "@/broker/types";
 import { marketToLatestBars } from "@/store/event/candlestick-bars";
-import { CoinHolders } from "./components/holders/coin-holders";
 
 const EVENT_TYPES: BrokerEvent[] = ["Chat", "PeriodicState", "Swap"];
 
@@ -37,7 +36,6 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
     <Box>
       <MainInfo data={props.data} />
       {isTablet || isMobile ? <MobileGrid data={props.data} /> : <DesktopGrid data={props.data} />}
-      <CoinHolders holders={props.data.holders} marketView={props.data.marketView} />
     </Box>
   );
 };
