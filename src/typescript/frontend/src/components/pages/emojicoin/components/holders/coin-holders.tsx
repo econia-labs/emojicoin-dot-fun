@@ -87,7 +87,7 @@ export const CoinHolders: FC<Props> = ({ holders, marketView }) => {
   );
   return (
     <EcTable
-      className="m-auto overflow-auto max-h-[330px]"
+      className="m-auto overflow-auto h-[330px]"
       onClick={(item) => router.push(`${ROUTES.wallet}/${item.owner_address}`)}
       textFormat="body-sm"
       columns={COLUMNS}

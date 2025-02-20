@@ -9,10 +9,8 @@ import Popup from "components/popup";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { FormattedNumber } from "components/FormattedNumber";
-import { toNominalPrice } from "@sdk/utils";
 import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
 import { toExplorerLink } from "lib/utils/explorer-link";
-import { cn } from "lib/utils/class-name";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "lib/utils/decimals";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
@@ -124,7 +122,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
 
   return (
     <EcTable
-      className="m-auto overflow-auto max-h-[330px]"
+      className="m-auto overflow-auto h-[330px]"
       onClick={(item) =>
         router.push(
           toExplorerLink({
