@@ -6,7 +6,6 @@ import {
   StyledBlockWrapper,
   StyledContentInner,
   StyledBlock,
-  StyledContentHeader,
 } from "./styled";
 
 import ChatBox from "../chat/ChatBox";

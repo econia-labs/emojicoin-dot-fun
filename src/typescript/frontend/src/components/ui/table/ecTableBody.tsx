@@ -1,7 +1,6 @@
-import { Fragment, useMemo } from "react";
+import { Fragment } from "react";
 import { type TableProps } from "./ecTable";
-import { TableBody, TableCell, TableRow } from "./table";
-import { cn } from "lib/utils/class-name";
+import { TableBody } from "./table";
 import { EcTableRow } from "./ecTableRow";
 
 export const EcTableBody = <T,>({
@@ -17,8 +16,6 @@ export const EcTableBody = <T,>({
     throw new Error(
       "Either renderRow must be defined or renderCell must be defined in each column"
     );
-
-  const row = useMemo(() => {}, []);
 
   return (
     <TableBody className={className}>
