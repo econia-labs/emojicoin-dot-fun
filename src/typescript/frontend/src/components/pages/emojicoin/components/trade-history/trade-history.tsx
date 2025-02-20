@@ -31,6 +31,7 @@ const COLUMNS: EcTableColumn<Omit<ReturnType<typeof toTableItem>, "amount">>[] =
     text: "Rank",
     id: "rank",
     cellClassName: "pl-10",
+    width: 100,
     renderCell: (item) => (
       <Popup
         content={
@@ -51,6 +52,7 @@ const COLUMNS: EcTableColumn<Omit<ReturnType<typeof toTableItem>, "amount">>[] =
   {
     text: "APT",
     id: "apt",
+    width: 80,
     renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
   },
   {

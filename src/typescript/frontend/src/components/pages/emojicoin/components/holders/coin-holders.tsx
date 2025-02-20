@@ -29,16 +29,16 @@ const COLUMNS: EcTableColumn<
   {
     id: "rank",
     text: "Rank",
-    width: 40,
+    width: 100,
     cellClassName: "pl-10",
     sortCallback: (holder) => holder.amount,
     renderCell: (holder) => holder.rank,
   },
   {
-    id: "address",
-    text: "Owner",
-    width: 50,
-    renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
+    id: "value",
+    text: "APT",
+    width: 60,
+    renderCell: (holder) => <AptCell value={holder.value} />,
   },
   {
     id: "balance",
@@ -53,18 +53,18 @@ const COLUMNS: EcTableColumn<
     renderCell: (holder) => <FormattedNumber scramble value={holder.supplyPercentage} suffix="%" />,
   },
   {
-    id: "value",
-    text: "Value",
-    width: 80,
-    renderCell: (holder) => <AptCell value={holder.value} />,
-  },
-  {
     id: "usd-value",
     text: "USD",
     width: 80,
     renderCell: (holder) => (
       <FormattedNumber scramble value={holder.usdValue} style={"fixed"} prefix="$" />
     ),
+  },
+  {
+    id: "address",
+    text: "Owner",
+    width: 50,
+    renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
   },
 ];
 
@@ -77,7 +77,7 @@ export const CoinHolders: FC<Props> = ({ holders, marketView }) => {
     () =>
       holders.map((holder, index) => {
         const amount = toNominal(BigInt(holder.amount));
-        const supplyPercentage = amount / maxSupply;
+        const supplyPercentage = (amount / maxSupply) * 100;
         const price = toNominalPrice(marketView.lastSwap.avgExecutionPriceQ64);
         const value = amount * price;
         const usdValue = value * (aptPrice || 0);
