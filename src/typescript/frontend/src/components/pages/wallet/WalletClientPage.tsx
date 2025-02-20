@@ -3,21 +3,14 @@
 import { useNameResolver } from "@hooks/use-name-resolver";
 import AptosIconBlack from "@icons/AptosBlack";
 import { formatDisplayName } from "@sdk/utils";
-import { type FullCoinData } from "app/wallet/[address]/page";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
-import _ from "lodash";
-import { type FC } from "react";
 import { PortfolioRow } from "./PortfolioRow";
 import { FormattedNumber } from "components/FormattedNumber";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-
-interface Props {
-  address: string;
-  ownedCoins: FullCoinData[];
-  walletStats: {
-    totalValue: number;
-  };
-}
+import {
+  type FullCoinData,
+  useUserEmojicoinBalances,
+} from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
 
 const COLUMNS: EcTableColumn<FullCoinData>[] = [
   { id: "emoji", text: "Emoji", width: 80 },
@@ -53,7 +46,8 @@ const COLUMNS: EcTableColumn<FullCoinData>[] = [
   },
 ];
 
-export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }) => {
+export const WalletClientPage = ({ address }: { address: string }) => {
+  const { ownedCoins, totalValue } = useUserEmojicoinBalances(address);
   const resolvedName = useNameResolver(address);
 
   return (
@@ -66,8 +60,7 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
       </span>
       <div className="flex justify-between w-full mb-4">
         <span className="pixel-heading-3b">
-          Total value:{" "}
-          <FormattedNumber scramble value={walletStats.totalValue} style="sliding-precision" />
+          Total value: <FormattedNumber scramble value={totalValue} style="sliding-precision" />
           <AptosIconBlack className="icon-inline" />
         </span>
         <span className="pixel-heading-3b">Unique owned: {ownedCoins.length}</span>
@@ -79,7 +72,7 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
           items={ownedCoins}
           getKey={(coin) => coin.asset_type}
           renderRow={(item, i) => (
-            <PortfolioRow key={item.symbol} index={i} coinData={item} walletStats={walletStats} />
+            <PortfolioRow key={item.symbol} index={i} coinData={item} totalValue={totalValue} />
           )}
         />
       </div>

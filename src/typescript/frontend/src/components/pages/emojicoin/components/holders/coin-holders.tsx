@@ -6,7 +6,7 @@ import { AptCell } from "components/ui/table-cells/apt-cell";
 import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 import { useAptPrice } from "context/AptPrice";
-import { type AssetBalance } from "lib/aptos-indexer/fungible-assets";
+import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
 import { toNominal } from "lib/utils/decimals";
 import { useRouter } from "next/navigation";
 import { useMemo, type FC } from "react";

@@ -1,8 +1,8 @@
-import { type FullCoinData } from "app/wallet/[address]/page";
 import { FormattedNumber } from "components/FormattedNumber";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { TableCell, TableRow } from "components/ui/table/table";
 import { useAptPrice } from "context/AptPrice";
+import { type FullCoinData } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
 import { useRouter } from "next/navigation";
 import { useMemo, type FC } from "react";
 import { ROUTES } from "router/routes";
@@ -11,12 +11,10 @@ import { Emoji } from "utils/emoji";
 interface Props {
   index: number;
   coinData: FullCoinData;
-  walletStats: {
-    totalValue: number;
-  };
+  totalValue: number;
 }
 
-export const PortfolioRow: FC<Props> = ({ coinData, index, walletStats }) => {
+export const PortfolioRow: FC<Props> = ({ coinData, index, totalValue }) => {
   const router = useRouter();
   const aptPrice = useAptPrice();
   const usdOwnedValue = useMemo(
@@ -51,7 +49,7 @@ export const PortfolioRow: FC<Props> = ({ coinData, index, walletStats }) => {
       <TableCell className="text-end">
         <FormattedNumber
           scramble
-          value={(coinData.ownedValue / walletStats.totalValue) * 100}
+          value={(coinData.ownedValue / totalValue) * 100}
           suffix="%"
           style={"fixed"}
         />

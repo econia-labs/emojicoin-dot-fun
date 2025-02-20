@@ -7,7 +7,7 @@ import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/ma
 import { type Metadata } from "next";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
-import { fetchCachedHolders } from "lib/aptos-indexer/fungible-assets";
+import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 
 export const revalidate = 2;
@@ -83,7 +83,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       wrappedCachedContractMarketView(marketAddress),
       getAptPrice(),
-      fetchCachedHolders(marketAddress),
+      fetchCachedTopHolders(marketAddress),
     ]);
 
     return (
