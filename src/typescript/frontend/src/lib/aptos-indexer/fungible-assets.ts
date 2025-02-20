@@ -3,7 +3,7 @@
 import { AccountAddress, parseTypeTag } from "@aptos-labs/ts-sdk";
 import { encodeEmojis, getSymbolEmojisInString } from "@sdk/emoji_data";
 import { getEmojicoinMarketAddressAndTypeTags, toCoinTypes } from "@sdk/markets";
-import { getAptosClient } from "@sdk/utils";
+import { removeLeadingZerosFromStructString, getAptosClient } from "@sdk/utils";
 import { unstable_cache } from "next/cache";
 
 const aptosClient = getAptosClient();
@@ -25,29 +25,9 @@ export type FetchEmojicoinBalancesResponse = {
 export type FetchFungibleAssetsParams = {
   ownerAddress?: string;
   // Can be used to fetch holders of specific coin.
-  assetType?: string;
+  assetType?: `0x${string}::${string}::${string}`;
   offset?: number;
   limit?: number;
-};
-
-// Removes leading zeroes from address (ex: 0x00b -> 0xb)
-const shortAddress = (address: `0x${string}`) =>
-  address.toString().replace(/^0x0*([0-9a-fA-F]+)$/, "0x$1");
-
-/**
- * @param assetType a type tag that matches the form `0x${string}::${string}::${string}
- * @throws if `assetType` is not a TypeTagStruct type
- * @returns a coin type tag with no leading zeros
- */
-const formatAssetTypeForIndexer = (assetType: string) => {
-  const typeTag = parseTypeTag(assetType);
-  if (!typeTag.isStruct()) {
-    throw new Error("Invalid coin type tag.");
-  }
-
-  const { address, moduleName, name } = typeTag.value;
-
-  return `${shortAddress(address.toString())}::${moduleName.identifier}::${name.identifier}`;
 };
 
 /**
@@ -96,7 +76,7 @@ async function fetchFungibleAssetsBalance({
         offset,
         limit,
         // The Aptos indexer expects the asset type address to be in short format (ex: 0x00b -> 0xb).
-        assetType: assetType ? formatAssetTypeForIndexer(assetType) : undefined,
+        assetType: assetType ? removeLeadingZerosFromStructString(assetType) : undefined,
       },
     },
   });
@@ -140,9 +120,14 @@ export async function fetchAllFungibleAssetsBalance({
 
 async function fetchHoldersInternal(marketAddress: `0x${string}`) {
   const address = AccountAddress.from(marketAddress).toString();
-  const holders = await fetchFungibleAssetsBalance({
-    assetType: toCoinTypes(marketAddress).emojicoin.toString(),
-  });
+  const { emojicoin } = toCoinTypes(marketAddress);
+  if (!emojicoin.isStruct()) {
+    console.error(`Invalid market address passed to \`fetchHoldersInternal\`: ${marketAddress}`);
+    return [];
+  }
+  const assetType = emojicoin.toString();
+  const holders = await fetchFungibleAssetsBalance({ assetType });
+
   // Exclude the factory address from the holders list.
   return holders.current_fungible_asset_balances.filter(
     (h) => AccountAddress.from(h.owner_address).toString() !== address

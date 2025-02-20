@@ -1,5 +1,6 @@
-import { type HexInput } from "@aptos-labs/ts-sdk";
+import { type AccountAddressInput, type HexInput } from "@aptos-labs/ts-sdk";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
+import { toAccountAddressString } from "./account-address";
 
 /**
  * Because `Hex.fromHexInput(hex).toString() as `0x${string}`` is too verbose and heavy.
@@ -28,4 +29,20 @@ export const normalizeHex = (hex: HexInput) => {
     bytes = hex;
   }
   return `0x${bytesToHex(bytes)}` as const;
+};
+
+/**
+ * Remove the leading zeros from a hex string that starts with `0x`.
+ *
+ * Typically used for shortening address-like strings.
+ *
+ * @param input
+ * @returns the hex string without leading zeros
+ * @example 0x00b -> 0xb
+ * @example 0x00123 -> 0x123
+ * @example 0x0 -> 0x0
+ */
+export const removeLeadingZeros = (input: `0x${string}` | AccountAddressInput) => {
+  const address = toAccountAddressString(input);
+  return address.replace(/^0x0*([0-9a-fA-F]+)$/, "0x$1");
 };
