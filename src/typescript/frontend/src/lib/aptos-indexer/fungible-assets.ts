@@ -1,10 +1,9 @@
 // cspell:word ilike
 
 import { parseTypeTag } from "@aptos-labs/ts-sdk";
-import { encodeEmojis, getSymbolEmojisInString, SYMBOL_EMOJIS } from "@sdk/emoji_data";
+import { encodeEmojis, getSymbolEmojisInString } from "@sdk/emoji_data";
 import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
 import { getAptosClient } from "@sdk/utils";
-import { emoji } from "utils";
 
 const aptosClient = getAptosClient();
 
