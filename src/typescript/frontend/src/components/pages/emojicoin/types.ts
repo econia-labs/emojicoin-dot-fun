@@ -3,6 +3,7 @@ import { type SymbolEmoji } from "@sdk/emoji_data/types";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { type MarketMetadataModel, type DatabaseModels } from "@sdk/indexer-v2/types";
 import { type Types } from "@sdk/types";
+import { type TokenBalance } from "lib/aptos-indexer/fungible-assets";
 
 export interface WithVersion {
   version: number;
@@ -13,6 +14,7 @@ type DataProps = MarketMetadataModel & {
   chats: Array<DatabaseModels["chat_events"]>;
   state: DatabaseModels["market_state"];
   marketView: Types["MarketView"];
+  holders: TokenBalance[];
 };
 
 export interface EmojicoinProps {

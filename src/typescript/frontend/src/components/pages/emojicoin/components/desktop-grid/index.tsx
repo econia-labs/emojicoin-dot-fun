@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 
 import {
   StyledContentWrapper,
@@ -9,13 +9,22 @@ import {
 } from "./styled";
 
 import ChatBox from "../chat/ChatBox";
-import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
 import ChartContainer from "components/charts/ChartContainer";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
 import Loading from "components/loading";
+import { Flex, FlexGap } from "@containers";
+import Text from "components/text";
+import { translationFunction } from "context/language-context";
+import { CoinHolders } from "../holders/coin-holders";
+import { TradeHistory } from "../trade-history/trade-history";
+
+const tabs = ["Trade History", "Top Holders"] as const;
 
 const DesktopGrid = (props: GridProps) => {
+  const [currentTab, setCurrentTab] = useState<(typeof tabs)[number]>("Trade History");
+  const { t } = translationFunction();
+
   return (
     <StyledContentWrapper>
       <StyledContentInner>
@@ -46,8 +55,24 @@ const DesktopGrid = (props: GridProps) => {
 
         <StyledContentColumn>
           <StyledBlock width="57%">
+            <FlexGap className="px-6 h-10 items-center" gap="20px" width="fit-content">
+              {tabs.map((tab) => (
+                <Flex key={tab} cursor="pointer" onClick={() => setCurrentTab(tab)}>
+                  <Text
+                    textScale="pixelHeading4"
+                    color={currentTab === tab ? "lightGray" : "darkGray"}
+                    textTransform="uppercase"
+                  >
+                    {t(tab)}
+                  </Text>
+                </Flex>
+              ))}
+            </FlexGap>
             <StyledBlockWrapper>
-              <TradeHistory data={props.data} />
+              {currentTab === "Trade History" && <TradeHistory data={props.data} />}
+              {currentTab === "Top Holders" && (
+                <CoinHolders marketView={props.data.marketView} holders={props.data.holders} />
+              )}
             </StyledBlockWrapper>
           </StyledBlock>
 
