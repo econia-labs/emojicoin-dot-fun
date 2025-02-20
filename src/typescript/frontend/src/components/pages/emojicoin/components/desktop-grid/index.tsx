@@ -20,7 +20,7 @@ import { translationFunction } from "context/language-context";
 import { CoinHolders } from "../holders/coin-holders";
 import { TradeHistory } from "../trade-history/trade-history";
 
-const tabs = ["Trade History", "Holders"] as const;
+const tabs = ["Trade History", "Top Holders"] as const;
 
 const DesktopGrid = (props: GridProps) => {
   const [currentTab, setCurrentTab] = useState<(typeof tabs)[number]>("Trade History");
@@ -71,7 +71,7 @@ const DesktopGrid = (props: GridProps) => {
             </FlexGap>
             <StyledBlockWrapper>
               {currentTab === "Trade History" && <TradeHistory data={props.data} />}
-              {currentTab === "Holders" && (
+              {currentTab === "Top Holders" && (
                 <CoinHolders marketView={props.data.marketView} holders={props.data.holders} />
               )}
             </StyledBlockWrapper>
