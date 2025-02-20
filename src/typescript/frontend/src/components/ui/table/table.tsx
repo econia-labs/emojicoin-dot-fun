@@ -64,7 +64,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "text-lighter-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "text-light-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props}
@@ -98,6 +98,11 @@ const TableRow = React.forwardRef<
           type: "just",
           delay: index * 0.03,
         },
+      }}
+      whileHover={{
+        filter: "brightness(1.05) saturate(1.1)",
+        boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
+        transition: { duration: 0.05 },
       }}
       ref={ref}
       style={{ height, ...props.style }}
