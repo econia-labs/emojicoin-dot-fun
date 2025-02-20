@@ -59,6 +59,7 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
   fullscreen: false,
   autosize: true,
   loading_screen: { backgroundColor: "#000000" },
+  compare_symbols: [],
   overrides: {
     "paneProperties.backgroundType": "solid",
     "paneProperties.background": "#000000",
@@ -119,4 +120,22 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
       title: "All",
     },
   ],
+};
+
+export const SECONDARY_SERIES_OVERRIDES = {
+  style: 1, // Candlesticks.
+  "barStyle.upColor": GREEN,
+  "barStyle.downColor": PINK,
+  "candleStyle.upColor": GREEN,
+  "candleStyle.downColor": PINK,
+  "candleStyle.borderUpColor": GREEN,
+  "candleStyle.borderDownColor": PINK,
+  "candleStyle.wickUpColor": GREEN,
+  "candleStyle.wickDownColor": PINK,
+  "columnStyle.upColor": GREEN_OPACITY_HALF,
+  "columnStyle.downColor": PINK_OPACITY_HALF,
+  "hollowCandleStyle.upColor": GREEN,
+  "hollowCandleStyle.downColor": PINK,
+  "rangeStyle.upColor": GREEN,
+  "rangeStyle.downColor": PINK,
 };

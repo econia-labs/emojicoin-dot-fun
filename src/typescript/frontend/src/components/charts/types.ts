@@ -1,7 +1,9 @@
 import { type SymbolEmojiData } from "@sdk/emoji_data";
-export interface ChartContainerProps {
-  marketID: string;
-  emojis: Array<SymbolEmojiData>;
+import { type ClassValue } from "clsx";
+
+export type ChartContainerProps = {
   symbol: string;
-  marketAddress: `0x${string}`;
-}
+  emojis: SymbolEmojiData[];
+  secondarySymbol?: string;
+  className?: ClassValue;
+};
