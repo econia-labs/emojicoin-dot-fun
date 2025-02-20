@@ -62,7 +62,7 @@ const COLUMNS: EcTableColumn<
   },
   {
     id: "address",
-    text: "Owner",
+    text: "Holder",
     width: 50,
     renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
   },
