@@ -1,6 +1,8 @@
 "use client";
 
 import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
+import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
+import { cn } from "lib/utils/class-name";
 import React, { useCallback, useMemo } from "react";
 import { useEffect } from "react";
 import { emoji } from "utils";
@@ -66,6 +68,7 @@ export const AnimatedLoadingBoxes = ({
 }) => {
   const scope = useStaggerAnimation({ speed, delay });
   const emptyArray = useMemo(() => Array.from({ length: numSquares }), [numSquares]);
+  const { emojiFontClassName } = useEmojiFontConfig();
 
   const getSquares = useCallback(
     (color: boolean) =>
@@ -92,7 +95,7 @@ export const AnimatedLoadingBoxes = ({
   return (
     <div className="flex flex-row relative h-fit w-fit pixel-heading-4 " ref={scope}>
       <div className="flex flex-col gap-1">
-        <div className="relative flex flex-row select-none">
+        <div className={cn("relative flex flex-row select-none", emojiFontClassName)}>
           {getSquares(true)}
           <div className="absolute top-[50%] translate-y-[-50%] left-0 gap-0 flex flex-row z-[-1]">
             {getSquares(false)}

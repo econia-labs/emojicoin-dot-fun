@@ -11,31 +11,33 @@ import {
   type FullCoinData,
   useUserEmojicoinBalances,
 } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
+import AnimatedLoadingBoxes from "../launch-emojicoin/animated-loading-boxes";
+import { cn } from "lib/utils/class-name";
 
 const COLUMNS: EcTableColumn<FullCoinData>[] = [
   { id: "emoji", text: "Emoji", width: 80 },
   {
     id: "percentage",
-    text: "Percentage",
-    width: 130,
+    text: "percent",
+    width: 105,
     sortCallback: (coin) => coin.percentage,
   },
   {
     id: "amount",
     text: "Amount",
-    width: 110,
+    width: 130,
     sortCallback: (coin) => coin.amount,
   },
   {
     id: "marketCap",
     text: "Market cap",
-    width: 150,
+    width: 145,
     sortCallback: (coin) => coin.marketCap,
   },
   {
     id: "usdValue",
     text: "USD Value",
-    width: 120,
+    width: 130,
     sortCallback: (coin) => coin.ownedValue,
   },
   {
@@ -47,7 +49,7 @@ const COLUMNS: EcTableColumn<FullCoinData>[] = [
 ];
 
 export const WalletClientPage = ({ address }: { address: string }) => {
-  const { ownedCoins, totalValue } = useUserEmojicoinBalances(address);
+  const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
   const resolvedName = useNameResolver(address);
 
   return (
@@ -60,21 +62,41 @@ export const WalletClientPage = ({ address }: { address: string }) => {
       </span>
       <div className="flex justify-between w-full mb-4">
         <span className="pixel-heading-3b">
-          Total value: <FormattedNumber scramble value={totalValue} style="sliding-precision" />
-          <AptosIconBlack className="icon-inline" />
+          {"Total value: "}
+          {isLoading ? (
+            <>{"???"}</>
+          ) : (
+            <>
+              <FormattedNumber scramble value={totalValue} style="sliding-precision" />
+              <AptosIconBlack className="icon-inline ml-[2px]" />
+            </>
+          )}
         </span>
-        <span className="pixel-heading-3b">Unique owned: {ownedCoins.length}</span>
+        <span className="pixel-heading-3b">
+          Unique owned: {isLoading ? "?" : ownedCoins.length}
+        </span>
       </div>
       <div className="w-full overflow-x-auto">
-        <EcTable
-          className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[calc(100vh-300px)] m-auto overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
-          columns={COLUMNS}
-          items={ownedCoins}
-          getKey={(coin) => coin.symbol}
-          renderRow={(item, i) => (
-            <PortfolioRow key={item.symbol} index={i} coinData={item} totalValue={totalValue} />
-          )}
-        />
+        {isLoading ? (
+          <div className="flex mobile-sm:min-w-[calc(100vw-20px)] sm:min-w-[80vw] md:min-w-[700px] h-[100px]">
+            <div className="flex m-auto">
+              <AnimatedLoadingBoxes numSquares={11} />
+            </div>
+          </div>
+        ) : (
+          <EcTable
+            className={cn(
+              "flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[calc(100vh-300px)] m-auto",
+              "overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
+            )}
+            columns={COLUMNS}
+            items={ownedCoins}
+            getKey={(coin) => coin.symbol}
+            renderRow={(item, i) => (
+              <PortfolioRow key={item.symbol} index={i} coinData={item} totalValue={totalValue} />
+            )}
+          />
+        )}
       </div>
     </>
   );

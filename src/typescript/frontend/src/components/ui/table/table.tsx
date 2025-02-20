@@ -19,6 +19,8 @@ const TableHeader = React.forwardRef<
     ref={ref}
     className={cn(
       "text-ec-blue body-lg bg-black uppercase text-center sticky -top-[1px] z-10",
+      "[&_td]:!border [&_td]:!border-dark-gray [&_td]:before:absolute [&_td]:before:top-0",
+      "[&_td]:before:h-[1px] [&_td]:before:w-full [&_td]:before:bg-dark-gray",
       className
     )}
     {...props}
@@ -49,7 +51,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-8 align-middle font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-normal",
+      "h-8 align-middle tracking-wide font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props}
@@ -92,6 +94,15 @@ const TableRow = React.forwardRef<
         filter: "brightness(1) saturate(1)",
         boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
       }}
+      whileHover={
+        !isHeader
+          ? {
+              filter: "brightness(1.05) saturate(1.1)",
+              boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
+              transition: { duration: 0.05 },
+            }
+          : {}
+      }
       animate={{
         opacity: 1,
         transition: {
