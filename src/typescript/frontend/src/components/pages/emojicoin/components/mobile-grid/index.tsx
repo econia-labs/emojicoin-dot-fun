@@ -10,19 +10,22 @@ import {
   StyledMobileContentHeader,
   StyledMobileContentInner,
 } from "./styled";
-import TradeHistory from "../trade-history";
 import ChatBox from "../chat/ChatBox";
 import { type GridProps } from "../../types";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
 import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
 import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
+import { CoinHolders } from "../holders/coin-holders";
+import { TradeHistory } from "../trade-history/trade-history";
 
 const DISPLAY_HEADER_ABOVE_CHART = false;
 const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";
 
+const TABS = ["Trade History", "Swap", "Chat", "Top Holders"] as const;
+
 const MobileGrid = (props: GridProps) => {
-  const [tab, setTab] = useState(2);
+  const [tab, setTab] = useState<(typeof TABS)[number]>("Swap");
   const { t } = translationFunction();
 
   return (
@@ -45,63 +48,42 @@ const MobileGrid = (props: GridProps) => {
       <StyledMobileContentBlock>
         <StyledMobileContentHeader>
           <FlexGap gap="20px" width="fit-content">
-            <Flex cursor="pointer" onClick={() => setTab(1)}>
-              <Text
-                textScale="pixelHeading4"
-                color={tab === 1 ? "lightGray" : "darkGray"}
-                textTransform="uppercase"
-              >
-                {t("Trade History")}
-              </Text>
-            </Flex>
-
-            <Flex cursor="pointer" onClick={() => setTab(2)}>
-              <Text
-                textScale="pixelHeading4"
-                color={tab === 2 ? "lightGray" : "darkGray"}
-                textTransform="uppercase"
-              >
-                {t("Swap")}
-              </Text>
-            </Flex>
-
-            <Flex cursor="pointer" onClick={() => setTab(3)}>
-              <Text
-                textScale="pixelHeading4"
-                color={tab === 3 ? "lightGray" : "darkGray"}
-                textTransform="uppercase"
-              >
-                {t("Chat")}
-              </Text>
-            </Flex>
+            {TABS.map((tb) => (
+              <Flex key={tb} cursor="pointer" onClick={() => setTab(tb)}>
+                <Text
+                  textScale="pixelHeading4"
+                  color={tab === tb ? "lightGray" : "darkGray"}
+                  textTransform="uppercase"
+                >
+                  {t(tb)}
+                </Text>
+              </Flex>
+            ))}
           </FlexGap>
         </StyledMobileContentHeader>
-
-        {tab === 1 ? (
-          <StyledMobileContentInner>
-            <TradeHistory data={props.data} />
-          </StyledMobileContentInner>
-        ) : tab === 2 ? (
-          <>
-            <div style={{ width: "100%" }}>
-              <LiquidityButton data={props.data} />
-            </div>
-            <StyledMobileContentInner>
-              <Flex width="100%" justifyContent="center" px="17px">
-                <SwapComponent
-                  emojicoin={props.data.symbol}
-                  marketAddress={props.data.marketAddress}
-                  marketEmojis={props.data.symbolEmojis}
-                  initNumSwaps={props.data.swaps.length}
-                />
-              </Flex>
-            </StyledMobileContentInner>
-          </>
-        ) : (
-          <StyledMobileContentInner>
-            <ChatBox data={props.data} />
-          </StyledMobileContentInner>
+        {tab === "Swap" && (
+          <div style={{ width: "100%" }}>
+            <LiquidityButton data={props.data} />
+          </div>
         )}
+
+        <StyledMobileContentInner>
+          {tab === "Trade History" && <TradeHistory data={props.data} />}
+          {tab === "Top Holders" && (
+            <CoinHolders holders={props.data.holders} marketView={props.data.marketView} />
+          )}
+          {tab === "Chat" && <ChatBox data={props.data} />}
+          {tab === "Swap" && (
+            <Flex width="100%" justifyContent="center" px="17px">
+              <SwapComponent
+                emojicoin={props.data.symbol}
+                marketAddress={props.data.marketAddress}
+                marketEmojis={props.data.symbolEmojis}
+                initNumSwaps={props.data.swaps.length}
+              />
+            </Flex>
+          )}
+        </StyledMobileContentInner>
       </StyledMobileContentBlock>
     </StyledMobileContentWrapper>
   );
