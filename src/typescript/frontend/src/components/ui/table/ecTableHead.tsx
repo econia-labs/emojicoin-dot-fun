@@ -26,12 +26,6 @@ export const EcTableHead: FC<SortableHeadProps> = ({
   sort,
   setSort,
 }) => {
-  const { ref, replay } = useScramble({
-    text: `${text}`,
-    overdrive: false,
-    speed: 0.5,
-  });
-
   const currDirection = sort?.column === id ? sort.direction : undefined;
   const isSortable = setSort !== undefined;
 
@@ -53,9 +47,7 @@ export const EcTableHead: FC<SortableHeadProps> = ({
           className
         )}
       >
-        <span onMouseEnter={() => replay()} ref={ref}>
-          {text}
-        </span>
+        <span>{text}</span>
         {currDirection ? (
           <SortArrow
             className={
