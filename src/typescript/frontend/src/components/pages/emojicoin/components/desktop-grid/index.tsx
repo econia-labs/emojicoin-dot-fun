@@ -71,7 +71,11 @@ const DesktopGrid = (props: GridProps) => {
             <StyledBlockWrapper>
               {currentTab === "Trade History" && <TradeHistory data={props.data} />}
               {currentTab === "Top Holders" && (
-                <CoinHolders marketView={props.data.marketView} holders={props.data.holders} />
+                <CoinHolders
+                  emojicoin={props.data.symbol}
+                  marketView={props.data.marketView}
+                  holders={props.data.holders}
+                />
               )}
             </StyledBlockWrapper>
           </StyledBlock>

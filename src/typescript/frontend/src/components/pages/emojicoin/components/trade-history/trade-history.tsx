@@ -26,75 +26,6 @@ const toTableItem = ({ swap, transaction }) => ({
   version: transaction.version,
 });
 
-const COLUMNS: EcTableColumn<Omit<ReturnType<typeof toTableItem>, "amount">>[] = [
-  {
-    text: "Rank",
-    id: "rank",
-    cellClassName: "pl-10",
-    width: 100,
-    renderCell: (item) => (
-      <Popup
-        content={
-          item.rankIcon === emoji("blowfish")
-            ? "n00b"
-            : item.rankIcon === emoji("spouting whale")
-              ? "365 UR SO JULIA"
-              : "SKILL ISSUE"
-        }
-        uppercase={false}
-      >
-        <div className="flex h-full relative">
-          <Emoji className="text-light-gray m-auto" emojis={item.rankIcon} />
-        </div>
-      </Popup>
-    ),
-  },
-  {
-    text: "APT",
-    id: "apt",
-    width: 80,
-    renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
-  },
-  {
-    text: "Amount",
-    id: "amount",
-    width: 80,
-    renderCell: (item) => (
-      <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
-    ),
-  },
-  {
-    text: "Time",
-    id: "time",
-    renderCell: (item) =>
-      item.date.toLocaleString(undefined, {
-        month: "2-digit" as const,
-        day: "2-digit" as const,
-        hour: "2-digit" as const,
-        minute: "2-digit" as const,
-        second: "2-digit" as const,
-      }),
-  },
-  {
-    text: "Price",
-    id: "price",
-    renderCell: (item) => (
-      <ColoredPriceDisplay
-        q64
-        price={item.priceQ64}
-        className={item.type === "sell" ? "text-pink" : "text-green"}
-        decimals={9}
-        style="fixed"
-      />
-    ),
-  },
-  {
-    text: "Sender",
-    id: "sender",
-    renderCell: (item) => <WalletAddressCell address={item.swapper} />,
-  },
-];
-
 const HARD_LIMIT = 500;
 
 export const TradeHistory = (props: TradeHistoryProps) => {
@@ -122,6 +53,78 @@ export const TradeHistory = (props: TradeHistoryProps) => {
     [props.data.swaps.length, swaps.length]
   );
 
+  const columns: EcTableColumn<(typeof sortedSwaps)[number]>[] = useMemo(
+    () => [
+      {
+        text: "Rank",
+        id: "rank",
+        cellClassName: "pl-10",
+        width: 100,
+        renderCell: (item) => (
+          <Popup
+            content={
+              item.rankIcon === emoji("blowfish")
+                ? "n00b"
+                : item.rankIcon === emoji("spouting whale")
+                  ? "365 UR SO JULIA"
+                  : "SKILL ISSUE"
+            }
+            uppercase={false}
+          >
+            <div className="flex h-full relative">
+              <Emoji className="text-light-gray m-auto" emojis={item.rankIcon} />
+            </div>
+          </Popup>
+        ),
+      },
+      {
+        text: "APT",
+        id: "apt",
+        width: 80,
+        renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
+      },
+      {
+        text: props.data.symbol,
+        id: "amount",
+        width: 80,
+        renderCell: (item) => (
+          <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
+        ),
+      },
+      {
+        text: "Time",
+        id: "time",
+        renderCell: (item) =>
+          item.date.toLocaleString(undefined, {
+            month: "2-digit" as const,
+            day: "2-digit" as const,
+            hour: "2-digit" as const,
+            minute: "2-digit" as const,
+            second: "2-digit" as const,
+          }),
+      },
+      {
+        text: "Price",
+        id: "price",
+        renderCell: (item) => (
+          <ColoredPriceDisplay
+            q64
+            price={item.priceQ64}
+            className={item.type === "sell" ? "text-pink" : "text-green"}
+            decimals={9}
+            style="fixed"
+          />
+        ),
+      },
+      {
+        text: "Sender",
+        id: "sender",
+        renderCell: (item) => <WalletAddressCell address={item.swapper} />,
+      },
+    ],
+    [props.data.symbol]
+  );
+
   return (
     <EcTable
       className="m-auto overflow-auto h-[330px]"
@@ -134,7 +137,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         )
       }
       textFormat="body-sm"
-      columns={COLUMNS}
+      columns={columns}
       getKey={(item) => item.version.toString()}
       items={sortedSwaps}
     />
