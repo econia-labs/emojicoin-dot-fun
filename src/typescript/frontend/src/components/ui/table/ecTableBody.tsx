@@ -1,7 +1,8 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { type TableProps } from "./ecTable";
 import { TableBody, TableCell, TableRow } from "./table";
 import { cn } from "lib/utils/class-name";
+import { EcTableRow } from "./ecTableRow";
 
 export const EcTableBody = <T,>({
   className,
@@ -17,33 +18,20 @@ export const EcTableBody = <T,>({
       "Either renderRow must be defined or renderCell must be defined in each column"
     );
 
+  const row = useMemo(() => {}, []);
+
   return (
     <TableBody className={className}>
       {renderRow
         ? items.map((item, i) => <Fragment key={getKey(item)}>{renderRow(item, i)}</Fragment>)
-        : items.map((item, rowIndex) => (
-            <TableRow
+        : items.map((item, i) => (
+            <EcTableRow
               key={getKey(item)}
-              index={rowIndex}
-              onClick={() => onClick?.(item)}
-              className="cursor-pointer group"
-            >
-              {columns.map((col, cellIndex) => (
-                <TableCell key={cellIndex}>
-                  <span
-                    className={cn(
-                      "flex",
-                      cellIndex === 0 ? "pl-6" : cellIndex === columns.length - 1 ? "pr-6" : "",
-                      cellIndex === 0 ? "justify-start" : "justify-end",
-                      col.className,
-                      col.cellClassName
-                    )}
-                  >
-                    {col.renderCell?.(item)}
-                  </span>
-                </TableCell>
-              ))}
-            </TableRow>
+              item={item}
+              index={i}
+              columns={columns}
+              onClick={onClick}
+            />
           ))}
     </TableBody>
   );
