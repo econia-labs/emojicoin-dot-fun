@@ -26,7 +26,7 @@ export const TableHeaders = (props: {
         "[&_th]:border-t-0 [&_th]:border-b-0",
         "[&_th]:before:absolute [&_th]:before:top-0 [&_th]:before:left-0 [&_th]:before:w-full [&_th]:before:h-[1px]",
         "[&_th]:after:absolute [&_th]:after:bottom-0 [&_th]:after:left-0 [&_th]:after:w-full [&_th]:after:h-[1px]",
-        "[&_th]:before:bg-dark-gray [&_th]:after:bg-dark-gray",
+        "[&_th]:before:bg-dark-gray [&_th]:after:bg-dark-gray"
       )}
     >
       <tr className="">
