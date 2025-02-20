@@ -80,6 +80,10 @@
       "cache": false,
       "outputs": []
     },
+    "test:sdk:arena-candlesticks": {
+      "cache": false,
+      "outputs": []
+    },
     "test:sdk:parallel": {
       "cache": false,
       "outputs": []
