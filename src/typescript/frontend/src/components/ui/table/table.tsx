@@ -82,8 +82,8 @@ TableCaption.displayName = "TableCaption";
 
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
-  HTMLMotionProps<"tr"> & { isHeader?: boolean; index?: number }
->(({ className, isHeader = false, index = 0, ...props }, ref) => {
+  HTMLMotionProps<"tr"> & { noHover?: boolean; isHeader?: boolean; index?: number; height?: number }
+>(({ className, height = 33, noHover, isHeader = false, index = 0, ...props }, ref) => {
   return (
     <motion.tr
       layout
@@ -100,8 +100,9 @@ const TableRow = React.forwardRef<
         },
       }}
       ref={ref}
+      style={{ height, ...props.style }}
       className={cn(
-        "relative w-full h-[33px] group",
+        "relative w-full group",
         !isHeader ? "border-solid border-b border-dark-gray" : "",
         className
       )}
@@ -109,12 +110,13 @@ const TableRow = React.forwardRef<
     >
       {props.children as React.ReactNode}
       {
-        <div
+        <td
           className={cn(
             "absolute bg-transparent z-[1] inline-flex left-0 w-full h-full pointer-events-none",
-            !isHeader
-              ? "group-hover:border-solid group-hover:border-ec-blue border-[2px]"
-              : "border-solid border-[1px] border-dark-gray border-t"
+            !isHeader &&
+              !noHover &&
+              "group-hover:border-solid group-hover:border-ec-blue border-[2px]",
+            isHeader && "border-solid border-[1px] border-dark-gray border-t"
           )}
         />
       }
