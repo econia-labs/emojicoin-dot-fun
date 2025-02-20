@@ -49,7 +49,7 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
       {
         id: "value",
         text: "APT",
-        width: 60,
+        width: 80,
         renderCell: (holder) => <AptCell value={holder.value} />,
       },
       {
