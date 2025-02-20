@@ -92,7 +92,7 @@ async function fetchFungibleAssetsBalance({
           }
         }`,
       variables: {
-        ownerAddress: ownerAddress ? AccountAddress.from(ownerAddress) : undefined,
+        ownerAddress: ownerAddress ? AccountAddress.from(ownerAddress).toString() : undefined,
         offset,
         limit,
         // The Aptos indexer expects the asset type address to be in short format (ex: 0x00b -> 0xb).
