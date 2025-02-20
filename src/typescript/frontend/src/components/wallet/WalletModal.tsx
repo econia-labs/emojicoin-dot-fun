@@ -14,7 +14,6 @@ import { Arrow } from "components/svg";
 import LearnMoreSlideshow, { SLIDE_INDICES } from "./LearnMoreSlideshow";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { type MotionProps, motion, type PanInfo } from "framer-motion";
-import ClosePixelated from "@icons/ClosePixelated";
 
 const WalletItemClassName =
   "relative flex h-[45px] w-full items-center p-4 text-neutral-600" +
@@ -82,8 +81,8 @@ export const FirstSlide = ({
       </AptosPrivacyPolicy>
 
       <div className="flex items-center gap-4 py-4 uppercase mb-[1.5ch]">
-        <div className="h-[1px] w-full bg-black" />
-        Or
+        <div className="h-[1px] w-full bg-black text-black" />
+        <span className="text-black">Or</span>
         <div className="h-[1px] w-full bg-black" />
       </div>
 
@@ -127,9 +126,6 @@ export const FirstSlide = ({
     <></>
   );
 };
-
-const CornerIconClasses =
-  "absolute group top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center";
 
 export type SlideState = {
   idx: number;
@@ -200,30 +196,11 @@ export const WalletModal = ({
       className="w-[430px]"
       isOpen={open}
       onClose={handleClose}
-      showBackButton={false}
-      showCloseButton={false}
+      onBack={reset}
+      showBackButton={slide.idx !== 0}
+      showCloseButton={true}
     >
       <motion.div className="bg-ec-blue radii-xs" {...dragProps}>
-        {/* Back button */}
-        {slide.idx !== 0 ? (
-          <div className={CornerIconClasses + " left-0 "} onClick={reset}>
-            <div className="flex m-auto rotate-180">
-              <Arrow
-                width={17}
-                height={18}
-                className="!transition-none group-hover:w-[18px] group-hover:h-[19px] fill-black"
-              />
-            </div>
-          </div>
-        ) : null}
-        {/* Close button */}
-        <div className={CornerIconClasses + " right-0  justify-center"} onClick={handleClose}>
-          <ClosePixelated
-            width={15}
-            height={16}
-            className="group-hover:w-[18px] group-hover:h-[19px]"
-          />
-        </div>
         <FirstSlide slide={slide} setOpen={setOpen} increment={increment} />
         <LearnMoreSlideshow
           slide={slide.idx}

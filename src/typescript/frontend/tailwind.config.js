@@ -1,13 +1,13 @@
 // cspell:word noto
 /** @type {import('tailwindcss').Config} */
 import colors from "tailwindcss/colors";
+import { fontFamily } from "tailwindcss/defaultTheme";
 delete colors.lightBlue;
 delete colors.warmGray;
 delete colors.lightBlue;
 delete colors.trueGray;
 delete colors.coolGray;
 delete colors.blueGray;
-import { fontFamily } from "tailwindcss/defaultTheme";
 
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -175,6 +175,11 @@ module.exports = {
         ".body-lg": {
           fontFamily: "var(--font-forma)",
           fontSize: "16px",
+          lineHeight: "18px",
+        },
+        ".body-md": {
+          fontFamily: "var(--font-forma)",
+          fontSize: "14px",
           lineHeight: "18px",
         },
         ".body-sm": {

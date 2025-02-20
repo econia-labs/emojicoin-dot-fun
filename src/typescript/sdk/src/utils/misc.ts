@@ -166,11 +166,11 @@ export const truncateANSName = (input: string): string => {
 /**
  * Takes an address or a name and formats it accordingly.
  */
-export const formatDisplayName = (input: string) => {
+export const formatDisplayName = (input: string, options?: { noTruncateANSName: boolean }) => {
   if (AccountAddress.isValid({ input, strict: false }).valid) {
     return truncateAddress(input);
   }
-  return truncateANSName(input);
+  return options?.noTruncateANSName ? input : truncateANSName(input);
 };
 
 export class Lazy<T> {
