@@ -12,13 +12,15 @@ import {
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { Copy, LogOut, User } from "lucide-react";
+import { Copy, LogOut, User, UserRound } from "lucide-react";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { AnimatePresence, useAnimationControls } from "framer-motion";
 import AnimatedDropdownItem from "./components/animated-dropdown-item";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { ROUTES } from "router/routes";
+import { useRouter } from "next/navigation";
 
-const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch]";
+const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-black";
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
@@ -26,6 +28,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   linksForCurrentPage,
 }) => {
   const { wallet, account, disconnect } = useWallet();
+  const router = useRouter();
   const { copyAddress } = useAptos();
   const { openWalletModal } = useWalletModal();
   const subMenuControls = useAnimationControls();
@@ -118,6 +121,14 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                     />
                   </a>
                 )}
+                <AnimatedDropdownItem
+                  key="my-emojicoins-dropdown"
+                  onClick={() => router.push(`${ROUTES.wallet}/${account?.address}`)}
+                  title="My emojicoins"
+                  icon={<UserRound className={IconClass} />}
+                  controls={subMenuControls}
+                  borderControls={borderControls}
+                />
                 <AnimatedDropdownItem
                   key="copy-address-dropdown"
                   title="Copy address"

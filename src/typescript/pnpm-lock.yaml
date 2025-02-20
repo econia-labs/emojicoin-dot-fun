@@ -7596,7 +7596,7 @@ snapshots:
       lru-cache: 10.4.3
       media-query-parser: 2.0.2
       modern-ahocorasick: 1.1.0
-      picocolors: 1.1.0
+      picocolors: 1.1.1
     transitivePeerDependencies:
       - babel-plugin-macros
 

@@ -72,7 +72,7 @@ export default function CultClientPage() {
             defaultPosition: { x: width / 2, y: height / 2 },
           }}
           type="info"
-          className="max-w-[700px] -translate-x-1/2 -translate-y-1/2 [&>*]:!pl-2 !font-pixelar !lowercase [&>div>button]:lowercase text-[27px]"
+          className="text-black max-w-[700px] -translate-x-1/2 -translate-y-1/2 [&>*]:!pl-2 !font-pixelar !lowercase [&>div>button]:lowercase text-[27px]"
           titleBarOptions={<TitleBar.Close onClick={() => setModalContent(undefined)} />}
           buttons={modalContent.buttons || []}
         />

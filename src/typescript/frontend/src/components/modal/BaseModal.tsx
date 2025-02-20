@@ -55,7 +55,7 @@ export const BaseModal: React.FC<
                     className="absolute group right-0 top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center justify-center"
                     onClick={onClose}
                   >
-                    <ClosePixelated className="w-[15px] h-[16px] transition-all group-hover:w-[18px] group-hover:h-[19px]" />
+                    <ClosePixelated className="w-[15px] h-[16px] transition-all group-hover:w-[18px] group-hover:h-[19px] text-black" />
                   </div>
                 </DialogTitle>
               ) : null}
