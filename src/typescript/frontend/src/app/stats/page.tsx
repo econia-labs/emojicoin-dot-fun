@@ -1,87 +1,92 @@
-import { fetchMarkets, fetchPriceFeedWithMarketState } from "@/queries/home";
-import { toPriceFeed } from "@sdk/indexer-v2/types";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import StatsPageComponent from "./StatsPage";
-import { compareNumber, getAptosClient } from "@sdk/utils";
-import { RegistryView } from "@/contract-apis";
-import { toRegistryView } from "@sdk-types";
-import { ORDER_BY } from "@sdk/indexer-v2/const";
+import {
+  fetchCachedFirstTenPagesOfPriceDeltas,
+  fetchCachedMarketStates,
+} from "../../components/pages/stats/cached-fetches";
+import { headers } from "next/headers";
+import {
+  type StatsPageSearchParams,
+  statsSearchParamsToColumn,
+  toStatsPageParamsWithDefault,
+} from "../../components/pages/stats/params";
+import { toTableRowData } from "../../components/pages/stats/types";
+import { TableHeaders } from "../../components/pages/stats/HeaderRow";
+import { MarketTableRow, type TableRowData } from "../../components/pages/stats/MarketTableRow";
+import { calculateCirculatingSupply, calculateCurvePrice } from "@sdk/markets";
+import { getEmojiFontFromUserAgent } from "lib/hooks/use-emoji-font-family";
+import { cn } from "lib/utils/class-name";
+import { StatsButtonsBlock } from "components/pages/stats/StatsButtonsBlock";
+import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 
-export const revalidate = 60;
-export const dynamic = "force-static";
-
-// Ensure a max number of pages fetched per query. Once we begin exceeding this amount (at 500 per page, this is 10000
-// markets), we can switch over to a client-side pagination solution. For now, exhaustively querying the data server-
-// side once every 60 seconds is fine.
-const MAX_PAGES_PER_QUERY = 20;
-
-// Nothing here is cached because we only revalidate this static page once every `revalidate` seconds.
-export default async function Stats() {
-  const commonArgs = {
-    page: 1,
-    orderBy: ORDER_BY.DESC,
-    pageSize: 500,
+export interface MarketStatsPageParams {
+  params?: {};
+  searchParams?: {
+    page: StatsPageSearchParams["page"];
+    sort: StatsPageSearchParams["sort"];
+    order: StatsPageSearchParams["order"];
   };
+}
 
-  const priceFeedDataPromise = fetchPriceFeedWithMarketState({
-    ...commonArgs,
-    sortBy: SortMarketsBy.DailyVolume,
-  })
-    .then((res) => res.map(toPriceFeed))
-    .then((res) => res.toSorted((a, b) => compareNumber(a.deltaPercentage, b.deltaPercentage)));
+const MARKETS_PER_PAGE = 100;
 
-  const fetchMarketsBy = (sortBy: SortMarketsBy, page: number) =>
-    fetchMarkets({ ...commonArgs, sortBy, page });
-  const paginateAll = async (sortBy: SortMarketsBy) => {
-    const res: Awaited<ReturnType<typeof fetchMarketsBy>> = [];
-    let page = 1;
-    do {
-      await fetchMarketsBy(sortBy, page).then((data) => res.push(...data));
-      page += 1;
-    } while (
-      res.length !== 0 &&
-      res.length % commonArgs.pageSize === 0 &&
-      page <= MAX_PAGES_PER_QUERY
+export default async function MarketStatsPage({ searchParams }: MarketStatsPageParams) {
+  const { page, sortBy, orderBy } = toStatsPageParamsWithDefault(searchParams);
+
+  const priceDeltas = await fetchCachedFirstTenPagesOfPriceDeltas();
+
+  // If sorting by price delta, there's no need to fetch the total number of markets, since the number of markets with
+  // daily activity will always be less than or equal to the total.
+  const numMarkets =
+    sortBy === "delta"
+      ? Object.keys(priceDeltas).length
+      : await fetchCachedNumMarketsFromAptosNode();
+  const numPages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
+
+  const userAgent = headers().get("user-agent") || "";
+  const { emojiFontClassName } = getEmojiFontFromUserAgent(userAgent);
+
+  const marketRowData = await fetchCachedMarketStates({ page, sortBy, orderBy })
+    .then((jsonRows) => jsonRows.map(toTableRowData))
+    .then((rows) =>
+      rows.map<Omit<TableRowData, "sort">>((row) => ({
+        ...row,
+        priceDelta: priceDeltas[row.symbol] ?? undefined,
+        clammVirtualReservesQuote: row.clammVirtualReserves.quote,
+        circulatingSupply: calculateCirculatingSupply(row),
+        currentCurvePrice: calculateCurvePrice(row).toNumber(),
+        emojiFontClassName,
+      }))
     );
-    return res;
-  };
 
-  const dailyVolumeDataPromise = paginateAll(SortMarketsBy.DailyVolume);
-  const marketCapDataPromise = paginateAll(SortMarketsBy.MarketCap);
-  const allTimeVolumeDataPromise = paginateAll(SortMarketsBy.AllTimeVolume);
-  const latestPricesDataPromise = paginateAll(SortMarketsBy.Price);
-  const tvlDataPromise = paginateAll(SortMarketsBy.Tvl);
-  const registryResourcePromise = RegistryView.view({ aptos: getAptosClient() }).then(
-    toRegistryView
+  const baseUrl = headers().get("host");
+  const sort = statsSearchParamsToColumn(sortBy);
+
+  return (
+    <>
+      <StatsButtonsBlock numPages={numPages} page={page} sort={sort} desc={!orderBy.ascending} />
+      {/* Padding top 14px to make the distance between the top & bottom nav buttons symmetrical, due to scrollbar. */}
+      <div className="flex max-w-[80vw] m-auto overflow-auto mt-4 mb-4 shadow-[0_0_0_1px_var(--dark-gray)]">
+        <table className={cn("[&_th]:px-4 [&_th]:py-2 m-auto", "border-collapse")}>
+          <TableHeaders
+            emojiFontClassName={emojiFontClassName}
+            sort={sort}
+            desc={orderBy.ascending !== true}
+            baseUrl={baseUrl}
+          />
+          <tbody
+            className={cn(
+              "[&_tr]:text-lighter-gray [&_tr]:text-sm [&_tr]:font-forma [&_tr]:p-3 [&_tr]:hover:ec-blue",
+              "[&_tr]:bg-opacity-5",
+              "[&_td]:px-4 [&_td]:py-2 [&_td]:border-solid",
+              "[&_td]:border-[1px] [&_td]:border-dark-gray [&_td:first-child]:border-l-transparent"
+            )}
+          >
+            {marketRowData.map((row) => (
+              <MarketTableRow key={`${row.symbol}-${sortBy}`} sort={sort} {...row} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <StatsButtonsBlock numPages={numPages} page={page} sort={sort} desc={!orderBy.ascending} />
+    </>
   );
-  const [
-    dailyVolumeData,
-    priceFeedData,
-    marketCapData,
-    allTimeVolumeData,
-    latestPricesData,
-    tvlData,
-    registryResource,
-  ] = await Promise.all([
-    dailyVolumeDataPromise,
-    priceFeedDataPromise,
-    marketCapDataPromise,
-    allTimeVolumeDataPromise,
-    latestPricesDataPromise,
-    tvlDataPromise,
-    registryResourcePromise,
-  ]);
-
-  const props = {
-    numMarkets: Number(registryResource.numMarkets),
-    dailyVolumeData,
-    priceFeedData,
-    marketCapData,
-    allTimeVolumeData,
-    latestPricesData,
-    tvlData,
-    registryResource,
-  };
-
-  return <StatsPageComponent {...props} />;
 }
