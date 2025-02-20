@@ -20,7 +20,7 @@ interface Props {
 }
 
 const COLUMNS: EcTableColumn<FullCoinData>[] = [
-  { id: "emoji", text: "Emoji", width: 80, className: "!justify-center" },
+  { id: "emoji", text: "Emoji", width: 80 },
   {
     id: "percentage",
     text: "Percentage",
@@ -73,16 +73,15 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
         <span className="pixel-heading-3b">Unique owned: {ownedCoins.length}</span>
       </div>
       <div className="w-full overflow-x-auto">
-        <div className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] max-h-[calc(100vh-300px)] m-auto overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]">
-          <EcTable
-            getId={(coin) => coin.asset_type}
-            columns={COLUMNS}
-            items={ownedCoins}
-            renderRow={(item) => (
-              <PortfolioRow key={item.symbol} coinData={item} walletStats={walletStats} />
-            )}
-          />
-        </div>
+        <EcTable
+          className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] max-h-[calc(100vh-300px)] m-auto overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
+          columns={COLUMNS}
+          items={ownedCoins}
+          getKey={(coin) => coin.asset_type}
+          renderRow={(item, i) => (
+            <PortfolioRow key={item.symbol} index={i} coinData={item} walletStats={walletStats} />
+          )}
+        />
       </div>
     </>
   );

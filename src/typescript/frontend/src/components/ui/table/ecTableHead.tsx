@@ -8,6 +8,8 @@ import { useScramble } from "use-scramble";
 interface SortableHeadProps {
   text: string;
   id: string;
+  index: number;
+  columnsCount: number;
   sort?: { column: string; direction: "asc" | "desc" };
   width?: number;
   // Undefined if column is not sortable
@@ -17,6 +19,8 @@ interface SortableHeadProps {
 export const EcTableHead: FC<SortableHeadProps> = ({
   id,
   text,
+  index,
+  columnsCount,
   width,
   className,
   sort,
@@ -33,7 +37,7 @@ export const EcTableHead: FC<SortableHeadProps> = ({
 
   return (
     <TableHead
-      className={cn(setSort ? "cursor-pointer" : "", "group")}
+      className={cn(setSort ? "cursor-pointer" : "")}
       onClick={
         isSortable
           ? () => setSort({ column: id, direction: currDirection === "desc" ? "asc" : "desc" })
@@ -43,7 +47,9 @@ export const EcTableHead: FC<SortableHeadProps> = ({
       <div
         style={{ minWidth: width ? `${width}px` : undefined }}
         className={cn(
-          "w-full flex gap-1 items-center group-first:justify-start justify-end",
+          "w-full flex gap-1 items-center",
+          index === 0 ? "pl-6" : index === columnsCount - 1 ? "pr-6" : "",
+          index === 0 ? "justify-start" : "justify-end",
           className
         )}
       >

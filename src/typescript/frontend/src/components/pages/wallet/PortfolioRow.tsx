@@ -1,6 +1,6 @@
-import AptosIconBlack from "@icons/AptosBlack";
 import { type FullCoinData } from "app/wallet/[address]/page";
 import { FormattedNumber } from "components/FormattedNumber";
+import { AptCell } from "components/ui/table-cells/apt-cell";
 import { TableCell, TableRow } from "components/ui/table/table";
 import { useAptPrice } from "context/AptPrice";
 import { useRouter } from "next/navigation";
@@ -9,13 +9,14 @@ import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
 interface Props {
+  index: number;
   coinData: FullCoinData;
   walletStats: {
     totalValue: number;
   };
 }
 
-export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
+export const PortfolioRow: FC<Props> = ({ coinData, index, walletStats }) => {
   const router = useRouter();
   const aptPrice = useAptPrice();
   const usdOwnedValue = useMemo(
@@ -24,6 +25,7 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
   );
   return (
     <TableRow
+      index={index}
       onClick={() => router.push("/market/" + coinData.emojiPath)}
       className="cursor-pointer"
     >
@@ -59,8 +61,7 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
       </TableCell>
       <TableCell className="text-right">
         <span className="flex items-center justify-end gap-1">
-          <FormattedNumber scramble value={coinData.marketCap} style={"fixed"} />
-          <AptosIconBlack className="icon-inline text-xl" />
+          <AptCell value={coinData.marketCap} />
         </span>
       </TableCell>
       <TableCell className="text-right">
@@ -70,8 +71,7 @@ export const PortfolioRow: FC<Props> = ({ coinData, walletStats }) => {
       </TableCell>
       <TableCell className="text-right px-6">
         <span className="flex items-center justify-end gap-1">
-          <FormattedNumber scramble value={coinData.ownedValue} />{" "}
-          <AptosIconBlack className="ml-1 icon-inline text-xl" />
+          <AptCell value={coinData.ownedValue} />
         </span>
       </TableCell>
     </TableRow>

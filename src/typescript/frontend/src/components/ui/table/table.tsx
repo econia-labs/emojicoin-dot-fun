@@ -1,4 +1,5 @@
 import { cn } from "lib/utils/class-name";
+import { type HTMLMotionProps, motion, MotionProps } from "framer-motion";
 import * as React from "react";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
@@ -17,7 +18,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "text-ec-blue display-4 bg-black uppercase text-center sticky -top-[1px] z-10",
+      "text-ec-blue body-lg bg-black uppercase text-center sticky -top-[1px] z-10",
       className
     )}
     {...props}
@@ -41,36 +42,6 @@ const TableFooter = React.forwardRef<
 ));
 TableFooter.displayName = "TableFooter";
 
-const TableRow = React.forwardRef<
-  HTMLTableRowElement,
-  React.HTMLAttributes<HTMLTableRowElement> & { isHeader?: boolean }
->(({ className, isHeader, ...props }, ref) => {
-  return (
-    <tr
-      ref={ref}
-      className={cn(
-        "relative w-full h-[33px] group",
-        !isHeader ? "border-solid border-b border-dark-gray" : "",
-        className
-      )}
-      {...props}
-    >
-      {props.children}
-      {
-        <div
-          className={cn(
-            "absolute bg-transparent z-[1] inline-flex left-0 w-full h-full pointer-events-none",
-            !isHeader
-              ? "group-hover:border-solid group-hover:border-ec-blue border-[2px]"
-              : "border-solid border-[1px] border-dark-gray border-t"
-          )}
-        />
-      }
-    </tr>
-  );
-});
-TableRow.displayName = "TableRow";
-
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -78,7 +49,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "first:pl-6 last:pr-6 h-10 px-2 align-middle font-forma body-lg [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] sticky",
+      "h-8 align-middle font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-normal",
       className
     )}
     {...props}
@@ -93,7 +64,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "first:pl-6 last:pr-6 text-lighter-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "text-lighter-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props}
@@ -108,5 +79,48 @@ const TableCaption = React.forwardRef<
   <caption ref={ref} className={cn("mt-4 text-sm text-muted-foreground", className)} {...props} />
 ));
 TableCaption.displayName = "TableCaption";
+
+const TableRow = React.forwardRef<
+  HTMLTableRowElement,
+  HTMLMotionProps<"tr"> & { isHeader?: boolean; index?: number }
+>(({ className, isHeader = false, index = 0, ...props }, ref) => {
+  return (
+    <motion.tr
+      layout
+      initial={{
+        opacity: 0,
+        filter: "brightness(1) saturate(1)",
+        boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
+      }}
+      animate={{
+        opacity: 1,
+        transition: {
+          type: "just",
+          delay: index * 0.03,
+        },
+      }}
+      ref={ref}
+      className={cn(
+        "relative w-full h-[33px] group",
+        !isHeader ? "border-solid border-b border-dark-gray" : "",
+        className
+      )}
+      {...props}
+    >
+      {props.children as React.ReactNode}
+      {
+        <div
+          className={cn(
+            "absolute bg-transparent z-[1] inline-flex left-0 w-full h-full pointer-events-none",
+            !isHeader
+              ? "group-hover:border-solid group-hover:border-ec-blue border-[2px]"
+              : "border-solid border-[1px] border-dark-gray border-t"
+          )}
+        />
+      }
+    </motion.tr>
+  );
+});
+TableRow.displayName = "TableRow";
 
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
