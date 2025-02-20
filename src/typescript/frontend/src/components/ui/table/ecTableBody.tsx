@@ -23,7 +23,7 @@ export const EcTableBody = <T,>({
     if (containerRef) {
       const height = containerRef.clientHeight;
       // We subtract 1 because of the header, and 1 to remove last row to prevent overflow
-      return Math.ceil(height / rowHeight) - 2;
+      return Math.floor(height / rowHeight) - 2;
     }
     return 0;
   }, [rowHeight, containerRef]);
