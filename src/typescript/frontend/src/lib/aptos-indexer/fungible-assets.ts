@@ -135,5 +135,5 @@ async function fetchHoldersInternal(marketAddress: `0x${string}`) {
 }
 
 export const fetchCachedHolders = unstable_cache(fetchHoldersInternal, ["fetch-holders"], {
-  revalidate: 60,
+  revalidate: 10,
 });
