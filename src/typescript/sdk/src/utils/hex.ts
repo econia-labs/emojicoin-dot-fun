@@ -10,8 +10,6 @@ import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
 /**
  * A helper function to normalize a hex string without having to import @aptos-labs/ts-sdk.
- * This is because `next.js` middleware does not have access to `setImmediate` from the TS SDK.
- *
  *
  * Does *not* require hex inputs to be prefixed with `0x`.
  *
