@@ -50,7 +50,7 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
         id: "value",
         text: "APT",
         width: 80,
-        renderCell: (holder) => <AptCell value={holder.value} />,
+        renderCell: (holder) => <AptCell value={holder.value} decimals={2} style="fixed" />,
       },
       {
         id: "balance",
@@ -62,7 +62,9 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
         id: "supply-percentage",
         text: "Supply %",
         width: 120,
-        renderCell: (holder) => <FormattedNumber value={holder.supplyPercentage} suffix="%" />,
+        renderCell: (holder) => (
+          <FormattedNumber value={holder.supplyPercentage} style={"fixed"} suffix="%" />
+        ),
       },
       {
         id: "usd-value",
