@@ -87,10 +87,15 @@ const TableRow = React.forwardRef<
   HTMLMotionProps<"tr"> & { noHover?: boolean; isHeader?: boolean; index?: number; height?: number }
 >(({ className, height = 33, noHover, isHeader = false, index = 0, ...props }, ref) => {
   // Shorter duration for rows further down, to avoid them taking forever to animate in.
-  const delay = React.useMemo(
-    () => (index <= 30 ? index * 0.025 : 30 * 0.025 + (index % 30) * 0.01),
-    [index]
-  );
+  const delay = React.useMemo(() => {
+    if (index <= 30) {
+      return index * 0.025;
+    }
+    const first30 = 30 * 0.025;
+    const after30 = (index % 30) * 0.01;
+    return first30 + after30;
+  }, [index]);
+
   return (
     <motion.tr
       layout
