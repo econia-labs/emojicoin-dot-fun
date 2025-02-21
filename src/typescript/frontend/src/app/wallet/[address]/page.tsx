@@ -5,7 +5,7 @@ import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import {
   fetchAllFungibleAssetsBalance,
-  type TokenBalance,
+  type AssetBalance,
 } from "lib/aptos-indexer/fungible-assets";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { toNominal } from "lib/utils/decimals";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: `Explore the emojicoin cult`,
 };
 
-export type FullCoinData = Omit<TokenBalance, "amount"> &
+export type FullCoinData = Omit<AssetBalance, "amount"> &
   Awaited<ReturnType<typeof fetchSpecificMarkets>>[number] & {
     symbol: string;
     marketCap: number;

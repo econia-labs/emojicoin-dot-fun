@@ -8,7 +8,7 @@ import { unstable_cache } from "next/cache";
 
 const aptosClient = getAptosClient();
 
-export type TokenBalance = {
+export type AssetBalance = {
   amount: string;
   asset_type: string;
   owner_address: string;
@@ -19,7 +19,7 @@ export type TokenBalance = {
 };
 
 export type FetchEmojicoinBalancesResponse = {
-  current_fungible_asset_balances: TokenBalance[];
+  current_fungible_asset_balances: AssetBalance[];
 };
 
 export type FetchFungibleAssetsParams = {
@@ -87,11 +87,11 @@ export async function fetchAllFungibleAssetsBalance({
   // Fetch at most 1000 by default, which corresponds to 10 requests.
   max = 1000,
 }: { max?: number } & Omit<FetchFungibleAssetsParams, "offset" | "limit">): Promise<
-  TokenBalance[]
+  AssetBalance[]
 > {
   const limit = 100;
   let offset = 0;
-  let allTokens: TokenBalance[] = [];
+  let allTokens: AssetBalance[] = [];
   let hasMore = true;
 
   while (hasMore && offset < max) {
