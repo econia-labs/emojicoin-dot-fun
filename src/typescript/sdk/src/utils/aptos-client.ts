@@ -38,6 +38,7 @@ export function getAptosClient(additionalConfig?: Partial<AptosConfig>): Aptos {
 
   const config = new AptosConfig({
     network,
+    fullnode: "https://app.movementcoin.net/v1",
     ...additionalConfig,
     clientConfig: {
       ...APTOS_CONFIG,
