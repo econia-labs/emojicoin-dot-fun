@@ -70,7 +70,7 @@ export const WalletClientPage = ({ address }: { address: string }) => {
           className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[calc(100vh-300px)] m-auto overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
           columns={COLUMNS}
           items={ownedCoins}
-          getKey={(coin) => coin.asset_type}
+          getKey={(coin) => coin.symbol}
           renderRow={(item, i) => (
             <PortfolioRow key={item.symbol} index={i} coinData={item} totalValue={totalValue} />
           )}
