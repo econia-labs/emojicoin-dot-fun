@@ -8,7 +8,6 @@ import { unstable_cache } from "next/cache";
 import { fetchEmojicoinBalances } from "./fetch-emojicoin-balances";
 
 async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
-  const address = AccountAddress.from(marketAddress).toString();
   const { emojicoin } = toCoinTypes(marketAddress);
   if (!emojicoin.isStruct()) {
     console.error(`Invalid market address passed to \`fetchHoldersInternal\`: ${marketAddress}`);
@@ -17,9 +16,10 @@ async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
   const assetType = emojicoin.toString();
   const holders = await fetchEmojicoinBalances({ assetType });
 
-  // Exclude the factory address from the holders list.
+  // Exclude the emojicoin market address from the holders list.
+  const market = AccountAddress.from(marketAddress);
   return holders.current_fungible_asset_balances.filter(
-    (h) => AccountAddress.from(h.owner_address).toString() !== address
+    (h) => !market.equals(AccountAddress.from(h.owner_address))
   );
 }
 
