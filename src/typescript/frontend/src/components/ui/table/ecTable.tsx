@@ -22,6 +22,7 @@ export interface EcTableColumn<T> {
 export interface TableProps<T> {
   items: T[];
   columns: EcTableColumn<T>[];
+  rowHeight?: number;
   className?: string;
   // Function to get the unique key for each item
   getKey: (item: T) => string;
@@ -34,11 +35,13 @@ export const EcTable = <T,>({
   items,
   className,
   columns,
+  rowHeight = 33,
   renderRow,
   getKey,
   onClick,
   textFormat = "body-md",
 }: TableProps<T>) => {
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
     column: "ownedValue",
     direction: "desc",
@@ -50,7 +53,7 @@ export const EcTable = <T,>({
   }, [columns, sort.column, sort.direction, items]);
 
   return (
-    <div className={cn("flex w-full", className)}>
+    <div ref={(ref) => setContainerRef(ref)} className={cn("flex w-full", className)}>
       <Table className={cn("border-solid border-[1px] border-dark-gray")}>
         <TableHeader>
           <TableRow isHeader>
@@ -72,6 +75,8 @@ export const EcTable = <T,>({
         <EcTableBody
           className={textFormat}
           onClick={onClick}
+          rowHeight={rowHeight}
+          containerRef={containerRef}
           items={sorted}
           columns={columns}
           renderRow={renderRow}

@@ -13,62 +13,12 @@ import { useMemo, type FC } from "react";
 import { ROUTES } from "router/routes";
 
 interface Props {
+  emojicoin: string;
   holders: TokenBalance[];
   marketView: Types["MarketView"];
 }
 
-const COLUMNS: EcTableColumn<
-  Omit<TokenBalance, "amount"> & {
-    amount: number;
-    rank: number;
-    supplyPercentage: number;
-    value: number;
-    usdValue: number;
-  }
->[] = [
-  {
-    id: "rank",
-    text: "Rank",
-    width: 100,
-    cellClassName: "pl-10",
-    sortCallback: (holder) => holder.amount,
-    renderCell: (holder) => holder.rank,
-  },
-  {
-    id: "value",
-    text: "APT",
-    width: 60,
-    renderCell: (holder) => <AptCell value={holder.value} />,
-  },
-  {
-    id: "balance",
-    text: "Balance",
-    width: 80,
-    renderCell: (holder) => <FormattedNumber scramble value={holder.amount} style={"fixed"} />,
-  },
-  {
-    id: "supply-percentage",
-    text: "Supply %",
-    width: 80,
-    renderCell: (holder) => <FormattedNumber scramble value={holder.supplyPercentage} suffix="%" />,
-  },
-  {
-    id: "usd-value",
-    text: "USD",
-    width: 80,
-    renderCell: (holder) => (
-      <FormattedNumber scramble value={holder.usdValue} style={"fixed"} prefix="$" />
-    ),
-  },
-  {
-    id: "address",
-    text: "Holder",
-    width: 50,
-    renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
-  },
-];
-
-export const CoinHolders: FC<Props> = ({ holders, marketView }) => {
+export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
   const aptPrice = useAptPrice();
   const maxSupply = useMemo(() => toNominal(calculateCirculatingSupply(marketView)), [marketView]);
   const router = useRouter();
@@ -85,12 +35,60 @@ export const CoinHolders: FC<Props> = ({ holders, marketView }) => {
       }),
     [aptPrice, holders, marketView.lastSwap.avgExecutionPriceQ64, maxSupply]
   );
+
+  const columns: EcTableColumn<(typeof holdersWithRank)[number]>[] = useMemo(
+    () => [
+      {
+        id: "rank",
+        text: "Rank",
+        width: 100,
+        cellClassName: "pl-10",
+        sortCallback: (holder) => holder.amount,
+        renderCell: (holder) => holder.rank,
+      },
+      {
+        id: "value",
+        text: "APT",
+        width: 80,
+        renderCell: (holder) => <AptCell value={holder.value} />,
+      },
+      {
+        id: "balance",
+        text: emojicoin,
+        width: 80,
+        renderCell: (holder) => <FormattedNumber scramble value={holder.amount} style={"fixed"} />,
+      },
+      {
+        id: "supply-percentage",
+        text: "Supply %",
+        width: 80,
+        renderCell: (holder) => (
+          <FormattedNumber scramble value={holder.supplyPercentage} suffix="%" />
+        ),
+      },
+      {
+        id: "usd-value",
+        text: "USD",
+        width: 80,
+        renderCell: (holder) => (
+          <FormattedNumber scramble value={holder.usdValue} style={"fixed"} prefix="$" />
+        ),
+      },
+      {
+        id: "address",
+        text: "Holder",
+        width: 50,
+        renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
+      },
+    ],
+    [emojicoin]
+  );
   return (
     <EcTable
       className="m-auto overflow-auto h-[330px]"
       onClick={(item) => router.push(`${ROUTES.wallet}/${item.owner_address}`)}
       textFormat="body-sm"
-      columns={COLUMNS}
+      columns={columns}
       getKey={(item) => item.owner_address}
       items={holdersWithRank}
     />
