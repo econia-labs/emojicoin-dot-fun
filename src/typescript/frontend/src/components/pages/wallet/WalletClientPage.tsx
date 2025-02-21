@@ -74,7 +74,7 @@ export const WalletClientPage: FC<Props> = ({ address, ownedCoins, walletStats }
       </div>
       <div className="w-full overflow-x-auto">
         <EcTable
-          className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] max-h-[calc(100vh-300px)] m-auto overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
+          className="flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[calc(100vh-300px)] m-auto overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
           columns={COLUMNS}
           items={ownedCoins}
           getKey={(coin) => coin.asset_type}

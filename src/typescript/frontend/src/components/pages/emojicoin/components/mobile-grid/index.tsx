@@ -70,7 +70,11 @@ const MobileGrid = (props: GridProps) => {
         <StyledMobileContentInner>
           {tab === "Trade History" && <TradeHistory data={props.data} />}
           {tab === "Top Holders" && (
-            <CoinHolders holders={props.data.holders} marketView={props.data.marketView} />
+            <CoinHolders
+              emojicoin={props.data.symbol}
+              holders={props.data.holders}
+              marketView={props.data.marketView}
+            />
           )}
           {tab === "Chat" && <ChatBox data={props.data} />}
           {tab === "Swap" && (

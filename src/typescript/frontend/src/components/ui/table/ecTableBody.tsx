@@ -1,21 +1,32 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { type TableProps } from "./ecTable";
-import { TableBody } from "./table";
+import { TableBody, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
 
 export const EcTableBody = <T,>({
+  containerRef,
   className,
   items,
   renderRow,
+  rowHeight = 33,
   columns,
   getKey,
   onClick,
-}: TableProps<T> & { className: string }) => {
-  // Make sure there is either a renderRow function or a renderCell function in each column
+}: TableProps<T> & { containerRef: HTMLDivElement | null; className: string }) => {
+  // Make sure there is either a renderRow function or a renderCell function in each column.
   if (!renderRow && (!columns || columns.some((col) => !col.renderCell)))
     throw new Error(
       "Either renderRow must be defined or renderCell must be defined in each column"
     );
+
+  const minRows = useMemo(() => {
+    if (containerRef) {
+      const height = containerRef.clientHeight;
+      // We subtract 1 because of the header, and 1 to remove last row to prevent overflow
+      return Math.floor(height / rowHeight) - 2;
+    }
+    return 0;
+  }, [rowHeight, containerRef]);
 
   return (
     <TableBody className={className}>
@@ -25,11 +36,15 @@ export const EcTableBody = <T,>({
             <EcTableRow
               key={getKey(item)}
               item={item}
+              height={rowHeight}
               index={i}
               columns={columns}
               onClick={onClick}
             />
           ))}
+      {Array.from({ length: minRows - items.length }).map((_, i) => (
+        <TableRow key={i} index={items.length + i} noHover height={rowHeight} />
+      ))}
     </TableBody>
   );
 };
