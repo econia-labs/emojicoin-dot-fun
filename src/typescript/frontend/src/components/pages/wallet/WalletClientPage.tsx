@@ -86,7 +86,7 @@ export const WalletClientPage = ({ address }: { address: string }) => {
         ) : (
           <EcTable
             className={cn(
-              "flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[calc(100vh-300px)] m-auto",
+              "flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[60dvh] m-auto",
               "overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
             )}
             columns={COLUMNS}
