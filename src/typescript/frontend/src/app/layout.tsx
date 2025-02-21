@@ -4,6 +4,7 @@ import Providers from "context/providers";
 import StyledComponentsRegistry from "lib/registry";
 import "react-toastify/dist/ReactToastify.css";
 import "../app/global.css";
+import "../app/tailwind.css"
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
 import { headers } from "next/headers";

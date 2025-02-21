@@ -63,6 +63,8 @@ export const fontWeight = {
 } as const;
 
 export const fonts = {
+  sifonn: "var(--font-sifonn)",
+  lora: "var(--font-lora)",
   pixelar: "var(--font-pixelar)",
   forma: "var(--font-forma)",
   formaM: "var(--font-formaM)",

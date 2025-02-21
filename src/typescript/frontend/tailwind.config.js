@@ -19,6 +19,8 @@ module.exports = {
         forma: ["var(--font-forma)", ...fontFamily.sans],
         "forma-bold": ["var(--font-formaM)", ...fontFamily.sans],
         "forma-thin": ["var(--font-formaDR)", ...fontFamily.sans],
+        sifonn: ["var(--font-sifonn)", ...fontFamily.sans],
+        lora: ["var(--font-lora)", ...fontFamily.sans],
       },
       screens: {
         tall: { raw: "(min-height: 960px)" },

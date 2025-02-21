@@ -1,5 +1,4 @@
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
-import HomePageComponent from "./HomePage";
 import {
   fetchMarkets,
   fetchMarketsWithCount,
@@ -16,6 +15,7 @@ import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { ORDER_BY } from "@sdk/queries";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
+import HomePageComponentV2 from "./HomePageV2";
 
 export const revalidate = 2;
 
@@ -96,7 +96,15 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   return (
     <AptPriceContextProvider aptPrice={aptPrice}>
-      <HomePageComponent
+      {/* <HomePageComponent
+        markets={markets}
+        numMarkets={numMarkets}
+        page={page}
+        sortBy={sortBy}
+        searchBytes={q}
+        priceFeed={priceFeedData}
+      /> */}
+      <HomePageComponentV2
         markets={markets}
         numMarkets={numMarkets}
         page={page}
