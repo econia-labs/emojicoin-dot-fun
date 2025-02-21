@@ -94,6 +94,13 @@ const TableRow = React.forwardRef<
         filter: "brightness(1) saturate(1)",
         boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
       }}
+      animate={{
+        opacity: 1,
+        transition: {
+          type: "just",
+          delay: index * 0.03,
+        },
+      }}
       whileHover={
         !isHeader
           ? {
@@ -103,18 +110,6 @@ const TableRow = React.forwardRef<
             }
           : {}
       }
-      animate={{
-        opacity: 1,
-        transition: {
-          type: "just",
-          delay: index * 0.03,
-        },
-      }}
-      whileHover={{
-        filter: "brightness(1.05) saturate(1.1)",
-        boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-        transition: { duration: 0.05 },
-      }}
       ref={ref}
       style={{ height, ...props.style }}
       className={cn(
