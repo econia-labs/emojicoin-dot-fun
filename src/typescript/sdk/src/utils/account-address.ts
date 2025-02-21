@@ -18,3 +18,19 @@ export const toAccountAddress = (input: AnyAccount | AccountAddressInput) =>
 
 export const toAccountAddressString = (input: AnyAccount | AccountAddressInput) =>
   toAccountAddress(input).toString();
+
+/**
+ * Remove the leading zeros from a hex string that starts with `0x`.
+ *
+ * Typically used for shortening address-like strings.
+ *
+ * @param input
+ * @returns the hex string without leading zeros
+ * @example 0x00b -> 0xb
+ * @example 0x00123 -> 0x123
+ * @example 0x0 -> 0x0
+ */
+export const removeLeadingZeros = (input: `0x${string}` | AccountAddressInput) => {
+  const address = toAccountAddressString(input);
+  return address.replace(/^0x0*([0-9a-fA-F]+)$/, "0x$1");
+};

@@ -1,9 +1,17 @@
-import { type AccountAddressInput, type HexInput } from "@aptos-labs/ts-sdk";
+import { type HexInput } from "@aptos-labs/ts-sdk";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
-import { toAccountAddressString } from "./account-address";
+
+// -------------------------------------------------------------------------------------------------
+//
+// NOTE: If you try to import @aptos-labs/ts-sdk in this file, the frontend build will fail due to
+// the usage of `setImmediate` which is unavailable to the `edge` runtime used in NextJS middleware.
+//
+// -------------------------------------------------------------------------------------------------
 
 /**
- * Because `Hex.fromHexInput(hex).toString() as `0x${string}`` is too verbose and heavy.
+ * A helper function to normalize a hex string without having to import @aptos-labs/ts-sdk.
+ * This is because `next.js` middleware does not have access to `setImmediate` from the TS SDK.
+ *
  *
  * Does *not* require hex inputs to be prefixed with `0x`.
  *
@@ -29,20 +37,4 @@ export const normalizeHex = (hex: HexInput) => {
     bytes = hex;
   }
   return `0x${bytesToHex(bytes)}` as const;
-};
-
-/**
- * Remove the leading zeros from a hex string that starts with `0x`.
- *
- * Typically used for shortening address-like strings.
- *
- * @param input
- * @returns the hex string without leading zeros
- * @example 0x00b -> 0xb
- * @example 0x00123 -> 0x123
- * @example 0x0 -> 0x0
- */
-export const removeLeadingZeros = (input: `0x${string}` | AccountAddressInput) => {
-  const address = toAccountAddressString(input);
-  return address.replace(/^0x0*([0-9a-fA-F]+)$/, "0x$1");
 };

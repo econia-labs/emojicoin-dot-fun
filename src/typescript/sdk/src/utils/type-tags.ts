@@ -12,7 +12,7 @@ import {
   REWARDS_MODULE_ADDRESS,
 } from "../const";
 import { type TypeTagInput } from "../emojicoin_dot_fun";
-import { removeLeadingZeros } from "./hex";
+import { removeLeadingZeros } from "./account-address";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
