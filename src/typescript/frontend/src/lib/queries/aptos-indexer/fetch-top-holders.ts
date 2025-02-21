@@ -1,7 +1,5 @@
 "use server";
 
-// cspell:word ilike
-
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { toCoinTypes } from "@sdk/markets";
 import { unstable_cache } from "next/cache";

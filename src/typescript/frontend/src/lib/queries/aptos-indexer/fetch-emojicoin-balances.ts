@@ -1,3 +1,4 @@
+// cspell:word ilike
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { getAptosClient, removeLeadingZerosFromStructString } from "@sdk/utils";
 
@@ -17,7 +18,6 @@ export type FetchEmojicoinBalancesResponse = {
 
 export type FetchFungibleAssetsParams = {
   ownerAddress?: string;
-  // Can be used to fetch holders of specific coin.
   assetType?: `0x${string}::${string}::${string}`;
   offset?: number;
   limit?: number;
