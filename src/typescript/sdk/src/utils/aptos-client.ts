@@ -24,7 +24,7 @@ export function getAptosClient(additionalConfig?: Partial<AptosConfig>): Aptos {
     if (fs.existsSync("/.dockerenv")) {
       const config = new AptosConfig({
         network: NetworkToNetworkName["local"],
-        fullnode: toDockerUrl(NetworkToNodeAPI["local"]),
+        fullnode: "https://app.movementcoin.net/v1",
         indexer: toDockerUrl(NetworkToIndexerAPI["local"]),
         faucet: toDockerUrl(NetworkToFaucetAPI["local"]),
         clientConfig: {
