@@ -61,7 +61,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Rank",
         id: "rank",
         cellClassName: "pl-10",
-        width: 100,
+        width: 50,
         renderCell: (item) => (
           <Popup
             content={
@@ -82,13 +82,11 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "APT",
         id: "apt",
-        width: 80,
         renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
       },
       {
         text: props.data.symbol,
         id: "amount",
-        width: 80,
         renderCell: (item) => (
           <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
         ),
@@ -96,6 +94,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Time",
         id: "time",
+        width: 80,
         renderCell: (item) =>
           item.date.toLocaleString(undefined, {
             month: "2-digit" as const,
@@ -108,6 +107,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Price",
         id: "price",
+        width: 80,
         renderCell: (item) => (
           <ColoredPriceDisplay
             q64
@@ -121,6 +121,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Sender",
         id: "sender",
+        width: 80,
         renderCell: (item) => <WalletAddressCell address={item.swapper} />,
       },
     ],
