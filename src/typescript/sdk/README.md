@@ -144,12 +144,20 @@ await Chat.submit({
 
 ## The EmojicoinClient helper class
 
+The EmojicoinClient class is a helper class primarily for local and test
+development. It facilitates terse, imperative code to interact with the
+contract's multiple entry and view functions.
+
 ### Not intended for web applications
 
-The EmojicoinClient is primarily for local and test development. Please be
-mindful of configuration options in the client that are set by default.
+The EmojicoinClient was primarily made as a utility class for local development.
+The default configuration options are not as explicit as the auto-generated
+contract classes above.
 
+Please be mindful of the default configuration options in the client.
 See [EmojicoinClient] and the [default config] for more details.
+
+### Using the EmojicoinClient
 
 You must import the `EmojicoinClient` from the SDK explicitly:
 
@@ -166,6 +174,7 @@ To run the equivalent of the sample code above:
 // Load environment variables for testnet:
 // `pnpm dotenv -e ./example.testnet.env -- pnpm tsx ./my-script.ts`
 
+import { AnyEmoji } from "@econia-labs/emojicoin-sdk";
 import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
 
 const emojicoin = new EmojicoinClient();
@@ -180,8 +189,8 @@ const amountBought = await emojicoin.rewards
   .then((res) => res.swap.event.netProceeds);
 await emojicoin.rewards.sell(account, emojis, amountBought);
 
-// Using an array will let you use auto-complete suggestions.
-const arr: SymbolEmoji[] = ["🆕", "🆕", "🐥", "🆕", "🐥", "💿", "💿", "🐥"];
+// Using an array will let you use auto-complete suggestions for emojis.
+const arr: AnyEmoji[] = ["🆕", "🆕", "🐥", "🆕", "🐥", "💿", "💿", "🐥"];
 // You can also simply use a string: "🆕🆕🐥🆕🐥💿💿🐥🆕"
 await emojicoin.chat(account, emojis, arr);
 
