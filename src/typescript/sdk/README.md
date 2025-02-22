@@ -211,49 +211,57 @@ import {
   WebSocketClient,
   isSwapEventModel,
   isEventModelWithMarket,
+  toNominalPrice,
+  calculateCurvePrice,
 } from "@econia-labs/emojicoin-sdk";
 
-export const main = async () => {
+export const connect = () => {
   const client = new WebSocketClient({
     // The WebSockets endpoint for the `broker` service. See `src/rust/broker`
-    // and `src/docker`. If you are running the local development stack with
-    // `pnpm run docker:up`, you can use the default value set in
-    // `example.local.env`.
+    // and `src/docker`. If you loaded an env file, you can also just use
+    // `process.env.NEXT_PUBLIC_BROKER_URL` here.
     url: "ws://localhost:3009",
     listeners: {
       // Callback upon receiving any WebSocket message. `event` is automatically
       // deserialized into an emojicoin event model.
       onMessage(event) {
         if (isSwapEventModel(event)) {
-          console.log(event.swap);
-        }
+          const { swap, state } = event;
+          console.log({
+            ...event.swap,
+            avgPrice: toNominalPrice(swap.avgExecutionPriceQ64).toFixed(9),
+            curvePrice: calculateCurvePrice(state).toFixed(9),
+          });
+
         if (isEventModelWithMarket(event)) {
           console.log(event.market.symbolEmojis, event.eventName);
         }
       },
       onConnect(_e) {
-        const innerClient = client.client;
-        console.log("Connected!");
-        console.log("Client state:", innerClient.readyState);
-        console.log("Open state:", innerClient.OPEN);
         client.subscribeEvents(["Swap", "Chat", "MarketLatestState"]);
-      },,
+      },
       onError(e) {
         console.error(e);
       },
-      onClose(e) {
-        console.info("Closing!", e);
+      onClose(_e) {
+        setTimeout(() => {
+          console.info("Attempting to reconnect...");
+          connect();
+        }, 1000);
       },
     },
     permanentlySubscribeToMarketRegistrations: true,
   });
+};
 
+export const main = async () => {
+  connect();
   while (true) {
     await sleep(10000);
   }
 };
 
-main().then(() => console.log("Done!"));
+main();
 ```
 
 Example output of a swap:
@@ -262,24 +270,26 @@ Example output of a swap:
 
 ```typescript
 {
-  swapper: '0xf0592f4cfada893dedec5e1f7c164d925ba423b0ddf098ad91a1eb3d34d77430',
+  swapper: '0x5c6e0b64f018af5b4bdcd043cf87e69004691ee3c160c266bf0966688a83f3c0',
   integrator: '0x99994f5124fa5cc95538217780cbfc01e4c4f842dfcc453890755b2ce4779999',
-  integratorFee: 50000n,
-  inputAmount: 5000000n,
-  isSell: false,
+  integratorFee: 4773161n,
+  inputAmount: 640733754055n,
+  isSell: true,
   integratorFeeRateBPs: 100,
-  netProceeds: 35273041585n,
-  baseVolume: 35273041585n,
-  quoteVolume: 4950000n,
-  avgExecutionPriceQ64: 2588701712746337n,
-  poolFee: 88403612n,
+  netProceeds: 471349707n,
+  baseVolume: 640733754055n,
+  quoteVolume: 471349707n,
+  avgExecutionPriceQ64: 13570172258320925n,
+  poolFee: 1193290n,
   startsInBondingCurve: false,
   resultsInStateTransition: false,
-  balanceAsFractionOfCirculatingSupplyBeforeQ64: 145424341860594414n,
-  balanceAsFractionOfCirculatingSupplyAfterQ64: 145601208616530340n
+  balanceAsFractionOfCirculatingSupplyBeforeQ64: 2879374649688647n,
+  balanceAsFractionOfCirculatingSupplyAfterQ64: 0n,
+  avgPrice: '0.000735641',
+  curvePrice: '0.000743749'
 }
-[ '🐘' ] Swap
-[ '🐘' ] State
+[ '🐝' ] Swap
+[ '🐝' ] State
 ```
 
 ## Common errors
