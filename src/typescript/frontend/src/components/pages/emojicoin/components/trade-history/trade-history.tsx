@@ -94,7 +94,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Time",
         id: "time",
-        width: 80,
+        width: 120,
         renderCell: (item) =>
           item.date.toLocaleString(undefined, {
             month: "2-digit" as const,
@@ -121,7 +121,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Sender",
         id: "sender",
-        width: 80,
+        width: 120,
         renderCell: (item) => <WalletAddressCell address={item.swapper} />,
       },
     ],
