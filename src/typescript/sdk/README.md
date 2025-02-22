@@ -282,8 +282,6 @@ Example output of a swap:
 [ '🐘' ] State
 ```
 
-<!-- markdownlint-enable MD013 -->
-
 ## Common errors
 
 ### Error: Missing environment variables \$\{key}
@@ -298,44 +296,39 @@ Error: This module cannot be imported from a Client Component module. It should
 only be used from a Server Component.
 ```
 
-This is because you're inadvertently importing indexer queries or functions that
-import server-side environment variables. You can fix this one of two ways:
+This error occurs because you've imported code that has a "server-only" import
+guard at the top of the file. See the next.js docs on
+[keeping server-only code out of the client environment] for more information.
 
-#### 1. Narrow your import to avoid importing types and functions you don't need
+It will always throw an error _unless_ the `NODE_OPTIONS` environment
+variable has specified the condition: `--react-server`.
+
+There are two ways to fix this:
+
+#### 1. Satisfy the `react-server` condition
+
+If you know what you're doing, you can silence the warning like so:
+
+```shell
+pnpm dotenv -v NODE_OPTIONS="--react-server" -e "example.testnet.env" -- ./my-local-script.ts
+```
+
+#### 2. Narrow your import to avoid importing types and functions you don't need
 
 Most indexer types and helper functions are available at
 `@econia-labs/emojicoin-sdk`. You shouldn't need to import
 `@econia-labs/emojicoin-sdk/indexer-v2` to use them.
 
-Please [file an issue] if you need access to an import and it's impossible
-or difficult to use.
+Please [file an issue] if you need access to an import that's not available!
 
-#### 2. Satisfy the `react-server` condition
-
-If you are just using the SDK to run scripts or know what you're doing, you can
-silence the warning like so:
-
-```shell
-file="example.testnet.env"
-pnpm dotenv -v NODE_OPTIONS="--react-server" -e "$file" -- ./my-local-script.ts
-```
-
-The error arises because you've imported code that has a "server-only" import
-guard at the top of the file. Essentially, this file acts as protection against
-accidentally leaking server-side secrets like API keys client-side in browser
-based applications where the application code is sent to the client.
-
-It will always throw an error _unless_ the `NODE_OPTIONS` environment
-variable has specified the condition: `--react-server`.
-
-If you are getting this error in your frontend application, _you should
-heed its warning_ and understand the implications of not doing so!
+<!-- markdownlint-enable MD013 -->
 
 [an import error]: #error-this-module-cannot-be-imported-from-a-client-component-module
 [contract apis]: src/emojicoin_dot_fun/contract-apis/
 [default config]: https://github.com/econia-labs/emojicoin-dot-fun/blob/974e29fa607fa7d4bf391be3f8ed42e74d36cf87/src/typescript/sdk/src/client/emojicoin-client.ts#L153
 [emojicoinclient]: src/client/emojicoin-client.ts
 [file an issue]: https://github.com/econia-labs/emojicoin-dot-fun/issues
+[keeping server-only code out of the client environment]: https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 [local network]: ../example.local.env
 [mainnet network]: ../example.mainnet.env
 [testnet network]: ../example.testnet.env
