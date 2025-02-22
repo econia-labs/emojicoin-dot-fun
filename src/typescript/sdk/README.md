@@ -192,6 +192,98 @@ if (exists) {
 }
 ```
 
+## Using the WebSocketClient
+
+The simplest way to test the WebSocketClient and endpoint is by running a local
+network. You can do this by navigating to `src/typescript` and running:
+
+```shell
+# Please note this may overwrite any existing Aptos local network data.
+pnpm run docker:up
+```
+
+Then you can interact with the contract locally and see events come in in real
+time with the code below:
+
+```typescript
+import { sleep } from "@aptos-labs/ts-sdk";
+import {
+  WebSocketClient,
+  isSwapEventModel,
+  isEventModelWithMarket,
+} from "@econia-labs/emojicoin-sdk";
+
+export const main = async () => {
+  const client = new WebSocketClient({
+    // The WebSockets endpoint for the `broker` service. See `src/rust/broker`
+    // and `src/docker`. If you are running the local development stack with
+    // `pnpm run docker:up`, you can use the default value set in
+    // `example.local.env`.
+    url: "ws://localhost:3009",
+    listeners: {
+      // Callback upon receiving any WebSocket message. `event` is automatically
+      // deserialized into an emojicoin event model.
+      onMessage(event) {
+        if (isSwapEventModel(event)) {
+          console.log(event.swap);
+        }
+        if (isEventModelWithMarket(event)) {
+          console.log(event.market.symbolEmojis, event.eventName);
+        }
+      },
+      onConnect(_e) {
+        const innerClient = client.client;
+        console.log("Connected!");
+        console.log("Client state:", innerClient.readyState);
+        console.log("Open state:", innerClient.OPEN);
+        client.subscribeEvents(["Swap", "Chat", "MarketLatestState"]);
+      },,
+      onError(e) {
+        console.error(e);
+      },
+      onClose(e) {
+        console.info("Closing!", e);
+      },
+    },
+    permanentlySubscribeToMarketRegistrations: true,
+  });
+
+  while (true) {
+    await sleep(10000);
+  }
+};
+
+main().then(() => console.log("Done!"));
+```
+
+Example output of a swap:
+
+<!-- markdownlint-disable MD013 -->
+
+```typescript
+{
+  swapper: '0xf0592f4cfada893dedec5e1f7c164d925ba423b0ddf098ad91a1eb3d34d77430',
+  integrator: '0x99994f5124fa5cc95538217780cbfc01e4c4f842dfcc453890755b2ce4779999',
+  integratorFee: 50000n,
+  inputAmount: 5000000n,
+  isSell: false,
+  integratorFeeRateBPs: 100,
+  netProceeds: 35273041585n,
+  baseVolume: 35273041585n,
+  quoteVolume: 4950000n,
+  avgExecutionPriceQ64: 2588701712746337n,
+  poolFee: 88403612n,
+  startsInBondingCurve: false,
+  resultsInStateTransition: false,
+  balanceAsFractionOfCirculatingSupplyBeforeQ64: 145424341860594414n,
+  balanceAsFractionOfCirculatingSupplyAfterQ64: 145601208616530340n
+}
+[ '🐘' ] Swap
+[ '🐘' ] State
+```
+
+<!-- markdownlint-enable MD013 -->
+
 ## Common errors
 
 ### Error: Missing environment variables \$\{key}
