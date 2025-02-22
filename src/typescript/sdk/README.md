@@ -224,7 +224,7 @@ export const connect = () => {
   // and `src/docker` for more info on running the broker locally.
   const url = "ws://localhost:3009";
 
-  new WebSocketClient({
+  const client = new WebSocketClient({
     url,
     listeners: {
       // Callback upon receiving any WebSocket message. `event` is automatically
@@ -237,7 +237,7 @@ export const connect = () => {
             avgPrice: toNominalPrice(swap.avgExecutionPriceQ64).toFixed(9),
             curvePrice: calculateCurvePrice(state).toFixed(9),
           });
-
+        }
         if (isEventModelWithMarket(event)) {
           console.log(event.market.symbolEmojis, event.eventName);
         }
