@@ -14,8 +14,9 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "lib/utils/decimals";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
+import { type SwapEventModel } from "@sdk/indexer-v2/types";
 
-const toTableItem = ({ swap, transaction }) => ({
+const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),
   apt: swap.quoteVolume,
   emoji: swap.baseVolume,
@@ -24,6 +25,7 @@ const toTableItem = ({ swap, transaction }) => ({
   priceQ64: swap.avgExecutionPriceQ64,
   swapper: swap.swapper,
   version: transaction.version,
+  guid,
 });
 
 const HARD_LIMIT = 500;
@@ -138,7 +140,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       }
       textFormat="body-sm"
       columns={columns}
-      getKey={(item) => item.version.toString()}
+      getKey={(item) => item.guid}
       items={sortedSwaps}
     />
   );
