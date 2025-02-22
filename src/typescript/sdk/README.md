@@ -3,7 +3,7 @@
 ## Overview
 
 The emojicoin SDK was originally used to supplement the next.js frontend
-with server-side queries and API keys. As such, there are a few setup
+with server-side queries that use private API keys. As such, there are a few
 configurations and quirks to be mindful of when using the SDK.
 
 ### Loading environment variables
