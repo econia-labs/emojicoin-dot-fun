@@ -107,7 +107,7 @@
     "build:no-checks": "IGNORE_BUILD_ERRORS=true next build --no-lint",
     "check": "next build --experimental-build-mode compile",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
-    "dev": "next dev --turbo --port 3001",
+    "dev": "NODE_OPTIONS='--inspect' next dev --turbo --port 3001",
     "format": "pnpm _format --list-different --write",
     "format:check": "pnpm _format --check",
     "lint": "eslint --max-warnings=0 -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
