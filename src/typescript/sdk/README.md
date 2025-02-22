@@ -203,16 +203,11 @@ if (exists) {
 
 ## Using the WebSocketClient
 
-The simplest way to test the WebSocketClient and endpoint is by running a local
-network. You can do this by navigating to `src/typescript` and running:
+You can use the custom WebSocketClient class as a light wrapper around
+a simple WebSocket connection to the `broker` service. It automatically
+parses events emitted from the `broker` into emojicoin event models.
 
-```shell
-# Please note this may overwrite any existing Aptos local network data.
-pnpm run docker:up
-```
-
-Then you can interact with the contract locally and see events come in in real
-time with the code below:
+Here's a simple example of an automatically reconnecting connection:
 
 ```typescript
 import { sleep } from "@aptos-labs/ts-sdk";
@@ -225,11 +220,12 @@ import {
 } from "@econia-labs/emojicoin-sdk";
 
 export const connect = () => {
-  const client = new WebSocketClient({
-    // The WebSockets endpoint for the `broker` service. See `src/rust/broker`
-    // and `src/docker`. If you loaded an env file, you can also just use
-    // `process.env.NEXT_PUBLIC_BROKER_URL` here.
-    url: "ws://localhost:3009",
+  // The WebSockets endpoint for the `broker` service. See `src/rust/broker`
+  // and `src/docker` for more info on running the broker locally.
+  const url = "ws://localhost:3009";
+
+  new WebSocketClient({
+    url,
     listeners: {
       // Callback upon receiving any WebSocket message. `event` is automatically
       // deserialized into an emojicoin event model.
