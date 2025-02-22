@@ -187,7 +187,9 @@ await emojicoin.chat(account, emojis, arr);
 
 // As a bonus, check if the market exists:
 const exists = await emojicoin.view.marketExists(emojis);
-console.log(`Yes, ${emojis.join("")} exists!`);
+if (exists) {
+  console.log(`Yes, ${emojis.join("")} exists!`);
+}
 ```
 
 ## Common errors
