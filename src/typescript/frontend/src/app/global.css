@@ -1,5 +1,5 @@
 /* cspell:disable */
-/* 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,7 +96,7 @@
   :root {
     --radius: 0.5rem;
   }
-} */
+}
 
 #home {
   width: 100%;

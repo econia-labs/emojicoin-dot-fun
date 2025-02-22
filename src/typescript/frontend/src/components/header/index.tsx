@@ -19,6 +19,7 @@ import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton
 import { useSearchParams } from "next/navigation";
 import Link, { type LinkProps } from "next/link";
 import { useEmojiPicker } from "context/emoji-picker-context";
+import { StyledImage } from "components/image/styled";
 
 const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
   const { isDesktop } = useMatchBreakpoints();
@@ -64,8 +65,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
         variants={slideTopVariants(offsetHeight)}
       >
         <Link className="mt-[6px]" {...linkProps}>
-          <StyledClickItem>
-          </StyledClickItem>
+          <StyledClickItem></StyledClickItem>
         </Link>
 
         <StyledCloseIcon>
@@ -77,11 +77,12 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
         <Flex my="30px" justifyContent="space-between" alignItems="center">
           <Link className="ml-[50px]" {...linkProps}>
             <StyledClickItem>
+              <StyledImage src="/images/logo.svg" alt="logo" className="header-logo w-full" />
             </StyledClickItem>
           </Link>
 
           {isDesktop && (
-            <FlexGap marginRight="50px" gap="24px" alignItems="center">
+            <FlexGap marginRight="10px" gap="50px" alignItems="center">
               {linksForCurrentPage.map(({ title, path, width }) => {
                 return (
                   <Link

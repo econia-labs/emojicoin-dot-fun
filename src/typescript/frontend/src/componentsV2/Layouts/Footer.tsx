@@ -8,7 +8,7 @@ const FooterComponent = (): JSX.Element => {
         <Container>
           <TextWrapper>
             <FooterText>
-              <a href="https://valuesnetwork.com">V.M.C is a product of Values Network.</a>
+              V.M.C is a product of <a href="https://www.values.network">Values Network.</a>
             </FooterText>
           </TextWrapper>
         </Container>

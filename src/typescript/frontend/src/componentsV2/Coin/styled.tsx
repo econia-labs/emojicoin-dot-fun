@@ -12,6 +12,8 @@ export const CoinTitle = styled.h1`
   font-weight: bold;
   color: white;
   margin-bottom: 16px;
+  text-transform: uppercase;
+  text-align: center;
 `;
 
 export const CoinDescription = styled.p`

@@ -2,7 +2,7 @@ import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { MarketValidityIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import { useRegisterMarket } from "../hooks/use-register-market";
@@ -27,8 +27,20 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   );
   const { aptBalance, refetchIfStale } = useAptos();
 
+  const [launchCoinData, setLaunchCoinData] = useState({
+    title: "",
+    description: "",
+    image: "",
+  });
+
   const { registerMarket, cost } = useRegisterMarket();
-  const { invalid, registered } = useIsMarketRegistered();
+  const { invalid: isEmojiSelected, registered } = useIsMarketRegistered();
+
+  const invalid =
+    isEmojiSelected ||
+    !launchCoinData.title ||
+    !launchCoinData.description ||
+    !launchCoinData.image;
 
   useEffect(() => {
     return () => setIsLoadingRegisteredMarket(false);
@@ -58,7 +70,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
 
   const handleClick = async () => {
     if (!invalid && !registered) {
-      await registerMarket();
+      await registerMarket(launchCoinData);
     }
   };
 
@@ -88,6 +100,35 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
                 handleClick={handleClick}
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
+              />
+
+              {/* Title Input */}
+              <input
+                type="text"
+                placeholder="Enter Title"
+                className="mt-4 p-3 !border !border-solid !border-light-gray rounded-md"
+                value={launchCoinData.title}
+                onChange={(e) => setLaunchCoinData({ ...launchCoinData, title: e.target.value })}
+              />
+
+              {/* Image Upload Input */}
+              <input
+                type="text"
+                placeholder="Enter Image URL"
+                className="mt-4 p-3 !border !border-solid !border-light-gray rounded-md"
+                value={launchCoinData.image}
+                onChange={(e) => setLaunchCoinData({ ...launchCoinData, image: e.target.value })}
+              />
+
+              {/* Description Input */}
+              <textarea
+                placeholder="Enter Description"
+                className="mt-4 p-3 !border !border-solid !border-light-gray rounded-md"
+                rows={3}
+                value={launchCoinData.description}
+                onChange={(e) =>
+                  setLaunchCoinData({ ...launchCoinData, description: e.target.value })
+                }
               />
             </div>
           </div>
@@ -186,7 +227,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
               invalid={invalid}
               registered={registered}
               onWalletButtonClick={() => {
-                registerMarket();
+                registerMarket(launchCoinData);
               }}
             />
           </motion.div>

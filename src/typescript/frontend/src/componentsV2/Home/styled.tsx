@@ -59,7 +59,7 @@ export const StatsText = styled.p`
   font-size: 20px !important;
   line-height: 36px !important;
   letter-spacing: 0% !important;
-
+  text-transform: uppercase;
   span {
     font-weight: 700 !important;
   }

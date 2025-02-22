@@ -1,21 +1,63 @@
 "use client";
+import React, { useMemo, useState } from "react";
 import { StyledImage } from "components/image/styled";
-import React from "react";
 import { StatsText } from "./styled";
+import { type MainCardProps } from "components/pages/home/components/main-card/MainCard";
+import { translationFunction } from "context/language-context";
+import { sortByValue } from "lib/utils/sort-events";
+import { useInterval } from "react-use";
+import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
+import { FormattedNumber } from "components/FormattedNumber";
+import Link from "next/link";
 
-const HeroSection = (): JSX.Element => {
+const FEATURED_MARKET_INTERVAL = 5 * 1000;
+const MAX_NUM_FEATURED_MARKETS = 5;
+
+const HeroSection: React.FC<MainCardProps> = (props): JSX.Element => {
+  const featuredMarkets = useMemo(() => {
+    const sorted = props.featuredMarkets.toSorted((a, b) =>
+      sortByValue(a.deltaPercentage, b.deltaPercentage, "desc")
+    );
+    const positives = sorted.filter(({ deltaPercentage }) => deltaPercentage > 0);
+    const notPositives = sorted.filter(({ deltaPercentage }) => deltaPercentage <= 0);
+    return positives.length
+      ? positives.slice(0, MAX_NUM_FEATURED_MARKETS)
+      : notPositives.slice(0, MAX_NUM_FEATURED_MARKETS);
+  }, [props.featuredMarkets]);
+
+  const { t } = translationFunction();
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useInterval(() => {
+    setCurrentIndex((i) => (i + 1) % Math.min(featuredMarkets.length, MAX_NUM_FEATURED_MARKETS));
+  }, FEATURED_MARKET_INTERVAL);
+
+  const featured = useMemo(() => featuredMarkets.at(currentIndex), [featuredMarkets, currentIndex]);
+
+  const { marketCap, dailyVolume, allTimeVolume, priceDelta } = useMemo(() => {
+    return {
+      marketCap: BigInt(featured?.state.instantaneousStats.marketCap ?? 0),
+      dailyVolume: BigInt(featured?.dailyVolume ?? 0),
+      allTimeVolume: BigInt(featured?.state.cumulativeStats.quoteVolume ?? 0),
+      priceDelta: featured?.deltaPercentage ?? 0,
+    };
+  }, [featured]);
+
+  const usdMarketCap = useUsdMarketCap(marketCap);
+
   return (
     <>
       <div className="w-full px-4 md:w-4/12 lg:w-4/12">
-        <div className="wow fadeInUp group" data-wow-delay=".1s">
-          <StyledImage src="/images/home/banner-circle.png" />
-        </div>
+        <Link href={`/coin/droplet`} className="wow fadeInUp group" data-wow-delay=".1s">
+          <StyledImage src="/images/home/banner-circle.png" className="cursor-pointer"/>
+        </Link>
       </div>
       <div className="w-full px-10 sm-px-10 md:w-1/2 w60-box">
         <div className="wow fadeInUp group" data-wow-delay=".1s">
           <div className="flex  mb-5">
-            <div className="mr-3">
-              <StyledImage src="/images/home/fire.png" />
+            <div className="mr-3 ">
+              <StyledImage src="/images/home/fire.png"  />
             </div>
             <div className="px-4 py-2 font-medium text-lg border-green text-green rounded-full mr-3 b-1">
               +30.65%
@@ -24,17 +66,26 @@ const HeroSection = (): JSX.Element => {
               1% to GREENPEACE
             </div>
           </div>
-          <h1 className="mb-3 text-left main-title font-bold text-white dark:text-white">
-            #1 COIN TITLE
-          </h1>
+          <Link href={`/coin/droplet`} className="mb-3 text-left main-title font-bold text-white dark:text-white cursor-pointer">
+            {featured?.market.symbolData?.name ?? "BLACK HEART"}
+          </Link>
           <StatsText>
-            MKT CAP: <span>$4,675,4534.99</span>
+            {t("Mkt. Cap:")} {/* $4,675,4534.99 */}
+            {usdMarketCap === undefined ? (
+              <FormattedNumber value={marketCap} nominalize scramble />
+            ) : (
+              <FormattedNumber value={usdMarketCap} scramble />
+            )}
+            &nbsp;
+            {usdMarketCap !== undefined && "$"}
           </StatsText>
           <StatsText>
-            24H VOLUME: <span>$40,675,4534.99</span>
+            {t("24 hour vol:")} {/* $40,675,4534.99 */}
+            <FormattedNumber value={dailyVolume} scramble nominalize />
           </StatsText>
           <StatsText>
-            ALL-TIME VOLUME: <span>$400,675,4534.99</span>
+            {t("All-time vol:")} {/* $400,675,4534.99 */}
+            <FormattedNumber value={allTimeVolume} scramble nominalize />
           </StatsText>
         </div>
       </div>

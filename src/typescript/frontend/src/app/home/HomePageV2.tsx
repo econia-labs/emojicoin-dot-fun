@@ -16,14 +16,20 @@ export interface HomePageProps {
   priceFeed: DatabaseModels["price_feed"][];
 }
 
-const HomePageComponentV2: React.FC<HomePageProps> = async (): Promise<JSX.Element> => {
+const HomePageComponentV2: React.FC<HomePageProps> = async ({
+  markets,
+  numMarkets,
+  page,
+  sortBy,
+  priceFeed,
+}): Promise<JSX.Element> => {
   return (
     <div id="home" className="relative overflow-hidden pt-[120px] md:pt-[130px] lg:pt-[130px]">
       <div className="container">
         <div className="mx-0 md:-mx-4 flex items-center justify-between flex-wrap mt-16">
-          <HeroSection />
+          <HeroSection featuredMarkets={priceFeed} page={page} sortBy={sortBy} />
           <TabBar />
-          <CoinsList />
+          <CoinsList markets={markets} numMarkets={numMarkets} page={page} sortBy={sortBy} />
         </div>
       </div>
       <StyledImage

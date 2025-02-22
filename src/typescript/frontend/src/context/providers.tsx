@@ -36,8 +36,8 @@ import { completePickerData } from "utils/picker-data/complete-picker-data";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { init } from "emoji-mart";
 import { NewCoinInputProvider } from "./new-coin-input-context/NewCoinInputContextProvider";
-import HeaderComponent from "componentsV2/Layouts/Header";
 import FooterComponent from "componentsV2/Layouts/Footer";
+import { Header } from "components";
 
 /**
  * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
@@ -94,8 +94,7 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
                     <Suspense fallback={<Loader />}>
                       <StyledToaster />
                       {/* <ContentWrapper> */}
-                        {/* <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} /> */}
-                        <HeaderComponent />
+                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
                         <GeoblockedBanner />
                         {children}
                         <FooterComponent />

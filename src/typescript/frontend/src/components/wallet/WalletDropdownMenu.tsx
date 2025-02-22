@@ -37,7 +37,8 @@ const WalletDropdownMenu = () => {
   }, [addressName, t]);
 
   const { ref, replay } = useScramble({
-    text: text.startsWith("0x") ? `0x${text.slice(2).toUpperCase()}` : text.toUpperCase(),
+    // text: text.startsWith("0x") ? `0x${text.slice(2).toUpperCase()}` : text.toUpperCase(),
+    text: "WALLET DISCONNECT",
     overdrive: false,
     overflow: false,
     speed: 0.6,
@@ -47,7 +48,7 @@ const WalletDropdownMenu = () => {
   });
 
   const width = useMemo(() => {
-    return `${text.length + 1}ch`;
+    return `${text.length + 8}ch`;
   }, [text]);
 
   const handleReplay = (enabled: boolean, replay: () => void) => {
@@ -63,19 +64,19 @@ const WalletDropdownMenu = () => {
         <DropdownTrigger asChild className="focus:outline-none">
           <button className="" onMouseOver={() => handleReplay(enabled, replay)}>
             <div className="flex flex-row text-ec-blue text-2xl">
-              <Emoji
+              {/* <Emoji
                 className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
                 emojis={emoji("high voltage")}
-              />
+              /> */}
               <p
                 className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
-                style={{ width, maxWidth: width }}
+                style={{ width, maxWidth: width, color: "#A562FF" }}
                 ref={ref}
               />
-              <Emoji
+              {/* <Emoji
                 className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
                 emojis={emoji("high voltage")}
-              />
+              /> */}
             </div>
           </button>
         </DropdownTrigger>

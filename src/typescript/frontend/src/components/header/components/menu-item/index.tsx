@@ -19,22 +19,22 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, width, onClick = () => {} })
 
   return (
     <FlexGap gap="8px" onMouseOver={replay} onClick={onClick}>
-      <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">
+      {/* <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">
         {"{ "}
-      </Text>
+      </Text> */}
       <Text
         textScale="pixelHeading4"
-        color="econiaBlue"
+        color="white"
         width={width}
         maxWidth={width}
         textTransform="uppercase"
         fontSize="24px"
         ref={ref}
-        ellipsis
+        // ellipsis
       />
-      <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">
+      {/* <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">
         {" }"}
-      </Text>
+      </Text> */}
     </FlexGap>
   );
 };
