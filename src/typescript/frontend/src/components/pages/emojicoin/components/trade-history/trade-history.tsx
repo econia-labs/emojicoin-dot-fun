@@ -14,8 +14,9 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "lib/utils/decimals";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
+import { type SwapEventModel } from "@sdk/indexer-v2/types";
 
-const toTableItem = ({ swap, transaction }) => ({
+const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),
   apt: swap.quoteVolume,
   emoji: swap.baseVolume,
@@ -24,6 +25,7 @@ const toTableItem = ({ swap, transaction }) => ({
   priceQ64: swap.avgExecutionPriceQ64,
   swapper: swap.swapper,
   version: transaction.version,
+  guid,
 });
 
 const HARD_LIMIT = 500;
@@ -59,7 +61,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Rank",
         id: "rank",
         cellClassName: "pl-10",
-        width: 100,
+        width: 50,
         renderCell: (item) => (
           <Popup
             content={
@@ -80,13 +82,11 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "APT",
         id: "apt",
-        width: 80,
         renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
       },
       {
         text: props.data.symbol,
         id: "amount",
-        width: 80,
         renderCell: (item) => (
           <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
         ),
@@ -94,6 +94,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Time",
         id: "time",
+        width: 120,
         renderCell: (item) =>
           item.date.toLocaleString(undefined, {
             month: "2-digit" as const,
@@ -106,6 +107,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Price",
         id: "price",
+        width: 80,
         renderCell: (item) => (
           <ColoredPriceDisplay
             q64
@@ -119,6 +121,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Sender",
         id: "sender",
+        width: 120,
         renderCell: (item) => <WalletAddressCell address={item.swapper} />,
       },
     ],
@@ -138,7 +141,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       }
       textFormat="body-sm"
       columns={columns}
-      getKey={(item) => item.version.toString()}
+      getKey={(item) => item.guid}
       items={sortedSwaps}
     />
   );

@@ -19,6 +19,8 @@ const TableHeader = React.forwardRef<
     ref={ref}
     className={cn(
       "text-ec-blue body-lg bg-black uppercase text-center sticky -top-[1px] z-10",
+      "[&_td]:!border [&_td]:!border-dark-gray [&_td]:before:absolute [&_td]:before:top-0",
+      "[&_td]:before:h-[1px] [&_td]:before:w-full [&_td]:before:bg-dark-gray",
       className
     )}
     {...props}
@@ -49,7 +51,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-8 align-middle font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-normal",
+      "h-8 align-middle tracking-wide font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props}
@@ -84,6 +86,16 @@ const TableRow = React.forwardRef<
   HTMLTableRowElement,
   HTMLMotionProps<"tr"> & { noHover?: boolean; isHeader?: boolean; index?: number; height?: number }
 >(({ className, height = 33, noHover, isHeader = false, index = 0, ...props }, ref) => {
+  // Shorter duration for rows further down, to avoid them taking forever to animate in.
+  const delay = React.useMemo(() => {
+    if (index <= 30) {
+      return index * 0.025;
+    }
+    const first30 = 30 * 0.025;
+    const after30 = (index % 30) * 0.01;
+    return first30 + after30;
+  }, [index]);
+
   return (
     <motion.tr
       layout
@@ -96,14 +108,18 @@ const TableRow = React.forwardRef<
         opacity: 1,
         transition: {
           type: "just",
-          delay: index * 0.03,
+          delay,
         },
       }}
-      whileHover={{
-        filter: "brightness(1.05) saturate(1.1)",
-        boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-        transition: { duration: 0.05 },
-      }}
+      whileHover={
+        !isHeader
+          ? {
+              filter: "brightness(1.05) saturate(1.1)",
+              boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
+              transition: { duration: 0.05 },
+            }
+          : {}
+      }
       ref={ref}
       style={{ height, ...props.style }}
       className={cn(

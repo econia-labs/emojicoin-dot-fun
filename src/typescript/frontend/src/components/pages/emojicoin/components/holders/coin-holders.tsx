@@ -6,7 +6,7 @@ import { AptCell } from "components/ui/table-cells/apt-cell";
 import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 import { useAptPrice } from "context/AptPrice";
-import { type TokenBalance } from "lib/aptos-indexer/fungible-assets";
+import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
 import { toNominal } from "lib/utils/decimals";
 import { useRouter } from "next/navigation";
 import { useMemo, type FC } from "react";
@@ -14,7 +14,7 @@ import { ROUTES } from "router/routes";
 
 interface Props {
   emojicoin: string;
-  holders: TokenBalance[];
+  holders: AssetBalance[];
   marketView: Types["MarketView"];
 }
 
@@ -50,34 +50,34 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
         id: "value",
         text: "APT",
         width: 80,
-        renderCell: (holder) => <AptCell value={holder.value} />,
+        renderCell: (holder) => <AptCell value={holder.value} decimals={2} style="fixed" />,
       },
       {
         id: "balance",
         text: emojicoin,
-        width: 80,
-        renderCell: (holder) => <FormattedNumber scramble value={holder.amount} style={"fixed"} />,
+        width: 120,
+        renderCell: (holder) => <FormattedNumber value={holder.amount} style={"fixed"} />,
       },
       {
         id: "supply-percentage",
         text: "Supply %",
-        width: 80,
+        width: 120,
         renderCell: (holder) => (
-          <FormattedNumber scramble value={holder.supplyPercentage} suffix="%" />
+          <FormattedNumber value={holder.supplyPercentage} style={"fixed"} suffix="%" />
         ),
       },
       {
         id: "usd-value",
         text: "USD",
-        width: 80,
+        width: 100,
         renderCell: (holder) => (
-          <FormattedNumber scramble value={holder.usdValue} style={"fixed"} prefix="$" />
+          <FormattedNumber value={holder.usdValue} style={"fixed"} prefix="$" />
         ),
       },
       {
         id: "address",
         text: "Holder",
-        width: 50,
+        width: 160,
         renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
       },
     ],

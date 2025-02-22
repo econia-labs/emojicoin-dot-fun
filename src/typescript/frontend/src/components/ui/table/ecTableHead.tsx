@@ -30,18 +30,18 @@ export const EcTableHead: FC<SortableHeadProps> = ({
 
   return (
     <TableHead
-      className={cn(setSort ? "cursor-pointer" : "")}
+      className={cn(setSort ? "cursor-pointer hover:brightness-[1.5]" : "")}
       onClick={
         isSortable
           ? () => setSort({ column: id, direction: currDirection === "desc" ? "asc" : "desc" })
           : undefined
       }
     >
-      <div
+      <span
         style={{ minWidth: width ? `${width}px` : undefined }}
         className={cn(
           "w-full flex gap-1 items-center",
-          index === 0 ? "pl-6" : index === columnsCount - 1 ? "pr-6" : "",
+          index === 0 ? "pl-4" : index === columnsCount - 1 ? "pr-6" : "",
           index === 0 ? "justify-start" : "justify-end",
           className
         )}
@@ -49,17 +49,18 @@ export const EcTableHead: FC<SortableHeadProps> = ({
         <span>{text}</span>
         {currDirection ? (
           <SortArrow
-            className={
+            className={cn(
               currDirection === "desc"
-                ? "rotate-180 -translate-x-[5px] -translate-y-1"
-                : "translate-x-[6px]"
-            }
+                ? "rotate-180 -translate-x-[5px] -translate-y-[3px]"
+                : "translate-x-[6px] translate-y-0.5",
+              "!transition-none"
+            )}
             color="econiaBlue"
           />
         ) : isSortable ? (
           <Arrows className="translate-x-1" />
         ) : undefined}
-      </div>
+      </span>
     </TableHead>
   );
 };

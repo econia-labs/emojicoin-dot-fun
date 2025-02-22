@@ -12,6 +12,7 @@ import {
   REWARDS_MODULE_ADDRESS,
 } from "../const";
 import { type TypeTagInput } from "../emojicoin_dot_fun";
+import { removeLeadingZeros } from "./account-address";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
@@ -97,3 +98,25 @@ const structStringToName = new Map(
 
 export const typeTagInputToStructName = (typeTag: TypeTagInput): EmojicoinStructName | undefined =>
   structStringToName.get(typeTag.toString() as StructTagString);
+
+/**
+ * Primarily for the `GraphQL` indexer, since it expects fungible asset/coin types to not have
+ * leading zeros at the beginning of the struct type tag.
+ *
+ * @param assetType a type tag string that matches the form `0x${string}::${string}::${string}
+ * @throws if `assetType` cannot be converted to a TypeTagStruct type
+ * @returns a coin type tag with no leading zeros
+ */
+export const removeLeadingZerosFromStructString = (
+  assetType: `0x${string}::${string}::${string}` | ReturnType<TypeTagStruct["toString"]>
+) => {
+  const typeTag = parseTypeTag(assetType);
+  if (!typeTag.isStruct()) {
+    throw new Error("Invalid coin type tag.");
+  }
+
+  const { address, moduleName, name } = typeTag.value;
+  const shortenedAddress = removeLeadingZeros(address.toString());
+
+  return `${shortenedAddress}::${moduleName.identifier}::${name.identifier}`;
+};
