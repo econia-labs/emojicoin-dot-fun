@@ -1,22 +1,20 @@
-import { type FullCoinData } from "app/wallet/[address]/page";
 import { FormattedNumber } from "components/FormattedNumber";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { TableCell, TableRow } from "components/ui/table/table";
 import { useAptPrice } from "context/AptPrice";
+import { type FullCoinData } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
 import { useRouter } from "next/navigation";
-import { useMemo, type FC } from "react";
+import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
 interface Props {
   index: number;
   coinData: FullCoinData;
-  walletStats: {
-    totalValue: number;
-  };
+  totalValue: number;
 }
 
-export const PortfolioRow: FC<Props> = ({ coinData, index, walletStats }) => {
+export const PortfolioRow = ({ coinData, index, totalValue }: Props) => {
   const router = useRouter();
   const aptPrice = useAptPrice();
   const usdOwnedValue = useMemo(
@@ -26,7 +24,7 @@ export const PortfolioRow: FC<Props> = ({ coinData, index, walletStats }) => {
   return (
     <TableRow
       index={index}
-      onClick={() => router.push("/market/" + coinData.emojiPath)}
+      onClick={() => router.push(`${ROUTES.market}/${coinData.emojiPath}`)}
       className="cursor-pointer"
     >
       <TableCell className="text-center">
@@ -36,28 +34,22 @@ export const PortfolioRow: FC<Props> = ({ coinData, index, walletStats }) => {
             href={`${ROUTES.pools}?pool=${coinData.symbol}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <Emoji
-              className={`${coinData.symbol.length <= 2 ? "text-[24px]" : "text-[20px]"} text-nowrap`}
-              emojis={coinData.symbol}
-            />
+            <Emoji className={`text-[1.2em] text-nowrap`} emojis={coinData.symbol} />
           </a>
         ) : (
-          <Emoji
-            className={`${coinData.symbol.length <= 2 ? "text-[24px]" : "text-[20px]"} text-nowrap`}
-            emojis={coinData.symbol}
-          />
+          <Emoji className={`text-[1.2em] text-nowrap`} emojis={coinData.symbol} />
         )}
       </TableCell>
       <TableCell className="text-end">
         <FormattedNumber
-          scramble
-          value={(coinData.ownedValue / walletStats.totalValue) * 100}
+          value={(coinData.ownedValue / totalValue) * 100}
           suffix="%"
           style={"fixed"}
+          className="mr-[2em]"
         />
       </TableCell>
       <TableCell className="text-right">
-        <FormattedNumber scramble value={coinData.amount} style={"fixed"} />
+        <FormattedNumber value={coinData.amount} style={"fixed"} className="mr-[1.25em]" />
       </TableCell>
       <TableCell className="text-right">
         <span className="flex items-center justify-end gap-1">
@@ -65,8 +57,8 @@ export const PortfolioRow: FC<Props> = ({ coinData, index, walletStats }) => {
         </span>
       </TableCell>
       <TableCell className="text-right">
-        <span className="flex items-center justify-end gap-1">
-          <FormattedNumber scramble value={usdOwnedValue} style={"fixed"} prefix="$" />
+        <span className="flex items-center justify-end gap-1 mr-[1.75em]">
+          <FormattedNumber value={usdOwnedValue} style={"fixed"} prefix="$" />
         </span>
       </TableCell>
       <TableCell className="text-right px-6">

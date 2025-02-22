@@ -21,17 +21,17 @@ export const EcTableRow = <T,>({ index, onClick, height, item, columns }: Props<
     >
       {columns.map((col, cellIndex) => (
         <TableCell key={cellIndex}>
-          <span
+          <div
             className={cn(
               "flex",
-              cellIndex === 0 ? "pl-6" : cellIndex === columns.length - 1 ? "pr-6" : "",
+              cellIndex === 0 ? "pl-4" : cellIndex === columns.length - 1 ? "pr-6" : "",
               cellIndex === 0 ? "justify-start" : "justify-end",
               col.className,
               col.cellClassName
             )}
           >
             {col.renderCell?.(item)}
-          </span>
+          </div>
         </TableCell>
       ))}
     </TableRow>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { EcTableHead } from "./ecTableHead";
 import { Table, TableHeader, TableRow } from "./table";
 import _ from "lodash";
@@ -41,7 +41,13 @@ export const EcTable = <T,>({
   onClick,
   textFormat = "body-md",
 }: TableProps<T>) => {
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  // const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
+  const containerRef = useCallback((node: HTMLElement | null) => {
+    if (node) {
+      setContainerHeight(node.clientHeight);
+    }
+  }, []);
   const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
     column: "ownedValue",
     direction: "desc",
@@ -53,7 +59,7 @@ export const EcTable = <T,>({
   }, [columns, sort.column, sort.direction, items]);
 
   return (
-    <div ref={(ref) => setContainerRef(ref)} className={cn("flex w-full", className)}>
+    <div ref={containerRef} className={cn("flex w-full", className)}>
       <Table className={cn("border-solid border-[1px] border-dark-gray")}>
         <TableHeader>
           <TableRow isHeader>
@@ -76,7 +82,7 @@ export const EcTable = <T,>({
           className={textFormat}
           onClick={onClick}
           rowHeight={rowHeight}
-          containerRef={containerRef}
+          containerHeight={containerHeight}
           items={sorted}
           columns={columns}
           renderRow={renderRow}
