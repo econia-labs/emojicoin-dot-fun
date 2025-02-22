@@ -1,10 +1,10 @@
 import { Fragment, useMemo } from "react";
 import { type TableProps } from "./ecTable";
-import { TableBody, TableRow } from "./table";
+import { TableBody, TableCell, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
 
 export const EcTableBody = <T,>({
-  containerRef,
+  containerHeight,
   className,
   items,
   renderRow,
@@ -12,7 +12,7 @@ export const EcTableBody = <T,>({
   columns,
   getKey,
   onClick,
-}: TableProps<T> & { containerRef: HTMLDivElement | null; className: string }) => {
+}: TableProps<T> & { containerHeight: number; className: string }) => {
   // Make sure there is either a renderRow function or a renderCell function in each column.
   if (!renderRow && (!columns || columns.some((col) => !col.renderCell)))
     throw new Error(
@@ -20,13 +20,13 @@ export const EcTableBody = <T,>({
     );
 
   const minRows = useMemo(() => {
-    if (containerRef) {
-      const height = containerRef.clientHeight;
+    if (containerHeight) {
+      const height = containerHeight;
       // We subtract 1 because of the header, and 1 to remove last row to prevent overflow
       return Math.floor(height / rowHeight) - 2;
     }
     return 0;
-  }, [rowHeight, containerRef]);
+  }, [rowHeight, containerHeight]);
 
   return (
     <TableBody className={className}>
@@ -43,7 +43,9 @@ export const EcTableBody = <T,>({
             />
           ))}
       {Array.from({ length: minRows - items.length }).map((_, i) => (
-        <TableRow key={i} index={items.length + i} noHover height={rowHeight} />
+        <TableRow key={i} index={items.length + i} height={rowHeight}>
+          <TableCell className="absolute !w-full !h-full" />
+        </TableRow>
       ))}
     </TableBody>
   );

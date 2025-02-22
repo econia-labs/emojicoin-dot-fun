@@ -1,14 +1,13 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
 import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
-import { encodeEmojis, SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { type Metadata } from "next";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
-import { fetchCachedHolders } from "lib/aptos-indexer/fungible-assets";
-import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
+import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 
 export const revalidate = 2;
@@ -77,14 +76,14 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
 
   if (state) {
     const { marketID } = state.market;
-    const addresses = getEmojicoinMarketAddressAndTypeTags({ symbolBytes: encodeEmojis(emojis) });
+    const marketAddress = getMarketAddress(emojis).toString();
 
     const [chats, swaps, marketView, aptPrice, holders] = await Promise.all([
       fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
-      wrappedCachedContractMarketView(addresses.marketAddress.toString()),
+      wrappedCachedContractMarketView(marketAddress),
       getAptPrice(),
-      fetchCachedHolders(getMarketAddress(emojis).toString()),
+      fetchCachedTopHolders(marketAddress),
     ]);
 
     return (
