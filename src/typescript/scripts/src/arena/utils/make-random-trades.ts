@@ -19,6 +19,7 @@ interface MakeRandomTrades {
   inputAmount?: bigint;
   accountID?: string;
   enterSymbolIndex?: 0 | 1;
+  numTrades?: number;
 }
 
 /**
@@ -37,6 +38,7 @@ export const makeRandomTrades = async ({
   inputAmount = upToOneApt(),
   accountID = getAccountPrefix(account),
   enterSymbolIndex = Math.random() <= 0.5 ? 0 : 1,
+  numTrades = 100,
 }: MakeRandomTrades) => {
   const [symbol0, symbol1] = [melee.market1.symbolEmojis, melee.market2.symbolEmojis];
   const coins = [symbol0, symbol1];
@@ -61,7 +63,7 @@ export const makeRandomTrades = async ({
       });
 
     let i = 0;
-    while (i < 100) {
+    while (i < numTrades) {
       const baseSleep = i * 200;
       const randomizedSleep = Math.random() * 30 * 1000;
       await sleep(baseSleep + randomizedSleep);
