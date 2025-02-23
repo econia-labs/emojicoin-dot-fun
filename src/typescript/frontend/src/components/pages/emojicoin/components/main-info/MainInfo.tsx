@@ -129,8 +129,6 @@ const MainInfo = ({ data }: MainInfoProps) => {
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [data.marketAddress]);
 
-  const dexscreenerButton = <LinkButton name={"dexscreener"} link={undefined} />;
-
   const telegramButton = (
     <LinkButton
       name={"telegram"}
@@ -246,7 +244,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             >
               <Button scale="lg">copy coin address</Button>
             </motion.div>
-            {dexscreenerButton}
+
             {twitterButton}
             {telegramButton}
             {websiteButton}
