@@ -8,23 +8,24 @@ environments.**
 
 ## Loading environment variables and running a script
 
-### Running a script for the local network
+### Running a script on the local network
 
-Run the local stack:
+To run a script on the local network, first make sure the indexer and chain
+are up and running.
 
-### Wipe all local indexer and chain data and restart both
+#### Start or restart the local Docker services
 
 ```shell
+# 1. Wipe all local indexer and chain data and restart both
 pnpm run -w docker:restart
-```
 
-#### Start all local services with existing indexer and chain data
+# OR
 
-```shell
+# 2. Start all local services with existing indexer and chain data
 pnpm run -w docker:up
 ```
 
-#### Initialize arena and make random trades
+#### Initialize the arena and make random trades
 
 ```shell
 # Initialize the local network for the first time, with a new arena:
@@ -36,8 +37,9 @@ pnpm run arena:bots
 
 ### Running a script for non-local networks
 
-To run another script, just load a different environment. You can use the
-existing `package.json` commands or pass a custom env file:
+To run a script that doesn't necessarily need to run on a local network, just
+load a different environment. You can use the existing `package.json` commands
+or pass a custom env file:
 
 ```shell
 # Use the example testnet environment variables:
