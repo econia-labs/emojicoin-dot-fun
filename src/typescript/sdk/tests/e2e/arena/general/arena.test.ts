@@ -393,14 +393,14 @@ describe("ensures leaderboard history is working", () => {
 
     expect(user1LeaderboardData.exited).toEqual(true);
     expect(user1LeaderboardData.lastExit0).toEqual(true);
-    expect(Number(leaderboard![0].profits) / Number(leaderboard![0].losses)).toBeGreaterThan(1);
+    expect(Number(user1LeaderboardData.profits) / Number(user1LeaderboardData.losses)).toBeGreaterThan(1);
 
     expect(user2LeaderboardData.exited).toEqual(true);
     expect(user2LeaderboardData.lastExit0).toEqual(false);
 
     expect(user3LeaderboardData.exited).toEqual(false);
     expect(user3LeaderboardData.lastExit0).toBeNull();
-    expect(Number(leaderboard![2].profits) / Number(leaderboard![2].losses)).toBeLessThan(1);
+    expect(Number(user3LeaderboardData.profits) / Number(user3LeaderboardData.losses)).toBeLessThan(1);
   }, 15000);
 
   it("verifies the data during a melee with no activity", async () => {
