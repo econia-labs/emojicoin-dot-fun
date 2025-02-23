@@ -12,13 +12,19 @@ environments.**
 
 Run the local stack:
 
-```shell
-# To wipe all local indexer and local network data:
-pnpm run -w docker:restart
+### Wipe all local indexer and chain data and restart both
 
-# To boot up the local stack with existing processor/local network data:
+```shell
+pnpm run -w docker:restart
+```
+
+#### Start all local services with existing indexer and chain data
+
+```shell
 pnpm run -w docker:up
 ```
+
+#### Initialize arena and make random trades
 
 ```shell
 # Initialize the local network for the first time, with a new arena:
