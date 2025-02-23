@@ -9,6 +9,7 @@ import { DEFAULT_MELEE_DURATION } from "../utils/const";
 
 const LOG_FAILED = false;
 const NUM_ACCOUNTS = 100;
+const NUM_TRADES = 100;
 
 export const main = async () => {
   const accounts = getRandomFundedAccounts(NUM_ACCOUNTS);
@@ -23,6 +24,7 @@ export const main = async () => {
       makeRandomTrades({
         melee,
         account,
+        numTrades: NUM_TRADES,
       }).catch(async (e) => {
         // Most likely, a new melee has started. Refetch and reset it.
         if (e.message.includes("E_INVALID_COIN_TYPES")) {
