@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   EXCHANGE_NAME,
-  MS_IN_ONE_DAY,
   ResolutionStringToPeriod,
   TV_CHARTING_LIBRARY_RESOLUTIONS,
   WIDGET_OPTIONS,
@@ -41,6 +40,8 @@ import {
 import { emoji, parseJSON } from "utils";
 import { Emoji } from "utils/emoji";
 import { getAptosClient } from "@sdk/utils/aptos-client";
+import useStatePersisted from "@hooks/use-state-persisted";
+import { createSwitch } from "components/charts/EmptyCandlesSwitch";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -72,6 +73,10 @@ export const Chart = (props: ChartContainerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const symbol = props.symbol;
+  const [showEmptyCandles, setShowEmptyCandles] = useStatePersisted(
+    "chart.showEmptyCandles",
+    false
+  );
   const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
@@ -111,9 +116,27 @@ export const Chart = (props: ChartContainerProps) => {
         onResultReadyCallback(symbols);
       },
       resolveSymbol: async (symbolName, onSymbolResolvedCallback, _onErrorCallback) => {
+        // We pass parameters in the symbolName to prevent re-rendering.
+        // This seems to be the only way to seamlessly change some properties such as has_empty_bars without re-creating the whole chart.
+        // Normally, we would add the state showEmptyCandles in the dependency array to re-create the whole datafeed and the chart.
+        // But this causes the re-creation of the whole chart, and briefly breaks the view (for ex: the custom button gets removed and re-added).
+        // This solution allows to call chart.setSymbol with custom params to update the chart seamlessly.
+        // Uses similar syntax to url query params.
+        const [baseSymbolName, params] = symbolName.split("?");
+        const { has_empty_bars } = !params
+          ? {}
+          : params.split("&").reduce(
+              (acc, param) => {
+                const [key, value] = param.split("=");
+                acc[key] = value;
+                return acc;
+              },
+              {} as Record<string, string>
+            );
+
         // Try to look up the symbol as if it were a market ID and then as if it were the actual market symbol,
         // aka, the emoji(s) symbol string.
-        const { symbol } = symbolToEmojis(symbolName);
+        const { symbol } = symbolToEmojis(baseSymbolName);
         if (symbol !== props.symbol) {
           const newRoute = path.join(ROUTES.market, symbol);
           console.debug(`[resolveSymbol]: Redirecting to ${newRoute}`);
@@ -131,8 +154,8 @@ export const Chart = (props: ChartContainerProps) => {
           exchange: EXCHANGE_NAME,
           listed_exchange: "",
           session: "24x7",
-          // Note that `has_empty_bars` causes invalid `time order violation` errors if it's set to `true`.
-          has_empty_bars: true,
+          // If has_empty_bars is undefined, we use showEmptyCandles value, which contains the value from local storage.
+          has_empty_bars: has_empty_bars ? has_empty_bars === "true" || false : showEmptyCandles,
           has_seconds: false,
           has_intraday: true,
           has_daily: true,
@@ -348,6 +371,29 @@ export const Chart = (props: ChartContainerProps) => {
           .catch((error) => {
             console.error("Error applying visible range:", error);
           });
+      });
+
+      tvWidget.current.headerReady().then(() => {
+        if (!tvWidget.current) return;
+        const btn = tvWidget.current.createButton();
+
+        const { setState } = createSwitch(btn, {
+          initialState: showEmptyCandles,
+          label: "Empty candles",
+          onTitle: "Hide empty candles",
+          offTitle: "Show empty candles",
+        });
+
+        btn.addEventListener("click", () => {
+          const chart = tvWidget.current?.activeChart();
+          if (!chart) return;
+          setShowEmptyCandles((prev) => {
+            const show = !prev;
+            chart.setSymbol(`${chart.symbol()}?has_empty_bars=${show}`);
+            setState(show);
+            return show;
+          });
+        });
       });
     }
 
