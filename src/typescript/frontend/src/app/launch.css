@@ -1,0 +1,76 @@
+/* cspell:disable */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.med-pixel-text {
+  font-size: 20px !important;
+  line-height: 25px;
+  font-family: var(--font-pixelar) !important;
+}
+
+@media screen and (min-width: 768px) {
+  .med-pixel-text {
+    font-size: 22px !important;
+    line-height: 27px;
+    font-family: var(--font-pixelar) !important;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .med-pixel-text {
+    font-size: 24px !important;
+    line-height: 30px;
+    font-family: var(--font-pixelar) !important;
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .med-pixel-text {
+    font-size: 32px !important;
+    line-height: 40px;
+    font-family: var(--font-pixelar) !important;
+  }
+}
+
+.med-pixel-search {
+  width: 18px;
+}
+
+.med-pixel-search-arrows {
+  width: 11px;
+}
+
+@media screen and (min-width: 768px) {
+  .med-pixel-search-arrows {
+    width: 12px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .med-pixel-search-arrows {
+    width: 14px;
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .med-pixel-search-arrows {
+    width: 18px;
+  }
+}
+
+.med-pixel-close {
+  width: 12px;
+}
+
+.search-picker {
+  position: relative !important;
+  width: 100% !important;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}

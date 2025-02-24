@@ -1,3 +1,4 @@
+"use client"
 import styled from "styled-components";
 import { ResponsiveBox } from "components/layout/components/responsive-box";
 import { type SkeletonProps } from "components/skeleton/types";

@@ -4,6 +4,22 @@ import { Noto_Color_Emoji } from "next/font/google";
 
 export const fontsStyle = `
   @font-face {
+    font-family: 'Sifonn';
+    src: url('/fonts/sifonn.woff') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: Lora;
+    src: url('/fonts/Lora-Regular.woff') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
     font-family: Pixelar;
     font-style: normal;
     font-weight: 400;
@@ -25,9 +41,11 @@ export const fontsStyle = `
   }
 
   :root {
+    --font-sifonn: 'Sifonn';
     --font-pixelar: Pixelar;
     --font-forma: Forma;
     --font-formaM: FormaM;
+    --font-lora: Lora;
   }
 `;
 
