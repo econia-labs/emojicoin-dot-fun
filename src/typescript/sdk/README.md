@@ -155,7 +155,8 @@ The default configuration options are not as explicit as the auto-generated
 contract classes above.
 
 Please be mindful of the default configuration options in the client.
-See [EmojicoinClient] and the [default config] for more details.
+See the [EmojicoinClient] and the default values passed to the constructor
+for more details.
 
 ### Using the EmojicoinClient
 
@@ -340,7 +341,6 @@ Please [file an issue] if you need access to an import that's not available!
 
 [an import error]: #error-this-module-cannot-be-imported-from-a-client-component-module
 [contract apis]: src/emojicoin_dot_fun/contract-apis/
-[default config]: https://github.com/econia-labs/emojicoin-dot-fun/blob/974e29fa607fa7d4bf391be3f8ed42e74d36cf87/src/typescript/sdk/src/client/emojicoin-client.ts#L153
 [emojicoinclient]: src/client/emojicoin-client.ts
 [file an issue]: https://github.com/econia-labs/emojicoin-dot-fun/issues
 [keeping server-only code out of the client environment]: https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
