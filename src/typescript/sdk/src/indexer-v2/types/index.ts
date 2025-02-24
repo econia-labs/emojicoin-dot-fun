@@ -6,6 +6,7 @@ import {
 } from "../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
+  type EventName,
   toCumulativeStats,
   toInstantaneousStats,
   toLastSwap,
@@ -508,7 +509,7 @@ export const withArenaVaultBalanceUpdateData = curryToNamedType(
   "arenaVaultBalanceUpdate"
 );
 
-const EVENT_NAMES = {
+const EVENT_NAMES: { [key in EventName]: key } = {
   GlobalState: "GlobalState",
   PeriodicState: "PeriodicState",
   MarketRegistration: "MarketRegistration",
@@ -517,8 +518,6 @@ const EVENT_NAMES = {
   Liquidity: "Liquidity",
   State: "State",
 } as const;
-
-export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
 
 const formatEmojis = <T extends { symbol_emojis: SymbolEmoji[] } | { symbolEmojis: SymbolEmoji[] }>(
   data: T
@@ -542,7 +541,7 @@ export const GuidGetters = {
     const registryNonce = "registry_nonce" in data ? data.registry_nonce : data.registryNonce;
     return {
       eventName,
-      guid: `${eventName}::${registryNonce}::` as const,
+      guid: `${eventName}::${registryNonce}` as const,
     };
   },
   periodicStateEvent: (
