@@ -1,12 +1,12 @@
 import { type Metadata } from "next";
 import { emoji } from "utils";
 
-export const DEFAULT_TITLE = "Values.co";
-export const DEFAULT_DESCRIPTION = `Give your wallet the personality it deserves ${emoji("zany face")}${emoji("sparkles")}`;
-export const OG_IMAGES = "/social-preview.png";
+export const DEFAULT_TITLE = "V.M.C";
+export const DEFAULT_DESCRIPTION = `Welcome to Movement Coins`;
+export const OG_IMAGES = "/web-app-manifest-192x192.png";
 export const OG_TYPE = "website";
 export const TWITTER_CARD = "summary";
-export const TWITTER_IMAGES = "/social-preview.png";
+export const TWITTER_IMAGES = "/web-app-manifest-192x192.png";
 
 export const getDefaultMetadata = (): Metadata => {
   /**
