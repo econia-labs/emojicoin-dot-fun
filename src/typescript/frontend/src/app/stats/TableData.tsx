@@ -8,6 +8,7 @@ import { ROUTES } from "router/routes";
 import { EXTERNAL_LINK_PROPS } from "components/link/const";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import { PriceDelta } from "components/price-feed/inner";
+import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 
 export enum Column {
   Price,
@@ -18,18 +19,6 @@ export enum Column {
   Tvl,
   MarketCap,
 }
-
-const NominalPriceDisplay = ({ price }: { price: number }) => {
-  const fixed = price.toFixed(8);
-  const firstSigFigOnwards = fixed.match(/[1-9].*/)?.at(0) ?? "";
-  const beforeSigFig = fixed.slice(0, fixed.length - firstSigFigOnwards.length);
-  return (
-    <>
-      <span className="text-dark-gray">{beforeSigFig}</span>
-      <span className="text-lighter-gray">{firstSigFigOnwards}</span>
-    </>
-  );
-};
 
 export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["market_state"]>({
   data = [] as T[],
@@ -86,14 +75,14 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
       </td>
       <td>{row.market.marketID.toString()}</td>
       <td className={getCN(Column.Price)}>
-        <NominalPriceDisplay price={cells.price(row)} />
+        <ColoredPriceDisplay price={cells.price(row)} />
       </td>
       <td className={getCN(Column.AllTimeVolume)}>{cells.allTimeVolume(row)}</td>
       <td className={getCN(Column.DailyVolume)}>{cells.dailyVolume(row)}</td>
       <td className={getCN(Column.Tvl)}>{cells.tvl(row)}</td>
       <td className={getCN(Column.LastAvgExecutionPrice)}>
         <ExplorerLink className="hover:underline" value={row.transaction.version} type="txn">
-          <NominalPriceDisplay price={cells.lastAvgPrice(row)} />
+          <ColoredPriceDisplay price={cells.lastAvgPrice(row)} />
         </ExplorerLink>
       </td>
       <td className={getCN(Column.MarketCap)}>{cells.marketCap(row)}</td>

@@ -6,6 +6,7 @@ import {
 } from "../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
+  type EventName,
   toCumulativeStats,
   toInstantaneousStats,
   toLastSwap,
@@ -508,7 +509,7 @@ export const withArenaVaultBalanceUpdateData = curryToNamedType(
   "arenaVaultBalanceUpdate"
 );
 
-const EVENT_NAMES = {
+const EVENT_NAMES: { [key in EventName]: key } = {
   GlobalState: "GlobalState",
   PeriodicState: "PeriodicState",
   MarketRegistration: "MarketRegistration",
@@ -517,8 +518,6 @@ const EVENT_NAMES = {
   Liquidity: "Liquidity",
   State: "State",
 } as const;
-
-export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
 
 const formatEmojis = <T extends { symbol_emojis: SymbolEmoji[] } | { symbolEmojis: SymbolEmoji[] }>(
   data: T
@@ -542,7 +541,7 @@ export const GuidGetters = {
     const registryNonce = "registry_nonce" in data ? data.registry_nonce : data.registryNonce;
     return {
       eventName,
-      guid: `${eventName}::${registryNonce}::` as const,
+      guid: `${eventName}::${registryNonce}` as const,
     };
   },
   periodicStateEvent: (
@@ -636,12 +635,6 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
   ...GuidGetters.liquidityEvent(data),
 });
 
-/**
- * Default to 0n while the processor is in need of a cold upgrade, otherwise the /stats
- * page will fail to render and the build can't complete. This is temporary.
- */
-const temporarilyDefaultToZero = (value: AnyNumberString) => BigInt(value ?? 0n);
-
 // Note that daily TVL defaults to `0` since that's the initial value in the database.
 export const toProcessedData = (
   data: ProcessedFields & { daily_tvl_per_lp_coin_growth_q64?: string }
@@ -649,7 +642,7 @@ export const toProcessedData = (
   dailyTvlPerLPCoinGrowth: Big(data.daily_tvl_per_lp_coin_growth ?? 0).toString(),
   inBondingCurve: data.in_bonding_curve,
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
-  baseVolumeIn1MStateTracker: temporarilyDefaultToZero(data.base_volume_in_1m_state_tracker),
+  baseVolumeIn1MStateTracker: BigInt(data.base_volume_in_1m_state_tracker),
 });
 
 export const toMarketLatestStateEventModel = (
@@ -666,7 +659,7 @@ export const toMarketLatestStateEventModel = (
 export const toMarketStateModel = (data: DatabaseJsonType["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
-  dailyBaseVolume: temporarilyDefaultToZero(data.daily_base_volume),
+  dailyBaseVolume: BigInt(data.daily_base_volume),
 });
 
 export const toTransactionMetadataForUserLiquidityPools = (
@@ -767,14 +760,18 @@ export const toArenaInfoModel = toArenaInfoFromDatabase;
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
-export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
-  return {
-    ...toMarketStateModel(data),
-    openPrice: q64ToBig(data.open_price_q64).toNumber(),
-    closePrice: q64ToBig(data.close_price_q64).toNumber(),
-    deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
-  };
-};
+export const toPriceFeedData = (
+  data: Pick<DatabaseJsonType["price_feed"], "open_price_q64" | "close_price_q64">
+) => ({
+  openPrice: q64ToBig(data.open_price_q64).toNumber(),
+  closePrice: q64ToBig(data.close_price_q64).toNumber(),
+  deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
+});
+
+export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
+  ...toMarketStateModel(data),
+  ...toPriceFeedData(data),
+});
 
 export const toAggregateMarketState = (data: DatabaseJsonType["aggregate_market_state"]) => ({
   lastEmojicoinTransactionVersion: BigInt(data.last_emojicoin_transaction_version),

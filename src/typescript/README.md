@@ -24,13 +24,13 @@ The contract address of the main `emojicoin-dot-fun` module.
 
 <!-- markdownlint-disable MD013 -->
 
-- **Example**: `"0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111"`
+- **Example**: `"0x1abfa4c5bb5f381b00719fc19e8e655cb2531904bf8f59309efd18eb081373b4"`
 
 #### `NEXT_PUBLIC_REWARDS_MODULE_ADDRESS`
 
 The contract address of the rewards module with an overloaded swap function.
 
-- **Example**: `"0x22227920701e36651a6649be2067cd7eebf3fabb94717ff3b256e3ada58b2222"`
+- **Example**: `"0x2e51979739db25dc987bd24e1a968e45cca0e0daea7cae9121f68af93e8884c9"`
 
 #### `NEXT_PUBLIC_INTEGRATOR_ADDRESS`
 

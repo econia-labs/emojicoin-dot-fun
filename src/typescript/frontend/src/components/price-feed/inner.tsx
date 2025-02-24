@@ -9,18 +9,22 @@ import useEffectOnce from "react-use/lib/useEffectOnce";
 import { useEventStore } from "context/event-store-context/hooks";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import { FormattedNumber } from "components/FormattedNumber";
+import { PriceColors } from "components/misc/ColoredPriceDisplay";
 
 export const PriceDelta = ({ delta, className = "" }: { delta: number; className?: string }) => {
   const { prefix, suffix } = useMemo(
     () => ({
-      prefix: delta >= 0 ? "+" : "-",
+      prefix: delta === 0 ? "" : delta > 0 ? "+" : "-",
       suffix: "%",
     }),
     [delta]
   );
 
+  const { color } =
+    delta === 0 ? PriceColors["neutral"] : delta >= 0 ? PriceColors["buy"] : PriceColors["sell"];
+
   return (
-    <span className={cn(`${delta >= 0 ? "text-green" : "text-pink"}`, className)}>
+    <span className={cn(color, className)}>
       <FormattedNumber value={Math.abs(delta)} suffix={suffix} prefix={prefix} scramble />
     </span>
   );
