@@ -27,7 +27,7 @@ function useStatePersisted<T>(
   const [storedValue, setStoredValue] = useState<T>(readValue);
 
   const clear = () => {
-    window.localStorage.removeItem(key);
+    window[storageType].removeItem(key);
   };
 
   // Effect to persist changes to local storage
@@ -37,11 +37,11 @@ function useStatePersisted<T>(
     }
 
     try {
-      window.localStorage.setItem(key, JSON.stringify(storedValue));
+      window[storageType].setItem(key, JSON.stringify(storedValue));
     } catch (error) {
       console.warn(`Error setting localStorage key “${key}”:`, error);
     }
-  }, [key, storedValue]);
+  }, [key, storedValue, storageType]);
 
   return [storedValue, setStoredValue, clear];
 }
