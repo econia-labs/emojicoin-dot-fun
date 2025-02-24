@@ -12,7 +12,7 @@ git submodule update --init --recursive
 ## Run the indexer processor by itself for `mainnet` or `testnet`
 
 ```shell
-docker compose -f compose.yaml up --env-file example.testnet.env up -d
+docker compose -f compose.yaml --env-file example.testnet.env up -d
 ```
 
 To run `mainnet` instead of `testnet` just pass `example.mainnet.env` as the

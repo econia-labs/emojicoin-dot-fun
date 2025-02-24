@@ -3,30 +3,33 @@ import {
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
+import { formatDisplayName } from "@sdk/utils/misc";
 import {
   DropdownArrow,
   DropdownContent,
   DropdownMenu,
   DropdownTrigger,
 } from "components/dropdown-menu";
-import React, { useMemo, useState } from "react";
-import { User, Copy, LogOut } from "lucide-react";
-import { translationFunction } from "context/language-context";
-import { formatDisplayName } from "@sdk/utils/misc";
-import { useScramble } from "use-scramble";
 import { EXTERNAL_LINK_PROPS } from "components/link";
-import { WalletDropdownItem } from "./WalletDropdownItem";
+import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { Copy, LogOut, User, UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { ROUTES } from "router/routes";
+import { useScramble } from "use-scramble";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+import { WalletDropdownItem } from "./WalletDropdownItem";
 
 const WIDTH = "24ch";
 
 const WalletDropdownMenu = () => {
   const { t } = translationFunction();
   const { disconnect, wallet } = useWallet();
-  const { addressName, copyAddress } = useAptos();
+  const { account, addressName, copyAddress } = useAptos();
   const [enabled, setEnabled] = useState(true);
+  const router = useRouter();
 
   const text = useMemo(() => {
     if (addressName) {
@@ -83,7 +86,7 @@ const WalletDropdownMenu = () => {
           sideOffset={4}
           className={
             "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer z-[50] " +
-            "rounded-[3px] min-w-[146px] pl-[2px]"
+            "rounded-[3px] min-w-[155px] pl-[2px]"
           }
           align="center"
           side="bottom"
@@ -94,6 +97,11 @@ const WalletDropdownMenu = () => {
               <WalletDropdownItem scrambleText="Account" icon={<User className="h-4 w-4" />} />
             </a>
           )}
+          <WalletDropdownItem
+            onSelect={() => router.push(`${ROUTES.wallet}/${account?.address}`)}
+            scrambleText="My emojicoins"
+            icon={<UserRound className="h-4 w-4" />}
+          />
           <WalletDropdownItem
             onSelect={copyAddress}
             scrambleText="Copy address"

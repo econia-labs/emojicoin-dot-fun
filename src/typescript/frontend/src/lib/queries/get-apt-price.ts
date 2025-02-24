@@ -20,7 +20,10 @@ export const getAptPrice = unstable_cache(
         },
       }
     )
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (r.ok) return r.json();
+        throw new Error(r.statusText + " " + JSON.stringify(await r.json()));
+      })
       .then((r) => r.aptos.usd as number)
       .catch((e) => {
         console.error("Could not get APT price from CoinGecko.", e);

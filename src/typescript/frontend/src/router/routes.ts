@@ -14,4 +14,5 @@ export const ROUTES = {
   notFound: "/not-found",
   pools: "/pools",
   verify: "/verify",
+  wallet: "/wallet",
 } as const;

@@ -1,8 +1,15 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
+// -------------------------------------------------------------------------------------------------
+//
+// NOTE: If you try to import @aptos-labs/ts-sdk in this file, the frontend build will fail due to
+// the usage of `setImmediate` which is unavailable to the `edge` runtime used in NextJS middleware.
+//
+// -------------------------------------------------------------------------------------------------
+
 /**
- * Because `Hex.fromHexInput(hex).toString() as `0x${string}`` is too verbose and heavy.
+ * A helper function to normalize a hex string without having to import @aptos-labs/ts-sdk.
  *
  * Does *not* require hex inputs to be prefixed with `0x`.
  *

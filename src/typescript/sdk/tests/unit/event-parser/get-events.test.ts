@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word goldens
 import {
+  type EventName,
   getEvents,
   type JsonTypes,
   MODULE_ADDRESS,
@@ -18,7 +19,6 @@ import {
   isAnEmojicoinStructName,
   toCamelCaseEventName,
 } from "../../../src/emojicoin_dot_fun/events";
-import { type EventName } from "../../../src/indexer-v2/types";
 import Data from "./json/event-data.json";
 // Note that this isn't an actual valid transaction, it's just structured like one for parsing.
 import Transaction from "./json/transaction.json";
