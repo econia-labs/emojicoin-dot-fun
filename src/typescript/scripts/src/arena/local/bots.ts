@@ -26,7 +26,8 @@ export const main = async () => {
         account,
         numTrades: NUM_TRADES,
       }).catch(async (e) => {
-        // Most likely, this error message means a new melee has started.
+        // Unless the initial types are somehow incorrect (unlikely), this error
+        // message means a new melee has started.
         if (e.message.includes("E_INVALID_COIN_TYPES")) {
           console.log("The melee has ended. Restart this script.");
         }
