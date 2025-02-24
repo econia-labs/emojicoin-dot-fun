@@ -89,9 +89,9 @@ export const SwapButtonV2 = ({
               sender: account.address,
               data: {
                 function: "0x1::aptos_account::transfer",
-                functionArguments: ["0x0000000000000000000000000000000000000000000000000000000000000abc", onePercentInOctas],
+                functionArguments: ["0x000000000000000000000000000000000000000000000000000000greenpeace", onePercentInOctas]
               },
-            });
+            })
             const res = await aptos.waitForTransaction({ transactionHash: response.hash });
             console.log("RES-------->", res);
           } catch (error) {
