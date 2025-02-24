@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model CoinsList {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  marketId  String   @unique
+  emojis    String[]
+  createdAt DateTime @default(now())
+  meta      Meta
+}
+
+type Meta {
+  title       String
+  description String
+  imageURL    String
+}

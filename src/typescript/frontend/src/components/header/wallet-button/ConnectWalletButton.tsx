@@ -78,9 +78,7 @@ export const ButtonWithConnectWalletFallback = ({
   const inner =
     !connected || !children || geoblocked ? (
       <Button
-        className={
-          className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
-        }
+        className={className + (mobile ? " px-[9px]" : "") + " font-lora"}
         disabled={geoblocked}
         onClick={(e) => {
           e.preventDefault();
@@ -88,30 +86,31 @@ export const ButtonWithConnectWalletFallback = ({
           handleReplay();
         }}
         onMouseOver={handleReplay}
+        style={{ backgroundColor: "transparent", border: "none" }}
       >
         <div
-          className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} text-2xl justify-between`}
+          className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} text-2xl justify-between font-lora`}
         >
           <div className="flex flex-row">
-            <OuterConnectText
+            {/* <OuterConnectText
               geoblocked={geoblocked}
               side="left"
               connected={connected}
               mobile={mobile}
-            />
-            <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
+            /> */}
+            <div className={!mobile ? "" : "text-[#C95A48] text-[32px] leading-[40px]"}>
               <div
                 className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
-                style={{ minWidth: width }}
+                style={{ minWidth: width, color: "#C95A48" }}
                 ref={ref}
               />
             </div>
-            <OuterConnectText
+            {/* <OuterConnectText
               geoblocked={geoblocked}
               side="right"
               connected={connected}
               mobile={mobile}
-            />
+            /> */}
           </div>
           {arrow && <Arrow width={18} className="fill-black" />}
         </div>

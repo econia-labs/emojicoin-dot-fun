@@ -12,4 +12,5 @@ export const ROUTES = {
   maintenance: "/maintenance",
   launching: "/launching",
   dexscreener: "/dexscreener",
+  coin: "/coin",
 } as const;

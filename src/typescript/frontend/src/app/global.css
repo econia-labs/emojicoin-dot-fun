@@ -97,3 +97,61 @@
     --radius: 0.5rem;
   }
 }
+
+#home {
+  width: 100%;
+  background-image: url("/images/home/hero-gradient.png");
+  height: auto;
+  background-repeat: no-repeat;
+}
+
+#coins {
+  width: 100%;
+  height: auto;
+  background-repeat: no-repeat;
+  background-size: contain; /* Added to make the background image contain */
+}
+
+.main-title {
+  font-size: 5rem !important;
+}
+
+.main-title-sm {
+  font-size: 3rem !important;
+  line-height: 3rem !important;
+}
+
+.main-title-sm-2 {
+  font-size: 2rem !important;
+}
+
+.border-white {
+  border: 1px solid #a1a1a1;
+}
+
+.border-green {
+  border: 1px solid #0b9d1c;
+}
+
+@media (max-width: 700px) {
+  .main-title {
+    font-size: 2rem;
+  }
+
+  .main-title-sm {
+    font-size: 2rem;
+  }
+
+  .mobile-coin {
+    display: none !important;
+  }
+  .desktop-coin {
+    display: block !important;
+  }
+  .detail-coin {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+}

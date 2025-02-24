@@ -148,6 +148,7 @@ const TableCard = ({
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [curr]);
 
+  console.log("marketCap==============", marketCap);
   return (
     <motion.div
       layout

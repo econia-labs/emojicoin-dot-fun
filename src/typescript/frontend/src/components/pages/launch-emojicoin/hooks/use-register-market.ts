@@ -17,6 +17,7 @@ import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { createCoin } from "app/actions/createCoin";
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {
@@ -90,7 +91,7 @@ export const useRegisterMarket = () => {
     unitPrice = 100;
   }
 
-  const registerMarket = async () => {
+  const registerMarket = async (launchCoinData: { title: string, description: string, image: string }) => {
     if (!account) {
       return;
     }
@@ -118,6 +119,30 @@ export const useRegisterMarket = () => {
     });
 
     if (res && isUserTransactionResponse(res)) {
+      // Call server action to create coin in database
+      // const result = await createCoin({
+      //   marketId: res.hash,
+      //   emojis: emojiBytes as unknown as string[],
+      //   meta: {
+      //     title: launchCoinData.title,
+      //     description: launchCoinData.description,
+      //     imageURL: launchCoinData.image
+      //   }
+      // });
+
+      // if (!result.success) {
+      //   throw new Error(result.error);
+      // }
+      console.log("LAUNCH COIN DATA------------", {
+        marketId: res.hash,
+        emojis: emojiBytes as unknown as string[],
+        meta: {
+          title: launchCoinData?.title,
+          description: launchCoinData?.description,
+          imageURL: launchCoinData?.image
+        }
+      });
+
       clear();
       // The event is parsed and added as a registered market in `event-store.ts`,
       // we don't need to do anything here other than set the loading state.
