@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { type SwapComponentProps } from "components/pages/emojicoin/types";
-import { toActualCoinDecimals } from "lib/utils/decimals";
+import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useGetGasWithDefault } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/event-store-context";
 import { useSearchParams } from "next/navigation";
@@ -138,10 +138,10 @@ export default function SwapComponentV2({
     setEmojicoinType(emojicoinType);
   }, [marketAddress, setEmojicoinType]);
 
-  const availableAptBalance = useMemo(
-    () => (aptBalance - gasCost > 0 ? aptBalance - gasCost : 0n),
-    [gasCost, aptBalance]
-  );
+  // const availableAptBalance = useMemo(
+  //   () => (aptBalance - gasCost > 0 ? aptBalance - gasCost : 0n),
+  //   [gasCost, aptBalance]
+  // );
 
   useEffect(() => {
     if (netProceeds === 0n || error) {
@@ -163,6 +163,19 @@ export default function SwapComponentV2({
     }
   }, [account, aptBalance, emojicoinBalance, isSell, inputAmount]);
 
+  const balanceLabel = useMemo(() => {
+    const coinBalance = isSell ? emojicoinBalance : aptBalance;
+    const balance = toDisplayCoinDecimals({
+      num: coinBalance,
+      decimals: 4,
+    });
+    return (
+      <span>{balance}</span>
+    );
+  }, [isSell, aptBalance, emojicoinBalance]);
+
+
+
   return (
     <div className="mx-auto w-full">
       <BalanceContainer>
@@ -170,7 +183,8 @@ export default function SwapComponentV2({
         <BalanceInfo>
           <h6>Your balance</h6>
           <h4>
-            <FormattedNumber value={availableAptBalance} scramble /> APT
+            {/* <FormattedNumber value={availableAptBalance} scramble /> */}
+            {balanceLabel} APT
           </h4>
         </BalanceInfo>
       </BalanceContainer>
@@ -209,8 +223,8 @@ export default function SwapComponentV2({
           className="match_box w-full px-4 py-2 rounded-full justify-between flex items-center sm-mb-5 cursor-pointer"
           onClick={() => setIsSell((v) => !v)}
         >
-          <h6 className="text-lg font-medium text-white">
-            You Receive:{" "}
+          <h6 className="text-lg font-medium text-white text-center w-full">
+            You Receive: <br />
             <FormattedNumber
               value={isLoading ? previous : outputAmount}
               nominalize
@@ -221,7 +235,7 @@ export default function SwapComponentV2({
         </MatchBox>
       </DetailBox>
       <GreenpeaceText>Greenpeace Receives: 0.1</GreenpeaceText>
-      <div className="w-full flex justify-center sm-mb-5">
+      <div className="w-full flex justify-center sm-mb-5 z-10">
         <SwapButtonV2
           inputAmount={inputAmount}
           marketAddress={marketAddress}
