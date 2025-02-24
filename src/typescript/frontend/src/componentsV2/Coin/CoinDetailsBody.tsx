@@ -32,7 +32,7 @@ const SideImageContainer = styled.div`
 const MainContent = styled.div`
   width: 100%;
   padding: 0 2.5rem;
-
+  z-index: 10;
   @media (min-width: 768px) {
     width: 50%;
   }
@@ -59,8 +59,8 @@ const CoinDetailsBody = (props: GridProps): JSX.Element => {
         <div className="w-full flex justify-center items-center px-10 sm-px-10 md:w-3/12 lg:w-3/12">
           <StyledImage src="/images/coin/match2.png" />
         </div>
-        <div className="flex negative-margin justify-end mb-5 w-full px-2 md:px-0">
-          <a href="#" onClick={() => setShowInfo(true)}>
+        <div className="flex negative-margin justify-end mb-5 px-2 md:px-0 w-full z-1">
+          <a href="#" onClick={() => setShowInfo(!showInfo)}>
             <StyledImage src="/images/coin/info.png" />
           </a>
         </div>
