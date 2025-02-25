@@ -29,7 +29,7 @@ import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
-import { type AnyArenaEvent } from "../../types/arena-types";
+import { safeParseBigIntOrPostgresTimestamp, type AnyArenaEvent } from "../../types/arena-types";
 import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
 
 export type TransactionMetadata = {
@@ -246,6 +246,21 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
+});
+
+const toArenaCandlestickFromDatabase = (
+  data: DatabaseStructType["ArenaCandlestick"]
+): Types["ArenaCandlestick"] => ({
+  meleeID: BigInt(data.melee_id),
+  volume: BigInt(data.volume),
+  period: toPeriod(data.period),
+  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  openPrice: data.open_price === null ? null : Number(data.open_price),
+  closePrice: data.close_price === null ? null : Number(data.close_price),
+  highPrice: data.high_price === null ? null : Number(data.high_price),
+  lowPrice: data.low_price === null ? null : Number(data.low_price),
+  integratorFees: BigInt(data.integrator_fees),
+  nSwaps: BigInt(data.n_swaps),
 });
 
 const toArenaLeaderboardHistoryFromDatabase = (
@@ -491,6 +506,7 @@ export type ArenaPositionModel = ReturnType<typeof toArenaPositionModel>;
 export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
 export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
+export type ArenaCandlestickModel = ReturnType<typeof toArenaCandlestickModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
 export type ArenaLeaderboardHistoryWithArenaInfoModel = ReturnType<
@@ -897,6 +913,7 @@ export const toArenaPositionModel = toArenaPositionFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
 export const toArenaInfoModel = toArenaInfoFromDatabase;
+export const toArenaCandlestickModel = toArenaCandlestickFromDatabase;
 
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
@@ -951,6 +968,7 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaExitEvents]: toArenaExitModel,
   [TableName.ArenaSwapEvents]: toArenaSwapModel,
   [TableName.ArenaInfo]: toArenaInfoModel,
+  [TableName.ArenaCandlestick]: toArenaCandlestickModel,
   [TableName.ArenaPosition]: toArenaPositionModel,
   [TableName.ArenaVaultBalanceUpdateEvents]: toArenaVaultBalanceUpdateModel,
   [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
@@ -981,6 +999,7 @@ export type DatabaseModels = {
   [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
   [TableName.ArenaPosition]: ArenaPositionModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
+  [TableName.ArenaCandlestick]: ArenaCandlestickModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
   [TableName.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoModel;
