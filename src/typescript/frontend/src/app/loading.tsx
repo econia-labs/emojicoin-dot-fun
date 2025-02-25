@@ -2,8 +2,8 @@
 
 import React from "react";
 
-import LoadingComponent from "components/loading";
+// import LoadingComponent from "components/loading";
 
 export default function Loading() {
-  return <LoadingComponent />;
+  return <div style={{ height: "100vh", width: "100vw" }}></div>;
 }
