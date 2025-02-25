@@ -2,6 +2,8 @@
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { StyledImage } from "components/image/styled";
 import { EmojiMarketPageLinkV2 } from "components/pages/home/components/table-card/LinkOrAnimationTriggerV2";
+import Link from "next/link";
+import { ROUTES } from "router/routes";
 
 interface CoinCardProps {
   id: number;
@@ -11,6 +13,8 @@ interface CoinCardProps {
   change: string;
   description?: string;
   emojis: Array<SymbolEmojiData>;
+  imageURL?: string;
+  titleSlug: string;
 }
 
 const formatTimeAgo = (timestamp: number): string => {
@@ -64,15 +68,27 @@ const CoinCard: React.FC<CoinCardProps> = ({
   value,
   change,
   description,
+  imageURL,
+  titleSlug,
 }) => {
   const timeAgo = formatTimeAgo(time);
   const formattedValue = formatValue(value ?? 0n);
 
   return (
-    <EmojiMarketPageLinkV2 emojis={emojis}>
+    <Link href={`${ROUTES.coin}/${titleSlug}`}>
       <div className="box-show cursor-pointer px-5 mt-12 py-5 flex-box items-center rounded-full round w-full">
         <div className="flex items-center mr-5 sm-mb">
-          <StyledImage className="box-img" src="/images/home/box-cir.png" />
+          <StyledImage
+            className="box-img"
+            src={imageURL ?? "/images/home/box-cir.png"}
+            style={{
+              ...(imageURL && {
+                clipPath: "circle(45%)",
+              }),
+            }}
+            width={150}
+            height={150}
+          />
         </div>
         <div className="w50-box">
           <div className="flex mb-5">
@@ -95,7 +111,7 @@ const CoinCard: React.FC<CoinCardProps> = ({
           <h5 className="mb-3 main-title-sm-2 text-white dark:text-white">{formattedValue}</h5>
         </div>
       </div>
-    </EmojiMarketPageLinkV2>
+    </Link>
   );
 };
 

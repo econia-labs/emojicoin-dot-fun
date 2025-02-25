@@ -39,6 +39,9 @@ const nextConfig = {
     styledComponents: DEBUG ? styledComponentsConfig : true,
   },
   ...(DEBUG ? debugConfigOptions : {}),
+  images: {
+    unoptimized: true
+  },
   // Log full fetch URLs if we're in a specific environment.
   logging:
     process.env.NODE_ENV === "development" ||

@@ -91,10 +91,15 @@ export const useRegisterMarket = () => {
     unitPrice = 100;
   }
 
-  const registerMarket = async (launchCoinData: { title: string, description: string, image: string }) => {
+  const registerMarket = async (launchCoinData: {
+    title: string;
+    description: string;
+    image: string;
+  }) => {
     if (!account) {
       return;
     }
+
     // Set the picker invisible for the duration of the registration transaction.
     setPickerInvisible(true);
     let res: PendingTransactionResponse | UserTransactionResponse | undefined | null;
@@ -120,27 +125,16 @@ export const useRegisterMarket = () => {
 
     if (res && isUserTransactionResponse(res)) {
       // Call server action to create coin in database
-      // const result = await createCoin({
-      //   marketId: res.hash,
-      //   emojis: emojiBytes as unknown as string[],
-      //   meta: {
-      //     title: launchCoinData.title,
-      //     description: launchCoinData.description,
-      //     imageURL: launchCoinData.image
-      //   }
-      // });
-
-      // if (!result.success) {
-      //   throw new Error(result.error);
-      // }
-      console.log("LAUNCH COIN DATA------------", {
-        marketId: res.hash,
-        emojis: emojiBytes as unknown as string[],
+      const emojiSlug = emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.name).join("-");
+      await createCoin({
+        data: res,
+        emojiSlug,
+        emojis: emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.name),
         meta: {
-          title: launchCoinData?.title,
-          description: launchCoinData?.description,
-          imageURL: launchCoinData?.image
-        }
+          title: launchCoinData.title,
+          description: launchCoinData.description,
+          imageURL: launchCoinData.image,
+        },
       });
 
       clear();

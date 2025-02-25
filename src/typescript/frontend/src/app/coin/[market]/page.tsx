@@ -9,6 +9,7 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 // import { AptPriceContextProvider } from "context/AptPrice";
 import dynamic from "next/dynamic";
 import ClientEmojicoinPageV2 from "./ClientEmojicoinPageV2";
+import { prisma } from "lib/prisma";
 
 const AptPriceContextProvider = dynamic(() => import("context/AptPrice").then((mod) => mod.AptPriceContextProvider), {
   ssr: false,
@@ -33,18 +34,9 @@ interface EmojicoinPageProps {
 const EVENTS_ON_PAGE_LOAD = 25;
 
 export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
-  const { market: marketSlug } = params;
-  const names = pathToEmojiNames(marketSlug);
-  const emojis = names.map((n) => {
-    const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
-    if (!res) {
-      throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
-    }
-    return res;
-  });
-
-  const title = `${names.join(" ").toUpperCase()}`;
-  const description = `Coin on VMC`;
+  const { market: coinSlug } = params;
+  const title = `${coinSlug}`;
+  const description = `Trade ${coinSlug} on emojicoin.fun !`;
 
   return {
     title,
@@ -66,7 +58,19 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
  * Whereas the actual emoji bytes are: 0xf09f9285f09f8fbe.
  */
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
-  const { market: marketSlug } = params.params;
+  const { market: coinSlug } = params.params;
+
+  const coin = await prisma.coinsList.findFirst({
+    where: {
+      titleSlug: coinSlug,
+    },
+  }).catch((e) => {
+    console.error("Failed to get coin:", e);
+    return null;
+  });
+
+  const marketSlug = coin?.emojiSlug ?? coinSlug;
+
   const names = pathToEmojiNames(marketSlug);
   const emojis = names.map((n) => {
     const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
@@ -98,6 +102,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
             chats,
             state,
             marketView,
+            coinImage: coin?.meta.imageURL,
             ...state.market,
           }}
         />

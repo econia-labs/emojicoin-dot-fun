@@ -16,6 +16,7 @@ import { ORDER_BY } from "@sdk/queries";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
 import HomePageComponentV2 from "./HomePageV2";
+import { getCoin } from "app/actions/createCoin";
 
 export const revalidate = 2;
 
@@ -94,6 +95,28 @@ export default async function Home({ searchParams }: HomePageParams) {
     ] as const;
   });
 
+  const marketsWithCoinData = await Promise.all(
+    // remove droplet and fire
+    markets
+      .filter(
+        (market) =>
+          market.market?.symbolData?.name !== "droplet" &&
+          market.market?.symbolData?.name !== "fire"
+      )
+      .map(async (market) => {
+        const coin = await getCoin(market?.market?.symbolData?.name);
+        return {
+          ...market,
+          coinMeta: coin?.data
+            ? {
+                ...coin.data.meta,
+                titleSlug: coin.data.titleSlug,
+              }
+            : null,
+        };
+      })
+  );
+
   return (
     <AptPriceContextProvider aptPrice={aptPrice}>
       {/* <HomePageComponent
@@ -105,7 +128,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         priceFeed={priceFeedData}
       /> */}
       <HomePageComponentV2
-        markets={markets}
+        markets={marketsWithCoinData}
         numMarkets={numMarkets}
         page={page}
         sortBy={sortBy}

@@ -13,6 +13,7 @@ type DataProps = MarketMetadataModel & {
   chats: Array<DatabaseModels["chat_events"]>;
   state: DatabaseModels["market_state"];
   marketView: Types["MarketView"];
+  coinImage?: string;
 };
 
 export interface EmojicoinProps {

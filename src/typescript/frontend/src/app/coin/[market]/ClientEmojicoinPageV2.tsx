@@ -32,7 +32,7 @@ const ClientEmojicoinPageV2 = (props: EmojicoinProps) => {
   return (
     <div className="relative overflow-hidden pt-[120px] md:pt-[130px] lg:pt-[130px]">
       <CoinDetailsHeader />
-      <CoinDetailsBody data={props.data} />
+      <CoinDetailsBody data={props.data} coinImage={props?.data?.coinImage} />
     </div>
   );
 };
