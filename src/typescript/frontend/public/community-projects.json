@@ -10,5 +10,11 @@
     "id": "1",
     "name": "emojirocket100",
     "url": "https://telegram.me/emojirocket100_bot"
+  },
+  {
+    "description": "A public goods project for an Aptos red envelope robot, distributing red envelopes across the entire chain, utilizing Aptos native randomness, and supporting the emojicoin token.",
+    "id": "2",
+    "name": "Aptos RedEnvelope Bot",
+    "url": "https://telegram.me/Faintlight_RedEnvelope_Bot"
   }
 ]
