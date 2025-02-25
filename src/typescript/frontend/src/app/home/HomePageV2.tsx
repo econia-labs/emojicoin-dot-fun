@@ -1,3 +1,4 @@
+import { type Meta } from "@prisma/client";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import { StyledImage } from "components/image/styled";
 import CoinsList from "componentsV2/Home/CoinsList";
@@ -7,7 +8,7 @@ import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import React from "react";
 
 export interface HomePageProps {
-  markets: Array<DatabaseModels["market_state"]>;
+  markets: Array<DatabaseModels["market_state"] & { coinMeta: Meta | null }>;
   numMarkets: number;
   page: number;
   sortBy: MarketDataSortByHomePage;

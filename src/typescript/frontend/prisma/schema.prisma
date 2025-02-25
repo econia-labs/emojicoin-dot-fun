@@ -9,7 +9,9 @@ datasource db {
 
 model CoinsList {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  marketId  String   @unique
+  data      Json?
+  titleSlug String   @unique
+  emojiSlug String   @unique
   emojis    String[]
   createdAt DateTime @default(now())
   meta      Meta

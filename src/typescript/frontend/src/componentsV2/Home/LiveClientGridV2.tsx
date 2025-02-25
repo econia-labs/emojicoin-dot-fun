@@ -10,8 +10,14 @@ import { type HomePageProps } from "app/home/HomePage";
 import { useGridRowLength } from "components/pages/home/components/emoji-table/hooks/use-grid-items-per-line";
 import { ANIMATION_DEBOUNCE_TIME } from "components/pages/home/components/table-card/animation-variants/grid-variants";
 import CoinCard from "./CoinCard";
-import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "components/pages/home/components/emoji-table/utils";
+import {
+  constructOrdered,
+  toSerializedGridOrder,
+  type WithTimeIndexAndPrev,
+} from "components/pages/home/components/emoji-table/utils";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import { type Meta } from "@prisma/client";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 
 // TODO: Consider queueing up the changes by storing each state update in a queue and then updating the state
 // by popping off the queue. This would allow us to update the state in a more controlled manner and avoid lots of
@@ -21,7 +27,7 @@ export const LiveClientGridV2 = ({
   markets,
   sortBy,
 }: {
-  markets: HomePageProps["markets"];
+  markets: HomePageProps["markets"] & { coinMeta: Meta | null };
   sortBy: MarketDataSortByHomePage;
 }) => {
   const rowLength = useGridRowLength();
@@ -42,7 +48,14 @@ export const LiveClientGridV2 = ({
   // is right when we should update the ordered list.
   const [gridOrder, setGridOrder] = useState(toSerializedGridOrder(latestOrdered.current));
   const [ordered, setOrdered] = useState<
-    Array<WithTimeIndexAndPrev & { runInitialAnimation?: boolean, title?: string, change?: string, description?: string }>
+    Array<
+      WithTimeIndexAndPrev & {
+        runInitialAnimation?: boolean;
+        title?: string;
+        change?: string;
+        description?: string;
+      }
+    >
   >(
     constructOrdered({
       markets,
@@ -54,6 +67,19 @@ export const LiveClientGridV2 = ({
       runInitialAnimation: true,
     }))
   );
+
+  const orderedWithCoinMeta = ordered.map((item) => {
+    const marketData: any = markets.find(
+      (market) => market?.market?.symbolData?.name === emojisToName(item.emojis)
+    );
+    return {
+      ...item,
+      titleSlug: marketData?.coinMeta?.titleSlug || null,
+      title: marketData?.coinMeta?.title || null,
+      description: marketData?.coinMeta?.description || null,
+      imageURL: marketData?.coinMeta?.imageURL || null,
+    };
+  });
 
   // Note that this must be a stable function that's not in any effect's dependency array, otherwise
   // it'd trigger a re-render and thus an infinite loop. We use `useEvent` for this.
@@ -148,7 +174,7 @@ export const LiveClientGridV2 = ({
 
   return (
     <div className="w-full">
-      {ordered.map((v) => {
+      {orderedWithCoinMeta?.map((v) => {
         return (
           <CoinCard
             key={`live-${v.marketID}-${v.searchEmojisKey}`}
@@ -159,6 +185,8 @@ export const LiveClientGridV2 = ({
             change={v?.change ?? "0%"}
             description={v.description}
             emojis={v.emojis}
+            imageURL={v.imageURL}
+            titleSlug={v.titleSlug ?? emojiNamesToPath(v.emojis.map((x) => x.name))}
           />
           // <TableCard
           //   key={`live-${v.marketID}-${v.searchEmojisKey}`}

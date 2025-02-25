@@ -13,6 +13,7 @@ import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { type SortMarketsBy } from "@sdk/indexer-v2/types/common";
 // import { useGridRowLength } from "components/pages/home/components/emoji-table/hooks/use-grid-items-per-line";
 import { LiveClientGridV2 } from "./LiveClientGridV2";
+import { type Meta } from "@prisma/client";
 
 export interface CoinsListProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
@@ -82,7 +83,7 @@ const CoinsList = (props: CoinsListProps): JSX.Element => {
     eventTypes: ["MarketLatestState"],
   });
 
-  return <LiveClientGridV2 markets={markets} sortBy={sort} />;
+  return <LiveClientGridV2 markets={markets as HomePageProps["markets"] & { coinMeta: Meta | null }} sortBy={sort} />;
 };
 
 export default CoinsList;

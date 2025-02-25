@@ -2,7 +2,7 @@ import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { MarketValidityIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import { useRegisterMarket } from "../hooks/use-register-market";
@@ -16,6 +16,7 @@ import Info from "components/info";
 import { Emoji } from "utils/emoji";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
+import Image from "next/image";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -36,11 +37,32 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   const { registerMarket, cost } = useRegisterMarket();
   const { invalid: isEmojiSelected, registered } = useIsMarketRegistered();
 
-  const invalid =
-    isEmojiSelected ||
-    !launchCoinData.title ||
-    !launchCoinData.description ||
-    !launchCoinData.image;
+  const isValidImageURL = useCallback(() => {
+    try {
+      new URL(launchCoinData.image);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }, [launchCoinData.image]);
+
+  const validateCoinData = useCallback(() => {
+    return (
+      !isEmojiSelected &&
+      launchCoinData.title &&
+      launchCoinData.description &&
+      launchCoinData.image &&
+      isValidImageURL()
+    );
+  }, [
+    isEmojiSelected,
+    launchCoinData?.title,
+    launchCoinData?.description,
+    launchCoinData?.image,
+    isValidImageURL,
+  ]);
+
+  const invalid = !validateCoinData();
 
   useEffect(() => {
     return () => setIsLoadingRegisteredMarket(false);
@@ -85,6 +107,9 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
 
   return (
     <AnimatePresence initial={false} mode="wait">
+      {launchCoinData?.image?.length > 0 && (
+        <Image src={launchCoinData.image} alt="Picture of the author" width={250} height={250} />
+      )}
       {/* Input */}
       {!loading ? (
         <motion.div
