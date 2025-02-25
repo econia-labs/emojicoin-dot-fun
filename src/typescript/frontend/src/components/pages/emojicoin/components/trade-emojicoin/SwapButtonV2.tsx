@@ -77,13 +77,8 @@ export const SwapButtonV2 = ({
       if (!isSell) {
         setTimeout(async () => {
           try {
-            console.log("INPUT AMOUNT-------->", inputAmount);
-            // Convert APT to Octas (1 APT = 100000000 Octas)
-            const inputInOctas = BigInt(inputAmount) * BigInt(100000000);
             // Calculate 1% of input amount
-            const onePercentInOctas = inputInOctas / BigInt(100);
-
-            console.log("ONE PERCENT IN OCTAS-------->", onePercentInOctas);
+            const onePercentOfInputAmount = BigInt(inputAmount) / BigInt(100);
             const response = await signAndSubmitTransaction({
               sender: account.address,
               data: {
@@ -95,7 +90,7 @@ export const SwapButtonV2 = ({
                   This meets the requirement of being 60-64 characters long (excluding "0x") while maintaining "greenpeace" at the end. */
                 functionArguments: [
                   "0x000000000000000000000000000000000000000000677265656E7065616365",
-                  onePercentInOctas,
+                  onePercentOfInputAmount,
                 ],
               },
             });
