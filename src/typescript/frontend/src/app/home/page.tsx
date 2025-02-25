@@ -96,18 +96,25 @@ export default async function Home({ searchParams }: HomePageParams) {
   });
 
   const marketsWithCoinData = await Promise.all(
-    markets.map(async (market) => {
-      const coin = await getCoin(market?.market?.symbolData?.name);
-      return {
-        ...market,
-        coinMeta: coin?.data
-          ? {
-              ...coin.data.meta,
-              titleSlug: coin.data.titleSlug,
-            }
-          : null,
-      };
-    })
+    // remove droplet and fire
+    markets
+      .filter(
+        (market) =>
+          market.market?.symbolData?.name !== "droplet" &&
+          market.market?.symbolData?.name !== "fire"
+      )
+      .map(async (market) => {
+        const coin = await getCoin(market?.market?.symbolData?.name);
+        return {
+          ...market,
+          coinMeta: coin?.data
+            ? {
+                ...coin.data.meta,
+                titleSlug: coin.data.titleSlug,
+              }
+            : null,
+        };
+      })
   );
 
   return (

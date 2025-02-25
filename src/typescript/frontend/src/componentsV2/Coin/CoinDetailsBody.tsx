@@ -44,7 +44,15 @@ const CoinDetailsBody = (props: GridProps & { coinImage?: string }): JSX.Element
     <div className="container px-4">
       <ContentWrapper>
         <SideImageContainer>
-          <StyledImage src={props.coinImage ?? "/images/coin/match1.png"} style={{ zIndex: 1 }} />
+          <StyledImage
+            src={props.coinImage ?? "/images/coin/match1.png"}
+            style={{
+              ...(props.coinImage && {
+                clipPath: "circle(45%)",
+              }),
+              zIndex: 1,
+            }}
+          />
         </SideImageContainer>
 
         <MainContent>
