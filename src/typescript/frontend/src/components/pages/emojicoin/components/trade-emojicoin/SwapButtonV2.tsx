@@ -21,18 +21,17 @@ const GRACE_PERIOD_MESSAGE =
   "creator can trade. The grace period ends 5 minutes after the market registration or after the first " +
   "trade, whichever comes first.";
 
-  
 const BuyButton = styled.button`
-background: white;
-color: #1a1a1a;
-border: none !important;
-font-weight: bold;
-font-size: 1.5rem;
-padding: 0.75rem 2.5rem;
-border-radius: 9999px;
-width: 50%;
-cursor: pointer;
-z-index: 9;
+  background: white;
+  color: #1a1a1a;
+  border: none !important;
+  font-weight: bold;
+  font-size: 1.5rem;
+  padding: 0.75rem 2.5rem;
+  border-radius: 9999px;
+  width: 50%;
+  cursor: pointer;
+  z-index: 9;
 `;
 
 export const SwapButtonV2 = ({
@@ -75,7 +74,7 @@ export const SwapButtonV2 = ({
       });
     const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
-      if(!isSell){
+      if (!isSell) {
         setTimeout(async () => {
           try {
             console.log("INPUT AMOUNT-------->", inputAmount);
@@ -83,15 +82,23 @@ export const SwapButtonV2 = ({
             const inputInOctas = BigInt(inputAmount) * BigInt(100000000);
             // Calculate 1% of input amount
             const onePercentInOctas = inputInOctas / BigInt(100);
-            
+
             console.log("ONE PERCENT IN OCTAS-------->", onePercentInOctas);
             const response = await signAndSubmitTransaction({
               sender: account.address,
               data: {
                 function: "0x1::aptos_account::transfer",
-                functionArguments: ["0x000000000000000000000000000000000000000000000000000000greenpeace", onePercentInOctas]
+                /* I've padded the address with zeros at the beginning to make it exactly 64 characters long (excluding "0x"):
+                  "0x" prefix
+                  44 zeros for padding
+                  "677265656E7065616365" (hex for "greenpeace")
+                  This meets the requirement of being 60-64 characters long (excluding "0x") while maintaining "greenpeace" at the end. */
+                functionArguments: [
+                  "0x000000000000000000000000000000000000000000677265656E7065616365",
+                  onePercentInOctas,
+                ],
               },
-            })
+            });
             const res = await aptos.waitForTransaction({ transactionHash: response.hash });
             console.log("RES-------->", res);
           } catch (error) {
@@ -106,6 +113,7 @@ export const SwapButtonV2 = ({
         controls.start("celebration");
         toast.dark(
           <>
+            image.png
             <RewardsAnimation controls={controls} />
             <CongratulationsToast
               transactionHash={res.response.hash}
