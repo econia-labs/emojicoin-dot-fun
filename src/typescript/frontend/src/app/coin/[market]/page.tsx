@@ -43,8 +43,8 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
     return res;
   });
 
-  const title = `${emojis.join("")}`;
-  const description = `Trade ${emojis.join("")} on emojicoin.fun !`;
+  const title = `${names.join(" ").toUpperCase()}`;
+  const description = `Coin on VMC`;
 
   return {
     title,
