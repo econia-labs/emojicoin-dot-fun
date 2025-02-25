@@ -102,6 +102,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
             chats,
             state,
             marketView,
+            coinImage: coin?.meta.imageURL,
             ...state.market,
           }}
         />

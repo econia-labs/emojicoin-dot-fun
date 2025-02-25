@@ -38,13 +38,13 @@ const MainContent = styled.div`
   }
 `;
 
-const CoinDetailsBody = (props: GridProps): JSX.Element => {
+const CoinDetailsBody = (props: GridProps & { coinImage?: string }): JSX.Element => {
   const [showInfo, setShowInfo] = useState(false);
   return (
     <div className="container px-4">
       <ContentWrapper>
         <SideImageContainer>
-          <StyledImage src="/images/coin/match1.png" style={{ zIndex: 1 }} />
+          <StyledImage src={props.coinImage ?? "/images/coin/match1.png"} style={{ zIndex: 1 }} />
         </SideImageContainer>
 
         <MainContent>
