@@ -19,7 +19,12 @@ import {
   type Timezone,
   widget,
 } from "@static/charting_library";
-import { getClientTimezone, hasTradingActivity } from "lib/chart-utils";
+import {
+  formatSymbolWithParams,
+  getClientTimezone,
+  hasTradingActivity,
+  parseSymbolWithParams,
+} from "lib/chart-utils";
 import { type ChartContainerProps } from "./types";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
@@ -115,24 +120,11 @@ export const Chart = (props: ChartContainerProps) => {
         }, []);
         onResultReadyCallback(symbols);
       },
-      resolveSymbol: async (symbolName, onSymbolResolvedCallback, _onErrorCallback) => {
-        // We pass parameters in the symbolName to prevent re-rendering.
-        // This seems to be the only way to seamlessly change some properties such as has_empty_bars without re-creating the whole chart.
-        // Normally, we would add the state showEmptyCandles in the dependency array to re-create the whole datafeed and the chart.
-        // But this causes the re-creation of the whole chart, and briefly breaks the view (for ex: the custom button gets removed and re-added).
-        // This solution allows to call chart.setSymbol with custom params to update the chart seamlessly.
-        // Uses similar syntax to url query params.
-        const [baseSymbolName, params] = symbolName.split("?");
-        const { has_empty_bars } = !params
-          ? {}
-          : params.split("&").reduce(
-              (acc, param) => {
-                const [key, value] = param.split("=");
-                acc[key] = value;
-                return acc;
-              },
-              {} as Record<string, string>
-            );
+      resolveSymbol: async (symbolNameWithParams, onSymbolResolvedCallback, _onErrorCallback) => {
+        // symbolNameWithParams is used to pass additional parameters such as `has_empty_bars` to update the chart without re-rendering it.
+        // The params part is removed, and only the actual symbol is sent to trading view as part of the symbolInfo.
+        const { baseSymbolName, params } = parseSymbolWithParams(symbolNameWithParams);
+        const { has_empty_bars } = params;
 
         // Try to look up the symbol as if it were a market ID and then as if it were the actual market symbol,
         // aka, the emoji(s) symbol string.
@@ -389,7 +381,7 @@ export const Chart = (props: ChartContainerProps) => {
           if (!chart) return;
           setShowEmptyCandles((prev) => {
             const show = !prev;
-            chart.setSymbol(`${chart.symbol()}?has_empty_bars=${show}`);
+            chart.setSymbol(formatSymbolWithParams(chart.symbol(), { has_empty_bars: show }));
             setState(show);
             return show;
           });

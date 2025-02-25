@@ -76,3 +76,74 @@ export function getClientTimezone() {
 
 export const hasTradingActivity = (bar: Bar) =>
   [bar.open, bar.high, bar.low, bar.close].some((price) => price !== 0);
+
+/**
+ * Parses a symbol name with URL-like parameters.
+ * Example: "BTC?has_empty_bars=true&another_param=value"
+ *
+ * @param symbolName - The symbol name with optional URL-like parameters
+ * @returns An object containing the base symbol name and parsed parameters
+ * @throws Will not throw, but returns empty object for invalid inputs
+ */
+export function parseSymbolWithParams(symbolName: string) {
+  if (!symbolName || typeof symbolName !== "string") {
+    return { baseSymbolName: "", params: {} };
+  }
+  const [baseSymbolName = "", paramString = ""] = symbolName.split("?");
+  if (!paramString) {
+    return { baseSymbolName, params: {} };
+  }
+
+  // Parse parameters
+  const params = paramString.split("&").reduce(
+    (acc, param) => {
+      if (!param) return acc;
+
+      try {
+        const [key, value] = param.split("=");
+        if (!key) return acc;
+        const decodedKey = decodeURIComponent(key);
+        // If no value provided, default to "true". Value is always a string.
+        const decodedValue = value === undefined ? "true" : decodeURIComponent(value);
+        acc[decodedKey] = decodedValue;
+      } catch (error) {
+        // Silently ignore malformed parameters.
+        // This prevents URL decoding errors from breaking the function.
+      }
+
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
+  return { baseSymbolName, params };
+}
+
+/**
+ * Formats a symbol name with URL-like parameters.
+ * Example: formatSymbolWithParams("BTC", { has_empty_bars: true }) => "BTC?has_empty_bars=true"
+ *
+ * @param baseSymbolName - The base symbol name
+ * @param params - An object containing the parameters to add
+ * @returns A formatted symbol string with URL-like parameters
+ */
+export function formatSymbolWithParams(
+  baseSymbolName: string,
+  params: Record<string, string | boolean | number> = {}
+): string {
+  if (!baseSymbolName) {
+    return "";
+  }
+
+  if (!params || Object.keys(params).length === 0) {
+    return baseSymbolName;
+  }
+
+  const paramString = Object.entries(params)
+    .filter(([_, value]) => value !== undefined && value !== null)
+    // Encode both key and value
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .join("&");
+
+  return paramString ? `${baseSymbolName}?${paramString}` : baseSymbolName;
+}
