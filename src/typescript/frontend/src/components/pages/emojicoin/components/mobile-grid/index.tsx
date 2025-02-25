@@ -22,7 +22,7 @@ import { TradeHistory } from "../trade-history/trade-history";
 const DISPLAY_HEADER_ABOVE_CHART = false;
 const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";
 
-const TABS = ["Trade History", "Swap", "Chat", "Top Holders"] as const;
+const TABS = ["Trades", "Swap", "Chat", "Holders"] as const;
 
 const MobileGrid = (props: GridProps) => {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Swap");
@@ -68,8 +68,8 @@ const MobileGrid = (props: GridProps) => {
         )}
 
         <StyledMobileContentInner>
-          {tab === "Trade History" && <TradeHistory data={props.data} />}
-          {tab === "Top Holders" && (
+          {tab === "Trades" && <TradeHistory data={props.data} />}
+          {tab === "Holders" && (
             <CoinHolders
               emojicoin={props.data.symbol}
               holders={props.data.holders}
