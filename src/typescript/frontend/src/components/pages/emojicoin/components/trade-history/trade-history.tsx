@@ -15,6 +15,7 @@ import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "@sdk/utils";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { type SwapEventModel } from "@sdk/indexer-v2/types";
+import { TimeCell } from "components/ui/table-cells/time-cell";
 
 const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),
@@ -95,14 +96,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Time",
         id: "time",
         width: 120,
-        renderCell: (item) =>
-          item.date.toLocaleString(undefined, {
-            month: "2-digit" as const,
-            day: "2-digit" as const,
-            hour: "2-digit" as const,
-            minute: "2-digit" as const,
-            second: "2-digit" as const,
-          }),
+        renderCell: (item) => <TimeCell date={item.date} />,
       },
       {
         text: "Price",
