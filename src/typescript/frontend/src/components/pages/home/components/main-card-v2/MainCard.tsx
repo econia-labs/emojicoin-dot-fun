@@ -18,7 +18,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useInterval } from "react-use";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
-import { HomePageProps } from "app/home/HomePageV2";
+import { type HomePageProps } from "app/home/HomePageV2";
 
 export interface MainCardPropsV2 {
   featuredMarkets: HomePageProps["priceFeed"];
