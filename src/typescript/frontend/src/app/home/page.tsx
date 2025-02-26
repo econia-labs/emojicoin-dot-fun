@@ -117,6 +117,9 @@ export default async function Home({ searchParams }: HomePageParams) {
       })
   );
 
+
+
+
   return (
     <AptPriceContextProvider aptPrice={aptPrice}>
       {/* <HomePageComponent
@@ -133,7 +136,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         page={page}
         sortBy={sortBy}
         searchBytes={q}
-        priceFeed={priceFeedData}
+        priceFeed={marketsWithCoinData}
       />
     </AptPriceContextProvider>
   );

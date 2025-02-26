@@ -14,7 +14,7 @@ export interface HomePageProps {
   sortBy: MarketDataSortByHomePage;
   searchBytes?: string;
   children?: React.ReactNode;
-  priceFeed: DatabaseModels["price_feed"][];
+  priceFeed: Array<DatabaseModels["market_state"] & { coinMeta: Meta | null }>;
 }
 
 const HomePageComponentV2: React.FC<HomePageProps> = async ({

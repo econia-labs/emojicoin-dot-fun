@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { StyledImage } from "components/image/styled";
 import { StatsText } from "./styled";
-import { type MainCardProps } from "components/pages/home/components/main-card/MainCard";
+import { type MainCardPropsV2 } from "components/pages/home/components/main-card-v2/MainCard";
 import { translationFunction } from "context/language-context";
 import { sortByValue } from "lib/utils/sort-events";
 import { useInterval } from "react-use";
@@ -13,16 +13,9 @@ import Link from "next/link";
 const FEATURED_MARKET_INTERVAL = 5 * 1000;
 const MAX_NUM_FEATURED_MARKETS = 5;
 
-const HeroSection: React.FC<MainCardProps> = (props): JSX.Element => {
+const HeroSection: React.FC<MainCardPropsV2> = (props): JSX.Element => {
   const featuredMarkets = useMemo(() => {
-    const sorted = props.featuredMarkets.toSorted((a, b) =>
-      sortByValue(a.deltaPercentage, b.deltaPercentage, "desc")
-    );
-    const positives = sorted.filter(({ deltaPercentage }) => deltaPercentage > 0);
-    const notPositives = sorted.filter(({ deltaPercentage }) => deltaPercentage <= 0);
-    return positives.length
-      ? positives.slice(0, MAX_NUM_FEATURED_MARKETS)
-      : notPositives.slice(0, MAX_NUM_FEATURED_MARKETS);
+    return props.featuredMarkets
   }, [props.featuredMarkets]);
 
   const { t } = translationFunction();
@@ -35,12 +28,12 @@ const HeroSection: React.FC<MainCardProps> = (props): JSX.Element => {
 
   const featured = useMemo(() => featuredMarkets.at(currentIndex), [featuredMarkets, currentIndex]);
 
-  const { marketCap, dailyVolume, allTimeVolume, priceDelta } = useMemo(() => {
+  const { marketCap, dailyVolume, allTimeVolume } = useMemo(() => {
     return {
       marketCap: BigInt(featured?.state.instantaneousStats.marketCap ?? 0),
       dailyVolume: BigInt(featured?.dailyVolume ?? 0),
       allTimeVolume: BigInt(featured?.state.cumulativeStats.quoteVolume ?? 0),
-      priceDelta: featured?.deltaPercentage ?? 0,
+      // priceDelta: featured?.deltaPercentage ?? 0,
     };
   }, [featured]);
 
@@ -49,8 +42,8 @@ const HeroSection: React.FC<MainCardProps> = (props): JSX.Element => {
   return (
     <>
       <div className="w-full px-4 md:w-4/12 lg:w-4/12">
-        <Link href={`/coin/droplet`} className="wow fadeInUp group" data-wow-delay=".1s">
-          <StyledImage src="/images/home/banner-circle.png" className="cursor-pointer"/>
+        <Link href={`/coin/${featured?.coinMeta?.title.toLowerCase()}`} className="wow fadeInUp group" data-wow-delay=".1s">
+          <StyledImage src={featured?.coinMeta?.imageURL} className="cursor-pointer [clip-path:circle(45%)]"/>
         </Link>
       </div>
       <div className="w-full px-10 sm-px-10 md:w-1/2 w60-box">
@@ -66,8 +59,8 @@ const HeroSection: React.FC<MainCardProps> = (props): JSX.Element => {
               1% to GREENPEACE
             </div>
           </div>
-          <Link href={`/coin/droplet`} className="mb-3 text-left main-title font-bold text-white dark:text-white cursor-pointer">
-            {featured?.market.symbolData?.name ?? "BLACK HEART"}
+          <Link href={`/coin/${featured?.coinMeta?.title.toLowerCase()}`} className="mb-3 text-left main-title font-bold text-white dark:text-white cursor-pointer">
+            {featured?.coinMeta?.title ?? "BLACK HEART"}
           </Link>
           <StatsText>
             {t("Mkt. Cap:")} {/* $4,675,4534.99 */}
