@@ -49,7 +49,7 @@ export const EcTable = <T,>({
     }
   }, []);
   const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
-    column: "ownedValue",
+    column: "",
     direction: "desc",
   });
 
