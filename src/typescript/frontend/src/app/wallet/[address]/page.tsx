@@ -1,4 +1,7 @@
+import { type fetchSenderSwapEvents } from "@/queries/market";
+import { useQuery } from "@tanstack/react-query";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
+import { WalletTransactionTable } from "components/pages/wallet/WalletTransactionTable";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { type Metadata } from "next";
@@ -15,6 +18,7 @@ export default async function WalletPage({ params }: { params: { address: string
     <div className="mx-auto">
       <AptPriceContextProvider aptPrice={aptPrice}>
         <WalletClientPage address={params.address} />
+        <WalletTransactionTable address={params.address} />
       </AptPriceContextProvider>
     </div>
   );
