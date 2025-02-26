@@ -1,13 +1,13 @@
 // cspell:word funder
 
 import { EmojicoinArena } from "@/contract-apis";
-import { UserTransactionResponse, type Account } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse, Account } from "@aptos-labs/ts-sdk";
 import {
   type SymbolEmoji,
   fetchArenaRegistryView,
   fetchArenaMeleeView,
   fetchMeleeEmojiData,
-  AnyNumberString,
+  type AnyNumberString,
 } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { getPublisher, getAptosClient } from "../../utils";
