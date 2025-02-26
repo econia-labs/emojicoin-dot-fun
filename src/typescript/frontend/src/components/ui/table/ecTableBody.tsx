@@ -2,6 +2,7 @@ import { Fragment, useMemo } from "react";
 import { type TableProps } from "./ecTable";
 import { TableBody, TableCell, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
+import { cn } from "lib/utils/class-name";
 
 export const EcTableBody = <T,>({
   containerHeight,
@@ -43,8 +44,11 @@ export const EcTableBody = <T,>({
             />
           ))}
       {Array.from({ length: minRows - items.length }).map((_, i) => (
-        <TableRow key={i} index={items.length + i} height={rowHeight}>
-          <TableCell className="absolute !w-full !h-full" />
+        <TableRow key={i} index={items.length + i} height={rowHeight} className="w-full">
+          {/* This is required for some browsers, otherwise the row doesn't take the full width */}
+          {columns.map((c) => (
+            <TableCell key={c.id} />
+          ))}
         </TableRow>
       ))}
     </TableBody>
