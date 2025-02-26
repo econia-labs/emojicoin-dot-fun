@@ -54,13 +54,13 @@ export const WalletClientPage = ({ address }: { address: string }) => {
 
   return (
     <>
-      <span className="pixel-heading-2">
+      <span className="pixel-heading-2 mobile-sm:px-4 sm:px-0 flex flex-wrap gap-x-2 mb-4">
         Portfolio of{" "}
         <ExplorerLink className="text-ec-blue hover:underline" type="account" value={address}>
           {formatDisplayName(resolvedName, { noTruncateANSName: true })}
         </ExplorerLink>
       </span>
-      <div className="flex justify-between w-full mb-4">
+      <div className="flex justify-between w-full mb-4 flex-wrap gap-x-2 mobile-sm:px-4 sm:px-0">
         <span className="pixel-heading-3b">
           {"Total value: "}
           {isLoading ? (
