@@ -8,7 +8,7 @@ const CoinDetailsHeader = (): JSX.Element => {
   const name = params?.market as string ?? "BLACK_HEART";
 
   const formattedName = useMemo(() => {
-    return name.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    return name.replace(/[_-]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
   }, [name]);
 
   return (

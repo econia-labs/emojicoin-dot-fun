@@ -13,6 +13,11 @@ import Link from "next/link";
 const FEATURED_MARKET_INTERVAL = 5 * 1000;
 const MAX_NUM_FEATURED_MARKETS = 5;
 
+const generateTitleSlug = (title: string | undefined) => {
+  if (!title) return ""
+  return title.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "");
+};
+
 const HeroSection: React.FC<MainCardPropsV2> = (props): JSX.Element => {
   const featuredMarkets = useMemo(() => {
     return props.featuredMarkets
@@ -42,7 +47,7 @@ const HeroSection: React.FC<MainCardPropsV2> = (props): JSX.Element => {
   return (
     <>
       <div className="w-full px-4 md:w-4/12 lg:w-4/12">
-        <Link href={`/coin/${featured?.coinMeta?.title.toLowerCase()}`} className="wow fadeInUp group" data-wow-delay=".1s">
+        <Link href={`/coin/${generateTitleSlug(featured?.coinMeta?.title)}`} className="wow fadeInUp group" data-wow-delay=".1s">
           <StyledImage src={featured?.coinMeta?.imageURL} className="cursor-pointer [clip-path:circle(45%)]"/>
         </Link>
       </div>
@@ -59,7 +64,7 @@ const HeroSection: React.FC<MainCardPropsV2> = (props): JSX.Element => {
               1% to GREENPEACE
             </div>
           </div>
-          <Link href={`/coin/${featured?.coinMeta?.title.toLowerCase()}`} className="mb-3 text-left main-title font-bold text-white dark:text-white cursor-pointer">
+          <Link href={`/coin/${generateTitleSlug(featured?.coinMeta?.title)}`} className="mb-3 text-left main-title font-bold text-white dark:text-white cursor-pointer">
             {featured?.coinMeta?.title ?? "BLACK HEART"}
           </Link>
           <StatsText>
