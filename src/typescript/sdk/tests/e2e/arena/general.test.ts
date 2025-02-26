@@ -24,12 +24,12 @@ import {
   toArenaPositionModel,
   toArenaSwapModel,
   waitForEmojicoinIndexer,
-} from ".././../../src/indexer-v2";
+} from "../../../src/indexer-v2";
 import {
   fetchArenaMeleeView,
   fetchMeleeEmojiData,
   type MeleeEmojiData,
-} from ".././../../src/markets/arena-utils";
+} from "../../../src/markets/arena-utils";
 import { getFundedAccount } from "../../utils/test-accounts";
 import {
   ONE_SECOND_MICROSECONDS,
@@ -38,7 +38,7 @@ import {
   PROCESSING_WAIT_TIME,
   waitForProcessor,
 } from "./utils";
-import { getPublisher } from ".././../utils/helpers";
+import { getPublisher } from "../../utils/helpers";
 
 const getEmojicoinLockedDiffFromSwapRes = (
   swapRes: Awaited<ReturnType<typeof EmojicoinClient.prototype.arena.swap>>,
@@ -301,19 +301,19 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(position.emojicoin0Balance).toEqual(viewArenaSwapEvent.emojicoin0Proceeds);
     expect(position.emojicoin1Balance).toEqual(viewArenaSwapEvent.emojicoin1Proceeds);
 
-    const exitResponse = await emojicoin.arena.exit(
+    const exitResponse1 = await emojicoin.arena.exit(
       account,
       melee.market1.symbolEmojis,
       melee.market2.symbolEmojis
     );
 
-    expect(exitResponse.events.arenaExitEvents).toHaveLength(1);
+    expect(exitResponse1.events.arenaExitEvents).toHaveLength(1);
 
-    const viewExitEvent = exitResponse.events.arenaExitEvents[0];
+    let viewExitEvent = exitResponse1.events.arenaExitEvents[0];
 
-    await waitForProcessor(exitResponse);
+    await waitForProcessor(exitResponse1);
 
-    const arenaExits: ArenaExitModel[] | null = await postgrest
+    let arenaExits: ArenaExitModel[] | null = await postgrest
       .from(TableName.ArenaExitEvents)
       .select("*")
       .eq("melee_id", melee.view.meleeID)
@@ -335,10 +335,13 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
 
     expect(arenaInfo).not.toBeNull();
 
-    const dbExitEvent = arenaExits![0];
+    let dbExitEvent = arenaExits![0];
     position = arenaPositions![0];
 
-    expectObjectEqualityExceptEventIndexAndVersion(dbExitEvent.exit, viewExitEvent);
+    expectObjectEqualityExceptEventIndexAndVersion(dbExitEvent.exit, {
+      ...viewExitEvent,
+      duringMelee: true,
+    });
 
     expect(position.user).toEqual(viewExitEvent.user);
     expect(position.meleeID).toEqual(viewExitEvent.meleeID);
@@ -355,6 +358,47 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(position.withdrawals).toBeLessThanOrEqual((withdrawalsApt * 10001n) / 10000n);
     expect(position.emojicoin0Balance).toEqual(0n);
     expect(position.emojicoin1Balance).toEqual(0n);
+
+    await waitForProcessor(
+      await emojicoin.arena.enter(
+        account,
+        1n * 10n ** 8n,
+        false,
+        melee.market1.symbolEmojis,
+        melee.market2.symbolEmojis,
+        "symbol1"
+      )
+    );
+
+    await waitUntilCurrentMeleeEnds();
+
+    const exitResponse2 = await emojicoin.arena.exit(
+      account,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis
+    );
+    await waitForProcessor(exitResponse2);
+    viewExitEvent = exitResponse2.events.arenaExitEvents[0];
+
+    arenaExits = await postgrest
+      .from(TableName.ArenaExitEvents)
+      .select("*")
+      .eq("melee_id", melee.view.meleeID)
+      .then((r) => r.data)
+      .then((r) => (r === null ? null : r.map(toArenaExitModel)));
+
+    dbExitEvent = arenaExits![1];
+
+    expect(Number(dbExitEvent.exit.aptProceeds) / 10 ** 8).toBeCloseTo(
+      Number(viewExitEvent.aptProceeds) / 10 ** 8,
+      5
+    );
+
+    // Compare proceeds separately as they can differ from the event and db by 1 due to rounding differences
+    expectObjectEqualityExceptEventIndexAndVersion(
+      { ...dbExitEvent.exit, aptProceeds: 0n },
+      { ...viewExitEvent, aptProceeds: 0n, duringMelee: false }
+    );
   }, 30000);
 });
 
@@ -369,7 +413,10 @@ describe("ensures leaderboard history is working", () => {
 
   let accountIndex = 100;
 
-  const getNextAccount = () => getFundedAccount((accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]);
+  const getNextAccount = () =>
+    getFundedAccount(
+      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
+    );
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
@@ -432,9 +479,15 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toStringLong())!;
-    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toStringLong())!;
-    const leaderboard3 = leaderboard!.find((l) => l.user === account3.accountAddress.toStringLong())!;
+    const leaderboard1 = leaderboard!.find(
+      (l) => l.user === account1.accountAddress.toStringLong()
+    )!;
+    const leaderboard2 = leaderboard!.find(
+      (l) => l.user === account2.accountAddress.toStringLong()
+    )!;
+    const leaderboard3 = leaderboard!.find(
+      (l) => l.user === account3.accountAddress.toStringLong()
+    )!;
 
     expect(leaderboard1.exited).toEqual(true);
     expect(leaderboard1.lastExit0).toEqual(true);
@@ -494,9 +547,15 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toStringLong())!;
-    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toStringLong())!;
-    const leaderboard3 = leaderboard!.find((l) => l.user === account3.accountAddress.toStringLong())!;
+    const leaderboard1 = leaderboard!.find(
+      (l) => l.user === account1.accountAddress.toStringLong()
+    )!;
+    const leaderboard2 = leaderboard!.find(
+      (l) => l.user === account2.accountAddress.toStringLong()
+    )!;
+    const leaderboard3 = leaderboard!.find(
+      (l) => l.user === account3.accountAddress.toStringLong()
+    )!;
 
     expect(leaderboard1.exited).toEqual(true);
     expect(leaderboard1.lastExit0).toEqual(true);
@@ -532,9 +591,15 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toStringLong())!;
-    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toStringLong())!;
-    const leaderboard3 = leaderboard!.find((l) => l.user === account3.accountAddress.toStringLong())!;
+    const leaderboard1 = leaderboard!.find(
+      (l) => l.user === account1.accountAddress.toStringLong()
+    )!;
+    const leaderboard2 = leaderboard!.find(
+      (l) => l.user === account2.accountAddress.toStringLong()
+    )!;
+    const leaderboard3 = leaderboard!.find(
+      (l) => l.user === account3.accountAddress.toStringLong()
+    )!;
 
     expect(leaderboard1.exited).toEqual(false);
     expect(leaderboard1.lastExit0).toBeNull();
@@ -558,7 +623,10 @@ describe("ensures arena info is working", () => {
 
   let accountIndex = 200;
 
-  const getNextAccount = () => getFundedAccount((accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]);
+  const getNextAccount = () =>
+    getFundedAccount(
+      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
+    );
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
