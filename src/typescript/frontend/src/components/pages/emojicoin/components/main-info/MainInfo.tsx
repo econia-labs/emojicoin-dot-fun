@@ -173,10 +173,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
                 gap: "1em",
                 flexDirection: "column",
                 width: "100%",
-                paddingRight: "0px",
-                paddingLeft: "0px",
-                paddingTop: "40px",
-                paddingBottom: "40px",
+                padding: "40px 0px",
               }
             : {
                 display: "grid",
