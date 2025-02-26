@@ -102,8 +102,6 @@ const TableRow = React.forwardRef<
       layout
       initial={{
         opacity: 0,
-        filter: "brightness(1) saturate(1)",
-        boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
       }}
       animate={{
         opacity: 1,
@@ -112,21 +110,12 @@ const TableRow = React.forwardRef<
           delay,
         },
       }}
-      whileHover={
-        !isHeader
-          ? {
-              filter: "brightness(1.05) saturate(1.1)",
-              boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-              transition: { duration: 0.05 },
-            }
-          : {}
-      }
       ref={ref}
       style={{ height, ...props.style }}
       className={cn(
         "relative w-full",
         !isHeader && !noHover
-          ? "border-solid border-y border-dark-gray transition-colors hover:border-ec-blue hover:border-2 hover:z-10"
+          ? "border-solid border-y border-dark-gray transition-colors hover:shadow-[inset_0px_0px_0px_2px_#086CD9] border-2 hover:z-10"
           : "",
         className
       )}
