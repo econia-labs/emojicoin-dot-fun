@@ -17,6 +17,21 @@ import {
 import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
 import { type SymbolEmoji } from "../../../emoji_data/types";
 
+const selectSwapsBySender = ({
+  sender,
+  page = 1,
+  pageSize = LIMIT,
+}: { sender: string } & MarketStateQueryArgs) => {
+  const query = postgrest
+    .from(TableName.SwapEvents)
+    .select("*")
+    .eq("sender", sender)
+    .order("market_nonce", ORDER_BY.DESC)
+    .range((page - 1) * pageSize, page * pageSize - 1);
+
+  return query;
+};
+
 const selectSwapsByMarketID = ({
   marketID,
   page = 1,
@@ -76,6 +91,7 @@ const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =
     .limit(1)
     .single();
 
+export const fetchSenderSwapEvents = queryHelper(selectSwapsBySender, toSwapEventModel);
 export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);
 export const fetchPeriodicEventsSince = queryHelper(
