@@ -18,7 +18,7 @@ export const ConnectToWebSockets = () => {
               emojis={connected ? emoji("green circle") : emoji("black circle")}
             />
             <motion.div
-              className="m-auto text-white font-pixelar uppercase text-2xl"
+              className="m-auto text-white font-lora uppercase text-2xl"
               key={received}
               animate={{ scale: 1, filter: `drop-shadow(0 0 4px ${hexToRgba("#FFFFFFFA")})` }}
               style={{ scale: 1.2, filter: `drop-shadow(0 0 0px ${hexToRgba("#FFFFFF00")})` }}

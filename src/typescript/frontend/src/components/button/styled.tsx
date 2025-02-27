@@ -8,7 +8,7 @@ const StyledButton = styled.button<ButtonProps>`
   background-color: ${({ theme }) => theme.colors.transparent};
   border-radius: ${({ theme }) => theme.radii.semiMedium};
   font-weight: ${({ theme }) => theme.fontWeight.regular};
-  font-family: ${({ theme }) => theme.fonts.pixelar};
+  font-family: ${({ theme }) => theme.fonts.lora};
   text-transform: uppercase;
   position: relative;
   align-items: center;

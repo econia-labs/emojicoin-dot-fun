@@ -14,13 +14,16 @@ const FEATURED_MARKET_INTERVAL = 5 * 1000;
 const MAX_NUM_FEATURED_MARKETS = 5;
 
 const generateTitleSlug = (title: string | undefined) => {
-  if (!title) return ""
-  return title.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "");
+  if (!title) return "";
+  return title
+    .toLowerCase()
+    .replace(/ /g, "-")
+    .replace(/[^a-z0-9-]/g, "");
 };
 
 const HeroSection: React.FC<MainCardPropsV2> = (props): JSX.Element => {
   const featuredMarkets = useMemo(() => {
-    return props.featuredMarkets
+    return props.featuredMarkets;
   }, [props.featuredMarkets]);
 
   const { t } = translationFunction();
@@ -47,15 +50,22 @@ const HeroSection: React.FC<MainCardPropsV2> = (props): JSX.Element => {
   return (
     <>
       <div className="w-full px-4 md:w-4/12 lg:w-4/12">
-        <Link href={`/coin/${generateTitleSlug(featured?.coinMeta?.title)}`} className="wow fadeInUp group" data-wow-delay=".1s">
-          <StyledImage src={featured?.coinMeta?.imageURL} className="cursor-pointer [clip-path:circle(45%)]"/>
+        <Link
+          href={`/coin/${generateTitleSlug(featured?.coinMeta?.title)}`}
+          className="wow fadeInUp group"
+          data-wow-delay=".1s"
+        >
+          <StyledImage
+            src={featured?.coinMeta?.imageURL ?? "/images/home/banner-circle.png"}
+            className={`cursor-pointer  ${featured?.coinMeta?.imageURL ? "[clip-path:circle(45%)]" : ""}`}
+          />
         </Link>
       </div>
       <div className="w-full px-10 sm-px-10 md:w-1/2 w60-box">
         <div className="wow fadeInUp group" data-wow-delay=".1s">
           <div className="flex  mb-5">
             <div className="mr-3 ">
-              <StyledImage src="/images/home/fire.png"  />
+              <StyledImage src="/images/home/fire.png" />
             </div>
             <div className="px-4 py-2 font-medium text-lg border-green text-green rounded-full mr-3 b-1">
               +30.65%
@@ -64,7 +74,10 @@ const HeroSection: React.FC<MainCardPropsV2> = (props): JSX.Element => {
               1% to GREENPEACE
             </div>
           </div>
-          <Link href={`/coin/${generateTitleSlug(featured?.coinMeta?.title)}`} className="mb-3 text-left main-title font-bold text-white dark:text-white cursor-pointer">
+          <Link
+            href={`/coin/${generateTitleSlug(featured?.coinMeta?.title)}`}
+            className="mb-3 text-left main-title font-bold text-white dark:text-white cursor-pointer"
+          >
             {featured?.coinMeta?.title ?? "BLACK HEART"}
           </Link>
           <StatsText>

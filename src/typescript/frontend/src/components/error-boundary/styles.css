@@ -11,7 +11,7 @@ div {
 h1,
 h2,
 p {
-  font-family: var(--font-pixelar);
+  font-family: var(--font-lora);
 }
 
 .error-container {

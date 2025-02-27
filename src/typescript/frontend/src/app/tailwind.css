@@ -3178,8 +3178,15 @@ video {
 }
 
 .bottom-match {
-  bottom: -26%;
-  right: -6%;
+  bottom: -20% !important;
+  right: -7% !important;
+}
+
+@media (max-width: 1440px) {
+  .bottom-match {
+    bottom: -0% !important;
+    right: 2% !important;
+  }
 }
 
 .btn-w50 {
@@ -3197,6 +3204,12 @@ video {
 
 .progress {
   background-image: linear-gradient(to right, #5ccacc, #a562ff);
+  height: 18px;
+  width: 70%;
+}
+
+.progress-2 {
+  background-image: linear-gradient(90deg, #aecc5c 0%, #ff62a3 100%);
   height: 18px;
   width: 70%;
 }

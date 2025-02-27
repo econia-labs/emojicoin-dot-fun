@@ -49,7 +49,7 @@ export const isSupportedWallet = (s: string) => {
     .includes(s.toLowerCase());
 };
 
-const WalletNameClassName = "ml-4 font-pixelar text-[20px] text-black uppercase flex";
+const WalletNameClassName = "ml-4 font-lora text-[20px] text-black uppercase flex";
 const ArrowDivClassName = "arrow-wrapper absolute right-0 p-[7px] transition-all text-black";
 
 type ScrambledProps = {

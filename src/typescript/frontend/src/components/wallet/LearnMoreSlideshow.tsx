@@ -79,7 +79,7 @@ export const LearnMoreSlideshow = ({
   }, [slide, setSlide, onLeftArrow, onRightArrow]);
 
   return slide >= 1 ? (
-    <div className="flex flex-col relative text-black font-pixelar text-md uppercase w-full min-h-[420px] justify-between">
+    <div className="flex flex-col relative text-black font-lora text-md uppercase w-full min-h-[420px] justify-between">
       {/* About Aptos Connect */}
       <div className="flex w-full text-xl mt-[2.75ch]">
         <span className="m-auto">About aptos connect</span>

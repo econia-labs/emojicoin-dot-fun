@@ -95,7 +95,7 @@ html, body, div, span, applet, object, iframe,
     min-width: 100vw;
     min-height: 100vh;
     margin: 0;
-    font-family: ${({ theme }) => theme.fonts.pixelar};
+    font-family: ${({ theme }) => theme.fonts.lora};
     background-color: ${({ theme }) => theme.colors.black};
 
     img {

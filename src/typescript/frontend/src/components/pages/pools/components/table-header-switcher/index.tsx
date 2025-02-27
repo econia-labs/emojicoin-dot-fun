@@ -34,7 +34,7 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherProps> = ({ title1, title
       <Flex cursor="pointer" onMouseOver={replay1}>
         <Text
           textScale="pixelHeading3"
-          className="font-pixelar text-lg text-blue"
+          className="font-lora text-lg text-blue"
           textTransform="uppercase"
           color={selectedTitle === title1 ? "lightGray" : "darkGray"}
           onClick={() => setSelectedTitle(title1)}
@@ -45,7 +45,7 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherProps> = ({ title1, title
       <Flex cursor="pointer" onMouseOver={replay2}>
         <Text
           textScale="pixelHeading3"
-          className="font-pixelar text-lg text-blue"
+          className="font-lora text-lg text-blue"
           textTransform="uppercase"
           color={selectedTitle === title2 ? "lightGray" : "darkGray"}
           onClick={() => setSelectedTitle(title2)}

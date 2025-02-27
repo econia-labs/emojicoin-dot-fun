@@ -85,7 +85,7 @@ export default function EmojiPicker(
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(`
         section {
-          --font-family: var(--font-pixelar) !important;
+          --font-family: var(--font-lora) !important;
           --font-transform: uppercase !important;
           text-transform: uppercase !important;
           font-weight: 500 !important;

@@ -69,7 +69,7 @@ const WalletDropdownMenu = () => {
                 emojis={emoji("high voltage")}
               /> */}
               <p
-                className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                className="whitespace-nowrap text-overflow-ellipsis overflow-hidden font-sifonn"
                 style={{ width, maxWidth: width, color: "#A562FF" }}
                 ref={ref}
               />

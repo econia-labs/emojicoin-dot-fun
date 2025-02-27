@@ -12,7 +12,7 @@ const Popup: React.FC<
         <RadixTooltip.Portal>
           <RadixTooltip.Content className={`TooltipContent ${className}`} sideOffset={5}>
             <div
-              className={`text-black pixel-heading-4 font-pixelar ${uppercase ? "uppercase" : ""}`}
+              className={`text-black pixel-heading-4 font-lora ${uppercase ? "uppercase" : ""}`}
             >
               {content}
             </div>

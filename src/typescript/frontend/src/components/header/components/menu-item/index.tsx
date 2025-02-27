@@ -30,6 +30,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, width, onClick = () => {} })
         textTransform="uppercase"
         fontSize="24px"
         ref={ref}
+        fontFamily="Sifonn"
         // ellipsis
       />
       {/* <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">

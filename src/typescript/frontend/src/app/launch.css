@@ -7,14 +7,14 @@
 .med-pixel-text {
   font-size: 20px !important;
   line-height: 25px;
-  font-family: var(--font-pixelar) !important;
+  font-family: var(--font-lora) !important;
 }
 
 @media screen and (min-width: 768px) {
   .med-pixel-text {
     font-size: 22px !important;
     line-height: 27px;
-    font-family: var(--font-pixelar) !important;
+    font-family: var(--font-lora) !important;
   }
 }
 
@@ -22,7 +22,7 @@
   .med-pixel-text {
     font-size: 24px !important;
     line-height: 30px;
-    font-family: var(--font-pixelar) !important;
+    font-family: var(--font-lora) !important;
   }
 }
 
@@ -30,7 +30,7 @@
   .med-pixel-text {
     font-size: 32px !important;
     line-height: 40px;
-    font-family: var(--font-pixelar) !important;
+    font-family: var(--font-lora) !important;
   }
 }
 

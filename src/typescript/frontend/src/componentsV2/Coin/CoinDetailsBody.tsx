@@ -87,7 +87,8 @@ const CoinDetailsBody = (props: GridProps & { coinImage?: string }): JSX.Element
         )}
 
         <MarketCard />
-        <ProgressBar />
+        <ProgressBar title="CORAL REEFS SAVED" progress={183} />
+        <ProgressBar title="EDUCATORS TRAINED" progress={31} variant="pink" />
       </ContentWrapper>
       <StyledImage className="w-full absolute bottom-match" src="/images/home/match.png" />
     </div>

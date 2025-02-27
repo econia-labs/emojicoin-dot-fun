@@ -42,11 +42,11 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
         <Popup content="go to market">
           <Link href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}>
             <Flex justifyContent="space-between" className="cursor-pointer">
-              <div className="font-pixelar font-sm text-ec-blue">{"{"}</div>
+              <div className="font-lora font-sm text-ec-blue">{"{"}</div>
               <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
                 <Emoji emojis={item.market.emojis} />
               </Text>
-              <div className="font-pixelar font-sm text-ec-blue">{"}"}</div>
+              <div className="font-lora font-sm text-ec-blue">{"}"}</div>
             </Flex>
           </Link>
         </Popup>

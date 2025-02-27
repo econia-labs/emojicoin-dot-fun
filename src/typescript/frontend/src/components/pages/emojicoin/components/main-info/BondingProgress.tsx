@@ -95,13 +95,13 @@ const BondingProgress = ({ data }: MainInfoProps) => {
         </div>
       </div>
       <div className="absolute bottom-[-1em] my-[-.2em] right-0 flex justify-end mr-[1em]">
-        <div className={statsTextClasses + " text-dark-gray font-pixelar text-[1em]"}>
+        <div className={statsTextClasses + " text-dark-gray font-lora text-[1em]"}>
           {t("Bonding progress:")}
         </div>
         <FormattedNumber
           value={bondingProgress}
           className={
-            statsTextClasses + " text-dark-gray font-pixelar text-[1em] text-end min-w-[3.3em]"
+            statsTextClasses + " text-dark-gray font-lora text-[1em] text-end min-w-[3.3em]"
           }
           suffix="%"
           scramble

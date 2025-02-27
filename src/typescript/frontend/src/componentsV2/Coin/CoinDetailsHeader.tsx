@@ -4,8 +4,8 @@ import { HeaderContainer, CoinTitle, CoinDescription, CoinDescriptionSpan } from
 import { useParams } from "next/navigation";
 
 const CoinDetailsHeader = (): JSX.Element => {
-  const params = useParams()
-  const name = params?.market as string ?? "BLACK_HEART";
+  const params = useParams();
+  const name = (params?.market as string) ?? "BLACK_HEART";
 
   const formattedName = useMemo(() => {
     return name.replace(/[_-]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
@@ -18,10 +18,12 @@ const CoinDetailsHeader = (): JSX.Element => {
           <div className="wow fadeInUp group" data-wow-delay=".1s">
             <CoinTitle>{formattedName}</CoinTitle>
             <CoinDescription>
-              Join our movement. 1% of goes to{" "}
+              1% of every trade goes to{" "}
               <CoinDescriptionSpan className="text-third underline">
-                Greenpeace.
+                Project Zero’s Coral Collective,
               </CoinDescriptionSpan>
+              a multiyear global initiative
+              <br /> and the largest global conservation effort to save coral reefs from extinction.
             </CoinDescription>
           </div>
         </div>

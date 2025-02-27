@@ -20,10 +20,10 @@ export const fontsStyle = `
   }
 
   @font-face {
-    font-family: Pixelar;
+    font-family: Lora;
     font-style: normal;
     font-weight: 400;
-    src: url("${CDN_URL}/fonts/Pixelar-Regular.woff2");
+    src: url('/fonts/Lora-Regular.woff') format('woff2');
   }
 
   @font-face {

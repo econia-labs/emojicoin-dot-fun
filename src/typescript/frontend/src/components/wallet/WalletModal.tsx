@@ -40,7 +40,7 @@ export const FirstSlide = ({
   return slide.idx === 0 ? (
     <div className="px-[46px] py-[25.5px]" {...props}>
       {/* Favicon + Log in or sign up with ... */}
-      <div className="flex flex-col text-center font-pixelar text-xl text-black uppercase">
+      <div className="flex flex-col text-center font-lora text-xl text-black uppercase">
         <EmojicoinLogo width={40} height={40} className="m-auto mb-2" />
         <span>Log in or sign up</span>
         <span>With social + Aptos Connect</span>

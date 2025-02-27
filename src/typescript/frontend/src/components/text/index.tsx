@@ -27,7 +27,7 @@ export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
 }))`
   color: ${({ theme, color }) => (color ? theme.colors[color] : theme.colors.white)};
   text-transform: ${({ textTransform }) => textTransform};
-
+  
   ${({ textScale }) => textScale && textStyles(textScale as keyof typeof scales)}
 
   ${fontWeights}

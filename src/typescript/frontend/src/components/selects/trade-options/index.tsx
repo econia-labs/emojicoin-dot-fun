@@ -25,8 +25,8 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
       <StyledDropdownMenuItem disabled={false}>
         <DropdownMenuInner>
           <div className="med-pixel-text flex flex-row justify-between gap-[16px] w-[100%]">
-            <span className="text-black font-pixelar text-2xl">MAX. SLIPPAGE</span>
-            <span className="text-black font-pixelar text-2xl">{Number(maxSlippage) / 100}%</span>
+            <span className="text-black font-lora text-2xl">MAX. SLIPPAGE</span>
+            <span className="text-black font-lora text-2xl">{Number(maxSlippage) / 100}%</span>
           </div>
         </DropdownMenuInner>
       </StyledDropdownMenuItem>
@@ -37,7 +37,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
               <span
                 className={
                   `${maxSlippageMode === "auto" ? "opacity-100" : "opacity-30"} ` +
-                  "text-black font-pixelar text-2xl cursor-pointer"
+                  "text-black font-lora text-2xl cursor-pointer"
                 }
                 onClick={() => {
                   setMaxSlippageMode("auto");
@@ -51,7 +51,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
               <span
                 className={
                   `${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} ` +
-                  "text-black font-pixelar text-2xl cursor-pointer"
+                  "text-black font-lora text-2xl cursor-pointer"
                 }
                 onClick={() => {
                   setMaxSlippageMode("custom");

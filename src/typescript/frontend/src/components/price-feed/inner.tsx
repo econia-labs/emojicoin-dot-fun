@@ -30,7 +30,7 @@ const Item = ({ emoji, delta }: { emoji: string; delta: number }) => {
   return (
     <Link
       href={`/market/${emoji}`}
-      className={`font-pixelar whitespace-nowrap border-[1px] border-solid ${delta >= 0 ? "border-green" : "border-pink"} rounded-full px-3 py-[2px] select-none mr-[22px]`}
+      className={`font-lora whitespace-nowrap border-[1px] border-solid ${delta >= 0 ? "border-green" : "border-pink"} rounded-full px-3 py-[2px] select-none mr-[22px]`}
       draggable={false}
     >
       <Emoji className="text-xl mr-[9px]" emojis={emoji} />

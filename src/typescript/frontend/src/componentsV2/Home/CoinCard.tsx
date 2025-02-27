@@ -82,9 +82,9 @@ const CoinCard: React.FC<CoinCardProps> = ({
             className="box-img"
             src={imageURL ?? "/images/home/box-cir.png"}
             style={{
-              ...(imageURL && {
-                clipPath: "circle(45%)",
-              }),
+              // ...(imageURL && {
+              //   clipPath: "circle(45%)",
+              // }),
             }}
             width={150}
             height={150}

@@ -74,10 +74,10 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
       </StyledMobileHeader>
 
       <Container>
-        <Flex my="30px" justifyContent="space-between" alignItems="center">
+        <Flex  justifyContent="space-between" alignItems="center">
           <Link className="ml-[50px]" {...linkProps}>
             <StyledClickItem>
-              <StyledImage src="/images/logo.svg" alt="logo" className="header-logo w-full" />
+              <StyledImage src="/images/logo.svg" alt="logo" className="header-logo w-[100px] h-[100px]" />
             </StyledClickItem>
           </Link>
 

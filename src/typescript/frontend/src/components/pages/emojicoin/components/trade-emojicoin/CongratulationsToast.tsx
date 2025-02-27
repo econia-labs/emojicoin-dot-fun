@@ -19,7 +19,7 @@ export const CongratulationsToast = ({
     <div className="flex flex-col text-center">
       <Emoji className="text-7xl p-[20px]" emojis={emoji("party popper")} />
       <div className="flex flex-col text-center">
-        <span className="font-pixelar text-5xl uppercase">Congratulations!</span>
+        <span className="font-lora text-5xl uppercase">Congratulations!</span>
         <span className="font-forma text-2xl uppercase text-ec-blue">
           <span>{`You won ${amountString} APT.`}</span>
         </span>

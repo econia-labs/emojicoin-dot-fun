@@ -28,7 +28,7 @@ export const LaunchButtonOrGoToMarketLink = ({
       <ButtonWithConnectWalletFallback>
         {registered ? (
           <Link
-            className="font-pixelar text-lg uppercase text-ec-blue"
+            className="font-lora text-lg uppercase text-ec-blue"
             href={path.join(ROUTES.market, emojis.join(""))}
           >
             <Button scale="lg" scrambleProps={scrambleProps}>

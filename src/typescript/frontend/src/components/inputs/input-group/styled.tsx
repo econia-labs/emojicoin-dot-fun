@@ -36,9 +36,9 @@ export const variantStyles = ({ theme, variant }: ThemedProps) => {
       align-items: center;
 
       ${Text} {
-        font-family: ${({ theme }) => theme.fonts.pixelar};
+        font-family: ${({ theme }) => theme.fonts.lora};
         text-transform: uppercase;
-        font-family: ${theme.fonts.pixelar};
+        font-family: ${theme.fonts.lora};
         color: ${theme.colors.lightGray};
         margin-bottom: 0;
       }
