@@ -1,41 +1,22 @@
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import HomePageComponent from "./HomePage";
-import { fetchMarkets, fetchMarketsWithCount, fetchPriceFeedWithMarketState } from "@/queries/home";
+import { fetchMarkets, fetchMarketsWithCount } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { unstable_cache } from "next/cache";
-import { parseJSON, stringifyJSON } from "utils";
 import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
-import { type DatabaseJsonType } from "@sdk/indexer-v2/types/json-types";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
-import { ORDER_BY } from "@sdk/indexer-v2/const";
 import { getCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import { fetchCachedPriceFeed } from "lib/queries/price-feed";
 
 export const revalidate = 2;
-
-const NUM_MARKETS_ON_PRICE_FEED = 25;
-
-const stringifiedFetchPriceFeedData = () =>
-  fetchPriceFeedWithMarketState({
-    sortBy: SortMarketsBy.DailyVolume,
-    orderBy: ORDER_BY.DESC,
-    pageSize: NUM_MARKETS_ON_PRICE_FEED,
-  }).then((res) => stringifyJSON(res));
-
-const getCachedPriceFeedData = unstable_cache(
-  stringifiedFetchPriceFeedData,
-  ["price-feed-with-market-data"],
-  { revalidate: 10 }
-);
 
 export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
-  const priceFeedPromise = getCachedPriceFeedData()
-    .then((res) => parseJSON<DatabaseJsonType["price_feed"][]>(res).map((p) => toPriceFeed(p)))
+  const priceFeedPromise = fetchCachedPriceFeed()
+    .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
