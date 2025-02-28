@@ -89,12 +89,10 @@ const TableRow = React.forwardRef<
 >(({ className, height = 33, noHover, isHeader = false, index = 0, ...props }, ref) => {
   // Shorter duration for rows further down, to avoid them taking forever to animate in.
   const delay = React.useMemo(() => {
-    if (index <= 30) {
-      return index * 0.025;
-    }
-    const first30 = 30 * 0.025;
-    const after30 = (index % 30) * 0.01;
-    return first30 + after30;
+    // Start with minimal delay and increase logarithmically
+    const baseDelay = 0.08;
+    const maxDelay = 0.5;
+    return Math.min(baseDelay + Math.log10(index + 1) * 0.08, maxDelay);
   }, [index]);
 
   return (
