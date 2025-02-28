@@ -11,6 +11,7 @@ import type {
 import { type JsonTypes, type Flatten } from "../../types";
 
 export type PeriodTypeFromDatabase =
+  | "period_15s"
   | "period_1m"
   | "period_5m"
   | "period_15m"
@@ -20,6 +21,7 @@ export type PeriodTypeFromDatabase =
   | "period_1d";
 
 export type PeriodTypeFromBroker =
+  | "FifteenSeconds"
   | "OneMinute"
   | "FiveMinutes"
   | "FifteenMinutes"
@@ -271,8 +273,11 @@ type ArenaMeleeEventData = Flatten<
 type ArenaEnterEventData = FlattenedExchangeRateWithEventIndex<"ArenaEnterEvent">;
 type ArenaExitEventData = FlattenedExchangeRateWithEventIndex<"ArenaExitEvent"> & {
   apt_proceeds: Uint64String;
+  during_melee: boolean;
 };
-type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent">;
+type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent"> & {
+  during_melee: boolean;
+};
 
 type ArenaVaultBalanceUpdateEventData = {
   event_index: Uint64String;
@@ -353,6 +358,20 @@ type ArenaLeaderboardData = {
   withdrawals: Uint64String;
 };
 
+type ArenaCandlestickData = {
+  melee_id: Uint64String;
+  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
+  start_time: PostgresTimestamp;
+
+  open_price: number;
+  close_price: number;
+  high_price: number;
+  low_price: number;
+
+  volume: Uint64String;
+  n_swaps: Uint64String;
+};
+
 export type DatabaseStructType = {
   TransactionMetadata: TransactionMetadata;
   MarketAndStateMetadata: MarketAndStateMetadata;
@@ -374,6 +393,7 @@ export type DatabaseStructType = {
   ArenaLeaderboard: ArenaLeaderboardData;
   ArenaLeaderboardHistory: ArenaLeaderboardHistoryData;
   ArenaInfo: ArenaInfoData;
+  ArenaCandlestick: ArenaCandlestickData;
 };
 
 export type BrokerJsonTypes =
@@ -412,6 +432,7 @@ export enum TableName {
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
   ArenaPosition = "arena_position",
   ArenaInfo = "arena_info",
+  ArenaCandlestick = "arena_candlestick",
   // The view for the current arena leaderboard, all users.
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.
@@ -513,6 +534,7 @@ export type DatabaseJsonType = {
   >;
   [TableName.ArenaPosition]: ArenaPositionData;
   [TableName.ArenaInfo]: ArenaInfoData;
+  [TableName.ArenaCandlestick]: ArenaCandlestickData;
 
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
@@ -567,6 +589,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
   DatabaseJsonType[TableName.ArenaPosition] &
   DatabaseJsonType[TableName.ArenaInfo] &
+  DatabaseJsonType[TableName.ArenaCandlestick] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[DatabaseRpc.UserPools] &

@@ -1,3 +1,4 @@
+import type { Period } from "../const";
 import { type SymbolEmoji } from "../emoji_data";
 import { type AccountAddressString } from "../emojicoin_dot_fun";
 import {
@@ -58,6 +59,7 @@ export type ArenaTypes = {
     emojicoin0ExchangeRateQuote: bigint;
     emojicoin1ExchangeRateBase: bigint;
     emojicoin1ExchangeRateQuote: bigint;
+    duringMelee: boolean;
     eventName: "ArenaExit";
   } & WithVersionAndEventIndex;
 
@@ -72,6 +74,7 @@ export type ArenaTypes = {
     emojicoin0ExchangeRateQuote: bigint;
     emojicoin1ExchangeRateBase: bigint;
     emojicoin1ExchangeRateQuote: bigint;
+    duringMelee: boolean;
     eventName: "ArenaSwap";
   } & WithVersionAndEventIndex;
 
@@ -153,6 +156,20 @@ export type ArenaTypes = {
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
+  };
+
+  ArenaCandlestick: {
+    meleeID: bigint;
+    period: Period;
+    startTime: Date;
+
+    openPrice: number;
+    closePrice: number;
+    highPrice: number;
+    lowPrice: number;
+
+    volume: bigint;
+    nSwaps: bigint;
   };
 };
 
@@ -255,6 +272,7 @@ export const toArenaExitEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaExit" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  duringMelee: true,
 });
 
 export const toArenaSwapEvent = (
@@ -271,6 +289,7 @@ export const toArenaSwapEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaSwap" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  duringMelee: true,
 });
 
 export const toArenaVaultBalanceUpdateEvent = (
