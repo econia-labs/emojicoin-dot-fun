@@ -4,7 +4,6 @@ import { DECIMALS } from "../../../const"; /* eslint-disable-line */
 import { calculateCirculatingSupply, calculateCurvePrice } from "../../../markets";
 import { toReserves } from "../../../types";
 
-export type TrendingMarketsResponse = TrendingMarket[];
 export type TrendingMarket = ReturnType<typeof toTrendingMarket>;
 export type TrendingMarketArgs = DatabaseJsonType["price_feed"] & { apt_price?: number };
 
@@ -13,20 +12,15 @@ const coin = (v: string) => toNominal(BigInt(v));
 /**
  * Converts data from the `price_feed` view into a `TrendingMarket` for the trending markets
  * API route.
+ * 
+ * If you pass `apt_price` to this function, it will calculate USD values for relevant fields.
  *
- * NOTE: All fields in this response that represent coin values are converted to their nominal
- * value form. That is, they are divided by 10 ^ {@link DECIMALS}.
- *
- * `base` always refers to the emojicoin.
- * `quote` always refers to APT.
- *
- * `theoretical_curve_price` is the exact current quote price on the curve- it doesn't mean the
- * price ever actually traded there. In other words, if a user traded an infinitesimally small
- * amount, that's the price they would get quoted at.
- *
- * @param data
+ * @param data a price feed query JSON response, possibly with `apt_price` included.
  * @returns a JSON response of price feed and market data, intended to be consumed as a
  * public API.
+ *
+ * See {@link [/api/trending](../../../../../frontend/src/app/api/trending/route.ts)} for more
+ * details.
  */
 export const toTrendingMarket = (data: TrendingMarketArgs) => {
   const priceFeedData = toPriceFeedData(data);

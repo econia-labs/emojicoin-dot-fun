@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import {
   toTrendingMarket,
+  type TrendingMarket,
   type TrendingMarketArgs,
-  type TrendingMarketsResponse,
 } from "@sdk/indexer-v2/queries";
 import { getAptPrice } from "lib/queries/get-apt-price";
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -12,14 +12,28 @@ import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/pri
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 /**
- * Returns the top {@link NUM_MARKETS_ON_PRICE_FEED} markets in the form of a JSON response.
+ * ### /api/trending
  *
- * NOTES:
- *   - All q64 values are normalized to decimalized values with {@link q64ToBig}
- *   - All APT and emojicoin values are converted to their decimalized formats; that is, they are
- *     divided by 10 ^ {@link DECIMALS}.
+ * The GET endpoint with no query params for retrieving the top {@link NUM_MARKETS_ON_PRICE_FEED}
+ * trending markets.
  *
- * @returns the top trending markets {@link TrendingMarketsResponse}
+ * Prices are expressed in terms of the base asset being the emojicoin.
+ *   - `"quote_price": 0.0123` indicates `1` emojicoin is worth  `0.0123` APT.
+ *   - `"usd_price": 0.20` indicates `1` emojicoin is worth `0.20 USD`.
+ *
+ * All q64 values in the contract are normalized to decimalized values with {@link q64ToBig}
+ *
+ * All APT and emojicoin values are converted to their decimalized formats; that is, they are
+ * divided by 10 ^ {@link DECIMALS}.
+ *
+ * `base` always refers to the emojicoin.
+ *
+ * `quote` always refers to APT.
+ *
+ * `theoretical_curve_price` is the exact current quote price on the curve— it doesn't mean the
+ * price ever actually traded there. In other words, if a user traded an infinitesimally small
+ * amount, that's the price they would get quoted at.
+ *
  * @example
  * ```json
  * [
@@ -76,10 +90,10 @@ export async function GET(_request: Request) {
       return toTrendingMarket(mkt);
     });
 
-    return NextResponse.json<TrendingMarketsResponse>(res);
+    return NextResponse.json<TrendingMarket[]>(res);
   } catch (error) {
     console.error("Failed to fetch trending markets:", error);
 
-    return new NextResponse("Failed to fetch trending markets.", { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch trending markets." }, { status: 500 });
   }
 }
