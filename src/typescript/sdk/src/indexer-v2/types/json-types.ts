@@ -11,6 +11,7 @@ import type {
 import { type JsonTypes, type Flatten } from "../../types";
 
 export type PeriodTypeFromDatabase =
+  | "period_15s"
   | "period_1m"
   | "period_5m"
   | "period_15m"
@@ -20,6 +21,7 @@ export type PeriodTypeFromDatabase =
   | "period_1d";
 
 export type PeriodTypeFromBroker =
+  | "FifteenSeconds"
   | "OneMinute"
   | "FiveMinutes"
   | "FifteenMinutes"
@@ -353,6 +355,21 @@ type ArenaLeaderboardData = {
   withdrawals: Uint64String;
 };
 
+type ArenaCandlestickData = {
+  melee_id: Uint64String;
+  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
+  start_time: PostgresTimestamp;
+
+  open_price: number | null;
+  close_price: number | null;
+  high_price: number | null;
+  low_price: number | null;
+
+  volume: Uint64String;
+  integrator_fees: Uint64String;
+  n_swaps: Uint64String;
+};
+
 export type DatabaseStructType = {
   TransactionMetadata: TransactionMetadata;
   MarketAndStateMetadata: MarketAndStateMetadata;
@@ -374,6 +391,7 @@ export type DatabaseStructType = {
   ArenaLeaderboard: ArenaLeaderboardData;
   ArenaLeaderboardHistory: ArenaLeaderboardHistoryData;
   ArenaInfo: ArenaInfoData;
+  ArenaCandlestick: ArenaCandlestickData;
 };
 
 export type BrokerJsonTypes =
@@ -412,6 +430,7 @@ export enum TableName {
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
   ArenaPosition = "arena_position",
   ArenaInfo = "arena_info",
+  ArenaCandlestick = "arena_candlestick",
   // The view for the current arena leaderboard, all users.
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.
@@ -513,6 +532,7 @@ export type DatabaseJsonType = {
   >;
   [TableName.ArenaPosition]: ArenaPositionData;
   [TableName.ArenaInfo]: ArenaInfoData;
+  [TableName.ArenaCandlestick]: ArenaCandlestickData;
 
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
@@ -567,6 +587,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
   DatabaseJsonType[TableName.ArenaPosition] &
   DatabaseJsonType[TableName.ArenaInfo] &
+  DatabaseJsonType[TableName.ArenaCandlestick] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
