@@ -57,7 +57,7 @@ type PostgresTimestamp = string;
  *
  * NOTE: This function assumes that the input timestamp is in UTC, but without the "Z" suffix.
  * If that changes, this function will break. This is intentional.
-
+ *
  * This function takes a PostgreSQL timestamp string and converts it to the number of
  * microseconds elapsed since the Unix epoch (January 1, 1970, 00:00:00 UTC). It handles
  * timestamps with varying precision in the fractional seconds part, from 1 to 6 digits.
