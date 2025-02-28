@@ -1,13 +1,12 @@
-import type { Ed25519Account, Account, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { Ed25519Account, Account } from "@aptos-labs/ts-sdk";
 import {
-  type AnyNumberString,
   ARENA_MODULE_ADDRESS,
   EmojicoinArena,
   getAptosClient,
   ONE_APT_BIGINT,
   type SymbolEmoji,
-} from "../../../../src";
-import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
+} from "../../../src";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {
   type ArenaEnterModel,
   type ArenaExitModel,
@@ -25,19 +24,21 @@ import {
   toArenaPositionModel,
   toArenaSwapModel,
   waitForEmojicoinIndexer,
-} from "../../../../src/indexer-v2";
+} from ".././../../src/indexer-v2";
 import {
   fetchArenaMeleeView,
   fetchMeleeEmojiData,
   type MeleeEmojiData,
-} from "../../../../src/markets/arena-utils";
-import { getFundedAccount } from "../../../utils/test-accounts";
+} from ".././../../src/markets/arena-utils";
+import { getFundedAccount } from "../../utils/test-accounts";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
-} from "../utils";
-import { getPublisher } from "../../../utils/helpers";
+  PROCESSING_WAIT_TIME,
+  waitForProcessor,
+} from "./utils";
+import { getPublisher } from ".././../utils/helpers";
 
 const getEmojicoinLockedDiffFromSwapRes = (
   swapRes: Awaited<ReturnType<typeof EmojicoinClient.prototype.arena.swap>>,
@@ -61,17 +62,6 @@ const getEmojicoinLockedDiffFromSwapRes = (
 
   return { emojicoin0Locked, emojicoin1Locked };
 };
-
-const PROCESSING_WAIT_TIME = 2 * 1000;
-const waitForProcessor = <
-  T extends { version: AnyNumberString } | { response: UserTransactionResponse },
->(
-  res: T
-) =>
-  waitForEmojicoinIndexer(
-    "version" in res ? res.version : res.response.version,
-    PROCESSING_WAIT_TIME
-  );
 
 const objectKeysWithoutEventIndexAndVersion = (v: object) => {
   const set = new Set(Object.keys(v));
