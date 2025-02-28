@@ -27,7 +27,8 @@ const selectSwapsBySender = ({
     .from(TableName.SwapEvents)
     .select("*")
     .eq("sender", sender)
-    .order("market_nonce", ORDER_BY.DESC)
+    .order("transaction_version", ORDER_BY.DESC)
+    .order("event_index", ORDER_BY.DESC)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (marketID) {
