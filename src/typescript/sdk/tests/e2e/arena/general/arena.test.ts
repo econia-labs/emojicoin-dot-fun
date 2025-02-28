@@ -383,19 +383,23 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    const leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-    const leaderboard3 = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
+    const user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+    const user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+    const user3LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
 
-    expect(leaderboard1.exited).toEqual(true);
-    expect(leaderboard1.lastExit0).toEqual(true);
+    expect(user1LeaderboardData).toBeDefined();
+    expect(user2LeaderboardData).toBeDefined();
+    expect(user3LeaderboardData).toBeDefined();
+
+    expect(user1LeaderboardData.exited).toEqual(true);
+    expect(user1LeaderboardData.lastExit0).toEqual(true);
     expect(Number(leaderboard![0].profits) / Number(leaderboard![0].losses)).toBeGreaterThan(1);
 
-    expect(leaderboard2.exited).toEqual(true);
-    expect(leaderboard2.lastExit0).toEqual(false);
+    expect(user2LeaderboardData.exited).toEqual(true);
+    expect(user2LeaderboardData.lastExit0).toEqual(false);
 
-    expect(leaderboard3.exited).toEqual(false);
-    expect(leaderboard3.lastExit0).toBeNull();
+    expect(user3LeaderboardData.exited).toEqual(false);
+    expect(user3LeaderboardData.lastExit0).toBeNull();
     expect(Number(leaderboard![2].profits) / Number(leaderboard![2].losses)).toBeLessThan(1);
   }, 15000);
 
@@ -445,18 +449,22 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    const leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-    const leaderboard3 = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
+    const user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+    const user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+    const user3LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
 
-    expect(leaderboard1.exited).toEqual(true);
-    expect(leaderboard1.lastExit0).toEqual(true);
+    expect(user1LeaderboardData).toBeDefined();
+    expect(user2LeaderboardData).toBeDefined();
+    expect(user3LeaderboardData).toBeDefined();
 
-    expect(leaderboard2.exited).toEqual(true);
-    expect(leaderboard2.lastExit0).toEqual(false);
+    expect(user1LeaderboardData.exited).toEqual(true);
+    expect(user1LeaderboardData.lastExit0).toEqual(true);
 
-    expect(leaderboard3.exited).toEqual(false);
-    expect(leaderboard3.lastExit0).toBeNull();
+    expect(user2LeaderboardData.exited).toEqual(true);
+    expect(user2LeaderboardData.lastExit0).toEqual(false);
+
+    expect(user3LeaderboardData.exited).toEqual(false);
+    expect(user3LeaderboardData.lastExit0).toBeNull();
   }, 15000);
 
   it("verifies the data during a melee with no exits", async () => {
@@ -483,18 +491,22 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    const leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-    const leaderboard3 = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
+    const user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+    const user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+    const user3LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
 
-    expect(leaderboard1.exited).toEqual(false);
-    expect(leaderboard1.lastExit0).toBeNull();
+    expect(user1LeaderboardData).toBeDefined();
+    expect(user2LeaderboardData).toBeDefined();
+    expect(user3LeaderboardData).toBeDefined();
 
-    expect(leaderboard2.exited).toEqual(false);
-    expect(leaderboard2.lastExit0).toBeNull();
+    expect(user1LeaderboardData.exited).toEqual(false);
+    expect(user1LeaderboardData.lastExit0).toBeNull();
 
-    expect(leaderboard3.exited).toEqual(false);
-    expect(leaderboard3.lastExit0).toBeNull();
+    expect(user2LeaderboardData.exited).toEqual(false);
+    expect(user2LeaderboardData.lastExit0).toBeNull();
+
+    expect(user3LeaderboardData.exited).toEqual(false);
+    expect(user3LeaderboardData.lastExit0).toBeNull();
   }, 15000);
 
   it("verifies that exited is correctly set after a melee ends", async () => {
@@ -521,14 +533,17 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(2);
 
-    let leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    let leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+    let user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+    let user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
 
-    expect(leaderboard1.exited).toEqual(true);
-    expect(leaderboard1.lastExit0).toEqual(true);
+    expect(user1LeaderboardData).toBeDefined();
+    expect(user2LeaderboardData).toBeDefined();
 
-    expect(leaderboard2.exited).toEqual(false);
-    expect(leaderboard2.lastExit0).toBeNull();
+    expect(user1LeaderboardData.exited).toEqual(true);
+    expect(user1LeaderboardData.lastExit0).toEqual(true);
+
+    expect(user2LeaderboardData.exited).toEqual(false);
+    expect(user2LeaderboardData.lastExit0).toBeNull();
 
     const exitRes = await emojicoin.arena.exit(
       account2,
@@ -548,13 +563,13 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(2);
 
-    leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+    user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+    user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
 
-    expect(leaderboard1.exited).toEqual(true);
-    expect(leaderboard1.lastExit0).toEqual(true);
+    expect(user1LeaderboardData.exited).toEqual(true);
+    expect(user1LeaderboardData.lastExit0).toEqual(true);
 
-    expect(leaderboard2.exited).toEqual(true);
-    expect(leaderboard2.lastExit0).toEqual(false);
+    expect(user2LeaderboardData.exited).toEqual(true);
+    expect(user2LeaderboardData.lastExit0).toEqual(false);
   }, 15000);
 });
