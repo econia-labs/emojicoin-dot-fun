@@ -43,8 +43,11 @@ export const EcTableBody = <T,>({
             />
           ))}
       {Array.from({ length: minRows - items.length }).map((_, i) => (
-        <TableRow key={i} index={items.length + i} height={rowHeight}>
-          <TableCell className="absolute !w-full !h-full" />
+        <TableRow key={i} index={items.length + i} height={rowHeight} className="w-full">
+          {/* Fill the row with empty cells, otherwise on some browsers the row won't be the full width */}
+          {columns.map((c) => (
+            <TableCell key={c.id} />
+          ))}
         </TableRow>
       ))}
     </TableBody>

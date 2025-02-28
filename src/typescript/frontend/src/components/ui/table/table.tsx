@@ -18,9 +18,10 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "text-ec-blue body-lg bg-black uppercase text-center sticky -top-[1px] z-10",
+      "text-ec-blue body-lg bg-black uppercase text-center sticky top-0 z-50 border-y border-dark-gray bg-clip-padding",
       "[&_td]:!border [&_td]:!border-dark-gray [&_td]:before:absolute [&_td]:before:top-0",
       "[&_td]:before:h-[1px] [&_td]:before:w-full [&_td]:before:bg-dark-gray",
+      "before:absolute before:top-0 before:left-0 before:w-full before:h-[1px] before:bg-dark-gray before:z-50 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-dark-gray",
       className
     )}
     {...props}
@@ -100,9 +101,9 @@ const TableRow = React.forwardRef<
     <motion.tr
       layout
       initial={{
-        opacity: 0,
         filter: "brightness(1) saturate(1)",
         boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
+        opacity: 0,
       }}
       animate={{
         opacity: 1,
@@ -115,32 +116,23 @@ const TableRow = React.forwardRef<
         !isHeader
           ? {
               filter: "brightness(1.05) saturate(1.1)",
-              boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-              transition: { duration: 0.05 },
+              boxShadow: "0px 0px 4px 2px #086CD9",
+              transition: { duration: 0.01 },
             }
           : {}
       }
       ref={ref}
       style={{ height, ...props.style }}
       className={cn(
-        "relative w-full group",
-        !isHeader ? "border-solid border-b border-dark-gray" : "",
+        "relative w-full",
+        !isHeader && !noHover
+          ? "border-solid border-y border-dark-gray transition-colors border-2 hover:z-10"
+          : "",
         className
       )}
       {...props}
     >
       {props.children as React.ReactNode}
-      {
-        <td
-          className={cn(
-            "absolute bg-transparent z-[1] inline-flex left-0 w-full h-full pointer-events-none",
-            !isHeader &&
-              !noHover &&
-              "group-hover:border-solid group-hover:border-ec-blue border-[2px]",
-            isHeader && "border-solid border-[1px] border-dark-gray border-t"
-          )}
-        />
-      }
     </motion.tr>
   );
 });
