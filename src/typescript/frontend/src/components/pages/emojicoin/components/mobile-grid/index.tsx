@@ -18,11 +18,12 @@ import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
 import { CoinHolders } from "../holders/coin-holders";
 import { TradeHistory } from "../trade-history/trade-history";
+import { PersonalTradeHistory } from "../personal-trade-history/personal-trade-history";
 
 const DISPLAY_HEADER_ABOVE_CHART = false;
 const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";
 
-const TABS = ["Trades", "Swap", "Chat", "Holders"] as const;
+const TABS = ["Trades", "My Trades", "Swap", "Chat", "Holders"] as const;
 
 const MobileGrid = (props: GridProps) => {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Swap");
@@ -69,6 +70,7 @@ const MobileGrid = (props: GridProps) => {
 
         <StyledMobileContentInner>
           {tab === "Trades" && <TradeHistory data={props.data} />}
+          {tab === "My Trades" && <PersonalTradeHistory data={props.data} />}
           {tab === "Holders" && (
             <CoinHolders
               emojicoin={props.data.symbol}
