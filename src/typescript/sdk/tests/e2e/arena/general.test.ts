@@ -21,12 +21,14 @@ import {
   toArenaEnterModel,
   toArenaExitModel,
   toArenaLeaderboardHistoryModel,
+  toArenaLeaderboardModel,
   toArenaPositionModel,
   toArenaSwapModel,
   waitForEmojicoinIndexer,
 } from "../../../src/indexer-v2";
 import {
   fetchArenaMeleeView,
+  fetchArenaRegistryView,
   fetchMeleeEmojiData,
   type MeleeEmojiData,
 } from "../../../src/markets/arena-utils";
@@ -796,5 +798,158 @@ describe("ensures arena info is working", () => {
     expect(arenaInfo!.volume).toEqual(volume);
     expect(arenaInfo!.emojicoin0Locked).toEqual(emojicoin0Locked);
     expect(arenaInfo!.emojicoin1Locked).toEqual(emojicoin1Locked);
+  }, 30000);
+});
+
+describe("ensures arena works in edge cases", () => {
+  const emojicoin = new EmojicoinClient();
+
+  let melee: MeleeEmojiData;
+
+  const MELEE_DURATION = ONE_SECOND_MICROSECONDS * 15n;
+
+  const publisher = getPublisher();
+
+  let accountIndex = 200;
+
+  const getNextAccount = () =>
+    getFundedAccount(
+      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
+    );
+
+  // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
+  const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
+    emojicoin.arena.enter(
+      account,
+      ONE_APT_BIGINT,
+      false,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis,
+      escrowCoin
+    );
+
+  beforeAll(async () => {
+    await waitUntilCurrentMeleeEnds();
+    await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
+      melee = res.melee;
+      return waitForEmojicoinIndexer(res.version, PROCESSING_WAIT_TIME);
+    });
+  }, 30000);
+
+  beforeEach(async () => {
+    await waitUntilCurrentMeleeEnds();
+    // Crank the melee to end it and start a new one.
+    const res = await emojicoin.arena.enter(
+      publisher,
+      1n,
+      false,
+      melee.market1.symbolEmojis,
+      melee.market2.symbolEmojis,
+      "symbol1"
+    );
+    melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
+    await waitForProcessor(res);
+
+    return true;
+  }, 30000);
+
+  it("verifies that a swap after a melee has endend and has been cranked is indexed properly", async () => {
+    const account1 = getNextAccount();
+    const account2 = getNextAccount();
+
+    await enterHelper(account1, "symbol1");
+    await enterHelper(account2, "symbol1");
+
+    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+
+    await waitUntilCurrentMeleeEnds();
+
+    // In order to crank
+    await enterHelper(account1, "symbol1");
+
+    const registry = await fetchArenaRegistryView();
+
+    expect(registry.currentMeleeID).toEqual(melee.view.meleeID + 1n);
+
+    await sleep(2000);
+
+    await waitForProcessor(await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis));
+
+    const swaps = await postgrest
+      .from(TableName.ArenaSwapEvents)
+      .select("*")
+      .eq("melee_id", melee.view.meleeID)
+      .order("transaction_version")
+      .then((r) => r.data)
+      .then((r) => (r === null ? null : r.map(toArenaSwapModel)));
+
+    const exits = await postgrest
+      .from(TableName.ArenaExitEvents)
+      .select("*")
+      .eq("melee_id", melee.view.meleeID)
+      .order("transaction_version")
+      .then((r) => r.data)
+      .then((r) => (r === null ? null : r.map(toArenaExitModel)));
+
+    const positions = await postgrest
+      .from(TableName.ArenaPosition)
+      .select("*")
+      .eq("melee_id", melee.view.meleeID)
+      .then((r) => r.data)
+      .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
+
+    const leaderboard = await postgrest
+      .from(TableName.ArenaLeaderboardHistory)
+      .select("*")
+      .eq("melee_id", melee.view.meleeID)
+      .then((r) => r.data)
+      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+    expect(swaps).not.toBeNull();
+    expect(swaps).toHaveLength(1);
+
+    expect(swaps![0].swap.duringMelee).toEqual(false);
+
+    expect(exits).not.toBeNull();
+    expect(exits).toHaveLength(2);
+
+    expect(exits![0].exit.duringMelee).toEqual(true);
+    expect(exits![1].exit.duringMelee).toEqual(false);
+
+    expect(positions).not.toBeNull();
+    expect(positions).toHaveLength(2);
+    expect(positions).toHaveLength(2);
+
+    const position1 = positions!.find(p => p.user === account1.accountAddress.toStringLong())!;
+    const position2 = positions!.find(p => p.user === account2.accountAddress.toStringLong())!;
+
+    expect(position1.open).toEqual(false);
+    expect(position2.open).toEqual(false);
+
+    expect(position1.lastExit0).toEqual(true);
+    expect(position2.lastExit0).toEqual(false);
+
+    expect(leaderboard).not.toBeNull();
+    expect(leaderboard).toHaveLength(2);
+
+    console.log(leaderboard);
+
+    const leaderboard1 = leaderboard!.find(l => l.user === account1.accountAddress.toStringLong())!;
+    const leaderboard2 = leaderboard!.find(l => l.user === account2.accountAddress.toStringLong())!;
+
+    expect(leaderboard1.exited).toEqual(true);
+    expect(leaderboard2.exited).toEqual(true);
+
+    expect(leaderboard1.emojicoin0Balance).toEqual(0n);
+    expect(leaderboard2.emojicoin0Balance).toBeGreaterThan(0n);
+
+    expect(leaderboard1.emojicoin1Balance).toEqual(0n);
+    expect(leaderboard2.emojicoin1Balance).toEqual(0n);
+
+    expect(leaderboard1.withdrawals).toBeGreaterThan(0n);
+    expect(leaderboard2.withdrawals).toEqual(0n);
+
+    expect(leaderboard1.lastExit0).toEqual(true);
+    expect(leaderboard2.lastExit0).toEqual(false);
   }, 30000);
 });
