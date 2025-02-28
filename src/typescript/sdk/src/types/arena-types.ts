@@ -59,6 +59,7 @@ export type ArenaTypes = {
     emojicoin0ExchangeRateQuote: bigint;
     emojicoin1ExchangeRateBase: bigint;
     emojicoin1ExchangeRateQuote: bigint;
+    duringMelee: boolean;
     eventName: "ArenaExit";
   } & WithVersionAndEventIndex;
 
@@ -73,6 +74,7 @@ export type ArenaTypes = {
     emojicoin0ExchangeRateQuote: bigint;
     emojicoin1ExchangeRateBase: bigint;
     emojicoin1ExchangeRateQuote: bigint;
+    duringMelee: boolean;
     eventName: "ArenaSwap";
   } & WithVersionAndEventIndex;
 
@@ -161,13 +163,12 @@ export type ArenaTypes = {
     period: ArenaPeriod;
     startTime: Date;
 
-    openPrice: number | null;
-    closePrice: number | null;
-    highPrice: number | null;
-    lowPrice: number | null;
+    openPrice: number;
+    closePrice: number;
+    highPrice: number;
+    lowPrice: number;
 
     volume: bigint;
-    integratorFees: bigint;
     nSwaps: bigint;
   };
 };
@@ -271,6 +272,7 @@ export const toArenaExitEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaExit" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  duringMelee: true,
 });
 
 export const toArenaSwapEvent = (
@@ -287,6 +289,7 @@ export const toArenaSwapEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaSwap" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  duringMelee: true,
 });
 
 export const toArenaVaultBalanceUpdateEvent = (
