@@ -2,7 +2,6 @@ import { Fragment, useMemo } from "react";
 import { type TableProps } from "./ecTable";
 import { TableBody, TableCell, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
-import { cn } from "lib/utils/class-name";
 
 export const EcTableBody = <T,>({
   containerHeight,
