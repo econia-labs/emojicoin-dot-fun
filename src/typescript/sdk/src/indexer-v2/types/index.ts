@@ -253,7 +253,7 @@ const toArenaCandlestickFromDatabase = (
 ): Types["ArenaCandlestick"] => ({
   meleeID: BigInt(data.melee_id),
   volume: BigInt(data.volume),
-  period: toPeriod(data.period),
+  period: toArenaPeriod(data.period),
   startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
   openPrice: data.open_price === null ? null : Number(data.open_price),
   closePrice: data.close_price === null ? null : Number(data.close_price),
