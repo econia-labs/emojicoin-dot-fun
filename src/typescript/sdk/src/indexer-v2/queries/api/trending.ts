@@ -1,6 +1,8 @@
 import { deserializeToHexString, toNominal } from "../../../utils";
 import { type DatabaseJsonType, toPriceFeedData } from "../../types";
 import { DECIMALS } from "../../../const"; /* eslint-disable-line */
+import { calculateCirculatingSupply, calculateCurvePrice } from "../../../markets";
+import { toReserves } from "../../../types";
 
 export type TrendingMarketsResponse = TrendingMarket[];
 export type TrendingMarket = ReturnType<typeof toTrendingMarket>;
@@ -15,20 +17,41 @@ const coin = (v: string) => toNominal(BigInt(v));
  * NOTE: All fields in this response that represent coin values are converted to their nominal
  * value form. That is, they are divided by 10 ^ {@link DECIMALS}.
  *
+ * `base` always refers to the emojicoin.
+ * `quote` always refers to APT.
+ *
+ * `theoretical_curve_price` is the exact current quote price on the curve- it doesn't mean the
+ * price ever actually traded there. In other words, if a user traded an infinitesimally small
+ * amount, that's the price they would get quoted at.
+ *
  * @param data
  * @returns a JSON response of price feed and market data, intended to be consumed as a
  * public API.
- *
  */
 export const toTrendingMarket = (data: TrendingMarketArgs) => {
   const priceFeedData = toPriceFeedData(data);
-  const market_cap = coin(data.instantaneous_stats_market_cap);
+  const market_cap_apt = coin(data.instantaneous_stats_market_cap);
+  const calculationArgs = {
+    inBondingCurve: data.in_bonding_curve,
+    clammVirtualReserves: toReserves({
+      base: data.clamm_virtual_reserves_base,
+      quote: data.clamm_virtual_reserves_quote,
+    }),
+    cpammRealReserves: toReserves({
+      base: data.cpamm_real_reserves_base,
+      quote: data.cpamm_real_reserves_quote,
+    }),
+  };
+  const circulatingSupply = calculateCirculatingSupply(calculationArgs).toString();
+  const curvePrice = calculateCurvePrice(calculationArgs);
   return {
-    market_nonce: Number(data.market_nonce),
     market_id: Number(data.market_id),
     symbol_bytes: deserializeToHexString(data.symbol_bytes),
     symbol_emojis: data.symbol_emojis,
     market_address: data.market_address,
+    theoretical_curve_price: curvePrice.toNumber(),
+    market_nonce: Number(data.market_nonce),
+    in_bonding_curve: data.in_bonding_curve,
     clamm_virtual_reserves: {
       base: coin(data.clamm_virtual_reserves_base),
       quote: coin(data.clamm_virtual_reserves_quote),
@@ -47,18 +70,19 @@ export const toTrendingMarket = (data: TrendingMarketArgs) => {
       n_chat_messages: Number(data.cumulative_stats_n_chat_messages),
     },
     instantaneous_stats: {
+      circulating_supply: coin(circulatingSupply),
       total_quote_locked: coin(data.instantaneous_stats_total_quote_locked),
       total_value_locked: coin(data.instantaneous_stats_total_value_locked),
-      market_cap,
       fully_diluted_value: coin(data.instantaneous_stats_fully_diluted_value),
-      market_cap_usd: data.apt_price ? market_cap * data.apt_price : undefined,
+      market_cap_apt,
+      market_cap_usd: data.apt_price ? market_cap_apt * data.apt_price : undefined,
     },
     daily_tvl_lp_growth: Number(Number(data.daily_tvl_per_lp_coin_growth).toPrecision(8)),
-    in_bonding_curve: data.in_bonding_curve,
-    daily_volume_apt: coin(data.daily_volume),
-    daily_volume_emojicoin: coin(data.daily_base_volume),
-    price_current: priceFeedData.closePrice,
-    price_24h_ago: priceFeedData.openPrice,
-    price_delta_24h: priceFeedData.deltaPercentage,
+    daily_volume_quote: coin(data.daily_volume),
+    daily_volume_base: coin(data.daily_base_volume),
+    quote_price: priceFeedData.closePrice,
+    quote_price_24h_ago: priceFeedData.openPrice,
+    quote_price_delta_24h: priceFeedData.deltaPercentage,
+    usd_price: data.apt_price ? priceFeedData.closePrice * data.apt_price : undefined,
   };
 };

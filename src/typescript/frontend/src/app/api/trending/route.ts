@@ -24,42 +24,45 @@ import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/pri
  * ```json
  * [
  *   {
- *     "market_nonce": 26245,
  *     "market_id": 413,
  *     "symbol_bytes": "0xf09fa7a7",
  *     "symbol_emojis": ["🧧"],
  *     "market_address": "0x6b0debd0d80e34b073b1de5f8bfe27983dd604497ac457fb082844894a3e548d",
+ *     "theoretical_curve_price": 0.03549040905972445,
+ *     "market_nonce": 26386,
+ *     "in_bonding_curve": false,
  *     "clamm_virtual_reserves": {
  *       "base": 0,
  *       "quote": 0
  *     },
  *     "cpamm_real_reserves": {
- *       "base": 559288.95671031,
- *       "quote": 19814.01809551
+ *       "base": 558793.14425783,
+ *       "quote": 19831.79726948
  *     },
  *     "cumulative_stats": {
- *       "base_volume": 102726771.2477148,
- *       "quote_volume": 515902.75892755,
- *       "integrator_fees": 5097.5643033,
- *       "pool_fees_base": 76889.80051043,
- *       "pool_fees_quote": 626.22126947,
- *       "n_swaps": 25370,
+ *       "base_volume": 102729004.71052358,
+ *       "quote_volume": 515981.96931268,
+ *       "integrator_fees": 5097.70502162,
+ *       "pool_fees_base": 76893.22065444,
+ *       "pool_fees_quote": 626.29825998,
+ *       "n_swaps": 25511,
  *       "n_chat_messages": 840
  *     },
  *     "instantaneous_stats": {
- *       "total_quote_locked": 19814.01809551,
- *       "total_value_locked": 39628.03619102,
- *       "market_cap": 1574408.08051778,
- *       "fully_diluted_value": 1594222.09861329,
- *       "market_cap_usd": 9608140.192975856
+ *       "circulating_supply": 44441206.85574217,
+ *       "total_quote_locked": 19831.79726948,
+ *       "total_value_locked": 39663.59453896,
+ *       "fully_diluted_value": 1597068.4076876,
+ *       "market_cap_apt": 1577236.61041812,
+ *       "market_cap_usd": 9086302.388957748
  *     },
- *     "daily_tvl_lp_growth": 0.99959452,
- *     "in_bonding_curve": false,
- *     "daily_volume_apt": 4192.15884355,
- *     "daily_volume_emojicoin": 109780.70181239,
- *     "price_current": 0.03533928558048081,
- *     "price_24h_ago": 0.04395169029413305,
- *     "price_delta_24h": -19.595161542175966
+ *     "daily_tvl_lp_growth": 1.0004915,
+ *     "daily_volume_quote": 3825.62539183,
+ *     "daily_volume_base": 101609.09655166,
+ *     "quote_price": 0.03557685205345566,
+ *     "quote_price_24h_ago": 0.04263140726110441,
+ *     "quote_price_delta_24h": -16.547788733413714,
+ *     "usd_price": 0.20495468699475275
  *   }
  * ]
  * ```
