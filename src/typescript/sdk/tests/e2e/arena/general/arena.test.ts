@@ -5,7 +5,6 @@ import {
   EmojicoinArena,
   getAptosClient,
   ONE_APT_BIGINT,
-  sleep,
   type SymbolEmoji,
 } from "../../../../src";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
@@ -599,7 +598,7 @@ describe("ensures arena info is working", () => {
     return true;
   }, 30000);
 
-  it("verifies that arena info data is correct 1", async () => {
+  it("verifies that all fields in the arena_info table are correctly calculated in a simple trading scenario", async () => {
     const account1 = getFundedAccount("420");
     const account2 = getFundedAccount("421");
     const account3 = getFundedAccount("422");
@@ -643,7 +642,7 @@ describe("ensures arena info is working", () => {
     expect(arenaInfo!.emojicoin1Locked).toEqual(0n);
   }, 30000);
 
-  it("verifies that arena info data is correct 2", async () => {
+  it("verifies that all fields in the arena_info table are correctly calculated in a complex trading scenario", async () => {
     let volume = 0n;
     let emojicoin0Locked = 0n;
     let emojicoin1Locked = 0n;
@@ -659,16 +658,18 @@ describe("ensures arena info is working", () => {
       getFundedAccount("427"),
     ];
 
-    for (const account of accounts.map((a, i) => [a, i] as [Ed25519Account, number])) {
+    // Enter with all accounts alternating between symbol 1 and 2.
+    for (const [account, index] of accounts.map((a, i) => [a, i] as [Ed25519Account, number])) {
       const enterRes = await enterHelper(
-        account[0],
-        `symbol${(account[1] % 2) + 1}` as "symbol1" | "symbol2"
+        account,
+        `symbol${(index % 2) + 1}` as "symbol1" | "symbol2"
       );
       volume += enterRes.events.arenaEnterEvents[0].quoteVolume;
       emojicoin0Locked += enterRes.events.arenaEnterEvents[0].emojicoin0Proceeds;
       emojicoin1Locked += enterRes.events.arenaEnterEvents[0].emojicoin1Proceeds;
     }
 
+    // Swap with all accounts.
     for (const account of accounts) {
       const swapRes = await emojicoin.arena.swap(
         account,
@@ -681,6 +682,7 @@ describe("ensures arena info is working", () => {
       emojicoin1Locked += diff.emojicoin1Locked;
     }
 
+    // Swap with half of the accounts.
     for (const account of accounts.slice(0, Math.floor(accounts.length / 2))) {
       const swapRes = await emojicoin.arena.swap(
         account,
@@ -693,17 +695,18 @@ describe("ensures arena info is working", () => {
       emojicoin1Locked += diff.emojicoin1Locked;
     }
 
+    let lastExitRes;
     for (const account of accounts.slice(Math.floor(accounts.length / 2))) {
-      const exitRes = await emojicoin.arena.exit(
+      lastExitRes = await emojicoin.arena.exit(
         account,
         melee.market1.symbolEmojis,
         melee.market2.symbolEmojis
       );
-      emojicoin0Locked -= exitRes.events.arenaExitEvents[0].emojicoin0Proceeds;
-      emojicoin1Locked -= exitRes.events.arenaExitEvents[0].emojicoin1Proceeds;
+      emojicoin0Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin0Proceeds;
+      emojicoin1Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin1Proceeds;
     }
 
-    await sleep(1000);
+    waitForProcessor(lastExitRes!);
 
     const arenaPositions: ArenaPositionModel[] | null = await postgrest
       .from(TableName.ArenaPosition)
