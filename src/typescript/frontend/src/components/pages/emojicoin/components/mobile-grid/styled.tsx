@@ -4,8 +4,8 @@ export const StyledMobileContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   border: 1px solid ${({ theme }) => theme.colors.darkGray};
-  margin-left: 30px;
-  margin-right: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
   position: relative;
 
   &:before {
