@@ -37,7 +37,6 @@ export const normalizeHex = (hex: HexInput) => {
   return `0x${bytesToHex(bytes)}` as const;
 };
 
-//
 /**
  * Converts an input hex string or byte array to a hex string.
  *   - If received from postgrest, `BYTEA` bytes come in as a string in the format "\\xabcd" where
