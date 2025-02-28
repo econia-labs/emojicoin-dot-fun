@@ -2,7 +2,6 @@ import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { type TradeHistoryProps } from "../../types";
-import { Emoji } from "utils/emoji";
 import { FormattedNumber } from "components/FormattedNumber";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { AptCell } from "components/ui/table-cells/apt-cell";
@@ -12,11 +11,11 @@ import { TimeCell } from "components/ui/table-cells/time-cell";
 import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useSwapEventsQuery";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
-export const TradeHistory = (props: TradeHistoryProps) => {
+export const PersonalTradeHistory = (props: TradeHistoryProps) => {
   const router = useRouter();
   const { account } = useWallet();
 
-  const query = useSwapEventsQuery(account?.address, props.data.marketID);
+  const query = useSwapEventsQuery(account?.address, props.data.marketID.toString());
 
   const initialLoad = useRef(true);
   useEffect(() => {
