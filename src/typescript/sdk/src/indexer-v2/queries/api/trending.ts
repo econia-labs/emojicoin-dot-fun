@@ -3,6 +3,7 @@ import { type DatabaseJsonType, toPriceFeedData } from "../../types";
 import { DECIMALS } from "../../../const"; /* eslint-disable-line */
 import { calculateCirculatingSupply, calculateCurvePrice } from "../../../markets";
 import { toReserves } from "../../../types";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 
 export type TrendingMarket = ReturnType<typeof toTrendingMarket>;
 export type TrendingMarketArgs = DatabaseJsonType["price_feed"] & { apt_price?: number };
@@ -12,7 +13,7 @@ const coin = (v: string) => toNominal(BigInt(v));
 /**
  * Converts data from the `price_feed` view into a `TrendingMarket` for the trending markets
  * API route.
- * 
+ *
  * If you pass `apt_price` to this function, it will calculate USD values for relevant fields.
  *
  * @param data a price feed query JSON response, possibly with `apt_price` included.
@@ -38,11 +39,15 @@ export const toTrendingMarket = (data: TrendingMarketArgs) => {
   };
   const circulatingSupply = calculateCirculatingSupply(calculationArgs).toString();
   const curvePrice = calculateCurvePrice(calculationArgs);
+  const timestampAsUTC = `${data.transaction_timestamp}Z`;
   return {
+    transaction_version: Number(data.transaction_version),
+    sender: AccountAddress.from(data.sender).toString(),
+    transaction_timestamp: timestampAsUTC,
     market_id: Number(data.market_id),
     symbol_bytes: deserializeToHexString(data.symbol_bytes),
     symbol_emojis: data.symbol_emojis,
-    market_address: data.market_address,
+    market_address: AccountAddress.from(data.market_address).toString(),
     theoretical_curve_price: curvePrice.toNumber(),
     market_nonce: Number(data.market_nonce),
     in_bonding_curve: data.in_bonding_curve,

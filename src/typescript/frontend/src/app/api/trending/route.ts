@@ -9,6 +9,7 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 import { DECIMALS } from "@sdk/const";
 import { q64ToBig } from "@sdk/utils";
 import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
+import { type AccountAddress } from "@aptos-labs/ts-sdk";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 /**
@@ -25,6 +26,8 @@ import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/pri
  *
  * All APT and emojicoin values are converted to their decimalized formats; that is, they are
  * divided by 10 ^ {@link DECIMALS}.
+ * 
+ * All addresses are AIP-40 compliant. See `.toString()` in {@link AccountAddress}.
  *
  * `base` always refers to the emojicoin.
  *
