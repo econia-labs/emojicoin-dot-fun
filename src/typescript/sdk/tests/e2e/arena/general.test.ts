@@ -367,6 +367,10 @@ describe("ensures leaderboard history is working", () => {
 
   const publisher = getPublisher();
 
+  let accountIndex = 100;
+
+  const getNextAccount = () => getFundedAccount((accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]);
+
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
     emojicoin.arena.enter(
@@ -404,9 +408,9 @@ describe("ensures leaderboard history is working", () => {
   }, 10000);
 
   it("verifies that the leaderboard data is correct", async () => {
-    const account1 = getFundedAccount("420");
-    const account2 = getFundedAccount("421");
-    const account3 = getFundedAccount("422");
+    const account1 = getNextAccount();
+    const account2 = getNextAccount();
+    const account3 = getNextAccount();
     await enterHelper(account1, "symbol1");
     await enterHelper(account2, "symbol1");
     await enterHelper(account3, "symbol1");
@@ -428,9 +432,9 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    const leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-    const leaderboard3 = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
+    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toStringLong())!;
+    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toStringLong())!;
+    const leaderboard3 = leaderboard!.find((l) => l.user === account3.accountAddress.toStringLong())!;
 
     expect(leaderboard1.exited).toEqual(true);
     expect(leaderboard1.lastExit0).toEqual(true);
@@ -447,7 +451,7 @@ describe("ensures leaderboard history is working", () => {
   it("verifies the data during a melee with no activity", async () => {
     await waitUntilCurrentMeleeEnds();
     const res = await emojicoin.arena.enter(
-      getFundedAccount("667"),
+      getNextAccount(),
       1n * 10n ** 8n,
       false,
       melee.market1.symbolEmojis,
@@ -467,9 +471,9 @@ describe("ensures leaderboard history is working", () => {
   }, 15000);
 
   it("verifies the data during a melee with no swaps", async () => {
-    const account1 = getFundedAccount("420");
-    const account2 = getFundedAccount("421");
-    const account3 = getFundedAccount("422");
+    const account1 = getNextAccount();
+    const account2 = getNextAccount();
+    const account3 = getNextAccount();
     await enterHelper(account1, "symbol1");
     await enterHelper(account2, "symbol2");
     await enterHelper(account3, "symbol1");
@@ -490,9 +494,9 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    const leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-    const leaderboard3 = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
+    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toStringLong())!;
+    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toStringLong())!;
+    const leaderboard3 = leaderboard!.find((l) => l.user === account3.accountAddress.toStringLong())!;
 
     expect(leaderboard1.exited).toEqual(true);
     expect(leaderboard1.lastExit0).toEqual(true);
@@ -505,9 +509,9 @@ describe("ensures leaderboard history is working", () => {
   }, 15000);
 
   it("verifies the data during a melee with no exits", async () => {
-    const account1 = getFundedAccount("420");
-    const account2 = getFundedAccount("421");
-    const account3 = getFundedAccount("422");
+    const account1 = getNextAccount();
+    const account2 = getNextAccount();
+    const account3 = getNextAccount();
     await enterHelper(account1, "symbol1");
     await enterHelper(account2, "symbol2");
     await enterHelper(account3, "symbol1");
@@ -528,9 +532,9 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(3);
 
-    const leaderboard1 = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    const leaderboard2 = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-    const leaderboard3 = leaderboard!.find((l) => l.user.startsWith("0x422"))!;
+    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toStringLong())!;
+    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toStringLong())!;
+    const leaderboard3 = leaderboard!.find((l) => l.user === account3.accountAddress.toStringLong())!;
 
     expect(leaderboard1.exited).toEqual(false);
     expect(leaderboard1.lastExit0).toBeNull();
@@ -551,6 +555,10 @@ describe("ensures arena info is working", () => {
   const MELEE_DURATION = ONE_SECOND_MICROSECONDS * 15n;
 
   const publisher = getPublisher();
+
+  let accountIndex = 200;
+
+  const getNextAccount = () => getFundedAccount((accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
@@ -638,14 +646,14 @@ describe("ensures arena info is working", () => {
     let emojicoin1Locked = 0n;
 
     const accounts = [
-      getFundedAccount("420"),
-      getFundedAccount("421"),
-      getFundedAccount("422"),
-      getFundedAccount("423"),
-      getFundedAccount("424"),
-      getFundedAccount("425"),
-      getFundedAccount("426"),
-      getFundedAccount("427"),
+      getNextAccount(),
+      getNextAccount(),
+      getNextAccount(),
+      getNextAccount(),
+      getNextAccount(),
+      getNextAccount(),
+      getNextAccount(),
+      getNextAccount(),
     ];
 
     // Enter with all accounts alternating between symbol 1 and 2.
