@@ -18,6 +18,7 @@ import { ROUTES } from "router/routes";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { useRouter } from "next/navigation";
 import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
+import { useArenaEscrows } from "@hooks/use-arena-escrows";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -96,6 +97,9 @@ export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
   const { account } = useAptos();
   const router = useRouter();
+  const escrows = useArenaEscrows();
+  
+  useEffect(() => console.log(escrows));
 
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
