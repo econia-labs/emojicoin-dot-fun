@@ -2,6 +2,8 @@ import { Fragment, useMemo } from "react";
 import { type TableProps } from "./ecTable";
 import { TableBody, TableCell, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
+import { LoadMore } from "./loadMore";
+import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
 
 export const EcTableBody = <T,>({
   containerHeight,
@@ -12,6 +14,8 @@ export const EcTableBody = <T,>({
   columns,
   getKey,
   onClick,
+  pagination,
+  isLoading,
 }: TableProps<T> & { containerHeight: number; className: string }) => {
   // Make sure there is either a renderRow function or a renderCell function in each column.
   if (!renderRow && (!columns || columns.some((col) => !col.renderCell)))
@@ -28,6 +32,20 @@ export const EcTableBody = <T,>({
     return 0;
   }, [rowHeight, containerHeight]);
 
+  if (items.length === 0 && isLoading)
+    return (
+      <TableBody
+        className="flex justify-center items-center absolute top-[50%] left-[50%]"
+        style={{ height: containerHeight - rowHeight + "px" }}
+      >
+        <tr className="-translate-x-1/2 -translate-y-1/2">
+          <td>
+            <AnimatedLoadingBoxes numSquares={11} />
+          </td>
+        </tr>
+      </TableBody>
+    );
+
   return (
     <TableBody className={className}>
       {renderRow
@@ -42,6 +60,7 @@ export const EcTableBody = <T,>({
               onClick={onClick}
             />
           ))}
+
       {Array.from({ length: minRows - items.length }).map((_, i) => (
         <TableRow key={i} index={items.length + i} height={rowHeight} className="w-full">
           {/* Fill the row with empty cells, otherwise on some browsers the row won't be the full width */}
@@ -50,6 +69,7 @@ export const EcTableBody = <T,>({
           ))}
         </TableRow>
       ))}
+      {pagination && items.length > minRows && <LoadMore query={pagination} />}
     </TableBody>
   );
 };

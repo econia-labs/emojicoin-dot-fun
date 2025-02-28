@@ -19,9 +19,10 @@ import { type SymbolEmoji } from "../../../emoji_data/types";
 
 const selectSwapsBySender = ({
   sender,
+  marketID,
   page = 1,
   pageSize = LIMIT,
-}: { sender: string } & MarketStateQueryArgs) => {
+}: { sender: string; marketID?: AnyNumberString } & MarketStateQueryArgs) => {
   const query = postgrest
     .from(TableName.SwapEvents)
     .select("*")
@@ -29,7 +30,18 @@ const selectSwapsBySender = ({
     .order("market_nonce", ORDER_BY.DESC)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
+  if (marketID) {
+    query.eq("market_id", marketID);
+  }
+
   return query;
+};
+
+const countSwapsBySender = ({ sender }: { sender: string }) => {
+  return postgrest
+    .from(TableName.SwapEvents)
+    .select("*", { count: "exact", head: true })
+    .eq("sender", sender);
 };
 
 const selectSwapsByMarketID = ({
@@ -92,6 +104,10 @@ const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =
     .single();
 
 export const fetchSenderSwapEvents = queryHelper(selectSwapsBySender, toSwapEventModel);
+export const countSenderSwapEvents = async (sender: string): Promise<number> => {
+  const { count } = await countSwapsBySender({ sender });
+  return count ?? 0;
+};
 export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);
 export const fetchPeriodicEventsSince = queryHelper(

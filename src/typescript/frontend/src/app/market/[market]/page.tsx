@@ -3,7 +3,12 @@ import EmojiNotFoundPage from "./not-found";
 import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
-import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
+import {
+  fetchChatEvents,
+  fetchMarketState,
+  fetchSenderSwapEvents,
+  fetchSwapEvents,
+} from "@/queries/market";
 import { type Metadata } from "next";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
