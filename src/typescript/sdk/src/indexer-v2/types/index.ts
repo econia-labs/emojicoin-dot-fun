@@ -1,9 +1,4 @@
-import { hexToBytes } from "@noble/hashes/utils";
-import {
-  type Uint64String,
-  type AccountAddressString,
-  type HexString,
-} from "../../emojicoin_dot_fun";
+import { type Uint64String, type AccountAddressString } from "../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
   type EventName,
@@ -26,7 +21,7 @@ import {
 } from "./json-types";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
-import { toAccountAddressString } from "../../utils";
+import { deserializeToHexString, toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
 
@@ -61,14 +56,6 @@ const toBlockAndEventIndex = (data: BlockAndEventIndexMetadata) =>
       }
     : undefined;
 
-/// If received from postgres, symbol bytes come in as a hex string in the format "\\xabcd" where
-/// "abcd" is the hex string.
-/// If received from the broker, the symbolBytes will be deserialized as an array of values.
-const deserializeSymbolBytes = (symbolBytes: HexString | Array<AnyNumberString>) =>
-  Array.isArray(symbolBytes)
-    ? new Uint8Array(symbolBytes.map(Number))
-    : hexToBytes(symbolBytes.replace(/\\x/g, ""));
-
 export type MarketMetadataModel = {
   marketID: bigint;
   time: bigint;
@@ -85,7 +72,7 @@ const toMarketMetadataModel = (
     | DatabaseStructType["MarketAndStateMetadata"]
     | WithEmitTime<DatabaseStructType["MarketAndStateMetadata"]>
 ): MarketMetadataModel => {
-  const symbolBytes = deserializeSymbolBytes(data.symbol_bytes);
+  const symbolBytes = deserializeToHexString(data.symbol_bytes);
 
   return {
     marketID: BigInt(data.market_id),

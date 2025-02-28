@@ -10,6 +10,9 @@ import {
   generateRandomSymbol,
   toCoinTypes,
   getMarketAddress,
+  deserializeToHexString,
+  chunk,
+  zip,
 } from "../../src";
 
 describe("hex utility functions", () => {
@@ -174,4 +177,33 @@ describe("hex utility functions", () => {
     expect(lpTypeString.endsWith("::coin_factory::EmojicoinLP")).toBe(true);
     expect(lpNoLeadingZeros.endsWith("::coin_factory::EmojicoinLP")).toBe(true);
   }, 2000);
+
+  const hexInputs = ["0011223344", "4433221100", "0123456789", "0f", "f0", "00", "ff", ""];
+  const hexOutputs = hexInputs.map((v) => `0x${v}`);
+  it("deserializes symbol hex bytes from the broker properly, with number[] and Uint8Array", () => {
+    const hexInputsAsNumbers = hexInputs.map((v) =>
+      chunk(Array.from(v), 2)
+        .map((pair) => pair.join(""))
+        .map((hexValue) => parseInt(hexValue, 16))
+    );
+    zip(hexInputsAsNumbers, hexOutputs).forEach(([input, output]) => {
+      expect(deserializeToHexString(input)).toEqual(output);
+      const asBytes = new Uint8Array(input);
+      expect(deserializeToHexString(asBytes)).toEqual(output);
+    });
+  });
+
+  it("deserializes symbol hex bytes from a postgres JSON response properly, with & w/o leading 0x", () => {
+    const postgresHexInputs = hexInputs.map((v) => `\\x${v}` as const);
+    zip(postgresHexInputs, hexOutputs).forEach(([input, output]) => {
+      expect(deserializeToHexString(input)).toEqual(output);
+    });
+  });
+
+  it("deserializes symbol bytes from a 0x${string} hex string properly, with & w/o leading 0x", () => {
+    const withPrefixes = hexInputs.map((v) => `0x${v}` as const);
+    zip(withPrefixes, hexOutputs).forEach(([input, output]) => {
+      expect(deserializeToHexString(input)).toEqual(output);
+    });
+  });
 });

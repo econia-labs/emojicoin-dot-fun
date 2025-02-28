@@ -166,7 +166,9 @@ export const Chart = (props: ChartContainerProps) => {
             countBack: countBack.toString(),
             to: to.toString(),
           });
-          const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
+          const data: PeriodicStateEventModel[] = await fetch(
+            `${ROUTES.candlesticks}?${params.toString()}`
+          )
             .then((res) => res.text())
             .then((res) => parseJSON(res));
 

@@ -36,3 +36,24 @@ export const normalizeHex = (hex: HexInput) => {
   }
   return `0x${bytesToHex(bytes)}` as const;
 };
+
+/**
+ * Converts an input hex string or byte array to a hex string.
+ *   - If received from postgrest, `BYTEA` bytes come in as a string in the format "\\xabcd" where
+ *     "abcd" is the hex string.
+ *   - If received from the rust broker, the bytes will be a number[] array.
+ *
+ * Also accepts valid hex `string`, `0x${string}` and `Uint8Array` inputs.
+ *
+ * @param bytes the input hex string, number array, or byte array
+ * @returns a valid hex string: `0x${string}`
+ */
+export const deserializeToHexString = (
+  bytes: `0x${string}` | `\\x${string}` | number[] | Uint8Array
+): `0x${string}` => {
+  if (typeof bytes === "string") {
+    return `0x${bytes.replace(/^(0x|\\x)/, "")}`;
+  }
+  const uint8Arr = new Uint8Array([...bytes]);
+  return `0x${bytesToHex(uint8Arr)}`;
+};
