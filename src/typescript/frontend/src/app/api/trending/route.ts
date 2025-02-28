@@ -69,14 +69,12 @@ import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/pri
  */
 export async function GET(_request: Request) {
   try {
-    const res = await getAptPrice().then((aptPrice) =>
-      fetchCachedPriceFeed().then((res) =>
-        res.map((v) => {
-          (v as TrendingMarketArgs)["apt_price"] = aptPrice;
-          return toTrendingMarket(v);
-        })
-      )
-    );
+    const aptPrice = await getAptPrice();
+    const priceFeed = await fetchCachedPriceFeed();
+    const res = priceFeed.map((mkt) => {
+      (mkt as TrendingMarketArgs)["apt_price"] = aptPrice;
+      return toTrendingMarket(mkt);
+    });
 
     return NextResponse.json<TrendingMarketsResponse>(res);
   } catch (error) {
