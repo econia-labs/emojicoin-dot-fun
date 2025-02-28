@@ -1,0 +1,58 @@
+import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
+import {
+  type FullCoinData,
+  useUserEmojicoinBalances,
+} from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
+import { PortfolioRow } from "./PortfolioRow";
+
+const COLUMNS: EcTableColumn<FullCoinData>[] = [
+  { id: "emoji", text: "Emoji", width: 80 },
+  {
+    id: "percentage",
+    text: "percent",
+    width: 105,
+    sortCallback: (coin) => coin.percentage,
+  },
+  {
+    id: "amount",
+    text: "Amount",
+    width: 130,
+    sortCallback: (coin) => coin.amount,
+  },
+  {
+    id: "marketCap",
+    text: "Market cap",
+    width: 145,
+    sortCallback: (coin) => coin.marketCap,
+  },
+  {
+    id: "usdValue",
+    text: "USD Value",
+    width: 130,
+    sortCallback: (coin) => coin.ownedValue,
+  },
+  {
+    id: "ownedValue",
+    text: "Value",
+    width: 110,
+    sortCallback: (coin) => coin.ownedValue,
+  },
+];
+
+export const WalletPortfolioTable = ({ address }: { address: string }) => {
+  const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
+
+  return (
+    <EcTable
+      className={"flex w-full overflow-auto h-[60dvh] shadow-[0_0_0_1px_var(--dark-gray)]"}
+      columns={COLUMNS}
+      defaultSortColumn="ownedValue"
+      items={ownedCoins}
+      getKey={(coin) => coin.symbol}
+      isLoading={isLoading}
+      renderRow={(item, i) => (
+        <PortfolioRow key={item.symbol} index={i} coinData={item} totalValue={totalValue} />
+      )}
+    />
+  );
+};

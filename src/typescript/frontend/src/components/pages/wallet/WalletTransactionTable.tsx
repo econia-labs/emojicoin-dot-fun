@@ -1,26 +1,18 @@
 "use client";
 
-import { parseJSONWithBigInts } from "@sdk/indexer-v2/json-bigint";
-import { type fetchSenderSwapEvents } from "@sdk/indexer-v2/queries/misc/fetch-wallet-swaps";
-import { useQuery } from "@tanstack/react-query";
-import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { FormattedNumber } from "components/FormattedNumber";
-import SearchBar from "components/inputs/search-bar";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { TimeCell } from "components/ui/table-cells/time-cell";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { useEmojiPicker } from "context/emoji-picker-context";
-import { cn } from "lib/utils/class-name";
 import { toNominal } from "lib/utils/decimals";
-import { sortEvents } from "lib/utils/sort-events";
 import _ from "lodash";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
-import { parseJSON } from "utils";
 import { Emoji } from "utils/emoji";
-
-type SwapEvent = Awaited<ReturnType<typeof fetchSenderSwapEvents>>[number];
+import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "router/routes";
+import { emojiNamesToPath } from "utils/pathname-helpers";
+import { toMarketEmojiData } from "@sdk/emoji_data";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
@@ -35,7 +27,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
     text: "Time",
     id: "time",
     width: 120,
-    renderCell: (item) => <TimeCell date={item.transaction.timestamp} />,
+    renderCell: (item) => <TimeCell date={new Date(Number(item.transaction.time / 1000n))} />,
   },
   {
     text: "Price",
@@ -71,47 +63,22 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
 ];
 
 export const WalletTransactionTable = ({ address }: { address: string }) => {
+  const query = useSwapEventsQuery(address);
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
-
-      return params.toString();
-    },
-    [searchParams]
-  );
-
-  const emojis = useEmojiPicker((s) => s.emojis);
-
-  const { data } = useQuery<Awaited<ReturnType<typeof fetchSenderSwapEvents>>>({
-    queryKey: ["fetchSwapEvents", address],
-    queryFn: () =>
-      fetch(`/wallet/${address}/swaps`)
-        .then(async (res) => res.text())
-        .then((res) => parseJSON(res)),
-  });
-
-  useEffect(() => {
-    if (emojis) {
-      router.push(pathname + "?" + createQueryString("emoji", emojis.join()));
-    }
-  }, [createQueryString, emojis]);
 
   return (
     <>
-      <SearchBar />
       <EcTable
-        className={cn(
-          "flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[60dvh] m-auto",
-          "overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
-        )}
+        className={"flex w-full overflow-auto h-[60dvh] shadow-[0_0_0_1px_var(--dark-gray)]"}
         getKey={(item) => item.guid}
         columns={COLUMNS}
-        items={data}
+        onClick={(item) => {
+          router.push(
+            `${ROUTES.market}/${emojiNamesToPath(item.market.symbolData.name.split(","))}`
+          );
+        }}
+        items={query.data?.pages.flatMap((page) => page) ?? []}
+        pagination={query}
       />
     </>
   );
