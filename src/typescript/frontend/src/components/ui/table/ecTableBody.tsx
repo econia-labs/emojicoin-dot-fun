@@ -32,16 +32,15 @@ export const EcTableBody = <T,>({
     return 0;
   }, [rowHeight, containerHeight]);
 
-  if (items.length === 0 && isLoading)
+  if (items.length === 0)
     return (
-      <TableBody
-        className="flex justify-center items-center absolute top-[50%] left-[50%]"
-        style={{ height: containerHeight - rowHeight + "px" }}
-      >
-        <tr className="-translate-x-1/2 -translate-y-1/2">
-          <td>
-            <AnimatedLoadingBoxes numSquares={11} />
-          </td>
+      <TableBody className={className}>
+        <tr style={{ height: containerHeight - rowHeight - 1.5 + "px" }}>
+          <TableCell colSpan={columns.length}>
+            <div className="flex justify-center items-center">
+              {isLoading ? <AnimatedLoadingBoxes numSquares={11} /> : "Empty"}
+            </div>
+          </TableCell>
         </tr>
       </TableBody>
     );
@@ -63,13 +62,12 @@ export const EcTableBody = <T,>({
 
       {Array.from({ length: minRows - items.length }).map((_, i) => (
         <TableRow key={i} index={items.length + i} height={rowHeight} className="w-full">
-          {/* Fill the row with empty cells, otherwise on some browsers the row won't be the full width */}
-          {columns.map((c) => (
-            <TableCell key={c.id} />
-          ))}
+          <TableCell colSpan={columns.length} />
         </TableRow>
       ))}
-      {pagination && items.length > minRows && <LoadMore query={pagination} />}
+      {pagination && items.length > minRows && (
+        <LoadMore colSpan={columns.length} query={pagination} />
+      )}
     </TableBody>
   );
 };
