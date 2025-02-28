@@ -2,7 +2,10 @@
 export const ROUTES = {
   root: "/",
   // Alphabetized after this.
-  api: "/api",
+  api: {
+    trending: "/api/trending",
+  },
+  candlesticks: "/candlesticks",
   cult: "/cult",
   dexscreener: "/dexscreener",
   docs: "https://docs.emojicoin.fun/category/--start-here",

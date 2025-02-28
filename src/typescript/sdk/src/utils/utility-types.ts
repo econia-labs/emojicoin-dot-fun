@@ -27,7 +27,7 @@ export type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
  * type OrderByValues = ValueOf<typeof ORDER_BY>; // 'ASC' | 'DESC' | 100
  * ```
  */
-export type ValueOf<T> = T[keyof T];
+export type ValueOf<T> = Required<T>[keyof T];
 
 export type Writable<T> = {
   -readonly [P in keyof T]: T[P];

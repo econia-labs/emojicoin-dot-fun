@@ -4,7 +4,6 @@ import { type SymbolEmoji } from "../../emoji_data";
 import type {
   UnsizedDecimalString,
   AccountAddressString,
-  HexString,
   Uint128String,
   Uint64String,
 } from "../../emojicoin_dot_fun/types";
@@ -118,7 +117,7 @@ export const postgresTimestampToDate = (timestamp: PostgresTimestamp): Date => {
 
 // `inserted_at` is omitted if the data comes from the broker.
 type TransactionMetadata = {
-  transaction_version: Uint64String;
+  transaction_version: Uint64String | number;
   sender: AccountAddressString;
   entry_function?: string | null;
   transaction_timestamp: PostgresTimestamp;
@@ -130,9 +129,12 @@ export type BlockAndEventIndexMetadata = {
   event_index: number;
 };
 
+type PostgresBytes = `\\x${string}`;
+type BrokerBytes = number[];
+
 type MarketAndStateMetadata = {
   market_id: Uint64String;
-  symbol_bytes: HexString;
+  symbol_bytes: PostgresBytes | BrokerBytes;
   symbol_emojis: SymbolEmoji[];
   bump_time: PostgresTimestamp;
   market_nonce: Uint64String;
