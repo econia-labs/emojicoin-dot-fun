@@ -26,7 +26,7 @@ import { type AccountAddress } from "@aptos-labs/ts-sdk";
  *
  * All APT and emojicoin values are converted to their decimalized formats; that is, they are
  * divided by 10 ^ {@link DECIMALS}.
- * 
+ *
  * All addresses are AIP-40 compliant. See `.toString()` in {@link AccountAddress}.
  *
  * `base` always refers to the emojicoin.
