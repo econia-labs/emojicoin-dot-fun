@@ -197,13 +197,13 @@ describe("hex utility functions", () => {
     const postgresHexInputs = hexInputs.map((v) => `\\x${v}` as const);
     zip(postgresHexInputs, hexOutputs).forEach(([input, output]) => {
       expect(deserializeToHexString(input)).toEqual(output);
-    })
+    });
   });
 
   it("deserializes symbol bytes from a 0x${string} hex string properly, with & w/o leading 0x", () => {
     const withPrefixes = hexInputs.map((v) => `0x${v}` as const);
     zip(withPrefixes, hexOutputs).forEach(([input, output]) => {
       expect(deserializeToHexString(input)).toEqual(output);
-    })
+    });
   });
 });
