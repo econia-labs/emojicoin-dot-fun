@@ -29,6 +29,14 @@ export interface TableProps<T> {
   renderRow?: (item: T, i: number) => React.ReactNode;
   onClick?: (item: T) => void;
   textFormat?: "body-md" | "body-sm" | string;
+  defaultSortColumn?: string;
+  isLoading?: boolean;
+  pagination?: {
+    hasNextPage?: boolean;
+    fetchNextPage: () => void;
+    isLoading: boolean;
+    isFetching: boolean;
+  };
 }
 
 export const EcTable = <T,>({
@@ -40,6 +48,9 @@ export const EcTable = <T,>({
   getKey,
   onClick,
   textFormat = "body-md",
+  defaultSortColumn,
+  pagination,
+  isLoading,
 }: TableProps<T>) => {
   // const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = useState<number>(0);
@@ -49,7 +60,7 @@ export const EcTable = <T,>({
     }
   }, []);
   const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
-    column: "",
+    column: defaultSortColumn || "",
     direction: "desc",
   });
 
@@ -60,7 +71,7 @@ export const EcTable = <T,>({
 
   return (
     <div ref={containerRef} className={cn("flex w-full", className)}>
-      <Table className={cn("border-solid border-[1px] border-dark-gray")}>
+      <Table className={cn("relative border-solid border-[1px] border-dark-gray")}>
         <TableHeader>
           <TableRow isHeader>
             {columns.map((column, i) => (
@@ -87,6 +98,8 @@ export const EcTable = <T,>({
           columns={columns}
           renderRow={renderRow}
           getKey={getKey}
+          pagination={pagination}
+          isLoading={isLoading}
         />
       </Table>
     </div>
