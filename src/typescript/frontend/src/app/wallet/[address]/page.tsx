@@ -1,4 +1,5 @@
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
+import { WalletTransactionTable } from "components/pages/wallet/WalletTransactionTable";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { type Metadata } from "next";

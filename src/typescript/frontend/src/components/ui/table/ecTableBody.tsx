@@ -2,6 +2,8 @@ import { Fragment, useMemo } from "react";
 import { type TableProps } from "./ecTable";
 import { TableBody, TableCell, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
+import { LoadMore } from "./loadMore";
+import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
 
 export const EcTableBody = <T,>({
   containerHeight,
@@ -12,6 +14,8 @@ export const EcTableBody = <T,>({
   columns,
   getKey,
   onClick,
+  pagination,
+  isLoading,
 }: TableProps<T> & { containerHeight: number; className: string }) => {
   // Make sure there is either a renderRow function or a renderCell function in each column.
   if (!renderRow && (!columns || columns.some((col) => !col.renderCell)))
@@ -28,6 +32,19 @@ export const EcTableBody = <T,>({
     return 0;
   }, [rowHeight, containerHeight]);
 
+  if (items.length === 0)
+    return (
+      <TableBody className={className}>
+        <tr style={{ height: containerHeight - rowHeight - 1.5 + "px" }}>
+          <TableCell colSpan={columns.length}>
+            <div className="flex justify-center items-center">
+              {isLoading ? <AnimatedLoadingBoxes numSquares={11} /> : "Empty"}
+            </div>
+          </TableCell>
+        </tr>
+      </TableBody>
+    );
+
   return (
     <TableBody className={className}>
       {renderRow
@@ -42,14 +59,15 @@ export const EcTableBody = <T,>({
               onClick={onClick}
             />
           ))}
+
       {Array.from({ length: minRows - items.length }).map((_, i) => (
         <TableRow key={i} index={items.length + i} height={rowHeight} className="w-full">
-          {/* Fill the row with empty cells, otherwise on some browsers the row won't be the full width */}
-          {columns.map((c) => (
-            <TableCell key={c.id} />
-          ))}
+          <TableCell colSpan={columns.length} />
         </TableRow>
       ))}
+      {pagination && items.length > minRows && (
+        <LoadMore colSpan={columns.length} query={pagination} />
+      )}
     </TableBody>
   );
 };
