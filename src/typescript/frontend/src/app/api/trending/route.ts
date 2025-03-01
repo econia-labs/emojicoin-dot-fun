@@ -12,6 +12,8 @@ import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/pri
 import { type AccountAddress } from "@aptos-labs/ts-sdk";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
+export const revalidate = 10;
+
 /**
  * ### /api/trending
  *
@@ -21,6 +23,8 @@ import { type AccountAddress } from "@aptos-labs/ts-sdk";
  * Prices are expressed in terms of the base asset being the emojicoin.
  *   - `"quote_price": 0.0123` indicates `1` emojicoin is worth  `0.0123` APT.
  *   - `"usd_price": 0.20` indicates `1` emojicoin is worth `0.20 USD`.
+ *
+ * #### NOTE: `market_cap_usd` and `usd_price` may be absent if APT/USD isn't fetched successfully.
  *
  * All q64 values in the contract are normalized to decimalized values with {@link q64ToBig}
  *
@@ -71,7 +75,7 @@ import { type AccountAddress } from "@aptos-labs/ts-sdk";
  *       "total_value_locked": 39663.59453896,
  *       "fully_diluted_value": 1597068.4076876,
  *       "market_cap_apt": 1577236.61041812,
- *       "market_cap_usd": 9086302.388957748
+ *       "market_cap_usd": 9086302.388957748 // possibly undefined
  *     },
  *     "daily_tvl_lp_growth": 1.0004915,
  *     "daily_volume_quote": 3825.62539183,
@@ -79,7 +83,7 @@ import { type AccountAddress } from "@aptos-labs/ts-sdk";
  *     "quote_price": 0.03557685205345566,
  *     "quote_price_24h_ago": 0.04263140726110441,
  *     "quote_price_delta_24h": -16.547788733413714,
- *     "usd_price": 0.20495468699475275
+ *     "usd_price": 0.20495468699475275 // possibly undefined
  *   }
  * ]
  * ```
