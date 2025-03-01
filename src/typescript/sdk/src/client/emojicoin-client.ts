@@ -111,12 +111,7 @@ export class EmojicoinClient {
     remove: this.removeLiquidity.bind(this),
   };
 
-  public utils: {
-    emojisToHexStrings: typeof EmojicoinClient.prototype.emojisToHexStrings;
-    emojisToHexSymbol: typeof EmojicoinClient.prototype.emojisToHexSymbol;
-    getEmojicoinInfo: typeof EmojicoinClient.prototype.getEmojicoinInfo;
-    getTransactionEventData: typeof EmojicoinClient.prototype.getTransactionEventData;
-  } = {
+  public utils = {
     emojisToHexStrings: this.emojisToHexStrings.bind(this),
     emojisToHexSymbol: this.emojisToHexSymbol.bind(this),
     getEmojicoinInfo: this.getEmojicoinInfo.bind(this),
@@ -131,13 +126,7 @@ export class EmojicoinClient {
     sell: this.sellWithRewards.bind(this),
   };
 
-  public view: {
-    marketExists: typeof EmojicoinClient.prototype.isMarketRegisteredView;
-    simulateBuy: typeof EmojicoinClient.prototype.simulateBuy;
-    simulateSell: typeof EmojicoinClient.prototype.simulateSell;
-    registry: typeof EmojicoinClient.prototype.registryView;
-    market: typeof EmojicoinClient.prototype.marketView;
-  } = {
+  public view = {
     marketExists: this.isMarketRegisteredView.bind(this),
     simulateBuy: this.simulateBuy.bind(this),
     simulateSell: this.simulateSell.bind(this),

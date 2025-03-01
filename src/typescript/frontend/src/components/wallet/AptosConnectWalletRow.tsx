@@ -44,7 +44,7 @@ export function AptosConnectWalletRow({ wallet, onConnect, onClick }: WalletRowP
           <div className={"flex w-full gap-4 h-[50px] " + " group-hover:bg-[#0000000E]"}>
             <div className="flex flex-row m-auto">
               <WalletItem.Icon className="h-5 w-5 m-auto mr-[1.5ch] drop-shadow-text" />
-              <WalletItem.Name className="font-pixelar uppercase text-xl" ref={ref} />
+              <WalletItem.Name className="font-pixelar uppercase text-xl text-black" ref={ref} />
             </div>
           </div>
         </WalletItem.ConnectButton>

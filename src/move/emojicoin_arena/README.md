@@ -112,6 +112,21 @@ published), namely:
 }
 ```
 
+## Fund the vault
+
+```sh
+EMOJICOIN_ARENA=0xaaa...
+PROFILE=my-profile
+OCTAS_TO_FUND="u64:1234"
+```
+
+```sh
+aptos move run \
+    --args $OCTAS_TO_FUND \
+    --function-id $EMOJICOIN_ARENA::emojicoin_arena::fund_vault \
+    --profile $PROFILE
+```
+
 <!-- markdownlint-enable MD013 -->
 
 [a simulator issue]: https://github.com/aptos-labs/aptos-core/issues/15769

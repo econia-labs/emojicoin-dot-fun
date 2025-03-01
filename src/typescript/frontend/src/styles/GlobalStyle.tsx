@@ -72,22 +72,6 @@ html, body, div, span, applet, object, iframe,
     -moz-appearance: textfield;
   }
 
-  ::-webkit-scrollbar {
-    width: 14px;
-    height: 14px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => theme.colors.transparent};
-    border-radius: 5px;
-    border: 4px solid rgba(0, 0, 0, 0);
-    box-shadow: inset 0 0 0 4px ${({ theme }) => theme.colors.econiaBlue};
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: ${({ theme }) => theme.colors.black};
-  }
-
   body {
     line-height: 1;
     font-size: 16px;

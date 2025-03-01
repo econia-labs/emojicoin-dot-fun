@@ -1,4 +1,5 @@
 export * from "./app";
 export * from "./client";
-export * from "./utils";
+export * from "./misc";
 export * from "./query-params";
+export * from "./utils";

@@ -166,11 +166,11 @@ export const truncateANSName = (input: string): string => {
 /**
  * Takes an address or a name and formats it accordingly.
  */
-export const formatDisplayName = (input: string) => {
+export const formatDisplayName = (input: string, options?: { noTruncateANSName: boolean }) => {
   if (AccountAddress.isValid({ input, strict: false }).valid) {
     return truncateAddress(input);
   }
-  return truncateANSName(input);
+  return options?.noTruncateANSName ? input : truncateANSName(input);
 };
 
 export class Lazy<T> {
@@ -241,6 +241,19 @@ export function enumerate<T>(arr: T[]): Array<[T, number]> {
     arr,
     arr.map((_, i) => i)
   );
+}
+
+/**
+ * Simple utility function to chunk arrays.
+ *
+ * NOTE: This this mutates the array passed in.
+ */
+export function chunk<T>(arr: T[], size: number): T[][] {
+  const res: T[][] = [];
+  while (arr.length) {
+    res.push(arr.splice(0, size));
+  }
+  return res;
 }
 
 /**

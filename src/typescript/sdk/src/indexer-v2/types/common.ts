@@ -1,6 +1,6 @@
 import { type Period } from "../../const";
-import { type OrderBy } from "../const";
 import { type AnyNumberString } from "../../types";
+import { type OrderBy } from "../const";
 
 export enum SortMarketsBy {
   MarketCap = "market_cap",
