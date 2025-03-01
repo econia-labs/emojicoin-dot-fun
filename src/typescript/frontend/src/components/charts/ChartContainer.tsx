@@ -32,7 +32,6 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
           console.error("Error loading bundle.js", error);
         }}
       />
-      ;
     </>
   );
 };
