@@ -16,10 +16,9 @@ import { emoji } from "utils";
 import { Network } from "@aptos-labs/ts-sdk";
 import { successfulTransactionToast } from "@/components/wallet/toasts";
 import { toast } from "react-toastify";
-import { getPublisher } from "../../../../../sdk/tests/utils/helpers";
 import { getAptosClient } from "@sdk/utils";
-import { getEventsAsProcessorModelsFromResponse } from "@sdk/indexer-v2";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { LOCAL_PUBLISHER } from "@/components/pages/test-utils";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
@@ -56,7 +55,7 @@ export const StoreOnClient = () => {
     }
     await EmojicoinArena.SetNextMeleeDuration.submit({
       aptosConfig: aptos.config,
-      emojicoinArena: getPublisher(),
+      emojicoinArena: LOCAL_PUBLISHER,
       duration: 60 * 1_000_000,
     }).then((res) => {
       if (res.success) {
