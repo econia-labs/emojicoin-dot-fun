@@ -1,10 +1,10 @@
 // cspell:word mkts
 "use client";
 
-import { EmojicoinArena, RegisterMarket } from "@/contract-apis";
+import { EmojicoinArena, RegisterMarket, Swap } from "@/contract-apis";
 import { type AccountInfo, useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
-import { INTEGRATOR_ADDRESS, ONE_APT } from "@sdk/const";
-import { fetchAllCurrentMeleeData, toArenaCoinTypes } from "@sdk/markets";
+import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@sdk/const";
+import { fetchAllCurrentMeleeData, toArenaCoinTypes, toCoinTypesForEntry } from "@sdk/markets";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { APTOS_NETWORK } from "lib/env";
@@ -18,6 +18,8 @@ import { successfulTransactionToast } from "@/components/wallet/toasts";
 import { toast } from "react-toastify";
 import { getPublisher } from "../../../../../sdk/tests/utils/helpers";
 import { getAptosClient } from "@sdk/utils";
+import { getEventsAsProcessorModelsFromResponse } from "@sdk/indexer-v2";
+import { getEvents } from "@sdk/emojicoin_dot_fun";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
@@ -66,12 +68,32 @@ export const StoreOnClient = () => {
     for (const emojis of ["⚽", "🎐", "🍧", "🏔️", "🌨️", "❄️"].map((v) => [
       new TextEncoder().encode(v),
     ])) {
+      // This is not robust. Just for testing.
       await RegisterMarket.builder({
         aptosConfig: getAptosClient().config,
         registrant: definedAccount.address,
         emojis,
         integrator: INTEGRATOR_ADDRESS,
-      });
+      })
+        .then((builder) => builder.payloadBuilder.toInputPayload())
+        .then(submit)
+        .then((res) => res!.response)
+        .then(getEvents)
+        .then((models) =>
+          Swap.builder({
+            aptosConfig: getAptosClient().config,
+            swapper: definedAccount.address,
+            marketAddress: models.marketRegistrationEvents[0].marketMetadata.marketAddress,
+            inputAmount: 1n,
+            isSell: false,
+            integrator: INTEGRATOR_ADDRESS,
+            integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
+            minOutputAmount: 0n,
+            typeTags: toCoinTypesForEntry(
+              models.marketRegistrationEvents[0].marketMetadata.marketAddress
+            ),
+          })
+        );
     }
   };
 
