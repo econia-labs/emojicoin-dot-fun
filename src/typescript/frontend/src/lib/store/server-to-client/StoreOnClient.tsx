@@ -24,7 +24,7 @@ import { toast } from "react-toastify";
 import { getAptosClient } from "@sdk/utils";
 import { getEvents, getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { LOCAL_PUBLISHER } from "@/components/pages/test-utils";
-import { type SymbolEmoji } from "@sdk/emoji_data";
+import { encodeEmojis, type SymbolEmoji } from "@sdk/emoji_data";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
@@ -84,7 +84,7 @@ export const StoreOnClient = () => {
         await RegisterMarket.builder({
           aptosConfig: getAptosClient().config,
           registrant: definedAccount.address,
-          emojis,
+          emojis: [encodeEmojis(emojis)],
           integrator: INTEGRATOR_ADDRESS,
         })
           .then((builder) => builder.payloadBuilder.toInputPayload())
