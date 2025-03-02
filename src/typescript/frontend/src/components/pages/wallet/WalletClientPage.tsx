@@ -19,7 +19,7 @@ export const WalletClientPage = ({ address }: { address: string }) => {
   const _ = useSwapEventsQuery({ sender: address });
 
   return (
-    <div className="mobile-sm:min-w-[calc(100vw-20px)] sm:min-w-[80vw] md:min-w-[900px]">
+    <div className="max-w-[100vw] px-2 sm:min-w-[80vw] md:min-w-[800px]">
       <span className="pixel-heading-2 mobile-sm:px-4 sm:px-0 flex flex-wrap gap-x-2 mb-4">
         Portfolio of{" "}
         <ExplorerLink className="text-ec-blue hover:underline" type="account" value={address}>
@@ -42,7 +42,6 @@ export const WalletClientPage = ({ address }: { address: string }) => {
           Unique owned: {isLoading ? "?" : ownedCoins.length}
         </span>
       </div>
-      <div className="flex"></div>
       <Tabs defaultValue="portfolio">
         <TabsList>
           <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
