@@ -16,7 +16,7 @@ export const WalletClientPage = ({ address }: { address: string }) => {
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
 
   // Just to prefetch the data even when the tab is closed.
-  const _ = useSwapEventsQuery(address);
+  const _ = useSwapEventsQuery({ sender: address });
 
   return (
     <div className="mobile-sm:min-w-[calc(100vw-20px)] sm:min-w-[80vw] md:min-w-[900px]">

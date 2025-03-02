@@ -48,19 +48,22 @@ const MobileGrid = (props: GridProps) => {
 
       <StyledMobileContentBlock>
         <StyledMobileContentHeader>
-          <FlexGap gap="20px" width="fit-content">
-            {TABS.map((tb) => (
-              <Flex key={tb} cursor="pointer" onClick={() => setTab(tb)}>
-                <Text
-                  textScale="pixelHeading4"
-                  color={tab === tb ? "lightGray" : "darkGray"}
-                  textTransform="uppercase"
-                >
-                  {t(tb)}
-                </Text>
-              </Flex>
-            ))}
-          </FlexGap>
+          <div className="overflow-x-auto">
+            <div className="flex gap-6">
+              {TABS.map((tb) => (
+                <Flex key={tb} cursor="pointer" onClick={() => setTab(tb)}>
+                  <Text
+                    textScale="pixelHeading4"
+                    color={tab === tb ? "lightGray" : "darkGray"}
+                    textTransform="uppercase"
+                    className="whitespace-nowrap"
+                  >
+                    {t(tb)}
+                  </Text>
+                </Flex>
+              ))}
+            </div>
+          </div>
         </StyledMobileContentHeader>
         {tab === "Swap" && (
           <div style={{ width: "100%" }}>
