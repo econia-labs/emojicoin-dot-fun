@@ -11,8 +11,12 @@ import { isNumberInConstruction } from "@sdk/utils";
 import { Label } from "@/components/ui/Label";
 import { successfulTransactionToast } from "@/components/wallet/toasts";
 import { toast } from "react-toastify";
+import { APTOS_NETWORK } from "@sdk/const";
 
-const publisher = (() => {
+export const LOCAL_PUBLISHER = (() => {
+  if (APTOS_NETWORK !== Network.LOCAL) {
+    throw new Error("You can't call this function in a non-local network environment.");
+  }
   // This is the publisher private key used in test.
   const privateKeyString =
     process.env.PUBLISHER_PRIVATE_KEY ??
@@ -36,7 +40,7 @@ export const SetMeleeDurationForm = ({ className }: React.HTMLAttributes<HTMLDiv
     const durationAsMicroseconds = BigInt(floored);
     EmojicoinArena.SetNextMeleeDuration.submit({
       aptosConfig: aptos.config,
-      emojicoinArena: publisher,
+      emojicoinArena: LOCAL_PUBLISHER,
       duration: durationAsMicroseconds,
     }).then((res) => {
       if (res.success) {
