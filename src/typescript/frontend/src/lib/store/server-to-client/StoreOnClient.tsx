@@ -64,8 +64,8 @@ export const StoreOnClient = () => {
         toast.error("Fail.");
       }
     });
-    for (const emojis of ["⚽", "🎐", "🍧", "🏔️", "🌨️", "❄️"].map((v) => [
-      new TextEncoder().encode(v),
+    for (const emojis of [["⚽", "🎐", "🍧", "🏔️", "🌨️", "❄️"]].map((v) => [
+      new TextEncoder().encode(v.join("")),
     ])) {
       // This is not robust. Just for testing.
       await RegisterMarket.builder({
