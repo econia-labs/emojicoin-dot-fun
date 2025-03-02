@@ -40,38 +40,41 @@ const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? (
 // NOTE: If we ever add another processor type to the indexer processor stack, this will need to be
 // updated, because it is assumed here that there is a single row returned. Multiple processors
 // would mean there would be multiple rows.
-export const getProcessorStatus = async () =>
-  postgrest
+export const getProcessorStatus = async () => {
+  const query = postgrest
     .from(TableName.ProcessorStatus)
     .select("processor, last_success_version, last_updated, last_transaction_timestamp")
     .limit(1)
-    .single()
-    .then((r) => {
-      const row = extractRow(r);
-      if (!row) {
-        console.error(r);
-        throw new Error("No processor status row found.");
-      }
-      if (
-        !(
-          "processor" in row &&
-          "last_success_version" in row &&
-          "last_updated" in row &&
-          "last_transaction_timestamp" in row
-        )
-      ) {
-        console.warn("Couldn't find all fields in the row response data.", r);
-      }
-      return {
-        processor: row.processor,
-        lastSuccessVersion: BigInt(row.last_success_version),
-        lastUpdated: postgresTimestampToDate(row.last_updated),
-        lastTransactionTimestamp: row.last_transaction_timestamp
-          ? postgresTimestampToDate(row.last_transaction_timestamp)
-          : new Date(0), // Provide a default, because this field is nullable.
-      };
-    });
+    .single();
+  console.log(query);
 
+  const res = query.then((r) => {
+    const row = extractRow(r);
+    if (!row) {
+      console.error(r);
+      throw new Error("No processor status row found.");
+    }
+    if (
+      !(
+        "processor" in row &&
+        "last_success_version" in row &&
+        "last_updated" in row &&
+        "last_transaction_timestamp" in row
+      )
+    ) {
+      console.warn("Couldn't find all fields in the row response data.", r);
+    }
+    return {
+      processor: row.processor,
+      lastSuccessVersion: BigInt(row.last_success_version),
+      lastUpdated: postgresTimestampToDate(row.last_updated),
+      lastTransactionTimestamp: row.last_transaction_timestamp
+        ? postgresTimestampToDate(row.last_transaction_timestamp)
+        : new Date(0), // Provide a default, because this field is nullable.
+    };
+  });
+  return res;
+};
 export const getLatestProcessedEmojicoinVersion = async () =>
   getProcessorStatus().then((r) => r.lastSuccessVersion);
 
