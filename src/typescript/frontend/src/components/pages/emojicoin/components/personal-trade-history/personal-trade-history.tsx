@@ -15,7 +15,10 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
   const router = useRouter();
   const { account } = useWallet();
 
-  const query = useSwapEventsQuery(account?.address, props.data.marketID.toString());
+  const query = useSwapEventsQuery({
+    sender: account?.address,
+    marketId: props.data.marketID.toString(),
+  });
 
   const initialLoad = useRef(true);
   useEffect(() => {

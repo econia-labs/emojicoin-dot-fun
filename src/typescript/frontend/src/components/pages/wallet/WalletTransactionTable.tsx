@@ -12,7 +12,6 @@ import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";
-import { toMarketEmojiData } from "@sdk/emoji_data";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
@@ -63,7 +62,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
 ];
 
 export const WalletTransactionTable = ({ address }: { address: string }) => {
-  const query = useSwapEventsQuery(address);
+  const query = useSwapEventsQuery({ sender: address });
   const router = useRouter();
 
   return (
