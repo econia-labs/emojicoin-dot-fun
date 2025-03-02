@@ -16,23 +16,27 @@ import {
 } from "../../types";
 import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
 import { type SymbolEmoji } from "../../../emoji_data/types";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 
-const selectSwapsBySender = ({
+const selectSwaps = ({
   sender,
-  marketID,
+  marketId,
   page = 1,
   pageSize = LIMIT,
-}: { sender: string; marketID?: AnyNumberString } & MarketStateQueryArgs) => {
+}: { sender?: AccountAddress; marketId?: AnyNumberString } & MarketStateQueryArgs) => {
   const query = postgrest
     .from(TableName.SwapEvents)
     .select("*")
-    .eq("sender", sender)
     .order("transaction_version", ORDER_BY.DESC)
     .order("event_index", ORDER_BY.DESC)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  if (marketID) {
-    query.eq("market_id", marketID);
+  if (sender) {
+    query.eq("sender", sender);
+  }
+
+  if (marketId) {
+    query.eq("market_id", marketId);
   }
 
   return query;
@@ -44,18 +48,6 @@ const countSwapsBySender = ({ sender }: { sender: string }) => {
     .select("*", { count: "exact", head: true })
     .eq("sender", sender);
 };
-
-const selectSwapsByMarketID = ({
-  marketID,
-  page = 1,
-  pageSize = LIMIT,
-}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
-  postgrest
-    .from(TableName.SwapEvents)
-    .select("*")
-    .eq("market_id", marketID)
-    .order("market_nonce", ORDER_BY.DESC)
-    .range((page - 1) * pageSize, page * pageSize - 1);
 
 const selectChatsByMarketID = ({
   marketID,
@@ -104,12 +96,12 @@ const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =
     .limit(1)
     .single();
 
-export const fetchSenderSwapEvents = queryHelper(selectSwapsBySender, toSwapEventModel);
+export const fetchSwapEvents = queryHelper(selectSwaps, toSwapEventModel);
 export const countSenderSwapEvents = async (sender: string): Promise<number> => {
   const { count } = await countSwapsBySender({ sender });
   return count ?? 0;
 };
-export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
+
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);
 export const fetchPeriodicEventsSince = queryHelper(
   selectPeriodicEventsSince,
