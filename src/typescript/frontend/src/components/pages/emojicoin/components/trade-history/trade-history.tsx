@@ -24,7 +24,7 @@ const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   date: new Date(Number(transaction.time / 1000n)),
   type: swap.isSell ? "sell" : "buy",
   priceQ64: swap.avgExecutionPriceQ64,
-  swapper: swap.swapper,
+  sender: swap.sender,
   version: transaction.version,
   guid,
 });
@@ -116,7 +116,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Sender",
         id: "sender",
         width: 120,
-        renderCell: (item) => <WalletAddressCell address={item.swapper} />,
+        renderCell: (item) => <WalletAddressCell address={item.sender} />,
       },
     ],
     [props.data.symbol]
