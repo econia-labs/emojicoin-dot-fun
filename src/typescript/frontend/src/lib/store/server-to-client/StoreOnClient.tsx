@@ -1,10 +1,9 @@
 // cspell:word mkts
 "use client";
 
-import { EmojicoinArena } from "@/contract-apis";
+import { EmojicoinArena, RegisterMarket } from "@/contract-apis";
 import { type AccountInfo, useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
-import { ONE_APT } from "@sdk/const";
-import { type SymbolEmoji } from "@sdk/emoji_data";
+import { INTEGRATOR_ADDRESS, ONE_APT } from "@sdk/const";
 import { fetchAllCurrentMeleeData, toArenaCoinTypes } from "@sdk/markets";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -15,6 +14,10 @@ import { useCallback, useState } from "react";
 import { ROUTES } from "router/routes";
 import { emoji } from "utils";
 import { Network } from "@aptos-labs/ts-sdk";
+import { successfulTransactionToast } from "@/components/wallet/toasts";
+import { toast } from "react-toastify";
+import { getPublisher } from "../../../../../sdk/tests/utils/helpers";
+import { getAptosClient } from "@sdk/utils";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
@@ -27,25 +30,49 @@ export const StoreOnClient = () => {
   const registeredMarkets = useEventStore((s) => s.markets);
   const handleCrank = (definedAccount: AccountInfo) => {
     // Use fire and water if on the local network, otherwise get the actual melee data.
-    (APTOS_NETWORK === Network.LOCAL
-      ? Promise.resolve([["🔥"], ["💧"]] as SymbolEmoji[][])
-      : fetchAllCurrentMeleeData().then(({ market1, market2 }) => [
-          market1.symbolEmojis,
-          market2.symbolEmojis,
-        ])
-    ).then(([symbol1, symbol2]) => {
-      const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol1, symbol2 });
-      EmojicoinArena.Enter.builder({
-        aptosConfig: aptos.config,
-        entrant: definedAccount.address,
-        inputAmount: 1n,
-        lockIn: false,
-        // Mismatched but existing coin types to short-circuit the `enter` function if the crank isn't pulled.
-        typeTags: [c0, lp1, c1, lp0, c0],
-      })
-        .then((builder) => builder.payloadBuilder.toInputPayload())
-        .then(submit);
+    fetchAllCurrentMeleeData()
+      .then(({ market1, market2 }) => [market1.symbolEmojis, market2.symbolEmojis])
+      .then(([symbol1, symbol2]) => {
+        const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol1, symbol2 });
+        EmojicoinArena.Enter.builder({
+          aptosConfig: aptos.config,
+          entrant: definedAccount.address,
+          inputAmount: 1n,
+          lockIn: false,
+          // Mismatched but existing coin types to short-circuit the `enter` function if the crank isn't pulled.
+          typeTags: [c0, lp1, c1, lp0, c0],
+        })
+          .then((builder) => builder.payloadBuilder.toInputPayload())
+          .then(submit);
+      });
+  };
+
+  const init = async (definedAccount: AccountInfo) => {
+    if (APTOS_NETWORK !== Network.LOCAL) {
+      console.warn("Can't set next melee duration unless in a local development environment.");
+      return;
+    }
+    await EmojicoinArena.SetNextMeleeDuration.submit({
+      aptosConfig: aptos.config,
+      emojicoinArena: getPublisher(),
+      duration: 60 * 1_000_000,
+    }).then((res) => {
+      if (res.success) {
+        successfulTransactionToast(res, { name: Network.LOCAL });
+      } else {
+        toast.error("Fail.");
+      }
     });
+    for (const emojis of ["⚽", "🎐", "🍧", "🏔️", "🌨️", "❄️"].map((v) => [
+      new TextEncoder().encode(v),
+    ])) {
+      await RegisterMarket.builder({
+        aptosConfig: getAptosClient().config,
+        registrant: definedAccount.address,
+        emojis,
+        integrator: INTEGRATOR_ADDRESS,
+      });
+    }
   };
 
   // Curry a function to force a connection if the wallet isn't connected or call the original function otherwise.
@@ -94,6 +121,13 @@ export const StoreOnClient = () => {
               className={debugButtonClassName}
             >
               {"Crank melee"}
+            </button>
+            <button
+              onClick={forceConnectOrRunFunction(init)}
+              className={debugButtonClassName}
+              title="Initialize arena stuff for test"
+            >
+              {"init arena"}
             </button>
           </>
         )}
