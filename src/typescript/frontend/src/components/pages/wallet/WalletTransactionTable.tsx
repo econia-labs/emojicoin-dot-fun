@@ -31,7 +31,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
     text: "Price",
     id: "price",
-    width: 80,
+    width: 120,
     renderCell: (item) => (
       <ColoredPriceDisplay
         q64
@@ -45,12 +45,13 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
     text: "APT",
     id: "apt",
+    width: 100,
     renderCell: (item) => <AptCell value={toNominal(item.swap.quoteVolume)} />,
   },
   {
     id: "change",
     text: "Change",
-    width: 80,
+    width: 120,
     renderCell: (item) => (
       <FormattedNumber
         className={item.swap.isSell ? "text-pink" : "text-green"}

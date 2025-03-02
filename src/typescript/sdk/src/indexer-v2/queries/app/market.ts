@@ -16,7 +16,7 @@ import {
 } from "../../types";
 import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
 import { type SymbolEmoji } from "../../../emoji_data/types";
-import { AccountAddress } from "@aptos-labs/ts-sdk";
+import { type AccountAddress } from "@aptos-labs/ts-sdk";
 
 const selectSwaps = ({
   sender,
