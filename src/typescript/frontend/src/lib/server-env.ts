@@ -37,6 +37,7 @@ export const COINGECKO_API_KEY: string = process.env.COINGECKO_API_KEY;
 if (
   APTOS_NETWORK.toString() === "local" &&
   !EMOJICOIN_INDEXER_URL.includes("localhost") &&
+  !EMOJICOIN_INDEXER_URL.includes("127.0.0.1") &&
   !EMOJICOIN_INDEXER_URL.includes("docker")
 ) {
   throw new Error(
