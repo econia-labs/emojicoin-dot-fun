@@ -44,7 +44,7 @@ export const WalletPortfolioTable = ({ address }: { address: string }) => {
 
   return (
     <EcTable
-      className={"flex w-full overflow-auto h-[60dvh] shadow-[0_0_0_1px_var(--dark-gray)]"}
+      className={"overflow-auto h-[60dvh]"}
       columns={COLUMNS}
       defaultSortColumn="ownedValue"
       items={ownedCoins}

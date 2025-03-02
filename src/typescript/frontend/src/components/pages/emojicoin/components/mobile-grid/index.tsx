@@ -1,6 +1,6 @@
 import React, { Suspense, useState } from "react";
 
-import { Flex, FlexGap } from "@containers";
+import { Flex } from "@containers";
 import { Text } from "components";
 import { translationFunction } from "context/language-context";
 
