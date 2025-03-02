@@ -297,6 +297,7 @@ const toMarketRegistrationEventData = (
 
 type SwapEventData = {
   swapper: AccountAddressString;
+  sender: AccountAddressString;
   integrator: AccountAddressString;
   integratorFee: bigint;
   inputAmount: bigint;
@@ -315,6 +316,7 @@ type SwapEventData = {
 
 const toSwapEventData = (data: DatabaseStructType["SwapEventData"]): SwapEventData => ({
   swapper: data.swapper,
+  sender: data.sender,
   integrator: data.integrator,
   integratorFee: BigInt(data.integrator_fee),
   inputAmount: BigInt(data.input_amount),
