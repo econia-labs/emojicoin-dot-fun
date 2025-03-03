@@ -11,31 +11,31 @@ const COLUMNS: EcTableColumn<FullCoinData>[] = [
     id: "percentage",
     text: "percent",
     width: 105,
-    sortCallback: (coin) => coin.percentage,
+    sortFn: (coin) => coin.percentage,
   },
   {
     id: "amount",
     text: "Amount",
     width: 130,
-    sortCallback: (coin) => coin.amount,
+    sortFn: (coin) => coin.amount,
   },
   {
     id: "marketCap",
     text: "Market cap",
     width: 145,
-    sortCallback: (coin) => coin.marketCap,
+    sortFn: (coin) => coin.marketCap,
   },
   {
     id: "usdValue",
     text: "USD Value",
     width: 130,
-    sortCallback: (coin) => coin.ownedValue,
+    sortFn: (coin) => coin.ownedValue,
   },
   {
     id: "ownedValue",
     text: "Value",
     width: 110,
-    sortCallback: (coin) => coin.ownedValue,
+    sortFn: (coin) => coin.ownedValue,
   },
 ];
 
