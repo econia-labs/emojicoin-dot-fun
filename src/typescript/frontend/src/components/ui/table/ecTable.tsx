@@ -4,6 +4,7 @@ import { Table, TableHeader, TableRow } from "./table";
 import _ from "lodash";
 import { EcTableBody } from "./ecTableBody";
 import { cn } from "lib/utils/class-name";
+import { type OrderByStrings } from "@sdk/indexer-v2/const";
 
 export interface EcTableColumn<T> {
   id: string;
@@ -14,7 +15,10 @@ export interface EcTableColumn<T> {
   headClassName?: string;
   // Only for body cells.
   cellClassName?: string;
-  sortCallback?: (item: T) => unknown;
+
+  // This prop is used to handle client side sorting.
+  sortFn?: (item: T) => unknown;
+  isServerSideSortable?: boolean;
   // Can either render individual cells, or the whole row by using RenderRow TableProps
   renderCell?: (item: T) => React.ReactNode;
 }
@@ -31,6 +35,8 @@ export interface TableProps<T> {
   textFormat?: "body-md" | "body-sm" | string;
   defaultSortColumn?: string;
   isLoading?: boolean;
+  // This prop is used to handle server side sorting.
+  serverSideOrderHandler?: (column: string, direction: OrderByStrings) => void;
   pagination?: {
     hasNextPage?: boolean;
     fetchNextPage: () => void;
@@ -50,6 +56,7 @@ export const EcTable = <T,>({
   textFormat = "body-md",
   defaultSortColumn,
   pagination,
+  serverSideOrderHandler,
   isLoading,
 }: TableProps<T>) => {
   // const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -59,15 +66,28 @@ export const EcTable = <T,>({
       setContainerHeight(node.clientHeight);
     }
   }, []);
-  const [sort, setSort] = useState<{ column: string; direction: "asc" | "desc" }>({
+
+  const [sort, setSort] = useState<{ column: string; direction: OrderByStrings }>({
     column: defaultSortColumn || "",
     direction: "desc",
   });
 
   const sorted = useMemo(() => {
-    const sortCallback = _.find(columns, { id: sort.column })?.sortCallback;
-    return _.orderBy(items, sortCallback, sort.direction);
-  }, [columns, sort.column, sort.direction, items]);
+    //Ignore client side sorting if orderByHandler is provided
+    if (serverSideOrderHandler) {
+      return items;
+    }
+    const sortFn = _.find(columns, { id: sort.column })?.sortFn;
+    return _.orderBy(items, sortFn, sort.direction);
+  }, [serverSideOrderHandler, columns, sort.column, sort.direction, items]);
+
+  const setSortHandler = (sort: { column: string; direction: OrderByStrings }) => {
+    const columnData = columns.find((column) => column.id === sort.column);
+    setSort(sort);
+    if (serverSideOrderHandler && columnData?.isServerSideSortable) {
+      serverSideOrderHandler(sort.column, sort.direction);
+    }
+  };
 
   return (
     <div ref={containerRef} className={cn("flex w-full", className)}>
@@ -82,7 +102,7 @@ export const EcTable = <T,>({
                 id={column.id}
                 sort={sort}
                 width={column.width}
-                setSort={column.sortCallback ? setSort : undefined}
+                setSort={column.sortFn || column.isServerSideSortable ? setSortHandler : undefined}
                 className={cn(column.className, column.headClassName)}
                 text={column.text}
               />
