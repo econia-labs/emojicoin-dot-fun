@@ -25,7 +25,7 @@ import {
   type BlockAndEventIndexMetadata,
 } from "./json-types";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
-import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
+import { toArenaPeriod, toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
