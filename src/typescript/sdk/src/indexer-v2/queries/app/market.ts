@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
-import { LIMIT, ORDER_BY } from "../../const";
+import { LIMIT, ORDER_BY, OrderByStrings, toOrderBy } from "../../const";
 import { type AnyNumberString } from "../../../types";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
@@ -16,18 +16,42 @@ import {
 } from "../../types";
 import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
 import { type SymbolEmoji } from "../../../emoji_data/types";
+import { type AccountAddress } from "@aptos-labs/ts-sdk";
 
-const selectSwapsByMarketID = ({
-  marketID,
+const selectSwaps = ({
+  sender,
+  marketId,
   page = 1,
   pageSize = LIMIT,
-}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
-  postgrest
+  orderBy = ORDER_BY.DESC,
+}: {
+  sender?: AccountAddress;
+  marketId?: AnyNumberString;
+} & MarketStateQueryArgs) => {
+  const query = postgrest
     .from(TableName.SwapEvents)
     .select("*")
-    .eq("market_id", marketID)
-    .order("market_nonce", ORDER_BY.DESC)
+    .order("transaction_version", orderBy)
+    .order("event_index", orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
+
+  if (sender) {
+    query.eq("sender", sender);
+  }
+
+  if (marketId) {
+    query.eq("market_id", marketId);
+  }
+
+  return query;
+};
+
+const countSwapsBySender = ({ sender }: { sender: string }) => {
+  return postgrest
+    .from(TableName.SwapEvents)
+    .select("*", { count: "exact", head: true })
+    .eq("sender", sender);
+};
 
 const selectChatsByMarketID = ({
   marketID,
@@ -76,7 +100,12 @@ const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =
     .limit(1)
     .single();
 
-export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
+export const fetchSwapEvents = queryHelper(selectSwaps, toSwapEventModel);
+export const countSenderSwapEvents = async (sender: string): Promise<number> => {
+  const { count } = await countSwapsBySender({ sender });
+  return count ?? 0;
+};
+
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);
 export const fetchPeriodicEventsSince = queryHelper(
   selectPeriodicEventsSince,
