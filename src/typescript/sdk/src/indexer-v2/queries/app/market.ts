@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
-import { LIMIT, ORDER_BY } from "../../const";
+import { LIMIT, ORDER_BY, OrderByStrings, toOrderBy } from "../../const";
 import { type AnyNumberString } from "../../../types";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
@@ -23,12 +23,16 @@ const selectSwaps = ({
   marketId,
   page = 1,
   pageSize = LIMIT,
-}: { sender?: AccountAddress; marketId?: AnyNumberString } & MarketStateQueryArgs) => {
+  orderBy = ORDER_BY.DESC,
+}: {
+  sender?: AccountAddress;
+  marketId?: AnyNumberString;
+} & MarketStateQueryArgs) => {
   const query = postgrest
     .from(TableName.SwapEvents)
     .select("*")
-    .order("transaction_version", ORDER_BY.DESC)
-    .order("event_index", ORDER_BY.DESC)
+    .order("transaction_version", orderBy)
+    .order("event_index", orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (sender) {
