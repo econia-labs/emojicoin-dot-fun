@@ -38,6 +38,7 @@ const toMarketRegistrationEventData = (
 
 const toSwapEventData = (event: Types["SwapEvent"]): DatabaseModels["swap_events"]["swap"] => ({
   swapper: event.swapper,
+  sender: event.sender,
   integrator: event.integrator,
   integratorFee: event.integratorFee,
   inputAmount: event.inputAmount,
