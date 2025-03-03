@@ -1,4 +1,10 @@
-import { ArenaPeriod, calculateCurvePrice, ONE_APT_BIGINT, sleep, type SymbolEmoji } from "../../../src";
+import {
+  ArenaPeriod,
+  calculateCurvePrice,
+  ONE_APT_BIGINT,
+  sleep,
+  type SymbolEmoji,
+} from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {
   type ArenaCandlestickModel,
@@ -117,7 +123,7 @@ describe("ensures arena candlesticks work", () => {
     let state0: MarketLatestStateEventModel = {} as MarketLatestStateEventModel;
     let state1: MarketLatestStateEventModel = {} as MarketLatestStateEventModel;
 
-    const queryCandlesticks = async () => {
+    const refreshCandlesticksData = async () => {
       candlesticks = await postgrest
         .from(TableName.ArenaCandlestick)
         .select("*")
@@ -125,7 +131,7 @@ describe("ensures arena candlesticks work", () => {
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaCandlestickModel)));
     };
-    const queryStates = async () => {
+    const refreshStateData = async () => {
       state0 = await postgrest
         .from(TableName.MarketLatestStateEvent)
         .select("*")
@@ -141,7 +147,7 @@ describe("ensures arena candlesticks work", () => {
         .then((r) => r.data)
         .then((r) => toMarketLatestStateEventModel(r));
     };
-    const waitTo15sBoundryStart = async () => {
+    const waitForNew15sPeriodBoundary = async () => {
       const now = new Date().getTime();
       const fifteenSecondStart = now - (now % 15000);
       const fifteenSecondEnd = fifteenSecondStart + 15000;
@@ -157,8 +163,8 @@ describe("ensures arena candlesticks work", () => {
       return price0.div(price1).toNumber();
     };
 
-    await queryCandlesticks();
-    await queryStates();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
     expect(candlesticks).toHaveLength(0);
@@ -166,7 +172,7 @@ describe("ensures arena candlesticks work", () => {
     expect(state0.lastSwap.avgExecutionPriceQ64).toEqual(0n);
     expect(state1.lastSwap.avgExecutionPriceQ64).toEqual(0n);
 
-    await waitTo15sBoundryStart();
+    await waitForNew15sPeriodBoundary();
 
     // ATM, no swaps are present on either market.
 
@@ -181,8 +187,8 @@ describe("ensures arena candlesticks work", () => {
       )
     );
 
-    await queryCandlesticks();
-    await queryStates();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
     expect(candlesticks!.length).toBeGreaterThan(0);
@@ -217,8 +223,8 @@ describe("ensures arena candlesticks work", () => {
       )
     );
 
-    await queryCandlesticks();
-    await queryStates();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     let oldExpectedPrice = expectedPrice;
     expectedPrice = calculatePrice(state0, state1);
@@ -243,8 +249,8 @@ describe("ensures arena candlesticks work", () => {
       await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
     );
 
-    await queryCandlesticks();
-    await queryStates();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
 
@@ -262,7 +268,7 @@ describe("ensures arena candlesticks work", () => {
     expect(fifteenSecondCandles[0].closePrice).toBeCloseTo(expectedPrice, 5);
     expect(fifteenSecondCandles[0].volume).toEqual(expectedVolume);
 
-    await waitTo15sBoundryStart();
+    await waitForNew15sPeriodBoundary();
 
     // This swap should happen in the next candlestick boundry, so it should generate a new one.
 
@@ -272,8 +278,8 @@ describe("ensures arena candlesticks work", () => {
 
     const oldSwap1 = state1!;
 
-    await queryCandlesticks();
-    await queryStates();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
 

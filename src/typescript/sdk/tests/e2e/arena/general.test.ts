@@ -4,6 +4,7 @@ import {
   EmojicoinArena,
   getAptosClient,
   ONE_APT_BIGINT,
+  sleep,
   type SymbolEmoji,
 } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
@@ -21,7 +22,6 @@ import {
   toArenaEnterModel,
   toArenaExitModel,
   toArenaLeaderboardHistoryModel,
-  toArenaLeaderboardModel,
   toArenaPositionModel,
   toArenaSwapModel,
   waitForEmojicoinIndexer,
@@ -873,7 +873,9 @@ describe("ensures arena works in edge cases", () => {
 
     await sleep(2000);
 
-    await waitForProcessor(await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis));
+    await waitForProcessor(
+      await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
+    );
 
     const swaps = await postgrest
       .from(TableName.ArenaSwapEvents)
@@ -920,8 +922,8 @@ describe("ensures arena works in edge cases", () => {
     expect(positions).toHaveLength(2);
     expect(positions).toHaveLength(2);
 
-    const position1 = positions!.find(p => p.user === account1.accountAddress.toStringLong())!;
-    const position2 = positions!.find(p => p.user === account2.accountAddress.toStringLong())!;
+    const position1 = positions!.find((p) => p.user === account1.accountAddress.toStringLong())!;
+    const position2 = positions!.find((p) => p.user === account2.accountAddress.toStringLong())!;
 
     expect(position1.open).toEqual(false);
     expect(position2.open).toEqual(false);
@@ -932,10 +934,12 @@ describe("ensures arena works in edge cases", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(2);
 
-    console.log(leaderboard);
-
-    const leaderboard1 = leaderboard!.find(l => l.user === account1.accountAddress.toStringLong())!;
-    const leaderboard2 = leaderboard!.find(l => l.user === account2.accountAddress.toStringLong())!;
+    const leaderboard1 = leaderboard!.find(
+      (l) => l.user === account1.accountAddress.toStringLong()
+    )!;
+    const leaderboard2 = leaderboard!.find(
+      (l) => l.user === account2.accountAddress.toStringLong()
+    )!;
 
     expect(leaderboard1.exited).toEqual(true);
     expect(leaderboard2.exited).toEqual(true);
