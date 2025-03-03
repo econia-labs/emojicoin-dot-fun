@@ -83,6 +83,9 @@ const expectObjectEqualityExceptEventIndexAndVersion = (a: object, b: object) =>
   expect(stringifyJSONWithBigInts(newA)).toEqual(stringifyJSONWithBigInts(newB));
 };
 
+const getNextAccountHelper = (i: number) =>
+  getFundedAccount(i.toString().padStart(3, "0") as FundedAccountIndex);
+
 /**
  * Because this test checks the details of the very first arena it must run separately from other
  * arena tests.
@@ -415,10 +418,7 @@ describe("ensures leaderboard history is working", () => {
 
   let accountIndex = 100;
 
-  const getNextAccount = () =>
-    getFundedAccount(
-      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
-    );
+  const getNextAccount = () => getNextAccountHelper(accountIndex++);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
@@ -625,10 +625,7 @@ describe("ensures arena info is working", () => {
 
   let accountIndex = 200;
 
-  const getNextAccount = () =>
-    getFundedAccount(
-      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
-    );
+  const getNextAccount = () => getNextAccountHelper(accountIndex++);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
@@ -812,10 +809,7 @@ describe("ensures arena works in edge cases", () => {
 
   let accountIndex = 200;
 
-  const getNextAccount = () =>
-    getFundedAccount(
-      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
-    );
+  const getNextAccount = () => getNextAccountHelper(accountIndex++);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
