@@ -12,6 +12,8 @@ import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";
+import { useState } from "react";
+import { type OrderByStrings } from "@sdk/indexer-v2/const";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
@@ -26,6 +28,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
     text: "Time",
     id: "time",
     width: 120,
+    isServerSideSortable: true,
     renderCell: (item) => <TimeCell date={new Date(Number(item.transaction.time / 1000n))} />,
   },
   {
@@ -63,7 +66,8 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
 ];
 
 export const WalletTransactionTable = ({ address }: { address: string }) => {
-  const query = useSwapEventsQuery({ sender: address });
+  const [orderBy, setOrderBy] = useState<OrderByStrings>("desc");
+  const query = useSwapEventsQuery({ sender: address, orderBy });
   const router = useRouter();
 
   return (
@@ -77,7 +81,10 @@ export const WalletTransactionTable = ({ address }: { address: string }) => {
             `${ROUTES.market}/${emojiNamesToPath(item.market.symbolData.name.split(","))}`
           );
         }}
+        defaultSortColumn="time"
         items={query.data?.pages.flatMap((page) => page) ?? []}
+        // In this case we can only sort by a single column, so no need to check for column.
+        serverSideOrderHandler={(_, dir) => setOrderBy(dir)}
         pagination={query}
       />
     </>
