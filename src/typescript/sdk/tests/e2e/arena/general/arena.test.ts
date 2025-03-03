@@ -706,7 +706,7 @@ describe("ensures arena info is working", () => {
       emojicoin1Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin1Proceeds;
     }
 
-    waitForProcessor(lastExitRes!);
+    await waitForProcessor(lastExitRes!);
 
     const arenaPositions: ArenaPositionModel[] | null = await postgrest
       .from(TableName.ArenaPosition)
