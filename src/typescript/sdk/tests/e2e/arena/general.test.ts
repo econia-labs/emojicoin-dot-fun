@@ -414,7 +414,9 @@ describe("ensures leaderboard history is working", () => {
   let accountIndex = 100;
 
   const getNextAccount = () =>
-    getFundedAccount((accountIndex++).toString().padStart(3, "0") as FundedAccountIndex);
+    getFundedAccount(
+      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
+    );
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
