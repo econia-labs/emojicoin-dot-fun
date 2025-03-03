@@ -31,6 +31,8 @@ import {
 import { getPublisher } from "../../utils/helpers";
 import type { Account } from "@aptos-labs/ts-sdk";
 
+const TWO_SECONDS = 2000;
+
 describe("ensures arena candlesticks work", () => {
   const emojicoin = new EmojicoinClient();
 
@@ -151,7 +153,8 @@ describe("ensures arena candlesticks work", () => {
       const now = new Date().getTime();
       const fifteenSecondStart = now - (now % 15000);
       const fifteenSecondEnd = fifteenSecondStart + 15000;
-      const timeToWait = Math.max(fifteenSecondEnd - now, 0) + 200;
+      const bufferForTimeDrift = TWO_SECONDS;
+      const timeToWait = Math.max(fifteenSecondEnd - now, 0) + bufferForTimeDrift;
       await sleep(timeToWait);
     };
     const calculatePrice = (
