@@ -30,7 +30,7 @@ import {
   fetchMeleeEmojiData,
   type MeleeEmojiData,
 } from "../../../src/markets/arena-utils";
-import { getFundedAccount } from "../../utils/test-accounts";
+import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
@@ -414,9 +414,7 @@ describe("ensures leaderboard history is working", () => {
   let accountIndex = 100;
 
   const getNextAccount = () =>
-    getFundedAccount(
-      (accountIndex++).toString() as unknown as Parameters<typeof getFundedAccount>[0]
-    );
+    getFundedAccount((accountIndex++).toString().padStart(3, "0") as FundedAccountIndex);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
   const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
