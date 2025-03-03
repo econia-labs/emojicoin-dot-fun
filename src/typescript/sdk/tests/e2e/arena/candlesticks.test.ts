@@ -1,13 +1,18 @@
-import { ArenaPeriod, ONE_APT_BIGINT, sleep, SymbolEmoji } from "../../../src";
+import {
+  ArenaPeriod,
+  calculateCurvePrice,
+  ONE_APT_BIGINT,
+  sleep,
+  type SymbolEmoji,
+} from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {
-  ArenaCandlestickModel,
-  ORDER_BY,
+  type ArenaCandlestickModel,
+  type MarketLatestStateEventModel,
   postgrest,
-  SwapEventModel,
   TableName,
   toArenaCandlestickModel,
-  toSwapEventModel,
+  toMarketLatestStateEventModel,
   waitForEmojicoinIndexer,
 } from "../../../src/indexer-v2";
 import {
@@ -15,7 +20,7 @@ import {
   fetchMeleeEmojiData,
   type MeleeEmojiData,
 } from "../../../src/markets/arena-utils";
-import { FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
+import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
@@ -24,8 +29,7 @@ import {
   waitForProcessor,
 } from "./utils";
 import { getPublisher } from "../../utils/helpers";
-import { Account } from "@aptos-labs/ts-sdk";
-import Big from "big.js";
+import type { Account } from "@aptos-labs/ts-sdk";
 
 describe("ensures arena candlesticks work", () => {
   const emojicoin = new EmojicoinClient();
@@ -115,12 +119,11 @@ describe("ensures arena candlesticks work", () => {
     let candlesticks: ArenaCandlestickModel[] | null = null;
     let fifteenSecondCandles: ArenaCandlestickModel[] = [];
     let expectedPrice = 1;
-    let expectedFees = 0n;
     let expectedVolume = 0n;
-    let swap0: SwapEventModel | null = null;
-    let swap1: SwapEventModel | null = null;
+    let state0: MarketLatestStateEventModel = {} as MarketLatestStateEventModel;
+    let state1: MarketLatestStateEventModel = {} as MarketLatestStateEventModel;
 
-    const queryCandlesticks = async () => {
+    const refreshCandlesticksData = async () => {
       candlesticks = await postgrest
         .from(TableName.ArenaCandlestick)
         .select("*")
@@ -128,45 +131,48 @@ describe("ensures arena candlesticks work", () => {
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaCandlestickModel)));
     };
-    const querySwaps = async () => {
-      swap0 = await postgrest
-        .from(TableName.SwapEvents)
+    const refreshStateData = async () => {
+      state0 = await postgrest
+        .from(TableName.MarketLatestStateEvent)
         .select("*")
         .eq("market_id", melee.market1.marketID)
-        .order("market_nonce", ORDER_BY.DESC)
-        .limit(1)
+        .single()
         .then((r) => r.data)
-        .then((r) => (r === null ? null : r.map(toSwapEventModel)))
-        .then((r) => (r?.length === 1 ? r[0] : null));
-      swap1 = await postgrest
-        .from(TableName.SwapEvents)
+        .then((r) => toMarketLatestStateEventModel(r));
+      state1 = await postgrest
+        .from(TableName.MarketLatestStateEvent)
         .select("*")
         .eq("market_id", melee.market2.marketID)
-        .order("market_nonce", ORDER_BY.DESC)
-        .limit(1)
+        .single()
         .then((r) => r.data)
-        .then((r) => (r === null ? null : r.map(toSwapEventModel)))
-        .then((r) => (r?.length === 1 ? r[0] : null));
+        .then((r) => toMarketLatestStateEventModel(r));
     };
-    const waitTo15sBoundryStart = async () => {
+    const waitForNew15sPeriodBoundary = async () => {
       const now = new Date().getTime();
       const fifteenSecondStart = now - (now % 15000);
       const fifteenSecondEnd = fifteenSecondStart + 15000;
       const timeToWait = Math.max(fifteenSecondEnd - now, 0) + 200;
       await sleep(timeToWait);
     };
-    const calculatePrice = (swap0: SwapEventModel, swap1: SwapEventModel) => {
-      const price0 = Big(swap0!.swap.avgExecutionPriceQ64.toString()).div(2 ** 64);
-      const price1 = Big(swap1!.swap.avgExecutionPriceQ64.toString()).div(2 ** 64);
+    const calculatePrice = (
+      state0: MarketLatestStateEventModel,
+      state1: MarketLatestStateEventModel
+    ) => {
+      const price0 = calculateCurvePrice(state0.state);
+      const price1 = calculateCurvePrice(state1.state);
       return price0.div(price1).toNumber();
     };
 
-    await queryCandlesticks();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
     expect(candlesticks).toHaveLength(0);
 
-    await waitTo15sBoundryStart();
+    expect(state0.lastSwap.avgExecutionPriceQ64).toEqual(0n);
+    expect(state1.lastSwap.avgExecutionPriceQ64).toEqual(0n);
+
+    await waitForNew15sPeriodBoundary();
 
     // ATM, no swaps are present on either market.
 
@@ -181,25 +187,24 @@ describe("ensures arena candlesticks work", () => {
       )
     );
 
-    await queryCandlesticks();
-    await querySwaps();
-
-    // Since we only have one swap on one side, there is no price, and all price
-    // columns are null. However, volume, integratorFees, and nSwaps are set.
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
     expect(candlesticks!.length).toBeGreaterThan(0);
 
     fifteenSecondCandles = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
 
+    expectedPrice = calculatePrice(state0, state1);
+    const expectedOpenPrice = expectedPrice;
+
     expect(fifteenSecondCandles).toHaveLength(1);
     expect(fifteenSecondCandles[0].nSwaps).toEqual(1n);
-    expect(fifteenSecondCandles[0].lowPrice).toBeNull();
-    expect(fifteenSecondCandles[0].highPrice).toBeNull();
-    expect(fifteenSecondCandles[0].openPrice).toBeNull();
-    expect(fifteenSecondCandles[0].closePrice).toBeNull();
-    expect(fifteenSecondCandles[0].integratorFees).toEqual(swap0!.swap.integratorFee);
-    expect(fifteenSecondCandles[0].volume).toEqual(swap0!.swap.quoteVolume);
+    expect(fifteenSecondCandles[0].lowPrice).toEqual(expectedPrice);
+    expect(fifteenSecondCandles[0].highPrice).toEqual(expectedPrice);
+    expect(fifteenSecondCandles[0].openPrice).toEqual(expectedOpenPrice);
+    expect(fifteenSecondCandles[0].closePrice).toEqual(expectedPrice);
+    expect(fifteenSecondCandles[0].volume).toEqual(state0!.lastSwap.quoteVolume);
 
     // No swap is generated from the exit.
 
@@ -218,15 +223,13 @@ describe("ensures arena candlesticks work", () => {
       )
     );
 
-    await queryCandlesticks();
-    await querySwaps();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
-    expectedPrice = calculatePrice(swap0!, swap1!);
+    let oldExpectedPrice = expectedPrice;
+    expectedPrice = calculatePrice(state0, state1);
 
-    expectedFees = swap0!.swap.integratorFee + swap1!.swap.integratorFee;
-    expectedVolume = swap0!.swap.quoteVolume + swap1!.swap.quoteVolume;
-
-    // Now that we have a price on each side, price columns are set as well.
+    expectedVolume = state0!.lastSwap.quoteVolume + state1!.lastSwap.quoteVolume;
 
     expect(candlesticks).not.toBeNull();
 
@@ -235,10 +238,9 @@ describe("ensures arena candlesticks work", () => {
     expect(fifteenSecondCandles).toHaveLength(1);
     expect(fifteenSecondCandles[0].nSwaps).toEqual(2n);
     expect(fifteenSecondCandles[0].lowPrice).toBeCloseTo(expectedPrice, 5);
-    expect(fifteenSecondCandles[0].highPrice).toBeCloseTo(expectedPrice, 5);
-    expect(fifteenSecondCandles[0].openPrice).toBeCloseTo(expectedPrice, 5);
+    expect(fifteenSecondCandles[0].highPrice).toBeCloseTo(oldExpectedPrice, 5);
+    expect(fifteenSecondCandles[0].openPrice).toBeCloseTo(expectedOpenPrice, 5);
     expect(fifteenSecondCandles[0].closePrice).toBeCloseTo(expectedPrice, 5);
-    expect(fifteenSecondCandles[0].integratorFees).toEqual(expectedFees);
     expect(fifteenSecondCandles[0].volume).toEqual(expectedVolume);
 
     // We swap for emojicoin 1 to emojicoin 0.
@@ -247,28 +249,26 @@ describe("ensures arena candlesticks work", () => {
       await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
     );
 
-    await queryCandlesticks();
-    await querySwaps();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
 
-    let oldExpectedPrice = expectedPrice;
+    oldExpectedPrice = expectedPrice;
 
-    expectedPrice = calculatePrice(swap0!, swap1!);
-    expectedFees += swap0!.swap.integratorFee + swap1!.swap.integratorFee;
-    expectedVolume += swap0!.swap.quoteVolume + swap1!.swap.quoteVolume;
+    expectedPrice = calculatePrice(state0!, state1!);
+    expectedVolume += state0!.lastSwap.quoteVolume + state1!.lastSwap.quoteVolume;
     fifteenSecondCandles = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
 
     expect(fifteenSecondCandles).toHaveLength(1);
     expect(fifteenSecondCandles[0].nSwaps).toEqual(4n);
     expect(fifteenSecondCandles[0].lowPrice).toBeCloseTo(oldExpectedPrice, 5);
     expect(fifteenSecondCandles[0].highPrice).toBeCloseTo(expectedPrice, 5);
-    expect(fifteenSecondCandles[0].openPrice).toBeCloseTo(oldExpectedPrice, 5);
+    expect(fifteenSecondCandles[0].openPrice).toBeCloseTo(expectedOpenPrice, 5);
     expect(fifteenSecondCandles[0].closePrice).toBeCloseTo(expectedPrice, 5);
-    expect(fifteenSecondCandles[0].integratorFees).toEqual(expectedFees);
     expect(fifteenSecondCandles[0].volume).toEqual(expectedVolume);
 
-    await waitTo15sBoundryStart();
+    await waitForNew15sPeriodBoundary();
 
     // This swap should happen in the next candlestick boundry, so it should generate a new one.
 
@@ -276,10 +276,10 @@ describe("ensures arena candlesticks work", () => {
       await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
     );
 
-    const oldSwap1 = swap1!;
+    const oldSwap1 = state1!;
 
-    await queryCandlesticks();
-    await querySwaps();
+    await refreshCandlesticksData();
+    await refreshStateData();
 
     expect(candlesticks).not.toBeNull();
 
@@ -290,13 +290,11 @@ describe("ensures arena candlesticks work", () => {
     expect(fifteenSecondCandles[0].nSwaps).toEqual(4n);
     expect(fifteenSecondCandles[0].lowPrice).toBeCloseTo(oldExpectedPrice, 5);
     expect(fifteenSecondCandles[0].highPrice).toBeCloseTo(expectedPrice, 5);
-    expect(fifteenSecondCandles[0].openPrice).toBeCloseTo(oldExpectedPrice, 5);
+    expect(fifteenSecondCandles[0].openPrice).toBeCloseTo(expectedOpenPrice, 5);
     expect(fifteenSecondCandles[0].closePrice).toBeCloseTo(expectedPrice, 5);
-    expect(fifteenSecondCandles[0].integratorFees).toEqual(expectedFees);
     expect(fifteenSecondCandles[0].volume).toEqual(expectedVolume);
 
-    expectedVolume = swap0!.swap.quoteVolume + swap1!.swap.quoteVolume;
-    expectedFees = swap0!.swap.integratorFee + swap1!.swap.integratorFee;
+    expectedVolume = state0!.lastSwap.quoteVolume + state1!.lastSwap.quoteVolume;
 
     // When an arena swap happens, they are actually slightly staggered, meaning
     // that two swaps happen (one on each market), one after the other. This
@@ -331,15 +329,14 @@ describe("ensures arena candlesticks work", () => {
     // candlestick time boundry, there are two different prices for low/high
     // and for open/close.
 
-    const intermediaryExpectedPrice = calculatePrice(swap0!, oldSwap1);
-    expectedPrice = calculatePrice(swap0!, swap1!);
+    const intermediaryExpectedPrice = calculatePrice(state0!, oldSwap1);
+    expectedPrice = calculatePrice(state0!, state1!);
 
     expect(fifteenSecondCandles[1].lowPrice).toBeCloseTo(expectedPrice, 5);
     expect(fifteenSecondCandles[1].highPrice).toBeCloseTo(intermediaryExpectedPrice, 5);
     expect(fifteenSecondCandles[1].openPrice).toBeCloseTo(intermediaryExpectedPrice, 5);
     expect(fifteenSecondCandles[1].closePrice).toBeCloseTo(expectedPrice, 5);
     expect(fifteenSecondCandles[1].nSwaps).toEqual(2n);
-    expect(fifteenSecondCandles[1].integratorFees).toEqual(expectedFees);
     expect(fifteenSecondCandles[1].volume).toEqual(expectedVolume);
   }, 70000);
 });

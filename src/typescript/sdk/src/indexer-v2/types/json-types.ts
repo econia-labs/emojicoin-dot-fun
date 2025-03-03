@@ -273,8 +273,11 @@ type ArenaMeleeEventData = Flatten<
 type ArenaEnterEventData = FlattenedExchangeRateWithEventIndex<"ArenaEnterEvent">;
 type ArenaExitEventData = FlattenedExchangeRateWithEventIndex<"ArenaExitEvent"> & {
   apt_proceeds: Uint64String;
+  during_melee: boolean;
 };
-type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent">;
+type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent"> & {
+  during_melee: boolean;
+};
 
 type ArenaVaultBalanceUpdateEventData = {
   event_index: Uint64String;
@@ -360,13 +363,12 @@ type ArenaCandlestickData = {
   period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
   start_time: PostgresTimestamp;
 
-  open_price: number | null;
-  close_price: number | null;
-  high_price: number | null;
-  low_price: number | null;
+  open_price: number;
+  close_price: number;
+  high_price: number;
+  low_price: number;
 
   volume: Uint64String;
-  integrator_fees: Uint64String;
   n_swaps: Uint64String;
 };
 
