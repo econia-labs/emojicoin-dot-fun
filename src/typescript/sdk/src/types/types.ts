@@ -233,6 +233,7 @@ export type Types = ArenaTypes & {
         time: bigint;
         marketNonce: bigint;
         swapper: AccountAddressString;
+        sender: AccountAddressString;
         inputAmount: bigint;
         isSell: boolean;
         integrator: AccountAddressString;
@@ -580,6 +581,7 @@ export const toSwapEvent = (
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
   swapper: standardizeAddress(data.swapper),
+  sender: standardizeAddress(data.sender),
   inputAmount: BigInt(data.input_amount),
   isSell: data.is_sell,
   integrator: standardizeAddress(data.integrator),
