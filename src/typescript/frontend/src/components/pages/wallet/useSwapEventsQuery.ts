@@ -1,7 +1,7 @@
 import { type fetchSwapEvents } from "@/queries/market";
 import { LIMIT } from "@sdk/indexer-v2/const";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { type GetTradesSchema } from "app/api/trades/route";
+import { type GetTradesSchema } from "app/api/trades/schema";
 import { axiosInstance } from "utils/axios";
 import { type z } from "zod";
 
