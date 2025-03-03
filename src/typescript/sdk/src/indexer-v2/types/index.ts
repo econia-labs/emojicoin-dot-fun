@@ -25,7 +25,7 @@ import {
   type BlockAndEventIndexMetadata,
 } from "./json-types";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
-import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
+import { toArenaPeriod, toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
@@ -158,6 +158,7 @@ const toArenaExitFromDatabase = (
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+  duringMelee: data.during_melee,
 });
 
 const toArenaSwapFromDatabase = (
@@ -173,6 +174,7 @@ const toArenaSwapFromDatabase = (
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+  duringMelee: data.during_melee,
 });
 
 const toArenaVaultBalanceUpdateFromDatabase = (
@@ -255,11 +257,10 @@ const toArenaCandlestickFromDatabase = (
   volume: BigInt(data.volume),
   period: toArenaPeriod(data.period),
   startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
-  openPrice: data.open_price === null ? null : Number(data.open_price),
-  closePrice: data.close_price === null ? null : Number(data.close_price),
-  highPrice: data.high_price === null ? null : Number(data.high_price),
-  lowPrice: data.low_price === null ? null : Number(data.low_price),
-  integratorFees: BigInt(data.integrator_fees),
+  openPrice: Number(data.open_price),
+  closePrice: Number(data.close_price),
+  highPrice: Number(data.high_price),
+  lowPrice: Number(data.low_price),
   nSwaps: BigInt(data.n_swaps),
 });
 
