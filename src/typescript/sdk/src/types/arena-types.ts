@@ -10,6 +10,9 @@ import {
   type ArenaVaultBalanceUpdateModel,
   type ArenaEventModels,
   type ArenaEventModelWithMeleeID,
+  type ArenaCandlestickModel,
+  EVENT_NAMES,
+  ARENA_CANDLESTICK_NAME,
 } from "../indexer-v2";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
@@ -333,32 +336,36 @@ export type AnyArenaEvent =
 /* eslint-disable import/no-unused-modules */
 
 export const isArenaEnterEvent = (e: AnyArenaEvent): e is Types["ArenaEnterEvent"] =>
-  e.eventName === "ArenaEnter";
+  e.eventName === EVENT_NAMES.ArenaEnter;
 
 export const isArenaExitEvent = (e: AnyArenaEvent): e is Types["ArenaExitEvent"] =>
-  e.eventName === "ArenaExit";
+  e.eventName === EVENT_NAMES.ArenaExit;
 
 export const isArenaMeleeEvent = (e: AnyArenaEvent): e is Types["ArenaMeleeEvent"] =>
-  e.eventName === "ArenaMelee";
+  e.eventName === EVENT_NAMES.ArenaMelee;
 
 export const isArenaSwapEvent = (e: AnyArenaEvent): e is Types["ArenaSwapEvent"] =>
-  e.eventName === "ArenaSwap";
+  e.eventName === EVENT_NAMES.ArenaSwap;
 
 export const isArenaVaultBalanceUpdateEvent = (
   e: AnyArenaEvent
-): e is Types["ArenaVaultBalanceUpdateEvent"] => e.eventName === "ArenaVaultBalanceUpdate";
+): e is Types["ArenaVaultBalanceUpdateEvent"] =>
+  e.eventName === EVENT_NAMES.ArenaVaultBalanceUpdate;
 
 export const isArenaEnterModel = (e: BrokerEventModels): e is ArenaEnterModel =>
-  e.eventName === "ArenaEnter";
+  e.eventName === EVENT_NAMES.ArenaEnter;
 
 export const isArenaExitModel = (e: BrokerEventModels): e is ArenaExitModel =>
-  e.eventName === "ArenaExit";
+  e.eventName === EVENT_NAMES.ArenaExit;
 
 export const isArenaMeleeModel = (e: BrokerEventModels): e is ArenaMeleeModel =>
-  e.eventName === "ArenaMelee";
+  e.eventName === EVENT_NAMES.ArenaMelee;
 
 export const isArenaSwapModel = (e: BrokerEventModels): e is ArenaSwapModel =>
-  e.eventName === "ArenaSwap";
+  e.eventName === EVENT_NAMES.ArenaSwap;
+
+export const isArenaCandlestickModel = (e: BrokerEventModels): e is ArenaCandlestickModel =>
+  e.eventName === ARENA_CANDLESTICK_NAME;
 
 export const isArenaVaultBalanceUpdateModel = (
   e: BrokerEventModels

@@ -19,8 +19,14 @@ export type ClientState = {
 
 export type ClientActions = {
   close: () => void;
-  subscribeEvents: (events: SubscribableBrokerEvents[], arena?: boolean) => void;
-  unsubscribeEvents: (events: SubscribableBrokerEvents[], arena?: boolean) => void;
+  subscribeEvents: (
+    events: SubscribableBrokerEvents[],
+    arena?: { baseEvents?: boolean; candlesticks?: boolean }
+  ) => void;
+  unsubscribeEvents: (
+    events: SubscribableBrokerEvents[],
+    arena?: { baseEvents?: boolean; candlesticks?: boolean }
+  ) => void;
 };
 
 export type WebSocketClientStore = ClientState & ClientActions;
@@ -52,6 +58,7 @@ export const createWebSocketClientStore = (
     marketIDs: new Set(),
     eventTypes: new Set(),
     arena: false,
+    arenaCandlesticks: false,
   },
   received: 0,
   client: getSingletonClient({
@@ -84,14 +91,16 @@ export const createWebSocketClientStore = (
   subscribeEvents: (e, arena) => {
     set((state) => {
       state.client.subscribeEvents(e, arena);
-      state.subscriptions.arena = !!arena;
+      state.subscriptions.arena = !!arena?.baseEvents;
+      state.subscriptions.arenaCandlesticks = !!arena?.candlesticks;
       state.subscriptions = state.client.subscriptions;
     });
   },
   unsubscribeEvents: (e, arena) => {
     set((state) => {
       state.client.unsubscribeEvents(e, arena);
-      state.subscriptions.arena = !!arena;
+      state.subscriptions.arena = !!arena?.baseEvents;
+      state.subscriptions.arenaCandlesticks = !!arena?.candlesticks;
       state.subscriptions = state.client.subscriptions;
     });
   },
