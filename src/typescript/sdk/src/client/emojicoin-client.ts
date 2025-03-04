@@ -381,7 +381,7 @@ export class EmojicoinClient {
         ledgerVersion,
       },
     });
-    return toSwapEvent(res, -1);
+    return toSwapEvent(res, -1, swapper.toString());
   }
 
   private async isMarketRegisteredView(

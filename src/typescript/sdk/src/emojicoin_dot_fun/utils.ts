@@ -112,7 +112,7 @@ function getEventsMaybeWithIndices(
     // TypeScript can't infer or narrow the types properly below, but they're correct.
     /* eslint-disable @typescript-eslint/no-explicit-any */
     if (isAnEmojicoinStructName(structName)) {
-      const data = converter[structName](event.data, response.version);
+      const data = converter[structName](event.data, response.version, response.sender);
       const camelCasedAndPlural = `${toCamelCaseEventName(structName)}s` as const;
       const eventData = withIndices ? { ...data, eventIndex } : data;
       events[camelCasedAndPlural].push(eventData as any);

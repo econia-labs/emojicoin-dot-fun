@@ -19,9 +19,10 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
     id: "emoji",
     text: "Emoji",
-    width: 80,
     renderCell: (item) => (
-      <Emoji className={`text-[1.2em] text-nowrap`} emojis={item.market.emojis} />
+      <span className="w-full">
+        <Emoji className={`text-[1.2em] text-nowrap`} emojis={item.market.emojis} />
+      </span>
     ),
   },
   {
@@ -83,6 +84,7 @@ export const WalletTransactionTable = ({ address }: { address: string }) => {
         }}
         defaultSortColumn="time"
         items={query.data?.pages.flatMap((page) => page) ?? []}
+        isLoading={query.isLoading}
         // In this case we can only sort by a single column, so no need to check for column.
         serverSideOrderHandler={(_, dir) => setOrderBy(dir)}
         pagination={query}
