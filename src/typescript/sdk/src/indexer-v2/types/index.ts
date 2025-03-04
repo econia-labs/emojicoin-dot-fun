@@ -22,11 +22,15 @@ import {
   type BlockAndEventIndexMetadata,
 } from "./json-types";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
-import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
+import { toArenaPeriod, toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { deserializeToHexString, toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
-import { type AnyArenaEvent } from "../../types/arena-types";
+import {
+  ARENA_CANDLESTICK_NAME,
+  safeParseBigIntOrPostgresTimestamp,
+  type AnyArenaEvent,
+} from "../../types/arena-types";
 import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
 
 export type TransactionMetadata = {
@@ -148,6 +152,7 @@ const toArenaExitFromDatabase = (
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+  duringMelee: data.during_melee,
 });
 
 const toArenaSwapFromDatabase = (
@@ -163,6 +168,7 @@ const toArenaSwapFromDatabase = (
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+  duringMelee: data.during_melee,
 });
 
 const toArenaVaultBalanceUpdateFromDatabase = (
@@ -175,6 +181,7 @@ const toArenaPositionFromDatabase = (
   data: DatabaseStructType["ArenaPosition"]
 ): Types["ArenaPosition"] => ({
   meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
   user: toAccountAddressString(data.user),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
@@ -189,6 +196,7 @@ const toArenaLeaderboardFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboard"]
 ): Types["ArenaLeaderboard"] => ({
   user: toAccountAddressString(data.user),
+  version: BigInt(data.last_transaction_version),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
@@ -222,6 +230,7 @@ export const toTotalAptLocked = (args: {
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
   meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   rewardsRemaining: BigInt(data.rewards_remaining),
   emojicoin0Locked: BigInt(data.emojicoin_0_locked),
@@ -238,10 +247,26 @@ const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["
   maxMatchAmount: BigInt(data.max_match_amount),
 });
 
+const toArenaCandlestickFromDatabase = (
+  data: DatabaseStructType["ArenaCandlestick"]
+): Types["ArenaCandlestick"] => ({
+  meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
+  volume: BigInt(data.volume),
+  period: toArenaPeriod(data.period),
+  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  openPrice: Number(data.open_price),
+  closePrice: Number(data.close_price),
+  highPrice: Number(data.high_price),
+  lowPrice: Number(data.low_price),
+  nSwaps: BigInt(data.n_swaps),
+});
+
 const toArenaLeaderboardHistoryFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboardHistory"]
 ): Types["ArenaLeaderboardHistory"] => ({
   user: toAccountAddressString(data.user),
+  version: BigInt(data.last_transaction_version),
   meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
@@ -481,6 +506,7 @@ export type ArenaPositionModel = ReturnType<typeof toArenaPositionModel>;
 export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
 export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
+export type ArenaCandlestickModel = ReturnType<typeof toArenaCandlestickModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
 export type ArenaLeaderboardHistoryWithArenaInfoModel = ReturnType<
@@ -659,6 +685,11 @@ export const GuidGetters = {
   >) => ({
     eventName: EVENT_NAMES.ArenaVaultBalanceUpdate,
     guid: `${EVENT_NAMES.ArenaVaultBalanceUpdate}::${sender}::${version}::${event_index}`,
+  }),
+  arenaCandlestick: ({ melee_id, start_time, period }: DatabaseJsonType["arena_candlesticks"]) => ({
+    // Not a real contract event, but used to classify the type of data.
+    eventName: ARENA_CANDLESTICK_NAME,
+    guid: `${ARENA_CANDLESTICK_NAME}::${melee_id}::${period}::${start_time}`,
   }),
 };
 
@@ -864,6 +895,10 @@ export const toArenaPositionModel = toArenaPositionFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
 export const toArenaInfoModel = toArenaInfoFromDatabase;
+export const toArenaCandlestickModel = (data: DatabaseJsonType["arena_candlesticks"]) => ({
+  ...toArenaCandlestickFromDatabase(data),
+  ...GuidGetters.arenaCandlestick(data),
+});
 
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
@@ -922,6 +957,7 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaExitEvents]: toArenaExitModel,
   [TableName.ArenaSwapEvents]: toArenaSwapModel,
   [TableName.ArenaInfo]: toArenaInfoModel,
+  [TableName.ArenaCandlesticks]: toArenaCandlestickModel,
   [TableName.ArenaPosition]: toArenaPositionModel,
   [TableName.ArenaVaultBalanceUpdateEvents]: toArenaVaultBalanceUpdateModel,
   [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
@@ -952,6 +988,7 @@ export type DatabaseModels = {
   [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
   [TableName.ArenaPosition]: ArenaPositionModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
+  [TableName.ArenaCandlesticks]: ArenaCandlestickModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
   [TableName.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoModel;
