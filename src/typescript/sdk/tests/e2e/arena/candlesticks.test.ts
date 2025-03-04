@@ -89,7 +89,7 @@ describe("ensures arena candlesticks work", () => {
     // We have to swap with the accounts that registered the markets as the
     // markets were never traded on and can be in the grace period.
     //
-    // The market registrant can either be 0xfood if the market is one of
+    // The market registrant can either be 0xf00d if the market is one of
     // the two initial markets, or one of the funded accounts (0x000 to 0xfff).
 
     const registrant0: string = await postgrest
@@ -273,7 +273,7 @@ describe("ensures arena candlesticks work", () => {
 
     await waitForNew15sPeriodBoundary();
 
-    // This swap should happen in the next candlestick boundry, so it should generate a new one.
+    // This swap should happen in the next candlestick boundary, so it should generate a new one.
 
     await waitForProcessor(
       await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
@@ -319,7 +319,7 @@ describe("ensures arena candlesticks work", () => {
     //
     // Then, there is a swap (buy) on market B, where APT is sold for emojicoin B.
     //
-    // This markes the price of emojicoin B go up to 1.01.
+    // This marks the price of emojicoin B go up to 1.01.
     //
     // The A/B price is now ~0.98 (0.99 / 1.01).
     //
@@ -329,7 +329,7 @@ describe("ensures arena candlesticks work", () => {
     // intermediary price of 1.01.
     //
     // Because of this, despite there only being one "arena swap" in this
-    // candlestick time boundry, there are two different prices for low/high
+    // candlestick time boundary, there are two different prices for low/high
     // and for open/close.
 
     const intermediaryExpectedPrice = calculatePrice(state0!, oldSwap1);

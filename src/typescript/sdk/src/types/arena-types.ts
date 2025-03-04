@@ -1,4 +1,4 @@
-import type { ArenaPeriod, Period } from "../const";
+import type { ArenaPeriod } from "../const";
 import { type SymbolEmoji } from "../emoji_data";
 import { type AccountAddressString } from "../emojicoin_dot_fun";
 import {
