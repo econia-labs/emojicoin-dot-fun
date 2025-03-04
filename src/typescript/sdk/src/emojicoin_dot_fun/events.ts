@@ -62,7 +62,12 @@ export const createEmptyEvents = (): Events => ({
 });
 
 type Converter = {
-  [K in EmojicoinStructName]: (data: JsonTypes[K], version: number | string) => Types[K];
+  [K in EmojicoinStructName]: (
+    data: JsonTypes[K],
+    version: number | string,
+    // Make it optional because it's only required on the SwapEvent. If we don't make it optional, we have to add it to every converter function.
+    sender?: string
+  ) => Types[K];
 };
 
 export const converter: Converter = {
