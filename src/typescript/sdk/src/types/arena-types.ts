@@ -11,7 +11,7 @@ import {
   type ArenaEventModels,
   type ArenaEventModelWithMeleeID,
   type ArenaCandlestickModel,
-  ARENA_CANDLESTICK_NAME,
+  // Note that if you import anything more than a type here, you'll get lots of import issues.
 } from "../indexer-v2/types";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
