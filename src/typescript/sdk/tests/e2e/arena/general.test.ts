@@ -482,13 +482,13 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).toHaveLength(3);
 
     const user1LeaderboardData = leaderboard!.find(
-      (l) => l.user === account1.accountAddress.toStringLong()
+      (l) => l.user === account1.accountAddress.toString()
     )!;
     const user2LeaderboardData = leaderboard!.find(
-      (l) => l.user === account2.accountAddress.toStringLong()
+      (l) => l.user === account2.accountAddress.toString()
     )!;
     const user3LeaderboardData = leaderboard!.find(
-      (l) => l.user === account3.accountAddress.toStringLong()
+      (l) => l.user === account3.accountAddress.toString()
     )!;
 
     expect(user1LeaderboardData).toBeDefined();
@@ -558,13 +558,13 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).toHaveLength(3);
 
     const user1LeaderboardData = leaderboard!.find(
-      (l) => l.user === account1.accountAddress.toStringLong()
+      (l) => l.user === account1.accountAddress.toString()
     )!;
     const user2LeaderboardData = leaderboard!.find(
-      (l) => l.user === account2.accountAddress.toStringLong()
+      (l) => l.user === account2.accountAddress.toString()
     )!;
     const user3LeaderboardData = leaderboard!.find(
-      (l) => l.user === account3.accountAddress.toStringLong()
+      (l) => l.user === account3.accountAddress.toString()
     )!;
 
     expect(user1LeaderboardData).toBeDefined();
@@ -606,13 +606,13 @@ describe("ensures leaderboard history is working", () => {
     expect(leaderboard).toHaveLength(3);
 
     const user1LeaderboardData = leaderboard!.find(
-      (l) => l.user === account1.accountAddress.toStringLong()
+      (l) => l.user === account1.accountAddress.toString()
     )!;
     const user2LeaderboardData = leaderboard!.find(
-      (l) => l.user === account2.accountAddress.toStringLong()
+      (l) => l.user === account2.accountAddress.toString()
     )!;
     const user3LeaderboardData = leaderboard!.find(
-      (l) => l.user === account3.accountAddress.toStringLong()
+      (l) => l.user === account3.accountAddress.toString()
     )!;
 
     expect(user1LeaderboardData).toBeDefined();
@@ -927,7 +927,7 @@ describe("ensures arena works in edge cases", () => {
     return true;
   }, 30000);
 
-  it("verifies that a swap after a melee has endend and has been cranked is indexed properly", async () => {
+  it("verifies that a swap after a melee has ended and has been cranked is indexed properly", async () => {
     const account1 = getNextAccount();
     const account2 = getNextAccount();
 
@@ -996,8 +996,8 @@ describe("ensures arena works in edge cases", () => {
     expect(positions).toHaveLength(2);
     expect(positions).toHaveLength(2);
 
-    const position1 = positions!.find((p) => p.user === account1.accountAddress.toStringLong())!;
-    const position2 = positions!.find((p) => p.user === account2.accountAddress.toStringLong())!;
+    const position1 = positions!.find((p) => p.user === account1.accountAddress.toString())!;
+    const position2 = positions!.find((p) => p.user === account2.accountAddress.toString())!;
 
     expect(position1.open).toEqual(false);
     expect(position2.open).toEqual(false);
@@ -1008,12 +1008,8 @@ describe("ensures arena works in edge cases", () => {
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(2);
 
-    const leaderboard1 = leaderboard!.find(
-      (l) => l.user === account1.accountAddress.toStringLong()
-    )!;
-    const leaderboard2 = leaderboard!.find(
-      (l) => l.user === account2.accountAddress.toStringLong()
-    )!;
+    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toString())!;
+    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toString())!;
 
     expect(leaderboard1.exited).toEqual(true);
     expect(leaderboard2.exited).toEqual(true);
