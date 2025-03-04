@@ -96,7 +96,7 @@ function getEventsMaybeWithIndices(
     if (!structName || !isAnEmojicoinStructName(structName)) {
       return;
     }
-    const data = converter[structName](event.data, response.version);
+    const data = converter[structName](event.data, response.version, response.sender);
     const camelCasedAndPlural = `${toCamelCaseEventName(structName)}s` as const;
     const eventData = withIndices ? { ...data, eventIndex } : data;
     // TypeScript can't infer or narrow the type. It's too difficult to figure out how to get it to
