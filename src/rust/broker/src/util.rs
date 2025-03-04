@@ -37,6 +37,7 @@ pub fn is_match(subscription: &Subscription, event: &EmojicoinDbEvent) -> bool {
         EmojicoinDbEventType::ArenaMelee => subscription.arena,
         EmojicoinDbEventType::ArenaSwap => subscription.arena,
         EmojicoinDbEventType::ArenaVaultBalanceUpdate => subscription.arena,
+        EmojicoinDbEventType::ArenaCandlestick => subscription.arena_candlesticks,
         EmojicoinDbEventType::GlobalState => {
             subscription.event_types.is_empty() || subscription.event_types.contains(&event_type)
         }
