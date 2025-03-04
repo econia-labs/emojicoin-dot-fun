@@ -191,6 +191,7 @@ const toArenaPositionFromDatabase = (
   data: DatabaseStructType["ArenaPosition"]
 ): Types["ArenaPosition"] => ({
   meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
   user: toAccountAddressString(data.user),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
@@ -205,6 +206,7 @@ const toArenaLeaderboardFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboard"]
 ): Types["ArenaLeaderboard"] => ({
   user: toAccountAddressString(data.user),
+  version: BigInt(data.last_transaction_version),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
@@ -238,6 +240,7 @@ export const toTotalAptLocked = (args: {
 
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
   meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   rewardsRemaining: BigInt(data.rewards_remaining),
   emojicoin0Locked: BigInt(data.emojicoin_0_locked),
@@ -258,6 +261,7 @@ const toArenaCandlestickFromDatabase = (
   data: DatabaseStructType["ArenaCandlestick"]
 ): Types["ArenaCandlestick"] => ({
   meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   period: toArenaPeriod(data.period),
   startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
@@ -272,6 +276,7 @@ const toArenaLeaderboardHistoryFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboardHistory"]
 ): Types["ArenaLeaderboardHistory"] => ({
   user: toAccountAddressString(data.user),
+  version: BigInt(data.last_transaction_version),
   meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),

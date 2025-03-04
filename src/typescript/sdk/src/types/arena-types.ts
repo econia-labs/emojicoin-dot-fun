@@ -87,6 +87,7 @@ export type ArenaTypes = {
 
   ArenaPosition: {
     user: AccountAddressString;
+    version: bigint;
     meleeID: bigint;
     open: boolean;
     emojicoin0Balance: bigint;
@@ -99,6 +100,7 @@ export type ArenaTypes = {
 
   ArenaLeaderboardHistory: {
     user: AccountAddressString;
+    version: bigint;
     meleeID: bigint;
     profits: bigint;
     losses: bigint;
@@ -132,6 +134,7 @@ export type ArenaTypes = {
 
   ArenaLeaderboard: {
     user: AccountAddressString;
+    version: bigint;
     open: boolean;
     emojicoin0Balance: bigint;
     emojicoin1Balance: bigint;
@@ -144,6 +147,7 @@ export type ArenaTypes = {
 
   ArenaInfo: {
     meleeID: bigint;
+    version: bigint;
     volume: bigint;
     rewardsRemaining: bigint;
     emojicoin0Locked: bigint;
@@ -162,14 +166,13 @@ export type ArenaTypes = {
 
   ArenaCandlestick: {
     meleeID: bigint;
+    version: bigint;
     period: ArenaPeriod;
     startTime: Date;
-
     openPrice: number;
     closePrice: number;
     highPrice: number;
     lowPrice: number;
-
     volume: bigint;
     nSwaps: bigint;
   };
