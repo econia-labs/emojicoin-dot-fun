@@ -584,7 +584,7 @@ export const withArenaVaultBalanceUpdateData = curryToNamedType(
   "arenaVaultBalanceUpdate"
 );
 
-const EVENT_NAMES = {
+export const EVENT_NAMES = {
   GlobalState: "GlobalState",
   PeriodicState: "PeriodicState",
   MarketRegistration: "MarketRegistration",
@@ -1046,7 +1046,8 @@ export type BrokerEventModels =
   | DatabaseModels[TableName.ArenaMeleeEvents]
   | DatabaseModels[TableName.ArenaExitEvents]
   | DatabaseModels[TableName.ArenaSwapEvents]
-  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents]
+  | DatabaseModels[TableName.ArenaCandlestick];
 
 export type EventModelWithMarket =
   | DatabaseModels[TableName.SwapEvents]
