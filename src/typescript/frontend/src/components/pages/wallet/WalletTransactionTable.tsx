@@ -9,11 +9,11 @@ import { toNominal } from "lib/utils/decimals";
 import _ from "lodash";
 import { Emoji } from "utils/emoji";
 import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
-import { useRouter } from "next/navigation";
-import { ROUTES } from "router/routes";
-import { emojiNamesToPath } from "utils/pathname-helpers";
 import { useState } from "react";
-import { type OrderByStrings } from "@sdk/indexer-v2/const";
+import { useQuery } from "@tanstack/react-query";
+import type { OrderByStrings } from "@sdk/indexer-v2/const";
+import { encodeEmojis, type AnyEmoji, type SymbolEmoji } from "@sdk/emoji_data";
+import { fetchSpecificMarketsAction } from "./fetch-specific-markets-action";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
@@ -66,10 +66,32 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
   },
 ];
 
-export const WalletTransactionTable = ({ address }: { address: string }) => {
+export const WalletTransactionTable = ({
+  address,
+  emojis,
+  setEmojis,
+}: {
+  address: string;
+  emojis: SymbolEmoji[];
+  setEmojis: (emojis: AnyEmoji[]) => void;
+}) => {
   const [orderBy, setOrderBy] = useState<OrderByStrings>("desc");
-  const query = useSwapEventsQuery({ sender: address, orderBy });
-  const router = useRouter();
+
+  const marketQuery = useQuery({
+    queryKey: ["fetchMarket", emojis],
+    queryFn: async () => {
+      const markets = await fetchSpecificMarketsAction([emojis]);
+      if (markets.length === 0) return null;
+      return markets[0];
+    },
+    enabled: emojis.length > 0,
+  });
+
+  const query = useSwapEventsQuery({
+    sender: address,
+    orderBy,
+    symbolEmojis: emojis?.length > 0 ? encodeEmojis(emojis) : undefined,
+  });
 
   return (
     <>
@@ -78,13 +100,11 @@ export const WalletTransactionTable = ({ address }: { address: string }) => {
         getKey={(item) => item.guid}
         columns={COLUMNS}
         onClick={(item) => {
-          router.push(
-            `${ROUTES.market}/${emojiNamesToPath(item.market.symbolData.name.split(","))}`
-          );
+          setEmojis(item.market.symbolEmojis);
         }}
         defaultSortColumn="time"
         items={query.data?.pages.flatMap((page) => page) ?? []}
-        isLoading={query.isLoading}
+        isLoading={query.isLoading || marketQuery.isFetching}
         // In this case we can only sort by a single column, so no need to check for column.
         serverSideOrderHandler={(_, dir) => setOrderBy(dir)}
         pagination={query}

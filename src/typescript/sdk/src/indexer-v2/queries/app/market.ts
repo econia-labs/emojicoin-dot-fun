@@ -22,11 +22,13 @@ const selectSwaps = ({
   sender,
   marketID,
   page = 1,
+  symbolEmojis,
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
 }: {
   sender?: AccountAddress;
   marketID?: AnyNumberString;
+  symbolEmojis?: SymbolEmoji[];
 } & MarketStateQueryArgs) => {
   const query = postgrest
     .from(TableName.SwapEvents)
@@ -35,13 +37,11 @@ const selectSwaps = ({
     .order("event_index", orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  if (sender) {
-    query.eq("sender", sender);
-  }
+  if (sender) query.eq("sender", sender);
 
-  if (marketID) {
-    query.eq("market_id", marketID);
-  }
+  if (marketID) query.eq("market_id", marketID);
+
+  if (symbolEmojis) query.eq("symbol_emojis", toQueryArray(symbolEmojis));
 
   return query;
 };
