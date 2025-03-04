@@ -1,13 +1,10 @@
-import {
-  type BrokerEventModels,
-  DatabaseTypeConverter,
-  type ARENA_CANDLESTICK_NAME,
-} from "../indexer-v2/types";
+import { type BrokerEventModels, DatabaseTypeConverter } from "../indexer-v2/types";
 import {
   type BrokerJsonTypes,
   type DatabaseJsonType,
   TableName,
 } from "../indexer-v2/types/json-types";
+import { ARENA_CANDLESTICK_NAME } from "../types/arena-types";
 import { type AnyNumberString } from "../types/types";
 
 export type BrokerEvent = SubscribableBrokerEvents | BrokerArenaEvent;
