@@ -154,8 +154,18 @@ export const INITIAL_REAL_RESERVES: Types["Reserves"] = {
   quote: 0n,
 };
 
-/// As defined in the database, aka the enum string.
 export enum Period {
+  Period1M = "period_1m",
+  Period5M = "period_5m",
+  Period15M = "period_15m",
+  Period30M = "period_30m",
+  Period1H = "period_1h",
+  Period4H = "period_4h",
+  Period1D = "period_1d",
+}
+
+export enum ArenaPeriod {
+  Period15S = "period_15s",
   Period1M = "period_1m",
   Period5M = "period_5m",
   Period15M = "period_15m",
@@ -194,6 +204,31 @@ export const toPeriod = (s: DatabaseStructType["PeriodicStateMetadata"]["period"
     OneHour: Period.Period1H,
     FourHours: Period.Period4H,
     OneDay: Period.Period1D,
+  })[s as ValueOf<typeof Period>] ??
+  (() => {
+    throw new Error(`Unknown period: ${s}`);
+  })();
+
+export const toArenaPeriod = (s: DatabaseStructType["ArenaCandlestick"]["period"]) =>
+  ({
+    // From the database.
+    period_15s: ArenaPeriod.Period15S,
+    period_1m: ArenaPeriod.Period1M,
+    period_5m: ArenaPeriod.Period5M,
+    period_15m: ArenaPeriod.Period15M,
+    period_30m: ArenaPeriod.Period30M,
+    period_1h: ArenaPeriod.Period1H,
+    period_4h: ArenaPeriod.Period4H,
+    period_1d: ArenaPeriod.Period1D,
+    // From the broker.
+    FifteenSeconds: ArenaPeriod.Period15S,
+    OneMinute: ArenaPeriod.Period1M,
+    FiveMinutes: ArenaPeriod.Period5M,
+    FifteenMinutes: ArenaPeriod.Period15M,
+    ThirtyMinutes: ArenaPeriod.Period30M,
+    OneHour: ArenaPeriod.Period1H,
+    FourHours: ArenaPeriod.Period4H,
+    OneDay: ArenaPeriod.Period1D,
   })[s as ValueOf<typeof Period>] ??
   (() => {
     throw new Error(`Unknown period: ${s}`);
