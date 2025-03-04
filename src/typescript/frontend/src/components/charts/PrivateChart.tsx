@@ -30,7 +30,7 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore } from "context/event-store-context";
+import { useEventStore, useUserSettings } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
 import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
@@ -45,7 +45,6 @@ import {
 import { emoji, parseJSON } from "utils";
 import { Emoji } from "utils/emoji";
 import { getAptosClient } from "@sdk/utils/aptos-client";
-import useStatePersisted from "@hooks/use-state-persisted";
 import { createSwitch } from "components/charts/EmptyCandlesSwitch";
 
 const configurationData: DatafeedConfiguration = {
@@ -78,10 +77,10 @@ export const Chart = (props: ChartContainerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const symbol = props.symbol;
-  const [showEmptyCandles, setShowEmptyCandles] = useStatePersisted(
-    "chart.showEmptyCandles",
-    false
-  );
+
+  const showEmptyBars = useUserSettings((s) => s.showEmptyBars);
+  const setShowEmptyBars = useUserSettings((s) => s.setShowEmptyBars);
+
   const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
@@ -146,8 +145,8 @@ export const Chart = (props: ChartContainerProps) => {
           exchange: EXCHANGE_NAME,
           listed_exchange: "",
           session: "24x7",
-          // If has_empty_bars is undefined, we use showEmptyCandles value, which contains the value from local storage.
-          has_empty_bars: has_empty_bars ? has_empty_bars === "true" || false : showEmptyCandles,
+          // If has_empty_bars is undefined, we use showEmptyBars value, which contains the value from local storage.
+          has_empty_bars: has_empty_bars ? has_empty_bars === "true" || false : showEmptyBars,
           has_seconds: false,
           has_intraday: true,
           has_daily: true,
@@ -370,7 +369,7 @@ export const Chart = (props: ChartContainerProps) => {
         const btn = tvWidget.current.createButton();
 
         const { setState } = createSwitch(btn, {
-          initialState: showEmptyCandles,
+          initialState: showEmptyBars,
           label: "Empty candles",
           onTitle: "Hide empty candles",
           offTitle: "Show empty candles",
@@ -379,7 +378,7 @@ export const Chart = (props: ChartContainerProps) => {
         btn.addEventListener("click", () => {
           const chart = tvWidget.current?.activeChart();
           if (!chart) return;
-          setShowEmptyCandles((prev) => {
+          setShowEmptyBars((prev) => {
             const show = !prev;
             chart.setSymbol(formatSymbolWithParams(chart.symbol(), { has_empty_bars: show }));
             setState(show);
