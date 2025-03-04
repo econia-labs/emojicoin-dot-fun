@@ -1,23 +1,23 @@
 // cspell:word funder
 
-import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../../src";
-import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
-import { type MeleeEmojiData } from "../../../../src/markets/arena-utils";
+import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+import { type MeleeEmojiData } from "../../../src/markets/arena-utils";
 import {
   isArenaEnterModel,
   isArenaExitModel,
   isArenaSwapModel,
   isArenaVaultBalanceUpdateModel,
-} from "../../../../src/types/arena-types";
-import { getFundedAccount } from "../../../utils/test-accounts";
-import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../../broker/utils";
+} from "../../../src/types/arena-types";
+import { getFundedAccount } from "../../utils/test-accounts";
+import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../broker/utils";
 import {
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
   ONE_SECOND_MICROSECONDS,
   depositToVault,
   waitUntilCurrentMeleeEnds,
-} from "../utils";
+} from "./utils";
 
 describe("tests to ensure that arena websocket events work as expected", () => {
   const user = getFundedAccount("085");
