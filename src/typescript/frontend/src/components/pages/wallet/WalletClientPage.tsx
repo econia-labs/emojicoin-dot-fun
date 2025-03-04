@@ -8,15 +8,11 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
 import { WalletTransactionTable } from "./WalletTransactionTable";
 import { WalletPortfolioTable } from "./WalletPortfolioTable";
-import { useSwapEventsQuery } from "./useSwapEventsQuery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs/tabs";
 
 export const WalletClientPage = ({ address }: { address: string }) => {
   const resolvedName = useNameResolver(address);
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
-
-  // Just to prefetch the data even when the tab is closed.
-  const _ = useSwapEventsQuery({ sender: address });
 
   return (
     <div className="max-w-[100vw] px-2 sm:min-w-[80vw] md:min-w-[800px]">
