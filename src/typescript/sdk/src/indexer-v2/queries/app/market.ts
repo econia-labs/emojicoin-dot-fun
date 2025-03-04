@@ -20,13 +20,13 @@ import { type AccountAddress } from "@aptos-labs/ts-sdk";
 
 const selectSwaps = ({
   sender,
-  marketId,
+  marketID,
   page = 1,
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
 }: {
   sender?: AccountAddress;
-  marketId?: AnyNumberString;
+  marketID?: AnyNumberString;
 } & MarketStateQueryArgs) => {
   const query = postgrest
     .from(TableName.SwapEvents)
@@ -39,8 +39,8 @@ const selectSwaps = ({
     query.eq("sender", sender);
   }
 
-  if (marketId) {
-    query.eq("market_id", marketId);
+  if (marketID) {
+    query.eq("market_id", marketID);
   }
 
   return query;
