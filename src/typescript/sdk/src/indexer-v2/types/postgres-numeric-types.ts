@@ -139,6 +139,7 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
   "block_number",
   "event_index",
   "last_success_version",
+  "last_transaction_version",
   "transaction_version",
 ]);
 
