@@ -29,7 +29,11 @@ import { toArenaPeriod, toPeriod, toTrigger, type Period, type Trigger } from ".
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
-import { safeParseBigIntOrPostgresTimestamp, type AnyArenaEvent } from "../../types/arena-types";
+import {
+  ARENA_CANDLESTICK_NAME,
+  safeParseBigIntOrPostgresTimestamp,
+  type AnyArenaEvent,
+} from "../../types/arena-types";
 import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
 
 export type TransactionMetadata = {
@@ -704,6 +708,11 @@ export const GuidGetters = {
     eventName: EVENT_NAMES.ArenaVaultBalanceUpdate,
     guid: `${EVENT_NAMES.ArenaVaultBalanceUpdate}::${sender}::${version}::${event_index}`,
   }),
+  arenaCandlestick: ({ melee_id, start_time, period }: DatabaseJsonType["arena_candlesticks"]) => ({
+    // Not a real contract event, but used to classify the type of data.
+    eventName: ARENA_CANDLESTICK_NAME,
+    guid: `${ARENA_CANDLESTICK_NAME}::${melee_id}::${period}::${start_time}`,
+  }),
 };
 
 export const toGlobalStateEventModel = (data: DatabaseJsonType["global_state_events"]) => ({
@@ -914,7 +923,10 @@ export const toArenaPositionModel = toArenaPositionFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
 export const toArenaInfoModel = toArenaInfoFromDatabase;
-export const toArenaCandlestickModel = toArenaCandlestickFromDatabase;
+export const toArenaCandlestickModel = (data: DatabaseJsonType["arena_candlesticks"]) => ({
+  ...toArenaCandlestickFromDatabase(data),
+  ...GuidGetters.arenaCandlestick(data),
+});
 
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();

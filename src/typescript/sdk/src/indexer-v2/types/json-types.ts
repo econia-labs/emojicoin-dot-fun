@@ -432,7 +432,7 @@ export enum TableName {
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
   ArenaPosition = "arena_position",
   ArenaInfo = "arena_info",
-  ArenaCandlestick = "arena_candlestick",
+  ArenaCandlestick = "arena_candlesticks",
   // The view for the current arena leaderboard, all users.
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.

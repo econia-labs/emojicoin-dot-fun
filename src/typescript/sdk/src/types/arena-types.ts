@@ -14,6 +14,8 @@ import { dateFromMicroseconds, toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
 import { type AnyNumberString, type Types } from "./types";
 
+export const ARENA_CANDLESTICK_NAME = "ArenaCandlestick";
+
 type WithVersionAndEventIndex = {
   version: number | string;
   eventIndex: number;
