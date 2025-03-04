@@ -1047,7 +1047,7 @@ export type BrokerEventModels =
   | DatabaseModels[TableName.ArenaExitEvents]
   | DatabaseModels[TableName.ArenaSwapEvents]
   | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents]
-  | DatabaseModels[TableName.ArenaCandlestick];
+  | DatabaseModels[TableName.ArenaCandlesticks];
 
 export type EventModelWithMarket =
   | DatabaseModels[TableName.SwapEvents]
