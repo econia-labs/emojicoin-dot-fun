@@ -80,7 +80,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
 
     const [chats, swaps, marketView, aptPrice, holders] = await Promise.all([
       fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
-      fetchSwapEvents({ marketId: marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+      fetchSwapEvents({ marketID: marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       wrappedCachedContractMarketView(marketAddress),
       getAptPrice(),
       fetchCachedTopHolders(marketAddress),

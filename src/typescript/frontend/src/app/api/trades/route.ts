@@ -11,7 +11,7 @@ export const GET = async (req: Request) => {
   }
   const swaps = await fetchSwapEvents({
     sender,
-    marketId,
+    marketID: marketId,
     pageSize: limit,
     page,
     orderBy,
