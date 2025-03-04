@@ -9,10 +9,16 @@ import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emoj
 import { WalletTransactionTable } from "./WalletTransactionTable";
 import { WalletPortfolioTable } from "./WalletPortfolioTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs/tabs";
+import SearchBar from "components/inputs/search-bar";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import { type SymbolEmoji } from "@sdk/emoji_data";
 
 export const WalletClientPage = ({ address }: { address: string }) => {
   const resolvedName = useNameResolver(address);
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
+
+  const emojis = useEmojiPicker((s) => s.emojis);
+  const setEmojis = useEmojiPicker((s) => s.setEmojis);
 
   return (
     <div className="max-w-[100vw] px-2 sm:min-w-[80vw] md:min-w-[800px]">
@@ -39,15 +45,22 @@ export const WalletClientPage = ({ address }: { address: string }) => {
         </span>
       </div>
       <Tabs defaultValue="portfolio">
-        <TabsList>
-          <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-          <TabsTrigger value="trade-history">Trade History</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between w-full flex-wrap">
+          <TabsList>
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="trade-history">Trade History</TabsTrigger>
+          </TabsList>
+          <SearchBar />
+        </div>
         <TabsContent value="portfolio">
           <WalletPortfolioTable address={address} />
         </TabsContent>
         <TabsContent value="trade-history">
-          <WalletTransactionTable address={address} />
+          <WalletTransactionTable
+            address={address}
+            emojis={emojis as SymbolEmoji[]}
+            setEmojis={(emojis) => setEmojis(emojis)}
+          />
         </TabsContent>
       </Tabs>
     </div>
