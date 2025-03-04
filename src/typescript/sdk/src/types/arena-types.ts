@@ -369,8 +369,6 @@ export const isArenaVaultBalanceUpdateModel = (
   e: BrokerEventModels
 ): e is ArenaVaultBalanceUpdateModel => e.eventName === "ArenaVaultBalanceUpdate";
 
-/* eslint-enable import/no-unused-modules */
-
 export const isArenaEventModelWithMeleeID = (
   e: BrokerEventModels
 ): e is ArenaEventModelWithMeleeID =>
@@ -378,3 +376,5 @@ export const isArenaEventModelWithMeleeID = (
 
 export const isArenaEventModel = (e: BrokerEventModels): e is ArenaEventModels =>
   isArenaEventModelWithMeleeID(e) || isArenaVaultBalanceUpdateModel(e);
+
+/* eslint-enable import/no-unused-modules */
