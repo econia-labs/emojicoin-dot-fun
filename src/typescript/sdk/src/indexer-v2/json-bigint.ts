@@ -25,7 +25,7 @@ const tryWithFallbackParse = (parser: (v: any) => any) => (v: any) => {
     return v;
   }
 };
-const parseFloat = (v: any) => (v === null ? null : Big(v).toString());
+const parseFloat = (v: any) => Big(v).toString();
 const parseBigInt = (v: any) => BigInt(v);
 const parseInteger = (v: any) => Number(v);
 const parseDefault = (v: any) => v;
