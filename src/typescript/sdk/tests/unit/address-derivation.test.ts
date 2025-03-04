@@ -12,8 +12,6 @@ describe("it derives emojicoin addresses", () => {
 
     const emojis: Array<SymbolEmoji> = ["🦓", "🧟"];
     const derivedNamedObjectFromRawEmojis = getMarketAddress(emojis, registryAddress);
-    expect(derivedNamedObjectFromRawEmojis.toStringLong()).toEqual(
-      expectedObjectAddress.toStringLong()
-    );
+    expect(derivedNamedObjectFromRawEmojis.toString()).toEqual(expectedObjectAddress.toString());
   });
 });

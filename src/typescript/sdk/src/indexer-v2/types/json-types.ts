@@ -10,6 +10,7 @@ import type {
 import { type JsonTypes, type Flatten } from "../../types";
 
 export type PeriodTypeFromDatabase =
+  | "period_15s"
   | "period_1m"
   | "period_5m"
   | "period_15m"
@@ -19,6 +20,7 @@ export type PeriodTypeFromDatabase =
   | "period_1d";
 
 export type PeriodTypeFromBroker =
+  | "FifteenSeconds"
   | "OneMinute"
   | "FiveMinutes"
   | "FifteenMinutes"
@@ -273,8 +275,11 @@ type ArenaMeleeEventData = Flatten<
 type ArenaEnterEventData = FlattenedExchangeRateWithEventIndex<"ArenaEnterEvent">;
 type ArenaExitEventData = FlattenedExchangeRateWithEventIndex<"ArenaExitEvent"> & {
   apt_proceeds: Uint64String;
+  during_melee: boolean;
 };
-type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent">;
+type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent"> & {
+  during_melee: boolean;
+};
 
 type ArenaVaultBalanceUpdateEventData = {
   event_index: Uint64String;
@@ -283,6 +288,7 @@ type ArenaVaultBalanceUpdateEventData = {
 
 type ArenaPositionData = {
   user: AccountAddressString;
+  last_transaction_version: Uint64String;
   melee_id: Uint64String;
   open: boolean;
   emojicoin_0_balance: Uint64String;
@@ -295,6 +301,7 @@ type ArenaPositionData = {
 
 type ArenaInfoData = {
   melee_id: Uint64String;
+  last_transaction_version: Uint64String;
   volume: Uint64String;
   rewards_remaining: Uint64String;
   emojicoin_0_locked: Uint64String;
@@ -313,6 +320,7 @@ type ArenaInfoData = {
 
 type ArenaLeaderboardHistoryData = {
   user: AccountAddressString;
+  last_transaction_version: Uint64String;
   melee_id: Uint64String;
   profits: Uint64String;
   losses: Uint64String;
@@ -323,28 +331,35 @@ type ArenaLeaderboardHistoryData = {
   withdrawals: Uint64String;
 };
 
-type ArenaLeaderboardHistoryWithArenaInfoData = {
-  user: AccountAddressString;
-  melee_id: Uint64String;
-  profits: Uint64String;
-  losses: Uint64String;
-  withdrawals: Uint64String;
-  emojicoin_0_balance: Uint64String;
-  emojicoin_1_balance: Uint64String;
-  exited: boolean;
-  last_exit_0: boolean | null;
-  emojicoin_0_market_address: AccountAddressString;
-  emojicoin_1_market_address: AccountAddressString;
-  emojicoin_0_market_id: Uint64String;
-  emojicoin_1_market_id: Uint64String;
-  emojicoin_0_symbols: SymbolEmoji[];
-  emojicoin_1_symbols: SymbolEmoji[];
-  start_time: string;
-  duration: Uint64String;
-};
+type ArenaLeaderboardHistoryWithArenaInfoData = Flatten<
+  Pick<
+    ArenaLeaderboardHistoryData,
+    | "user"
+    | "melee_id"
+    | "profits"
+    | "losses"
+    | "withdrawals"
+    | "emojicoin_0_balance"
+    | "emojicoin_1_balance"
+    | "exited"
+    | "last_exit_0"
+  > &
+    Pick<
+      ArenaInfoData,
+      | "emojicoin_0_symbols"
+      | "emojicoin_1_symbols"
+      | "emojicoin_0_market_address"
+      | "emojicoin_1_market_address"
+      | "emojicoin_0_market_id"
+      | "emojicoin_1_market_id"
+      | "start_time"
+      | "duration"
+    >
+>;
 
 type ArenaLeaderboardData = {
   user: AccountAddressString;
+  last_transaction_version: Uint64String;
   open: boolean;
   emojicoin_0_balance: Uint64String;
   emojicoin_1_balance: Uint64String;
@@ -353,6 +368,21 @@ type ArenaLeaderboardData = {
   pnl_percent: number;
   pnl_octas: number;
   withdrawals: Uint64String;
+};
+
+type ArenaCandlestickData = {
+  melee_id: Uint64String;
+  last_transaction_version: Uint64String;
+  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
+  start_time: PostgresTimestamp;
+
+  open_price: number;
+  close_price: number;
+  high_price: number;
+  low_price: number;
+
+  volume: Uint64String;
+  n_swaps: Uint64String;
 };
 
 export type DatabaseStructType = {
@@ -376,6 +406,7 @@ export type DatabaseStructType = {
   ArenaLeaderboard: ArenaLeaderboardData;
   ArenaLeaderboardHistory: ArenaLeaderboardHistoryData;
   ArenaInfo: ArenaInfoData;
+  ArenaCandlestick: ArenaCandlestickData;
 };
 
 export type BrokerJsonTypes =
@@ -414,6 +445,7 @@ export enum TableName {
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
   ArenaPosition = "arena_position",
   ArenaInfo = "arena_info",
+  ArenaCandlesticks = "arena_candlesticks",
   // The view for the current arena leaderboard, all users.
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.
@@ -515,6 +547,7 @@ export type DatabaseJsonType = {
   >;
   [TableName.ArenaPosition]: ArenaPositionData;
   [TableName.ArenaInfo]: ArenaInfoData;
+  [TableName.ArenaCandlesticks]: ArenaCandlestickData;
 
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
@@ -569,6 +602,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
   DatabaseJsonType[TableName.ArenaPosition] &
   DatabaseJsonType[TableName.ArenaInfo] &
+  DatabaseJsonType[TableName.ArenaCandlesticks] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[DatabaseRpc.UserPools] &

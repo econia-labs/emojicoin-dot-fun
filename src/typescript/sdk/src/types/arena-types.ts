@@ -1,3 +1,4 @@
+import type { ArenaPeriod } from "../const";
 import { type SymbolEmoji } from "../emoji_data";
 import { type AccountAddressString } from "../emojicoin_dot_fun";
 import {
@@ -12,6 +13,8 @@ import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
 import { type AnyNumberString, type Types } from "./types";
+
+export const ARENA_CANDLESTICK_NAME = "ArenaCandlestick";
 
 type WithVersionAndEventIndex = {
   version: number | string;
@@ -58,6 +61,7 @@ export type ArenaTypes = {
     emojicoin0ExchangeRateQuote: bigint;
     emojicoin1ExchangeRateBase: bigint;
     emojicoin1ExchangeRateQuote: bigint;
+    duringMelee: boolean;
     eventName: "ArenaExit";
   } & WithVersionAndEventIndex;
 
@@ -72,6 +76,7 @@ export type ArenaTypes = {
     emojicoin0ExchangeRateQuote: bigint;
     emojicoin1ExchangeRateBase: bigint;
     emojicoin1ExchangeRateQuote: bigint;
+    duringMelee: boolean;
     eventName: "ArenaSwap";
   } & WithVersionAndEventIndex;
 
@@ -82,6 +87,7 @@ export type ArenaTypes = {
 
   ArenaPosition: {
     user: AccountAddressString;
+    version: bigint;
     meleeID: bigint;
     open: boolean;
     emojicoin0Balance: bigint;
@@ -94,6 +100,7 @@ export type ArenaTypes = {
 
   ArenaLeaderboardHistory: {
     user: AccountAddressString;
+    version: bigint;
     meleeID: bigint;
     profits: bigint;
     losses: bigint;
@@ -127,6 +134,7 @@ export type ArenaTypes = {
 
   ArenaLeaderboard: {
     user: AccountAddressString;
+    version: bigint;
     open: boolean;
     emojicoin0Balance: bigint;
     emojicoin1Balance: bigint;
@@ -139,6 +147,7 @@ export type ArenaTypes = {
 
   ArenaInfo: {
     meleeID: bigint;
+    version: bigint;
     volume: bigint;
     rewardsRemaining: bigint;
     emojicoin0Locked: bigint;
@@ -153,6 +162,19 @@ export type ArenaTypes = {
     duration: bigint;
     maxMatchPercentage: bigint;
     maxMatchAmount: bigint;
+  };
+
+  ArenaCandlestick: {
+    meleeID: bigint;
+    version: bigint;
+    period: ArenaPeriod;
+    startTime: Date;
+    openPrice: number;
+    closePrice: number;
+    highPrice: number;
+    lowPrice: number;
+    volume: bigint;
+    nSwaps: bigint;
   };
 };
 
@@ -255,6 +277,7 @@ export const toArenaExitEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaExit" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  duringMelee: true,
 });
 
 export const toArenaSwapEvent = (
@@ -271,6 +294,7 @@ export const toArenaSwapEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaSwap" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  duringMelee: true,
 });
 
 export const toArenaVaultBalanceUpdateEvent = (

@@ -11,7 +11,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { CloseIcon } from "components/svg";
-import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { isUserTransactionResponse, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { ARENA_MODULE_ADDRESS } from "@sdk/const";
 import { emoji } from "utils";
 import { q64ToBig } from "@sdk/utils";
@@ -220,23 +220,27 @@ const EnterTabLockPhase: React.FC<{
               scale="lg"
               onClick={() => {
                 if (!account) return;
-                submit(transactionBuilder).then((r) => {
-                  if (!r || r?.error) {
+                submit(transactionBuilder).then((res) => {
+                  if (!res || res?.error) {
                     errorOut();
                   } else if (
-                    (r.response as UserTransactionResponse).events.find(
+                    (res.response as UserTransactionResponse).events.find(
                       (e) => e.type === `${ARENA_MODULE_ADDRESS}::emojicoin_arena::Melee`
                     )
                   ) {
                     setCranked();
                   } else {
-                    const enterEvent = (r.response as UserTransactionResponse).events.find(
+                    const { response } = res;
+                    if (!response || !isUserTransactionResponse(response)) return;
+                    const version = BigInt(response.version);
+                    const enterEvent = response.events.find(
                       (e) => e.type === `${ARENA_MODULE_ADDRESS}::emojicoin_arena::Enter`
                     )!;
-
+                    if (!enterEvent) return;
                     if (position && position.open) {
                       setPosition({
                         ...position,
+                        version,
                         deposits: position.deposits + BigInt(enterEvent.data.input_amount),
                         matchAmount: position.matchAmount + BigInt(enterEvent.data.match_amount),
                         emojicoin0Balance:
@@ -247,6 +251,7 @@ const EnterTabLockPhase: React.FC<{
                     } else {
                       setPosition({
                         open: true,
+                        version,
                         user: account.address as `0x${string}`,
                         meleeID: BigInt(enterEvent.data.melee_id),
                         deposits: BigInt(enterEvent.data.input_amount),

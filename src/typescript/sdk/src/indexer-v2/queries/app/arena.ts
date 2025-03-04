@@ -14,6 +14,7 @@ import {
 } from "../../types";
 import { ORDER_BY } from "../../const";
 import { toAccountAddressString } from "../../../utils/account-address";
+import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
 
 const selectMelee = () =>
   postgrest
@@ -31,19 +32,19 @@ const selectArenaInfo = () =>
     .limit(1)
     .single();
 
-const selectPosition = ({ user, meleeID }: { user: string; meleeID: bigint }) =>
+const selectPosition = ({ user, meleeID }: { user: AccountAddressInput; meleeID: bigint }) =>
   postgrest
     .from(TableName.ArenaPosition)
     .select("*")
-    .eq("user", user)
+    .eq("user", toAccountAddressString(user))
     .eq("melee_id", meleeID)
     .maybeSingle();
 
-const selectLatestPosition = ({ user }: { user: string }) =>
+const selectLatestPosition = ({ user }: { user: AccountAddressInput }) =>
   postgrest
     .from(TableName.ArenaPosition)
     .select("*")
-    .eq("user", user)
+    .eq("user", toAccountAddressString(user))
     .order("melee_id", ORDER_BY.DESC)
     .limit(1)
     .maybeSingle();
@@ -53,7 +54,7 @@ const selectArenaLeaderboardHistoryWithInfo = ({
   page = 1,
   pageSize,
 }: {
-  user: string;
+  user: AccountAddressInput;
   page: number;
   pageSize: number;
 }) =>
@@ -69,7 +70,7 @@ const selectMarketStateByAddress = ({ address }: { address: string }) =>
   postgrest
     .from(TableName.MarketState)
     .select("*")
-    .eq("market_address", address)
+    .eq("market_address", toAccountAddressString(address))
     .limit(1)
     .maybeSingle();
 
