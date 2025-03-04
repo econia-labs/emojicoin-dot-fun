@@ -432,7 +432,7 @@ export enum TableName {
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
   ArenaPosition = "arena_position",
   ArenaInfo = "arena_info",
-  ArenaCandlestick = "arena_candlesticks",
+  ArenaCandlesticks = "arena_candlesticks",
   // The view for the current arena leaderboard, all users.
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.
@@ -534,7 +534,7 @@ export type DatabaseJsonType = {
   >;
   [TableName.ArenaPosition]: ArenaPositionData;
   [TableName.ArenaInfo]: ArenaInfoData;
-  [TableName.ArenaCandlestick]: ArenaCandlestickData;
+  [TableName.ArenaCandlesticks]: ArenaCandlestickData;
 
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
@@ -589,7 +589,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
   DatabaseJsonType[TableName.ArenaPosition] &
   DatabaseJsonType[TableName.ArenaInfo] &
-  DatabaseJsonType[TableName.ArenaCandlestick] &
+  DatabaseJsonType[TableName.ArenaCandlesticks] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[DatabaseRpc.UserPools] &

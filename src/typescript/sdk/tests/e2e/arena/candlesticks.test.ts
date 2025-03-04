@@ -127,7 +127,7 @@ describe("ensures arena candlesticks work", () => {
 
     const refreshCandlesticksData = async () => {
       candlesticks = await postgrest
-        .from(TableName.ArenaCandlestick)
+        .from(TableName.ArenaCandlesticks)
         .select("*")
         .eq("melee_id", melee.view.meleeID)
         .then((r) => r.data)
