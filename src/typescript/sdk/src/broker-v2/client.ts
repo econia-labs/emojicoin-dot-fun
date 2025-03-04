@@ -71,6 +71,7 @@ export class WebSocketClient {
       marketIDs: new Set(),
       eventTypes: new Set(),
       arena: false,
+      arenaCandlesticks: false,
     };
     this.client = new WebSocket(new URL(url));
 
@@ -108,28 +109,35 @@ export class WebSocketClient {
   @SendToBroker
   public subscribeEvents(
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
-    arena?: boolean
+    arena?: {
+      baseEvents?: boolean;
+      candlesticks?: boolean;
+    }
   ) {
     const newTypes = new Set(ensureArray(input));
     newTypes.forEach((e) => this.subscriptions.eventTypes.add(e));
     if (this.permanentlySubscribeToMarketRegistrations) {
       this.subscriptions.eventTypes.add("MarketRegistration");
     }
-    this.subscriptions.arena = !!arena;
+    this.subscriptions.arena = !!arena?.baseEvents;
+    this.subscriptions.arenaCandlesticks = !!arena?.candlesticks;
   }
 
   @SendToBroker
   public unsubscribeEvents(
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
-    arena?: boolean
+    arena?: {
+      baseEvents?: boolean;
+      candlesticks?: boolean;
+    }
   ) {
     const newTypes = new Set(ensureArray(input));
     if (this.permanentlySubscribeToMarketRegistrations) {
       newTypes.delete("MarketRegistration");
     }
     newTypes.forEach((e) => this.subscriptions.eventTypes.delete(e));
-    // `arena: true` in the function args means it should be unsubscribed from.
-    this.subscriptions.arena = !arena;
+    this.subscriptions.arena = !arena?.baseEvents;
+    this.subscriptions.arenaCandlesticks = !arena?.candlesticks;
   }
 
   public sendToBroker() {
@@ -142,6 +150,7 @@ export class WebSocketClient {
         : Array.from(this.subscriptions.marketIDs).map(Number),
       event_types: this.subscribedTo.allBaseEvents ? [] : Array.from(this.subscriptions.eventTypes),
       arena: this.subscriptions.arena,
+      arena_candlesticks: this.subscriptions.arenaCandlesticks,
     };
     const msg = JSON.stringify(subscriptionMessage);
     this.client.send(msg);
