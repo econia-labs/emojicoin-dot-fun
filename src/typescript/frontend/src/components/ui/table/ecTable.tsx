@@ -5,6 +5,7 @@ import _ from "lodash";
 import { EcTableBody } from "./ecTableBody";
 import { cn } from "lib/utils/class-name";
 import { type OrderByStrings } from "@sdk/indexer-v2/const";
+import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
 
 /**
  * Configuration for a table column.
@@ -92,6 +93,7 @@ export interface TableProps<T> {
    * Configuration for pagination functionality.
    * Enables infinite scrolling when provided.
    */
+  emptyText?: string;
   pagination?: {
     /** Whether there are more pages to load */
     hasNextPage?: boolean;
@@ -144,6 +146,7 @@ export const EcTable = <T,>({
   pagination,
   serverSideOrderHandler,
   isLoading,
+  emptyText,
 }: TableProps<T>) => {
   // const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = useState<number>(0);
@@ -175,8 +178,37 @@ export const EcTable = <T,>({
     }
   };
 
+  const minRows = useMemo(() => {
+    if (containerHeight) {
+      const height = containerHeight;
+      return Math.floor(height / rowHeight) - 1;
+    }
+    return 0;
+  }, [rowHeight, containerHeight]);
+
   return (
-    <div ref={containerRef} className={cn("flex w-full", className)}>
+    <div
+      ref={containerRef}
+      className={cn("relative flex w-full", className)}
+      // Prevents scrollbar from appearing when there are empty rows
+      style={{ overflowY: items.length < minRows ? "hidden" : "auto" }}
+    >
+      {(items.length === 0 || isLoading) && (
+        <div
+          className={cn(
+            "absolute top-0 left-1 bottom-1 right-1 bg-black bg-opacity-30 z-10 flex justify-center text-light-gray items-center pixel-heading-4",
+            isLoading && "bg-opacity-80"
+          )}
+        >
+          <div className="mb-7">
+            {isLoading ? (
+              <AnimatedLoadingBoxes numSquares={11} />
+            ) : items.length === 0 ? (
+              <span>{emptyText || "Empty"}</span>
+            ) : null}
+          </div>
+        </div>
+      )}
       <Table className={cn("relative border-solid border-[1px] border-dark-gray")}>
         <TableHeader>
           <TableRow isHeader>
@@ -199,13 +231,14 @@ export const EcTable = <T,>({
           className={textFormat}
           onClick={onClick}
           rowHeight={rowHeight}
-          containerHeight={containerHeight}
+          minRows={minRows}
           items={sorted}
           columns={columns}
           renderRow={renderRow}
           getKey={getKey}
           pagination={pagination}
           isLoading={isLoading}
+          emptyText={emptyText}
         />
       </Table>
     </div>
