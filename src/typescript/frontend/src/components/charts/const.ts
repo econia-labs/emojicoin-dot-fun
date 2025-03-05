@@ -44,7 +44,7 @@ export const EXCHANGE_NAME = "emojicoin.fun";
 
 export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = {
   library_path: `${CDN_URL}/charting_library/`,
-  interval: "1" as ResolutionString,
+  interval: "60" as ResolutionString,
   theme: "Dark" as ThemeName,
   locale: "en" as LanguageCode,
   custom_css_url: `${CDN_URL}/charting_library_stylesheets/emojicoin-dot-fun.css`,
