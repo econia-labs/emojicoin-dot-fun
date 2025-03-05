@@ -4,9 +4,7 @@ import * as React from "react";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
-    </div>
+    <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
   )
 );
 Table.displayName = "Table";
@@ -18,10 +16,10 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "text-ec-blue body-lg bg-black uppercase text-center sticky top-0 z-50 border-y border-dark-gray bg-clip-padding",
+      "text-ec-blue body-lg bg-black uppercase text-center sticky top-0 z-10 border-y border-dark-gray bg-clip-padding",
       "[&_td]:!border [&_td]:!border-dark-gray [&_td]:before:absolute [&_td]:before:top-0",
       "[&_td]:before:h-[1px] [&_td]:before:w-full [&_td]:before:bg-dark-gray",
-      "before:absolute before:top-0 before:left-0 before:w-full before:h-[1px] before:bg-dark-gray before:z-50 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-dark-gray",
+      "before:absolute before:top-0 before:left-0 before:w-full before:h-[1px] before:bg-dark-gray before:z-10 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-dark-gray",
       className
     )}
     {...props}
@@ -33,7 +31,7 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn("table-body", className)} {...props} />
+  <tbody ref={ref} className={cn("table-body my-2", className)} {...props} />
 ));
 TableBody.displayName = "TableBody";
 
@@ -89,12 +87,10 @@ const TableRow = React.forwardRef<
 >(({ className, height = 33, noHover, isHeader = false, index = 0, ...props }, ref) => {
   // Shorter duration for rows further down, to avoid them taking forever to animate in.
   const delay = React.useMemo(() => {
-    if (index <= 30) {
-      return index * 0.025;
-    }
-    const first30 = 30 * 0.025;
-    const after30 = (index % 30) * 0.01;
-    return first30 + after30;
+    // Start with minimal delay and increase logarithmically
+    const baseDelay = 0.08;
+    const maxDelay = 0.5;
+    return Math.min(baseDelay + Math.log10(index + 1) * 0.08, maxDelay);
   }, [index]);
 
   return (
@@ -126,7 +122,7 @@ const TableRow = React.forwardRef<
       className={cn(
         "relative w-full",
         !isHeader && !noHover
-          ? "border-solid border-y border-dark-gray transition-colors border-2 hover:z-10"
+          ? "border-solid border-y border-dark-gray transition-colors border-2 hover:z-2"
           : "",
         className
       )}

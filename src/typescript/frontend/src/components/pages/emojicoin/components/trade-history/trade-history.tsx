@@ -15,6 +15,7 @@ import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "lib/utils/decimals";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { type SwapEventModel } from "@sdk/indexer-v2/types";
+import { TimeCell } from "components/ui/table-cells/time-cell";
 
 const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),
@@ -23,7 +24,7 @@ const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   date: new Date(Number(transaction.time / 1000n)),
   type: swap.isSell ? "sell" : "buy",
   priceQ64: swap.avgExecutionPriceQ64,
-  swapper: swap.swapper,
+  sender: swap.sender,
   version: transaction.version,
   guid,
 });
@@ -95,14 +96,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Time",
         id: "time",
         width: 120,
-        renderCell: (item) =>
-          item.date.toLocaleString(undefined, {
-            month: "2-digit" as const,
-            day: "2-digit" as const,
-            hour: "2-digit" as const,
-            minute: "2-digit" as const,
-            second: "2-digit" as const,
-          }),
+        renderCell: (item) => <TimeCell date={item.date} />,
       },
       {
         text: "Price",
@@ -122,7 +116,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Sender",
         id: "sender",
         width: 120,
-        renderCell: (item) => <WalletAddressCell address={item.swapper} />,
+        renderCell: (item) => <WalletAddressCell address={item.sender} />,
       },
     ],
     [props.data.symbol]
