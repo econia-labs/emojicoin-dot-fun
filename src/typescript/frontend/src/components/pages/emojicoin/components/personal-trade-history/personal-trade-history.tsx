@@ -76,8 +76,10 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
         )
       }
       textFormat="body-sm"
+      emptyText="No trade history"
       columns={columns}
       getKey={(item) => item.guid}
+      isLoading={query.isLoading}
       items={query.data?.pages.flatMap((page) => page) || []}
     />
   );

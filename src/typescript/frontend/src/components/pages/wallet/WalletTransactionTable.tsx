@@ -14,15 +14,22 @@ import { useQuery } from "@tanstack/react-query";
 import type { OrderByStrings } from "@sdk/indexer-v2/const";
 import { encodeEmojis, type AnyEmoji, type SymbolEmoji } from "@sdk/emoji_data";
 import { fetchSpecificMarketsAction } from "./fetch-specific-markets-action";
+import { ROUTES } from "router/routes";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
     id: "emoji",
     text: "Emoji",
+    cellClassName: "pl-6",
     renderCell: (item) => (
-      <span className="w-full">
+      <a
+        onClick={(e) => e.stopPropagation()}
+        className="w-full"
+        href={`${ROUTES.market}/${emojiNamesToPath(item.market.emojis.map((em) => em.name))}`}
+      >
         <Emoji className={`text-[1.2em] text-nowrap`} emojis={item.market.emojis} />
-      </span>
+      </a>
     ),
   },
   {

@@ -12,10 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs/tab
 import SearchBar from "components/inputs/search-bar";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { type SymbolEmoji } from "@sdk/emoji_data";
+import { useState } from "react";
 
 export const WalletClientPage = ({ address }: { address: string }) => {
   const resolvedName = useNameResolver(address);
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
+  const [tab, setTab] = useState<string>("portfolio");
 
   const emojis = useEmojiPicker((s) => s.emojis);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
@@ -44,13 +46,13 @@ export const WalletClientPage = ({ address }: { address: string }) => {
           Unique owned: {isLoading ? "?" : ownedCoins.length}
         </span>
       </div>
-      <Tabs defaultValue="portfolio">
-        <div className="flex justify-between w-full flex-wrap">
+      <Tabs value={tab} onValueChange={(v) => setTab(v)}>
+        <div className="flex h-[45px] items-end justify-between w-full flex-wrap">
           <TabsList>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="trade-history">Trade History</TabsTrigger>
           </TabsList>
-          <SearchBar />
+          {tab === "trade-history" && <SearchBar />}
         </div>
         <TabsContent value="portfolio">
           <WalletPortfolioTable address={address} />
