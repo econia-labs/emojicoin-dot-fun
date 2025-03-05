@@ -432,6 +432,8 @@ export type ArenaPositionsModel = ReturnType<typeof toArenaPositionsModel>;
 export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
 export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
+export type GeckoTerminalEventsModel = ReturnType<typeof toGeckoTerminalEvent>;
+export type GeckoTerminalLatestBlockModel = ReturnType<typeof toGeckoTerminalLatestBlock>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
 
@@ -742,6 +744,74 @@ export const toArenaVaultBalanceUpdateModel = (
 export const toArenaPositionsModel = toArenaPositionsFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
+
+export const toGeckoTerminalEvent = (data: DatabaseJsonType["geckoterminal_events"]) => {
+  if (data.event_type === "swap") {
+    return {
+      block: {
+        blockNumber: Number(data.block_number),
+        blockTimestamp: Math.floor(
+          postgresTimestampToDate(data.transaction_timestamp).getTime() / 1000
+        ),
+      },
+      eventType: "swap",
+      txnId: data.transaction_version.toString(),
+      txnIndex: Number(data.transaction_version),
+      eventIndex: Number(data.event_index),
+      maker: data.sender,
+      pairId: `${data.market_address}::coin_factory::Emojicoin`,
+      priceNative: Big(data.avg_execution_price_q64).div(Big(2).pow(64)).round(50).toString(),
+      reserves: {
+        asset0:
+          data.lp_coin_supply === "0"
+            ? data.clamm_virtual_reserves_base
+            : data.cpamm_real_reserves_base,
+        asset1:
+          data.lp_coin_supply === "0"
+            ? data.clamm_virtual_reserves_quote
+            : data.cpamm_real_reserves_quote,
+      },
+      ...(data.is_sell
+        ? {
+            asset0In: data.input_amount,
+            asset1Out: data.net_proceeds,
+          }
+        : {
+            asset1In: data.input_amount,
+            asset0Out: data.net_proceeds,
+          }),
+    };
+  } else {
+    return {
+      eventType: "swap",
+      txnId: data.transaction_version,
+      txnIndex: Number(data.transaction_version),
+      eventIndex: Number(data.event_index),
+      maker: data.sender,
+      pairId: `${data.market_address}::coin_factory::Emojicoin`,
+      amount0: data.base_amount,
+      amount1: data.quote_amount,
+      reserves: {
+        asset0:
+          data.lp_coin_supply === "0"
+            ? data.clamm_virtual_reserves_base
+            : data.cpamm_real_reserves_base,
+        asset1:
+          data.lp_coin_supply === "0"
+            ? data.clamm_virtual_reserves_quote
+            : data.cpamm_real_reserves_quote,
+      },
+    };
+  }
+};
+
+export const toGeckoTerminalLatestBlock = (
+  data: DatabaseJsonType["geckoterminal_latest_block"]
+) => ({
+  blockNumber: Number(data.block_number),
+  transactionTimestamp: postgresTimestampToDate(data.transaction_timestamp),
+});
+
 export const toArenaInfoModel = toArenaInfoFromDatabase;
 
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
@@ -832,6 +902,8 @@ export type DatabaseModels = {
   [TableName.ArenaInfo]: ArenaInfoModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
+  [TableName.GeckoTerminalEvents]: GeckoTerminalEventsModel;
+  [TableName.GeckoTerminalLatestBlock]: GeckoTerminalLatestBlockModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
   [DatabaseRpc.AggregateMarketState]: AggregateMarketStateModel;
 };

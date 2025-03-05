@@ -357,6 +357,32 @@ type ArenaLeaderboardData = {
   pnl_octas: number;
 };
 
+type GeckoTerminalEventsData = {
+  sender: string;
+  block_number: Uint64String;
+  transaction_timestamp: PostgresTimestamp;
+  transaction_version: Uint64String;
+  event_index: Uint64String;
+  market_address: string;
+  is_sell: Uint64String;
+  net_proceeds: Uint64String;
+  input_amount: Uint64String;
+  avg_execution_price_q64: Uint64String;
+  lp_coin_supply: Uint64String;
+  clamm_virtual_reserves_base: Uint64String;
+  clamm_virtual_reserves_quote: Uint64String;
+  cpamm_real_reserves_base: Uint64String;
+  cpamm_real_reserves_quote: Uint64String;
+  base_amount: Uint64String;
+  quote_amount: Uint64String;
+  event_type: "swap" | "join" | "exit";
+};
+
+type GeckoTerminalLatestBlockData = {
+  block_number: Uint64String;
+  transaction_timestamp: PostgresTimestamp;
+};
+
 export type DatabaseStructType = {
   TransactionMetadata: TransactionMetadata;
   MarketAndStateMetadata: MarketAndStateMetadata;
@@ -415,6 +441,8 @@ export enum TableName {
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.
   ArenaLeaderboardHistory = "arena_leaderboard_history",
+  GeckoTerminalEvents = "geckoterminal_events",
+  GeckoTerminalLatestBlock = "geckoterminal_latest_block",
 }
 
 export enum DatabaseRpc {
@@ -513,6 +541,8 @@ export type DatabaseJsonType = {
 
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
+  [TableName.GeckoTerminalEvents]: GeckoTerminalEventsData;
+  [TableName.GeckoTerminalLatestBlock]: GeckoTerminalLatestBlockData;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
@@ -565,6 +595,8 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaInfo] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
+  DatabaseJsonType[TableName.GeckoTerminalEvents] &
+  DatabaseJsonType[TableName.GeckoTerminalLatestBlock] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.AggregateMarketState];
 
