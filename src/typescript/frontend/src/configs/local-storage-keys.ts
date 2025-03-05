@@ -51,7 +51,7 @@ export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): 
       return null;
     }
     // Check for staleness.
-    if (new Date(cache.expiry) > new Date()) {
+    if (!cache.expiry || new Date(cache.expiry) > new Date()) {
       return cache.data;
     }
   } catch (e) {
