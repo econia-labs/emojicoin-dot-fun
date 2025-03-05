@@ -5,7 +5,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - if: '${{ github.event_name != ''merge_group'' }}'
-      uses: 'econia-labs/common/.github/actions/pr-size@ECO-2962'
+      uses: 'econia-labs/common/.github/actions/pr-size@main'
       with:
         max_lines_added: '${{ vars.PR_SIZE_MAX_LINES_ADDED }}'
         max_lines_removed: '${{ vars.PR_SIZE_MAX_LINES_REMOVED }}'
