@@ -16,6 +16,7 @@ import { encodeEmojis, type AnyEmoji, type SymbolEmoji } from "@sdk/emoji_data";
 import { fetchSpecificMarketsAction } from "./fetch-specific-markets-action";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";
+import { toExplorerLink } from "lib/utils/explorer-link";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
@@ -37,7 +38,18 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
     id: "time",
     width: 120,
     isServerSideSortable: true,
-    renderCell: (item) => <TimeCell date={new Date(Number(item.transaction.time / 1000n))} />,
+    renderCell: (item) => (
+      <a
+        href={toExplorerLink({
+          linkType: "txn",
+          value: `${item.transaction.version}`,
+        })}
+        onClick={(e) => e.stopPropagation()}
+        className="hover:underline"
+      >
+        <TimeCell date={new Date(Number(item.transaction.time / 1000n))} />
+      </a>
+    ),
   },
   {
     text: "Price",
