@@ -47,7 +47,7 @@ export const WalletClientPage = ({ address }: { address: string }) => {
         </span>
       </div>
       <Tabs value={tab} onValueChange={(v) => setTab(v)}>
-        <div className="flex h-[45px] items-end justify-between w-full flex-wrap">
+        <div className="flex min-h-[45px] items-end justify-between w-full flex-wrap">
           <TabsList>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="trade-history">Trade History</TabsTrigger>

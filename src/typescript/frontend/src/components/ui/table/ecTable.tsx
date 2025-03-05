@@ -209,7 +209,7 @@ export const EcTable = <T,>({
           </div>
         </div>
       )}
-      <Table className={cn("relative border-solid border-[1px] border-dark-gray")}>
+      <Table className={cn("border-solid border-[1px] border-dark-gray")}>
         <TableHeader>
           <TableRow isHeader>
             {columns.map((column, i) => (
