@@ -14,6 +14,9 @@ Conditions:
   DeployAlbDnsRecord: !Equals
   - !Ref 'DeployAlbDnsRecord'
   - 'true'
+  DeployApim: !Equals
+  - !Ref 'DeployApim'
+  - 'true'
   DeployBastionHost: !Equals
   - !Ref 'DeployBastionHost'
   - 'true'
@@ -69,6 +72,7 @@ Mappings:
     Logging:
       Prefix: 'emojicoin'
     Networking:
+      ApimPort: 6666
       BrokerPort: 3009
       DatabasePort: 5432
       DnsNameHostedZoneId:
@@ -104,6 +108,8 @@ Outputs:
       - 'Networking'
       - 'DnsNameRootDomain'
 Parameters:
+  ApimImageVersion:
+    Type: 'String'
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
     Type: 'AWS::EC2::Image::Id'
@@ -127,6 +133,11 @@ Parameters:
     - 'true'
     Type: 'String'
   DeployAlbDnsRecord:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  DeployApim:
     AllowedValues:
     - 'false'
     - 'true'
@@ -323,6 +334,217 @@ Resources:
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
+  # Security group for Apim clients.
+  ApimClientSecurityGroup:
+    Condition: 'DeployApim'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'ApimServerSecurityGroup'
+        IpProtocol: -1
+      VpcId:
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Listener for network load balancer traffic to Apim.
+  ApimNlbListener:
+    Condition: 'DeployNlb'
+    Properties:
+      DefaultActions:
+      - TargetGroupArn: !Ref 'ApimNlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Nlb'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'ApimPort'
+      Protocol: 'TCP'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # Target group for network load balancer traffic to Apim.
+  ApimNlbTargetGroup:
+    Condition: 'DeployNlb'
+    DependsOn: 'Nlb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'ApimPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-apim'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'ApimPort'
+      Protocol: 'TCP'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'false'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  # Service for running Apim.
+  ApimRunner:
+    Condition: 'DeployApim'
+    DependsOn:
+    # Wait for both database instances to ensure cluster is fully available.
+    - 'DbInstancePrimary'
+    - 'DbInstanceReplica'
+    # Wait for processor to ensure that migrations have been run, so that the
+    # schema will be available and load balancer health checks will pass.
+    - 'ProcessorRunner'
+    # Proxy for a conditional dependency on the network load balancer listener
+    # for Apim, which associates the Apim target group with the
+    # network load balancer.
+    Metadata:
+      ConditionalDependencyProxy: !If
+      - 'DeployNlb'
+      - !Ref 'ApimNlbListener'
+      - ''
+    Properties:
+      Cluster: !Ref 'ContainerCluster'
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+      LaunchType: 'FARGATE'
+      LoadBalancers: !If
+      - 'DeployNlb'
+      - - ContainerName: !Sub '${AWS::StackName}-apim'
+          ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ApimPort'
+          TargetGroupArn: !Ref 'ApimNlbTargetGroup'
+      - !Ref 'AWS::NoValue'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+          - !Ref 'DbUserSecurityGroup'
+          - !Ref 'ApimServerSecurityGroup'
+          - !Ref 'ContainerSecurityGroup'
+          Subnets:
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdB'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdC'
+      ServiceRegistries:
+      - RegistryArn: !GetAtt 'ApimServiceDiscovery.Arn'
+      TaskDefinition: !Ref 'ApimTask'
+    Type: 'AWS::ECS::Service'
+  # Security group for the Apim server.
+  ApimServerSecurityGroup:
+    Condition: 'DeployApim'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId:
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the Apim server security group.
+  ApimServerSecurityGroupIngress:
+    Condition: 'DeployApim'
+    Properties:
+      GroupId: !Ref 'ApimServerSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'ApimClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Service discovery for Apim.
+  ApimServiceDiscovery:
+    Condition: 'DeployApim'
+    Properties:
+      DnsConfig:
+        DnsRecords:
+        - TTL: 10
+          Type: 'A'
+        RoutingPolicy: 'MULTIVALUE'
+      Name: !Sub '${AWS::StackName}-apim'
+      NamespaceId:
+        Fn::ImportValue: !Sub '${VpcStackName}-PrivateDnsNamespaceId'
+    Type: 'AWS::ServiceDiscovery::Service'
+  # Task definition for Apim.
+  ApimTask:
+    Condition: 'DeployApim'
+    DependsOn: 'ContainerLogGroup'
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: 'DATABASE_URL'
+          Value: !Join
+          - ''
+          - - 'postgres://'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterPassword'
+            - '@'
+            # While the Apim endpoint is configured to support read-only
+            # operations, the Apim listener errors out when connected to
+            # a read replica because it relies on `LISTEN` and `NOTIFY`
+            # commands, which do not work on read replicas. Hence it is
+            # connected to the writer endpoint.
+            - !GetAtt 'DbCluster.Endpoint.Address'
+            - '/'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+        Image: !Join
+        - ''
+        - - !Ref 'AWS::AccountId'
+          - '.dkr.ecr.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/'
+          - !FindInMap
+            - 'Constants'
+            - 'ImageCache'
+            - 'RepositoryPrefix'
+          - '/econialabs/emojicoin-dot-fun-indexer-apim:'
+          - !Ref 'ApimImageVersion'
+        LogConfiguration:
+          LogDriver: 'awslogs'
+          Options:
+            awslogs-group: !Join
+            - ''
+            - - '/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: !FindInMap
+            - 'Constants'
+            - 'Logging'
+            - 'Prefix'
+        Name: !Sub '${AWS::StackName}-apim'
+        PortMappings:
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ApimPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ApimPort'
+      Cpu: '256'
+      ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
+      Family: !Ref 'AWS::StackName'
+      Memory: '2048'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+      - 'FARGATE'
+    Type: 'AWS::ECS::TaskDefinition'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'DeployBastionHost'
@@ -334,6 +556,10 @@ Resources:
         GroupSet:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
+        - !If
+          - 'DeployApim'
+          - !Ref 'ApimClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
         - !If
           - 'DeployBroker'
           - !Ref 'BrokerWsClientSecurityGroup'
@@ -366,10 +592,27 @@ Resources:
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
             echo '${NlbDnsNameExport}' >> /etc/profile
+            echo '${ApimUrlExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
-        - BrokerWsUrlExport: !If
+        - ApimUrlExport: !If
+          - 'DeployApim'
+          - !Join
+            - ''
+            - - 'export APIM_URL="http://'
+              - !GetAtt 'ApimServiceDiscovery.Name'
+              - '.'
+              # The private DNS namespace comes from the VPC stack.
+              - !Ref 'VpcStackName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'ApimPort'
+              - '"'
+          - '# APIM_URL not set (Apim not provisioned)'
+          BrokerWsUrlExport: !If
           - 'DeployBroker'
           - !Join
             - ''
@@ -890,10 +1133,11 @@ Resources:
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
-  # Autoscaling policy for scaling in broker and PostgREST.
+  # Autoscaling policy for scaling in Apim, broker and PostgREST.
   Fn::ForEach::AutoScalingPolicyScaleIn:
   - 'Identifier'
-  - - 'Broker'
+  - - 'Apim'
+    - 'Broker'
     - 'Postgrest'
   - AutoScalingPolicyScaleIn${Identifier}:
       Properties:
@@ -912,10 +1156,11 @@ Resources:
       # yamllint disable-line rule:key-ordering
       Condition: !Sub 'Deploy${Identifier}'
       Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-  # Autoscaling policy for scaling out broker and PostgREST.
+  # Autoscaling policy for scaling out Apim, broker and PostgREST.
   Fn::ForEach::AutoScalingPolicyScaleOut:
   - 'Identifier'
-  - - 'Broker'
+  - - 'Apim'
+    - 'Broker'
     - 'Postgrest'
   - AutoScalingPolicyScaleOut${Identifier}:
       Properties:
@@ -935,10 +1180,11 @@ Resources:
       # yamllint disable-line rule:key-ordering
       Condition: !Sub 'Deploy${Identifier}'
       Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-  # Autoscaling target for broker and for PostgREST.
+  # Autoscaling target for Apim, for broker and for PostgREST.
   Fn::ForEach::AutoScalingTarget:
   - 'Identifier'
-  - - 'Broker'
+  - - 'Apim'
+    - 'Broker'
     - 'Postgrest'
   - AutoScalingTarget${Identifier}:
       Properties:
@@ -958,10 +1204,11 @@ Resources:
       # yamllint disable-line rule:key-ordering
       Condition: !Sub 'Deploy${Identifier}'
       Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-  # Scale down trigger for broker and PostgREST.
+  # Scale down trigger for Apim, broker and PostgREST.
   Fn::ForEach::AutoScalingTriggerScaleIn:
   - 'Identifier'
-  - - 'Broker'
+  - - 'Apim'
+    - 'Broker'
     - 'Postgrest'
   - AutoScalingTriggerScaleIn${Identifier}:
       Properties:
@@ -1028,6 +1275,10 @@ Resources:
       SecurityGroups:
       - !Ref 'NlbSecurityGroup'
       - !If
+        - 'DeployApim'
+        - !Ref 'ApimClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      - !If
         - 'DeployBroker'
         - !Ref 'BrokerWsClientSecurityGroup'
         - !Ref 'AWS::NoValue'
@@ -1060,6 +1311,23 @@ Resources:
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
+  # Network load balancer security group ingress policy for Apim traffic
+  # over VPC link.
+  NlbSecurityGroupIngressApim:
+    Condition: 'DeployNlbVpcLink'
+    Properties:
+      CidrIp: '0.0.0.0/0'
+      FromPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'ApimPort'
+      GroupId: !Ref 'NlbSecurityGroup'
+      IpProtocol: 'tcp'
+      ToPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'ApimPort'
+    Type: 'AWS::EC2::SecurityGroupIngress'
   # Network load balancer security group ingress policy for PostgREST traffic
   # over VPC link.
   NlbSecurityGroupIngressPostgrest:
@@ -1696,6 +1964,149 @@ Resources:
       KeyType: 'API_KEY'
       UsagePlanId: !Ref 'RestApiUsagePlan'
     Type: 'AWS::ApiGateway::UsagePlanKey'
+  # REST API endpoint.
+  RestApim:
+    Condition: 'DeployApim'
+    Properties:
+      ApiKeySourceType: 'HEADER'
+      EndpointConfiguration:
+        Types:
+        - 'REGIONAL'
+      Name: !Ref 'AWS::StackName'
+    Type: 'AWS::ApiGateway::RestApi'
+  # DNS certificate for the REST API endpoint.
+  RestApimCertificate:
+    Condition: 'DeployApim'
+    Properties:
+      DomainName: !Sub
+      - 'apim.${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      DomainValidationOptions:
+      - DomainName: !Sub
+        - 'apim.${Environment}.${RootDomain}'
+        - RootDomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'DnsNameRootDomain'
+        HostedZoneId: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameHostedZoneId'
+      ValidationMethod: 'DNS'
+    Type: 'AWS::CertificateManager::Certificate'
+  # Deployment for the REST API endpoint.
+  RestApimDeployment:
+    Condition: 'DeployApim'
+    DependsOn:
+    - 'RestApimMethodGeneral'
+    - 'RestApimMethodRoot'
+    Properties:
+      RestApiId: !Ref 'RestApim'
+    Type: 'AWS::ApiGateway::Deployment'
+  # DNS record for the REST API.
+  RestApimDnsRecord:
+    Condition: 'DeployApim'
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt 'RestApimDomainName.RegionalDomainName'
+        HostedZoneId: !GetAtt 'RestApimDomainName.RegionalHostedZoneId'
+      HostedZoneId: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameHostedZoneId'
+      Name: !Sub
+      - 'apim.${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      Type: 'A'
+    Type: 'AWS::Route53::RecordSet'
+  # Domain mapping for the REST API endpoint.
+  RestApimDomainMapping:
+    Condition: 'DeployApim'
+    Properties:
+      DomainName: !Ref 'RestApimDomainName'
+      RestApiId: !Ref 'RestApim'
+      Stage: !Ref 'RestApimStage'
+    Type: 'AWS::ApiGateway::BasePathMapping'
+  # Custom domain name for the REST API endpoint.
+  RestApimDomainName:
+    Condition: 'DeployApim'
+    Properties:
+      DomainName: !Sub
+      - 'apim.${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      EndpointConfiguration:
+        Types:
+        - 'REGIONAL'
+      RegionalCertificateArn: !Ref 'RestApiCertificate'
+      SecurityPolicy: 'TLS_1_2'
+    Type: 'AWS::ApiGateway::DomainName'
+  # Rest API endpoint general method.
+  RestApiMethodGeneral:
+    Condition: 'DeployRestApi'
+    Properties:
+      ApiKeyRequired: true
+      AuthorizationType: 'NONE'
+      HttpMethod: 'GET'
+      Integration:
+        ConnectionId: !Ref 'NlbVpcLink'
+        ConnectionType: 'VPC_LINK'
+        IntegrationHttpMethod: 'GET'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        Type: 'HTTP_PROXY'
+        Uri: !Sub
+        - 'http://${NlbDnsName}:${ApimPort}/{proxy}'
+        - NlbDnsName: !GetAtt 'Nlb.DNSName'
+          ApimPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ApimPort'
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !Ref 'RestApimProxyResource'
+      RestApiId: !Ref 'RestApim'
+    Type: 'AWS::ApiGateway::Method'
+  # Rest API endpoint root method.
+  RestApimMethodRoot:
+    Condition: 'DeployApim'
+    Properties:
+      HttpMethod: 'GET'
+      Integration:
+        ConnectionId: !Ref 'NlbVpcLink'
+        ConnectionType: 'VPC_LINK'
+        IntegrationHttpMethod: 'GET'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        Type: 'HTTP_PROXY'
+        Uri: !Sub
+        - 'http://${NlbDnsName}:${ApimPort}/'
+        - NlbDnsName: !GetAtt 'Nlb.DNSName'
+          ApimPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ApimPort'
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !GetAtt 'RestApim.RootResourceId'
+      RestApiId: !Ref 'RestApim'
+    Type: 'AWS::ApiGateway::Method'
+  # Proxy resource for the REST API endpoint.
+  RestApimProxyResource:
+    Condition: 'DeployApim'
+    Properties:
+      ParentId: !GetAtt 'RestApim.RootResourceId'
+      PathPart: '{proxy+}'
+      RestApiId: !Ref 'RestApim'
+    Type: 'AWS::ApiGateway::Resource'
   # Web application firewall.
   Waf:
     Condition: 'DeployWaf'
@@ -1845,6 +2256,19 @@ Rules:
         - 'true'
       - !Equals
         - !Ref 'DeployAlbDnsRecord'
+        - 'false'
+  DeployApim:
+    Assertions:
+    - Assert: !Or
+      - !And
+        - !Equals
+          - !Ref 'DeployContainers'
+          - 'true'
+        - !Equals
+          - !Ref 'DeployProcessor'
+          - 'true'
+      - !Equals
+        - !Ref 'DeployApim'
         - 'false'
   DeployBastionHost:
     Assertions:
