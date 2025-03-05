@@ -1,7 +1,7 @@
 ---
 jobs:
   pr-size:
-    name: 'PR Size'
+    name: 'PR size'
     runs-on: 'ubuntu-latest'
     steps:
     - if: '${{ github.event_name != ''merge_group'' }}'
@@ -10,7 +10,7 @@ jobs:
         max_lines_added: '${{ vars.PR_SIZE_MAX_LINES_ADDED }}'
         max_lines_removed: '${{ vars.PR_SIZE_MAX_LINES_REMOVED }}'
         n_override_approvals: '${{ vars.PR_SIZE_N_OVERRIDE_APPROVALS }}'
-name: 'PR Size'
+name: 'PR size'
 'on':
   merge_group: null
   pull_request: null
