@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT last_success_version FROM processor_status",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_success_version",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4006e0f680cbff4f1161a7194cbae507bf3547b5bd773dbd25f688e671246509"
+}

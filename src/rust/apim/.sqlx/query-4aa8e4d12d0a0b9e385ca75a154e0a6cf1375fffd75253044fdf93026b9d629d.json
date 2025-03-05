@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT symbol_emojis\nFROM market_latest_state_event\nWHERE market_address = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "symbol_emojis",
+        "type_info": "TextArray"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4aa8e4d12d0a0b9e385ca75a154e0a6cf1375fffd75253044fdf93026b9d629d"
+}

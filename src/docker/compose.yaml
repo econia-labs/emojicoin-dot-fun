@@ -2,6 +2,28 @@
 ---
 name: 'emojicoin-dot-fun'
 services:
+  apim:
+    build:
+      context: '../rust'
+      dockerfile: 'apim/Dockerfile'
+    depends_on:
+      processor:
+        condition: 'service_healthy'
+    environment:
+      DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
+    image: 'econialabs/emojicoin-dot-fun-indexer-apim:0.1.0'
+    container_name: 'apim'
+    healthcheck:
+      test: 'curl -f http://localhost:6666/ || exit 1'
+      interval: '2m'
+      timeout: '5s'
+      retries: '1'
+      start_period: '10s'
+      start_interval: '2s'
+    ports:
+    - '${APIM_PORT}:6666'
+    restart: 'unless-stopped'
+
   broker:
     build:
       context: '../rust'
