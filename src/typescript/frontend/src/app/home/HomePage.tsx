@@ -1,3 +1,4 @@
+import { SubscribeToHomePageEvents } from "@/components/pages/home/components/SubscribeToHomePageEvents";
 import { ARENA_MODULE_ADDRESS } from "@sdk/const";
 import {
   type ArenaInfoModel,
@@ -67,6 +68,7 @@ export default async function HomePageComponent({
         sortBy={sortBy}
         searchBytes={searchBytes}
       />
+      <SubscribeToHomePageEvents info={meleeData?.melee} />
     </div>
   );
 }
