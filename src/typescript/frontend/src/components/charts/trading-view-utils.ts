@@ -57,7 +57,10 @@ export const searchSymbolsFromRegisteredMarketMap = ({
     []
   );
 
-export const constructLibrarySymbolInfo = (symbol: string, emptyBars: boolean): LibrarySymbolInfo => ({
+export const constructLibrarySymbolInfo = (
+  symbol: string,
+  emptyBars: boolean
+): LibrarySymbolInfo => ({
   ticker: symbol,
   name: symbol,
   description: symbol,
