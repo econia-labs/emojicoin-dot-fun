@@ -115,7 +115,7 @@ export const WalletTransactionTable = ({
   return (
     <>
       <EcTable
-        className={"flex w-full overflow-auto h-[60dvh] shadow-[0_0_0_1px_var(--dark-gray)]"}
+        className={"flex w-full overflow-auto h-[60dvh]"}
         getKey={(item) => item.guid}
         columns={COLUMNS}
         onClick={(item) => {

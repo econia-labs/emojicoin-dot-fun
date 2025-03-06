@@ -13,12 +13,15 @@ import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 export const PersonalTradeHistory = (props: TradeHistoryProps) => {
   const router = useRouter();
-  const { account } = useWallet();
+  const { account, connected } = useWallet();
 
-  const query = useSwapEventsQuery({
-    sender: account?.address,
-    marketId: props.data.marketID.toString(),
-  });
+  const query = useSwapEventsQuery(
+    {
+      sender: account?.address,
+      marketId: props.data.marketID.toString(),
+    },
+    !connected
+  );
 
   const columns: EcTableColumn<SwapEvent>[] = useMemo(
     () => [
