@@ -3,6 +3,7 @@ import { fetchUserArenaEscrows } from "@sdk/markets/arena-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
+import { QueryKey } from "./query-keys-enum";
 
 export const useArenaEscrows = () => {
   const { aptos, account } = useAptos();
@@ -14,7 +15,7 @@ export const useArenaEscrows = () => {
   }, [account]);
 
   const { data } = useQuery({
-    queryKey: ["user-arena-escrows", accountAddress?.toString()],
+    queryKey: [QueryKey["use-user-escrows"], accountAddress?.toString()],
     queryFn: () => (accountAddress ? fetchUserArenaEscrows(accountAddress, aptos) : null),
     staleTime: 10 * 1000,
   });
