@@ -61,7 +61,6 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Rank",
         id: "rank",
-        cellClassName: "pl-10",
         width: 50,
         renderCell: (item) => (
           <Popup
@@ -83,11 +82,13 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "APT",
         id: "apt",
+        width: 70,
         renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
       },
       {
         text: props.data.symbol,
         id: "amount",
+        width: 100,
         renderCell: (item) => (
           <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
         ),
