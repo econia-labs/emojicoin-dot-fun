@@ -7,7 +7,7 @@ import { type z } from "zod";
 
 export type SwapEvent = Awaited<ReturnType<typeof fetchSwapEvents>>[number];
 
-export const useSwapEventsQuery = (args: z.input<typeof GetTradesSchema>) => {
+export const useSwapEventsQuery = (args: z.input<typeof GetTradesSchema>, disabled?: boolean) => {
   const query = useInfiniteQuery({
     queryKey: ["fetchSwapEvents", args],
     queryFn: ({ pageParam }) =>
@@ -18,7 +18,7 @@ export const useSwapEventsQuery = (args: z.input<typeof GetTradesSchema>) => {
     getNextPageParam: (lastPage, allPages) =>
       lastPage?.length === LIMIT ? allPages.length + 1 : undefined,
     //Disable the query when neither sender nor marketId is provided
-    enabled: !!args.sender || !!args.marketId,
+    enabled: !disabled && (!!args.sender || !!args.marketId),
   });
 
   return query;

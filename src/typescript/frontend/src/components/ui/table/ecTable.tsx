@@ -200,7 +200,7 @@ export const EcTable = <T,>({
             isLoading && "bg-opacity-80"
           )}
         >
-          <div className="mb-7">
+          <div>
             {isLoading ? (
               <AnimatedLoadingBoxes numSquares={11} />
             ) : items.length === 0 ? (
@@ -209,7 +209,7 @@ export const EcTable = <T,>({
           </div>
         </div>
       )}
-      <Table className={cn("border-solid border-[1px] border-dark-gray")}>
+      <Table className={cn("border-solid border-l border-r border-dark-gray")}>
         <TableHeader>
           <TableRow isHeader>
             {columns.map((column, i) => (
