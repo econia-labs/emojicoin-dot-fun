@@ -109,7 +109,7 @@ importers:
         specifier: ^7.5.8
         version: 7.5.8
       axios:
-        specifier: ^1.7.7
+        specifier: '>=0.28.0'
         version: 1.7.7
       big.js:
         specifier: ^6.2.2
