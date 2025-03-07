@@ -17,7 +17,6 @@ export const getAptPrice = unstable_cache(
         precision: 4,
       },
       headers: {
-        Accept: "application/json",
         "x-cg-pro-api-key": COINGECKO_API_KEY,
       },
     })
