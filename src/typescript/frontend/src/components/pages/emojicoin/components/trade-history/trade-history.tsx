@@ -1,5 +1,4 @@
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import { type TradeHistoryProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
@@ -33,7 +32,6 @@ const HARD_LIMIT = 500;
 
 export const TradeHistory = (props: TradeHistoryProps) => {
   const swaps = useEventStore((s) => s.markets.get(props.data.symbol)?.swapEvents ?? []);
-  const router = useRouter();
 
   const initialLoad = useRef(true);
   useEffect(() => {
@@ -127,11 +125,12 @@ export const TradeHistory = (props: TradeHistoryProps) => {
     <EcTable
       className="m-auto overflow-auto h-[330px]"
       onClick={(item) =>
-        router.push(
+        window.open(
           toExplorerLink({
             linkType: "txn",
             value: `${item.version}`,
-          })
+          }),
+          "_blank"
         )
       }
       textFormat="body-sm"
