@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { withResponseError } from "./client";
 import { getSymbolEmojisInString, toMarketEmojiData } from "@sdk/emoji_data/utils";
 import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { fetchSpecificMarketsAction } from "components/pages/wallet/fetch-specific-markets-action";
 

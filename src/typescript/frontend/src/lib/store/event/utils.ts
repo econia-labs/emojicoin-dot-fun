@@ -12,7 +12,7 @@ import {
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
 import { q64ToBig } from "@sdk/utils/nominal-price";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 
 type PeriodicState = DatabaseModels["periodic_state_events"];
 
