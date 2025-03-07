@@ -5,7 +5,11 @@ export const ROUTES = {
   api: {
     trending: "/api/trending",
   },
-  arena: "/arena",
+  arena: {
+    ".": "/arena",
+    position: "/arena/position",
+    historicalPositions: "/arena/historical-positions",
+  },
   candlesticks: "/candlesticks",
   cult: "/cult",
   dexscreener: "/dexscreener",
