@@ -2,7 +2,7 @@ import { APTOS_COIN_TYPE_TAG } from "@sdk/const";
 import { postgrest } from "@sdk/indexer-v2/queries/client";
 import { TableName } from "@sdk/indexer-v2/types";
 import { toNominalPrice } from "@sdk/utils";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
 import { estimateLiquidityInUSD } from "./utils";
