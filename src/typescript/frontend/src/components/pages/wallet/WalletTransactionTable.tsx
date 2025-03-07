@@ -44,6 +44,8 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
           linkType: "txn",
           value: `${item.transaction.version}`,
         })}
+        target="_blank"
+        rel="noreferrer"
         onClick={(e) => e.stopPropagation()}
         className="hover:underline"
       >

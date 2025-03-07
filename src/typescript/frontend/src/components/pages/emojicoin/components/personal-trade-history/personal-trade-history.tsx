@@ -1,5 +1,4 @@
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { type TradeHistoryProps } from "../../types";
 import { FormattedNumber } from "components/FormattedNumber";
@@ -12,7 +11,6 @@ import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useS
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 export const PersonalTradeHistory = (props: TradeHistoryProps) => {
-  const router = useRouter();
   const { account, connected } = useWallet();
 
   const query = useSwapEventsQuery(
@@ -71,11 +69,12 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
     <EcTable
       className="m-auto overflow-auto h-[330px]"
       onClick={(item) =>
-        router.push(
+        window.open(
           toExplorerLink({
             linkType: "txn",
             value: `${item.transaction.version}`,
-          })
+          }),
+          "_blank"
         )
       }
       textFormat="body-sm"
