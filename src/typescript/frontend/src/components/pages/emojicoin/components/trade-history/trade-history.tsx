@@ -12,7 +12,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { AptCell } from "components/ui/table-cells/apt-cell";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { type SwapEventModel } from "@sdk/indexer-v2/types";
 

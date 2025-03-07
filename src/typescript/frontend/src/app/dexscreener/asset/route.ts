@@ -26,7 +26,7 @@ import { EMOJICOIN_SUPPLY } from "@sdk/const";
 import { calculateCirculatingSupply } from "@sdk/markets";
 import { symbolEmojiStringToArray } from "../util";
 import { fetchMarketState } from "@/queries/market";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 
 /**
  * - In most cases, asset ids will correspond to contract addresses. Ids are case-sensitive.
