@@ -7,16 +7,16 @@ export const revalidate = 0;
 export const GET = async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const params = Object.fromEntries(searchParams.entries());
-  const { page, sender, limit, marketId, orderBy, symbolEmojis } = GetTradesSchema.parse(params);
-  if (!sender && !marketId && !symbolEmojis) {
-    return new Response("At least one of address, marketId or symbolEmojis is required", {
+  const { page, sender, limit, marketID, orderBy, symbolEmojis } = GetTradesSchema.parse(params);
+  if (!sender && !marketID && !symbolEmojis) {
+    return new Response("At least one of address, marketID or symbolEmojis is required", {
       status: 400,
     });
   }
 
   const swaps = await fetchSwapEvents({
     sender,
-    marketID: marketId,
+    marketID,
     pageSize: limit,
     page,
     orderBy,
