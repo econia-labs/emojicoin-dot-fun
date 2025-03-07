@@ -15,7 +15,7 @@ export const useSwapEventsQuery = (args: z.input<typeof GetTradesSchema>, disabl
       ecFetch<SwapEvent[]>(ROUTES.api.trades, {
         method: "GET",
         searchParams: { ...args, page: pageParam },
-      }).then((res) => res),
+      }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
       lastPage?.length === LIMIT ? allPages.length + 1 : undefined,
