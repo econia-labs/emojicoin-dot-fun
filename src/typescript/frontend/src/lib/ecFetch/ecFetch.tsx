@@ -131,6 +131,11 @@ export const ecFetch = async <T extends Record<string, any>>(
   // Handle body serialization for objects
   const requestInit: RequestInit = {
     ...rest,
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...rest.headers,
+    },
     body:
       body && typeof body === "object" && !(body instanceof FormData) && !(body instanceof Blob)
         ? JSON.stringify(body)
