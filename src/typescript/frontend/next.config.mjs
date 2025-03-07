@@ -1,3 +1,5 @@
+// cspell:word dexscreener
+
 // @ts-check
 import analyzer from "@next/bundle-analyzer";
 
@@ -58,6 +60,42 @@ const nextConfig = {
       destination: "/home",
       permanent: true,
     },
+  ],
+  rewrites: async () => [
+    // These rewrites have been added after moving all the API routes to the /api folder.
+    {
+      source: "/candlesticks",
+      destination: "/api/candlesticks",
+    },
+    {
+      source: "/pools/api",
+      destination: "/api/pools",
+    },
+    {
+      source: "/coingecko/historical_trades",
+      destination: "/api/coingecko/historical_trades",
+    },
+    {
+      source: "/coingecko/tickers",
+      destination: "/api/coingecko/tickers",
+    },
+    {
+      source: "/dexscreener/asset",
+      destination: "/api/dexscreener/asset",
+    },
+    {
+      source: "/dexscreener/events",
+      destination: "/api/dexscreener/events",
+    },
+    {
+      source: "/dexscreener/latest-block",
+      destination: "/api/dexscreener/latest-block",
+    },
+    {
+      source: "/dexscreener/pair",
+      destination: "/api/dexscreener/pair",
+    },
+    // End of api rewrites
   ],
 };
 

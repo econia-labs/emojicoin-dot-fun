@@ -4,8 +4,9 @@ export const ROUTES = {
   // Alphabetized after this.
   api: {
     trending: "/api/trending",
+    candlesticks: "/api/candlesticks",
+    pools: "/api/pools",
   },
-  candlesticks: "/candlesticks",
   cult: "/cult",
   dexscreener: "/dexscreener",
   docs: "https://docs.emojicoin.fun/category/--start-here",
