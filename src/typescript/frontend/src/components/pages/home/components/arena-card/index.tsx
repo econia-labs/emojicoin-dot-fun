@@ -73,7 +73,7 @@ export const ArenaCard = ({
       >
         <Link
           className="place-self-center flex flex-col gap-[3em] w-[100%]"
-          href={ROUTES.arena["."]}
+          href={ROUTES.arena}
         >
           {isMobile && headerText}
           {arenaVs}

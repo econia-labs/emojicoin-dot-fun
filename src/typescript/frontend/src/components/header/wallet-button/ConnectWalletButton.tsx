@@ -36,7 +36,7 @@ export const ButtonWithConnectWalletFallback = ({
   const { t } = translationFunction();
   const shouldBeGeoblocked = useIsUserGeoblocked();
   const geoblocked = useMemo(() => {
-    // For letting the user connect on the `/verify_status` page when `forceAllowConnect` is `true`,
+    // For letting the user connect on the ROUTES["verify-status"] page when `forceAllowConnect` is `true`,
     // by only returning `geoblocked = true` if we're not force allow connecting and they're
     // geoblocked.
     return !forceAllowConnect && shouldBeGeoblocked;

@@ -9,7 +9,7 @@ import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 // and ["🔥"], to ensure that it's possible to publish the emojicoin arena module.
 // Without these two, the `init_module` function will loop infinitely and time out.
 // You can find the relevant publication code in `deployer/sh`.
-export default async function preTest() {
+export default async function setup() {
   // @ts-expect-error Using `globalThis` as any for a polyfill for `WebSocket` in node.js.
   globalThis.WebSocket = WebSocket;
 

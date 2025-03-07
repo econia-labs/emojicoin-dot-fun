@@ -111,11 +111,11 @@ export const ArenaClient = (props: ArenaProps) => {
     // This is done because account refreshes often and we don't want to refetch
     if (account) {
       setPosition(undefined);
-      fetch(`${ROUTES.arena.position}/${account.address}`)
+      fetch(`${ROUTES.api.arena.position}/${account.address}`)
         .then((r) => r.text())
         .then(parseJSON<ArenaPositionModel | null>)
         .then((r) => setPosition(r));
-      fetch(`${ROUTES.arena.historicalPositions}/${account.address}`)
+      fetch(`${ROUTES.api.arena["historical-positions"]}/${account.address}`)
         .then((r) => r.text())
         .then(parseJSON<ArenaLeaderboardHistoryWithArenaInfoModel[]>)
         .then((r) => setHistory(r));
