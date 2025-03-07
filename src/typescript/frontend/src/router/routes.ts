@@ -9,8 +9,8 @@ export const ROUTES = {
   },
   arena: {
     ".": "/arena",
-    historicalPositions: "/arena/historical-positions",
     position: "/arena/position",
+    historicalPositions: "/arena/historical-positions",
   },
   cult: "/cult",
   dexscreener: "/dexscreener",
