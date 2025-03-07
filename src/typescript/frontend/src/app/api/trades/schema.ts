@@ -11,7 +11,7 @@ export const GetTradesSchema = z.object({
     .transform((val) => (val ? AccountAddress.from(val) : undefined)),
   page: z.coerce.number().default(1),
   limit: z.coerce.number().max(100).default(100),
-  marketId: z.string().optional(),
+  marketID: z.string().optional(),
   orderBy: z
     .enum(["asc", "desc"])
     .optional()

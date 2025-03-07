@@ -6,6 +6,7 @@ export const ROUTES = {
     trending: "/api/trending",
     candlesticks: "/api/candlesticks",
     pools: "/api/pools",
+    trades: "/api/trades",
   },
   cult: "/cult",
   dexscreener: "/dexscreener",

@@ -22,7 +22,7 @@ export async function fetchSpecificMarketsAction(symbols: SymbolEmoji[][]) {
         nominalCurvePrice: curvePrice,
         nominalMarketCap: toNominal(marketCap),
         inBondingCurve: market.inBondingCurve,
-        marketId: market.market.marketID,
+        marketID: market.market.marketID,
       };
     })
   );

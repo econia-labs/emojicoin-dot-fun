@@ -16,7 +16,7 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
   const query = useSwapEventsQuery(
     {
       sender: account?.address,
-      marketId: props.data.marketID.toString(),
+      marketID: props.data.marketID.toString(),
     },
     !connected
   );
