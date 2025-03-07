@@ -181,7 +181,7 @@ export const Chart = (props: ChartContainerProps) => {
             to: to.toString(),
           });
           const data: PeriodicStateEventModel[] = await fetch(
-            `${ROUTES.candlesticks}?${params.toString()}`
+            `${ROUTES.api.candlesticks}?${params.toString()}`
           )
             .then((res) => res.text())
             .then((res) => parseJSON(res));
