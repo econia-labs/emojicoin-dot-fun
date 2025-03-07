@@ -171,9 +171,9 @@ module favorites::emojicoin_dot_fun_favorites {
         init_emojicoin();
         let account_1_signer = get_signer(ACCOUNT_1);
 
-        let unexistent_market_address = @0x1234;
+        let nonexistent_market_address = @0x1234;
 
-        set_favorite(&account_1_signer, unexistent_market_address);
+        set_favorite(&account_1_signer, nonexistent_market_address);
     }
 
     #[test]
