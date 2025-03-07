@@ -1,4 +1,5 @@
 import { parseJSON } from "utils";
+import type { RequestInit } from "next/dist/server/web/spec-extension/request";
 
 /**
  * ecFetch is an enhanced wrapper around the native fetch API that provides:
@@ -118,6 +119,7 @@ const addSearchParams = (url: URL, searchParams?: SearchParamsValue): URL => {
  * @returns {Promise<T>} Parsed response data
  * @throws {EcFetchError} If the request fails or response cannot be parsed
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const ecFetch = async <T extends Record<string, any>>(
   input: string | URL | globalThis.Request,
   init?: EcFetchInit
