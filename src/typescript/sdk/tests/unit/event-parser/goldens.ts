@@ -20,6 +20,9 @@ const Swap: Types["SwapEvent"] = {
   swapper: toAccountAddressString(
     "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe"
   ),
+  sender: toAccountAddressString(
+    "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe"
+  ),
   inputAmount: 100000000n,
   isSell: false,
   integrator: toAccountAddressString(

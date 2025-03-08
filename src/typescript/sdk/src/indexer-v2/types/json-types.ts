@@ -185,6 +185,7 @@ type MarketRegistrationEventData = {
 
 type SwapEventData = {
   swapper: AccountAddressString;
+  sender: AccountAddressString;
   integrator: AccountAddressString;
   integrator_fee: Uint64String;
   input_amount: Uint64String;
