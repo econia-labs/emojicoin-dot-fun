@@ -6,5 +6,8 @@ runs:
   - id: 'check-deploy-files'
     run: 'sh ${{ github.action_path }}/sh/check-deploy-files.sh'
     shell: 'sh'
+  - id: 'check-compose-file'
+    run: 'sh ${{ github.action_path }}/sh/check-compose-file.sh'
+    shell: 'sh'
   using: 'composite'
 ...
