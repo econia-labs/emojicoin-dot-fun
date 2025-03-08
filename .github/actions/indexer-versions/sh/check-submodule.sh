@@ -7,7 +7,6 @@ git submodule init $SUBMODULE_DIR
 git submodule update $SUBMODULE_DIR
 cd $SUBMODULE_DIR
 SUBMODULE_COMMIT=$(cd "$PROCESSOR_DIR" && git rev-parse HEAD)
-echo "Current submodule commit: $SUBMODULE_COMMIT"
 
 # Check the commit expected based on the tag.
 git fetch --tags
@@ -18,6 +17,7 @@ if [ -z "$TAG_COMMIT" ]; then
 	exit 1
 fi
 echo "Expected submodule tag: $EXPECTED_TAG"
+echo "Corresponding tag commit: $TAG_COMMIT"
 
 # Compare the commits.
 if [ "$SUBMODULE_COMMIT" != "$TAG_COMMIT" ]; then
