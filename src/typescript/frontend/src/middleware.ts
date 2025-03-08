@@ -12,16 +12,21 @@ import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
-  if (pathname === ROUTES.launching_soon) {
+  if (pathname === ROUTES["launching-soon"]) {
     return NextResponse.next();
   }
-  if (PRE_LAUNCH_TEASER && pathname !== ROUTES.launching_soon) {
-    return NextResponse.redirect(new URL(ROUTES.launching_soon, request.url));
+  if (PRE_LAUNCH_TEASER && pathname !== ROUTES["launching-soon"]) {
+    return NextResponse.redirect(new URL(ROUTES["launching-soon"], request.url));
   }
   if (MAINTENANCE_MODE && pathname !== ROUTES.maintenance) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
-  if (pathname === "/test" || pathname === "/verify_status" || pathname === ROUTES.dexscreener) {
+  const dexscreenerRoutes = Object.keys(ROUTES.api.dexscreener);
+  if (
+    pathname === ROUTES.test ||
+    pathname === ROUTES.dev["verify-status"] ||
+    dexscreenerRoutes.includes(pathname)
+  ) {
     return NextResponse.next();
   }
 
