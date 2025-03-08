@@ -3,11 +3,8 @@ description: 'Ensure consistent indexer versions across various contexts'
 name: 'Indexer versions'
 runs:
   steps:
-  - uses: 'actions/checkout@v4'
-    with:
-      fetch-depth: 0
   - id: 'say-hello'
-    run: 'sh ${{ github.action_path }}/sh/hello.sh'
+    run: 'sh ${{ github.action_path }}/sh/print.sh'
     shell: 'sh'
   using: 'composite'
 ...
