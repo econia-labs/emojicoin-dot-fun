@@ -43,7 +43,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
       {props.isInMelee && (
         <Carousel gap={16}>
           <div className="flex flex-row items-center gap-[16px]">
-            <Link href={ROUTES.arena["."]}>
+            <Link href={ROUTES.arena}>
               <Text
                 textScale="pixelHeading3"
                 color="econiaBlue"

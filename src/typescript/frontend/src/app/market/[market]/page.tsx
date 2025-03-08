@@ -85,7 +85,9 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       wrappedCachedContractMarketView(marketAddress),
       getAptPrice(),
       fetchCachedTopHolders(marketAddress),
-      fetchMelee({}).then((res) => (res ? res.melee : null)),
+      fetchMelee({})
+        .then((res) => (res ? res.melee : null))
+        .catch(() => null),
     ]);
 
     const isInMelee =
