@@ -32,12 +32,7 @@ const DesktopGrid = (props: GridProps) => {
           <StyledBlock width="57%" className="bg-black z-10">
             <StyledBlockWrapper>
               <Suspense fallback={<Loading numEmojis={20} />}>
-                <ChartContainer
-                  symbol={props.data.symbolData.symbol}
-                  emojis={props.data.emojis}
-                  marketID={props.data.marketID.toString()}
-                  marketAddress={props.data.marketView.metadata.marketAddress}
-                />
+                <ChartContainer symbol={props.data.symbolData.symbol} emojis={props.data.emojis} />
               </Suspense>
             </StyledBlockWrapper>
           </StyledBlock>
