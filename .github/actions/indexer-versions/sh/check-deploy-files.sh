@@ -31,8 +31,8 @@ check_file_exists "$DEPLOY_FILE_FALLBACK"
 check_file_exists "$DEPLOY_FILE_PRODUCTION"
 
 # Verify `Environment` values in fallback and production files.
-check_environment "$DEPLOY_FILE_PRODUCTION" "production"
 check_environment "$DEPLOY_FILE_FALLBACK" "fallback"
+check_environment "$DEPLOY_FILE_PRODUCTION" "production"
 
 # Create temporary files.
 TEMP_FALLBACK=$(mktemp)
