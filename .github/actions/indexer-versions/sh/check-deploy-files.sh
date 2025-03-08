@@ -51,6 +51,6 @@ PROCESSOR_VERSION=$(
 # Set GitHub Actions output variables.
 echo "broker_version=${BROKER_VERSION}" >>$GITHUB_OUTPUT
 echo "processor_version=${PROCESSOR_VERSION}" >>$GITHUB_OUTPUT
-echo "Successfully checked fallback and production deploy files with versions:"
+echo "✅ Fallback and production deploy files match, with versions:"
 echo "  Broker: ${BROKER_VERSION}"
 echo "  Processor: ${PROCESSOR_VERSION}"
