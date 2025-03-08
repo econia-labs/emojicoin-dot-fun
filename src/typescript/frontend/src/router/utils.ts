@@ -6,8 +6,8 @@ type PathNode = { [key: string]: PathNode | PathLeaf };
  */
 type ExpandPaths<T extends PathNode, P extends string = ""> = {
   [K in Extract<keyof T, string>]: T[K] extends ""
-    ? `${P}/${K}` // If it's a leaf, return the full path as a string
-    : ExpandPaths<Extract<T[K], PathNode>, `${P}/${K}`>; // If it's an object, recurs
+    ? `${P}/${K}` // If it's a leaf, return the full path as a joined path string.
+    : ExpandPaths<Extract<T[K], PathNode>, `${P}/${K}`>; // If it's an object, recurse.
 };
 
 // To satisfy the edge runtime, since it doesn't have access to the `node:path` function.
