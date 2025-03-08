@@ -1,7 +1,7 @@
 ---
 parameters:
   BrokerCpu: 1024
-  BrokerImageVersion: '6.0.1'
+  BrokerImageVersion: '6.0.0'
   BrokerMemory: 2048
   DbMaxCapacity: 8
   DeployAlb: 'true'
