@@ -3,11 +3,11 @@ description: 'Ensure consistent indexer versions across various contexts'
 name: 'Indexer versions'
 runs:
   steps:
-  - env:
-      YQ_BASE_URL: 'https://github.com/mikefarah/yq/releases/download'
-      YQ_VERSION: 'v4.45.1'
-    id: 'install-yq'
+  - uses: 'actions/setup-python@v5'
+    with:
+      python-version: '3.13'
+  - id: 'install-yq'
     run: 'sh ${{ github.action_path }}/sh/install-yq.sh'
     shell: 'sh'
-  using: 'ubuntu-latest'
+  using: 'composite'
 ...
