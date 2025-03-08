@@ -161,21 +161,16 @@ const MainInfo = ({ data }: MainInfoProps) => {
     />
   );
 
-  const switcher = <Switcher checked={showUSD} onChange={() => setShowUSD(!showUSD)} />;
+  const switcher = <Switcher disabled={valueUsd === undefined} checked={showUSD} onChange={() => setShowUSD((v) => !v)} />;
 
   function aptOrUsd(value: bigint, valueUsd: number | undefined) {
-    if (showUSD) {
-      if (valueUsd) {
-        return (
-          <>
-            <FormattedNumber value={valueUsd} scramble />
-            &nbsp;
-            {"$"}
-          </>
-        );
-      } else {
-        return <>{"N/A $"}</>;
-      }
+    if (valueUsd !== undefined && showUSD) {
+      return (
+        <>
+          <FormattedNumber value={valueUsd} scramble />
+          {" $"}
+        </>
+      );
     } else {
       return (
         <>
