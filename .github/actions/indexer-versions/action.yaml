@@ -3,8 +3,11 @@ description: 'Ensure consistent indexer versions across various contexts'
 name: 'Indexer versions'
 runs:
   steps:
-  - uses: dcarbone/install-yq-action@v1.3.1
-    with:
-      version: 'v4.45.1'
+    id: 'check-yq-install'
+    run: 'sh ${{ github.action_path }}/sh/install-yq.sh'
+    shell: 'sh'
+  # - uses: dcarbone/install-yq-action@v1.3.1
+  #   with:
+  #     version: 'v4.45.1'
   using: 'composite'
 ...
