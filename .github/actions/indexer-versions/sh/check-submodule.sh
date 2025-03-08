@@ -1,5 +1,8 @@
 #!/bin/sh
 set -e
 
-SUBMODULE_DIR="src/rust/process0r"
+# Get the current commit hash of the submodule.
+SUBMODULE_DIR="src/rust/processor"
 cd $SUBMODULE_DIR
+SUBMODULE_COMMIT=$(cd "$PROCESSOR_DIR" && git rev-parse HEAD)
+echo "Current submodule commit: $SUBMODULE_COMMIT"
