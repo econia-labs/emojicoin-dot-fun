@@ -6,11 +6,11 @@ runs:
   - id: 'check-deploy-files'
     run: 'sh ${{ github.action_path }}/sh/check-deploy-files.sh'
     shell: 'sh'
-    env:
+  - env:
       BROKER_VERSION: '${{ steps.check-deploy-files.outputs.broker_version }}'
       PROCESSOR_VERSION:
         '${{ steps.check-deploy-files.outputs.processor_version }}'
-  - id: 'check-compose-file'
+    id: 'check-compose-file'
     run: 'sh ${{ github.action_path }}/sh/check-compose-file.sh'
     shell: 'sh'
   using: 'composite'
