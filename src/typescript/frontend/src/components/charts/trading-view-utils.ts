@@ -71,7 +71,10 @@ export const constructLibrarySymbolInfo = (
   listed_exchange: "",
   session: "24x7",
   has_empty_bars: emptyBars,
-  has_seconds: false,
+  // If the symbol has a `/` in it, it's an arena candlestick, because it's a ratio.
+  has_seconds: symbol.includes("/"),
+  // Ensure the library is aware of the `15S` candles if its' an arena candlestick.
+  seconds_multipliers: symbol.includes("/") ? ["15"] : undefined,
   has_intraday: true,
   has_daily: true,
   has_weekly_and_monthly: false,
@@ -80,3 +83,13 @@ export const constructLibrarySymbolInfo = (
   supported_resolutions: CONFIGURATION_DATA.supported_resolutions,
   format: "price",
 });
+
+export const symbolInfoToSymbol = (symbolInfo: LibrarySymbolInfo) => {
+  const ticker = symbolInfo.ticker;
+  if (!ticker) {
+    // This should never occur, because we always set the ticker when we construct the symbol info
+    // when the `resolveSymbol` datafeed API function is called.
+    throw new Error(`No ticker for symbol: ${symbolInfo}`);
+  }
+  return ticker;
+};

@@ -1,5 +1,5 @@
 import { type Types } from "@sdk-types";
-import { type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
+import { type ArenaPeriod, type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
 import {
   type SwapEventModel,
   type PeriodicStateEventModel,
@@ -21,7 +21,7 @@ export type Bar = {
 };
 
 export type LatestBar = Bar & {
-  period: Period;
+  period: Period | ArenaPeriod;
   nonce: bigint;
 };
 
