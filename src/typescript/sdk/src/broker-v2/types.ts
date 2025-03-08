@@ -4,6 +4,7 @@ import {
   type DatabaseJsonType,
   TableName,
 } from "../indexer-v2/types/json-types";
+import { type ARENA_CANDLESTICK_NAME } from "../types/arena-types";
 import { type AnyNumberString } from "../types/types";
 
 export type BrokerEvent = SubscribableBrokerEvents | BrokerArenaEvent;
@@ -22,7 +23,8 @@ type BrokerArenaEvent =
   | "ArenaExit"
   | "ArenaMelee"
   | "ArenaSwap"
-  | "ArenaVaultBalanceUpdate";
+  | "ArenaVaultBalanceUpdate"
+  | typeof ARENA_CANDLESTICK_NAME;
 
 const Chat = TableName.ChatEvents;
 const Swap = TableName.SwapEvents;
@@ -36,6 +38,7 @@ const ArenaExit = TableName.ArenaExitEvents;
 const ArenaMelee = TableName.ArenaMeleeEvents;
 const ArenaSwap = TableName.ArenaSwapEvents;
 const ArenaVaultBalanceUpdate = TableName.ArenaVaultBalanceUpdateEvents;
+const ArenaCandlestick = TableName.ArenaCandlesticks;
 type ChatType = DatabaseJsonType[typeof Chat];
 type SwapType = DatabaseJsonType[typeof Swap];
 type LiquidityType = DatabaseJsonType[typeof Liquidity];
@@ -48,6 +51,7 @@ type ArenaExitType = DatabaseJsonType[typeof ArenaExit];
 type ArenaMeleeType = DatabaseJsonType[typeof ArenaMelee];
 type ArenaSwapType = DatabaseJsonType[typeof ArenaSwap];
 type ArenaVaultBalanceUpdateType = DatabaseJsonType[typeof ArenaVaultBalanceUpdate];
+type ArenaCandlestickType = DatabaseJsonType[typeof ArenaCandlestick];
 
 export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => BrokerEventModels> = {
   Chat: (d) => DatabaseTypeConverter[Chat](d as ChatType),
@@ -63,6 +67,7 @@ export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => Brok
   ArenaSwap: (d) => DatabaseTypeConverter[ArenaSwap](d as ArenaSwapType),
   ArenaVaultBalanceUpdate: (d) =>
     DatabaseTypeConverter[ArenaVaultBalanceUpdate](d as ArenaVaultBalanceUpdateType),
+  ArenaCandlestick: (d) => DatabaseTypeConverter[ArenaCandlestick](d as ArenaCandlestickType),
 };
 
 /**
@@ -79,6 +84,7 @@ export type SubscriptionMessage = {
   markets: number[];
   event_types: BrokerEvent[];
   arena: boolean;
+  arena_candlesticks: boolean;
 };
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -86,4 +92,5 @@ export type WebSocketSubscriptions = {
   marketIDs: Set<AnyNumberString>;
   eventTypes: Set<BrokerEvent>;
   arena: boolean;
+  arenaCandlesticks: boolean;
 };
