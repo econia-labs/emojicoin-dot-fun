@@ -5,8 +5,8 @@ runs:
   steps:
   - env:
       DEPLOY_FILE_SUFFIX: 'production'
-    id: 'get-production-versions'
-    run: 'sh ${{ github.action_path }}/sh/get-deploy-file-versions.sh'
+  - id: 'check-deploy-files'
+    run: 'sh ${{ github.action_path }}/sh/check-deploy-files.sh'
     shell: 'sh'
   using: 'composite'
 ...
