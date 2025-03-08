@@ -8,9 +8,19 @@ SUBMODULE_COMMIT=$(cd "$PROCESSOR_DIR" && git rev-parse HEAD)
 echo "Current submodule commit: $SUBMODULE_COMMIT"
 
 # Check the commit expected based on the tag.
-EXPECTED_TAG="emojicoin-process0r-v${PROCESSOR_VERSION}"
+EXPECTED_TAG="emojicoin-processor-v${PROCESSOR_VERSION}"
 TAG_COMMIT=$(git rev-list -n 1 $EXPECTED_TAG)
 if [ -z "$TAG_COMMIT" ]; then
 	echo "::error::Tag $EXPECTED_TAG does not exist in processor repository"
 	exit 1
 fi
+echo "Expected submodule tag: $EXPECTED_TAG"
+
+# Compare the commits.
+if [ "$SUBMODULE_COMMIT" != "$TAG_COMMIT" ]; then
+	echo "::error::Processor submodule commit does not match the commit" \
+        "for tag $EXPECTED_TAG"
+	exit 1
+fi
+
+echo "✅ Submodule version matches"
