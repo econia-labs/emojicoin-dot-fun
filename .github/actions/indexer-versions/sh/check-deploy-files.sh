@@ -30,7 +30,7 @@ DEPLOY_FILE_PRODUCTION="${DEPLOY_FILE_PREFIX}production.yaml"
 check_file_exists "$DEPLOY_FILE_FALLBACK"
 check_file_exists "$DEPLOY_FILE_PRODUCTION"
 
-# Verify `Environment` values in fallback and production files.
+# Verify `Environment` in both files.
 check_environment "$DEPLOY_FILE_FALLBACK" "fallback"
 check_environment "$DEPLOY_FILE_PRODUCTION" "production"
 
@@ -38,19 +38,19 @@ check_environment "$DEPLOY_FILE_PRODUCTION" "production"
 TEMP_FALLBACK=$(mktemp)
 TEMP_PRODUCTION=$(mktemp)
 
-# Extract data without Environment field.
+# Extract data without `Environment` field.
 yq 'del(.parameters.Environment)' "$DEPLOY_FILE_FALLBACK" >"$TEMP_FALLBACK"
 yq 'del(.parameters.Environment)' "$DEPLOY_FILE_PRODUCTION" >"$TEMP_PRODUCTION"
 
-# Compare the files.
+# Compare the results.
 if ! diff "$TEMP_FALLBACK" "$TEMP_PRODUCTION" >/dev/null; then
-	# Clean up.
+	# Clean up temporary files.
 	rm -f "$TEMP_FALLBACK" "$TEMP_PRODUCTION"
 	echo "::error::Fallback and production files mismatched"
 	exit 1
 fi
 
-# Clean up.
+# Clean up temporary files.
 rm -f "$TEMP_FALLBACK" "$TEMP_PRODUCTION"
 
 # Get binary versions.
