@@ -219,9 +219,9 @@ const MainInfo = ({ data }: MainInfoProps) => {
         <div className={`flex flex-col justify-between ${borderStyle}`}>
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>
-              APT&nbsp;
+              {"APT "}
               <AptosIconBlack className={"icon-inline mb-[0.0ch]"} />
-              &nbsp;/&nbsp;USD&nbsp;$:
+              {" / USD $:"}
             </div>
             <div className={statsTextClasses + " text-white"}>{switcher}</div>
           </div>
