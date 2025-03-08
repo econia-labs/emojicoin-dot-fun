@@ -161,7 +161,13 @@ const MainInfo = ({ data }: MainInfoProps) => {
     />
   );
 
-  const switcher = <Switcher disabled={valueUsd === undefined} checked={showUSD} onChange={() => setShowUSD((v) => !v)} />;
+  const switcher = (
+    <Switcher
+      disabled={usdMarketCap === undefined}
+      checked={showUSD}
+      onChange={() => setShowUSD((v) => !v)}
+    />
+  );
 
   function aptOrUsd(value: bigint, valueUsd: number | undefined) {
     if (valueUsd !== undefined && showUSD) {
