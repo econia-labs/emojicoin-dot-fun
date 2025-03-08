@@ -19,7 +19,7 @@ parameters:
   DeployWaf: 'false'
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
-  EnableWafRulesWebSocket: 'true'
+  EnableWafRulesWebSocket: 'false'
   Environment: 'fallback'
   IndexArena: 'false'
   Network: 'mainnet'
