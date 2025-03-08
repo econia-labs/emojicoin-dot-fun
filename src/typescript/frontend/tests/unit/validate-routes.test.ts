@@ -2,7 +2,6 @@ import path from "path";
 import { getGitRoot } from "../../../sdk/tests/utils/helpers";
 import { ROUTES } from "../../src/router/routes";
 import fs from "fs";
-import pathlib from "path";
 
 /**
  * There are four basic structures employed by the nextjs file-based routing system.
@@ -51,7 +50,7 @@ const walkDir = <T extends Record<string, any> | string>(
 };
 
 const gitRoot = getGitRoot();
-const appPath = pathlib.join(gitRoot, "src/typescript/frontend/src/app");
+const appPath = path.join(gitRoot, "src/typescript/frontend/src/app");
 describe("verifies that the router structure indicated by the `ROUTES` const is valid", () => {
   it("ensures that all routes in `ROUTES` exist as a filepath", () => {
     expect(walkDir(ROUTES, appPath)).toBe(true);
