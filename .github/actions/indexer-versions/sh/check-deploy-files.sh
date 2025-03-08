@@ -1,15 +1,6 @@
 #!/bin/sh
 set -e
 
-# Check if a file exists.
-check_file_exists() {
-	local file_path="$1"
-	if [ ! -f "$file_path" ]; then
-		echo "::error::File not found: $file_path"
-		exit 1
-	fi
-}
-
 # Check the `Environment` value for a deploy file.
 check_environment() {
 	local file_path="$1"
@@ -25,10 +16,6 @@ check_environment() {
 DEPLOY_FILE_PREFIX="src/cloud-formation/deploy-indexer-"
 DEPLOY_FILE_FALLBACK="${DEPLOY_FILE_PREFIX}fallback.yaml"
 DEPLOY_FILE_PRODUCTION="${DEPLOY_FILE_PREFIX}production.yaml"
-
-# Check if files exist.
-check_file_exists "$DEPLOY_FILE_FALLBACK"
-check_file_exists "$DEPLOY_FILE_PRODUCTION"
 
 # Verify `Environment` in both files.
 check_environment "$DEPLOY_FILE_FALLBACK" "fallback"
