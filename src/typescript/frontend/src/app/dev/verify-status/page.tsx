@@ -1,4 +1,4 @@
-import VerifyStatusPage from "components/pages/verify_status/VerifyStatusPage";
+import VerifyStatusPage from "@/components/pages/verify-status/VerifyStatusPage";
 import { headers } from "next/headers";
 
 const Verify = async () => {

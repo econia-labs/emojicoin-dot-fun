@@ -5,8 +5,8 @@ import { ArenaClient } from "components/pages/arena/ArenaClient";
 import type { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 import { redirect } from "next/navigation";
 import { parseJSON } from "utils";
-import { getCandlesticksRoute } from "../candlesticks/utils";
 import { Period } from "@sdk/const";
+import { getCandlesticksRoute } from "app/api/candlesticks/utils";
 
 export const revalidate = 2;
 

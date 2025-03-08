@@ -72,11 +72,11 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
  * Helper function to return the types for the necessary entry function inputs, rather than as
  * separate fields.
  *
- * @param inputAddress the market address
+ * @param marketAddress the market address
  * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
  */
-export function toCoinTypesForEntry(inputAddress: AccountAddressInput): [TypeTag, TypeTag] {
-  const { emojicoin, emojicoinLP } = toCoinTypes(inputAddress);
+export function toCoinTypesForEntry(marketAddress: AccountAddressInput): [TypeTag, TypeTag] {
+  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
   return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
 }
 
