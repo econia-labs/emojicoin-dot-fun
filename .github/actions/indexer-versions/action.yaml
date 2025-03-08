@@ -3,8 +3,6 @@ description: 'Ensure consistent indexer versions across various contexts'
 name: 'Indexer versions'
 runs:
   steps:
-  - env:
-      DEPLOY_FILE_SUFFIX: 'production'
   - id: 'check-deploy-files'
     run: 'sh ${{ github.action_path }}/sh/check-deploy-files.sh'
     shell: 'sh'
