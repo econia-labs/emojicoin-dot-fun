@@ -1,6 +1,7 @@
 adbeef
 aland
 allowlister
+alnoki
 aptn
 aptos
 aptoslabs
@@ -18,6 +19,7 @@ caicos
 clamm
 clipperton
 clippy
+codeowners
 cooldown
 counterparties
 cpamm
@@ -43,6 +45,7 @@ galxe
 gcloud
 geoblock
 geoblocked
+gitmodules
 guids
 hadolint
 hamsa
