@@ -62,8 +62,8 @@ PROCESSOR_VERSION=$(
 )
 
 # Set GitHub Actions output variables.
-echo "BROKER_VERSION=${BROKER_VERSION}" >>$GITHUB_OUTPUT
-echo "PROCESSOR_VERSION=${PROCESSOR_VERSION}" >>$GITHUB_OUTPUT
+echo "broker_version=${BROKER_VERSION}" >>$GITHUB_OUTPUT
+echo "processor_version=${PROCESSOR_VERSION}" >>$GITHUB_OUTPUT
 echo "Successfully checked deploy files with versions:"
 echo "  Broker: ${BROKER_VERSION}"
 echo "  Processor: ${PROCESSOR_VERSION}"
