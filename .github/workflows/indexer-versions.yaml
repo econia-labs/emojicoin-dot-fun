@@ -11,12 +11,6 @@ name: 'Indexer versions'
   merge_group: null
   pull_request:
     branches:
-    - 'main'
     - 'production'
     - 'fallback'
-  push:
-    branches:
-    - 'main'
-    - 'fallback'
-    - 'production'
 ...
