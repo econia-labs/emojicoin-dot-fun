@@ -9,5 +9,14 @@ jobs:
 name: 'Indexer versions'
 'on':
   merge_group: null
-  pull_request: null
+  pull_request:
+    branches:
+    - 'main'
+    - 'production'
+    - 'fallback'
+  push:
+    branches:
+    - 'main'
+    - 'fallback'
+    - 'production'
 ...
