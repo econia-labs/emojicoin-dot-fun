@@ -1,7 +1,21 @@
 #!/bin/sh
 set -e
+
+# Get broker and processor versions inside compose file.
 COMPOSE_FILE="src/docker/compose.yaml"
-COMPOSE_BROKER_VERSION=$(yq '.services.broker.image' "$COMPOSE_FILE")
-COMPOSE_PROCESSOR_VERSION=$(yq '.services.processor.image' "$COMPOSE_FILE")
-echo $COMPOSE_BROKER_VERSION
-echo $COMPOSE_PROCESSOR_VERSION
+COMPOSE_BROKER_IMAGE=$(yq '.services.broker.image' "$COMPOSE_FILE")
+COMPOSE_PROCESSOR_IMAGE=$(yq '.services.processor.image' "$COMPOSE_FILE")
+COMPOSE_BROKER_VERSION=$(echo "$COMPOSE_BROKER_IMAGE" | cut -d':' -f2)
+COMPOSE_PROCESSOR_VERSION=$(echo "$COMPOSE_PROCESSOR_IMAGE" | cut -d':' -f2)
+
+# Check if versions match.
+if [ "$BROKER_VERSION" != "$COMPOSE_BROKER_VERSION" ]; then
+	echo "::error::Compose broker version should be $BROKER_VERSION"
+	exit 1
+fi
+if [ "$PROCESSOR_VERSION" != "$COMPOSE_PROCESSOR_VERSION" ]; then
+	echo "::error::Compose broker version should be $PROCESSOR_VERSION"
+	exit 1
+fi
+
+echo "✅ Compose versions match"
