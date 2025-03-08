@@ -65,5 +65,5 @@ PROCESSOR_VERSION=$(
 echo "BROKER_VERSION=${BROKER_VERSION}" >>$GITHUB_OUTPUT
 echo "PROCESSOR_VERSION=${PROCESSOR_VERSION}" >>$GITHUB_OUTPUT
 echo "Successfully checked deploy files with versions:"
-echo "  Broker Version: ${BROKER_VERSION}"
-echo "  Processor Version: ${PROCESSOR_VERSION}"
+echo "  Broker: ${BROKER_VERSION}"
+echo "  Processor: ${PROCESSOR_VERSION}"
