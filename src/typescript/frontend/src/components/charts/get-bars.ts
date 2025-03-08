@@ -3,7 +3,7 @@ import {
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@/store/event/candlestick-bars";
-import { type Types } from "@sdk-types";
+import { type AnyNumberString, type Types } from "@sdk-types";
 import { Trigger, type Period, periodEnumToRawDuration, type PeriodDuration } from "@sdk/const";
 import { toMarketEmojiData } from "@sdk/emoji_data/utils";
 import { type MarketMetadataModel, type PeriodicStateEventModel } from "@sdk/indexer-v2";
@@ -20,12 +20,12 @@ export const fetchCandlesticksForChart = async ({
   periodParams,
   period,
 }: {
-  marketID: string;
+  marketID: AnyNumberString;
   periodParams: PeriodParams;
   period: Period;
 }): Promise<Bar[]> => {
   const params = new URLSearchParams({
-    marketID,
+    marketID: marketID.toString(),
     period: period.toString(),
     countBack: periodParams.countBack.toString(),
     to: periodParams.to.toString(),

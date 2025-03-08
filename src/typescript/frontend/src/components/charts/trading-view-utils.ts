@@ -80,3 +80,13 @@ export const constructLibrarySymbolInfo = (
   supported_resolutions: CONFIGURATION_DATA.supported_resolutions,
   format: "price",
 });
+
+export const symbolInfoToSymbol = (symbolInfo: LibrarySymbolInfo) => {
+  const ticker = symbolInfo.ticker;
+  if (!ticker) {
+    // This should never occur, because we always set the ticker when we construct the symbol info
+    // when the `resolveSymbol` datafeed API function is called.
+    throw new Error(`No ticker for symbol: ${symbolInfo}`);
+  }
+  return ticker;
+};
