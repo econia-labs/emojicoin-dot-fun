@@ -9,12 +9,14 @@ COMPOSE_BROKER_VERSION=$(echo "$COMPOSE_BROKER_IMAGE" | cut -d':' -f2)
 COMPOSE_PROCESSOR_VERSION=$(echo "$COMPOSE_PROCESSOR_IMAGE" | cut -d':' -f2)
 
 # Check if versions match.
+echo "Docker Compose broker version: $COMPOSE_BROKER_VERSION"
 if [ "$BROKER_VERSION" != "$COMPOSE_BROKER_VERSION" ]; then
-	echo "::error::Compose broker version should be $BROKER_VERSION"
+	echo "::error::Does not match $BROKER_VERSION from deploy files"
 	exit 1
 fi
+echo "Docker Compose processor version: $COMPOSE_PROCESSOR_VERSION"
 if [ "$PROCESSOR_VERSION" != "$COMPOSE_PROCESSOR_VERSION" ]; then
-	echo "::error::Compose broker version should be $PROCESSOR_VERSION"
+	echo "::error::Does not match $PROCESSOR_VERSION from deploy files"
 	exit 1
 fi
 
