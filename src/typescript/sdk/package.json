@@ -10,7 +10,8 @@
     "find-git-root": "^1.0.4",
     "json-bigint": "^1.0.0",
     "postgres": "^3.4.4",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "zod": "^3.24.2"
   },
   "description": "TypeScript SDK for Econia Labs' Emojicoin Dot Fun",
   "devDependencies": {
