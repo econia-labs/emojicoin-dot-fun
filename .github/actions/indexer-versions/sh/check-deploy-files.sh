@@ -1,4 +1,5 @@
 #!/bin/sh
+# cspell:word mktemp
 set -e
 
 # Check the `Environment` value for a deploy file.

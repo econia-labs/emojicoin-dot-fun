@@ -22,7 +22,7 @@ echo "Corresponding tag commit: $TAG_COMMIT"
 # Compare the commits.
 if [ "$SUBMODULE_COMMIT" != "$TAG_COMMIT" ]; then
 	echo "::error::Processor submodule commit does not match the commit" \
-        "for tag $EXPECTED_TAG"
+		"for tag $EXPECTED_TAG"
 	exit 1
 fi
 
