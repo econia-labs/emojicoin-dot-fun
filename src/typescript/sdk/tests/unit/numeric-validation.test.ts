@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { toPositiveBigInt, toPositiveInteger } from "../../src/utils/validation";
-import { parseOrDefault, asSchemaParser } from "../../src/utils/validation/parse-or";
+import { createSchemaParser } from "../../src/utils/validation";
 
 describe("basic numeric validation", () => {
   test.each([1, 2, 3, 4, 5].flatMap((v) => [Number(v), String(v), BigInt(v)]))(
@@ -79,39 +79,47 @@ describe("positive bigint input validation", () => {
     expect(toPositiveBigInt("001")).toBe(null);
   });
 
-  it("provides a default value for a zod schema", () => {
-    const customPosBigIntSchema = z.bigint().positive();
-    expect(parseOrDefault(customPosBigIntSchema, -1.01, 123456789n)).toEqual(123456789n);
-    expect(parseOrDefault(customPosBigIntSchema, 1.01, 9999999999999n)).toEqual(9999999999999n);
+  it("provides a default value for zod schemas", () => {
     expect(toPositiveBigInt("1.01")).toBe(null);
     expect(toPositiveBigInt("1.01", 1n)).toEqual(1n);
     expect(toPositiveBigInt("1.01", 1281n)).toEqual(1281n);
+    expect(toPositiveInteger("-1", 10)).toEqual(10);
+    expect(toPositiveInteger("1", 10)).toEqual(1);
+    expect(toPositiveInteger(-0, 77)).toEqual(77);
+    expect(toPositiveInteger(-100, 100)).toEqual(100);
+  });
 
-    // It should deem "-12" as an invalid default value.
-    expect(() => asSchemaParser(customPosBigIntSchema, "-12" as unknown as bigint)).toThrow();
-    expect(() => asSchemaParser(customPosBigIntSchema, "-0" as unknown as bigint)).toThrow();
-    expect(() => asSchemaParser(customPosBigIntSchema, "0" as unknown as bigint)).toThrow();
-    expect(() => asSchemaParser(customPosBigIntSchema, -1n)).toThrow();
+  it("should throw when an invalid default value is passed", () => {
+    const customPosBigIntSchema = z.bigint().positive();
+    const parser = createSchemaParser(customPosBigIntSchema);
+
+    expect(() => parser(1n, -1n)).toThrow();
+    expect(() => parser(0, "-12" as unknown as bigint)).toThrow();
+    expect(() => parser(0, "-0" as unknown as bigint)).toThrow();
+    expect(() => parser(0, "0" as unknown as bigint)).toThrow();
+  });
+
+  it("shouldn't throw when a valid default value is passed", () => {
+    const customPosBigIntSchema = z.bigint().positive();
+    const parser = createSchemaParser(customPosBigIntSchema);
 
     // This should work, because 1n is a valid default positive bigint.
-    expect(() => asSchemaParser(customPosBigIntSchema, 1n)).not.toThrow();
-    const withDefault = asSchemaParser(customPosBigIntSchema, 1n);
-    const withoutDefault = asSchemaParser(customPosBigIntSchema);
+    expect(() => parser("not_a_bigint", 1n)).not.toThrow();
 
-    expect(withDefault("not_a_bigint")).toEqual(1n);
-    expect(withDefault(2n)).toEqual(2n);
-    expect(withoutDefault("not_a_bigint")).toBe(null);
-    expect(withoutDefault(7n)).toBe(7n);
+    expect(parser("not_a_bigint", 1n)).toEqual(1n);
+    expect(parser(2n)).toEqual(2n);
+    expect(parser("not_a_bigint")).toBe(null);
   });
 
   it("uses the schema parser helper with a simple example", () => {
     const NegativeNumberSchema = z.number().negative();
-    const toNegativeNumber = (n?: number) => n ? asSchemaParser(NegativeNumberSchema, n) : asSchemaParser(NegativeNumberSchema);
-    const myDefaultWIthOne = asSchemaParser(NegativeNumberSchema, 12);
-    const res = myDefaultWIthOne(12);
-
+    const toNegativeNumber = createSchemaParser(NegativeNumberSchema);
     const alwaysANumber = toNegativeNumber("not_a_number", -1);
-    const sometimesNull = toNegativeNumber("not_a_number");
-    const willThrowAtRuntime = toNegativeNumber("not_a_number", 100);
+    expect(typeof alwaysANumber).toEqual("number");
+    const nullResult = toNegativeNumber("not_a_number");
+    expect(nullResult).toBe(null);
+
+    // Throws because `100`, the default value, is not a negative number.
+    expect(() => toNegativeNumber(1, 100)).toThrow();
   });
 });

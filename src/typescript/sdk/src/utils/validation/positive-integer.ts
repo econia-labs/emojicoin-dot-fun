@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { parseOrNull } from "./parse-or";
+import { createSchemaParser } from "./parse-or";
 
 const PositiveIntegerSchema = z.union([
   z.number().int().positive(),
@@ -15,4 +15,4 @@ const PositiveIntegerSchema = z.union([
     .transform(Number),
 ]);
 
-export const toPositiveInteger = (input: unknown) => parseOrNull(PositiveIntegerSchema, input);
+export const toPositiveInteger = createSchemaParser(PositiveIntegerSchema);
