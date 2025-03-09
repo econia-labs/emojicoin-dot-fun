@@ -20,7 +20,7 @@ parameters:
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'not-fallback'
+  Environment: 'fallback'
   IndexArena: 'false'
   Network: 'mainnet'
   ProcessorImageVersion: '6.0.1'
