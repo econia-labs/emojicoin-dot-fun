@@ -21,7 +21,7 @@ parameters:
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
   Environment: 'production'
-  IndexArena: 'true'
+  IndexArena: 'false'
   Network: 'mainnet'
   ProcessorImageVersion: '6.0.1'
   VpcStackName: 'emoji-vpc'

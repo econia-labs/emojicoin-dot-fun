@@ -10,7 +10,7 @@ SUBMODULE_COMMIT=$(cd "$PROCESSOR_DIR" && git rev-parse HEAD)
 
 # Check the commit expected based on the tag.
 git fetch --tags
-EXPECTED_TAG="emojicoin-processor-v${PROCESSOR_VERSION}"
+EXPECTED_TAG="foo-emojicoin-processor-v$PROCESSOR_VERSION"
 TAG_COMMIT=$(git rev-list -n 1 $EXPECTED_TAG)
 if [ -z "$TAG_COMMIT" ]; then
 	echo "::error::Tag $EXPECTED_TAG does not exist in processor repository"
