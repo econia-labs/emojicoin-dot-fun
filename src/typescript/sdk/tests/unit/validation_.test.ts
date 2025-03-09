@@ -1,4 +1,4 @@
-import * as validation from "../../src/utils/validation";
+import * as validation from "../../src/utils/validation_";
 
 describe("validation utility functions", () => {
   it("should trim leading zeros", () => {

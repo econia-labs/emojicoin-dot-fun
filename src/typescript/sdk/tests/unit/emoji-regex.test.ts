@@ -1,8 +1,13 @@
-import { CHAT_EMOJI_DATA, type ChatEmoji, SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../../src";
+import {
+  CHAT_EMOJI_DATA,
+  type ChatEmoji,
+  isValidMarketSymbol,
+  SYMBOL_EMOJI_DATA,
+  type SymbolEmoji,
+} from "../../src";
 import { encodeEmojis, getEmojisInString, symbolToEmojis } from "../../src/emoji_data/utils";
 import { SYMBOL_EMOJIS } from "../../src/emoji_data/symbol-emojis";
 import { toChatMessageEntryFunctionArgs } from "../../src/emoji_data/chat-message";
-import { isValidMarketSymbol } from "../utils/market-symbol";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {
   it("tests a few single emojis", () => {
