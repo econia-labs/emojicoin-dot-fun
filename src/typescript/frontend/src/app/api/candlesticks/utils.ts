@@ -8,7 +8,6 @@ import {
   PeriodDuration,
   periodEnumToRawDuration,
 } from "@sdk/index";
-import { isNumber } from "utils";
 import { unstable_cache } from "next/cache";
 import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
 import { parseJSON, stringifyJSON } from "utils";
@@ -80,6 +79,8 @@ export type ValidCandlesticksSearchParams = {
   amount: string;
   countBack: string;
 };
+
+const isNumber = (s: string) => !isNaN(parseInt(s));
 
 export const isValidCandlesticksSearchParams = (
   params: CandlesticksSearchParams
