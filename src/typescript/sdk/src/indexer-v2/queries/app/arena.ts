@@ -6,6 +6,7 @@ import { TableName } from "../../types/json-types";
 import { postgrest } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
 import {
+  toArenaCandlestickModel,
   toArenaInfoModel,
   toArenaLeaderboardHistoryWithArenaInfo,
   toArenaMeleeModel,
@@ -15,6 +16,8 @@ import {
 import { ORDER_BY } from "../../const";
 import { toAccountAddressString } from "../../../utils/account-address";
 import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { type AnyNumberString } from "../../../types";
+import { type ArenaPeriod } from "../../..";
 
 const selectMelee = () =>
   postgrest
@@ -22,6 +25,14 @@ const selectMelee = () =>
     .select("*")
     .order("melee_id", ORDER_BY.DESC)
     .limit(1)
+    .single();
+
+// prettier-ignore
+const selectArenaInfoByMeleeID = ({ meleeID }: {meleeID: AnyNumberString}) =>
+  postgrest
+    .from(TableName.ArenaInfo)
+    .select("*")
+    .eq("melee_id", meleeID)
     .single();
 
 const selectArenaInfo = () =>
@@ -74,8 +85,34 @@ const selectMarketStateByAddress = ({ address }: { address: string }) =>
     .limit(1)
     .maybeSingle();
 
+const selectArenaCandlesticksSince = ({
+  meleeID,
+  start,
+  end,
+  period,
+}: {
+  meleeID: AnyNumberString;
+  start: Date;
+  end: Date;
+  period: ArenaPeriod;
+}) => {
+  const query = postgrest
+    .from(TableName.ArenaCandlesticks)
+    .select("*")
+    .eq("melee_id", meleeID)
+    .eq("period", period)
+    .gte("start_time", start.toISOString())
+    .lt("start_time", end.toISOString())
+    .order("start_time", ORDER_BY.ASC);
+  return query;
+};
+
 export const fetchMelee = queryHelperSingle(selectMelee, toArenaMeleeModel);
 export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoModel);
+export const fetchArenaInfoByMeleeID = queryHelperSingle(
+  selectArenaInfoByMeleeID,
+  toArenaInfoModel
+);
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
 export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionModel);
 export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
@@ -85,4 +122,8 @@ export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
 export const fetchMarketStateByAddress = queryHelperSingle(
   selectMarketStateByAddress,
   toMarketStateModel
+);
+export const fetchArenaCandlesticksSince = queryHelper(
+  selectArenaCandlesticksSince,
+  toArenaCandlestickModel
 );

@@ -17,4 +17,4 @@ export const ArenaCandlesticksSearchParamsSchema = z.object({
  * @property {string} countBack     - The `countBack` value requested by the datafeed API.
  * @property {string} period        - The {@link ArenaPeriod}.
  */
-export type CandlesticksSearchParams = z.infer<typeof ArenaCandlesticksSearchParamsSchema>;
+export type ArenaCandlesticksSearchParams = z.infer<typeof ArenaCandlesticksSearchParamsSchema>;

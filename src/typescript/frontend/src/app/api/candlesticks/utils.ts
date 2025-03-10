@@ -134,7 +134,7 @@ const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["candlestic
   revalidate: NORMAL_CACHE_DURATION,
 });
 
-const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
+export const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
   getLatestProcessedEmojicoinTimestamp,
   ["processor-timestamp"],
   { revalidate: 5 }
