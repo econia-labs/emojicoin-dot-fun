@@ -1,8 +1,9 @@
-import { z } from "zod";
-import { isPositiveInteger, toPositiveBigInt, toPositiveInteger } from "../../src/utils/validation";
-import { createSchemaParser } from "../../src/utils/validation";
-import { toBigInt } from "../../src/utils/validation/bigint";
-import { toInteger } from "../../src/utils/validation/integer";
+import { Schemas } from "../../src";
+
+const toInteger = (input: unknown) => Schemas["Integer"].safeParse(input).data;
+const toPositiveInteger = (input: unknown) => Schemas["PositiveInteger"].safeParse(input).data;
+const toBigInt = (input: unknown) => Schemas["BigInt"].safeParse(input).data;
+const toPositiveBigInt = (input: unknown) => Schemas["PositiveBigInt"].safeParse(input).data;
 
 describe("basic numeric validation", () => {
   test.each(
@@ -16,13 +17,11 @@ describe("basic numeric validation", () => {
     ])
   )("%p is an integer, maybe positive", (input) => {
     const parsed = toInteger(input)!;
-    expect(parsed).not.toBe(null);
+    expect(parsed).not.toBe(undefined);
     if (parsed > 0) {
-      expect(isPositiveInteger(input)).toBe(true);
       expect(toPositiveInteger(input)).toEqual(parsed);
     } else {
-      expect(isPositiveInteger(input)).toBe(false);
-      expect(toPositiveInteger(input)).toBe(null);
+      expect(toPositiveInteger(input)).toBe(undefined);
     }
   });
 
@@ -39,7 +38,7 @@ describe("basic numeric validation", () => {
   test.each([0, -0, -1, -2, -3, -4, -5, "-0"].flatMap((v) => [Number(v), String(v), BigInt(v)]))(
     "%p is not a positive integer",
     (num) => {
-      expect(toPositiveInteger(num)).toBe(null);
+      expect(toPositiveInteger(num)).toBe(undefined);
     }
   );
 });
@@ -60,12 +59,12 @@ test.each(
   if (result === null) {
     console.warn(input);
   }
-  expect(result).not.toBe(null);
+  expect(result).not.toBe(undefined);
   if (typeof input === "string" && input.endsWith("n")) {
     expect(result).toEqual(BigInt(input.slice(0, -1)));
   }
   if (result <= 0n) {
-    expect(toPositiveBigInt(input)).toBe(null);
+    expect(toPositiveBigInt(input)).toBe(undefined);
   } else {
     expect(toPositiveBigInt(input)).toEqual(result);
   }
@@ -75,7 +74,7 @@ test.each([1.234e10, 100.5e6, Number.MAX_SAFE_INTEGER, -11.142e12])(
   "%s is a valid integer",
   (input) => {
     const result = toInteger(input)!;
-    expect(result).not.toBe(null);
+    expect(result).not.toBe(undefined);
     expect(result / 10).toEqual(Number(input) / 10);
     expect(result - 1).toEqual(Number(input) - 1);
     expect(result - 1).toEqual(Number(input) - 1);
@@ -84,14 +83,14 @@ test.each([1.234e10, 100.5e6, Number.MAX_SAFE_INTEGER, -11.142e12])(
 
 test.each([1.123e100, 1.4e50, "1182361283683863837244"])("%s is an invalid integer", (input) => {
   const result = toInteger(input)!;
-  expect(result).toBe(null);
+  expect(result).toBe(undefined);
 });
 
 test.each([1.234e10, 100.5e20, -123.412123675127353e30, Number.MAX_VALUE])(
   "%p is a valid bigint",
   (input) => {
     const result = toBigInt(input)!;
-    expect(result).not.toBe(null);
+    expect(result).not.toBe(undefined);
     expect(result * 10n).toEqual(BigInt(input) * 10n);
     expect(result - 1n).toEqual(BigInt(input) - 1n);
     expect(result - 1n).toEqual(BigInt(input) - 1n);
@@ -101,7 +100,7 @@ test.each([1.234e10, 100.5e20, -123.412123675127353e30, Number.MAX_VALUE])(
 it("doesn't prematurely lose precision due to the parsing function", () => {
   const maxValue = Number.MAX_VALUE;
   const result = toBigInt(maxValue)!;
-  expect(result).not.toBe(null);
+  expect(result).not.toBe(undefined);
   expect(result - 1n).toEqual(BigInt(maxValue) - 1n);
 
   // Note that this *does* lose precision:
@@ -113,9 +112,9 @@ test.each([1.234e2, 1.23456e3, 1.23456789341723e5])(
   "%p is not a valid integer or bigint",
   (input) => {
     const result = toBigInt(input);
-    expect(result).toBe(null);
+    expect(result).toBe(undefined);
     const result2 = toInteger(input);
-    expect(result2).toBe(null);
+    expect(result2).toBe(undefined);
   }
 );
 
@@ -125,53 +124,13 @@ test.each([
   0.00000000000000000000000000000000000000000000000000000000000000000000000000000000001,
   "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000001",
 ])("%p is an invalid integer input", (num) => {
-  expect(toInteger(num)).toBe(null);
-  expect(toBigInt(num)).toBe(null);
+  expect(toInteger(num)).toBe(undefined);
+  expect(toBigInt(num)).toBe(undefined);
 });
 
 describe("bigint input validation", () => {
   it("ensures idempotency with non-base-10 inputs", () => {
     expect(toPositiveBigInt(0o001)).toBe(BigInt(0o001));
-    expect(toPositiveBigInt("001")).toBe(null);
-  });
-
-  it("provides a default value for zod schemas", () => {
-    expect(toPositiveBigInt("1.01")).toBe(null);
-    expect(toPositiveBigInt("1.01", 1281n)).toEqual(1281n);
-    expect(toPositiveInteger("-1", 10)).toEqual(10);
-    expect(toPositiveInteger("1", 10)).toEqual(1);
-    expect(toPositiveInteger(0, 77)).toEqual(77);
-    expect(toPositiveInteger(-0, 77)).toEqual(77);
-    expect(toPositiveInteger(-100, 100)).toEqual(100);
-  });
-
-  it("should throw when an invalid default value is passed", () => {
-    const PositiveBigInt = z.bigint().positive();
-    const parser = createSchemaParser(PositiveBigInt);
-    expect(() => parser(1n, -1n)).toThrow();
-    expect(() => parser(0, "-12" as unknown as bigint)).toThrow();
-    expect(() => parser(0, "-0" as unknown as bigint)).toThrow();
-    expect(() => parser(0, "0" as unknown as bigint)).toThrow();
-    const NegativeNumber = z.number().negative();
-    const toNegativeNumber = createSchemaParser(NegativeNumber);
-    // Throws because `100`, the default value, is not a negative number.
-    expect(() => toNegativeNumber(1, 100)).toThrow();
-  });
-
-  it("shouldn't throw when a valid default value is passed", () => {
-    const customPosBigIntSchema = z.bigint().positive();
-    const parser = createSchemaParser(customPosBigIntSchema);
-    expect(parser("not_a_bigint", 1n)).toEqual(1n);
-    expect(parser(2n)).toEqual(2n);
-    expect(parser("not_a_bigint")).toBe(null);
-  });
-
-  it("uses the schema parser helper with a simple example", () => {
-    const NegativeNumber = z.number().negative();
-    const toNegativeNumber = createSchemaParser(NegativeNumber);
-    const alwaysANumber = toNegativeNumber("not_a_number", -1);
-    expect(typeof alwaysANumber).toEqual("number");
-    const nullResult = toNegativeNumber("not_a_number");
-    expect(nullResult).toBe(null);
+    expect(toPositiveBigInt("001")).toBe(undefined);
   });
 });

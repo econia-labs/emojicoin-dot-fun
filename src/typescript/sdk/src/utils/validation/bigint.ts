@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { createSchemaParser } from "./create-schema-parser";
 
 /**
  * Accepts integer-like numbers, bigints, and numeric strings that possibly end with "n".
@@ -18,6 +17,6 @@ export const BigIntSchema = z
           .or(z.coerce.string().refine((s) => s === "0" || s === "-0"))
       )
   )
-  .pipe(z.coerce.bigint());
+  .pipe(z.coerce.bigint())
 
-export const toBigInt = createSchemaParser(BigIntSchema);
+export const PositiveBigIntSchema = BigIntSchema.pipe(z.coerce.bigint().positive());
