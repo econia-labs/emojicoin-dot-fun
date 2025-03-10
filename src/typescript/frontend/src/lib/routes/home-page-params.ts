@@ -1,5 +1,5 @@
 import { toOrderBy } from "@sdk/indexer-v2/const";
-import { toPositiveInteger } from "@sdk/utils";
+import { Schemas } from "@sdk/utils";
 import { type HomePageSearchParams } from "lib/queries/sorting/query-params";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 
@@ -8,8 +8,10 @@ export interface HomePageParams {
   searchParams?: HomePageSearchParams;
 }
 
-export const safeParsePageWithDefault = (pageInput: unknown): number =>
-  toPositiveInteger(pageInput, 1);
+export const safeParsePageWithDefault = (pageInput: unknown): number => {
+  const result = Schemas["PositiveInteger"].safeParse(pageInput);
+  return result.success ? result.data : 1;
+};
 
 export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams | undefined) => {
   const {
