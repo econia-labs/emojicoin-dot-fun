@@ -5,7 +5,6 @@ import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { TimeCell } from "components/ui/table-cells/time-cell";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { toNominal } from "lib/utils/decimals";
 import _ from "lodash";
 import { Emoji } from "utils/emoji";
 import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
@@ -17,6 +16,7 @@ import { fetchSpecificMarketsAction } from "./fetch-specific-markets-action";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { toExplorerLink } from "lib/utils/explorer-link";
+import { toNominal } from "@sdk/utils";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
