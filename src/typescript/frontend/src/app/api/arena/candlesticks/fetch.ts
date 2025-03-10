@@ -101,6 +101,10 @@ const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["arena-cand
   revalidate: NORMAL_CACHE_DURATION,
 });
 
+/**
+ * This implementation and all utility functions imported from "utils" are essentially copied over
+ * from {@link [/api/candlesticks](../../candlesticks/utils.ts)}.
+ */
 export const fetchArenaCandlesticksRoute = async (args: ArenaCandlesticksSearchParams) => {
   const { meleeID, to, period, countBack } = args;
   const index = toIndex(to, period);
