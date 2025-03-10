@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { toPositiveBigInt, toPositiveInteger } from "../../src/utils/validation";
+import { isPositiveInteger, toPositiveBigInt, toPositiveInteger } from "../../src/utils/validation";
 import { createSchemaParser } from "../../src/utils/validation";
 import { toBigInt } from "../../src/utils/validation/bigint";
 import { toInteger } from "../../src/utils/validation/integer";
@@ -18,8 +18,10 @@ describe("basic numeric validation", () => {
     const parsed = toInteger(input)!;
     expect(parsed).not.toBe(null);
     if (parsed > 0) {
+      expect(isPositiveInteger(input)).toBe(true);
       expect(toPositiveInteger(input)).toEqual(parsed);
     } else {
+      expect(isPositiveInteger(input)).toBe(false);
       expect(toPositiveInteger(input)).toBe(null);
     }
   });
