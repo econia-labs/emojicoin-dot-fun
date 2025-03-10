@@ -201,6 +201,9 @@ importers:
       use-scramble:
         specifier: ^2.2.15
         version: 2.2.15(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
       zustand:
         specifier: ^4.5.5
         version: 4.5.5(@types/react@18.3.11)(immer@10.1.1)(react@18.3.1)
