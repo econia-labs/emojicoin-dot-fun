@@ -1,17 +1,8 @@
 import { z } from "zod";
 import { createSchemaParser } from "./parse-or";
+import { BigIntSchema } from "./bigint";
 
-const PositiveBigIntSchema = z.union([
-  z.bigint().positive(),
-  z
-    .number()
-    .int()
-    .positive()
-    .transform((n) => BigInt(n)),
-  z
-    .string()
-    .regex(/^[1-9]\d*$/, "Must be a valid, positive integer string with no leading zeros")
-    .transform((s) => BigInt(s)),
-]);
+// Composably build upon the existing bigint schema validation, ensuring the output is positive.
+const PositiveBigIntSchema = BigIntSchema.pipe(z.coerce.bigint().positive());
 
 export const toPositiveBigInt = createSchemaParser(PositiveBigIntSchema);

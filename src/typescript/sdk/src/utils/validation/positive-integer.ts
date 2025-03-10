@@ -1,18 +1,10 @@
 import { z } from "zod";
 import { createSchemaParser } from "./parse-or";
+import { BigIntSchema } from "./bigint";
+import { IntegerSchema } from "./integer";
 
-const PositiveIntegerSchema = z.union([
-  z.number().int().positive(),
-  z
-    .string()
-    .refine((v) => Number.isSafeInteger(Number.parseInt(v)))
-    .transform(Number)
-    .refine((v) => v > 0),
-  z
-    .bigint()
-    .positive()
-    .refine((v) => Number.isSafeInteger(Number(v)))
-    .transform(Number),
-]);
+const PositiveIntegerSchema = z
+  .union([IntegerSchema, BigIntSchema])
+  .pipe(z.coerce.number().positive());
 
 export const toPositiveInteger = createSchemaParser(PositiveIntegerSchema);
