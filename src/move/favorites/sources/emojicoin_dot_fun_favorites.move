@@ -1,7 +1,7 @@
 // cspell:word upsert
 module favorites::emojicoin_dot_fun_favorites {
     use aptos_framework::event;
-    use aptos_std::simple_map::{Self, SimpleMap};
+    use aptos_framework::ordered_map::{Self, OrderedMap};
     use std::option;
     use std::signer;
     use std::vector;
@@ -21,9 +21,9 @@ module favorites::emojicoin_dot_fun_favorites {
     has copy, drop, store;
 
     struct FavoriteData {
-        markets: SimpleMap<address, Nil>
+        markets: OrderedMap<address, Nil>
     }
-    has copy, drop, store, key;
+    has drop, key;
 
     #[view]
     public fun favorites(user: address): vector<address> acquires FavoriteData {
@@ -35,6 +35,12 @@ module favorites::emojicoin_dot_fun_favorites {
         }
     }
 
+    /// Set the market as a user's favorite.
+    ///
+    /// An error will be returned if:
+    ///
+    /// - The market does not exist.
+    /// - The market is already a favorite.
     public entry fun set_favorite(user: &signer, market: address) acquires FavoriteData {
         assert!(
             option::is_some(&emojicoin_dot_fun::market_metadata_by_market_address(market)),
@@ -48,13 +54,18 @@ module favorites::emojicoin_dot_fun_favorites {
             let favorites = borrow_global_mut<FavoriteData>(user_address);
             favorites.markets.add(market, Nil {});
         } else {
-            let map = simple_map::new();
+            let map = ordered_map::new();
             map.add(market, Nil {});
             let favorites = FavoriteData { markets: map };
             move_to<FavoriteData>(user, favorites);
         }
     }
 
+    /// Remove the market from the user's favorite.
+    ///
+    /// An error will be returned if:
+    ///
+    /// - The market is not a favorite.
     public entry fun unset_favorite(user: &signer, market: address) acquires FavoriteData {
         let user_address = signer::address_of(user);
         event::emit(
@@ -195,7 +206,7 @@ module favorites::emojicoin_dot_fun_favorites {
     }
 
     #[test, expected_failure(
-        abort_code = E_SIMPLE_MAP_NOT_FOUND, location = 0x1::simple_map
+        abort_code = E_SIMPLE_MAP_NOT_FOUND, location = 0x1::ordered_map
     )]
     fun test_unset_non_favorite() acquires FavoriteData {
         init_emojicoin();
@@ -231,7 +242,7 @@ module favorites::emojicoin_dot_fun_favorites {
     #[
         test,
         expected_failure(
-            abort_code = E_SIMPLE_MAP_ALREADY_EXISTS, location = 0x1::simple_map
+            abort_code = E_SIMPLE_MAP_ALREADY_EXISTS, location = 0x1::ordered_map
         )
     ]
     fun test_set_favorite_twice() acquires FavoriteData {
