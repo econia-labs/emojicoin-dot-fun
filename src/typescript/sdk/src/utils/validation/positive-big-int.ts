@@ -5,6 +5,6 @@ import { BigIntSchema } from "./bigint";
 /**
  * @see {@link BigIntSchema}
  */
-const PositiveBigIntSchema = BigIntSchema.pipe(z.coerce.bigint().positive());
+export const PositiveBigIntSchema = BigIntSchema.pipe(z.coerce.bigint().positive());
 export const toPositiveBigInt = createSchemaParser(PositiveBigIntSchema);
 export const isPositiveBigInt = (n: unknown) => toPositiveBigInt(n) !== null;
