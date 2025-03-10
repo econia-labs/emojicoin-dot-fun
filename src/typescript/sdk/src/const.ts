@@ -369,4 +369,5 @@ export const PERIODS = [
 
 const PERIODS_STRINGS_SET = new Set(PERIODS.map(String));
 
-export const isPeriod = (period: string): period is Period => PERIODS_STRINGS_SET.has(period);
+export const isPeriod = (period: unknown): period is Period =>
+  typeof period === "string" && PERIODS_STRINGS_SET.has(period);

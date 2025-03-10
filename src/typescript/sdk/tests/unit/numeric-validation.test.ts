@@ -163,6 +163,9 @@ describe("bigint input validation", () => {
     expect(toPositiveBigInt("1.01", 1281n)).toEqual(1281n);
     expect(toPositiveInteger("-1", 10)).toEqual(10);
     expect(toPositiveInteger("1", 10)).toEqual(1);
+    expect(toPositiveInteger("0", 77)).toEqual(77);
+    expect(toPositiveInteger("-0", 77)).toEqual(77);
+    expect(toPositiveInteger(0, 77)).toEqual(77);
     expect(toPositiveInteger(-0, 77)).toEqual(77);
     expect(toPositiveInteger(-100, 100)).toEqual(100);
   });

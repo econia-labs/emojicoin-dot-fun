@@ -4,6 +4,7 @@ import {
   type AnyNumberString,
   getPeriodStartTimeFromTime,
   isPeriod,
+  isPositiveInteger,
   type Period,
   PeriodDuration,
   periodEnumToRawDuration,
@@ -80,18 +81,15 @@ export type ValidCandlesticksSearchParams = {
   countBack: string;
 };
 
-const isNumber = (s: string) => !isNaN(parseInt(s));
-
 export const isValidCandlesticksSearchParams = (
   params: CandlesticksSearchParams
 ): params is ValidCandlesticksSearchParams => {
   const { marketID, to, period, countBack } = params;
-  // prettier-ignore
   return (
-    marketID !== null && isNumber(marketID) &&
-    to !== null && isNumber(to) &&
-    countBack !== null && isNumber(countBack) &&
-    period !== null && isPeriod(period)
+    isPositiveInteger(marketID) &&
+    isPositiveInteger(to) &&
+    isPositiveInteger(countBack) &&
+    isPeriod(period)
   );
 };
 

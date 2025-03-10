@@ -8,3 +8,4 @@ const PositiveIntegerSchema = z
   .pipe(z.coerce.number().positive());
 
 export const toPositiveInteger = createSchemaParser(PositiveIntegerSchema);
+export const isPositiveInteger = (n: unknown) => toPositiveInteger(n) !== null;
