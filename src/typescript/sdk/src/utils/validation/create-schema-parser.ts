@@ -2,8 +2,7 @@ import { type z, type ZodType } from "zod";
 
 /**
  * A generically overloaded utility function to create a flexible parser for a ZodType schema.
- *
- * It allows passing optional fallback values with properly inferred return types.
+ * Allows passing optional fallback values with properly inferred return types.
  *
  * #### Note: this function performs validation on the fallback value passed and throws if it fails.
  *

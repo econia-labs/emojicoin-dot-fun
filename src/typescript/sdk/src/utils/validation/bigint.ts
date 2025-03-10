@@ -1,9 +1,7 @@
 import { z } from "zod";
-import { createSchemaParser } from "./parse-or";
+import { createSchemaParser } from "./create-schema-parser";
 
 /**
- * Schema input validation for bigints.
- *
  * Accepts integer-like numbers, bigints, and numeric strings that possibly end with "n".
  */
 export const BigIntSchema = z
