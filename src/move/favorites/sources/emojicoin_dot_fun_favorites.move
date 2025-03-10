@@ -47,9 +47,7 @@ module favorites::emojicoin_dot_fun_favorites {
             E_MARKET_NOT_FOUND
         );
         let user_address = signer::address_of(user);
-        event::emit(
-            Favorite { user: user_address, market, is_favorite: true }
-        );
+        event::emit(Favorite { user: user_address, market, is_favorite: true });
         if (exists<FavoriteData>(user_address)) {
             let favorites = borrow_global_mut<FavoriteData>(user_address);
             favorites.markets.add(market, Nil {});
@@ -68,9 +66,7 @@ module favorites::emojicoin_dot_fun_favorites {
     /// - The market is not a favorite.
     public entry fun unset_favorite(user: &signer, market: address) acquires FavoriteData {
         let user_address = signer::address_of(user);
-        event::emit(
-            Favorite { user: user_address, market, is_favorite: false }
-        );
+        event::emit(Favorite { user: user_address, market, is_favorite: false });
         let favorites = borrow_global_mut<FavoriteData>(user_address);
         favorites.markets.remove(&market);
         if (favorites.markets.length() == 0) {
@@ -205,9 +201,10 @@ module favorites::emojicoin_dot_fun_favorites {
         assert!(account_1_favorites.contains(&market_2_address));
     }
 
-    #[test, expected_failure(
-        abort_code = E_SIMPLE_MAP_NOT_FOUND, location = 0x1::ordered_map
-    )]
+    #[
+        test,
+        expected_failure(abort_code = E_SIMPLE_MAP_NOT_FOUND, location = 0x1::ordered_map)
+    ]
     fun test_unset_non_favorite() acquires FavoriteData {
         init_emojicoin();
         let account_1_signer = get_signer(ACCOUNT_1);
