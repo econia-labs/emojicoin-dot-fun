@@ -36,7 +36,7 @@ describe("basic numeric validation", () => {
     }
   );
 
-  test.each([0, -0, -1, -2, -3, -4, -5].flatMap((v) => [Number(v), String(v), BigInt(v)]))(
+  test.each([0, -0, -1, -2, -3, -4, -5, "-0"].flatMap((v) => [Number(v), String(v), BigInt(v)]))(
     "%p is not a positive integer",
     (num) => {
       expect(toPositiveInteger(num)).toBe(null);
@@ -51,7 +51,6 @@ test.each(
     2,
     "100",
     "101",
-    "458237465832657",
     "458237465832657",
     "86238628463838234847484287423843874",
     "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
@@ -161,12 +160,9 @@ describe("bigint input validation", () => {
 
   it("provides a default value for zod schemas", () => {
     expect(toPositiveBigInt("1.01")).toBe(null);
-    expect(toPositiveBigInt("1.01", 1n)).toEqual(1n);
     expect(toPositiveBigInt("1.01", 1281n)).toEqual(1281n);
     expect(toPositiveInteger("-1", 10)).toEqual(10);
     expect(toPositiveInteger("1", 10)).toEqual(1);
-    expect(toPositiveInteger("0", 77)).toEqual(77);
-    expect(toPositiveInteger("-0", 77)).toEqual(77);
     expect(toPositiveInteger(0, 77)).toEqual(77);
     expect(toPositiveInteger(-0, 77)).toEqual(77);
     expect(toPositiveInteger(-100, 100)).toEqual(100);
@@ -175,20 +171,19 @@ describe("bigint input validation", () => {
   it("should throw when an invalid default value is passed", () => {
     const PositiveBigInt = z.bigint().positive();
     const parser = createSchemaParser(PositiveBigInt);
-
     expect(() => parser(1n, -1n)).toThrow();
     expect(() => parser(0, "-12" as unknown as bigint)).toThrow();
     expect(() => parser(0, "-0" as unknown as bigint)).toThrow();
     expect(() => parser(0, "0" as unknown as bigint)).toThrow();
+    const NegativeNumber = z.number().negative();
+    const toNegativeNumber = createSchemaParser(NegativeNumber);
+    // Throws because `100`, the default value, is not a negative number.
+    expect(() => toNegativeNumber(1, 100)).toThrow();
   });
 
   it("shouldn't throw when a valid default value is passed", () => {
     const customPosBigIntSchema = z.bigint().positive();
     const parser = createSchemaParser(customPosBigIntSchema);
-
-    // This should work, because 1n is a valid default positive bigint.
-    expect(() => parser("not_a_bigint", 1n)).not.toThrow();
-
     expect(parser("not_a_bigint", 1n)).toEqual(1n);
     expect(parser(2n)).toEqual(2n);
     expect(parser("not_a_bigint")).toBe(null);
@@ -201,12 +196,5 @@ describe("bigint input validation", () => {
     expect(typeof alwaysANumber).toEqual("number");
     const nullResult = toNegativeNumber("not_a_number");
     expect(nullResult).toBe(null);
-  });
-
-  it("throws when the default value to the schema parser helper doesn't pass schema validation", () => {
-    const NegativeNumber = z.number().negative();
-    const toNegativeNumber = createSchemaParser(NegativeNumber);
-    // Throws because `100`, the default value, is not a negative number.
-    expect(() => toNegativeNumber(1, 100)).toThrow();
   });
 });
