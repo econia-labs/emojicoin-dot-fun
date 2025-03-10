@@ -9,7 +9,7 @@ export const EmojiMarketPageLink = ({
   emojis,
   ...props
 }: { emojis: SymbolEmojiData[] } & PropsWithChildren) => (
-  <Link href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}>
+  <Link prefetch={false} href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}>
     {props.children}
   </Link>
 );

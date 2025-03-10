@@ -22,6 +22,7 @@ export const LiquidityButton = (props: GridProps) => {
         <StyledContentHeader>
           <Flex width="100%" justifyContent="center">
             <Link
+              prefetch={false}
               href={{
                 pathname: ROUTES.pools,
                 query: { pool: props.data.emojis.map((e) => e.emoji).join("") },
