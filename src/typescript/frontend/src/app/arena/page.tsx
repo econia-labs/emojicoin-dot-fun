@@ -48,7 +48,7 @@ export default async function Arena() {
   const [candlesticksMarket0, candlesticksMarket1] = await Promise.all([
     getCandlesticks(market0!.market.marketID),
     getCandlesticks(market1!.market.marketID),
-  ])
+  ]);
 
   return (
     <ArenaClient

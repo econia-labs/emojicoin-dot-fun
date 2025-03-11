@@ -17,6 +17,6 @@ export const BigIntSchema = z
           .or(z.coerce.string().refine((s) => s === "0" || s === "-0"))
       )
   )
-  .pipe(z.coerce.bigint())
+  .pipe(z.coerce.bigint());
 
 export const PositiveBigIntSchema = BigIntSchema.pipe(z.coerce.bigint().positive());
