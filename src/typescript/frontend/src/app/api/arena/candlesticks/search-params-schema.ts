@@ -12,9 +12,9 @@ export const ArenaCandlesticksSearchParamsSchema = z.object({
 /**
  * The search params used in the `GET` request at `candlesticks/api`.
  *
- * @property {string} meleeID       - The melee ID.
- * @property {string} to            - The end time boundary.
- * @property {string} countBack     - The `countBack` value requested by the datafeed API.
- * @property {string} period        - The {@link ArenaPeriod}.
+ * @property {string} meleeID       - A number string, as the melee ID.
+ * @property {string} to            - A number string, as the end time boundary as a UNIX timestamp.
+ * @property {string} countBack     - A number string, as `countBack` requested by the datafeed API.
+ * @property {string} period        - A string representing the {@link ArenaPeriod}
  */
 export type ArenaCandlesticksSearchParams = z.infer<typeof ArenaCandlesticksSearchParamsSchema>;
