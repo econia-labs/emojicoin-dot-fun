@@ -12,25 +12,24 @@ export { getStylesFromResponsiveValue } from "./styled-components-helpers";
 export { isDisallowedEventKey } from "./check-is-disallowed-event-key";
 export { getEmptyListTr } from "./get-empty-list-tr";
 
-export function stringifyJSON<T>(data: T) {
-  return JSON.stringify(data, (_, value) => {
-    if (typeof value === "bigint") return value.toString() + "n";
-    return value;
-  });
-}
+export const BigIntTrailingNRegex = /^-?(([1-9]\d*)|0)n$/;
+
+// This matches the below pattern: 1234-12-31T23:59:59.666Z
+export const DateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+
+export const stringifyJSON = <T>(data: T) =>
+  JSON.stringify(data, (_, value) => (typeof value === "bigint" ? `${value}n` : value));
 
 export const parseJSON = <T>(json: string): T =>
   JSON.parse(json, (_, value) => {
-    if (typeof value === "string" && /^\d+n$/.test(value)) {
-      return BigInt(value.substring(0, value.length - 1));
+    if (typeof value === "string" && BigIntTrailingNRegex.test(value)) {
+      return BigInt(value.slice(0, -1));
     }
-    // This matches the below pattern: 1234-12-31T23:59:59.666Z
-    const dateRegex = /^\d{4}-\d{2}-\d2T\d{2}:\d{2}:\d{2}.\d*Z$/;
-    if (typeof value === "string" && dateRegex.test(value)) {
+    if (typeof value === "string" && DateRegex.test(value)) {
       return new Date(value);
     }
-    return value as T;
-  });
+    return value;
+  }) as T;
 
 export const emoji = (name: AnyEmojiName) =>
   SYMBOL_EMOJI_DATA.hasName(name)
