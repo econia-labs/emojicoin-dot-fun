@@ -30,7 +30,7 @@ interface EmojicoinPageProps {
 const EVENTS_ON_PAGE_LOAD = 25;
 
 const logAndReturnValue = <T extends [] | undefined | null>(dataType: string, onFailure: T) => {
-  console.warn(`Failed to fetch ${dataType}`);
+  console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
   return onFailure;
 };
 
