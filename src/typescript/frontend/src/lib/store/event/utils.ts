@@ -1,4 +1,4 @@
-import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
+import { Period, NON_ARENA_PERIODS, periodEnumToRawDuration } from "@sdk/const";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
 import {
@@ -59,7 +59,7 @@ export const handleLatestBarForSwapEvent = (
   market: WritableDraft<MarketEventStore>,
   event: SwapEventModel
 ) => {
-  for (const period of PERIODS) {
+  for (const period of NON_ARENA_PERIODS) {
     const data = market[period];
     const swapPeriodStart = getPeriodStartTimeFromTime(event.market.time, period);
     const latestBarPeriodStart = BigInt(data.latestBar?.time ?? -1n) * 1000n;

@@ -1,12 +1,15 @@
 import { parseJSON, stringifyJSON } from "utils";
-import { ArenaCandlesticksUtils } from "./utils";
 import { type ArenaCandlesticksSearchParams } from "./search-params-schema";
 import {
   getCachedLatestProcessedEmojicoinTimestamp,
+  getPeriodDurationSeconds,
   HISTORICAL_CACHE_DURATION,
+  indexToParcelEndDate,
+  indexToParcelStartDate,
   jsonStrAppend,
   NORMAL_CACHE_DURATION,
   PARCEL_SIZE,
+  toIndex,
 } from "app/api/candlesticks/utils";
 import {
   type ArenaCandlestickModel,
@@ -16,14 +19,7 @@ import {
 import { type AnyNumberString } from "@sdk-types";
 import { unstable_cache } from "next/cache";
 import { type ArenaPeriod } from "@sdk/const";
-
-const {
-  indexToParcelStartDate,
-  indexToParcelEndDate,
-  getPeriodDurationSeconds,
-  toIndex,
-  getArenaPeriodStartTimeFromTime,
-} = ArenaCandlesticksUtils;
+import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
 
 const getCandlesticks = async (
   params: Pick<ArenaCandlesticksSearchParams, "meleeID" | "period"> & { index: number }
@@ -87,7 +83,7 @@ const getMeleeStartPeriodBoundary = (meleeID: AnyNumberString, period: ArenaPeri
       }
       return time;
     })
-    .then((validTime) => new Date(Number(getArenaPeriodStartTimeFromTime(validTime, period))));
+    .then((validTime) => new Date(Number(getPeriodStartTimeFromTime(validTime, period))));
 
 const getHistoricCachedCandlesticks = unstable_cache(
   getCandlesticks,

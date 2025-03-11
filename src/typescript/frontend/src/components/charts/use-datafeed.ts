@@ -12,6 +12,7 @@ import {
   fetchLatestBarsFromMarketResource,
   updateLastTwoBars,
   createDummyBar,
+  fetchArenaCandlesticksForChart,
 } from "./get-bars";
 import {
   CONFIGURATION_DATA,
@@ -59,7 +60,10 @@ export const useDatafeed = (symbol: string) => {
           router.refresh();
         }
 
-        const symbolInfo = constructLibrarySymbolInfo(baseChartSymbol, emptyBars);
+        const symbolInfo = constructLibrarySymbolInfo(
+          baseChartSymbol,
+          emptyBars,
+        );
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
@@ -92,12 +96,11 @@ export const useDatafeed = (symbol: string) => {
             const { marketID: secondaryMarketID, marketAddress: secondaryMarketAddress } =
               entry0.marketMetadata;
 
-            bars = null as any; // TODO: fetch arena candlesticks, then store them in state.
-            bars = null as any; // TODO: fetch arena candlesticks, then store them in state.
-            bars = null as any; // TODO: fetch arena candlesticks, then store them in state.
-            bars = null as any; // TODO: fetch arena candlesticks, then store them in state.
-            bars = null as any; // TODO: fetch arena candlesticks, then store them in state.
-            bars = null as any; // TODO: fetch arena candlesticks, then store them in state.
+            bars = await fetchArenaCandlesticksForChart({
+              meleeID,
+              periodParams,
+              period,
+            });
           } else {
             const entry = getRegisteredMarketMap().get(symbol);
             if (!entry) {
@@ -152,6 +155,7 @@ export const useDatafeed = (symbol: string) => {
         _onResetCacheNeededCallback
       ) => {
         const symbol = symbolInfoToSymbol(symbolInfo);
+        console.log(resolution);
         const period = ResolutionStringToPeriod[resolution.toString()];
         const marketEmojis = getSymbolEmojisInString(symbol);
         subscribeToPeriod({
