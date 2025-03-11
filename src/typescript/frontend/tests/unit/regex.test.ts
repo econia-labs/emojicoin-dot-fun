@@ -69,7 +69,7 @@ describe("regex tests", () => {
   });
 
   it("returns NaN for an invalid date time", () => {
-    expect(new Date("asdfkljh").getTime()).toBe(NaN);
+    expect(new Date("baba boo ey").getTime()).toBe(NaN);
   });
 
   test.each([

@@ -13,7 +13,7 @@ describe("json parse and stringify tests", () => {
           "bool": true,
           "bool2": false,
           "my_number": 10,
-          "okie": [10, "ok!", 3, false, "boooo"]
+          "okie": [10, "ok!", 3, false, "boo"]
         }
     `;
     const obj = {
@@ -22,7 +22,7 @@ describe("json parse and stringify tests", () => {
       bool: true,
       bool2: false,
       my_number: 10,
-      okie: [10, "ok!", 3, false, "boooo"],
+      okie: [10, "ok!", 3, false, "boo"],
     };
     expect(parseJSON(text)).toEqual(obj);
     const stringified = stringifyJSON(obj);
