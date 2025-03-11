@@ -11,7 +11,7 @@ import { isNumberInConstruction } from "@sdk/utils";
 import { Label } from "@/components/ui/Label";
 import { successfulTransactionToast } from "@/components/wallet/toasts";
 import { toast } from "react-toastify";
-import { LOCAL_PUBLISHER } from "./local-publisher";
+import { getLocalPublisher } from "./local-publisher";
 
 const MICROSECONDS_PER_MINUTE = 60 * 1000 * 1000;
 
@@ -28,7 +28,7 @@ export const SetMeleeDurationForm = ({ className }: React.HTMLAttributes<HTMLDiv
     const durationAsMicroseconds = BigInt(floored);
     EmojicoinArena.SetNextMeleeDuration.submit({
       aptosConfig: aptos.config,
-      emojicoinArena: LOCAL_PUBLISHER,
+      emojicoinArena: getLocalPublisher(),
       duration: durationAsMicroseconds,
     }).then((res) => {
       if (res.success) {
