@@ -80,11 +80,11 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const marketAddress = getMarketAddress(emojis).toString();
 
     const [chats, swaps, marketView, aptPrice, holders, melee] = await Promise.all([
-      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
-      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() => []),
+      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() => []),
       wrappedCachedContractMarketView(marketAddress),
-      getAptPrice(),
-      fetchCachedTopHolders(marketAddress),
+      getAptPrice().catch(() => undefined),
+      fetchCachedTopHolders(marketAddress).catch(() => []),
       fetchMelee({})
         .then((res) => (res ? res.melee : null))
         .catch(() => null),
