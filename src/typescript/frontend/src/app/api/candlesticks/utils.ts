@@ -2,7 +2,7 @@
 
 import {
   type AnyNumberString,
-  AnyPeriod,
+  type AnyPeriod,
   getPeriodStartTimeFromTime,
   type Period,
   PeriodDuration,
