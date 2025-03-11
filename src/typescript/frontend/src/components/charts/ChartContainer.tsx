@@ -16,6 +16,8 @@ export const ChartContainer = (props: ChartContainerProps) => {
         <Suspense fallback={<Loading emojis={props.emojis} />}>
           <MemoizedChart
             symbol={props.symbol}
+            secondarySymbol={props.secondarySymbol}
+            className={props.className}
           />
         </Suspense>
       )}

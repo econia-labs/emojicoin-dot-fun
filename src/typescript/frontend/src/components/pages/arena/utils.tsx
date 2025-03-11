@@ -1,3 +1,4 @@
+import { type SymbolEmojiData } from "@econia-labs/emojicoin-sdk";
 import { useMatchBreakpoints } from "@hooks/index";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
@@ -14,13 +15,16 @@ export type ArenaProps = {
   arenaInfo: ArenaInfoModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
+  symbol0: string;
+  symbol1: string;
 };
 
-export type ArenaPropsWithPositionAndHistory = ArenaProps & {
+export type ArenaPropsWithPositionHistoryAndEmojiData = ArenaProps & {
   position?: ArenaPositionModel | null;
   setPosition: (position: ArenaPositionModel | null) => void;
   history: ArenaLeaderboardHistoryWithArenaInfoModel[];
   setHistory: (position: ArenaLeaderboardHistoryWithArenaInfoModel[]) => void;
+  allEmojiData: SymbolEmojiData[];
 };
 
 export const Box = ({

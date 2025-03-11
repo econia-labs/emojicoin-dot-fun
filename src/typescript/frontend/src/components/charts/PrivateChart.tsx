@@ -7,6 +7,7 @@ import { useUserSettings } from "context/event-store-context";
 import { BrowserNotSupported } from "./BrowserNotSupported";
 import { createSwitch } from "components/charts/EmptyCandlesSwitch";
 import { useDatafeed } from "./use-datafeed";
+import { cn } from "lib/utils/class-name";
 
 /**
  * The TradingView Chart component. This component is responsible for rendering the TradingView chart with the usage of
@@ -19,18 +20,22 @@ import { useDatafeed } from "./use-datafeed";
  * {@link https://github.com/econia-labs/emojicoin-dot-fun/tree/main/src/typescript/frontend/src/components/charts/README.md}
  * for a more detailed explanation of the architectural data flow.
  */
-export const Chart = (props: Omit<ChartContainerProps, "emojis">) => {
+export const Chart = ({
+  symbol,
+  secondarySymbol = undefined,
+  className = "",
+}: Omit<ChartContainerProps, "emojis">) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const showEmptyBars = useUserSettings((s) => s.showEmptyBars);
   const setShowEmptyBars = useUserSettings((s) => s.setShowEmptyBars);
-  const datafeed = useDatafeed(props.symbol);
+  const datafeed = useDatafeed(symbol);
 
   useEffect(() => {
     if (ref.current) {
       tvWidget.current = new widget({
         ...WIDGET_OPTIONS,
-        symbol: encodeSymbolsForChart(props.symbol, props.secondarySymbol),
+        symbol: encodeSymbolsForChart(symbol, secondarySymbol),
         datafeed,
         container: ref.current,
         timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone ?? "Etc/UTC") as Timezone,
@@ -82,10 +87,11 @@ export const Chart = (props: Omit<ChartContainerProps, "emojis">) => {
         tvWidget.current = undefined;
       }
     };
-  }, [datafeed, props.symbol]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [datafeed, symbol]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="relative w-full h-[420px]">
+    // Parent must be relative for the visual fallback with `BrowserNotSupported` to work.
+    <div className={cn("relative", className)}>
       <BrowserNotSupported />
       <div ref={ref} className="relative h-full w-full"></div>
     </div>

@@ -1,7 +1,7 @@
 // cspell:word Kolkata
 // cspell:word Fakaofo
 
-import { isValidMarketSymbol, toMarketEmojiData } from "@sdk/emoji_data";
+import { isValidMarketSymbol } from "@sdk/emoji_data";
 import { type Bar } from "@static/charting_library/datafeed-api";
 
 /**
