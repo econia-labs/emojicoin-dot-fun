@@ -9,10 +9,8 @@ import _ from "lodash";
 import { Emoji } from "utils/emoji";
 import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import type { OrderByStrings } from "@sdk/indexer-v2/const";
 import { encodeEmojis, type AnyEmoji, type SymbolEmoji } from "@sdk/emoji_data";
-import { fetchSpecificMarketsAction } from "./fetch-specific-markets-action";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { toExplorerLink } from "lib/utils/explorer-link";
@@ -98,16 +96,6 @@ export const WalletTransactionTable = ({
 }) => {
   const [orderBy, setOrderBy] = useState<OrderByStrings>("desc");
 
-  const marketQuery = useQuery({
-    queryKey: ["fetchMarket", emojis],
-    queryFn: async () => {
-      const markets = await fetchSpecificMarketsAction([emojis]);
-      if (markets.length === 0) return null;
-      return markets[0];
-    },
-    enabled: emojis.length > 0,
-  });
-
   const query = useSwapEventsQuery({
     sender: address,
     orderBy,
@@ -125,7 +113,7 @@ export const WalletTransactionTable = ({
         }}
         defaultSortColumn="time"
         items={query.data?.pages.flatMap((page) => page) ?? []}
-        isLoading={query.isLoading || marketQuery.isFetching}
+        isLoading={query.isLoading}
         // In this case we can only sort by a single column, so no need to check for column.
         serverSideOrderHandler={(_, dir) => setOrderBy(dir)}
         pagination={query}
