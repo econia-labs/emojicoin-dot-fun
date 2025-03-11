@@ -58,7 +58,7 @@ const MELEE_START_TIMES_TAG = "melee-start-times" as const;
  * There is no clear way to circumvent this issue- it is a limitation of `unstable_cache`, and
  * `revalidateTag` is not clear or worth the time to figure out properly.
  */
-const START_TIME_IF_FAILURE = 777777777777777 as const;
+const START_TIME_IF_FAILURE = 777777777777777 as const; // new Date(777...777) === year ~22,600.
 
 const getMeleeStartMs = async (meleeID: AnyNumberString) =>
   fetchArenaInfoByMeleeID({ meleeID }).then((res) => {
