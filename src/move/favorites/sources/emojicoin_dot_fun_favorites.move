@@ -16,6 +16,10 @@ module favorites::emojicoin_dot_fun_favorites {
 
     /// Market not found.
     const E_MARKET_NOT_FOUND: u64 = 1;
+    /// Market is already a favorite.
+    const E_ALREADY_FAVORITE: u64 = 2;
+    /// Market is not a favorite.
+    const E_NOT_FAVORITE: u64 = 3;
 
     struct Nil {}
     has copy, drop, store;
@@ -50,6 +54,10 @@ module favorites::emojicoin_dot_fun_favorites {
         event::emit(Favorite { user: user_address, market, is_favorite: true });
         if (exists<FavoriteData>(user_address)) {
             let favorites = borrow_global_mut<FavoriteData>(user_address);
+            assert!(
+                !favorites.markets.contains(&market),
+                E_ALREADY_FAVORITE
+            );
             favorites.markets.add(market, Nil {});
         } else {
             let map = ordered_map::new();
@@ -67,7 +75,15 @@ module favorites::emojicoin_dot_fun_favorites {
     public entry fun unset_favorite(user: &signer, market: address) acquires FavoriteData {
         let user_address = signer::address_of(user);
         event::emit(Favorite { user: user_address, market, is_favorite: false });
+        assert!(
+            exists<FavoriteData>(user_address),
+            E_NOT_FAVORITE
+        );
         let favorites = borrow_global_mut<FavoriteData>(user_address);
+        assert!(
+            favorites.markets.contains(&market),
+            E_NOT_FAVORITE
+        );
         favorites.markets.remove(&market);
         if (favorites.markets.length() == 0) {
             move_from<FavoriteData>(user_address);
@@ -201,10 +217,7 @@ module favorites::emojicoin_dot_fun_favorites {
         assert!(account_1_favorites.contains(&market_2_address));
     }
 
-    #[
-        test,
-        expected_failure(abort_code = E_SIMPLE_MAP_NOT_FOUND, location = 0x1::ordered_map)
-    ]
+    #[test, expected_failure(abort_code = E_NOT_FAVORITE)]
     fun test_unset_non_favorite() acquires FavoriteData {
         init_emojicoin();
         let account_1_signer = get_signer(ACCOUNT_1);
@@ -221,7 +234,7 @@ module favorites::emojicoin_dot_fun_favorites {
         assert!(account_1_favorites.contains(&market_1_address));
     }
 
-    #[test, expected_failure(major_status = 4008, location = Self)]
+    #[test, expected_failure(abort_code = E_NOT_FAVORITE)]
     fun test_unset_no_favorites() acquires FavoriteData {
         init_emojicoin();
 
@@ -236,12 +249,7 @@ module favorites::emojicoin_dot_fun_favorites {
         assert!(account_1_favorites.length() == 0);
     }
 
-    #[
-        test,
-        expected_failure(
-            abort_code = E_SIMPLE_MAP_ALREADY_EXISTS, location = 0x1::ordered_map
-        )
-    ]
+    #[test, expected_failure(abort_code = E_ALREADY_FAVORITE)]
     fun test_set_favorite_twice() acquires FavoriteData {
         init_emojicoin();
 
