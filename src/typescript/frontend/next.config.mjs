@@ -22,6 +22,13 @@ const debugConfigOptions = {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    // This is the publisher private key used in test. Hard code a fallback for convenience, since
+    // an incorrect value would be an obvious, trivial fix that only affects local development.
+    PUBLISHER_PRIVATE_KEY:
+      process.env.PUBLISHER_PRIVATE_KEY ??
+      "eaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e",
+  },
   ...(DEBUG ? debugConfigOptions : {}),
   crossOrigin: "use-credentials",
   typescript: {
