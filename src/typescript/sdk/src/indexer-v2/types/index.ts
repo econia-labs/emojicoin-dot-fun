@@ -1088,6 +1088,16 @@ export const isEventModelWithMarket = (data: BrokerEventModels): data is EventMo
   isMarketStateModel(data) ||
   isLiquidityEventModel(data);
 
+/**
+ * Event models that are emitted in a transaction and thus always have transaction metadata.
+ */
+export type TransactionEventModels = Extract<
+  BrokerEventModels,
+  { transaction: TransactionMetadata }
+>;
+export const isTransactionEventModel = (data: BrokerEventModels): data is TransactionEventModels =>
+  "transaction" in data;
+
 export * from "./common";
 export * from "./json-types";
 export * from "./postgres-numeric-types";
