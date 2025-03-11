@@ -65,5 +65,5 @@ export default async function middleware(request: NextRequest) {
 // Note this must be a static string- we can't dynamically construct it.
 export const config = {
   /* eslint-disable-next-line */
-  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|webclip.png|social-preview.png|manifest.json|images/wallets).*)`,
+  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|social-preview.png|manifest.json|images/wallets).*)`,
 };
