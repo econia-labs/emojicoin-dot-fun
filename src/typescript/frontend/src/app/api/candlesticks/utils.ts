@@ -3,16 +3,15 @@
 import {
   type AnyNumberString,
   getPeriodStartTimeFromTime,
-  isPeriod,
   type Period,
   PeriodDuration,
   periodEnumToRawDuration,
 } from "@sdk/index";
-import { isNumber } from "utils";
 import { unstable_cache } from "next/cache";
 import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
 import { parseJSON, stringifyJSON } from "utils";
 import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
+import { type CandlesticksSearchParams } from "./search-params-schema";
 
 /**
  * Parcel size is the amount of candlestick periods that will be in a single parcel.
@@ -50,48 +49,9 @@ export const jsonStrAppend = (a: string, b: string): string => {
 };
 
 export type GetCandlesticksParams = {
-  marketID: number;
+  marketID: AnyNumberString;
   index: number;
   period: Period;
-};
-
-/**
- * The search params used in the `GET` request at `candlesticks/api`.
- *
- * @property {string} marketID      - The market ID.
- * @property {string} to            - The end time boundary.
- * @property {string} period        - The {@link Period}.
- * @property {string} countBack     - The `countBack` value requested by the datafeed API.
- */
-export type CandlesticksSearchParams = {
-  marketID: string | null;
-  to: string | null;
-  period: string | null;
-  countBack: string | null;
-};
-
-/**
- * Validated {@link CandlesticksSearchParams}.
- */
-export type ValidCandlesticksSearchParams = {
-  marketID: string;
-  to: string;
-  period: Period;
-  amount: string;
-  countBack: string;
-};
-
-export const isValidCandlesticksSearchParams = (
-  params: CandlesticksSearchParams
-): params is ValidCandlesticksSearchParams => {
-  const { marketID, to, period, countBack } = params;
-  // prettier-ignore
-  return (
-    marketID !== null && isNumber(marketID) &&
-    to !== null && isNumber(to) &&
-    countBack !== null && isNumber(countBack) &&
-    period !== null && isPeriod(period)
-  );
 };
 
 export const HISTORICAL_CACHE_DURATION = 60 * 60 * 24 * 365; // 1 year.
@@ -180,12 +140,8 @@ const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
   { revalidate: 5 }
 );
 
-export const getCandlesticksRoute = async (
-  marketID: number,
-  to: number,
-  period: Period,
-  countBack: number
-) => {
+export const getCandlesticksRoute = async (args: CandlesticksSearchParams) => {
+  const { marketID, to, period, countBack } = args;
   const index = toIndex(to, period);
 
   let data: string = "[]";
