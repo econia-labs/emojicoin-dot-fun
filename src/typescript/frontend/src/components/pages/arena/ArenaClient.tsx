@@ -15,6 +15,7 @@ import {
   type ArenaPositionModel,
 } from "@sdk/indexer-v2/types";
 import { ROUTES } from "router/routes";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -96,6 +97,8 @@ export const ArenaClient = (props: ArenaProps) => {
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
+
+  useReliableSubscribe({ eventTypes: ["Swap"], arena: true, arenaCandlesticks: true });
 
   const r = useMemo(
     () =>

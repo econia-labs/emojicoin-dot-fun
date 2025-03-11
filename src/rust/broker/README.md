@@ -44,14 +44,18 @@ Arena events don't follow the same rules as the other subscriptions.
 To subscribe to arena events, simply pass `{ "arena": true }`. The default value
 is `false`; i.e., no subscription to arena events.
 
+To subscribe to arena candlesticks, pass `{ "arena_candlesticks": true }`. The
+default value is `false`.
+
 ```json5
 // Subscribe to every single event type.
-{ "arena": true, "markets": [], "event_types": [] }
+{ "arena": true, "arena_candlesticks": true, "markets": [], "event_types": [] }
 
 // Subscribe to all non-arena event types.
-// Both of the JSON objects below are equivalent.
+// All of the JSON objects below are equivalent.
 { "markets": [], "event_types": [] }
 { "arena": false, "markets": [], "event_types": [] }
+{ "arena_candlesticks": false, "markets": [], "event_types": [] }
 ```
 
 ### All markets, all non-arena event types

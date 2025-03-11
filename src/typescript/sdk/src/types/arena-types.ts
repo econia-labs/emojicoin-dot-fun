@@ -8,7 +8,11 @@ import {
   type ArenaMeleeModel,
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
-} from "../indexer-v2";
+  type ArenaEventModels,
+  type ArenaEventModelWithMeleeID,
+  type ArenaCandlestickModel,
+  // Note that if you import anything more than a type here, you'll get lots of import issues.
+} from "../indexer-v2/types";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
@@ -358,8 +362,19 @@ export const isArenaMeleeModel = (e: BrokerEventModels): e is ArenaMeleeModel =>
 export const isArenaSwapModel = (e: BrokerEventModels): e is ArenaSwapModel =>
   e.eventName === "ArenaSwap";
 
+export const isArenaCandlestickModel = (e: BrokerEventModels): e is ArenaCandlestickModel =>
+  e.eventName === ARENA_CANDLESTICK_NAME;
+
 export const isArenaVaultBalanceUpdateModel = (
   e: BrokerEventModels
 ): e is ArenaVaultBalanceUpdateModel => e.eventName === "ArenaVaultBalanceUpdate";
+
+export const isArenaEventModelWithMeleeID = (
+  e: BrokerEventModels
+): e is ArenaEventModelWithMeleeID =>
+  isArenaEnterModel(e) || isArenaExitModel(e) || isArenaMeleeModel(e) || isArenaSwapModel(e);
+
+export const isArenaEventModel = (e: BrokerEventModels): e is ArenaEventModels =>
+  isArenaEventModelWithMeleeID(e) || isArenaVaultBalanceUpdateModel(e);
 
 /* eslint-enable import/no-unused-modules */

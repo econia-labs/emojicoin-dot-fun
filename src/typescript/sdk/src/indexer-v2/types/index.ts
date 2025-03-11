@@ -1017,7 +1017,8 @@ export type BrokerEventModels =
   | DatabaseModels[TableName.ArenaMeleeEvents]
   | DatabaseModels[TableName.ArenaExitEvents]
   | DatabaseModels[TableName.ArenaSwapEvents]
-  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents]
+  | DatabaseModels[TableName.ArenaCandlesticks];
 
 export type EventModelWithMarket =
   | DatabaseModels[TableName.SwapEvents]
@@ -1026,6 +1027,15 @@ export type EventModelWithMarket =
   | DatabaseModels[TableName.PeriodicStateEvents]
   | DatabaseModels[TableName.MarketLatestStateEvent]
   | DatabaseModels[TableName.LiquidityEvents];
+
+export type ArenaEventModels =
+  | DatabaseModels[TableName.ArenaEnterEvents]
+  | DatabaseModels[TableName.ArenaMeleeEvents]
+  | DatabaseModels[TableName.ArenaExitEvents]
+  | DatabaseModels[TableName.ArenaSwapEvents]
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
+
+export type ArenaEventModelWithMeleeID = Exclude<ArenaEventModels, ArenaVaultBalanceUpdateModel>;
 
 const extractEventType = (guid: string) => {
   const match = guid.match(/^.*::(\w+)::/u);
@@ -1077,6 +1087,16 @@ export const isEventModelWithMarket = (data: BrokerEventModels): data is EventMo
   isMarketLatestStateEventModel(data) ||
   isMarketStateModel(data) ||
   isLiquidityEventModel(data);
+
+/**
+ * Event models that are emitted in a transaction and thus always have transaction metadata.
+ */
+export type TransactionEventModels = Extract<
+  BrokerEventModels,
+  { transaction: TransactionMetadata }
+>;
+export const isTransactionEventModel = (data: BrokerEventModels): data is TransactionEventModels =>
+  "transaction" in data;
 
 export * from "./common";
 export * from "./json-types";
