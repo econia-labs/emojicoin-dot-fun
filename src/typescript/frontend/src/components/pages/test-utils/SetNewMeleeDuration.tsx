@@ -4,22 +4,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "lib/utils/class-name";
 import { useState } from "react";
-import { Ed25519PrivateKey, Hex, Account, Network } from "@aptos-labs/ts-sdk";
+import { Network } from "@aptos-labs/ts-sdk";
 import { EmojicoinArena } from "@/contract-apis";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { isNumberInConstruction } from "@sdk/utils";
 import { Label } from "@/components/ui/Label";
 import { successfulTransactionToast } from "@/components/wallet/toasts";
 import { toast } from "react-toastify";
-
-const publisher = (() => {
-  // This is the publisher private key used in test.
-  const privateKeyString =
-    process.env.PUBLISHER_PRIVATE_KEY ??
-    "eaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e";
-  const privateKey = new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array());
-  return Account.fromPrivateKey({ privateKey });
-})();
+import { getLocalPublisher } from "./local-publisher";
 
 const MICROSECONDS_PER_MINUTE = 60 * 1000 * 1000;
 
@@ -36,7 +28,7 @@ export const SetMeleeDurationForm = ({ className }: React.HTMLAttributes<HTMLDiv
     const durationAsMicroseconds = BigInt(floored);
     EmojicoinArena.SetNextMeleeDuration.submit({
       aptosConfig: aptos.config,
-      emojicoinArena: publisher,
+      emojicoinArena: getLocalPublisher(),
       duration: durationAsMicroseconds,
     }).then((res) => {
       if (res.success) {
