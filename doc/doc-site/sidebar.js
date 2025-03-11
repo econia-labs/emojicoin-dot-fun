@@ -39,29 +39,29 @@ module.exports = {
         'resources/faq',
         'resources/audit',
         'resources/bug-submission-form',
+      ]
+    },
+    {
+      type: 'category',
+      label: '🏗 Integrators',
+      link: {
+        type: 'generated-index'
+      },
+      items: [
+        'resources/integrators/sdk',
         {
           type: 'category',
-          label: '🏗 Integrators',
+          label: '🔗 APIs',
           link: {
             type: 'generated-index'
           },
           items: [
-            'resources/integrators/sdk',
-            {
-              type: 'category',
-              label: '🔗 APIs',
-              link: {
-                type: 'generated-index'
-              },
-              items: [
-                'resources/integrators/api/coingecko',
-                'resources/integrators/api/dexscreener',
-                'resources/integrators/api/trending',
-              ]
-            },
+            'resources/integrators/api/coingecko',
+            'resources/integrators/api/dexscreener',
+            'resources/integrators/api/trending',
           ]
         },
       ]
-    }
+    },
   ]
 }

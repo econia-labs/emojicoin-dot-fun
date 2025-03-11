@@ -31,6 +31,8 @@ All addresses are [AIP-40] compliant, meaning that they include leading 0s.
 
 ### Example return data
 
+<!-- markdownlint-disable MD013 -->
+
 ```json
 [
   {
@@ -76,5 +78,7 @@ All addresses are [AIP-40] compliant, meaning that they include leading 0s.
   }
 ]
 ```
+
+<!-- markdownlint-enable MD013 -->
 
 [AIP-40]: https://github.com/aptos-foundation/AIPs/blob/fa86194b1bd617f7f7f747c5d962b9039286f689/aips/aip-40.md

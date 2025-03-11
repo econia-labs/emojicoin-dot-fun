@@ -37,6 +37,8 @@ Get all tickers from 100 to 200: `/tickers?skip=100`.
 
 `/tickers?limit=1`
 
+<!-- markdownlint-disable MD013 -->
+
 ```json
 [
   {
@@ -97,5 +99,7 @@ Get the first 100 trades for ticker `TICKER` :
   }
 ]
 ```
+
+<!-- markdownlint-enable MD013 -->
 
 [coingecko spec]: https://docs.google.com/document/d/1v27QFoQq1SKT3Priq3aqPgB70Xd_PnDzbOCiuoCyixw/edit?usp=sharing
