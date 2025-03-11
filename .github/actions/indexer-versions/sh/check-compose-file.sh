@@ -8,7 +8,8 @@ COMPOSE_PROCESSOR_IMAGE=$(yq '.services.processor.image' "$COMPOSE_FILE")
 COMPOSE_BROKER_VERSION=$(echo "$COMPOSE_BROKER_IMAGE" | cut -d':' -f2)
 COMPOSE_PROCESSOR_VERSION=$(echo "$COMPOSE_PROCESSOR_IMAGE" | cut -d':' -f2)
 
-# Check if versions match.
+# Check if the versions from GitHub actions output matches the docker compose
+# image versions.
 if [ "$BROKER_VERSION" != "$COMPOSE_BROKER_VERSION" ]; then
 	echo "::error::Docker Compose broker version does not match" \
 		"$BROKER_VERSION from deploy files"
