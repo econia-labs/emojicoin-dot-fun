@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { parseJSON } from "utils";
 import { Period } from "@sdk/const";
 import { getCandlesticksRoute } from "app/api/candlesticks/utils";
+import { type AnyNumberString } from "@sdk-types";
 
 export const revalidate = 2;
 
@@ -36,19 +37,18 @@ export default async function Arena() {
     }),
   ]);
 
-  const to = Math.ceil(new Date().getTime() / 1000);
-  const countBack = 500;
-  const period = Period.Period1M;
+  const getCandlesticks = (marketID: AnyNumberString) =>
+    getCandlesticksRoute({
+      marketID: Number(marketID),
+      to: Math.ceil(new Date().getTime() / 1000),
+      countBack: 500,
+      period: Period.Period1M,
+    }).then((res) => parseJSON<PeriodicStateEventModel[]>(res));
 
   const [candlesticksMarket0, candlesticksMarket1] = await Promise.all([
-    getCandlesticksRoute(Number(market0!.market.marketID), to, period, countBack).then((res) =>
-      parseJSON<PeriodicStateEventModel[]>(res)
-    ),
-    getCandlesticksRoute(Number(market1!.market.marketID), to, period, countBack).then((res) =>
-      parseJSON<PeriodicStateEventModel[]>(res)
-    ),
+    getCandlesticks(market0!.market.marketID),
+    getCandlesticks(market1!.market.marketID),
   ]);
-  /* */
 
   return (
     <ArenaClient
