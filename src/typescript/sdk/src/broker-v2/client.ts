@@ -1,7 +1,6 @@
 import { parseJSONWithBigInts } from "../indexer-v2/json-bigint";
 import { type BrokerEventModels } from "../indexer-v2/types";
 import { type BrokerJsonTypes } from "../indexer-v2/types/json-types";
-import { type AnyNumberString } from "../types";
 import { ensureArray } from "../utils/misc";
 import {
   type BrokerEvent,
@@ -72,6 +71,7 @@ export class WebSocketClient {
       marketIDs: new Set(),
       eventTypes: new Set(),
       arena: false,
+      arenaCandlesticks: false,
     };
     this.client = new WebSocket(new URL(url));
 
@@ -90,7 +90,6 @@ export class WebSocketClient {
 
   public setOnConnect(onConnect: NonNullable<WebSocketClientEventListeners["onConnect"]>) {
     this.client.onopen = (e: Event) => {
-      this.sendToBroker();
       onConnect(e);
     };
   }
@@ -108,43 +107,37 @@ export class WebSocketClient {
   }
 
   @SendToBroker
-  public subscribeMarkets(input: AnyNumberString | AnyNumberString[]) {
-    const newMarkets = new Set(ensureArray(input));
-    newMarkets.forEach((e) => this.subscriptions.marketIDs.add(e));
-  }
-
-  @SendToBroker
-  public subscribeEvents(input: SubscribableBrokerEvents | SubscribableBrokerEvents[]) {
+  public subscribeEvents(
+    input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
+    arena?: {
+      baseEvents?: boolean;
+      candlesticks?: boolean;
+    }
+  ) {
     const newTypes = new Set(ensureArray(input));
     newTypes.forEach((e) => this.subscriptions.eventTypes.add(e));
     if (this.permanentlySubscribeToMarketRegistrations) {
       this.subscriptions.eventTypes.add("MarketRegistration");
     }
+    this.subscriptions.arena = !!arena?.baseEvents;
+    this.subscriptions.arenaCandlesticks = !!arena?.candlesticks;
   }
 
   @SendToBroker
-  public subscribeArena() {
-    this.subscriptions.arena = true;
-  }
-
-  @SendToBroker
-  public unsubscribeMarkets(input: AnyNumberString | AnyNumberString[]) {
-    const newMarkets = new Set(ensureArray(input));
-    newMarkets.forEach((e) => this.subscriptions.marketIDs.delete(e));
-  }
-
-  @SendToBroker
-  public unsubscribeEvents(input: SubscribableBrokerEvents | SubscribableBrokerEvents[]) {
+  public unsubscribeEvents(
+    input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
+    arena?: {
+      baseEvents?: boolean;
+      candlesticks?: boolean;
+    }
+  ) {
     const newTypes = new Set(ensureArray(input));
     if (this.permanentlySubscribeToMarketRegistrations) {
       newTypes.delete("MarketRegistration");
     }
     newTypes.forEach((e) => this.subscriptions.eventTypes.delete(e));
-  }
-
-  @SendToBroker
-  public unsubscribeArena() {
-    this.subscriptions.arena = false;
+    this.subscriptions.arena = !arena?.baseEvents;
+    this.subscriptions.arenaCandlesticks = !arena?.candlesticks;
   }
 
   public sendToBroker() {
@@ -157,6 +150,7 @@ export class WebSocketClient {
         : Array.from(this.subscriptions.marketIDs).map(Number),
       event_types: this.subscribedTo.allBaseEvents ? [] : Array.from(this.subscriptions.eventTypes),
       arena: this.subscriptions.arena,
+      arena_candlesticks: this.subscriptions.arenaCandlesticks,
     };
     const msg = JSON.stringify(subscriptionMessage);
     this.client.send(msg);

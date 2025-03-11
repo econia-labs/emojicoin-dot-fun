@@ -10,11 +10,11 @@ export const CandlesticksSearchParamsSchema = z.object({
 });
 
 /**
- * The search params used in the `GET` request at `candlesticks/api`.
+ * The search params used in the `GET` request at `/api/candlesticks`.
  *
- * @property {string} marketID      - The market ID.
- * @property {string} to            - The end time boundary.
- * @property {string} countBack     - The `countBack` value requested by the datafeed API.
- * @property {string} period        - The {@link Period}.
+ * @property {string} marketID      - A number string, as the market ID.
+ * @property {string} to            - A number string, as the end time boundary as a UNIX timestamp.
+ * @property {string} countBack     - A number string, as `countBack` requested by the datafeed API.
+ * @property {string} period        - A string representing the {@link Period}.
  */
 export type CandlesticksSearchParams = z.infer<typeof CandlesticksSearchParamsSchema>;
