@@ -97,12 +97,14 @@ export const subscribe = (
   client: WebSocket,
   markets: AnyNumberString[],
   eventTypes: SubscribableBrokerEvents[],
-  arena: boolean = false
+  arena: boolean = false,
+  arenaCandlesticks: boolean = false
 ) => {
   const outgoingMessage: SubscriptionMessage = {
     markets: markets.map((n) => Number(n)),
     event_types: eventTypes,
     arena,
+    arena_candlesticks: arenaCandlesticks,
   };
   const json = JSON.stringify(outgoingMessage);
   client.send(json);
