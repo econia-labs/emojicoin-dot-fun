@@ -53,7 +53,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     // Emoji sequence length constraints.
     const MAX_CHAT_MESSAGE_LENGTH: u64 = 100;
-    const MAX_SYMBOL_LENGTH: u8 = 10;
+    const MAX_SYMBOL_LENGTH: u8 = 32;  //version2
+    const MIN_SYMBOL_LENGTH: u8 = 10;
 
     // Periods.
     const PERIOD_1M: u64 = 60_000_000;
@@ -135,6 +136,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO: u64 = 26;
     /// User does not have enough base for swap sell.
     const E_SWAP_NOT_ENOUGH_BASE: u64 = 27;
+    /// Too few bytes in emoji symbol.
+    const E_EMOJI_BYTES_TOO_SHORT: u64 = 28;
 
     /// Exists at package address, tracks the address of the registry object.
     struct RegistryAddress has key {
@@ -2270,10 +2273,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             vector::append(&mut verified_bytes, emoji);
         };
         assert!(!vector::is_empty(&verified_bytes), E_EMOJI_BYTES_EMPTY);
+
         assert!(
             vector::length(&verified_bytes) <= (MAX_SYMBOL_LENGTH as u64),
             E_EMOJI_BYTES_TOO_LONG
         );
+        //make sure bytes are  10 < x <= 32
+        assert!(vector::length(&verified_bytes) > (MIN_SYMBOL_LENGTH as u64),E_EMOJI_BYTES_TOO_SHORT);
 
         verified_bytes
     }

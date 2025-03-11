@@ -165,6 +165,7 @@
     };
     use std::bcs;
     use std::option;
+    use std::signer::address_of;
     use std::string::{Self, String, utf8};
     use std::type_info;
     use std::vector;
@@ -3221,6 +3222,56 @@
         mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_DEPOSIT());
         register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
         register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
+    }
+    fun prepare(){
+        // Initialize module with nonzero time that truncates for some periods.
+        timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
+        let one_day_and_one_hour = get_PERIOD_1D() + get_PERIOD_1H();
+        let time = one_day_and_one_hour;
+        timestamp::update_global_time_for_test(time);
+        init_module(&get_signer(@emojicoin_dot_fun));
+        ensure_aptos_coin_capability_store_initialized();
+
+        // Assert registry view.
+        let registry_view = base_registry_view();
+        registry_view.nonce = 1;
+        registry_view.last_bump_time = get_PERIOD_1D();
+        registry_view.n_markets = 0;
+        assert_registry_view(
+            registry_view,
+            registry_view(),
+        );
+        let market_1_registration_time = time + get_MICROSECONDS_PER_SECOND();
+        time = market_1_registration_time;
+        timestamp::update_global_time_for_test(time);
+    }
+    #[test(caller=@0x123)]
+    fun register_market_normal(caller:&signer){
+        prepare();
+        mint_aptos_coin_to(address_of(caller), get_MARKET_REGISTRATION_DEPOSIT());
+        let symbol = vector[BLACK_CAT,BLACK_CAT,BLACK_CAT];//30bytes
+        register_market(caller, symbol, INTEGRATOR);
+    }
+    #[test(caller=@0x123),
+    expected_failure(
+    abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_EMOJI_BYTES_TOO_LONG,
+    location = emojicoin_dot_fun
+    )]
+    fun register_market_maximun_bytes(caller:&signer){
+        prepare();
+        mint_aptos_coin_to(address_of(caller), get_MARKET_REGISTRATION_DEPOSIT());
+        let symbol = vector[BLACK_CAT,BLACK_CAT,BLACK_CAT,BLACK_CAT]; //40bytes
+        register_market(caller, symbol, INTEGRATOR);
+    }
+    #[test(caller=@0x123),expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_EMOJI_BYTES_TOO_SHORT,
+        location = emojicoin_dot_fun
+    )]
+    fun register_market_normal_min_bytes(caller:&signer){
+        prepare();
+        mint_aptos_coin_to(address_of(caller), get_MARKET_REGISTRATION_DEPOSIT());
+        let symbol = vector[BLACK_CAT]; //10bytes
+        register_market(caller, symbol, INTEGRATOR);
     }
 
     #[test] fun register_market_comprehensive_state_assertion() {
