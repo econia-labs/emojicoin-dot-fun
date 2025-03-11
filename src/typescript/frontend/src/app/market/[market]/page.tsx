@@ -29,6 +29,11 @@ interface EmojicoinPageProps {
 
 const EVENTS_ON_PAGE_LOAD = 25;
 
+const logAndReturnValue = <T extends [] | undefined | null>(dataType: string, onFailure: T) => {
+  console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
+  return onFailure;
+};
+
 export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
   const { market: marketSlug } = params;
   const names = pathToEmojiNames(marketSlug);
@@ -80,14 +85,18 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const marketAddress = getMarketAddress(emojis).toString();
 
     const [chats, swaps, marketView, aptPrice, holders, melee] = await Promise.all([
-      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
-      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
+        logAndReturnValue("chat events", [])
+      ),
+      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
+        logAndReturnValue("swap events", [])
+      ),
       wrappedCachedContractMarketView(marketAddress),
-      getAptPrice(),
-      fetchCachedTopHolders(marketAddress),
+      getAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
+      fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
       fetchMelee({})
         .then((res) => (res ? res.melee : null))
-        .catch(() => null),
+        .catch(() => logAndReturnValue("arena melee data", null)),
     ]);
 
     const isInMelee =
