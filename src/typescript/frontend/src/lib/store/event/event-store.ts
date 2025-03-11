@@ -37,6 +37,7 @@ import {
   isArenaSwapModel,
 } from "@sdk/types/arena-types";
 import { getMeleeIDFromArenaModel, toMappedMelees } from "../arena/utils";
+import { encodeSymbolsForChart } from "lib/chart-utils";
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
@@ -47,9 +48,17 @@ export const createEventStore = () => {
       getRegisteredMarkets: () => {
         return get().markets;
       },
+      getMeleeMap: () => {
+        return get().meleeMap;
+      },
       loadArenaInfoFromServer: (info) => {
         set((state) => {
           state.arenaInfoFromServer = info;
+          const arenaSymbol = encodeSymbolsForChart(
+            info.emojicoin0Symbols.join(""),
+            info.emojicoin1Symbols.join("")
+          );
+          state.meleeMap.set(arenaSymbol, info.meleeID);
         });
       },
       loadMarketStateFromServer: (states) => {

@@ -25,6 +25,7 @@ import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
 import ChartContainer from "@/components/charts/ChartContainer";
 import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
 import { type ClassValue } from "clsx";
+import { useEventStore } from "context/event-store-context/hooks";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -119,12 +120,19 @@ export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
   const { account } = useAptos();
   const router = useRouter();
+  const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
 
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
 
   useReliableSubscribe({ eventTypes: ["Chat"], arena: true });
+
+  useEffect(() => {
+    if (props.arenaInfo) {
+      loadArenaInfoFromServer(props.arenaInfo);
+    }
+  }, [loadArenaInfoFromServer, props.arenaInfo]);
 
   const latestMeleeID = useLatestMeleeID();
 

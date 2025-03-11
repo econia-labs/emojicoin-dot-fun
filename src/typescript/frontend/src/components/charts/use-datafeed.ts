@@ -1,4 +1,4 @@
-import { periodEnumToRawDuration } from "@sdk/const";
+import { isPeriod, periodEnumToRawDuration } from "@sdk/const";
 import { getSymbolEmojisInString } from "@sdk/emoji_data";
 import { type Bar, type IBasicDataFeed } from "@static/charting_library";
 import { useUserSettings, useEventStore } from "context/event-store-context";
@@ -29,6 +29,7 @@ export const useDatafeed = (symbol: string) => {
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
   const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarkets);
+  const getMeleeMap = useEventStore((s) => s.getMeleeMap);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -60,10 +61,7 @@ export const useDatafeed = (symbol: string) => {
           router.refresh();
         }
 
-        const symbolInfo = constructLibrarySymbolInfo(
-          baseChartSymbol,
-          emptyBars,
-        );
+        const symbolInfo = constructLibrarySymbolInfo(baseChartSymbol, emptyBars);
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
@@ -81,27 +79,23 @@ export const useDatafeed = (symbol: string) => {
 
         try {
           if (isArenaChartSymbol(symbol)) {
-            const { primarySymbol, secondarySymbol } = decodeSymbolsForChart(symbol);
-            const entry0 = getRegisteredMarketMap().get(primarySymbol);
-            const entry1 = getRegisteredMarketMap().get(secondarySymbol);
-            if (!entry0 || !entry1) {
-              console.error("Market metadata not in state for one arena symbol:", [
-                primarySymbol,
-                secondarySymbol,
-              ]);
+            const meleeID = getMeleeMap().get(symbol);
+            if (!meleeID) {
+              console.error("Melee ID not in state for arena symbol: ", symbol);
               return;
             }
-            const { marketID: primaryMarketID, marketAddress: primaryMarketAddress } =
-              entry0.marketMetadata;
-            const { marketID: secondaryMarketID, marketAddress: secondaryMarketAddress } =
-              entry0.marketMetadata;
 
             bars = await fetchArenaCandlesticksForChart({
               meleeID,
               periodParams,
               period,
             });
+
+            console.log(bars);
           } else {
+            if (!isPeriod(period)) {
+              throw new Error("Invalid period type for a non-arena symbol.");
+            }
             const entry = getRegisteredMarketMap().get(symbol);
             if (!entry) {
               console.error("Market metadata not in state for:", symbol);

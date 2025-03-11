@@ -319,8 +319,7 @@ export const rawTriggerToEnum = (num: number): Trigger => {
   throw new Error(`Invalid state trigger: ${num}`);
 };
 
-export const rawPeriodToEnum = (num: bigint): Period | ArenaPeriod.Period15S => {
-  if (num === BigInt(PeriodDuration.PERIOD_15S)) return ArenaPeriod.Period15S;
+export const rawPeriodToEnum = (num: bigint): Period => {
   if (num === BigInt(PeriodDuration.PERIOD_1M)) return Period.Period1M;
   if (num === BigInt(PeriodDuration.PERIOD_5M)) return Period.Period5M;
   if (num === BigInt(PeriodDuration.PERIOD_15M)) return Period.Period15M;
@@ -362,7 +361,7 @@ export const toPeriodDuration = (num: number | bigint): PeriodDuration => {
   throw new Error(`Invalid candlestick period duration: ${num}`);
 };
 
-export const NON_ARENA_PERIODS = [
+export const NON_ARENA_PERIODS = new Set([
   Period.Period1M,
   Period.Period5M,
   Period.Period15M,
@@ -370,4 +369,7 @@ export const NON_ARENA_PERIODS = [
   Period.Period1H,
   Period.Period4H,
   Period.Period1D,
-];
+]);
+
+export const isPeriod = (period: Period | ArenaPeriod): period is Period =>
+  (NON_ARENA_PERIODS as Set<string>).has(period);

@@ -1,6 +1,11 @@
 import { type Types } from "@sdk-types";
 import { type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
-import { type SwapEventModel, type PeriodicStateEventModel } from "@sdk/indexer-v2/types";
+import {
+  type SwapEventModel,
+  type PeriodicStateEventModel,
+  type ArenaCandlestickModel,
+  isPeriodicStateEventModel,
+} from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 import Big from "big.js";
@@ -54,14 +59,25 @@ export const marketToLatestBars = <
   return latestBars;
 };
 
-export const toBar = (event: PeriodicStateEventModel): Bar => ({
-  time: Number(event.periodicMetadata.startTime / 1000n),
-  open: q64ToBig(event.periodicState.openPriceQ64).toNumber(),
-  high: q64ToBig(event.periodicState.highPriceQ64).toNumber(),
-  low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
-  close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
-  volume: toNominal(event.periodicState.volumeQuote),
-});
+export function toBar(event: PeriodicStateEventModel | ArenaCandlestickModel): Bar {
+  return isPeriodicStateEventModel(event)
+    ? {
+        time: Number(event.periodicMetadata.startTime / 1000n),
+        open: q64ToBig(event.periodicState.openPriceQ64).toNumber(),
+        high: q64ToBig(event.periodicState.highPriceQ64).toNumber(),
+        low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
+        close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
+        volume: toNominal(event.periodicState.volumeQuote),
+      }
+    : {
+        time: event.startTime.getTime(),
+        open: event.openPrice,
+        high: event.highPrice,
+        low: event.lowPrice,
+        close: event.closePrice,
+        volume: toNominal(event.volume),
+      };
+}
 
 export const createBarFromSwap = (
   event: SwapEventModel,

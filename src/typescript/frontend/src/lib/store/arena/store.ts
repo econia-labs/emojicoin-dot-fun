@@ -6,6 +6,7 @@ import {
   type ArenaInfoModel,
 } from "@sdk/indexer-v2";
 import { type WritableDraft } from "immer";
+import { type ArenaChartSymbol } from "lib/chart-utils";
 
 export type MeleeState = {
   swaps: readonly ArenaSwapModel[];
@@ -17,6 +18,7 @@ export type ArenaState = {
   arenaInfoFromServer?: ArenaInfoModel;
   meleeEvents: readonly ArenaMeleeModel[];
   melees: Readonly<Map<bigint, MeleeState>>;
+  meleeMap: Readonly<Map<ArenaChartSymbol, bigint>>;
 };
 
 export type ArenaActions = {
@@ -33,4 +35,5 @@ export const initializeArenaStore = (): ArenaState => ({
   arenaInfoFromServer: undefined,
   meleeEvents: [],
   melees: new Map(),
+  meleeMap: new Map(),
 });

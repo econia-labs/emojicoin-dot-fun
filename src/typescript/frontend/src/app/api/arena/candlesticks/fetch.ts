@@ -121,6 +121,7 @@ export const fetchArenaCandlesticksRoute = async (args: ArenaCandlesticksSearchP
 
     if (i === 0) {
       const parsed = parseJSON<ArenaCandlestickModel[]>(res.data);
+      console.log(parsed);
       const filtered = parsed.filter((val) => val.startTime.getTime() < to * 1000);
       totalCount += filtered.length;
       data = jsonStrAppend(data, stringifyJSON(filtered));

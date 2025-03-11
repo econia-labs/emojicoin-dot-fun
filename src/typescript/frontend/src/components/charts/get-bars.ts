@@ -4,9 +4,19 @@ import {
   toBar,
 } from "@/store/event/candlestick-bars";
 import { type AnyNumberString, type Types } from "@sdk-types";
-import { Trigger, type Period, periodEnumToRawDuration, type PeriodDuration } from "@sdk/const";
+import {
+  Trigger,
+  type Period,
+  periodEnumToRawDuration,
+  type PeriodDuration,
+  type ArenaPeriod,
+} from "@sdk/const";
 import { toMarketEmojiData } from "@sdk/emoji_data/utils";
-import { type MarketMetadataModel, type PeriodicStateEventModel } from "@sdk/indexer-v2";
+import {
+  type ArenaCandlestickModel,
+  type MarketMetadataModel,
+  type PeriodicStateEventModel,
+} from "@sdk/indexer-v2";
 import { getMarketResource } from "@sdk/markets/utils";
 import { getAptosClient } from "@sdk/utils/aptos-client";
 import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
@@ -14,6 +24,36 @@ import { type Bar, type PeriodParams } from "@static/charting_library";
 import { hasTradingActivity } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
+
+export const fetchArenaCandlesticksForChart = async ({
+  meleeID,
+  periodParams,
+  period,
+}: {
+  meleeID: AnyNumberString;
+  periodParams: PeriodParams;
+  period: Period | ArenaPeriod;
+}): Promise<Bar[]> => {
+  const params = new URLSearchParams({
+    meleeID: meleeID.toString(),
+    period: period.toString(),
+    countBack: periodParams.countBack.toString(),
+    to: periodParams.to.toString(),
+  });
+  return await fetch(`${ROUTES.api.arena.candlesticks}?${params.toString()}`)
+    .then((res) => res.text())
+    .then((res) => {
+      console.log(res);
+      return res;
+    })
+    .then((res) => parseJSON<ArenaCandlestickModel[]>(res))
+    .then((res) =>
+      res
+        .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+        .map(toBar)
+        .reduce(curriedBarsReducer(periodParams.to), [])
+    );
+};
 
 export const fetchCandlesticksForChart = async ({
   marketID,

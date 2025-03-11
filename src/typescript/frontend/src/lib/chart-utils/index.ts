@@ -3,6 +3,7 @@
 
 import { isValidMarketSymbol } from "@sdk/emoji_data";
 import { type Bar } from "@static/charting_library/datafeed-api";
+import { StringToBoolean } from "class-variance-authority/types";
 
 /**
  * Retrieves the client's timezone based on the current system time offset.
@@ -163,17 +164,23 @@ export function formatSymbolWithParams(
 }
 
 const ARENA_SYMBOLS_DELIMITER = "/" as const;
-type ArenaChartSymbol = `${string}${typeof ARENA_SYMBOLS_DELIMITER}${string}`;
+export type ArenaChartSymbol = `${string}${typeof ARENA_SYMBOLS_DELIMITER}${string}`;
 
 /**
  * Encode one or two symbols into one string for the chart implementation.
  * This is to support the custom arena symbol for the chart, where it displays the price ratio
  * of two symbols against each other as a single chart series.
  */
-export const encodeSymbolsForChart = (symbol: string, secondarySymbol?: string) =>
-  [symbol, secondarySymbol].filter((v) => !!v).join(ARENA_SYMBOLS_DELIMITER) as
+export function encodeSymbolsForChart(symbol: string, secondarySymbol: string): ArenaChartSymbol;
+export function encodeSymbolsForChart(symbol: string, secondarySymbol?: string | undefined): string;
+export function encodeSymbolsForChart(
+  symbol: string,
+  secondarySymbol?: string | undefined
+): string | ArenaChartSymbol {
+  return [symbol, secondarySymbol].filter((v) => !!v).join(ARENA_SYMBOLS_DELIMITER) as
     | ArenaChartSymbol
     | string;
+}
 
 /**
  * Decode a symbol name into one or more symbols for the chart implementation.

@@ -70,6 +70,7 @@ export type SetLatestBarsArgs = {
 export type EventActions = {
   getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
+  getMeleeMap: () => Readonly<ArenaState["meleeMap"]>;
   loadMarketStateFromServer: (states: DatabaseModels["market_state"][]) => void;
   loadEventsFromServer: (events: BrokerEventModels[]) => void;
   pushEventsFromClient: (event: BrokerEventModels[], pushToLocalStorage?: boolean) => void;
