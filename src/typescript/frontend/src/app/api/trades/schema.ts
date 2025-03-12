@@ -1,9 +1,9 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { isValidEmojiHex, symbolBytesToEmojis } from "@sdk/emoji_data";
-import { toOrderBy } from "@sdk/indexer-v2/const";
+import { PaginationSchema } from "lib/api/schemas/api-pagination";
 import { z } from "zod";
 
-export const GetTradesSchema = z.object({
+export const GetTradesSchema = PaginationSchema.extend({
   sender: z
     .string()
     .refine((arg) => AccountAddress.isValid({ input: arg }), {
@@ -11,13 +11,6 @@ export const GetTradesSchema = z.object({
     })
     .optional()
     .transform((val) => (val ? AccountAddress.from(val) : undefined)),
-  page: z.coerce.number().int().min(1, "Page must be at least 1").default(1),
-  limit: z.coerce
-    .number()
-    .int()
-    .positive("Limit must be positive")
-    .max(100, "Maximum limit is 100")
-    .default(100),
   marketID: z
     .union([
       z.coerce.number(),
@@ -30,12 +23,6 @@ export const GetTradesSchema = z.object({
       z.number().int("Market ID must be an integer").min(1, "Market ID must be a positive integer")
     )
     .optional(),
-  orderBy: z
-    .enum(["asc", "desc"], {
-      errorMap: () => ({ message: "Order must be either 'asc' or 'desc'" }),
-    })
-    .optional()
-    .transform((o) => (o ? toOrderBy(o) : undefined)),
   symbolEmojis: z
     .string()
     .refine((e) => isValidEmojiHex(e), {
