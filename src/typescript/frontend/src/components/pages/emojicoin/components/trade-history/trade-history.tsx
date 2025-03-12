@@ -36,10 +36,12 @@ export const TradeHistory = (props: TradeHistoryProps) => {
 
   const sortedSwaps = useMemo(() => {
     return _.orderBy(
-      _.uniqBy([...swapsFromStore, ...(swapsQuery.data?.pages.flat() || [])], (i) => i.guid),
-      (i) => i.transaction.version,
+      _.uniqBy([...swapsFromStore, ...(swapsQuery.data?.pages.flat() || [])], (i) =>
+        i.transaction.version.toString()
+      ),
+      (i) => i.transaction.version.toString(),
       "desc"
-    ).map((s, i) => (i === 0 ? { ...toTableItem(s), animateInsertion: true } : toTableItem(s)));
+    ).map((s) => toTableItem(s));
   }, [swapsQuery.data?.pages, swapsFromStore]);
 
   const columns: EcTableColumn<(typeof sortedSwaps)[number]>[] = useMemo(
@@ -123,7 +125,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       }
       textFormat="body-sm"
       columns={columns}
-      getKey={(item) => item.guid}
+      getKey={(item) => item.version.toString()}
       items={sortedSwaps}
       pagination={swapsQuery}
     />

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { EcTableHead } from "./ecTableHead";
 import { Table, TableHeader, TableRow } from "./table";
 import _ from "lodash";
