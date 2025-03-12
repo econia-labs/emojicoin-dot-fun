@@ -395,6 +395,13 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     // first market is registered in relation to 1-minute period boundaries.
     subscribe(client, [], ["MarketRegistration", "MarketLatestState", "Swap", "Chat"]);
 
+    // For some reason, there's an issue with receiving the following state event (for register).
+    // The market registration state event in CI isn't received by the client unless we wait a very
+    // short amount of time in between subscribing and registering.
+    // Sleeping for a short amount of time makes this test significantly less flaky while still
+    // adhering to a reasonable amount of time between subscription message => event reception.
+    await sleep(200);
+
     const market_1 = marketsRegistered[MARKET_INDEX];
     const registerResponse = await RegisterMarket.submit({
       ...senderArgs[MARKET_INDEX],
