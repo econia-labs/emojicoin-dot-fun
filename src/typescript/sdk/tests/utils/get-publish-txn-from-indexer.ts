@@ -4,7 +4,8 @@ import {
   isUserTransactionResponse,
   type TransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { getEvents, Trigger } from "../../src";
+import { Trigger } from "../../src/const";
+import { getEvents } from "../../src/emojicoin_dot_fun/utils";
 import { getAptosClient } from "../../src/utils/aptos-client";
 import { getPublisherPrivateKey } from "./helpers";
 

@@ -1,4 +1,5 @@
-import { MAX_SYMBOL_LENGTH, getEmojisInString, isValidEmoji } from "../../src";
+import { MAX_SYMBOL_LENGTH } from "../const";
+import { getEmojisInString, isValidEmoji } from "./utils";
 
 /**
  * This parses an input string to see if it's a valid symbol.
@@ -9,8 +10,8 @@ import { MAX_SYMBOL_LENGTH, getEmojisInString, isValidEmoji } from "../../src";
  *
  * @example
  * ```typescript
- * isValidSymbol('🟥🟥'); // true
- * isValidSymbol('🟥🟥🟥🟥🟥'); // false (too long)
+ * isValidMarketSymbol('🟥🟥'); // true
+ * isValidMarketSymbol('🟥🟥🟥🟥🟥'); // false (too long)
  * ```
  */
 export const isValidMarketSymbol = (symbol: string): boolean => {

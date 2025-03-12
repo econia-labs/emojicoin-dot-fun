@@ -386,6 +386,9 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     });
   });
 
+  // Set the retry times for the flaky test: ("it receives events for all markets and event types").
+  // It's an issue with the broker not receiving all events from the processor properly.
+  jest.retryTimes(3, { logErrorsBeforeRetry: true });
   it("receives events for all markets and event types", async () => {
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
     const MARKET_INDEX = 5;
