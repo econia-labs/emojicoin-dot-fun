@@ -5,8 +5,6 @@ hide_title: false
 description: CoinGecko API
 ---
 
-# Coingecko API
-
 The Coingecko API is implemented according to the Coingecko official API
 requirements available [here][coingecko spec], with a few necessary changes in
 order to fit emojicoin dot fun.
@@ -54,6 +52,8 @@ Get all tickers from 100 to 200: `/tickers?skip=100`.
 ]
 ```
 
+<!-- markdownlint-enable MD013 -->
+
 ## `/historical_trades`
 
 `/historical_trades` is implemented as according to the [CoinGecko
@@ -99,7 +99,5 @@ Get the first 100 trades for ticker `TICKER` :
   }
 ]
 ```
-
-<!-- markdownlint-enable MD013 -->
 
 [coingecko spec]: https://docs.google.com/document/d/1v27QFoQq1SKT3Priq3aqPgB70Xd_PnDzbOCiuoCyixw/edit?usp=sharing

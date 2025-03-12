@@ -5,8 +5,6 @@ hide_title: false
 description: JS/TS SDK
 ---
 
-# SDKs
-
 The official typescript SDK to interact with the emojicoin.fun project is
 [`@econia-labs/emojicoin-sdk`].
 

@@ -5,8 +5,6 @@ hide_title: false
 description: DexScreener API
 ---
 
-# DEX Screener adapter specification
-
 The DexScreener API is implemented according to [the DexScreener adapter
 specification][dexscreener spec].
 

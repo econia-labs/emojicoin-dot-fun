@@ -5,18 +5,18 @@ hide_title: false
 description: Trending API
 ---
 
-# The trending API
-
 Route: `/api/trending`.
 
 Query the endpoint with no query params for retrieving the top 25 trending
 markets.
 
-Prices are expressed in terms of the base asset being the emojicoin.
-  - `"quote_price": 0.0123` indicates `1` emojicoin is worth `0.0123` APT.
-  - `"usd_price": 0.20` indicates `1` emojicoin is worth `0.20 USD`.
+Prices are expressed in terms of the base asset being the emojicoin:
 
-**NOTE: `market_cap_usd` and `usd_price` may be absent if APT/USD isn't fetched successfully.**
+- `"quote_price": 0.0123` indicates `1` emojicoin is worth `0.0123` APT.
+- `"usd_price": 0.20` indicates `1` emojicoin is worth `0.20 USD`.
+
+**NOTE: `market_cap_usd` and `usd_price` may be absent if APT/USD isn't fetched
+successfully.**
 
 All APT and emojicoin values are returned in their decimalized formats; that
 is, they are divided by $10^8$.
@@ -81,4 +81,4 @@ All addresses are [AIP-40] compliant, meaning that they include leading 0s.
 
 <!-- markdownlint-enable MD013 -->
 
-[AIP-40]: https://github.com/aptos-foundation/AIPs/blob/fa86194b1bd617f7f7f747c5d962b9039286f689/aips/aip-40.md
+[aip-40]: https://github.com/aptos-foundation/AIPs/blob/fa86194b1bd617f7f7f747c5d962b9039286f689/aips/aip-40.md
