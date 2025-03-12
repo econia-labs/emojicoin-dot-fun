@@ -138,7 +138,7 @@ export const ecFetch = async <T extends Record<string, any>>(
     },
     body:
       body && typeof body === "object" && !(body instanceof FormData) && !(body instanceof Blob)
-        ? JSON.stringify(body)
+        ? JSON.stringify(body, (v: unknown) => (typeof v === "bigint" ? v.toString() : v))
         : (body as BodyInit),
   };
 
