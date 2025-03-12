@@ -1,4 +1,5 @@
 import { type Uint64String, type AccountAddressString } from "../emojicoin_dot_fun";
+import { type DatabaseStructType } from "../indexer-v2";
 import type JsonTypes from "./json-types";
 
 export type ArenaJsonTypes = {
@@ -88,4 +89,9 @@ export type ArenaJsonTypes = {
     next_melee_max_match_percentage: Uint64String;
     next_melee_max_match_amount: Uint64String;
   };
+
+  /**
+   * Only exists as JSON data from the database or broker.
+   */
+  ArenaCandlestick: DatabaseStructType["ArenaCandlestick"];
 };
