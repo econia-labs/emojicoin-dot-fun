@@ -32,12 +32,20 @@ pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
 pub fn is_match(subscription: &Subscription, event: &EmojicoinDbEvent) -> bool {
     let event_type: EmojicoinDbEventType = event.into();
     match event_type {
-        EmojicoinDbEventType::ArenaEnter => subscription.arena,
-        EmojicoinDbEventType::ArenaExit => subscription.arena,
-        EmojicoinDbEventType::ArenaMelee => subscription.arena,
-        EmojicoinDbEventType::ArenaSwap => subscription.arena,
-        EmojicoinDbEventType::ArenaVaultBalanceUpdate => subscription.arena,
-        EmojicoinDbEventType::ArenaCandlestick => subscription.arena_candlesticks,
+        EmojicoinDbEventType::ArenaEnter
+        | EmojicoinDbEventType::ArenaExit
+        | EmojicoinDbEventType::ArenaMelee
+        | EmojicoinDbEventType::ArenaSwap
+        | EmojicoinDbEventType::ArenaVaultBalanceUpdate => subscription.arena,
+        EmojicoinDbEventType::ArenaCandlestick => {
+            if let EmojicoinDbEvent::ArenaCandlestick(event) = event {
+                subscription
+                    .arena_candlesticks
+                    .is_some_and(|period| period == event.period)
+            } else {
+                unreachable!("This would only ever be reachable if enums were mapped incorrectly.");
+            }
+        }
         EmojicoinDbEventType::GlobalState => {
             subscription.event_types.is_empty() || subscription.event_types.contains(&event_type)
         }

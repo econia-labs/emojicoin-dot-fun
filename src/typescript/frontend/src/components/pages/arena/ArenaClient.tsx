@@ -18,6 +18,7 @@ import { ROUTES } from "router/routes";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { useRouter } from "next/navigation";
 import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
+import { DEFAULT_BROKER_PERIOD } from "@/components/charts/const";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();

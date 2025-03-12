@@ -1,5 +1,5 @@
 import { parseJSONWithBigInts } from "../indexer-v2/json-bigint";
-import { type BrokerEventModels } from "../indexer-v2/types";
+import { type PeriodTypeFromBroker, type BrokerEventModels } from "../indexer-v2/types";
 import { type BrokerJsonTypes } from "../indexer-v2/types/json-types";
 import { ensureArray } from "../utils/misc";
 import {
@@ -71,7 +71,7 @@ export class WebSocketClient {
       marketIDs: new Set(),
       eventTypes: new Set(),
       arena: false,
-      arenaCandlesticks: false,
+      arenaCandlesticks: undefined,
     };
     this.client = new WebSocket(new URL(url));
 
@@ -107,20 +107,27 @@ export class WebSocketClient {
   }
 
   @SendToBroker
+  public subscribeToArenaPeriod(period: PeriodTypeFromBroker) {
+    this.subscriptions.arenaCandlesticks = period;
+  }
+
+  @SendToBroker
+  public unsubscribeFromAllArenaPeriods() {
+    this.subscriptions.arenaCandlesticks = undefined;
+  }
+
+  @SendToBroker
   public subscribeEvents(
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
     arena?: {
       baseEvents?: boolean;
-      candlesticks?: boolean;
+      candlesticks?: PeriodTypeFromBroker;
     }
   ) {
     const newTypes = new Set(ensureArray(input));
     newTypes.forEach((e) => this.subscriptions.eventTypes.add(e));
-    if (this.permanentlySubscribeToMarketRegistrations) {
-      this.subscriptions.eventTypes.add("MarketRegistration");
-    }
     this.subscriptions.arena = !!arena?.baseEvents;
-    this.subscriptions.arenaCandlesticks = !!arena?.candlesticks;
+    this.subscriptions.arenaCandlesticks = arena?.candlesticks;
   }
 
   @SendToBroker
@@ -128,22 +135,23 @@ export class WebSocketClient {
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
     arena?: {
       baseEvents?: boolean;
-      candlesticks?: boolean;
+      candlesticks?: PeriodTypeFromBroker;
     }
   ) {
     const newTypes = new Set(ensureArray(input));
-    if (this.permanentlySubscribeToMarketRegistrations) {
-      newTypes.delete("MarketRegistration");
-    }
     newTypes.forEach((e) => this.subscriptions.eventTypes.delete(e));
     this.subscriptions.arena = !arena?.baseEvents;
-    this.subscriptions.arenaCandlesticks = !arena?.candlesticks;
+    this.subscriptions.arenaCandlesticks = arena?.candlesticks;
   }
 
   public sendToBroker() {
     if (this.client.readyState !== this.client.OPEN) {
       return;
     }
+    if (this.permanentlySubscribeToMarketRegistrations) {
+      this.subscriptions.eventTypes.add("MarketRegistration");
+    }
+
     const subscriptionMessage: SubscriptionMessage = {
       markets: this.subscribedTo.allMarkets
         ? []

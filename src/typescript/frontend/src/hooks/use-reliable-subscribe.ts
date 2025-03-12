@@ -1,11 +1,12 @@
 import { type SubscribableBrokerEvents } from "@/broker/types";
+import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 import { useEventStore } from "context/event-store-context/hooks";
 import { useEffect } from "react";
 
 export type ReliableSubscribeArgs = {
   eventTypes: Array<SubscribableBrokerEvents>;
   arena?: boolean;
-  arenaCandlesticks?: boolean;
+  arenaCandlesticks?: PeriodTypeFromBroker;
 };
 
 /**

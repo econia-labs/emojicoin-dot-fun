@@ -1,4 +1,9 @@
-import { type BrokerEventModels, DatabaseTypeConverter } from "../indexer-v2/types";
+import { type AnyPeriod, ArenaPeriod } from "..";
+import {
+  type BrokerEventModels,
+  DatabaseTypeConverter,
+  type PeriodTypeFromBroker,
+} from "../indexer-v2/types";
 import {
   type BrokerJsonTypes,
   type DatabaseJsonType,
@@ -18,7 +23,7 @@ export type SubscribableBrokerEvents =
   | "PeriodicState"
   | "MarketRegistration";
 
-type BrokerArenaEvent =
+export type BrokerArenaEvent =
   | "ArenaEnter"
   | "ArenaExit"
   | "ArenaMelee"
@@ -84,7 +89,7 @@ export type SubscriptionMessage = {
   markets: number[];
   event_types: BrokerEvent[];
   arena: boolean;
-  arena_candlesticks: boolean;
+  arena_candlesticks?: PeriodTypeFromBroker;
 };
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -92,5 +97,18 @@ export type WebSocketSubscriptions = {
   marketIDs: Set<AnyNumberString>;
   eventTypes: Set<BrokerEvent>;
   arena: boolean;
-  arenaCandlesticks: boolean;
+  arenaCandlesticks?: PeriodTypeFromBroker;
 };
+
+const PeriodToBrokerPeriodType: Record<AnyPeriod, PeriodTypeFromBroker> = {
+  [ArenaPeriod.Period15S]: "FifteenSeconds",
+  [ArenaPeriod.Period1M]: "OneMinute",
+  [ArenaPeriod.Period5M]: "FiveMinutes",
+  [ArenaPeriod.Period15M]: "FifteenMinutes",
+  [ArenaPeriod.Period30M]: "ThirtyMinutes",
+  [ArenaPeriod.Period1H]: "OneHour",
+  [ArenaPeriod.Period4H]: "FourHours",
+  [ArenaPeriod.Period1D]: "OneDay",
+};
+
+export const periodToPeriodTypeFromBroker = (period: AnyPeriod) => PeriodToBrokerPeriodType[period];

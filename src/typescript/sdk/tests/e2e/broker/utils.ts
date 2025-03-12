@@ -1,4 +1,4 @@
-import { type AnyNumberString, waitFor } from "../../../src";
+import { type AnyNumberString, type PeriodTypeFromBroker, waitFor } from "../../../src";
 import {
   type BrokerEvent,
   type BrokerMessage,
@@ -98,7 +98,7 @@ export const subscribe = (
   markets: AnyNumberString[],
   eventTypes: SubscribableBrokerEvents[],
   arena: boolean = false,
-  arenaCandlesticks: boolean = false
+  arenaCandlesticks?: PeriodTypeFromBroker
 ) => {
   const outgoingMessage: SubscriptionMessage = {
     markets: markets.map((n) => Number(n)),
