@@ -29,6 +29,7 @@ darkgray
 dasharray
 defi
 devnet
+dexscreener
 diya
 dockerenv
 dockerhub
