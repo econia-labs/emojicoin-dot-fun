@@ -10,6 +10,7 @@ pub enum EventType {
     State,
     GlobalState,
     PeriodicState,
+    Candlestick,
     MarketRegistration,
 }
 
