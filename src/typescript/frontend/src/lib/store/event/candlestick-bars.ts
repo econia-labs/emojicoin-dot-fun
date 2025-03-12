@@ -1,5 +1,10 @@
 import { type Types } from "@sdk-types";
-import { type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
+import {
+  type ArenaPeriod,
+  type Period,
+  periodEnumToRawDuration,
+  rawPeriodToEnum,
+} from "@sdk/const";
 import {
   type SwapEventModel,
   type PeriodicStateEventModel,
@@ -21,13 +26,13 @@ export type Bar = {
 };
 
 export type LatestBar = Bar & {
-  period: Period;
-  marketNonce: bigint;
+  period: Period | ArenaPeriod;
+  nonce: bigint;
 };
 
 export const periodicStateTrackerToLatestBar = (
   tracker: Types["PeriodicStateTracker"],
-  marketNonce: bigint
+  nonce: bigint
 ): LatestBar => {
   const { startTime } = tracker;
   return {
@@ -38,7 +43,7 @@ export const periodicStateTrackerToLatestBar = (
     close: q64ToBig(tracker.closePriceQ64).toNumber(),
     volume: toNominal(tracker.volumeQuote),
     period: rawPeriodToEnum(tracker.period),
-    marketNonce,
+    nonce,
   };
 };
 
@@ -97,7 +102,7 @@ export const createBarFromSwap = (
     close: price,
     volume: toNominal(swap.quoteVolume),
     period,
-    marketNonce: market.marketNonce,
+    nonce: market.marketNonce,
   };
 };
 
@@ -118,6 +123,6 @@ export const createBarFromPeriodicState = (
     close: price,
     volume: 0,
     period,
-    marketNonce: market.marketNonce,
+    nonce: market.marketNonce,
   };
 };

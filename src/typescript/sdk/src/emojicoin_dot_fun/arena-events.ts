@@ -1,4 +1,5 @@
-import { type Types, type JsonTypes, type AnyNumberString } from "../types";
+import { type Types, type AnyNumberString } from "../types";
+import { type ArenaJsonTypes } from "../types/arena-json-types";
 import {
   toArenaEnterEvent,
   toArenaExitEvent,
@@ -48,7 +49,7 @@ export const createEmptyArenaEvents = (): ArenaEvents => ({
 
 type ArenaConverter = {
   [K in ArenaStructName]: (
-    data: JsonTypes[K],
+    data: ArenaJsonTypes[K],
     version: AnyNumberString,
     eventIndex: AnyNumberString
   ) => Types[K];

@@ -9,7 +9,7 @@ import {
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
   type ArenaEventModels,
-  type ArenaEventModelWithMeleeID,
+  type ArenaModelWithMeleeID,
   type ArenaCandlestickModel,
   // Note that if you import anything more than a type here, you'll get lots of import issues.
 } from "../indexer-v2/types";
@@ -369,12 +369,14 @@ export const isArenaVaultBalanceUpdateModel = (
   e: BrokerEventModels
 ): e is ArenaVaultBalanceUpdateModel => e.eventName === "ArenaVaultBalanceUpdate";
 
-export const isArenaEventModelWithMeleeID = (
-  e: BrokerEventModels
-): e is ArenaEventModelWithMeleeID =>
-  isArenaEnterModel(e) || isArenaExitModel(e) || isArenaMeleeModel(e) || isArenaSwapModel(e);
+export const isArenaModelWithMeleeID = (e: BrokerEventModels): e is ArenaModelWithMeleeID =>
+  isArenaEnterModel(e) ||
+  isArenaExitModel(e) ||
+  isArenaMeleeModel(e) ||
+  isArenaSwapModel(e) ||
+  isArenaCandlestickModel(e);
 
 export const isArenaEventModel = (e: BrokerEventModels): e is ArenaEventModels =>
-  isArenaEventModelWithMeleeID(e) || isArenaVaultBalanceUpdateModel(e);
+  isArenaModelWithMeleeID(e) || isArenaVaultBalanceUpdateModel(e);
 
 /* eslint-enable import/no-unused-modules */

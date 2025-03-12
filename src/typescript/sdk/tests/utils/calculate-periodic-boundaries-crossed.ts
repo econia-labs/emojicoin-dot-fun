@@ -34,7 +34,7 @@ export const calculatePeriodBoundariesCrossed = ({
   if (start > end) {
     throw new Error("End time cannot be later than start time.");
   }
-  const periodsCrossed = NON_ARENA_PERIODS.reduce(
+  const periodsCrossed = Array.from(NON_ARENA_PERIODS).reduce(
     (acc, period) => {
       // Get each period boundary of the start time; i.e., round it down to the nearest boundary.
       const lowerPeriodBoundary = getPeriodBoundary(start, period);

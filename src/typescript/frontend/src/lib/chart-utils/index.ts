@@ -3,7 +3,6 @@
 
 import { isValidMarketSymbol } from "@sdk/emoji_data";
 import { type Bar } from "@static/charting_library/datafeed-api";
-import { StringToBoolean } from "class-variance-authority/types";
 
 /**
  * Retrieves the client's timezone based on the current system time offset.

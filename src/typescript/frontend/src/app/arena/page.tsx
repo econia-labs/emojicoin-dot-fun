@@ -54,6 +54,7 @@ export default async function Arena() {
       market1={market1!}
       symbol0={symbol0}
       symbol1={symbol1}
+      candlesticks={[]}
     />
   );
 }

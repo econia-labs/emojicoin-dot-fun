@@ -685,10 +685,15 @@ export const GuidGetters = {
     eventName: EVENT_NAMES.ArenaVaultBalanceUpdate,
     guid: `${EVENT_NAMES.ArenaVaultBalanceUpdate}::${sender}::${version}::${event_index}` as const,
   }),
-  arenaCandlestick: ({ melee_id, start_time, period }: DatabaseJsonType["arena_candlesticks"]) => ({
+  arenaCandlestick: ({
+    melee_id,
+    start_time,
+    period,
+    last_transaction_version: version,
+  }: DatabaseJsonType["arena_candlesticks"]) => ({
     // Not a real contract event, but used to classify the type of data.
     eventName: ARENA_CANDLESTICK_NAME,
-    guid: `${ARENA_CANDLESTICK_NAME}::${melee_id}::${period}::${start_time}`,
+    guid: `${ARENA_CANDLESTICK_NAME}::${melee_id}::${period}::${start_time}::${version}`,
   }),
 };
 
@@ -894,7 +899,9 @@ export const toArenaPositionModel = toArenaPositionFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
 export const toArenaInfoModel = toArenaInfoFromDatabase;
-export const toArenaCandlestickModel = (data: DatabaseJsonType["arena_candlesticks"]) => ({
+export const toArenaCandlestickModel = (
+  data: DatabaseJsonType["arena_candlesticks" | "arena_latest_candlesticks"]
+) => ({
   ...toArenaCandlestickFromDatabase(data),
   ...GuidGetters.arenaCandlestick(data),
 });
@@ -988,6 +995,7 @@ export type DatabaseModels = {
   [TableName.ArenaPosition]: ArenaPositionModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
   [TableName.ArenaCandlesticks]: ArenaCandlestickModel;
+  [TableName.ArenaLatestCandlesticks]: ArenaCandlestickModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
   [TableName.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoModel;
@@ -1034,7 +1042,9 @@ export type ArenaEventModels =
   | DatabaseModels[TableName.ArenaSwapEvents]
   | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
 
-export type ArenaEventModelWithMeleeID = Exclude<ArenaEventModels, ArenaVaultBalanceUpdateModel>;
+export type ArenaModelWithMeleeID =
+  | Exclude<ArenaEventModels, ArenaVaultBalanceUpdateModel>
+  | ArenaCandlestickModel;
 
 export const isSwapEventModel = (d: BrokerEventModels): d is SwapEventModel =>
   d.eventName === "Swap";

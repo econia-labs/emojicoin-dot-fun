@@ -1,5 +1,4 @@
 import { isPeriod, periodEnumToRawDuration } from "@sdk/const";
-import { getSymbolEmojisInString } from "@sdk/emoji_data";
 import { type Bar, type IBasicDataFeed } from "@static/charting_library";
 import { useUserSettings, useEventStore } from "context/event-store-context";
 import { decodeSymbolsForChart, isArenaChartSymbol, parseSymbolWithParams } from "lib/chart-utils";
@@ -66,7 +65,7 @@ export const useDatafeed = (symbol: string) => {
       },
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         const { to } = periodParams;
-        const period = ResolutionStringToPeriod[resolution.toString()];
+        const period = ResolutionStringToPeriod[resolution];
         const periodDuration = periodEnumToRawDuration(period);
         const symbol = symbolInfoToSymbol(symbolInfo);
 
@@ -91,7 +90,9 @@ export const useDatafeed = (symbol: string) => {
               period,
             });
 
-            console.log(bars);
+            // Arena candlesticks are emitted as up-to-date candlesticks, and fetched elsewhere.
+            // Thus, it's not necessary to call `setLatestBars` here or do anything like the normal
+            // candlesticks for single markets have to do below.
           } else {
             if (!isPeriod(period)) {
               throw new Error("Invalid period type for a non-arena symbol.");
@@ -149,11 +150,9 @@ export const useDatafeed = (symbol: string) => {
         _onResetCacheNeededCallback
       ) => {
         const symbol = symbolInfoToSymbol(symbolInfo);
-        console.log(resolution);
         const period = ResolutionStringToPeriod[resolution.toString()];
-        const marketEmojis = getSymbolEmojisInString(symbol);
         subscribeToPeriod({
-          marketEmojis,
+          symbol,
           period,
           cb: onRealtimeCallback,
         });
@@ -163,9 +162,8 @@ export const useDatafeed = (symbol: string) => {
         // For example: `🚀_#_5` for the `🚀` market for a resolution of period `5`.
         const [symbol, resolution] = subscriberUID.split("_#_");
         const period = ResolutionStringToPeriod[resolution];
-        const marketEmojis = getSymbolEmojisInString(symbol);
         unsubscribeFromPeriod({
-          marketEmojis,
+          symbol,
           period,
         });
       },
@@ -175,6 +173,7 @@ export const useDatafeed = (symbol: string) => {
       setLatestBars, // Stable reference to a zustand function.
       subscribeToPeriod, // Stable reference to a zustand function.
       unsubscribeFromPeriod, // Stable reference to a zustand function.
+      getMeleeMap, // Stable reference to a zustand function.
       symbol,
       showEmptyBars,
       router,

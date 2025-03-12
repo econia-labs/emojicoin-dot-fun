@@ -1,4 +1,4 @@
-import { type Period } from "@sdk/const";
+import { type ArenaPeriod, type Period } from "@sdk/const";
 import { type SymbolEmoji } from "@sdk/emoji_data";
 import {
   type MarketMetadataModel,
@@ -11,6 +11,7 @@ import { type WritableDraft } from "immer";
 import { type ClientState, type ClientActions } from "../websocket/store";
 import { type ArenaActions, type ArenaState } from "../arena/store";
 import { type Flatten } from "@sdk-types";
+import { type ArenaChartSymbol } from "lib/chart-utils";
 
 // Aliased to avoid repeating the type names over and over.
 type Swap = DatabaseModels["swap_events"];
@@ -23,7 +24,7 @@ type MarketLatestState = DatabaseModels["market_state"];
 
 export type SymbolString = string;
 
-export type CandlestickData = {
+export type CandlestickPeriod = {
   callback: SubscribeBarsCallback | undefined;
   latestBar: LatestBar | undefined;
 };
@@ -39,13 +40,13 @@ export type MarketEventStore = {
   liquidityEvents: readonly Liquidity[];
   stateEvents: readonly (MarketLatestStateEvent | MarketLatestState)[];
   chatEvents: readonly Chat[];
-  [Period.Period1M]: CandlestickData;
-  [Period.Period5M]: CandlestickData;
-  [Period.Period15M]: CandlestickData;
-  [Period.Period30M]: CandlestickData;
-  [Period.Period1H]: CandlestickData;
-  [Period.Period4H]: CandlestickData;
-  [Period.Period1D]: CandlestickData;
+  [Period.Period1M]: CandlestickPeriod;
+  [Period.Period5M]: CandlestickPeriod;
+  [Period.Period15M]: CandlestickPeriod;
+  [Period.Period30M]: CandlestickPeriod;
+  [Period.Period1H]: CandlestickPeriod;
+  [Period.Period4H]: CandlestickPeriod;
+  [Period.Period1D]: CandlestickPeriod;
 };
 
 export type EventState = {
@@ -57,8 +58,8 @@ export type EventState = {
 };
 
 export type PeriodSubscription = {
-  marketEmojis: SymbolEmoji[];
-  period: Period;
+  symbol: string | ArenaChartSymbol;
+  period: ArenaPeriod | Period;
   cb: SubscribeBarsCallback;
 };
 
@@ -75,8 +76,8 @@ export type EventActions = {
   loadEventsFromServer: (events: BrokerEventModels[]) => void;
   pushEventsFromClient: (event: BrokerEventModels[], pushToLocalStorage?: boolean) => void;
   setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => void;
-  subscribeToPeriod: ({ marketEmojis, period, cb }: PeriodSubscription) => void;
-  unsubscribeFromPeriod: ({ marketEmojis, period }: Omit<PeriodSubscription, "cb">) => void;
+  subscribeToPeriod: ({ symbol, period, cb }: PeriodSubscription) => void;
+  unsubscribeFromPeriod: ({ symbol, period }: Omit<PeriodSubscription, "cb">) => void;
 };
 
 export type EventStore = EventState & EventActions & ArenaState & ArenaActions;

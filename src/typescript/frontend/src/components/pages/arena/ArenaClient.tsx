@@ -121,6 +121,7 @@ export const ArenaClient = (props: ArenaProps) => {
   const { account } = useAptos();
   const router = useRouter();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
+  const loadEventsFromServer = useEventStore((s) => s.loadEventsFromServer);
 
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
@@ -131,8 +132,9 @@ export const ArenaClient = (props: ArenaProps) => {
   useEffect(() => {
     if (props.arenaInfo) {
       loadArenaInfoFromServer(props.arenaInfo);
+      loadEventsFromServer(props.candlesticks);
     }
-  }, [loadArenaInfoFromServer, props.arenaInfo]);
+  }, [loadArenaInfoFromServer, loadEventsFromServer, props.arenaInfo, props.candlesticks]);
 
   const latestMeleeID = useLatestMeleeID();
 

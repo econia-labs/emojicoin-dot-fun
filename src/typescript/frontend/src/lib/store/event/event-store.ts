@@ -18,7 +18,6 @@ import {
   handleLatestBarForSwapEvent,
   toMappedMarketEvents,
   initialState,
-  ensureMeleeInStore,
 } from "./utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
@@ -30,14 +29,21 @@ import {
 } from "./local-storage";
 import { initializeArenaStore } from "../arena/store";
 import {
+  isArenaCandlestickModel,
   isArenaEnterModel,
-  isArenaEventModelWithMeleeID,
+  isArenaModelWithMeleeID,
   isArenaExitModel,
   isArenaMeleeModel,
   isArenaSwapModel,
 } from "@sdk/types/arena-types";
-import { getMeleeIDFromArenaModel, toMappedMelees } from "../arena/utils";
-import { encodeSymbolsForChart } from "lib/chart-utils";
+import {
+  ensureMeleeInStore,
+  getMeleeIDFromArenaModel,
+  handleLatestBarForArenaCandlestick,
+  toMappedMelees,
+} from "../arena/utils";
+import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
+import { periodToPeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
@@ -58,6 +64,7 @@ export const createEventStore = () => {
             info.emojicoin0Symbols.join(""),
             info.emojicoin1Symbols.join("")
           );
+          ensureMeleeInStore(state, info.meleeID);
           state.meleeMap.set(arenaSymbol, info.meleeID);
         });
       },
@@ -108,7 +115,7 @@ export const createEventStore = () => {
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
 
-          const arenaEvents = events.filter(isArenaEventModelWithMeleeID);
+          const arenaEvents = events.filter(isArenaModelWithMeleeID);
           const arenaMap = toMappedMelees(arenaEvents);
           Array.from(arenaMap.entries()).forEach(([meleeID, events]) => {
             ensureMeleeInStore(state, meleeID);
@@ -116,6 +123,11 @@ export const createEventStore = () => {
             melee.enters.push(...extractFilter(events, isArenaEnterModel));
             melee.exits.push(...extractFilter(events, isArenaExitModel));
             melee.swaps.push(...extractFilter(events, isArenaSwapModel));
+            // Update all the latest bars for arena candlesticks.
+            extractFilter(events, isArenaCandlestickModel).forEach((candlestick) => {
+              handleLatestBarForArenaCandlestick(melee, candlestick);
+            });
+            DEBUG_ASSERT(() => events.length === 0);
           });
           state.meleeEvents.push(...extractFilter(arenaEvents, isArenaMeleeModel));
         });
@@ -123,6 +135,7 @@ export const createEventStore = () => {
       pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
+        console.log("doesnt have guid?", events.map((v) => v.guid))
         if (!events.length) return;
         set((state) => {
           events.forEach((event) => {
@@ -154,7 +167,7 @@ export const createEventStore = () => {
                   maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
                 }
               } else {
-                if (isArenaEventModelWithMeleeID(event)) {
+                if (isArenaModelWithMeleeID(event)) {
                   const meleeID = getMeleeIDFromArenaModel(event);
                   ensureMeleeInStore(state, meleeID);
                   const melee = state.melees.get(meleeID)!;
@@ -166,6 +179,9 @@ export const createEventStore = () => {
                     melee.exits.unshift(event);
                   } else if (isArenaSwapModel(event)) {
                     melee.swaps.unshift(event);
+                  } else if (isArenaCandlestickModel(event)) {
+                    console.log("got melee event", melee, event.period, event.nSwaps);
+                    handleLatestBarForArenaCandlestick(melee, event);
                   }
                 }
               }
@@ -194,21 +210,45 @@ export const createEventStore = () => {
           });
         });
       },
-      subscribeToPeriod: ({ marketEmojis, period, cb }) => {
-        const symbol = marketEmojis.join("");
-        if (!get().markets.has(symbol)) return;
-        set((state) => {
-          const market = state.markets.get(symbol)!;
-          market[period].callback = cb;
-        });
+      subscribeToPeriod: ({ symbol, period, cb }) => {
+        if (isArenaChartSymbol(symbol)) {
+          const meleeID = get().meleeMap.get(symbol);
+          const melee = meleeID !== undefined && get().melees.has(meleeID);
+          if (!melee) return;
+          set((state) => {
+            const melee = state.melees.get(meleeID)!;
+            melee[period].callback = (bar) => {
+              console.log("callback???", bar);
+              cb(bar);
+            };
+            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
+            state.client.subscribeToArenaPeriod(brokerPeriodType);
+            console.log("subscribing to arenaa period", brokerPeriodType);
+          });
+        } else {
+          if (!get().markets.has(symbol)) return;
+          set((state) => {
+            const market = state.markets.get(symbol)!;
+            market[period].callback = cb;
+          });
+        }
       },
-      unsubscribeFromPeriod: ({ marketEmojis, period }) => {
-        const symbol = marketEmojis.join("");
-        if (!get().markets.has(symbol)) return;
-        set((state) => {
-          const market = state.markets.get(symbol)!;
-          market[period].callback = undefined;
-        });
+      unsubscribeFromPeriod: ({ symbol, period }) => {
+        if (isArenaChartSymbol(symbol)) {
+          const meleeID = get().meleeMap.get(symbol);
+          const melee = meleeID !== undefined && get().melees.has(meleeID);
+          if (!melee) return;
+          set((state) => {
+            const melee = state.melees.get(meleeID)!;
+            melee[period].callback = undefined;
+          });
+        } else {
+          if (!get().markets.has(symbol)) return;
+          set((state) => {
+            const market = state.markets.get(symbol)!;
+            market[period].callback = undefined;
+          });
+        }
       },
       ...createWebSocketClientStore(set, get),
     }))

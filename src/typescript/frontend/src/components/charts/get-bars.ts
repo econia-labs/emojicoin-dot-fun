@@ -42,10 +42,6 @@ export const fetchArenaCandlesticksForChart = async ({
   });
   return await fetch(`${ROUTES.api.arena.candlesticks}?${params.toString()}`)
     .then((res) => res.text())
-    .then((res) => {
-      console.log(res);
-      return res;
-    })
     .then((res) => parseJSON<ArenaCandlestickModel[]>(res))
     .then((res) =>
       res

@@ -107,6 +107,13 @@ const selectArenaCandlesticksSince = ({
   return query;
 };
 
+// prettier-ignore
+const selectLatestArenaCandlesticks = ({ meleeID }: { meleeID: AnyNumberString }) =>
+  postgrest
+    .from(TableName.ArenaLatestCandlesticks)
+    .select("*")
+    .eq("melee_id", meleeID);
+
 export const fetchMelee = queryHelperSingle(selectMelee, toArenaMeleeModel);
 export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoModel);
 export const fetchArenaInfoByMeleeID = queryHelperSingle(
@@ -122,6 +129,10 @@ export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
 export const fetchMarketStateByAddress = queryHelperSingle(
   selectMarketStateByAddress,
   toMarketStateModel
+);
+export const fetchLatestArenaCandlesticks = queryHelper(
+  selectLatestArenaCandlesticks,
+  toArenaCandlestickModel
 );
 export const fetchArenaCandlesticksSince = queryHelper(
   selectArenaCandlesticksSince,
