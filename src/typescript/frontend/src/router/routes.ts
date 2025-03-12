@@ -8,6 +8,7 @@ export const ROUTES = expandRoutes({
       "historical-positions": "",
     },
     candlesticks: "",
+    chats: "",
     dexscreener: {
       asset: "",
       pair: "",

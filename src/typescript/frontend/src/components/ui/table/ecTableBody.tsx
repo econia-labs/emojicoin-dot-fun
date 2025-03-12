@@ -41,7 +41,11 @@ export const EcTableBody = <T,>({
         </TableRow>
       ))}
       {pagination && items.length > minRows && (
-        <LoadMore colSpan={columns.length} query={pagination} />
+        <TableRow>
+          <TableCell colSpan={columns.length}>
+            <LoadMore query={pagination} />
+          </TableCell>
+        </TableRow>
       )}
     </TableBody>
   );
