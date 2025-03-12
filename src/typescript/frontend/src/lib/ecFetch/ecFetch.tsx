@@ -120,7 +120,7 @@ const addSearchParams = (url: URL, searchParams?: SearchParamsValue): URL => {
  * @throws {EcFetchError} If the request fails or response cannot be parsed
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ecFetch = async <T extends Record<string, any>>(
+export const ecFetch = async <T = any,>(
   input: string | URL | globalThis.Request,
   init?: EcFetchInit
 ): Promise<T> => {
