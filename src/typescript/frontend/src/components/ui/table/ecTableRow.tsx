@@ -1,16 +1,25 @@
 import { cn } from "lib/utils/class-name";
 import { type EcTableColumn } from "./ecTable";
 import { TableCell, TableRow } from "./table";
+import React from "react";
 
 interface Props<T> {
   index: number;
   onClick?: (item: T) => void;
+  animateInsertion?: boolean;
   height?: number;
   item: T;
   columns: EcTableColumn<T>[];
 }
 
-export const EcTableRow = <T,>({ index, onClick, height, item, columns }: Props<T>) => {
+export const EcTableRow = <T,>({
+  animateInsertion,
+  index,
+  onClick,
+  height,
+  item,
+  columns,
+}: Props<T>) => {
   return (
     <TableRow
       key={index}
@@ -18,6 +27,7 @@ export const EcTableRow = <T,>({ index, onClick, height, item, columns }: Props<
       height={height}
       onClick={() => onClick?.(item)}
       className="cursor-pointer group"
+      animateInsertion={animateInsertion}
     >
       {columns.map((col, cellIndex) => (
         <TableCell key={cellIndex}>

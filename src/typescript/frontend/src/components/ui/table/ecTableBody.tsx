@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { type TableProps } from "./ecTable";
 import { TableBody, TableCell, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
@@ -15,6 +15,19 @@ export const EcTableBody = <T,>({
   pagination,
   minRows,
 }: TableProps<T> & { minRows: number; className: string }) => {
+  const [firstItemKey, setFirstItemKey] = useState<string | undefined>(undefined);
+
+  const animateInsertion = useMemo(() => {
+    if (items.length === 0) return false;
+    return !!firstItemKey && getKey(items[0]) !== firstItemKey;
+  }, [firstItemKey, getKey, items]);
+
+  useEffect(() => {
+    if (items.length > 0) {
+      setFirstItemKey(getKey(items[0]));
+    }
+  }, [getKey, items]);
+
   // Make sure there is either a renderRow function or a renderCell function in each column.
   if (!renderRow && (!columns || columns.some((col) => !col.renderCell)))
     throw new Error(
@@ -27,6 +40,7 @@ export const EcTableBody = <T,>({
         ? items.map((item, i) => <Fragment key={getKey(item)}>{renderRow(item, i)}</Fragment>)
         : items.map((item, i) => (
             <EcTableRow
+              animateInsertion={animateInsertion && i === 0}
               key={getKey(item)}
               item={item}
               height={rowHeight}
@@ -41,7 +55,11 @@ export const EcTableBody = <T,>({
         </TableRow>
       ))}
       {pagination && items.length > minRows && (
-        <LoadMore colSpan={columns.length} query={pagination} />
+        <TableRow>
+          <TableCell colSpan={columns.length}>
+            <LoadMore query={pagination} />
+          </TableCell>
+        </TableRow>
       )}
     </TableBody>
   );
