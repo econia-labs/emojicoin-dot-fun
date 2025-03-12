@@ -135,7 +135,10 @@ export const createEventStore = () => {
       pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
-        console.log("doesnt have guid?", events.map((v) => v.guid))
+        console.log(
+          "doesnt have guid?",
+          events.map((v) => v.guid)
+        );
         if (!events.length) return;
         set((state) => {
           events.forEach((event) => {
