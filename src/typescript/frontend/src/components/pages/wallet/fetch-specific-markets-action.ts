@@ -3,7 +3,7 @@
 import { type SymbolEmoji } from "@sdk/emoji_data";
 import { fetchSpecificMarkets } from "@sdk/indexer-v2/queries";
 import { calculateCurvePrice } from "@sdk/markets";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 
 /**
  * Wrapper to make `fetchSpecificMarkets` into a single server action. Only return the data required

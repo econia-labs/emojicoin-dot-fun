@@ -21,7 +21,8 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { Colors } from "theme/types";
 import Popup from "components/popup";
 import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
-import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
+import { useUsdMarketCap, useUSDValue } from "@hooks/use-usd-market-cap";
+import { Switcher } from "../../../../switcher";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -82,6 +83,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const [allTimeVolume, setAllTimeVolume] = useState(
     BigInt(data.state.state.cumulativeStats.quoteVolume)
   );
+  const [showUSD, setShowUSD] = useState<boolean>(false);
 
   useEffect(() => {
     if (stateEvents.length === 0) return;
@@ -96,6 +98,8 @@ const MainInfo = ({ data }: MainInfoProps) => {
   }, [stateEvents]);
 
   const usdMarketCap = useUsdMarketCap(marketCap);
+  const usdDailyVolume = useUSDValue(dailyVolume);
+  const usdAllTimeVolume = useUSDValue(allTimeVolume);
 
   const { isMobile, isTablet } = useMatchBreakpoints();
 
@@ -157,6 +161,33 @@ const MainInfo = ({ data }: MainInfoProps) => {
     />
   );
 
+  const switcher = (
+    <Switcher
+      disabled={usdMarketCap === undefined}
+      checked={showUSD}
+      onChange={() => setShowUSD((v) => !v)}
+    />
+  );
+
+  function aptOrUsd(value: bigint, valueUsd: number | undefined) {
+    if (valueUsd !== undefined && showUSD) {
+      return (
+        <>
+          <FormattedNumber value={valueUsd} scramble />
+          {" $"}
+        </>
+      );
+    } else {
+      return (
+        <>
+          <FormattedNumber value={value} nominalize scramble />
+          &nbsp;
+          <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+        </>
+      );
+    }
+  }
+
   return (
     <div
       className="flex justify-center mt-[10px]"
@@ -193,20 +224,18 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
         <div className={`flex flex-col justify-between ${borderStyle}`}>
           <div className="flex justify-between">
+            <div className={statsTextClasses + " text-light-gray"}>
+              {"APT "}
+              <AptosIconBlack className={"icon-inline mb-[0.0ch]"} />
+              {" / USD $:"}
+            </div>
+            <div className={statsTextClasses + " text-white"}>{switcher}</div>
+          </div>
+          <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                {usdMarketCap === undefined ? (
-                  <FormattedNumber value={marketCap} nominalize scramble />
-                ) : (
-                  <FormattedNumber value={usdMarketCap} scramble />
-                )}
-                &nbsp;
-                {usdMarketCap === undefined ? (
-                  <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
-                ) : (
-                  "$"
-                )}
+                {aptOrUsd(marketCap, usdMarketCap)}
               </div>
             </div>
           </div>
@@ -215,9 +244,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("24 hour vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <FormattedNumber value={dailyVolume} nominalize scramble />
-                &nbsp;
-                <AptosIconBlack className="icon-inline mb-[0.3ch]" />
+                {aptOrUsd(dailyVolume, usdDailyVolume)}
               </div>
             </div>
           </div>
@@ -226,9 +253,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("All-time vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <FormattedNumber value={allTimeVolume} nominalize scramble />
-                &nbsp;
-                <AptosIconBlack className="icon-inline mb-[0.3ch]" />
+                {aptOrUsd(allTimeVolume, usdAllTimeVolume)}
               </div>
             </div>
           </div>

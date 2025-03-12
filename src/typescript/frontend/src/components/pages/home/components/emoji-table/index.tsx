@@ -31,12 +31,11 @@ import { Text } from "components/text";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { type HomePageProps } from "app/home/HomePage";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { Emoji } from "utils/emoji";
 
 export interface EmojiTableProps
-  extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
+  extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();
@@ -98,10 +97,6 @@ const EmojiTable = (props: EmojiTableProps) => {
   );
 
   const rowLength = useGridRowLength();
-
-  useReliableSubscribe({
-    eventTypes: ["MarketLatestState"],
-  });
 
   return (
     <>

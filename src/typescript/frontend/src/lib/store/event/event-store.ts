@@ -1,7 +1,7 @@
 import {
-  type AnyEventModel,
-  type EventModelWithMarket,
+  type BrokerEventModels,
   isChatEventModel,
+  isEventModelWithMarket,
   isGlobalStateEventModel,
   isLiquidityEventModel,
   isMarketLatestStateEventModel,
@@ -19,6 +19,7 @@ import {
   pushPeriodicStateEvents,
   toMappedMarketEvents,
   initialState,
+  ensureMeleeInStore,
 } from "./utils";
 import { periodEnumToRawDuration } from "@sdk/const";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
@@ -29,14 +30,29 @@ import {
   clearLocalStorage,
   LOCAL_STORAGE_EVENT_TYPES,
 } from "./local-storage";
+import { initializeArenaStore } from "../arena/store";
+import {
+  isArenaEnterModel,
+  isArenaEventModelWithMeleeID,
+  isArenaExitModel,
+  isArenaMeleeModel,
+  isArenaSwapModel,
+} from "@sdk/types/arena-types";
+import { getMeleeIDFromArenaModel, toMappedMelees } from "../arena/utils";
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
       ...initialState(),
+      ...initializeArenaStore(),
       getMarket: (emojis) => get().markets.get(emojis.join("")),
       getRegisteredMarkets: () => {
         return get().markets;
+      },
+      loadArenaInfoFromServer: (info) => {
+        set((state) => {
+          state.arenaInfoFromServer = info;
+        });
       },
       loadMarketStateFromServer: (states) => {
         const filtered = states.filter((e) => {
@@ -57,7 +73,7 @@ export const createEventStore = () => {
           });
         });
       },
-      loadEventsFromServer: (eventsIn: AnyEventModel[]) => {
+      loadEventsFromServer: (eventsIn: BrokerEventModels[]) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
         if (!events.length) return;
@@ -70,7 +86,9 @@ export const createEventStore = () => {
           state.globalStateEvents.push(...extractFilter(events, isGlobalStateEventModel));
           state.marketRegistrations.push(...extractFilter(events, isMarketRegistrationEventModel));
           DEBUG_ASSERT(() => !events.some(isGlobalStateEventModel));
-          const map = toMappedMarketEvents(events as Array<EventModelWithMarket>);
+
+          const eventsWithMarket = events.filter(isEventModelWithMarket);
+          const map = toMappedMarketEvents(eventsWithMarket);
           Array.from(map.entries()).forEach(([marketSymbol, marketEvents]) => {
             ensureMarketInStore(state, marketEvents[0].market);
             const market = state.markets.get(marketSymbol)!;
@@ -81,9 +99,20 @@ export const createEventStore = () => {
             pushPeriodicStateEvents(market, extractFilter(marketEvents, isPeriodicStateEventModel));
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
+
+          const arenaEvents = events.filter(isArenaEventModelWithMeleeID);
+          const arenaMap = toMappedMelees(arenaEvents);
+          Array.from(arenaMap.entries()).forEach(([meleeID, events]) => {
+            ensureMeleeInStore(state, meleeID);
+            const melee = state.melees.get(meleeID)!;
+            melee.enters.push(...extractFilter(events, isArenaEnterModel));
+            melee.exits.push(...extractFilter(events, isArenaExitModel));
+            melee.swaps.push(...extractFilter(events, isArenaSwapModel));
+          });
+          state.meleeEvents.push(...extractFilter(arenaEvents, isArenaMeleeModel));
         });
       },
-      pushEventsFromClient: (eventsIn: AnyEventModel[], pushToLocalStorage = false) => {
+      pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
         if (!events.length) return;
@@ -93,29 +122,46 @@ export const createEventStore = () => {
             if (isGlobalStateEventModel(event)) {
               state.globalStateEvents.unshift(event);
             } else {
-              const marketMetadata = event.market;
-              const symbol = marketMetadata.symbolData.symbol;
-              ensureMarketInStore(state, marketMetadata);
-              const market = state.markets.get(symbol)!;
-              if (isSwapEventModel(event)) {
-                market.swapEvents.unshift(event);
-                handleLatestBarForSwapEvent(market, event);
-                maybeUpdateLocalStorage(pushToLocalStorage, "swap", event);
-              } else if (isChatEventModel(event)) {
-                market.chatEvents.unshift(event);
-                maybeUpdateLocalStorage(pushToLocalStorage, "chat", event);
-              } else if (isLiquidityEventModel(event)) {
-                market.liquidityEvents.unshift(event);
-                maybeUpdateLocalStorage(pushToLocalStorage, "liquidity", event);
-              } else if (isMarketLatestStateEventModel(event)) {
-                market.stateEvents.unshift(event);
-                state.stateFirehose.unshift(event);
-                maybeUpdateLocalStorage(pushToLocalStorage, "market", event);
-              } else if (isPeriodicStateEventModel(event)) {
-                const period = periodEnumToRawDuration(event.periodicMetadata.period);
-                market[period].candlesticks.unshift(event);
-                handleLatestBarForPeriodicStateEvent(market, event);
-                maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
+              if (isEventModelWithMarket(event)) {
+                const marketMetadata = event.market;
+                const symbol = marketMetadata.symbolData.symbol;
+                ensureMarketInStore(state, marketMetadata);
+                const market = state.markets.get(symbol)!;
+                if (isSwapEventModel(event)) {
+                  market.swapEvents.unshift(event);
+                  handleLatestBarForSwapEvent(market, event);
+                  maybeUpdateLocalStorage(pushToLocalStorage, "swap", event);
+                } else if (isChatEventModel(event)) {
+                  market.chatEvents.unshift(event);
+                  maybeUpdateLocalStorage(pushToLocalStorage, "chat", event);
+                } else if (isLiquidityEventModel(event)) {
+                  market.liquidityEvents.unshift(event);
+                  maybeUpdateLocalStorage(pushToLocalStorage, "liquidity", event);
+                } else if (isMarketLatestStateEventModel(event)) {
+                  market.stateEvents.unshift(event);
+                  state.stateFirehose.unshift(event);
+                  maybeUpdateLocalStorage(pushToLocalStorage, "market", event);
+                } else if (isPeriodicStateEventModel(event)) {
+                  const period = periodEnumToRawDuration(event.periodicMetadata.period);
+                  market[period].candlesticks.unshift(event);
+                  handleLatestBarForPeriodicStateEvent(market, event);
+                  maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
+                }
+              } else {
+                if (isArenaEventModelWithMeleeID(event)) {
+                  const meleeID = getMeleeIDFromArenaModel(event);
+                  ensureMeleeInStore(state, meleeID);
+                  const melee = state.melees.get(meleeID)!;
+                  if (isArenaMeleeModel(event)) {
+                    state.meleeEvents.unshift(event);
+                  } else if (isArenaEnterModel(event)) {
+                    melee.enters.unshift(event);
+                  } else if (isArenaExitModel(event)) {
+                    melee.exits.unshift(event);
+                  } else if (isArenaSwapModel(event)) {
+                    melee.swaps.unshift(event);
+                  }
+                }
               }
             }
           });

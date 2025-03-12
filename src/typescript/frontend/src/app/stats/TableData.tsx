@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 import { calculateCurvePrice, calculateCirculatingSupply } from "@sdk/markets";
 import { MiniBondingCurveProgress } from "./MiniBondingCurveProgress";
 import { toNominalPrice } from "@sdk/utils";

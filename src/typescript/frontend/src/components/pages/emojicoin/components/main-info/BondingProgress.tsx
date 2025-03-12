@@ -5,9 +5,7 @@ import { type MainInfoProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
 import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
 import { FormattedNumber } from "components/FormattedNumber";
-import BondingCurveArrow from "@icons/BondingCurveArrow";
-import { emoji } from "utils";
-import { EmojiAsImage } from "utils/emoji";
+import ProgressBar from "components/ProgressBar";
 
 const statsTextClasses = "uppercase ellipses font-forma";
 
@@ -28,6 +26,15 @@ const BondingProgress = ({ data }: MainInfoProps) => {
       setBondingProgress(getBondingCurveProgress(event.state.clammVirtualReserves.quote));
     }
   }, [stateEvents]);
+
+  let position = 0;
+  if (bondingProgress >= 100) position = 7;
+  else if (bondingProgress >= 90) position = 6;
+  else if (bondingProgress >= 75) position = 5;
+  else if (bondingProgress >= 60) position = 4;
+  else if (bondingProgress >= 45) position = 3;
+  else if (bondingProgress >= 30) position = 2;
+  else if (bondingProgress >= 15) position = 1;
 
   return (
     <div className="relative mb-[.7em]">
@@ -56,44 +63,7 @@ const BondingProgress = ({ data }: MainInfoProps) => {
 
         Who knew CSS could be this hard...
       */}
-      <div className="w-[100%] pl-[3.26%]">
-        <div className="grid relative w-[100%]" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
-          <EmojiAsImage
-            size="100%"
-            className="absolute h-[175%] translate-x-[-50%] translate-y-[-18.75%]"
-            emojis={emoji("rocket")}
-            set="apple"
-          />
-          <BondingCurveArrow
-            className="w-[100%] h-[100%]"
-            color={bondingProgress > 15 ? "econiaBlue" : "darkGray"}
-          />
-          <BondingCurveArrow
-            className="w-[100%] h-[100%]"
-            color={bondingProgress > 30 ? "econiaBlue" : "darkGray"}
-          />
-          <BondingCurveArrow
-            className="w-[100%] h-[100%]"
-            color={bondingProgress > 45 ? "econiaBlue" : "darkGray"}
-          />
-          <BondingCurveArrow
-            className="w-[100%] h-[100%]"
-            color={bondingProgress > 60 ? "econiaBlue" : "darkGray"}
-          />
-          <BondingCurveArrow
-            className="w-[100%] h-[100%]"
-            color={bondingProgress > 75 ? "econiaBlue" : "darkGray"}
-          />
-          <BondingCurveArrow
-            className="w-[100%] h-[100%]"
-            color={bondingProgress > 90 ? "econiaBlue" : "darkGray"}
-          />
-          <BondingCurveArrow
-            className="w-[100%] h-[100%]"
-            color={bondingProgress >= 100 ? "econiaBlue" : "darkGray"}
-          />
-        </div>
-      </div>
+      <ProgressBar length={7} position={position} />
       <div className="absolute bottom-[-1em] my-[-.2em] right-0 flex justify-end mr-[1em]">
         <div className={statsTextClasses + " text-dark-gray font-pixelar text-[1em]"}>
           {t("Bonding progress:")}

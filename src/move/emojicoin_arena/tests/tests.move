@@ -2020,20 +2020,15 @@ module emojicoin_arena::tests {
         init_module_with_funded_vault_and_participant();
         set_randomness_seed_for_crank_coverage();
 
-        // Initialize all coverage conditions to false.
+        // Declare coverage condition for unequal market IDs, which must be marked true for the loop
+        // to exit.
+        let covered_unequal_market_ids;
+
+        // Initialize all remaining coverage conditions to false.
         let covered_equal_market_ids = false;
-        let covered_unequal_market_ids = false;
         let covered_sort_order_market_id_0_hi = false;
         let covered_sort_order_market_id_0_lo = false;
         let covered_melee_ids_by_market_ids_contains = false;
-
-        // Call all coverage conditions to silence erroneously compiler warnings about unused
-        // assignments per https://github.com/aptos-labs/aptos-core/issues/15713.
-        covered_equal_market_ids;
-        covered_unequal_market_ids;
-        covered_sort_order_market_id_0_hi;
-        covered_sort_order_market_id_0_lo;
-        covered_melee_ids_by_market_ids_contains;
 
         // Declare market IDs.
         let sorted_unique_market_ids;

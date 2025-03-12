@@ -16,7 +16,7 @@ const config: Config = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   workerThreads: true,
-  testEnvironment: "jsdom",
+  testEnvironment: "./tests/fixed-jsdom-environment.ts",
   testEnvironmentOptions: {
     customExportConditions: ["node", "node-addons"],
   },

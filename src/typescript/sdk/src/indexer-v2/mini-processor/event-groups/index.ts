@@ -115,7 +115,6 @@ export function getEventsAsProcessorModels(
       time: txnInfo.time,
       marketNonce,
       trigger: stateEvent.stateMetadata.trigger,
-      symbolEmojis: marketEmojiData.emojis.map((e) => e.emoji),
       marketAddress,
       ...marketEmojiData,
     };

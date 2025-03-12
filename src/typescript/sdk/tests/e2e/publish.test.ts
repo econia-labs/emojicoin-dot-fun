@@ -26,8 +26,8 @@ describe("tests publishing modules to a local network", () => {
       packageDirRelativeToRoot: `src/move/${packageName}`,
     });
 
-    expect(AccountAddress.from(publishResult.sender).toStringLong()).toEqual(
-      publisher.accountAddress.toStringLong()
+    expect(AccountAddress.from(publishResult.sender).toString()).toEqual(
+      publisher.accountAddress.toString()
     );
     expect(publishResult.success).toEqual(true);
 

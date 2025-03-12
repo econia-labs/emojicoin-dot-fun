@@ -56,4 +56,5 @@ bytea
 nominalize
 dexscreener
 clippyts
+xlarge
 rebranded

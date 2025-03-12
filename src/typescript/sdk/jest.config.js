@@ -25,6 +25,6 @@ module.exports = {
     },
   },
   maxWorkers: 4,
-  globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/pre-test.ts" : null,
-  globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/post-test.ts" : null,
+  globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/global-setup.ts" : null,
+  globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/global-teardown.ts" : null,
 };

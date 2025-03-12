@@ -4,7 +4,7 @@ import { type SwapEventModel, type PeriodicStateEventModel } from "@sdk/indexer-
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 import Big from "big.js";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 
 export type Bar = {
   time: number;

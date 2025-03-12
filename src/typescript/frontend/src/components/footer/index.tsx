@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
           </StyledSocialWrapper>
 
           <Flex alignItems="center">
-            <Link href={LINKS?.tos ?? ROUTES.notFound}>
+            <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
               <Text
                 textScale="display6"
                 $fontWeight="bold"

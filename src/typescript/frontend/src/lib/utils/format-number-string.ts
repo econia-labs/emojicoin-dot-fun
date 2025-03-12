@@ -1,5 +1,5 @@
 import { type AnyNumberString, type Flatten } from "@sdk-types";
-import { toNominal } from "./decimals";
+import { toNominal } from "@sdk/utils";
 
 /**
  * Sliding precision will show `decimals` decimals when Math.abs(number) is

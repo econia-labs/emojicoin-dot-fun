@@ -1,7 +1,9 @@
 import { type Uint64String, type AccountAddressString } from "../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
+  EVENT_NAMES,
   type EventName,
+  type Flatten,
   toCumulativeStats,
   toInstantaneousStats,
   toLastSwap,
@@ -20,10 +22,16 @@ import {
   type BlockAndEventIndexMetadata,
 } from "./json-types";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
-import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
+import { toArenaPeriod, toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { deserializeToHexString, toAccountAddressString } from "../../utils";
 import Big from "big.js";
 import { q64ToBig } from "../../utils/nominal-price";
+import {
+  ARENA_CANDLESTICK_NAME,
+  safeParseBigIntOrPostgresTimestamp,
+  type AnyArenaEvent,
+} from "../../types/arena-types";
+import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -56,14 +64,16 @@ const toBlockAndEventIndex = (data: BlockAndEventIndexMetadata) =>
       }
     : undefined;
 
-export type MarketMetadataModel = {
-  marketID: bigint;
-  time: bigint;
-  marketNonce: bigint;
-  trigger: Trigger;
-  symbolEmojis: Array<SymbolEmoji>;
-  marketAddress: AccountAddressString;
-} & MarketEmojiData;
+export type MarketMetadataModel = Flatten<
+  {
+    marketID: bigint;
+    time: bigint;
+    marketNonce: bigint;
+    trigger: Trigger;
+    symbolEmojis: Array<SymbolEmoji>;
+    marketAddress: AccountAddressString;
+  } & MarketEmojiData
+>;
 
 // To make things simpler, convert bumpTime and emitTime to `time`, and add the symbol data
 // to the metadata.
@@ -79,7 +89,6 @@ const toMarketMetadataModel = (
     time: postgresTimestampToMicroseconds("bump_time" in data ? data.bump_time : data.emit_time),
     marketNonce: BigInt(data.market_nonce),
     trigger: toTrigger(data.trigger),
-    symbolEmojis: data.symbol_emojis,
     marketAddress: toAccountAddressString(data.market_address),
     ...toMarketEmojiData(symbolBytes),
   };
@@ -95,20 +104,29 @@ const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types
     time: postgresTimestampToMicroseconds(data.last_swap_time).toString(),
   });
 
-const toArenaMeleeFromDatabase = (data: DatabaseStructType["ArenaMelee"]): Types["ArenaMelee"] => ({
-  meleeId: BigInt(data.melee_id),
+type WithoutEventNameIndexAndVersion<T extends AnyArenaEvent> = Omit<
+  T,
+  "eventName" | "eventIndex" | "version"
+>;
+
+const toArenaMeleeFromDatabase = (
+  data: DatabaseStructType["ArenaMelee"]
+): WithoutEventNameIndexAndVersion<Types["ArenaMeleeEvent"]> => ({
+  meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
-  startTime: postgresTimestampToMicroseconds(data.start_time),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
   availableRewards: BigInt(data.available_rewards),
 });
 
-const toArenaEnterFromDatabase = (data: DatabaseStructType["ArenaEnter"]): Types["ArenaEnter"] => ({
-  meleeId: BigInt(data.melee_id),
+const toArenaEnterFromDatabase = (
+  data: DatabaseStructType["ArenaEnter"]
+): WithoutEventNameIndexAndVersion<Types["ArenaEnterEvent"]> => ({
   user: toAccountAddressString(data.user),
+  meleeID: BigInt(data.melee_id),
   inputAmount: BigInt(data.input_amount),
   quoteVolume: BigInt(data.quote_volume),
   integratorFee: BigInt(data.integrator_fee),
@@ -121,20 +139,26 @@ const toArenaEnterFromDatabase = (data: DatabaseStructType["ArenaEnter"]): Types
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
 });
 
-const toArenaExitFromDatabase = (data: DatabaseStructType["ArenaExit"]): Types["ArenaExit"] => ({
-  meleeId: BigInt(data.melee_id),
+const toArenaExitFromDatabase = (
+  data: DatabaseStructType["ArenaExit"]
+): WithoutEventNameIndexAndVersion<Types["ArenaExitEvent"]> => ({
   user: toAccountAddressString(data.user),
+  meleeID: BigInt(data.melee_id),
   tapOutFee: BigInt(data.tap_out_fee),
   emojicoin0Proceeds: BigInt(data.emojicoin_0_proceeds),
   emojicoin1Proceeds: BigInt(data.emojicoin_1_proceeds),
+  aptProceeds: BigInt(data.apt_proceeds),
   emojicoin0ExchangeRateBase: BigInt(data.emojicoin_0_exchange_rate_base),
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+  duringMelee: data.during_melee,
 });
 
-const toArenaSwapFromDatabase = (data: DatabaseStructType["ArenaSwap"]): Types["ArenaSwap"] => ({
-  meleeId: BigInt(data.melee_id),
+const toArenaSwapFromDatabase = (
+  data: DatabaseStructType["ArenaSwap"]
+): WithoutEventNameIndexAndVersion<Types["ArenaSwapEvent"]> => ({
+  meleeID: BigInt(data.melee_id),
   user: toAccountAddressString(data.user),
   quoteVolume: BigInt(data.quote_volume),
   integratorFee: BigInt(data.integrator_fee),
@@ -144,30 +168,35 @@ const toArenaSwapFromDatabase = (data: DatabaseStructType["ArenaSwap"]): Types["
   emojicoin0ExchangeRateQuote: BigInt(data.emojicoin_0_exchange_rate_quote),
   emojicoin1ExchangeRateBase: BigInt(data.emojicoin_1_exchange_rate_base),
   emojicoin1ExchangeRateQuote: BigInt(data.emojicoin_1_exchange_rate_quote),
+  duringMelee: data.during_melee,
 });
 
 const toArenaVaultBalanceUpdateFromDatabase = (
   data: DatabaseStructType["ArenaVaultBalanceUpdate"]
-): Types["ArenaVaultBalanceUpdate"] => ({
+): WithoutEventNameIndexAndVersion<Types["ArenaVaultBalanceUpdateEvent"]> => ({
   newBalance: BigInt(data.new_balance),
 });
 
-const toArenaPositionsFromDatabase = (
-  data: DatabaseStructType["ArenaPositions"]
-): Types["ArenaPositions"] => ({
+const toArenaPositionFromDatabase = (
+  data: DatabaseStructType["ArenaPosition"]
+): Types["ArenaPosition"] => ({
+  meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
   user: toAccountAddressString(data.user),
-  meleeId: BigInt(data.melee_id),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
   withdrawals: BigInt(data.withdrawals),
   deposits: BigInt(data.deposits),
+  lastExit0: data.last_exit_0,
+  matchAmount: BigInt(data.match_amount),
 });
 
 const toArenaLeaderboardFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboard"]
 ): Types["ArenaLeaderboard"] => ({
   user: toAccountAddressString(data.user),
+  version: BigInt(data.last_transaction_version),
   open: data.open,
   emojicoin0Balance: BigInt(data.emojicoin_0_balance),
   emojicoin1Balance: BigInt(data.emojicoin_1_balance),
@@ -175,32 +204,77 @@ const toArenaLeaderboardFromDatabase = (
   losses: BigInt(data.losses),
   pnlPercent: data.pnl_percent,
   pnlOctas: data.pnl_octas,
+  withdrawals: BigInt(data.withdrawals),
 });
 
+const toAptLocked = (reserves: ReservesAndBondingCurveState, locked: bigint) => {
+  const curvePrice = calculateCurvePrice(reserves);
+  const bigLocked = Big(locked.toString());
+  const roundedResult = curvePrice.mul(bigLocked).round(0, Big.roundHalfEven);
+  return BigInt(roundedResult.toString());
+};
+
+export const toTotalAptLocked = (args: {
+  market0: {
+    state: MarketStateModel["state"];
+    locked: ArenaInfoModel["emojicoin0Locked"];
+  };
+  market1: {
+    state: MarketStateModel["state"];
+    locked: ArenaInfoModel["emojicoin1Locked"];
+  };
+}): bigint => {
+  const { market0, market1 } = args;
+  return toAptLocked(market0.state, market0.locked) + toAptLocked(market1.state, market1.locked);
+};
+
 const toArenaInfoFromDatabase = (data: DatabaseStructType["ArenaInfo"]): Types["ArenaInfo"] => ({
-  meleeId: BigInt(data.melee_id),
+  meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   rewardsRemaining: BigInt(data.rewards_remaining),
-  aptLocked: BigInt(data.apt_locked),
+  emojicoin0Locked: BigInt(data.emojicoin_0_locked),
+  emojicoin1Locked: BigInt(data.emojicoin_1_locked),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin0Symbols: data.emojicoin_0_symbols,
   emojicoin0MarketID: BigInt(data.emojicoin_0_market_id),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
   emojicoin1Symbols: data.emojicoin_1_symbols,
   emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
-  startTime: postgresTimestampToMicroseconds(data.start_time),
+  startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),
+});
+
+const toArenaCandlestickFromDatabase = (
+  data: DatabaseStructType["ArenaCandlestick"]
+): Types["ArenaCandlestick"] => ({
+  meleeID: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
+  volume: BigInt(data.volume),
+  period: toArenaPeriod(data.period),
+  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  openPrice: Number(data.open_price),
+  closePrice: Number(data.close_price),
+  highPrice: Number(data.high_price),
+  lowPrice: Number(data.low_price),
+  nSwaps: BigInt(data.n_swaps),
 });
 
 const toArenaLeaderboardHistoryFromDatabase = (
   data: DatabaseStructType["ArenaLeaderboardHistory"]
 ): Types["ArenaLeaderboardHistory"] => ({
   user: toAccountAddressString(data.user),
-  meleeId: BigInt(data.melee_id),
+  version: BigInt(data.last_transaction_version),
+  meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
+  lastExit0: data.last_exit_0,
+  exited: data.exited,
+  withdrawals: BigInt(data.withdrawals),
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
 });
 
 type GlobalStateEventData = {
@@ -428,12 +502,16 @@ export type ArenaEnterModel = ReturnType<typeof toArenaEnterModel>;
 export type ArenaExitModel = ReturnType<typeof toArenaExitModel>;
 export type ArenaSwapModel = ReturnType<typeof toArenaSwapModel>;
 export type ArenaVaultBalanceUpdateModel = ReturnType<typeof toArenaVaultBalanceUpdateModel>;
-export type ArenaPositionsModel = ReturnType<typeof toArenaPositionsModel>;
+export type ArenaPositionModel = ReturnType<typeof toArenaPositionModel>;
 export type ArenaLeaderboardModel = ReturnType<typeof toArenaLeaderboardModel>;
 export type ArenaLeaderboardHistoryModel = ReturnType<typeof toArenaLeaderboardHistoryModel>;
 export type ArenaInfoModel = ReturnType<typeof toArenaInfoModel>;
+export type ArenaCandlestickModel = ReturnType<typeof toArenaCandlestickModel>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 export type AggregateMarketStateModel = ReturnType<typeof toAggregateMarketState>;
+export type ArenaLeaderboardHistoryWithArenaInfoModel = ReturnType<
+  typeof toArenaLeaderboardHistoryWithArenaInfo
+>;
 
 /**
  * Converts a function that converts a type to another type into a function that converts the type
@@ -487,24 +565,14 @@ export const withChatEventData = curryToNamedType(toChatEventData, "chat");
 export const withLiquidityEventData = curryToNamedType(toLiquidityEventData, "liquidity");
 export const withStateEventData = curryToNamedType(toStateEventData, "state");
 export const withLastSwapData = curryToNamedType(toLastSwapFromDatabase, "lastSwap");
-export const withArenaMeleeData = curryToNamedType(toArenaMeleeFromDatabase, "arenaMelee");
-export const withArenaEnterData = curryToNamedType(toArenaEnterFromDatabase, "arenaEnter");
-export const withArenaExitData = curryToNamedType(toArenaExitFromDatabase, "arenaExit");
-export const withArenaSwapData = curryToNamedType(toArenaSwapFromDatabase, "arenaSwap");
+export const withArenaMeleeData = curryToNamedType(toArenaMeleeFromDatabase, "melee");
+export const withArenaEnterData = curryToNamedType(toArenaEnterFromDatabase, "enter");
+export const withArenaExitData = curryToNamedType(toArenaExitFromDatabase, "exit");
+export const withArenaSwapData = curryToNamedType(toArenaSwapFromDatabase, "swap");
 export const withArenaVaultBalanceUpdateData = curryToNamedType(
   toArenaVaultBalanceUpdateFromDatabase,
   "arenaVaultBalanceUpdate"
 );
-
-const EVENT_NAMES: { [key in EventName]: key } = {
-  GlobalState: "GlobalState",
-  PeriodicState: "PeriodicState",
-  MarketRegistration: "MarketRegistration",
-  Swap: "Swap",
-  Chat: "Chat",
-  Liquidity: "Liquidity",
-  State: "State",
-} as const;
 
 const formatEmojis = <T extends { symbol_emojis: SymbolEmoji[] } | { symbolEmojis: SymbolEmoji[] }>(
   data: T
@@ -521,6 +589,14 @@ const getMarketNonce = <T extends { market_nonce: string } | { marketNonce: bigi
   }
   return data.marketNonce;
 };
+
+type TxnVersionAndIndex<
+  T extends
+    | TableName.ArenaEnterEvents
+    | TableName.ArenaExitEvents
+    | TableName.ArenaMeleeEvents
+    | TableName.ArenaSwapEvents,
+> = Pick<DatabaseJsonType[T], "transaction_version" | "event_index" | "melee_id">;
 
 export const GuidGetters = {
   globalStateEvent: (data: DatabaseJsonType["global_state_events"] | GlobalStateEventData) => {
@@ -566,6 +642,54 @@ export const GuidGetters = {
   ) => ({
     eventName: EVENT_NAMES.State,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
+  }),
+  arenaEnterEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: TxnVersionAndIndex<TableName.ArenaEnterEvents>) => ({
+    eventName: EVENT_NAMES.ArenaEnter,
+    guid: `${EVENT_NAMES.ArenaEnter}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaExitEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: TxnVersionAndIndex<TableName.ArenaExitEvents>) => ({
+    eventName: EVENT_NAMES.ArenaExit,
+    guid: `${EVENT_NAMES.ArenaExit}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaMeleeEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: TxnVersionAndIndex<TableName.ArenaMeleeEvents>) => ({
+    eventName: EVENT_NAMES.ArenaMelee,
+    guid: `${EVENT_NAMES.ArenaMelee}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaSwapEvent: ({
+    melee_id,
+    transaction_version: version,
+    event_index,
+  }: TxnVersionAndIndex<TableName.ArenaSwapEvents>) => ({
+    eventName: EVENT_NAMES.ArenaSwap,
+    guid: `${EVENT_NAMES.ArenaSwap}::${melee_id}::${version}::${event_index}`,
+  }),
+  arenaVaultBalanceUpdate: ({
+    sender,
+    transaction_version: version,
+    event_index,
+  }: Pick<
+    DatabaseJsonType["arena_vault_balance_update_events"],
+    "sender" | "transaction_version" | "event_index"
+  >) => ({
+    eventName: EVENT_NAMES.ArenaVaultBalanceUpdate,
+    guid: `${EVENT_NAMES.ArenaVaultBalanceUpdate}::${sender}::${version}::${event_index}`,
+  }),
+  arenaCandlestick: ({ melee_id, start_time, period }: DatabaseJsonType["arena_candlesticks"]) => ({
+    // Not a real contract event, but used to classify the type of data.
+    eventName: ARENA_CANDLESTICK_NAME,
+    guid: `${ARENA_CANDLESTICK_NAME}::${melee_id}::${period}::${start_time}`,
   }),
 };
 
@@ -693,7 +817,7 @@ export const toMarket1MPeriodsInLastDay = (
   nonce: BigInt(data.nonce),
   volume: BigInt(data.volume),
   baseVolume: BigInt(data.base_volume),
-  startTime: data.start_time,
+  startTime: postgresTimestampToDate(data.start_time),
 });
 
 export const toProcessorStatus = (data: DatabaseJsonType["processor_status"]) => ({
@@ -712,24 +836,51 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
+export const toArenaLeaderboardHistoryWithArenaInfo = (
+  data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]
+): Types["ArenaLeaderboardHistoryWithArenaInfo"] => ({
+  user: data.user,
+  meleeID: BigInt(data.melee_id),
+  profits: BigInt(data.profits),
+  losses: BigInt(data.losses),
+  withdrawals: BigInt(data.withdrawals),
+  emojicoin0Balance: BigInt(data.emojicoin_0_balance),
+  emojicoin1Balance: BigInt(data.emojicoin_1_balance),
+  lastExit0: data.last_exit_0,
+  exited: data.exited,
+
+  emojicoin0Symbols: data.emojicoin_0_symbols,
+  emojicoin1Symbols: data.emojicoin_1_symbols,
+  emojicoin0MarketAddress: data.emojicoin_0_market_address,
+  emojicoin1MarketAddress: data.emojicoin_1_market_address,
+  emojicoin0MarketID: BigInt(data.emojicoin_0_market_id),
+  emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
+  startTime: postgresTimestampToDate(data.start_time),
+  duration: BigInt(data.duration),
+});
+
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaMeleeData(data),
+  ...GuidGetters.arenaMeleeEvent(data),
 });
 
 export const toArenaEnterModel = (data: DatabaseJsonType["arena_enter_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaEnterData(data),
+  ...GuidGetters.arenaEnterEvent(data),
 });
 
 export const toArenaExitModel = (data: DatabaseJsonType["arena_exit_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaExitData(data),
+  ...GuidGetters.arenaExitEvent(data),
 });
 
 export const toArenaSwapModel = (data: DatabaseJsonType["arena_swap_events"]) => ({
   ...withTransactionMetadata(data),
   ...withArenaSwapData(data),
+  ...GuidGetters.arenaSwapEvent(data),
 });
 
 export const toArenaVaultBalanceUpdateModel = (
@@ -737,12 +888,17 @@ export const toArenaVaultBalanceUpdateModel = (
 ) => ({
   ...withTransactionMetadata(data),
   ...withArenaVaultBalanceUpdateData(data),
+  ...GuidGetters.arenaVaultBalanceUpdate(data),
 });
 
-export const toArenaPositionsModel = toArenaPositionsFromDatabase;
+export const toArenaPositionModel = toArenaPositionFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
 export const toArenaInfoModel = toArenaInfoFromDatabase;
+export const toArenaCandlestickModel = (data: DatabaseJsonType["arena_candlesticks"]) => ({
+  ...toArenaCandlestickFromDatabase(data),
+  ...GuidGetters.arenaCandlestick(data),
+});
 
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
@@ -801,10 +957,12 @@ export const DatabaseTypeConverter = {
   [TableName.ArenaExitEvents]: toArenaExitModel,
   [TableName.ArenaSwapEvents]: toArenaSwapModel,
   [TableName.ArenaInfo]: toArenaInfoModel,
-  [TableName.ArenaPositions]: toArenaPositionsModel,
+  [TableName.ArenaCandlesticks]: toArenaCandlestickModel,
+  [TableName.ArenaPosition]: toArenaPositionModel,
   [TableName.ArenaVaultBalanceUpdateEvents]: toArenaVaultBalanceUpdateModel,
   [TableName.ArenaLeaderboard]: toArenaLeaderboardModel,
   [TableName.ArenaLeaderboardHistory]: toArenaLeaderboardHistoryModel,
+  [TableName.ArenaLeaderboardHistoryWithArenaInfo]: toArenaLeaderboardHistoryWithArenaInfo,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
   [DatabaseRpc.AggregateMarketState]: toAggregateMarketState,
 };
@@ -828,10 +986,12 @@ export type DatabaseModels = {
   [TableName.ArenaExitEvents]: ArenaExitModel;
   [TableName.ArenaSwapEvents]: ArenaSwapModel;
   [TableName.ArenaVaultBalanceUpdateEvents]: ArenaVaultBalanceUpdateModel;
-  [TableName.ArenaPositions]: ArenaPositionsModel;
+  [TableName.ArenaPosition]: ArenaPositionModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
+  [TableName.ArenaCandlesticks]: ArenaCandlestickModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
+  [TableName.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
   [DatabaseRpc.AggregateMarketState]: AggregateMarketStateModel;
 };
@@ -845,14 +1005,20 @@ export type AnyEventTable =
   | TableName.LiquidityEvents
   | TableName.GlobalStateEvents;
 
-export type AnyEventModel =
+export type BrokerEventModels =
   | DatabaseModels[TableName.SwapEvents]
   | DatabaseModels[TableName.ChatEvents]
   | DatabaseModels[TableName.MarketRegistrationEvents]
   | DatabaseModels[TableName.PeriodicStateEvents]
   | DatabaseModels[TableName.MarketLatestStateEvent]
   | DatabaseModels[TableName.LiquidityEvents]
-  | DatabaseModels[TableName.GlobalStateEvents];
+  | DatabaseModels[TableName.GlobalStateEvents]
+  | DatabaseModels[TableName.ArenaEnterEvents]
+  | DatabaseModels[TableName.ArenaMeleeEvents]
+  | DatabaseModels[TableName.ArenaExitEvents]
+  | DatabaseModels[TableName.ArenaSwapEvents]
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents]
+  | DatabaseModels[TableName.ArenaCandlesticks];
 
 export type EventModelWithMarket =
   | DatabaseModels[TableName.SwapEvents]
@@ -861,6 +1027,15 @@ export type EventModelWithMarket =
   | DatabaseModels[TableName.PeriodicStateEvents]
   | DatabaseModels[TableName.MarketLatestStateEvent]
   | DatabaseModels[TableName.LiquidityEvents];
+
+export type ArenaEventModels =
+  | DatabaseModels[TableName.ArenaEnterEvents]
+  | DatabaseModels[TableName.ArenaMeleeEvents]
+  | DatabaseModels[TableName.ArenaExitEvents]
+  | DatabaseModels[TableName.ArenaSwapEvents]
+  | DatabaseModels[TableName.ArenaVaultBalanceUpdateEvents];
+
+export type ArenaEventModelWithMeleeID = Exclude<ArenaEventModels, ArenaVaultBalanceUpdateModel>;
 
 const extractEventType = (guid: string) => {
   const match = guid.match(/^.*::(\w+)::/u);
@@ -873,36 +1048,55 @@ const eventTypeMatches = (
 ) => extractEventType(guid) === eventType;
 
 export const isSwapEventModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.SwapEvents] => eventTypeMatches(data.guid, "Swap");
 export const isChatEventModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.ChatEvents] => eventTypeMatches(data.guid, "Chat");
 export const isMarketRegistrationEventModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.MarketRegistrationEvents] =>
   eventTypeMatches(data.guid, "MarketRegistration");
 export const isPeriodicStateEventModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.PeriodicStateEvents] =>
   eventTypeMatches(data.guid, "PeriodicState");
 export const isMarketLatestStateEventModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.MarketLatestStateEvent] => eventTypeMatches(data.guid, "State");
 export const isMarketStateModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.MarketState] =>
   isMarketLatestStateEventModel(data) && "dailyVolume" in data;
 export const isLiquidityEventModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.LiquidityEvents] => eventTypeMatches(data.guid, "Liquidity");
 export const isGlobalStateEventModel = (
-  data: AnyEventModel
+  data: BrokerEventModels
 ): data is DatabaseModels[TableName.GlobalStateEvents] =>
   eventTypeMatches(data.guid, "GlobalState");
 
-export const isEventModelWithMarket = (data: AnyEventModel): data is EventModelWithMarket =>
-  !isGlobalStateEventModel(data);
+/**
+ * Non-arena event models with markets.
+ */
+export const isEventModelWithMarket = (data: BrokerEventModels): data is EventModelWithMarket =>
+  isSwapEventModel(data) ||
+  isChatEventModel(data) ||
+  isMarketRegistrationEventModel(data) ||
+  isPeriodicStateEventModel(data) ||
+  isMarketLatestStateEventModel(data) ||
+  isMarketStateModel(data) ||
+  isLiquidityEventModel(data);
+
+/**
+ * Event models that are emitted in a transaction and thus always have transaction metadata.
+ */
+export type TransactionEventModels = Extract<
+  BrokerEventModels,
+  { transaction: TransactionMetadata }
+>;
+export const isTransactionEventModel = (data: BrokerEventModels): data is TransactionEventModels =>
+  "transaction" in data;
 
 export * from "./common";
 export * from "./json-types";

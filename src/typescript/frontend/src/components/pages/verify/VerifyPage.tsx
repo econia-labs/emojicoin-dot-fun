@@ -97,7 +97,7 @@ export const ClientVerifyPage = () => {
           </div>
         </div>
         <Flex justifyContent="center" className="w-[100dvw]">
-          <Link href={LINKS?.tos ?? ROUTES.notFound}>
+          <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
             <Text
               textScale="display6"
               $fontWeight="bold"

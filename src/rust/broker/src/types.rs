@@ -19,4 +19,8 @@ pub struct Subscription {
     pub markets: Vec<u64>,
     #[serde(default)]
     pub event_types: Vec<EmojicoinDbEventType>,
+    #[serde(default)]
+    pub arena: bool,
+    #[serde(default)]
+    pub arena_candlesticks: bool,
 }

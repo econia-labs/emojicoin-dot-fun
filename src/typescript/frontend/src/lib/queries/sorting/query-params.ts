@@ -25,7 +25,7 @@ export const constructURLForHomePage = ({
   newURL.searchParams.delete("sort");
   newURL.searchParams.delete("q");
 
-  const safePage = safeParsePageWithDefault((page ?? 1).toString());
+  const safePage = safeParsePageWithDefault(page);
   if (safePage !== 1) {
     newURL.searchParams.set("page", safePage.toString());
   }
