@@ -1,4 +1,4 @@
-import { type AnyPeriod, ArenaPeriod } from "..";
+import { type AnyPeriod, ArenaPeriod } from "../const";
 import {
   type BrokerEventModels,
   DatabaseTypeConverter,

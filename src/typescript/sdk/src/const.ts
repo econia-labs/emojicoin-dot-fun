@@ -154,6 +154,8 @@ export const INITIAL_REAL_RESERVES: Types["Reserves"] = {
   quote: 0n,
 };
 
+export type AnyPeriod = Period | ArenaPeriod;
+
 export enum Period {
   Period1M = "period_1m",
   Period5M = "period_5m",
