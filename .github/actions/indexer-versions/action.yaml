@@ -1,0 +1,23 @@
+---
+description: 'Ensure consistent indexer versions across various contexts'
+name: 'Indexer versions'
+runs:
+  steps:
+  - id: 'check-deploy-files'
+    run: 'sh ${{ github.action_path }}/sh/check-deploy-files.sh'
+    shell: 'sh'
+  - env:
+      BROKER_VERSION: '${{ steps.check-deploy-files.outputs.broker_version }}'
+      PROCESSOR_VERSION:
+        '${{ steps.check-deploy-files.outputs.processor_version }}'
+    id: 'check-compose-file'
+    run: 'sh ${{ github.action_path }}/sh/check-compose-file.sh'
+    shell: 'sh'
+  - env:
+      PROCESSOR_VERSION:
+        '${{ steps.check-deploy-files.outputs.processor_version }}'
+    id: 'check-submodule'
+    run: 'sh ${{ github.action_path }}/sh/check-submodule.sh'
+    shell: 'sh'
+  using: 'composite'
+...
