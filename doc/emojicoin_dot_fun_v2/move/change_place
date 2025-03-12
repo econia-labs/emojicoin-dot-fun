@@ -1,0 +1,33 @@
+1769 - change number of MAX_SYMBOL_LENGTH -> 32
+
+1778 - Add const MAX_SYMBOL_LENGTH -> 10
+        - 1778 -1783
+        ```
+            <a id="0xc0de_emojicoin_dot_fun_MAX_SYMBOL_LENGTH"></a>
+
+
+
+            <pre><code><b>const</b> <a href="../../move/emojicoin_dot_fun/emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MIN_SYMBOL_LENGTH">MIN_SYMBOL_LENGTH</a>: u8 = 10;
+            </code></pre>
+        ```
+
+
+1961 - Add const Error code 28
+        - 1961 - 1967
+         ```
+             <a id="0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_TOO_LONG"></a>
+
+                   Too few bytes in emoji symbol.
+
+
+                   <pre><code><b>const</b> <a href="../../move/emojicoin_dot_fun/emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_TOO_SHORT">E_EMOJI_BYTES_TOO_SHORT</a>: u64 = 28;
+                   </code></pre>
+         ```
+
+
+5246 - get_verified_symbol_emoji_bytes
+       - 5274 - 5277
+       - <b>assert</b>!(
+                   <a href="_length">vector::length</a>(&verified_bytes) > (<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MIN_SYMBOL_LENGTH">MIN_SYMBOL_LENGTH</a> <b>as</b> u64),
+                   <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_TOO_SHORT">E_EMOJI_BYTES_TOO_SHORT</a>
+               );
