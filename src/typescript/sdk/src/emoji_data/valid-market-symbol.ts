@@ -1,4 +1,5 @@
-import { MAX_SYMBOL_LENGTH, getEmojisInString, isValidEmoji } from "..";
+import { MAX_SYMBOL_LENGTH } from "../const";
+import { getEmojisInString, isValidEmoji } from "./utils";
 
 /**
  * This parses an input string to see if it's a valid symbol.
