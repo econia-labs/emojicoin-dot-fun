@@ -1,4 +1,4 @@
-module emojicoin_dot_fun::emojicoin_dot_fun {
+module emojicoin_dot_fun::emojicoin_dot_fun{
 
     use aptos_framework::account;
     use aptos_framework::aggregator_v2::{Self, Aggregator, AggregatorSnapshot};
@@ -7,7 +7,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::code;
     use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
     use aptos_framework::event;
-    use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
+    use aptos_framework::object::{Self, ExtendRef, ObjectGroup, generate_extend_ref, create_named_object,
+        generate_signer_for_extending
+    };
     use aptos_framework::timestamp;
     use aptos_std::smart_table::{Self, SmartTable};
     use aptos_std::string_utils;
@@ -16,6 +18,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use emojicoin_dot_fun::hex_codes;
     use std::option::{Self, Option};
     use std::signer;
+    use std::signer::address_of;
     use std::string::{Self, String};
     use std::vector;
 
@@ -423,13 +426,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         lp_coins: u128,
     }
 
+    struct Emoji_extend has key,store{
+        ext:ExtendRef
+    }
+
     public entry fun register_market(
         registrant: &signer,
         emojis: vector<vector<u8>>,
         integrator: address,
-    ) acquires Market, Registry, RegistryAddress {
+    ) acquires Market, Registry, RegistryAddress, Emoji_extend {
         register_market_inner(registrant, emojis, integrator, true);
     }
+
+
 
     public entry fun swap<Emojicoin, EmojicoinLP>(
         swapper: &signer,
@@ -440,12 +449,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator_fee_rate_bps: u8,
         min_output_amount: u64,
     ) acquires
-        LPCoinCapabilities,
-        Market,
-        Registry,
-        RegistrantDeposit,
-        RegistrantGracePeriodFlag,
-        RegistryAddress
+    LPCoinCapabilities,
+    Market,
+    Registry,
+    RegistrantDeposit,
+    RegistrantGracePeriodFlag,
+    RegistryAddress, Emoji_extend
     {
 
         // Mutably borrow market, verify minimum output amount specified, then simulate a swap.
@@ -752,7 +761,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         emoji_bytes: vector<vector<u8>>,
         emoji_indices_sequence: vector<u8>,
-    ) acquires Market, Registry, RegistryAddress {
+    ) acquires Market, Registry, RegistryAddress, Emoji_extend {
 
         // Mutably borrow market and check its coin types.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
@@ -854,7 +863,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         quote_amount: u64,
         min_lp_coins_out: u64,
-    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress, Emoji_extend {
 
         // Sanitize inputs, set up local variables.
         assert!(min_lp_coins_out > 0, E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO);
@@ -937,7 +946,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         lp_coin_amount: u64,
         min_quote_out: u64,
-    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress, Emoji_extend {
 
         // Sanitize inputs, set up local variables.
         assert!(min_quote_out > 0, E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO);
@@ -1018,7 +1027,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// Checks if an individual emoji is supported as a coin symbol.
     public fun is_a_supported_symbol_emoji(
         hex_bytes: vector<u8>
-    ): bool acquires Registry, RegistryAddress {
+    ): bool acquires Registry, RegistryAddress, Emoji_extend {
         table::contains(&borrow_registry_ref().coin_symbol_emojis, hex_bytes)
     }
 
@@ -1026,7 +1035,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// Checks if an individual emoji is supported for usage in chat.
     public fun is_a_supported_chat_emoji(
         hex_bytes: vector<u8>
-    ): bool acquires Registry, RegistryAddress {
+    ): bool acquires Registry, RegistryAddress, Emoji_extend {
         is_a_supported_chat_emoji_inner(hex_bytes)
     }
 
@@ -1034,21 +1043,21 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// Checks if an individual emoji is supported for usage in chat only.
     public fun is_a_supplemental_chat_emoji(
         hex_bytes: vector<u8>
-    ): bool acquires Registry, RegistryAddress {
+    ): bool acquires Registry, RegistryAddress, Emoji_extend {
         table::contains(&borrow_registry_ref().supplemental_chat_emojis, hex_bytes)
     }
 
     #[view]
     public fun verified_symbol_emoji_bytes(emojis: vector<vector<u8>>): vector<u8>
-    acquires Registry, RegistryAddress {
+    acquires Registry, RegistryAddress, Emoji_extend {
         get_verified_symbol_emoji_bytes(borrow_registry_ref(), emojis)
     }
 
     #[view]
-    public fun registry_address(): address acquires RegistryAddress { get_registry_address() }
+    public fun registry_address(): address acquires RegistryAddress, Emoji_extend { get_registry_address() }
 
     #[view]
-    public fun registry_view(): RegistryView acquires Registry, RegistryAddress {
+    public fun registry_view(): RegistryView acquires Registry, RegistryAddress, Emoji_extend {
         let registry_ref = borrow_registry_ref();
         RegistryView {
             registry_address: registry_ref.registry_address,
@@ -1120,7 +1129,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun market_metadata_by_emoji_bytes(emoji_bytes: vector<u8>): Option<MarketMetadata>
-    acquires Market, Registry, RegistryAddress {
+    acquires Market, Registry, RegistryAddress, Emoji_extend {
         let registry_ref = borrow_registry_ref();
         let markets_by_emoji_bytes_ref = &registry_ref.markets_by_emoji_bytes;
         if (smart_table::contains(markets_by_emoji_bytes_ref, emoji_bytes)) {
@@ -1143,7 +1152,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun market_metadata_by_market_id(market_id: u64): Option<MarketMetadata>
-    acquires Market, Registry, RegistryAddress {
+    acquires Market, Registry, RegistryAddress, Emoji_extend {
         let registry_ref = borrow_registry_ref();
         let markets_by_market_id_ref = &registry_ref.markets_by_market_id;
         if (smart_table::contains(markets_by_market_id_ref, market_id)) {
@@ -1537,7 +1546,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (tvl, lp_coins)
     }
 
-    fun init_module(emojicoin_dot_fun: &signer) {
+    inline fun get_emoji_signer() :signer{
+        let emojicoin_dot_fun = generate_signer_for_extending(&borrow_global<Emoji_extend>(@emojicoin_dot_fun).ext);
+        emojicoin_dot_fun
+    }
+    public entry fun initialize(caller:&signer) acquires Emoji_extend {
+        assert!(address_of(caller)==@admin,10000);
+        let emojicoin_dot_fun = &generate_signer_for_extending(&borrow_global<Emoji_extend>(@emojicoin_dot_fun).ext);
         let constructor_ref = object::create_named_object(emojicoin_dot_fun, REGISTRY_NAME);
         let extend_ref = object::generate_extend_ref(&constructor_ref);
         let registry_signer = object::generate_signer(&constructor_ref);
@@ -1594,12 +1609,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
+
+    fun init_module(emojicoin_dot_fun: &signer) {
+        move_to(emojicoin_dot_fun,Emoji_extend{
+            ext:generate_extend_ref(&create_named_object(emojicoin_dot_fun,b"emoji"))
+        });
+    }
+
     fun register_market_inner(
         registrant: &signer,
         emojis: vector<vector<u8>>,
         integrator: address,
         publish_code: bool,
-    ) acquires Market, Registry, RegistryAddress {
+    ) acquires Market, Registry, RegistryAddress, Emoji_extend {
         let registry_ref_mut = borrow_registry_ref_mut();
 
         // Verify well-formed emoji bytes.
@@ -1948,12 +1970,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     inline fun borrow_registry_ref(): &Registry acquires Registry, RegistryAddress {
-        borrow_global<Registry>(borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address)
+        let add = address_of(&get_emoji_signer());
+        borrow_global<Registry>(borrow_global<RegistryAddress>(add).registry_address)
     }
 
     inline fun borrow_registry_ref_mut(): &mut Registry acquires Registry, RegistryAddress {
+        let add =address_of(&get_emoji_signer());
         borrow_global_mut<Registry>(
-            borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address
+            borrow_global<RegistryAddress>( add).registry_address
         )
     }
 
@@ -2258,7 +2282,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     inline fun get_registry_address(): address {
-        borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address
+        let add =address_of(&get_emoji_signer());
+        borrow_global<RegistryAddress>(add).registry_address
     }
 
     inline fun get_verified_symbol_emoji_bytes(
@@ -2665,7 +2690,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registrant: &signer,
         emojis: vector<vector<u8>>,
         integrator: address,
-    ) acquires Market, Registry, RegistryAddress {
+    ) acquires Market, Registry, RegistryAddress, Emoji_extend {
         register_market_inner(registrant, emojis, integrator, false);
     }
 

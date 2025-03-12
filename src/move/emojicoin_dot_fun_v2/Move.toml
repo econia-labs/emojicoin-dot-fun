@@ -1,15 +1,14 @@
 [addresses]
-emojicoin_dot_fun_v2 = "_"
-emojicoin_dot_fun = "_"
-
+emojicoin_dot_fun="0xed4b36e839063eb381e6dd80b255da59f6abeecb0a707c476c01f9fe1cb15037"
+admin="0x296e53ce1956ebdef5d969f3189a00b0ca29f2d377b311e30872202d4072b19b"
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
 [dev-addresses]
-coin_factory = "0xaaaa"
-emojicoin_dot_fun = "0xc0de"
+coin_factory = "0x875a415aacc11a22096d1462c745f64086fdf7c1d5a7a0e28a715d212032a31e"
+
 
 [dev-dependencies.BlackCatCoinFactory]
 local = "../test_coin_factories/black_cat"
@@ -27,6 +26,6 @@ local = "../test_coin_factories/yellow_heart"
 
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
-name = "EmojicoinDotFun_v2"
+name = "EmojicoinDotFun"
 upgrade_policy = "immutable"
 version = "1.0.1"
