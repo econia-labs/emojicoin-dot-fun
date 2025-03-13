@@ -101,7 +101,7 @@ export const ArenaClient = (props: ArenaProps) => {
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
 
-  useReliableSubscribe({ eventTypes: ["Swap"], arena: true, arenaCandlesticks: true });
+  useReliableSubscribe({ eventTypes: ["Chat"], arena: true });
 
   const latestMeleeID = useLatestMeleeID();
 
