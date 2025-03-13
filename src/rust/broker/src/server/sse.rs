@@ -12,7 +12,10 @@ use futures_util::{Stream, StreamExt};
 use log::{error, info, trace, warn};
 use tokio::sync::broadcast::error::RecvError;
 
-use crate::{types::Subscription, util::is_match};
+use crate::{
+    types::{ClientSubscription, SubscriptionMessage},
+    util::is_match,
+};
 
 use super::AppState;
 
@@ -30,9 +33,10 @@ use super::AppState;
 /// - `/sse`: subscribe to all events
 /// - `/sse?markets=1&markets=2&event_types=Chat&event_types=Swap`: subscribe to Chat and Swap events on markets 1 and 2
 pub async fn handler(
-    Query(subscription): Query<Subscription>,
+    Query(msg): Query<SubscriptionMessage>,
     State(state): State<Arc<AppState>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let subscription = ClientSubscription::from(msg);
     info!("New SSE connection ({subscription:?}).");
 
     let mut rx = state.tx.subscribe();

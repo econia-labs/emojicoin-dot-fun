@@ -83,13 +83,21 @@ export type BrokerMessage = {
 };
 
 /**
+ * Arena periods are subscribed in a granular way- like an actual sub/pub model with topics.
+ */
+export type ArenaPeriodRequest = {
+  action: "subscribe" | "unsubscribe";
+  period: PeriodTypeFromBroker;
+};
+
+/**
  * The message the client sends to the broker to subscribe or unsubscribe.
  */
 export type SubscriptionMessage = {
   markets: number[];
   event_types: BrokerEvent[];
   arena: boolean;
-  arena_candlesticks?: PeriodTypeFromBroker;
+  arena_period?: ArenaPeriodRequest;
 };
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -97,7 +105,7 @@ export type WebSocketSubscriptions = {
   marketIDs: Set<AnyNumberString>;
   eventTypes: Set<BrokerEvent>;
   arena: boolean;
-  arenaCandlesticks?: PeriodTypeFromBroker;
+  arenaPeriods: Set<PeriodTypeFromBroker>;
 };
 
 const PeriodToBrokerPeriodType: Record<AnyPeriod, PeriodTypeFromBroker> = {
