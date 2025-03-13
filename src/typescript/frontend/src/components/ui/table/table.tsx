@@ -117,24 +117,19 @@ const TableRow = React.forwardRef<
         initial={{
           filter: "brightness(1) saturate(1)",
           boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
-          x: animateInsertion ? "100%" : undefined,
           y: animateInsertion ? "-100%" : undefined,
-          scale: animateInsertion ? 0 : undefined,
           opacity: 0,
         }}
         animate={{
           opacity: 1,
           x: 0,
           y: 0,
-          scale: 1,
           transition: {
             opacity: {
               type: "just",
               delay,
             },
-            x: { type: "easeOut", delay: 0.1 },
-            y: { type: "easeOut", delay: 0.1 },
-            scale: { type: "easeOut", delay: 0.1 },
+            y: { type: "just", delay: 0.05 },
           },
         }}
         whileHover={

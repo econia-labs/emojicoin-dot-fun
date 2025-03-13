@@ -22,7 +22,6 @@ export const EcTableRow = <T,>({
 }: Props<T>) => {
   return (
     <TableRow
-      key={index}
       index={index}
       height={height}
       onClick={() => onClick?.(item)}
