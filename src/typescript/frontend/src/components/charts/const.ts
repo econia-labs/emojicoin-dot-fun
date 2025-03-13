@@ -19,7 +19,7 @@ export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
   "15",
   "30",
   "60",
-  "4H",
+  "240",
   "1D",
 ] as ResolutionString[];
 
@@ -50,11 +50,11 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
   custom_css_url: `${CDN_URL}/charting_library_stylesheets/emojicoin-dot-fun.css`,
   enabled_features: ["iframe_loading_compatibility_mode"],
   disabled_features: [
-    "use_localstorage_for_settings" as ChartingLibraryFeatureset,
-    "left_toolbar" as ChartingLibraryFeatureset,
-    "control_bar" as ChartingLibraryFeatureset,
-    "study_templates" as ChartingLibraryFeatureset,
-    "snapshot_trading_drawings" as ChartingLibraryFeatureset,
+    "use_localstorage_for_settings",
+    "left_toolbar",
+    "control_bar",
+    "study_templates",
+    "snapshot_trading_drawings",
   ],
   fullscreen: false,
   autosize: true,
