@@ -8,7 +8,7 @@ const COINGECKO_ROOT_URL = "https://pro-api.coingecko.com/api";
 const COINGECKO_ENDPOINT = "v3/simple/price";
 
 export const getAptPrice = async () =>
-  ecFetch(`${COINGECKO_ROOT_URL}/${COINGECKO_ENDPOINT}`, {
+  ecFetch<{ aptos: { usd: number } }>(`${COINGECKO_ROOT_URL}/${COINGECKO_ENDPOINT}`, {
     searchParams: {
       ids: COINGECKO_APT_ID,
       vs_currencies: "usd",
