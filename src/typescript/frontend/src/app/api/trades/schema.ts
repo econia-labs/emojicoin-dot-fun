@@ -9,9 +9,9 @@ export const GetTradesSchema = z.object({
     .refine((arg) => AccountAddress.isValid({ input: arg }))
     .optional()
     .transform((val) => (val ? AccountAddress.from(val) : undefined)),
-  page: z.coerce.number().default(1),
-  limit: z.coerce.number().max(100).default(100),
-  marketID: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().positive().max(100).default(100),
+  marketID: z.coerce.number().int().positive().optional(),
   orderBy: z
     .enum(["asc", "desc"])
     .optional()

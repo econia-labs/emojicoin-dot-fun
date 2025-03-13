@@ -25,7 +25,7 @@ import type { RequestInit } from "next/dist/server/web/spec-extension/request";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
 
-type PrimitiveValue = string | number | boolean | null | undefined;
+type PrimitiveValue = string | number | boolean | null | undefined | bigint;
 type SearchParamsRecord = Record<string, PrimitiveValue | PrimitiveValue[]>;
 type SearchParamsValue = string | SearchParamsRecord | URLSearchParams | string[][];
 
@@ -119,8 +119,7 @@ const addSearchParams = (url: URL, searchParams?: SearchParamsValue): URL => {
  * @returns {Promise<T>} Parsed response data
  * @throws {EcFetchError} If the request fails or response cannot be parsed
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ecFetch = async <T = any,>(
+export const ecFetch = async <T = unknown,>(
   input: string | URL | globalThis.Request,
   init?: EcFetchInit
 ): Promise<T> => {

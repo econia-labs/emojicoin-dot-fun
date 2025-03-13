@@ -2,6 +2,7 @@ import { fetchSwapEvents } from "@/queries/market";
 import { stringifyJSON } from "utils";
 import { GetTradesSchema } from "./schema";
 
+// Don't cache this route's response.
 export const revalidate = 0;
 
 export const GET = async (req: Request) => {
