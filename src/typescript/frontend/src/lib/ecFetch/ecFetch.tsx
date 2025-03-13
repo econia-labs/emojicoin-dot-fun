@@ -25,7 +25,7 @@ import type { RequestInit } from "next/dist/server/web/spec-extension/request";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
 
-type PrimitiveValue = string | number | boolean | null | undefined | bigint;
+type PrimitiveValue = string | number | boolean | null | undefined;
 type SearchParamsRecord = Record<string, PrimitiveValue | PrimitiveValue[]>;
 type SearchParamsValue = string | SearchParamsRecord | URLSearchParams | string[][];
 
