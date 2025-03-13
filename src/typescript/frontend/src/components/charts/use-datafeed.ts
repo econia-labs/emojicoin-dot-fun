@@ -130,7 +130,7 @@ export const useDatafeed = (symbol: string) => {
           const noData = bars.length === 0;
           if (noData && isFetchForMostRecentBars) {
             // Create a single empty bar if there's no trading activity, otherwise the chart shows "No chart data".
-            const dummyBar = createDummyBar(periodDuration);
+            const dummyBar = createDummyBar(periodDuration, symbol);
             bars.push(dummyBar);
           }
 

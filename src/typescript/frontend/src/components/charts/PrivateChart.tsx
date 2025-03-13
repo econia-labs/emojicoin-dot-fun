@@ -55,6 +55,12 @@ export const Chart = ({
           .catch((error) => {
             console.error("Error applying visible range:", error);
           });
+
+        // Remove the odd, floating price label on the volume study- it conflicts with the price label too much.
+        const volumeStudy = chart.getAllStudies().find((v) => v.name === "Volume");
+        if (volumeStudy) {
+          chart.getStudyById(volumeStudy.id).applyOverrides({ showLabelsOnPriceScale: false });
+        }
       });
 
       tvWidget.current.headerReady().then(() => {

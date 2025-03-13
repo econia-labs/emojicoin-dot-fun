@@ -132,9 +132,8 @@ export const ArenaClient = (props: ArenaProps) => {
   useEffect(() => {
     if (props.arenaInfo) {
       loadArenaInfoFromServer(props.arenaInfo);
-      loadEventsFromServer(props.candlesticks);
     }
-  }, [loadArenaInfoFromServer, loadEventsFromServer, props.arenaInfo, props.candlesticks]);
+  }, [loadArenaInfoFromServer, loadEventsFromServer, props.arenaInfo]);
 
   const latestMeleeID = useLatestMeleeID();
 

@@ -50,11 +50,10 @@ export default async function Arena() {
   return (
     <ArenaClient
       arenaInfo={arenaInfo}
-      market0={market0!}
-      market1={market1!}
+      market0={market0}
+      market1={market1}
       symbol0={symbol0}
       symbol1={symbol1}
-      candlesticks={[]}
     />
   );
 }
