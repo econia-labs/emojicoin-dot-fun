@@ -10,7 +10,6 @@ import {
 import {
   type PeriodicStateEventModel,
   type SwapEventModel,
-  type DatabaseModels,
   type EventModelWithMarket,
 } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
@@ -18,10 +17,7 @@ import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from ".
 import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
 import { type ArenaState, createInitialMeleeState } from "../arena/store";
 
-type PeriodicState = DatabaseModels["periodic_state_events"];
-
 export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
-  candlesticks: [] as PeriodicState[],
   callback: undefined,
   latestBar: undefined,
 });
@@ -57,16 +53,6 @@ export const ensureMeleeInStore = (state: WritableDraft<ArenaState>, meleeID: bi
   if (!state.melees.has(meleeID)) {
     state.melees.set(meleeID, createInitialMeleeState());
   }
-};
-
-export const pushPeriodicStateEvents = (
-  market: WritableDraft<MarketEventStore>,
-  periodicStateEvents: PeriodicState[]
-) => {
-  periodicStateEvents.forEach((p) => {
-    const { period } = p.periodicMetadata;
-    market[period].candlesticks.push(p);
-  });
 };
 
 export const handleLatestBarForSwapEvent = (

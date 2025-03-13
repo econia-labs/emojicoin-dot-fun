@@ -16,7 +16,6 @@ import {
   ensureMarketInStore,
   handleLatestBarForPeriodicStateEvent,
   handleLatestBarForSwapEvent,
-  pushPeriodicStateEvents,
   toMappedMarketEvents,
   initialState,
   ensureMeleeInStore,
@@ -96,7 +95,8 @@ export const createEventStore = () => {
             market.chatEvents.push(...extractFilter(marketEvents, isChatEventModel));
             market.liquidityEvents.push(...extractFilter(marketEvents, isLiquidityEventModel));
             market.stateEvents.push(...extractFilter(marketEvents, isMarketLatestStateEventModel));
-            pushPeriodicStateEvents(market, extractFilter(marketEvents, isPeriodicStateEventModel));
+            // Drain the rest of the periodic state events to satisfy the assertion.
+            const _ = extractFilter(marketEvents, isPeriodicStateEventModel);
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
 
