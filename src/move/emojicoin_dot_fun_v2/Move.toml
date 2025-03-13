@@ -1,5 +1,5 @@
 [addresses]
-emojicoin_dot_fun="0xed4b36e839063eb381e6dd80b255da59f6abeecb0a707c476c01f9fe1cb15037"
+emojicoin_dot_fun="0xc87af7d6288ea04fa4fbc840bb92419f957e8e92e2d4ab4cc8e55866b6974d35"
 admin="0x296e53ce1956ebdef5d969f3189a00b0ca29f2d377b311e30872202d4072b19b"
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
@@ -7,7 +7,7 @@ rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
 [dev-addresses]
-coin_factory = "0x875a415aacc11a22096d1462c745f64086fdf7c1d5a7a0e28a715d212032a31e"
+coin_factory = "0xa8a56419ed5290392257642429bfe4fc7f6c6b6c95cbbb2b13c22db1d70afc8c"
 
 
 [dev-dependencies.BlackCatCoinFactory]

@@ -1,5 +1,5 @@
 [addresses]
-coin_factory = "0x875a415aacc11a22096d1462c745f64086fdf7c1d5a7a0e28a715d212032a31e"
+coin_factory = "0xa8a56419ed5290392257642429bfe4fc7f6c6b6c95cbbb2b13c22db1d70afc8c"
 
 [dev-dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
