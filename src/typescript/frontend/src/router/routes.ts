@@ -20,6 +20,7 @@ export const ROUTES = expandRoutes({
     trending: _,
   },
   arena: _,
+  bridge: _,
   cult: _,
   dev: {
     metadata: _,
