@@ -4,6 +4,7 @@ import {
   type ArenaPositionModel,
   type ArenaInfoModel,
   type MarketStateModel,
+  type PeriodicStateEventModel,
 } from "@sdk/indexer-v2/types";
 import { type ClassValue } from "clsx";
 import React, { useState } from "react";
@@ -14,6 +15,8 @@ export type ArenaProps = {
   arenaInfo: ArenaInfoModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
+  candlesticksMarket0: PeriodicStateEventModel[];
+  candlesticksMarket1: PeriodicStateEventModel[];
 };
 
 export type ArenaPropsWithPositionAndHistory = ArenaProps & {

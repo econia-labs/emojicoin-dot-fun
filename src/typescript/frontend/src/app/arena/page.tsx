@@ -45,5 +45,13 @@ export default async function Arena() {
     redirect(ROUTES.home);
   }
 
-  return <ArenaClient arenaInfo={arenaInfo} market0={market0!} market1={market1!} />;
+  return (
+    <ArenaClient
+      arenaInfo={arenaInfo}
+      market0={market0!}
+      market1={market1!}
+      candlesticksMarket0={[]}
+      candlesticksMarket1={[]}
+    />
+  );
 }
