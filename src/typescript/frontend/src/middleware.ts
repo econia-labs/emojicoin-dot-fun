@@ -21,15 +21,6 @@ const redis = new Redis({
 const ratelimit = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(5, "10 s"),
-  prefix: "general",
-});
-
-// Separate rate limitter for candlesticks in order to allow for more queries on
-// the candlesticks without ratelimitting the rest of the website.
-const candlestickRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(5, "10 s"),
-  prefix: "candlestick",
 });
 
 export default async function middleware(request: NextRequest) {
@@ -44,42 +35,32 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
 
-  const ip = request.ip ?? "127.0.0.1";
+  if (pathname.startsWith(ROUTES.api["."])) {
+    const ip = request.ip ?? "127.0.0.1";
 
-  let limit: number;
-  let reset: number;
-  let remaining: number;
-  let domain: string;
-  let success: boolean;
+    let limit: number;
+    let reset: number;
+    let remaining: number;
+    let success: boolean;
 
-  if (pathname === ROUTES.api.candlesticks || pathname === "/candlesticks") {
-    const ratelimitRes = await candlestickRatelimit.limit(ip);
-    limit = ratelimitRes.limit;
-    reset = ratelimitRes.reset;
-    remaining = ratelimitRes.remaining;
-    success = ratelimitRes.success;
-    domain = "candlesticks";
-  } else {
     const ratelimitRes = await ratelimit.limit(ip);
     limit = ratelimitRes.limit;
     reset = ratelimitRes.reset;
     remaining = ratelimitRes.remaining;
     success = ratelimitRes.success;
-    domain = "general";
-  }
 
-  const headers = {
-    "X-RateLimit-Limit": limit.toString(),
-    "X-RateLimit-Remaining": remaining.toString(),
-    "X-RateLimit-Reset": reset.toString(),
-    "X-RateLimit-Domain": domain,
-  };
+    const headers = {
+      "X-RateLimit-Limit": limit.toString(),
+      "X-RateLimit-Remaining": remaining.toString(),
+      "X-RateLimit-Reset": reset.toString(),
+    };
 
-  if (!success) {
-    return new Response("", {
-      status: 429,
-      headers,
-    });
+    if (!success) {
+      return new Response("", {
+        status: 429,
+        headers,
+      });
+    }
   }
 
   const dexscreenerRoutes = Object.keys(ROUTES.api.dexscreener);
@@ -96,18 +77,18 @@ export default async function middleware(request: NextRequest) {
   // but then still require them to verify after.
   const possibleMarketPath = normalizePossibleMarketPath(pathname, request.url);
   if (possibleMarketPath) {
-    return NextResponse.redirect(possibleMarketPath, { headers });
+    return NextResponse.redirect(possibleMarketPath);
   }
 
   if (!IS_ALLOWLIST_ENABLED) {
-    return NextResponse.next({ headers });
+    return NextResponse.next();
   }
 
   const hashed = request.cookies.get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = request.cookies.get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
 
   if (!hashed || !address) {
-    return NextResponse.redirect(new URL(ROUTES.verify, request.url), { headers });
+    return NextResponse.redirect(new URL(ROUTES.verify, request.url));
   }
 
   const authenticated = await authenticate({
@@ -116,11 +97,11 @@ export default async function middleware(request: NextRequest) {
   });
 
   if (!authenticated) {
-    return NextResponse.redirect(new URL(ROUTES.verify, request.url), { headers });
+    return NextResponse.redirect(new URL(ROUTES.verify, request.url));
   }
 
   // If the user is authenticated, we can continue with the request.
-  return NextResponse.next({ headers });
+  return NextResponse.next();
 }
 
 // Note this must be a static string- we can't dynamically construct it.

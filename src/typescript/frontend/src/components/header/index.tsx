@@ -63,7 +63,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
         animate={isOpen ? "visible" : "hidden"}
         variants={slideTopVariants(offsetHeight)}
       >
-        <Link prefetch={false} className="mt-[6px]" {...linkProps}>
+        <Link className="mt-[6px]" {...linkProps}>
           <StyledClickItem>
             <LogoIcon width="170px" color="black" cursor="pointer" versionBadge={true} />
           </StyledClickItem>
@@ -76,7 +76,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
 
       <Container>
         <Flex my="30px" justifyContent="space-between" alignItems="center">
-          <Link prefetch={false} className="ml-[50px]" {...linkProps}>
+          <Link className="ml-[50px]" {...linkProps}>
             <StyledClickItem>
               <LogoIcon width="170px" cursor="pointer" versionBadge={true} />
             </StyledClickItem>
@@ -87,7 +87,6 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
               {NAVIGATE_LINKS.map(({ title, path }) => {
                 return (
                   <Link
-                    prefetch={false}
                     key={title}
                     href={path}
                     target={path.startsWith("https://") ? "_blank" : undefined}

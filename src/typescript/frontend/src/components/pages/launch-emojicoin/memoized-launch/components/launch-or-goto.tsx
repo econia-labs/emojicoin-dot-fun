@@ -38,7 +38,6 @@ export const LaunchButtonOrGoToMarketLink = ({
       <ButtonWithConnectWalletFallback forceDisplayChildren={registered}>
         {registered ? (
           <Link
-            prefetch={false}
             className="font-pixelar text-lg uppercase text-ec-blue"
             href={path.join(ROUTES.market, emojis.join(""))}
           >

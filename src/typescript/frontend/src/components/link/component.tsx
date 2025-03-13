@@ -22,7 +22,6 @@ const Link: React.FC<LinkProps> = ({ external, href, underline = false, target, 
   } else {
     return (
       <RouterLink
-        prefetch={false}
         href={href || ".."}
         aria-label={ariaLabel}
         underline={underline ? underline.toString() : undefined}

@@ -9,11 +9,11 @@ import { toMarketEmojiData } from "@sdk/emoji_data/utils";
 import { type MarketMetadataModel, type PeriodicStateEventModel } from "@sdk/indexer-v2";
 import { getMarketResource } from "@sdk/markets/utils";
 import { getAptosClient } from "@sdk/utils/aptos-client";
-import { getPeriodStartTimeFromTime, sleep } from "@sdk/utils/misc";
+import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
 import { type Bar, type PeriodParams } from "@static/charting_library";
 import { hasTradingActivity } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { fetchRateLimitted } from "utils";
 
 export const fetchCandlesticksForChart = async ({
   marketID,
@@ -30,38 +30,13 @@ export const fetchCandlesticksForChart = async ({
     countBack: periodParams.countBack.toString(),
     to: periodParams.to.toString(),
   });
-  let data: Bar[] = [];
-  let retriesLeft = 4;
-  while (true) {
-    try {
-      data = await fetch(`${ROUTES.api.candlesticks}?${params.toString()}`)
-        .then(async (res) => {
-          if (res.status === 429 && res.headers.get("X-RateLimit-Reset")) {
-            throw new Error(res.headers.get("X-RateLimit-Reset")!);
-          }
-          return res.text();
-        })
-        .then((res) => parseJSON<PeriodicStateEventModel[]>(res))
-        .then((res) =>
-          res
-            .sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime))
-            .map(toBar)
-            .reduce(curriedBarsReducer(periodParams.to), [])
-        );
-      break;
-    } catch (e) {
-      const reset = Number((e as Error).message);
-      const now = new Date().getTime();
-      const waitTime = reset - now;
-      await sleep(waitTime + 1000);
-      retriesLeft--;
-      if (retriesLeft <= 0) {
-        throw new Error("Could not get candlesticks.");
-      }
-    }
-  }
-
-  return data;
+  return await fetchRateLimitted<PeriodicStateEventModel[]>(`${ROUTES.api.candlesticks}?${params.toString()}`)
+  .then((res) =>
+    res
+      .sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime))
+      .map(toBar)
+      .reduce(curriedBarsReducer(periodParams.to), [])
+  );
 };
 
 /**

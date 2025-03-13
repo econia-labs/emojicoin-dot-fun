@@ -41,7 +41,6 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
       <Td p="7px 12px" width={{ _: "25%", tablet: "11.5%" }}>
         <Popup content="go to market">
           <Link
-            prefetch={false}
             href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}
           >
             <Flex justifyContent="space-between" className="cursor-pointer">
