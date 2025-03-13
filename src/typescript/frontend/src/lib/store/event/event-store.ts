@@ -135,10 +135,6 @@ export const createEventStore = () => {
       pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
-        console.log(
-          "doesnt have guid?",
-          events.map((v) => v.guid)
-        );
         if (!events.length) return;
         set((state) => {
           events.forEach((event) => {
@@ -183,7 +179,6 @@ export const createEventStore = () => {
                   } else if (isArenaSwapModel(event)) {
                     melee.swaps.unshift(event);
                   } else if (isArenaCandlestickModel(event)) {
-                    console.log("got melee event", melee, event.period, event.nSwaps);
                     handleLatestBarForArenaCandlestick(melee, event);
                   }
                 }
@@ -220,13 +215,9 @@ export const createEventStore = () => {
           if (!melee) return;
           set((state) => {
             const melee = state.melees.get(meleeID)!;
-            melee[period].callback = (bar) => {
-              console.log("callback???", bar);
-              cb(bar);
-            };
+            melee[period].callback = cb;
             const brokerPeriodType = periodToPeriodTypeFromBroker(period);
             state.client.subscribeToArenaPeriod(brokerPeriodType);
-            console.log("subscribing to arenaa period", brokerPeriodType);
           });
         } else {
           if (!get().markets.has(symbol)) return;
@@ -244,6 +235,8 @@ export const createEventStore = () => {
           set((state) => {
             const melee = state.melees.get(meleeID)!;
             melee[period].callback = undefined;
+            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
+            state.client.unsubscribeFromArenaPeriod(brokerPeriodType);
           });
         } else {
           if (!get().markets.has(symbol)) return;
