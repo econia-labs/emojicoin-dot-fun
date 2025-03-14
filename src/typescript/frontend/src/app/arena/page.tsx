@@ -1,15 +1,18 @@
-import { fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
+import { fetchArenaInfo } from "@/queries/arena";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
-// import { emoji } from "utils";
-// import type { SymbolEmoji } from "@sdk/emoji_data";
-import type { PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 import { redirect } from "next/navigation";
-import { parseJSON } from "utils";
-import { Period } from "@sdk/const";
-import { getCandlesticksRoute } from "app/api/candlesticks/utils";
-import { type AnyNumberString } from "@sdk-types";
+import { ROUTES } from "router/routes";
+import { fetchSpecificMarkets } from "@sdk/indexer-v2";
 
 export const revalidate = 2;
+
+const logAndReturnValue = <T extends [] | undefined | null | Record<string, unknown>>(
+  dataType: string,
+  onFailure: T
+) => {
+  console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
+  return onFailure;
+};
 
 export default async function Arena() {
   let arenaInfo: Awaited<ReturnType<typeof fetchArenaInfo>> = null;
@@ -17,46 +20,38 @@ export default async function Arena() {
   try {
     arenaInfo = await fetchArenaInfo({});
   } catch (e) {
-    console.warn(
-      "Could not get melee data. This probably means that the backend is running an outdated version of the processor" +
-        " without the arena processing. Please update."
-    );
-    redirect("/home");
+    console.warn("Could not get melee data.");
+    redirect(ROUTES.home);
   }
 
   if (!arenaInfo) {
-    redirect("/home");
+    redirect(ROUTES.home);
   }
 
-  const [market0, market1] = await Promise.all([
-    fetchMarketStateByAddress({
-      address: arenaInfo.emojicoin0MarketAddress,
-    }),
-    fetchMarketStateByAddress({
-      address: arenaInfo.emojicoin1MarketAddress,
-    }),
-  ]);
+  const { market0, market1 } = await fetchSpecificMarkets([
+    arenaInfo.emojicoin0Symbols,
+    arenaInfo.emojicoin1Symbols,
+  ])
+    .then((res) => ({
+      market0: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin0MarketAddress),
+      market1: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin1MarketAddress),
+    }))
+    .catch(() =>
+      logAndReturnValue("arena market0 and market1", { market0: undefined, market1: undefined })
+    );
 
-  const getCandlesticks = (marketID: AnyNumberString) =>
-    getCandlesticksRoute({
-      marketID: Number(marketID),
-      to: Math.ceil(new Date().getTime() / 1000),
-      countBack: 500,
-      period: Period.Period1M,
-    }).then((res) => parseJSON<PeriodicStateEventModel[]>(res));
-
-  const [candlesticksMarket0, candlesticksMarket1] = await Promise.all([
-    getCandlesticks(market0!.market.marketID),
-    getCandlesticks(market1!.market.marketID),
-  ]);
+  if (!market0 || !market1) {
+    console.warn("Couldn't fetch market state for one of the arena markets.");
+    redirect(ROUTES.home);
+  }
 
   return (
     <ArenaClient
       arenaInfo={arenaInfo}
       market0={market0!}
       market1={market1!}
-      candlesticksMarket0={candlesticksMarket0}
-      candlesticksMarket1={candlesticksMarket1}
+      candlesticksMarket0={[]}
+      candlesticksMarket1={[]}
     />
   );
 }

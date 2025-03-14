@@ -63,9 +63,6 @@ export const toBar = (event: PeriodicStateEventModel): Bar => ({
   volume: toNominal(event.periodicState.volumeQuote),
 });
 
-export const toBars = (events: PeriodicStateEventModel | PeriodicStateEventModel[]) =>
-  Array.isArray(events) ? events.map(toBar) : toBar(events);
-
 export const createBarFromSwap = (
   event: SwapEventModel,
   period: Period,
