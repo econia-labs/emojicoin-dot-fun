@@ -11,6 +11,7 @@ import {
   type PeriodDuration,
   type ArenaPeriod,
   isNonArenaPeriod,
+  type AnyPeriod,
 } from "@sdk/const";
 import { toMarketEmojiData } from "@sdk/emoji_data/utils";
 import {
@@ -133,9 +134,9 @@ export const fetchLatestBarsFromMarketResource = async ({
   period,
 }: {
   marketAddress: `0x${string}`;
-  period: Period;
+  period: AnyPeriod;
 }) => {
-  if (isNonArenaPeriod(period)) {
+  if (!isNonArenaPeriod(period)) {
     throw new Error("Invalid period passed");
   }
   const marketResource = await getMarketResource({ aptos: getAptosClient(), marketAddress });
