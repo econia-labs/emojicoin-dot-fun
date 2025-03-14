@@ -49,12 +49,6 @@ export const ensureMarketInStore = (
   }
 };
 
-export const ensureMeleeInStore = (state: WritableDraft<ArenaState>, meleeID: bigint) => {
-  if (!state.melees.has(meleeID)) {
-    state.melees.set(meleeID, createInitialMeleeState());
-  }
-};
-
 export const handleLatestBarForSwapEvent = (
   market: WritableDraft<MarketEventStore>,
   event: SwapEventModel

@@ -88,10 +88,6 @@ export const useDatafeed = (symbol: string) => {
               periodParams,
               period,
             });
-
-            // Arena candlesticks are emitted as up-to-date candlesticks, and fetched elsewhere.
-            // Thus, it's not necessary to call `setLatestBars` here or do anything like the normal
-            // candlesticks for single markets have to do below.
           } else {
             if (!isPeriod(period)) {
               throw new Error("Invalid period type for a non-arena symbol.");

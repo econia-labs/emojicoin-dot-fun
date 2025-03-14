@@ -18,7 +18,6 @@ import {
   handleLatestBarForSwapEvent,
   toMappedMarketEvents,
   initialState,
-  ensureMeleeInStore,
 } from "./utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
@@ -28,7 +27,7 @@ import {
   clearLocalStorage,
   LOCAL_STORAGE_EVENT_TYPES,
 } from "./local-storage";
-import { initializeArenaStore } from "../arena/store";
+import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,

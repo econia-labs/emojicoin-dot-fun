@@ -50,6 +50,12 @@ export const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
   [Period.Period1D]: createPeriodData(),
 });
 
+export const ensureMeleeInStore = (state: WritableDraft<ArenaState>, meleeID: bigint) => {
+  if (!state.melees.has(meleeID)) {
+    state.melees.set(meleeID, createInitialMeleeState());
+  }
+};
+
 export const initializeArenaStore = (): ArenaState => ({
   arenaInfoFromServer: undefined,
   meleeEvents: [],
