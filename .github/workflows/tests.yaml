@@ -38,21 +38,21 @@ jobs:
     strategy:
       matrix:
         include:
-        - job-name: 'Frontend tests: [unit]'
+        - job-name: 'Frontend: [unit]'
           command: 'pnpm run test:frontend:unit'
-        - job-name: 'SDK tests: [unit]'
+        - job-name: 'SDK: [unit]'
           command: 'pnpm run test:sdk:unit'
-        - job-name: 'SDK tests: [e2e, base, general]'
+        - job-name: 'SDK: [e2e, base, general]'
           command: 'pnpm run test:sdk:e2e:base-general'
-        - job-name: 'SDK tests: [e2e, base, websockets]'
+        - job-name: 'SDK: [e2e, base, websockets]'
           command: 'pnpm run test:sdk:e2e:base-ws'
-        - job-name: 'SDK tests: [e2e, arena, general]'
+        - job-name: 'SDK: [e2e, arena, general]'
           command: 'pnpm run test:sdk:e2e:arena-general'
-        - job-name: 'SDK tests: [e2e, arena, websockets]'
+        - job-name: 'SDK: [e2e, arena, websockets]'
           command: 'pnpm run test:sdk:e2e:arena-ws'
-        - job-name: 'SDK tests: [e2e, arena, candlesticks]'
+        - job-name: 'SDK: [e2e, arena, candlesticks]'
           command: 'pnpm run test:sdk:e2e:arena-candlesticks'
-name: 'Run the TypeScript tests'
+name: 'Run test suite'
 'on':
   merge_group: null
   pull_request: null
