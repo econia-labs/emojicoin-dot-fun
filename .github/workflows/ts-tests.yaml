@@ -52,7 +52,7 @@ jobs:
           command: 'pnpm run test:sdk:e2e:arena-ws'
         - job-name: 'SDK tests: [e2e, arena, candlesticks]'
           command: 'pnpm run test:sdk:e2e:arena-candlesticks'
-name: 'Run the SDK tests'
+name: 'Run the TypeScript tests'
 'on':
   merge_group: null
   pull_request: null
