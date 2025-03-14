@@ -6,12 +6,14 @@ import {
   type ResolutionString,
   type ThemeName,
 } from "@static/charting_library";
-import { Period } from "@econia-labs/emojicoin-sdk";
+import { ArenaPeriod, Period } from "@sdk/const";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
 import { CDN_URL } from "lib/env";
+import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 
 export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
+  "15S",
   "1",
   "5",
   "15",
@@ -26,7 +28,8 @@ export const GREEN = hexToRgba(GREEN_HEX);
 export const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
 export const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
-export const ResolutionStringToPeriod: { [key: string]: Period } = {
+export const ResolutionStringToPeriod: { [key: string]: Period | ArenaPeriod } = {
+  "15S": ArenaPeriod.Period15S,
   "1": Period.Period1M,
   "5": Period.Period5M,
   "15": Period.Period15M,
@@ -36,17 +39,31 @@ export const ResolutionStringToPeriod: { [key: string]: Period } = {
   "1D": Period.Period1D,
 };
 
+export const ResolutionStringToBrokerPeriod: { [key: string]: PeriodTypeFromBroker } = {
+  "15S": "FifteenSeconds",
+  "1": "OneMinute",
+  "5": "FiveMinutes",
+  "15": "FifteenMinutes",
+  "30": "ThirtyMinutes",
+  "60": "OneHour",
+  "240": "FourHours",
+  "1D": "OneDay",
+};
+
 export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 
 export const EXCHANGE_NAME = "emojicoin.fun";
 
+export const DEFAULT_RESOLUTION_STRING = "60" as ResolutionString;
+export const DEFAULT_BROKER_PERIOD = ResolutionStringToBrokerPeriod[DEFAULT_RESOLUTION_STRING];
+
 export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = {
   library_path: `${CDN_URL}/charting_library/`,
-  interval: "60" as ResolutionString,
+  interval: DEFAULT_RESOLUTION_STRING,
   theme: "Dark" as ThemeName,
   locale: "en" as LanguageCode,
   custom_css_url: `${CDN_URL}/charting_library_stylesheets/emojicoin-dot-fun.css`,
-  enabled_features: ["iframe_loading_compatibility_mode"],
+  enabled_features: ["iframe_loading_compatibility_mode", "seconds_resolution"],
   disabled_features: [
     "use_localstorage_for_settings",
     "left_toolbar",
