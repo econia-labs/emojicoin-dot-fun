@@ -11,7 +11,6 @@ import {
   fetchLatestBarsFromMarketResource,
   updateLastTwoBars,
   createDummyBar,
-  fetchArenaCandlesticksForChart,
 } from "./get-bars";
 import {
   CONFIGURATION_DATA,
@@ -84,8 +83,8 @@ export const useDatafeed = (symbol: string) => {
               return;
             }
 
-            bars = await fetchArenaCandlesticksForChart({
-              meleeID,
+            bars = await fetchCandlesticksForChart({
+              meleeID: meleeID.toString(),
               periodParams,
               period,
             });
@@ -106,7 +105,7 @@ export const useDatafeed = (symbol: string) => {
             const { marketID, marketAddress } = entry.marketMetadata;
 
             bars = await fetchCandlesticksForChart({
-              marketID,
+              marketID: marketID.toString(),
               periodParams,
               period,
             });

@@ -15,6 +15,7 @@ import {
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
 import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
+import { type ArenaState, createInitialMeleeState } from "../arena/store";
 
 export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
   callback: undefined,
@@ -45,6 +46,12 @@ export const ensureMarketInStore = (
   const key = market.symbolData.symbol;
   if (!state.markets.has(key)) {
     state.markets.set(key, createInitialMarketState(market));
+  }
+};
+
+export const ensureMeleeInStore = (state: WritableDraft<ArenaState>, meleeID: bigint) => {
+  if (!state.melees.has(meleeID)) {
+    state.melees.set(meleeID, createInitialMeleeState());
   }
 };
 

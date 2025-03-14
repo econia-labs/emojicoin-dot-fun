@@ -18,6 +18,7 @@ import {
   handleLatestBarForSwapEvent,
   toMappedMarketEvents,
   initialState,
+  ensureMeleeInStore,
 } from "./utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
@@ -37,7 +38,6 @@ import {
   isArenaSwapModel,
 } from "@sdk/types/arena-types";
 import {
-  ensureMeleeInStore,
   getMeleeIDFromArenaModel,
   handleLatestBarForArenaCandlestick,
   toMappedMelees,

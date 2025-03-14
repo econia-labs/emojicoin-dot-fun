@@ -24,7 +24,7 @@ import { getAptosClient } from "@sdk/utils/aptos-client";
 import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
 import { type XOR } from "@sdk/utils/utility-types";
 import { type Bar, type PeriodParams } from "@static/charting_library";
-import { hasTradingActivity } from "lib/chart-utils";
+import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
@@ -109,19 +109,21 @@ export const updateLastTwoBars = (bars: Bar[], onChainLatest: Bar) => {
   bars.push(onChainLatest);
 };
 
-/**
- * Utility function to create a dummy bar from the period duration when there's zero trading
- * activity for a market thus far.
- */
-export const createDummyBar = (periodDuration: PeriodDuration) => {
+export const createDummyBar = (
+  periodDuration: PeriodDuration,
+  symbol: string | ArenaChartSymbol
+) => {
   const time = BigInt(new Date().getTime()) * 1000n;
   const timeAsPeriod = getPeriodStartTimeFromTime(time, periodDuration) / 1000n;
+  // If the chart consists of two symbols (like for arena), we want to show a default ratio of 1
+  // instead, because the prices are equally 0.
+  const defaultValue = isArenaChartSymbol(symbol) ? 1 : 0;
   return {
     time: Number(timeAsPeriod.toString()),
-    open: 0,
-    high: 0,
-    low: 0,
-    close: 0,
+    open: defaultValue,
+    high: defaultValue,
+    low: defaultValue,
+    close: defaultValue,
     volume: 0,
   };
 };
