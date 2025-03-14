@@ -10,6 +10,19 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
+});
+
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "10 s"),
+});
+
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
   if (pathname === ROUTES["launching-soon"]) {
@@ -21,6 +34,35 @@ export default async function middleware(request: NextRequest) {
   if (MAINTENANCE_MODE && pathname !== ROUTES.maintenance) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
+
+  if (pathname.startsWith(ROUTES.api["."])) {
+    const ip = request.ip ?? "127.0.0.1";
+
+    let limit: number;
+    let reset: number;
+    let remaining: number;
+    let success: boolean;
+
+    const ratelimitRes = await ratelimit.limit(ip);
+    limit = ratelimitRes.limit;
+    reset = ratelimitRes.reset;
+    remaining = ratelimitRes.remaining;
+    success = ratelimitRes.success;
+
+    const headers = {
+      "X-RateLimit-Limit": limit.toString(),
+      "X-RateLimit-Remaining": remaining.toString(),
+      "X-RateLimit-Reset": reset.toString(),
+    };
+
+    if (!success) {
+      return new Response("", {
+        status: 429,
+        headers,
+      });
+    }
+  }
+
   const dexscreenerRoutes = Object.keys(ROUTES.api.dexscreener);
   if (
     pathname === ROUTES.test ||
@@ -65,5 +107,6 @@ export default async function middleware(request: NextRequest) {
 // Note this must be a static string- we can't dynamically construct it.
 export const config = {
   /* eslint-disable-next-line */
-  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|social-preview.png|manifest.json|images/wallets).*)`,
+  matcher: `/((?!verify|_next/static|_next/image|favicon.ico|logo192.png|icon.png|social-preview.png|manifest.json|images/wallets).*)`,
+  runtime: "experimental-edge",
 };

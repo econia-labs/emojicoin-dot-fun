@@ -13,7 +13,7 @@ import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
 import { type Bar, type PeriodParams } from "@static/charting_library";
 import { hasTradingActivity } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { fetchRateLimitted } from "utils";
 
 export const fetchCandlesticksForChart = async ({
   marketID,
@@ -30,15 +30,13 @@ export const fetchCandlesticksForChart = async ({
     countBack: periodParams.countBack.toString(),
     to: periodParams.to.toString(),
   });
-  return await fetch(`${ROUTES.api.candlesticks}?${params.toString()}`)
-    .then((res) => res.text())
-    .then((res) => parseJSON<PeriodicStateEventModel[]>(res))
-    .then((res) =>
-      res
-        .sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime))
-        .map(toBar)
-        .reduce(curriedBarsReducer(periodParams.to), [])
-    );
+  return await fetchRateLimitted<PeriodicStateEventModel[]>(`${ROUTES.api.candlesticks}?${params.toString()}`)
+  .then((res) =>
+    res
+      .sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime))
+      .map(toBar)
+      .reduce(curriedBarsReducer(periodParams.to), [])
+  );
 };
 
 /**
