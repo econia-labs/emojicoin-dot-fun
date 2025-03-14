@@ -1,11 +1,15 @@
 import { isValidMarketSymbol, SymbolEmoji } from "@econia-labs/emojicoin-sdk";
-import { decodeSymbolsForChart, encodeSymbolsForChart } from "../../src/lib/chart-utils";
+import {
+  ARENA_CHART_SYMBOL_DELIMITER,
+  decodeSymbolsForChart,
+  encodeSymbolsForChart,
+} from "../../src/lib/chart-utils";
 import { isArenaChartSymbol } from "../../src/lib/chart-utils";
 
 describe("checks the encoding and decoding of market symbols used in the chart component", () => {
   it("encodes and decodes a market symbol properly", () => {
     const [emojis0, emojis1]: [SymbolEmoji[], SymbolEmoji[]] = [
-      ["⛓️", "⛏️"],
+      ["🐏", "⛏️"],
       ["🐏", "🪥"],
     ];
     const [symbol0, symbol1] = [emojis0.join(""), emojis1.join("")];
@@ -14,6 +18,7 @@ describe("checks the encoding and decoding of market symbols used in the chart c
 
     const encoded = encodeSymbolsForChart(symbol0, symbol1);
     expect(isArenaChartSymbol(encoded)).toBe(true);
+    expect(encoded).toEqual(`${symbol0}${ARENA_CHART_SYMBOL_DELIMITER}${symbol1}`);
 
     const { primarySymbol, secondarySymbol } = decodeSymbolsForChart(encoded);
     expect(primarySymbol).toBeDefined();

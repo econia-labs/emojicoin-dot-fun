@@ -162,8 +162,8 @@ export function formatSymbolWithParams(
   return paramString ? `${baseChartSymbol}?${paramString}` : baseChartSymbol;
 }
 
-const ARENA_SYMBOLS_DELIMITER = "/" as const;
-export type ArenaChartSymbol = `${string}${typeof ARENA_SYMBOLS_DELIMITER}${string}`;
+export const ARENA_CHART_SYMBOL_DELIMITER = "/" as const;
+export type ArenaChartSymbol = `${string}${typeof ARENA_CHART_SYMBOL_DELIMITER}${string}`;
 
 /**
  * Encode one or two symbols into one string for the chart implementation.
@@ -176,7 +176,7 @@ export function encodeSymbolsForChart(
   symbol: string,
   secondarySymbol?: string | undefined
 ): string | ArenaChartSymbol {
-  return [symbol, secondarySymbol].filter((v) => !!v).join(ARENA_SYMBOLS_DELIMITER) as
+  return [symbol, secondarySymbol].filter((v) => !!v).join(ARENA_CHART_SYMBOL_DELIMITER) as
     | ArenaChartSymbol
     | string;
 }
