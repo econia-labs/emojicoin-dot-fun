@@ -1,4 +1,4 @@
-import { type Period } from "@sdk/const";
+import { type AnyPeriod, type Period } from "@sdk/const";
 import { type SymbolEmoji } from "@sdk/emoji_data";
 import {
   type MarketMetadataModel,
@@ -58,7 +58,7 @@ export type EventState = {
 
 export type PeriodSubscription = {
   marketEmojis: SymbolEmoji[];
-  period: Period;
+  period: AnyPeriod;
   cb: SubscribeBarsCallback;
 };
 
