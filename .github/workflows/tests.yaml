@@ -10,16 +10,18 @@ jobs:
     - uses: 'actions/checkout@v4'
       with:
         submodules: 'false'
-    - uses: 'actions/setup-node@v4'
+    - name: 'Install pnpm'
+      uses: 'pnpm/action-setup@v4'
       with:
+        package_json_file: 'src/typescript/package.json'
+    - name: 'Install node.js'
+      uses: 'actions/setup-node@v4'
+      with:
+        cache: 'pnpm'
+        cache-dependency-path: 'src/typescript/pnpm-lock.yaml'
         node-version-file: 'src/typescript/.node-version'
     - name: 'Install dependencies'
-      run: 'npm install -g pnpm && pnpm install'
-    - name: 'Install the latest Aptos CLI'
-      # yamllint disable-line rule:line-length
-      uses: 'aptos-labs/aptos-core/.github/actions/get-latest-cli@8792eefecd537c33fb879984635a0762838e2329'
-      with:
-        destination_directory: '/usr/local/bin'
+      run: 'pnpm install'
     - env:
         EMOJICOIN_ARENA_MODULE_ADDRESS: >-
           0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d
