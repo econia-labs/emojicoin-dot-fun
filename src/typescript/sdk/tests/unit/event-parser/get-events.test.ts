@@ -83,8 +83,8 @@ describe("tests for parsing event data", () => {
   it("parses swap event data", () => {
     const name: EventName = "Swap";
     const data = eventData[name];
-    const manual = toSwapEvent(data, TRANSACTION_VERSION);
-    const fromConverter = converter[`${name}Event`](data, TRANSACTION_VERSION);
+    const manual = toSwapEvent(data, TRANSACTION_VERSION, response.sender);
+    const fromConverter = converter[`${name}Event`](data, TRANSACTION_VERSION, response.sender);
     expect(manual).toEqual(fromConverter);
     expect(manual).toEqual(goldens[name]);
   });
@@ -136,7 +136,7 @@ describe("tests for parsing event data", () => {
       const fullName = `${name}Event` as const;
       const camelCaseName = toCamelCaseEventName(fullName);
       // TypeScript doesn't know the resolved type, so again, we must use `as any`.
-      const fromConverter = converter[fullName](data as any, TRANSACTION_VERSION);
+      const fromConverter = converter[fullName](data as any, TRANSACTION_VERSION, response.sender);
       expect(events[`${camelCaseName}s`].length).toEqual(1);
       const parsed = events[`${camelCaseName}s`].pop();
       expect(parsed).toEqual(fromConverter);

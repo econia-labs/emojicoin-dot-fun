@@ -1,10 +1,10 @@
-import { Fragment, useMemo } from "react";
+import { Fragment } from "react";
 import { type TableProps } from "./ecTable";
 import { TableBody, TableCell, TableRow } from "./table";
 import { EcTableRow } from "./ecTableRow";
+import { LoadMore } from "./loadMore";
 
 export const EcTableBody = <T,>({
-  containerHeight,
   className,
   items,
   renderRow,
@@ -12,21 +12,14 @@ export const EcTableBody = <T,>({
   columns,
   getKey,
   onClick,
-}: TableProps<T> & { containerHeight: number; className: string }) => {
+  pagination,
+  minRows,
+}: TableProps<T> & { minRows: number; className: string }) => {
   // Make sure there is either a renderRow function or a renderCell function in each column.
   if (!renderRow && (!columns || columns.some((col) => !col.renderCell)))
     throw new Error(
       "Either renderRow must be defined or renderCell must be defined in each column"
     );
-
-  const minRows = useMemo(() => {
-    if (containerHeight) {
-      const height = containerHeight;
-      // We subtract 1 because of the header, and 1 to remove last row to prevent overflow
-      return Math.floor(height / rowHeight) - 2;
-    }
-    return 0;
-  }, [rowHeight, containerHeight]);
 
   return (
     <TableBody className={className}>
@@ -44,12 +37,12 @@ export const EcTableBody = <T,>({
           ))}
       {Array.from({ length: minRows - items.length }).map((_, i) => (
         <TableRow key={i} index={items.length + i} height={rowHeight} className="w-full">
-          {/* Fill the row with empty cells, otherwise on some browsers the row won't be the full width */}
-          {columns.map((c) => (
-            <TableCell key={c.id} />
-          ))}
+          <TableCell colSpan={columns.length} />
         </TableRow>
       ))}
+      {pagination && items.length > minRows && (
+        <LoadMore colSpan={columns.length} query={pagination} />
+      )}
     </TableBody>
   );
 };

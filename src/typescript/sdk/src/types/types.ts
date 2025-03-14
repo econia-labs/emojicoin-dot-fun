@@ -233,6 +233,7 @@ export type Types = ArenaTypes & {
         time: bigint;
         marketNonce: bigint;
         swapper: AccountAddressString;
+        sender: AccountAddressString;
         inputAmount: bigint;
         isSell: boolean;
         integrator: AccountAddressString;
@@ -573,13 +574,15 @@ export const toStateMetadata = (data: JsonTypes["StateMetadata"]): Types["StateM
 
 export const toSwapEvent = (
   data: JsonTypes["SwapEvent"],
-  version: number | string
+  version: number | string,
+  sender?: string
 ): Types["SwapEvent"] => ({
   version: Number(version),
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
   swapper: standardizeAddress(data.swapper),
+  sender: standardizeAddress(sender || data.swapper),
   inputAmount: BigInt(data.input_amount),
   isSell: data.is_sell,
   integrator: standardizeAddress(data.integrator),
@@ -722,9 +725,10 @@ export const toRegistrantGracePeriodFlag = (data: JsonTypes["RegistrantGracePeri
 
 export const toEmojicoinDotFunRewards = (
   data: JsonTypes["EmojicoinDotFunRewards"],
-  version: number | string
+  version: number | string,
+  sender?: string
 ) => ({
-  swap: toSwapEvent(data.swap, version),
+  swap: toSwapEvent(data.swap, version, sender),
   octasRewardAmount: BigInt(data.octas_reward_amount),
 });
 
@@ -833,10 +837,12 @@ export interface WithTime {
 export function toEmojicoinEvent(
   type: (typeof STRUCT_STRINGS)[keyof typeof STRUCT_STRINGS],
   data: AnyEmojicoinJSONEvent,
+  sender: string,
   version?: number
 ): AnyEmojicoinEvent {
   const event = { type, data };
-  if (isJSONSwapEvent(event)) return toSwapEvent(data as JsonTypes["SwapEvent"], version ?? -1);
+  if (isJSONSwapEvent(event))
+    return toSwapEvent(data as JsonTypes["SwapEvent"], version ?? -1, sender);
   if (isJSONChatEvent(event)) return toChatEvent(data as JsonTypes["ChatEvent"], version ?? -1);
   if (isJSONMarketRegistrationEvent(event))
     return toMarketRegistrationEvent(data as JsonTypes["MarketRegistrationEvent"], version ?? -1);

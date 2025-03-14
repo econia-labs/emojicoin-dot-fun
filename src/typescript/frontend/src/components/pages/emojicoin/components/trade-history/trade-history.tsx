@@ -1,5 +1,4 @@
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import { type TradeHistoryProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
@@ -15,6 +14,7 @@ import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "@sdk/utils";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { type SwapEventModel } from "@sdk/indexer-v2/types";
+import { TimeCell } from "components/ui/table-cells/time-cell";
 
 const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),
@@ -23,7 +23,7 @@ const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   date: new Date(Number(transaction.time / 1000n)),
   type: swap.isSell ? "sell" : "buy",
   priceQ64: swap.avgExecutionPriceQ64,
-  swapper: swap.swapper,
+  sender: swap.sender,
   version: transaction.version,
   guid,
 });
@@ -32,7 +32,6 @@ const HARD_LIMIT = 500;
 
 export const TradeHistory = (props: TradeHistoryProps) => {
   const swaps = useEventStore((s) => s.markets.get(props.data.symbol)?.swapEvents ?? []);
-  const router = useRouter();
 
   const initialLoad = useRef(true);
   useEffect(() => {
@@ -60,7 +59,6 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "Rank",
         id: "rank",
-        cellClassName: "pl-10",
         width: 50,
         renderCell: (item) => (
           <Popup
@@ -82,11 +80,13 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       {
         text: "APT",
         id: "apt",
+        width: 70,
         renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
       },
       {
         text: props.data.symbol,
         id: "amount",
+        width: 100,
         renderCell: (item) => (
           <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
         ),
@@ -95,14 +95,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Time",
         id: "time",
         width: 120,
-        renderCell: (item) =>
-          item.date.toLocaleString(undefined, {
-            month: "2-digit" as const,
-            day: "2-digit" as const,
-            hour: "2-digit" as const,
-            minute: "2-digit" as const,
-            second: "2-digit" as const,
-          }),
+        renderCell: (item) => <TimeCell date={item.date} />,
       },
       {
         text: "Price",
@@ -122,7 +115,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         text: "Sender",
         id: "sender",
         width: 120,
-        renderCell: (item) => <WalletAddressCell address={item.swapper} />,
+        renderCell: (item) => <WalletAddressCell address={item.sender} />,
       },
     ],
     [props.data.symbol]
@@ -132,11 +125,12 @@ export const TradeHistory = (props: TradeHistoryProps) => {
     <EcTable
       className="m-auto overflow-auto h-[330px]"
       onClick={(item) =>
-        router.push(
+        window.open(
           toExplorerLink({
             linkType: "txn",
             value: `${item.version}`,
-          })
+          }),
+          "_blank"
         )
       }
       textFormat="body-sm"

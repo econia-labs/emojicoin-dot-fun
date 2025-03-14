@@ -18,6 +18,7 @@ export const ROUTES = expandRoutes({
       "latest-block": _,
     },
     pools: _,
+    trades: _,
     trending: _,
   },
   arena: _,
