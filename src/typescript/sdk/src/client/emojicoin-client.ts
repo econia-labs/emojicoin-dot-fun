@@ -156,18 +156,13 @@ export class EmojicoinClient {
     remove: this.removeLiquidity.bind(this),
   };
 
-  public arena: {
-    enter: typeof EmojicoinClient.prototype.arenaEnter;
-    exit: typeof EmojicoinClient.prototype.arenaExit;
-    swap: typeof EmojicoinClient.prototype.arenaSwap;
-    /**
-     * Note that `duration` is in microseconds.
-     */
-    setNextMeleeDuration: typeof EmojicoinClient.prototype.arenaSetNextMeleeDuration;
-  } = {
+  public arena = {
     enter: this.arenaEnter.bind(this),
     exit: this.arenaExit.bind(this),
     swap: this.arenaSwap.bind(this),
+    /**
+     * Note that `duration` is in microseconds.
+     */
     setNextMeleeDuration: this.arenaSetNextMeleeDuration.bind(this),
   };
 
@@ -178,10 +173,7 @@ export class EmojicoinClient {
     getTransactionEventData: this.getTransactionEventData.bind(this),
   };
 
-  public rewards: {
-    buy: typeof EmojicoinClient.prototype.buyWithRewards;
-    sell: typeof EmojicoinClient.prototype.sellWithRewards;
-  } = {
+  public rewards = {
     buy: this.buyWithRewards.bind(this),
     sell: this.sellWithRewards.bind(this),
   };
