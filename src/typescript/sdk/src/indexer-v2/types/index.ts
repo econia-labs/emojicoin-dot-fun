@@ -899,9 +899,7 @@ export const toArenaPositionModel = toArenaPositionFromDatabase;
 export const toArenaLeaderboardModel = toArenaLeaderboardFromDatabase;
 export const toArenaLeaderboardHistoryModel = toArenaLeaderboardHistoryFromDatabase;
 export const toArenaInfoModel = toArenaInfoFromDatabase;
-export const toArenaCandlestickModel = (
-  data: DatabaseJsonType["arena_candlesticks" | "arena_latest_candlesticks"]
-) => ({
+export const toArenaCandlestickModel = (data: DatabaseJsonType["arena_candlesticks"]) => ({
   ...toArenaCandlestickFromDatabase(data),
   ...GuidGetters.arenaCandlestick(data),
 });
@@ -995,7 +993,6 @@ export type DatabaseModels = {
   [TableName.ArenaPosition]: ArenaPositionModel;
   [TableName.ArenaInfo]: ArenaInfoModel;
   [TableName.ArenaCandlesticks]: ArenaCandlestickModel;
-  [TableName.ArenaLatestCandlesticks]: ArenaCandlestickModel;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardModel;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryModel;
   [TableName.ArenaLeaderboardHistoryWithArenaInfo]: ArenaLeaderboardHistoryWithArenaInfoModel;
