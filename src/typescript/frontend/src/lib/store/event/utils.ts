@@ -1,9 +1,9 @@
-import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
+import { Period, NON_ARENA_PERIODS, periodEnumToRawDuration } from "@sdk/const";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
 import {
   type EventState,
-  type CandlestickData,
+  type CandlestickPeriod,
   type MarketEventStore,
   type MarketStoreMetadata,
 } from "./types";
@@ -17,7 +17,7 @@ import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from ".
 import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
 import { type ArenaState, createInitialMeleeState } from "../arena/store";
 
-export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
+export const createPeriodData = (): WritableDraft<CandlestickPeriod> => ({
   callback: undefined,
   latestBar: undefined,
 });
@@ -30,13 +30,13 @@ export const createInitialMarketState = (
   liquidityEvents: [],
   stateEvents: [],
   chatEvents: [],
-  [Period.Period1M]: createInitialCandlestickData(),
-  [Period.Period5M]: createInitialCandlestickData(),
-  [Period.Period15M]: createInitialCandlestickData(),
-  [Period.Period30M]: createInitialCandlestickData(),
-  [Period.Period1H]: createInitialCandlestickData(),
-  [Period.Period4H]: createInitialCandlestickData(),
-  [Period.Period1D]: createInitialCandlestickData(),
+  [Period.Period1M]: createPeriodData(),
+  [Period.Period5M]: createPeriodData(),
+  [Period.Period15M]: createPeriodData(),
+  [Period.Period30M]: createPeriodData(),
+  [Period.Period1H]: createPeriodData(),
+  [Period.Period4H]: createPeriodData(),
+  [Period.Period1D]: createPeriodData(),
 });
 
 export const ensureMarketInStore = (
@@ -59,7 +59,7 @@ export const handleLatestBarForSwapEvent = (
   market: WritableDraft<MarketEventStore>,
   event: SwapEventModel
 ) => {
-  for (const period of PERIODS) {
+  for (const period of NON_ARENA_PERIODS) {
     const data = market[period];
     const swapPeriodStart = getPeriodStartTimeFromTime(event.market.time, period);
     const latestBarPeriodStart = BigInt(data.latestBar?.time ?? -1n) * 1000n;
@@ -70,13 +70,13 @@ export const handleLatestBarForSwapEvent = (
       callbackClonedLatestBarIfSubscribed(data.callback, newBar);
     } else if (!data.latestBar) {
       throw new Error("This should never occur. It is a type guard/hint.");
-    } else if (event.market.marketNonce >= data.latestBar.marketNonce) {
+    } else if (event.market.marketNonce >= data.latestBar.nonce) {
       const price = q64ToBig(event.swap.avgExecutionPriceQ64).toNumber();
       data.latestBar.time = Number(getPeriodStartTimeFromTime(event.market.time, period) / 1000n);
       data.latestBar.close = price;
       data.latestBar.high = Math.max(data.latestBar.high, price);
       data.latestBar.low = Math.min(data.latestBar.low, price);
-      data.latestBar.marketNonce = event.market.marketNonce;
+      data.latestBar.nonce = event.market.marketNonce;
       data.latestBar.volume += toNominal(event.swap.quoteVolume);
       // Note this results in `time order violation` errors if we set `has_empty_bars`
       // to `true` in the `LibrarySymbolInfo` configuration.
@@ -95,7 +95,7 @@ export const handleLatestBarForPeriodicStateEvent = (
   // Check if the new bar would be newer than the current latest bar.
   if (
     !data.latestBar ||
-    (data.latestBar.marketNonce < newBar.marketNonce && data.latestBar.time <= newBar.time)
+    (data.latestBar.nonce < newBar.nonce && data.latestBar.time <= newBar.time)
   ) {
     data.latestBar = newBar;
     // We need to update the latest bar for all periods with any existing swap
@@ -111,14 +111,14 @@ export const handleLatestBarForPeriodicStateEvent = (
       // NOTE: When a new periodic state event is emitted, the market nonce
       // for the swap event is actually exactly the same as the periodic state event,
       // hence why we use `>=` instead of just `>`.
-      if (swapInTimeRange && swapEvent.market.marketNonce >= data.latestBar.marketNonce) {
+      if (swapInTimeRange && swapEvent.market.marketNonce >= data.latestBar.nonce) {
         if (!data.latestBar) throw new Error("This should never occur. It is a type guard/hint.");
         const price = q64ToBig(innerSwap.avgExecutionPriceQ64).toNumber();
         data.latestBar.time = Number(getPeriodStartTimeFromTime(innerMarket.time, period) / 1000n);
         data.latestBar.close = price;
         data.latestBar.high = Math.max(data.latestBar.high, price);
         data.latestBar.low = Math.min(data.latestBar.low, price);
-        data.latestBar.marketNonce = innerMarket.marketNonce;
+        data.latestBar.nonce = innerMarket.marketNonce;
         data.latestBar.volume += toNominal(innerSwap.quoteVolume);
       }
     }

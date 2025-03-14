@@ -23,7 +23,7 @@ type MarketLatestState = DatabaseModels["market_state"];
 
 export type SymbolString = string;
 
-export type CandlestickData = {
+export type CandlestickPeriod = {
   callback: SubscribeBarsCallback | undefined;
   latestBar: LatestBar | undefined;
 };
@@ -39,13 +39,13 @@ export type MarketEventStore = {
   liquidityEvents: readonly Liquidity[];
   stateEvents: readonly (MarketLatestStateEvent | MarketLatestState)[];
   chatEvents: readonly Chat[];
-  [Period.Period1M]: CandlestickData;
-  [Period.Period5M]: CandlestickData;
-  [Period.Period15M]: CandlestickData;
-  [Period.Period30M]: CandlestickData;
-  [Period.Period1H]: CandlestickData;
-  [Period.Period4H]: CandlestickData;
-  [Period.Period1D]: CandlestickData;
+  [Period.Period1M]: CandlestickPeriod;
+  [Period.Period5M]: CandlestickPeriod;
+  [Period.Period15M]: CandlestickPeriod;
+  [Period.Period30M]: CandlestickPeriod;
+  [Period.Period1H]: CandlestickPeriod;
+  [Period.Period4H]: CandlestickPeriod;
+  [Period.Period1D]: CandlestickPeriod;
 };
 
 export type EventState = {

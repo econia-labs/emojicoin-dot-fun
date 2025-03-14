@@ -1,12 +1,13 @@
 import { type MarketEmojiData, toMarketEmojiData } from "@sdk/emoji_data";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { type ArenaInfoModel, type ArenaModelWithMeleeID } from "@sdk/indexer-v2";
 import {
-  type ArenaEventModels,
-  type ArenaVaultBalanceUpdateModel,
-  type ArenaInfoModel,
-  type ArenaEventModelWithMeleeID,
-} from "@sdk/indexer-v2";
-import { isArenaEnterModel, isArenaExitModel, isArenaMeleeModel } from "@sdk/types/arena-types";
+  isArenaCandlestickModel,
+  isArenaEnterModel,
+  isArenaExitModel,
+  isArenaMeleeModel,
+  isArenaSwapModel,
+} from "@sdk/types/arena-types";
 
 export type ArenaMarketPair = {
   market0: {
@@ -40,7 +41,7 @@ export const toArenaMarketPair = (info: ArenaInfoModel): ArenaMarketPair => {
   };
 };
 
-export const toMappedMelees = <T extends ArenaEventModelWithMeleeID>(models: T[]) => {
+export const toMappedMelees = <T extends ArenaModelWithMeleeID>(models: T[]) => {
   const map = new Map<bigint, T[]>();
 
   models.forEach((model) => {
@@ -53,15 +54,17 @@ export const toMappedMelees = <T extends ArenaEventModelWithMeleeID>(models: T[]
   return map;
 };
 
-export const getMeleeIDFromArenaModel = (
-  model: Exclude<ArenaEventModels, ArenaVaultBalanceUpdateModel>
-): bigint => {
+export const getMeleeIDFromArenaModel = (model: ArenaModelWithMeleeID): bigint => {
   if (isArenaMeleeModel(model)) {
     return model.melee.meleeID;
   } else if (isArenaEnterModel(model)) {
     return model.enter.meleeID;
   } else if (isArenaExitModel(model)) {
     return model.exit.meleeID;
+  } else if (isArenaSwapModel(model)) {
+    return model.swap.meleeID;
+  } else if (isArenaCandlestickModel(model)) {
+    return model.meleeID;
   }
-  return model.swap.meleeID;
+  throw new Error("Invalid arena model for `getMeleeID`: ", model);
 };
