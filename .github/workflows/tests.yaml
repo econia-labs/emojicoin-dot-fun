@@ -11,17 +11,17 @@ jobs:
       with:
         submodules: 'false'
     - name: 'Install pnpm'
-      uses: pnpm/action-setup@v4
+      uses: 'pnpm/action-setup@v4'
       with:
         package_json_file: 'src/typescript/package.json'
     - name: 'Install node.js'
       uses: 'actions/setup-node@v4'
       with:
-        node-version-file: 'src/typescript/.node-version'
         cache: 'pnpm'
         cache-dependency-path: 'src/typescript/pnpm-lock.yaml'
+        node-version-file: 'src/typescript/.node-version'
     - name: 'Install dependencies'
-      run: pnpm install
+      run: 'pnpm install'
     - env:
         EMOJICOIN_ARENA_MODULE_ADDRESS: >-
           0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d
