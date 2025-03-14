@@ -4,7 +4,7 @@ jobs:
     defaults:
       run:
         working-directory: 'src/typescript'
-    name: 'ts-tests / ${{ matrix.pretty-cmd-suffix}}'
+    name: 'ts-tests / (${{ matrix.pretty-cmd-suffix}})'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
