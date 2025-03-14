@@ -16,7 +16,6 @@ import { type Flatten } from "@sdk-types";
 type Swap = DatabaseModels["swap_events"];
 type Chat = DatabaseModels["chat_events"];
 type MarketRegistration = DatabaseModels["market_registration_events"];
-type PeriodicState = DatabaseModels["periodic_state_events"];
 type MarketLatestStateEvent = DatabaseModels["market_latest_state_event"];
 type Liquidity = DatabaseModels["liquidity_events"];
 type GlobalState = DatabaseModels["global_state_events"];
@@ -25,7 +24,6 @@ type MarketLatestState = DatabaseModels["market_state"];
 export type SymbolString = string;
 
 export type CandlestickData = {
-  candlesticks: readonly PeriodicState[];
   callback: SubscribeBarsCallback | undefined;
   latestBar: LatestBar | undefined;
 };

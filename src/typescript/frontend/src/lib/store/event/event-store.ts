@@ -16,12 +16,10 @@ import {
   ensureMarketInStore,
   handleLatestBarForPeriodicStateEvent,
   handleLatestBarForSwapEvent,
-  pushPeriodicStateEvents,
   toMappedMarketEvents,
   initialState,
   ensureMeleeInStore,
 } from "./utils";
-import { periodEnumToRawDuration } from "@sdk/const";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 import {
@@ -96,7 +94,8 @@ export const createEventStore = () => {
             market.chatEvents.push(...extractFilter(marketEvents, isChatEventModel));
             market.liquidityEvents.push(...extractFilter(marketEvents, isLiquidityEventModel));
             market.stateEvents.push(...extractFilter(marketEvents, isMarketLatestStateEventModel));
-            pushPeriodicStateEvents(market, extractFilter(marketEvents, isPeriodicStateEventModel));
+            // Drain the rest of the periodic state events to satisfy the assertion.
+            const _ = extractFilter(marketEvents, isPeriodicStateEventModel);
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
 
@@ -142,8 +141,6 @@ export const createEventStore = () => {
                   state.stateFirehose.unshift(event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "market", event);
                 } else if (isPeriodicStateEventModel(event)) {
-                  const period = periodEnumToRawDuration(event.periodicMetadata.period);
-                  market[period].candlesticks.unshift(event);
                   handleLatestBarForPeriodicStateEvent(market, event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
                 }
