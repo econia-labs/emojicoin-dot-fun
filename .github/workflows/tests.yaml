@@ -1,10 +1,10 @@
 ---
 jobs:
-  ts-tests:
+  typescript-tests:
     defaults:
       run:
         working-directory: 'src/typescript'
-    name: 'ts-tests / (${{ matrix.pretty-suffix }})'
+    name: 'typescript / (${{ matrix.pretty-suffix }})'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
@@ -35,7 +35,6 @@ jobs:
       name: 'Print local testnet logs on failure'
       run: 'cat ${{ runner.temp }}/local-testnet-logs.txt'
       shell: 'bash'
-    timeout-minutes: 15
     strategy:
       matrix:
         include:
@@ -46,6 +45,7 @@ jobs:
         - pretty-suffix: 'sdk, e2e, arena-general'
         - pretty-suffix: 'sdk, e2e, arena-ws'
         - pretty-suffix: 'sdk, e2e, arena-candlesticks'
+    timeout-minutes: 15
 name: 'Run test suite'
 'on':
   merge_group: null

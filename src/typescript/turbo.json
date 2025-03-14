@@ -72,7 +72,15 @@
       "cache": false,
       "outputs": []
     },
-    "test:unit": {
+    "test:e2e:arena-candlesticks": {
+      "cache": false,
+      "outputs": []
+    },
+    "test:e2e:arena-general": {
+      "cache": false,
+      "outputs": []
+    },
+    "test:e2e:arena-ws": {
       "cache": false,
       "outputs": []
     },
@@ -84,15 +92,7 @@
       "cache": false,
       "outputs": []
     },
-    "test:e2e:arena-candlesticks": {
-      "cache": false,
-      "outputs": []
-    },
-    "test:e2e:arena-general": {
-      "cache": false,
-      "outputs": []
-    },
-    "test:e2e:arena-ws": {
+    "test:unit": {
       "cache": false,
       "outputs": []
     }
