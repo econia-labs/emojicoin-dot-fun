@@ -1,4 +1,4 @@
-import { isPeriod, periodEnumToRawDuration } from "@sdk/const";
+import { isNonArenaPeriod, periodEnumToRawDuration } from "@sdk/const";
 import { type Bar, type IBasicDataFeed } from "@static/charting_library";
 import { useUserSettings, useEventStore } from "context/event-store-context";
 import { decodeSymbolsForChart, isArenaChartSymbol, parseSymbolWithParams } from "lib/chart-utils";
@@ -89,7 +89,7 @@ export const useDatafeed = (symbol: string) => {
               period,
             });
           } else {
-            if (!isPeriod(period)) {
+            if (!isNonArenaPeriod(period)) {
               throw new Error("Invalid period type for a non-arena symbol.");
             }
             const entry = getRegisteredMarketMap().get(symbol);
