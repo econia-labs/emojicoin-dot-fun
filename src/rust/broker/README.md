@@ -37,37 +37,97 @@ Note that they're typed *exactly* as shown below. If you try to send the JSON
 payload over multiple lines through `websocat`, it will error out and parse
 the JSON payload incorrectly.
 
-### Arena events
+### Basic subscriptions
 
-Arena events don't follow the same rules as the other subscriptions.
+The fields `markets`, `event_types`, and `arena` all work by overwriting the
+current subscription state each time a message is received by the broker from
+the client.
 
-To subscribe to arena events, simply pass `{ "arena": true }`. The default value
-is `false`; i.e., no subscription to arena events.
+There is currently no granular control over arena event types, the only
+way to subscribe to them is by simply passing `{ "arena": true }`. The default
+value is `false`; i.e., no subscription to arena events.
 
-To subscribe to arena candlesticks, pass `{ "arena_candlesticks": true }`. The
-default value is `false`.
-
-```json5
-// Subscribe to every single event type.
-{ "arena": true, "arena_candlesticks": true, "markets": [], "event_types": [] }
-
-// Subscribe to all non-arena event types.
-// All of the JSON objects below are equivalent.
-{ "markets": [], "event_types": [] }
-{ "arena": false, "markets": [], "event_types": [] }
-{ "arena_candlesticks": false, "markets": [], "event_types": [] }
-```
-
-### All markets, all non-arena event types
+Note that if you do not pass a value, it uses the default value, which for
+`markets` is all markets, for `event_types` is all event types, and for `arena`
+is false.
 
 ```json5
-// All of the below are equivalent.
-// Remember, with `websocat`, your message should be exactly one line.
-// This is four different ways to subscribe to all markets and non-arena events.
-{}
+// Subscribe to every single event type for all markets, including arena events.
+{ "markets": [], "event_types": [], "arena": true }
+
+// Effectively the same message as above:
+{ "arena": true }
+
+// Subscribe to all non-arena event types for all markets.
+// The following are all equivalent, note this *does not* include arena events:
+{ }
 { "markets": [] }
 { "event_types": [] }
 { "markets": [], "event_types": [] }
+```
+
+Keep in mind, for `markets`, `event_types`, and `arena`, each message overwrites
+the last value, even if you did not pass it explicitly:
+
+```json5
+// Subscribe to all event types for all markets and arena events.
+{ "arena": true }
+
+// Subscribe to all event types for markets 1 and 2 and effectively unsubscribe
+// from arena events.
+{ "markets": [1, 2] }
+```
+
+### Arena candlesticks
+
+Arena candlesticks don't follow the same rules as the other subscriptions. To
+subscribe to arena candlesticks, you must pass the specific arena period
+as well as the intent behind it.
+
+You can `subscribe` or `unsubscribe` to a `period` by including the following
+data in a subscription message to the broker:
+
+```json5
+// Subscribes to 1h candlesticks.
+{
+  // "markets": [],      // implicit default value, even if you don't pass it.
+  // "event_types": [],  // implicit default value, even if you don't pass it.
+  // "arena": false,     // implicit default value, even if you don't pass it.
+  "arena_period": {
+    "action": "subscribe",
+    "period": "OneHour",
+  }
+}
+
+// Adds 15s candlesticks to the current subscription of periods.
+{
+  // "markets": [],      // implicit default value, even if you don't pass it.
+  // "event_types": [],  // implicit default value, even if you don't pass it.
+  // "arena": false,     // implicit default value, even if you don't pass it.
+  "arena_period": {
+    "action": "subscribe",
+    "period": "FifteenSeconds",
+  }
+}
+
+// Remove 1h candlesticks from current arena period subscriptions.
+{
+  // "markets": [],      // implicit default value, even if you don't pass it.
+  // "event_types": [],  // implicit default value, even if you don't pass it.
+  // "arena": false,     // implicit default value, even if you don't pass it.
+  "arena_period": {
+    "action": "unsubscribe",
+    "period": "OneHour",
+  }
+}
+
+// This would leave you with the following subscriptions:
+{
+    "markets": [], // all markets
+    "event_types": [], // all event types
+    "arena": false, // no arena events
+    "arena_candlestick_periods": ["FifteenSeconds"] // only 15s candlesticks
+}
 ```
 
 ### Specific markets, all event types

@@ -1,11 +1,12 @@
 import { type SubscribableBrokerEvents } from "@/broker/types";
+import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 import { useEventStore } from "context/event-store-context/hooks";
 import { useEffect } from "react";
 
 export type ReliableSubscribeArgs = {
   eventTypes: Array<SubscribableBrokerEvents>;
   arena?: boolean;
-  arenaCandlesticks?: boolean;
+  arenaPeriod?: PeriodTypeFromBroker;
 };
 
 /**
@@ -13,7 +14,7 @@ export type ReliableSubscribeArgs = {
  * mounted. It automatically cleans up subscriptions when the component is unmounted.
  */
 export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
-  const { eventTypes, arena, arenaCandlesticks } = args;
+  const { eventTypes, arena, arenaPeriod } = args;
   const subscribeEvents = useEventStore((s) => s.subscribeEvents);
   const unsubscribeEvents = useEventStore((s) => s.unsubscribeEvents);
 
@@ -23,7 +24,7 @@ export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
     const timeout = window.setTimeout(() => {
       subscribeEvents(eventTypes, {
         baseEvents: arena,
-        candlesticks: arenaCandlesticks,
+        arenaPeriod,
       });
     }, 250);
 
@@ -32,8 +33,8 @@ export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
       clearTimeout(timeout);
       unsubscribeEvents(eventTypes, {
         baseEvents: arena,
-        candlesticks: arenaCandlesticks,
+        arenaPeriod,
       });
     };
-  }, [eventTypes, arena, arenaCandlesticks, subscribeEvents, unsubscribeEvents]);
+  }, [eventTypes, arena, arenaPeriod, subscribeEvents, unsubscribeEvents]);
 };
