@@ -3,13 +3,24 @@ import {
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@/store/event/candlestick-bars";
-import { type Types } from "@sdk-types";
-import { Trigger, type Period, periodEnumToRawDuration, type PeriodDuration } from "@sdk/const";
+import { type Flatten, type Types } from "@sdk-types";
+import {
+  Trigger,
+  type Period,
+  periodEnumToRawDuration,
+  type PeriodDuration,
+  type ArenaPeriod,
+} from "@sdk/const";
 import { toMarketEmojiData } from "@sdk/emoji_data/utils";
-import { type MarketMetadataModel, type PeriodicStateEventModel } from "@sdk/indexer-v2";
+import {
+  type ArenaCandlestickModel,
+  type MarketMetadataModel,
+  type PeriodicStateEventModel,
+} from "@sdk/indexer-v2";
 import { getMarketResource } from "@sdk/markets/utils";
 import { getAptosClient } from "@sdk/utils/aptos-client";
 import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
+import { type XOR } from "@sdk/utils/utility-types";
 import { type Bar, type PeriodParams } from "@static/charting_library";
 import { hasTradingActivity } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
@@ -17,28 +28,38 @@ import { parseJSON } from "utils";
 
 export const fetchCandlesticksForChart = async ({
   marketID,
+  meleeID,
   periodParams,
   period,
-}: {
-  marketID: string;
-  periodParams: PeriodParams;
-  period: Period;
-}): Promise<Bar[]> => {
+}: Flatten<
+  XOR<{ marketID: string }, { meleeID: string }> & {
+    periodParams: PeriodParams;
+    period: ArenaPeriod | Period;
+  }
+>): Promise<Bar[]> => {
   const params = new URLSearchParams({
-    marketID,
+    ...(marketID !== undefined ? { marketID } : { meleeID }),
     period: period.toString(),
     countBack: periodParams.countBack.toString(),
     to: periodParams.to.toString(),
   });
-  return await fetch(`${ROUTES.api.candlesticks}?${params.toString()}`)
+
+  const route =
+    marketID !== undefined ? ROUTES.api["candlesticks"] : ROUTES.api["arena"]["candlesticks"];
+
+  return await fetch(`${route}?${params}`)
     .then((res) => res.text())
-    .then((res) => parseJSON<PeriodicStateEventModel[]>(res))
+    .then((res) => parseJSON<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(res))
     .then((res) =>
       res
-        .sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime))
         .map(toBar)
+        .sort((a, b) => a.time - b.time)
         .reduce(curriedBarsReducer(periodParams.to), [])
-    );
+    )
+    .catch((error) => {
+      console.error(`Couldn't fetch candlesticks from ${route}: ${error}`);
+      return [];
+    });
 };
 
 /**
