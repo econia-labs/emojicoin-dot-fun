@@ -55,7 +55,11 @@ export const fetchCandlesticksForChart = async ({
         .map(toBar)
         .sort((a, b) => a.time - b.time)
         .reduce(curriedBarsReducer(periodParams.to), [])
-    );
+    )
+    .catch((error) => {
+      console.error(`Couldn't fetch candlesticks from ${route}: ${error}`);
+      return [];
+    });
 };
 
 /**
