@@ -38,20 +38,13 @@ jobs:
     strategy:
       matrix:
         include:
-        - job-name: 'FE:  [unit]'
-          command: 'pnpm run test:frontend:unit'
-        - job-name: 'SDK: [unit]'
-          command: 'pnpm run test:sdk:unit'
-        - job-name: 'SDK: [e2e, base, general]'
-          command: 'pnpm run test:sdk:e2e:base-general'
-        - job-name: 'SDK: [e2e, base, websockets]'
-          command: 'pnpm run test:sdk:e2e:base-ws'
-        - job-name: 'SDK: [e2e, arena, general]'
-          command: 'pnpm run test:sdk:e2e:arena-general'
-        - job-name: 'SDK: [e2e, arena, websockets]'
-          command: 'pnpm run test:sdk:e2e:arena-ws'
-        - job-name: 'SDK: [e2e, arena, candlesticks]'
-          command: 'pnpm run test:sdk:e2e:arena-candlesticks'
+        - command: 'pnpm run test:frontend:unit'
+        - command: 'pnpm run test:sdk:unit'
+        - command: 'pnpm run test:sdk:e2e:base-general'
+        - command: 'pnpm run test:sdk:e2e:base-ws'
+        - command: 'pnpm run test:sdk:e2e:arena-general'
+        - command: 'pnpm run test:sdk:e2e:arena-ws'
+        - command: 'pnpm run test:sdk:e2e:arena-candlesticks'
 name: 'Run test suite'
 'on':
   merge_group: null
