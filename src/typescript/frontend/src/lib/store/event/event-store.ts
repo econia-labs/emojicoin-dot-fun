@@ -20,7 +20,6 @@ import {
   initialState,
   ensureMeleeInStore,
 } from "./utils";
-import { periodEnumToRawDuration } from "@sdk/const";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 import {
@@ -142,8 +141,6 @@ export const createEventStore = () => {
                   state.stateFirehose.unshift(event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "market", event);
                 } else if (isPeriodicStateEventModel(event)) {
-                  const period = periodEnumToRawDuration(event.periodicMetadata.period);
-                  market[period].candlesticks.unshift(event);
                   handleLatestBarForPeriodicStateEvent(market, event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
                 }
