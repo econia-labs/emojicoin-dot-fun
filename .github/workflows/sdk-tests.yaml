@@ -28,13 +28,30 @@ jobs:
           0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d
         PUBLISHER_PRIVATE_KEY: >-
           0xeaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e
-      name: 'Run SDK tests'
-      run: 'pnpm run test:sdk'
+      name: '${{ matrix.job-name }}'
+      run: '${{ matrix.command }}'
     - if: 'failure()'
       name: 'Print local testnet logs on failure'
       run: 'cat ${{ runner.temp }}/local-testnet-logs.txt'
       shell: 'bash'
     timeout-minutes: 15
+    strategy:
+      matrix:
+        include:
+        - job-name: 'Frontend tests: [unit]'
+          command: 'pnpm run test:frontend:unit'
+        - job-name: 'SDK tests: [unit]'
+          command: 'pnpm run test:sdk:unit'
+        - job-name: 'SDK tests: [e2e, base, general]'
+          command: 'pnpm run test:sdk:e2e:base-general'
+        - job-name: 'SDK tests: [e2e, base, websockets]'
+          command: 'pnpm run test:sdk:e2e:base-ws'
+        - job-name: 'SDK tests: [e2e, arena, general]'
+          command: 'pnpm run test:sdk:e2e:arena-general'
+        - job-name: 'SDK tests: [e2e, arena, websockets]'
+          command: 'pnpm run test:sdk:e2e:arena-ws'
+        - job-name: 'SDK tests: [e2e, arena, candlesticks]'
+          command: 'pnpm run test:sdk:e2e:arena-candlesticks'
 name: 'Run the SDK tests'
 'on':
   merge_group: null

@@ -22,14 +22,12 @@
     "start": "pnpm --prefix src/typescript run start",
     "submodule": "pnpm --prefix src/typescript run submodule",
     "test": "pnpm --prefix src/typescript run test",
-    "test:debug": "pnpm --prefix src/typescript run test:debug",
     "test:frontend": "pnpm --prefix src/typescript run test:frontend",
     "test:frontend:e2e": "pnpm --prefix src/typescript run test:frontend:e2e",
+    "test:frontend:unit": "pnpm --prefix src/typescript run test:frontend:unit",
     "test:sdk": "pnpm --prefix src/typescript run test:sdk",
-    "test:sdk:arena": "pnpm --prefix src/typescript run test:sdk:arena",
     "test:sdk:e2e": "pnpm --prefix src/typescript run test:sdk:e2e",
     "test:sdk:unit": "pnpm --prefix src/typescript run test:sdk:unit",
-    "test:verbose": "pnpm --prefix src/typescript run test:verbose",
     "verify-processor-data": "pnpm --prefix src/typescript/sdk run verify-processor-data"
   }
 }
