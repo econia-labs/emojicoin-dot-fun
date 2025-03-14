@@ -26,19 +26,17 @@ import { hasTradingActivity } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
-type CandlesticksParams = Flatten<
-  {
-    periodParams: PeriodParams;
-    period: ArenaPeriod | Period;
-  } & XOR<{ marketID: string }, { meleeID: string }>
->;
-
-export const fetchCandlesticksForChart = async <T extends CandlesticksParams>({
+export const fetchCandlesticksForChart = async ({
   marketID,
   meleeID,
   periodParams,
   period,
-}: T): Promise<Bar[]> => {
+}: Flatten<
+  XOR<{ marketID: string }, { meleeID: string }> & {
+    periodParams: PeriodParams;
+    period: ArenaPeriod | Period;
+  }
+>): Promise<Bar[]> => {
   const params = new URLSearchParams({
     ...(marketID !== undefined ? { marketID } : { meleeID }),
     period: period.toString(),
