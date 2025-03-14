@@ -33,10 +33,6 @@ type CandlesticksParams = Flatten<
   } & XOR<{ marketID: string }, { meleeID: string }>
 >;
 
-type ParsedResponse<T extends CandlesticksParams> = T extends { marketID: string }
-  ? PeriodicStateEventModel
-  : ArenaCandlestickModel;
-
 export const fetchCandlesticksForChart = async <T extends CandlesticksParams>({
   marketID,
   meleeID,
@@ -52,7 +48,7 @@ export const fetchCandlesticksForChart = async <T extends CandlesticksParams>({
 
   return await fetch(`${ROUTES.api.candlesticks}?${params.toString()}`)
     .then((res) => res.text())
-    .then((res) => parseJSON<ParsedResponse<T>[]>(res))
+    .then((res) => parseJSON<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(res))
     .then((res) =>
       res
         .map(toBar)

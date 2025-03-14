@@ -3,7 +3,7 @@ import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-ap
 import { type WritableDraft } from "immer";
 import {
   type EventState,
-  type CandlestickPeriod,
+  type CandlestickData,
   type MarketEventStore,
   type MarketStoreMetadata,
 } from "./types";
@@ -17,7 +17,7 @@ import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from ".
 import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
 import { type ArenaState, createInitialMeleeState } from "../arena/store";
 
-export const createPeriodData = (): WritableDraft<CandlestickPeriod> => ({
+export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
   callback: undefined,
   latestBar: undefined,
 });
@@ -30,13 +30,13 @@ export const createInitialMarketState = (
   liquidityEvents: [],
   stateEvents: [],
   chatEvents: [],
-  [Period.Period1M]: createPeriodData(),
-  [Period.Period5M]: createPeriodData(),
-  [Period.Period15M]: createPeriodData(),
-  [Period.Period30M]: createPeriodData(),
-  [Period.Period1H]: createPeriodData(),
-  [Period.Period4H]: createPeriodData(),
-  [Period.Period1D]: createPeriodData(),
+  [Period.Period1M]: createInitialCandlestickData(),
+  [Period.Period5M]: createInitialCandlestickData(),
+  [Period.Period15M]: createInitialCandlestickData(),
+  [Period.Period30M]: createInitialCandlestickData(),
+  [Period.Period1H]: createInitialCandlestickData(),
+  [Period.Period4H]: createInitialCandlestickData(),
+  [Period.Period1D]: createInitialCandlestickData(),
 });
 
 export const ensureMarketInStore = (
