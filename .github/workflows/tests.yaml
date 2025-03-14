@@ -1,9 +1,10 @@
 ---
 jobs:
-  sdk-tests:
+  typescript-tests:
     defaults:
       run:
         working-directory: 'src/typescript'
+    name: 'typescript / (${{ matrix.pretty-suffix }})'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
@@ -28,14 +29,24 @@ jobs:
           0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d
         PUBLISHER_PRIVATE_KEY: >-
           0xeaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e
-      name: 'Run SDK tests'
-      run: 'pnpm run test:sdk'
+      run: >-
+        pnpm run test:$(echo "${{ matrix.pretty-suffix }}" | sed "s/, /:/g")
     - if: 'failure()'
       name: 'Print local testnet logs on failure'
       run: 'cat ${{ runner.temp }}/local-testnet-logs.txt'
       shell: 'bash'
+    strategy:
+      matrix:
+        include:
+        - pretty-suffix: 'frontend, unit'
+        - pretty-suffix: 'sdk, unit'
+        - pretty-suffix: 'sdk, e2e, base-general'
+        - pretty-suffix: 'sdk, e2e, base-ws'
+        - pretty-suffix: 'sdk, e2e, arena-general'
+        - pretty-suffix: 'sdk, e2e, arena-ws'
+        - pretty-suffix: 'sdk, e2e, arena-candlesticks'
     timeout-minutes: 15
-name: 'Run the SDK tests'
+name: 'Run test suite'
 'on':
   merge_group: null
   pull_request: null

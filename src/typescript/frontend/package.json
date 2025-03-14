@@ -115,7 +115,6 @@
     "playwright:install": "playwright install --with-deps",
     "start": "next start --port 3001",
     "submodule": "./submodule.sh",
-    "test": "pnpm run test:e2e",
     "test:e2e": "playwright test --project=firefox",
     "test:unit": "pnpm jest tests/unit",
     "vercel-install": "./submodule.sh && pnpm i"
