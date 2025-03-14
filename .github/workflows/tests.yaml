@@ -1,6 +1,6 @@
 ---
 jobs:
-  sdk-tests:
+  ts-tests:
     defaults:
       run:
         working-directory: 'src/typescript'
