@@ -4,6 +4,7 @@ jobs:
     defaults:
       run:
         working-directory: 'src/typescript'
+    name: 'ts-tests / ${{ matrix.pretty-cmd-suffix}}'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
@@ -28,7 +29,8 @@ jobs:
           0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d
         PUBLISHER_PRIVATE_KEY: >-
           0xeaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e
-      run: 'pnpm run test:${{ matrix.command-suffix }}'
+      run: >-
+        pnpm run test:$(echo "${{ matrix.pretty-suffix }}" | tr ', ' ':')
     - if: 'failure()'
       name: 'Print local testnet logs on failure'
       run: 'cat ${{ runner.temp }}/local-testnet-logs.txt'
@@ -37,13 +39,13 @@ jobs:
     strategy:
       matrix:
         include:
-        - command-suffix: 'frontend:unit'
-        - command-suffix: 'sdk:unit'
-        - command-suffix: 'sdk:e2e:base-general'
-        - command-suffix: 'sdk:e2e:base-ws'
-        - command-suffix: 'sdk:e2e:arena-general'
-        - command-suffix: 'sdk:e2e:arena-ws'
-        - command-suffix: 'sdk:e2e:arena-candlesticks'
+        - pretty-suffix: 'frontend, unit'
+        - pretty-suffix: 'sdk, unit'
+        - pretty-suffix: 'sdk, e2e, base-general'
+        - pretty-suffix: 'sdk, e2e, base-ws'
+        - pretty-suffix: 'sdk, e2e, arena-general'
+        - pretty-suffix: 'sdk, e2e, arena-ws'
+        - pretty-suffix: 'sdk, e2e, arena-candlesticks'
 name: 'Run test suite'
 'on':
   merge_group: null
