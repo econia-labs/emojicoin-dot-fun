@@ -5,6 +5,7 @@ import {
   type Period,
   periodEnumToRawDuration,
   toPeriodDuration,
+  type AnyPeriod,
 } from "../const";
 import {
   type AnyNumberString,
@@ -97,7 +98,7 @@ export function getPeriodStartTime(
  */
 export function getPeriodStartTimeFromTime(
   microseconds: AnyNumberString,
-  period: PeriodDuration | Period
+  period: PeriodDuration | AnyPeriod
 ) {
   const periodDuration = typeof period !== "number" ? periodEnumToRawDuration(period) : period;
   const time = BigInt(microseconds);

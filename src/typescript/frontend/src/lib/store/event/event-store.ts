@@ -31,7 +31,7 @@ import {
 import { initializeArenaStore } from "../arena/store";
 import {
   isArenaEnterModel,
-  isArenaEventModelWithMeleeID,
+  isArenaModelWithMeleeID,
   isArenaExitModel,
   isArenaMeleeModel,
   isArenaSwapModel,
@@ -99,7 +99,7 @@ export const createEventStore = () => {
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
 
-          const arenaEvents = events.filter(isArenaEventModelWithMeleeID);
+          const arenaEvents = events.filter(isArenaModelWithMeleeID);
           const arenaMap = toMappedMelees(arenaEvents);
           Array.from(arenaMap.entries()).forEach(([meleeID, events]) => {
             ensureMeleeInStore(state, meleeID);
@@ -145,7 +145,7 @@ export const createEventStore = () => {
                   maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
                 }
               } else {
-                if (isArenaEventModelWithMeleeID(event)) {
+                if (isArenaModelWithMeleeID(event)) {
                   const meleeID = getMeleeIDFromArenaModel(event);
                   ensureMeleeInStore(state, meleeID);
                   const melee = state.melees.get(meleeID)!;
