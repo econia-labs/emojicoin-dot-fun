@@ -1,8 +1,6 @@
-// cspell:word Featureset
 // cspell:word localstorage
 
 import {
-  type ChartingLibraryFeatureset,
   type ChartingLibraryWidgetOptions,
   type LanguageCode,
   type ResolutionString,
