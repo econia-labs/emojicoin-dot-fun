@@ -244,7 +244,19 @@ export const connect = () => {
         }
       },
       onConnect(_e) {
-        client.subscribeEvents(["Swap", "Chat", "MarketLatestState"]);
+        client.subscribeEvents(
+          // Subscribe to the following basic emojicoin_dot_fun events.
+          ["Swap", "Chat", "MarketLatestState"],
+          {
+            // Subscribe to all base arena events (Melee, Swap, Enter, Exit).
+            baseEvents: true,
+            // Subscribe to 1H candlestick updates for the current arena melee.
+            arenaPeriodRequest: {
+              action: "subscribe",
+              period: "OneHour",
+            }
+          }
+        );
       },
       onError(e) {
         console.error(e);
