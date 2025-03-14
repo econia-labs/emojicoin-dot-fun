@@ -15,7 +15,7 @@ import {
 import { toNominal } from "@sdk/utils";
 import { type WritableDraft } from "immer";
 import { toBar } from "../event/candlestick-bars";
-import { callbackClonedLatestBarIfSubscribed } from "../event/utils";
+import { callbackClonedLatestBarIfSubscribed } from "../utils";
 import { type MeleeState } from "./store";
 
 export type ArenaMarketPair = {

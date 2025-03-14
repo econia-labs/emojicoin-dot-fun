@@ -8,21 +8,21 @@ import {
 } from "@sdk/indexer-v2";
 import { type WritableDraft } from "immer";
 import { type ArenaChartSymbol } from "lib/chart-utils";
-import { type CandlestickPeriod } from "../event/types";
-import { createPeriodData } from "../event/utils";
+import { type CandlestickData } from "../event/types";
+import { createInitialCandlestickData } from "../utils";
 
 export type MeleeState = {
   swaps: readonly ArenaSwapModel[];
   enters: readonly ArenaEnterModel[];
   exits: readonly ArenaExitModel[];
-  [ArenaPeriod.Period15S]: CandlestickPeriod;
-  [Period.Period1M]: CandlestickPeriod;
-  [Period.Period5M]: CandlestickPeriod;
-  [Period.Period15M]: CandlestickPeriod;
-  [Period.Period30M]: CandlestickPeriod;
-  [Period.Period1H]: CandlestickPeriod;
-  [Period.Period4H]: CandlestickPeriod;
-  [Period.Period1D]: CandlestickPeriod;
+  [ArenaPeriod.Period15S]: CandlestickData;
+  [Period.Period1M]: CandlestickData;
+  [Period.Period5M]: CandlestickData;
+  [Period.Period15M]: CandlestickData;
+  [Period.Period30M]: CandlestickData;
+  [Period.Period1H]: CandlestickData;
+  [Period.Period4H]: CandlestickData;
+  [Period.Period1D]: CandlestickData;
 };
 
 export type ArenaState = {
@@ -40,14 +40,14 @@ export const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
   swaps: [],
   enters: [],
   exits: [],
-  [ArenaPeriod.Period15S]: createPeriodData(),
-  [Period.Period1M]: createPeriodData(),
-  [Period.Period5M]: createPeriodData(),
-  [Period.Period15M]: createPeriodData(),
-  [Period.Period30M]: createPeriodData(),
-  [Period.Period1H]: createPeriodData(),
-  [Period.Period4H]: createPeriodData(),
-  [Period.Period1D]: createPeriodData(),
+  [ArenaPeriod.Period15S]: createInitialCandlestickData(),
+  [Period.Period1M]: createInitialCandlestickData(),
+  [Period.Period5M]: createInitialCandlestickData(),
+  [Period.Period15M]: createInitialCandlestickData(),
+  [Period.Period30M]: createInitialCandlestickData(),
+  [Period.Period1H]: createInitialCandlestickData(),
+  [Period.Period4H]: createInitialCandlestickData(),
+  [Period.Period1D]: createInitialCandlestickData(),
 });
 
 export const ensureMeleeInStore = (state: WritableDraft<ArenaState>, meleeID: bigint) => {
