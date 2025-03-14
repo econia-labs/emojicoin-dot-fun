@@ -369,5 +369,5 @@ export const NON_ARENA_PERIODS = new Set([
   Period.Period1D,
 ]);
 
-export const isPeriod = (period: Period | ArenaPeriod): period is Period =>
+export const isNonArenaPeriod = (period: Period | ArenaPeriod): period is Period =>
   (NON_ARENA_PERIODS as Set<string>).has(period);
