@@ -44,7 +44,10 @@ export const fetchCandlesticksForChart = async ({
     to: periodParams.to.toString(),
   });
 
-  return await fetch(`${ROUTES.api.candlesticks}?${params.toString()}`)
+  const route =
+    marketID !== undefined ? ROUTES.api["candlesticks"] : ROUTES.api["arena"]["candlesticks"];
+
+  return await fetch(`${route}?${params}`)
     .then((res) => res.text())
     .then((res) => parseJSON<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(res))
     .then((res) =>
