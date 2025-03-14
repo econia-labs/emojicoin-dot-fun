@@ -5,10 +5,9 @@ import React, { Suspense } from "react";
 import Loading from "components/loading";
 import PrivateChart from "./PrivateChart";
 
-export const Chart = PrivateChart;
-const MemoizedChart = React.memo(Chart);
+const MemoizedChart = React.memo(PrivateChart);
 
-export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">) => {
+export const ChartContainer = (props: ChartContainerProps) => {
   const [isScriptReady, setIsScriptReady] = React.useState(false);
 
   return (
@@ -16,10 +15,9 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
       {isScriptReady && (
         <Suspense fallback={<Loading emojis={props.emojis} />}>
           <MemoizedChart
-            marketID={props.marketID}
-            emojis={props.emojis}
-            marketAddress={props.marketAddress}
             symbol={props.symbol}
+            secondarySymbol={props.secondarySymbol}
+            className={props.className}
           />
         </Suspense>
       )}

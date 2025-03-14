@@ -6,9 +6,13 @@ import { FormattedNumber } from "components/FormattedNumber";
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { parseJSON } from "utils";
-import { Box, EmojiTitle, type ArenaPropsWithPositionAndHistory, type ArenaProps } from "./utils";
+import {
+  Box,
+  EmojiTitle,
+  type ArenaPropsWithPositionHistoryAndEmojiData,
+  type ArenaProps,
+} from "./utils";
 import { BottomNavigation, TabContainer } from "./tabs";
-import { PriceChartDesktopBox, PriceChartMobile } from "./PriceChart";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
@@ -18,6 +22,9 @@ import { ROUTES } from "router/routes";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { useRouter } from "next/navigation";
 import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
+import ChartContainer from "@/components/charts/ChartContainer";
+import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
+import { type ClassValue } from "clsx";
 import { useEventStore } from "context/event-store-context/hooks";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
@@ -38,7 +45,9 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
   );
 };
 
-const Desktop = (props: ArenaPropsWithPositionAndHistory) => {
+const chartBoxClassName: ClassValue = "relative w-full h-full col-start-1 col-end-3";
+
+const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <div
@@ -58,7 +67,14 @@ const Desktop = (props: ArenaPropsWithPositionAndHistory) => {
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
       <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
-      <PriceChartDesktopBox {...props} />
+      <Box className={chartBoxClassName}>
+        <ChartContainer
+          emojis={props.allEmojiData}
+          symbol={props.symbol0}
+          secondarySymbol={props.symbol1}
+          className="w-full h-full"
+        />
+      </Box>
       <Box className="col-start-3 col-end-5 h-[100%]">
         <TabContainer {...props} />
       </Box>
@@ -66,7 +82,7 @@ const Desktop = (props: ArenaPropsWithPositionAndHistory) => {
   );
 };
 
-const Mobile = (props: ArenaPropsWithPositionAndHistory) => {
+const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <>
@@ -85,7 +101,14 @@ const Mobile = (props: ArenaPropsWithPositionAndHistory) => {
         </Box>
         <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
         <Box className="h-[500px]">
-          <PriceChartMobile {...props} />
+          <Box className={chartBoxClassName}>
+            <ChartContainer
+              emojis={props.allEmojiData}
+              symbol={props.symbol0}
+              secondarySymbol={props.symbol1}
+              className="w-full h-full"
+            />
+          </Box>
         </Box>
       </div>
       {createPortal(<BottomNavigation {...props} />, document.body)}
@@ -119,14 +142,19 @@ export const ArenaClient = (props: ArenaProps) => {
     }
   }, [latestMeleeID, props.arenaInfo.meleeID, router]);
 
+  const allEmojiData = useMemo(
+    () => [props.symbol0, props.symbol1].flatMap((v) => symbolToEmojis(v).emojis),
+    [props.symbol0, props.symbol1]
+  );
+
   const r = useMemo(
     () =>
       isMobile ? (
-        <Mobile {...props} {...{ position, setPosition, history, setHistory }} />
+        <Mobile {...props} {...{ allEmojiData, position, setPosition, history, setHistory }} />
       ) : (
-        <Desktop {...props} {...{ position, setPosition, history, setHistory }} />
+        <Desktop {...props} {...{ allEmojiData, position, setPosition, history, setHistory }} />
       ),
-    [isMobile, props, position, setPosition, history, setHistory]
+    [allEmojiData, isMobile, props, position, setPosition, history, setHistory]
   );
 
   useEffect(() => {
