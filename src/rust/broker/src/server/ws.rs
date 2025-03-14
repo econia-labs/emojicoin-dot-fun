@@ -11,7 +11,7 @@ use futures_util::{SinkExt, StreamExt};
 use log::{debug, error, info, warn};
 use tokio::sync::{broadcast::error::RecvError, RwLock};
 
-use crate::{types::Subscription, util::is_match};
+use crate::util::{is_match, update_subscription};
 
 use super::AppState;
 
@@ -35,10 +35,9 @@ async fn handle_websocket(socket: WebSocket, state: Arc<AppState>) {
     let r = async move {
         while let Some(Ok(msg)) = ws_rx.next().await {
             if let Ok(msg) = msg.to_text() {
-                let new_sub: Result<Subscription, _> = serde_json::from_str(msg);
-                if let Ok(new_sub) = new_sub {
-                    debug!("Subscription updated ({new_sub:?}).");
-                    *sub2.write().await = Some(new_sub);
+                let mut sub_lock = sub2.write().await;
+                if let Ok(_) = update_subscription(&mut sub_lock, msg) {
+                    debug!("Subscription updated ({sub_lock:?}).");
                 } else {
                     warn!("Got invalid JSON format from client, closing connection.");
                     break;
