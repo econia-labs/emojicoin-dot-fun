@@ -68,27 +68,27 @@
     "submodule": {
       "outputs": []
     },
-    "test": {
-      "cache": false,
-      "outputs": []
-    },
     "test:e2e": {
       "cache": false,
       "outputs": []
     },
-    "test:sdk:arena": {
+    "test:e2e:arena-candlesticks": {
       "cache": false,
       "outputs": []
     },
-    "test:sdk:arena-candlesticks": {
+    "test:e2e:arena-general": {
       "cache": false,
       "outputs": []
     },
-    "test:sdk:parallel": {
+    "test:e2e:arena-ws": {
       "cache": false,
       "outputs": []
     },
-    "test:sdk:sequential": {
+    "test:e2e:base-general": {
+      "cache": false,
+      "outputs": []
+    },
+    "test:e2e:base-ws": {
       "cache": false,
       "outputs": []
     },
