@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - job-name: 'Frontend: [unit]'
+        - job-name: 'FE:  [unit]'
           command: 'pnpm run test:frontend:unit'
         - job-name: 'SDK: [unit]'
           command: 'pnpm run test:sdk:unit'
