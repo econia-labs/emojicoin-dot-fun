@@ -80,6 +80,7 @@ mybuilder
 nazar
 nextjs
 nohup
+nosetup
 octa
 octas
 oden

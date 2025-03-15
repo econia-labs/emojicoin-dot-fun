@@ -43,6 +43,7 @@
     "test:debug": "FETCH_DEBUG=true pnpm run load-env:test -- turbo run test --force",
     "test:frontend": "    pnpm run load-env:test -- turbo run test --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "test:frontend:e2e": "pnpm run load-env:test -- turbo run test:e2e --filter @econia-labs/emojicoin-frontend --log-prefix none",
+    "test:frontend:e2e:nosetup": "pnpm run load-env:test -- turbo run test:e2e:nosetup --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "test:sdk": "pnpm run load-env:test -- turbo run test --filter @econia-labs/emojicoin-sdk --log-prefix none",
     "test:sdk:arena": "pnpm run load-env:test -- turbo run test:sdk:arena --filter @econia-labs/emojicoin-sdk --log-prefix none",
     "test:sdk:arena-candlesticks": "pnpm run load-env:test -- turbo run test:sdk:arena-candlesticks --filter @econia-labs/emojicoin-sdk --log-prefix none",

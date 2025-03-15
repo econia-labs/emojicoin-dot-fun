@@ -76,6 +76,10 @@
       "cache": false,
       "outputs": []
     },
+    "test:e2e:nosetup": {
+      "cache": false,
+      "outputs": []
+    },
     "test:sdk:arena": {
       "cache": false,
       "outputs": []
