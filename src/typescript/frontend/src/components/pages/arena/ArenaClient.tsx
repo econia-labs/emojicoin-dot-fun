@@ -26,6 +26,7 @@ import ChartContainer from "@/components/charts/ChartContainer";
 import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
 import { type ClassValue } from "clsx";
 import { useEventStore } from "context/event-store-context/hooks";
+import { useArenaEscrows } from "@hooks/use-arena-escrows";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -121,6 +122,9 @@ export const ArenaClient = (props: ArenaProps) => {
   const { account } = useAptos();
   const router = useRouter();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
+  const escrows = useArenaEscrows();
+  
+  useEffect(() => console.log(escrows));
 
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);

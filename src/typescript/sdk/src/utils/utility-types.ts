@@ -41,3 +41,11 @@ export type DeepWritable<T> = {
 export type XOR<T, U> =
   | (T & { [K in keyof U]?: never })
   | (U & { [K in keyof T]?: never });
+
+/**
+ * `{}` as a type technically means any non-nullish value.
+ * 
+ * `Record<string, never>` is recommended for usage as an `any object` type.
+ * @see {@link https://typescript-eslint.io/rules/no-empty-object-type}
+ */
+export type EmptyObject = Record<string, never>;

@@ -1,2 +1,2 @@
-export * from "./arena-utils";
+export * from "../utils/arena";
 export * from "./utils";

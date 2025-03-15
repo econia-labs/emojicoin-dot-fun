@@ -1,10 +1,13 @@
-import { type LedgerVersionArg, type TypeTag } from "@aptos-labs/ts-sdk";
-import { toMarketEmojiData, type SymbolEmoji } from "../emoji_data";
-import { EmojicoinArena, getMarketAddress, MarketView } from "../emojicoin_dot_fun";
-import { toCoinTypesForEntry } from "./utils";
-import { getAptosClient } from "../utils";
-import { toArenaMeleeEvent, toArenaRegistry } from "../types/arena-types";
-import { toMarketView } from "../types";
+import {
+  type LedgerVersionArg,
+  type TypeTag,
+} from "@aptos-labs/ts-sdk";
+import { toMarketEmojiData, type SymbolEmoji } from "../../emoji_data";
+import { EmojicoinArena, getMarketAddress, MarketView } from "../../emojicoin_dot_fun";
+import { toCoinTypesForEntry } from "../../markets/utils";
+import { getAptosClient } from "..";
+import { toArenaMeleeEvent, toArenaRegistry } from "../../types/arena-types";
+import { toMarketView } from "../../types";
 
 /**
  * Converts two input symbols to the four coin TypeTags necessary for arena entry functions.
