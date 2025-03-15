@@ -1,9 +1,9 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { fetchUserArenaEscrows } from "@sdk/markets/arena-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 import { QueryKey } from "./query-keys-enum";
+import { fetchUserArenaEscrows } from "@sdk/utils/arena/escrow";
 
 export const useArenaEscrows = () => {
   const { aptos, account } = useAptos();

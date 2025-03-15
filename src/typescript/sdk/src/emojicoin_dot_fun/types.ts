@@ -6,7 +6,7 @@ import {
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
 
-export type Option<T> = {
+export type MoveJsonOption<T> = {
   vec: [T] | [];
 };
 
