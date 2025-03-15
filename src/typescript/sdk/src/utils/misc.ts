@@ -1,4 +1,8 @@
-import { AccountAddress, type InputGenerateTransactionOptions } from "@aptos-labs/ts-sdk";
+import {
+  AccountAddress,
+  validateNumberInRange,
+  type InputGenerateTransactionOptions,
+} from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import {
   type PeriodDuration,

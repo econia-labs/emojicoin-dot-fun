@@ -1,19 +1,13 @@
 import {
-  AccountAddress,
-  parseTypeTag,
-  type AccountAddressInput,
-  type Aptos,
   type LedgerVersionArg,
   type TypeTag,
-  type TypeTagStruct,
 } from "@aptos-labs/ts-sdk";
-import { toMarketEmojiData, type SymbolEmoji } from "../emoji_data";
-import { EmojicoinArena, getMarketAddress, MarketView } from "../emojicoin_dot_fun";
-import { toCoinTypesForEntry } from "./utils";
-import { getAptosClient, STRUCT_STRINGS } from "../utils";
-import { toArenaMeleeEvent, toArenaRegistry } from "../types/arena-types";
-import { toMarketView } from "../types";
-import { type ArenaJsonTypes } from "../types/arena-json-types";
+import { toMarketEmojiData, type SymbolEmoji } from "../../emoji_data";
+import { EmojicoinArena, getMarketAddress, MarketView } from "../../emojicoin_dot_fun";
+import { toCoinTypesForEntry } from "../../markets/utils";
+import { getAptosClient } from "..";
+import { toArenaMeleeEvent, toArenaRegistry } from "../../types/arena-types";
+import { toMarketView } from "../../types";
 
 /**
  * Converts two input symbols to the four coin TypeTags necessary for arena entry functions.
@@ -126,38 +120,4 @@ export const fetchAllCurrentMeleeData = async () => {
     market1,
     market2,
   };
-};
-
-const isEscrowStruct = ({ value }: TypeTagStruct) => {
-  const { address, moduleName, name } = value;
-  const structString = [address.toString(), moduleName.identifier, name.identifier].join("::");
-  return STRUCT_STRINGS["Escrow"] === structString;
-};
-
-const toEscrowMaybe = (resource: { data: unknown; type: string }) => {
-  const { type } = resource;
-  if (/^0x([a-zA-Z0-9])+::emojicoin_arena::Escrow<0x.*LP>$/.test(type)) {
-    const typeTag = parseTypeTag(type);
-    if (typeTag.isStruct() && isEscrowStruct(typeTag)) {
-      const innerTags = typeTag.value.typeArgs;
-      if (innerTags.every((v) => v.isStruct()) && innerTags.length === 4) {
-        return {
-          resource: resource as ArenaJsonTypes["Escrow"],
-          coinTypes: innerTags as [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct],
-        };
-      }
-    }
-  }
-  return undefined;
-};
-
-/**
- * Fetch all Escrow resources the user owns.
- */
-export const fetchUserArenaEscrows = async (user: AccountAddressInput, aptosIn?: Aptos) => {
-  const aptos = aptosIn ? aptosIn : getAptosClient();
-  const accountAddress = AccountAddress.from(user).toString();
-  const resources = await aptos.getAccountResources({ accountAddress });
-  const escrows = resources.map(toEscrowMaybe).filter((v) => !!v);
-  return escrows;
 };
