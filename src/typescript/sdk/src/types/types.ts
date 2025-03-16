@@ -4,7 +4,12 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JsonTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { standardizeAddress } from "../utils/account-address";
-import { type Trigger, type EMOJICOIN_DOT_FUN_MODULE_NAME, rawTriggerToEnum } from "../const";
+import {
+  type Trigger,
+  type EMOJICOIN_DOT_FUN_MODULE_NAME,
+  rawTriggerToEnum,
+  ArenaPeriod,
+} from "../const";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -18,6 +23,7 @@ import {
 import { type STRUCT_STRINGS } from "../utils";
 import { type Flatten } from ".";
 import { type ArenaTypes } from "./arena-types";
+import { SymbolEmoji } from "../emoji_data";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);
@@ -372,6 +378,19 @@ export type Types = ArenaTypes & {
   EmojicoinDotFunRewards: {
     swap: Types["SwapEvent"];
     octasRewardAmount: bigint;
+  };
+
+  Candlestick: {
+    marketID: bigint;
+    version: bigint;
+    period: ArenaPeriod;
+    startTime: Date;
+    openPrice: Big;
+    closePrice: Big;
+    highPrice: Big;
+    lowPrice: Big;
+    volume: bigint;
+    symbolEmojis: SymbolEmoji[];
   };
 };
 

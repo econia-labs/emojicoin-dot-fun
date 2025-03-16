@@ -264,6 +264,21 @@ type FlattenedExchangeRateWithEventIndex<T extends keyof JsonTypes> = Flatten<
     emojicoin_1_exchange_rate_quote: Uint64String;
   }
 >;
+type CandlestickData = {
+  market_id: Uint64String;
+  last_transaction_version: Uint64String;
+  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
+  start_time: PostgresTimestamp;
+
+  open_price: number;
+  close_price: number;
+  high_price: number;
+  low_price: number;
+
+  symbol_emojis: SymbolEmoji[];
+
+  volume: Uint64String;
+};
 
 type ArenaMeleeEventData = Flatten<
   Omit<JsonTypes["ArenaMeleeEvent"], "start_time"> & {
@@ -397,6 +412,7 @@ export type DatabaseStructType = {
   ChatEventData: ChatEventData;
   StateEventData: StateEventData;
   GlobalStateEventData: GlobalStateEventData;
+  Candlestick: CandlestickData;
   ArenaMelee: ArenaMeleeEventData;
   ArenaEnter: ArenaEnterEventData;
   ArenaExit: ArenaExitEventData;
@@ -438,6 +454,7 @@ export enum TableName {
   MarketState = "market_state",
   ProcessorStatus = "processor_status",
   PriceFeed = "price_feed",
+  Candlesticks = "normal_candlesticks",
   ArenaMeleeEvents = "arena_melee_events",
   ArenaEnterEvents = "arena_enter_events",
   ArenaExitEvents = "arena_exit_events",
@@ -538,6 +555,7 @@ export type DatabaseJsonType = {
       close_price_q64: Uint64String;
     }
   >;
+  [TableName.Candlesticks]: CandlestickData;
   [TableName.ArenaMeleeEvents]: Flatten<TransactionMetadata & ArenaMeleeEventData>;
   [TableName.ArenaEnterEvents]: Flatten<TransactionMetadata & ArenaEnterEventData>;
   [TableName.ArenaExitEvents]: Flatten<TransactionMetadata & ArenaExitEventData>;
