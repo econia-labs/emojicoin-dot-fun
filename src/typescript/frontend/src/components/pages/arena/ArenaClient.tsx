@@ -23,7 +23,6 @@ import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { useRouter } from "next/navigation";
 import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
 import ChartContainer from "@/components/charts/ChartContainer";
-import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
 import { type ClassValue } from "clsx";
 import { useEventStore } from "context/event-store-context/hooks";
 
@@ -69,9 +68,8 @@ const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
       <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
       <Box className={chartBoxClassName}>
         <ChartContainer
-          emojis={props.allEmojiData}
-          symbol={props.symbol0}
-          secondarySymbol={props.symbol1}
+          symbol={market0.market.symbolData.symbol}
+          secondarySymbol={market1.market.symbolData.symbol}
           className="w-full h-full"
         />
       </Box>
@@ -103,9 +101,8 @@ const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
         <Box className="h-[500px]">
           <Box className={chartBoxClassName}>
             <ChartContainer
-              emojis={props.allEmojiData}
-              symbol={props.symbol0}
-              secondarySymbol={props.symbol1}
+              symbol={market0.market.symbolData.symbol}
+              secondarySymbol={market1.market.symbolData.symbol}
               className="w-full h-full"
             />
           </Box>
@@ -142,19 +139,14 @@ export const ArenaClient = (props: ArenaProps) => {
     }
   }, [latestMeleeID, props.arenaInfo.meleeID, router]);
 
-  const allEmojiData = useMemo(
-    () => [props.symbol0, props.symbol1].flatMap((v) => symbolToEmojis(v).emojis),
-    [props.symbol0, props.symbol1]
-  );
-
   const r = useMemo(
     () =>
       isMobile ? (
-        <Mobile {...props} {...{ allEmojiData, position, setPosition, history, setHistory }} />
+        <Mobile {...props} {...{ position, setPosition, history, setHistory }} />
       ) : (
-        <Desktop {...props} {...{ allEmojiData, position, setPosition, history, setHistory }} />
+        <Desktop {...props} {...{ position, setPosition, history, setHistory }} />
       ),
-    [allEmojiData, isMobile, props, position, setPosition, history, setHistory]
+    [isMobile, props, position, setPosition, history, setHistory]
   );
 
   useEffect(() => {

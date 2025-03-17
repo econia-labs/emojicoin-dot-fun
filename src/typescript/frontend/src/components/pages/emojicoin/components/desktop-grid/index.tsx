@@ -34,7 +34,6 @@ const DesktopGrid = (props: GridProps) => {
               <Suspense fallback={<Loading numEmojis={20} />}>
                 <ChartContainer
                   symbol={props.data.symbolData.symbol}
-                  emojis={props.data.emojis}
                   className="relative w-full h-[420px]"
                 />
               </Suspense>

@@ -45,15 +45,5 @@ export default async function Arena() {
     redirect(ROUTES.home);
   }
 
-  const [symbol0, symbol1] = [market0.market.symbolData.symbol, market1.market.symbolData.symbol];
-
-  return (
-    <ArenaClient
-      arenaInfo={arenaInfo}
-      market0={market0}
-      market1={market1}
-      symbol0={symbol0}
-      symbol1={symbol1}
-    />
-  );
+  return <ArenaClient arenaInfo={arenaInfo} market0={market0} market1={market1} />;
 }
