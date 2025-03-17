@@ -2,8 +2,9 @@ import { type fetchSwapEvents } from "@/queries/market";
 import { LIMIT } from "@sdk/indexer-v2/const";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { type GetTradesSchema } from "app/api/trades/schema";
-import { ecFetch } from "lib/ecFetch/ecFetch";
 import { ROUTES } from "router/routes";
+import { parseJSON } from "utils";
+import { addSearchParams } from "utils/url-utils";
 import { type z } from "zod";
 
 export type SwapEvent = Awaited<ReturnType<typeof fetchSwapEvents>>[number];
@@ -12,9 +13,12 @@ export const useSwapEventsQuery = (args: z.input<typeof GetTradesSchema>, disabl
   const query = useInfiniteQuery({
     queryKey: ["fetchSwapEvents", args],
     queryFn: ({ pageParam }) =>
-      ecFetch<SwapEvent[]>(ROUTES.api.trades, {
-        method: "GET",
-        searchParams: { ...args, page: pageParam },
+      fetch(addSearchParams(ROUTES.api.trades, { ...args, page: pageParam })).then(async (r) => {
+        if (!r.ok) {
+          const errorText = await r.text();
+          throw new Error(`HTTP error ${r.status}: ${errorText}`);
+        }
+        return parseJSON<SwapEvent[]>(await r.text());
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
