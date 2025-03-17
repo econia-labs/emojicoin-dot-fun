@@ -1,4 +1,4 @@
-import Big from "big.js";
+import type Big from "big.js";
 import {
   ArenaPeriod,
   calculateCurvePrice,
@@ -28,6 +28,17 @@ const waitForNew15sPeriodBoundary = async () => {
   await sleep(timeToWait);
 };
 
+const expectEqualOHLCV = (
+  fromDb: CandlestickModel,
+  calculated: { open: Big; high: Big; low: Big; close: Big; volume: bigint }
+) => {
+  expect(fromDb.lowPrice.eq(calculated.low.round(21))).toBe(true);
+  expect(fromDb.highPrice.eq(calculated.high.round(21))).toBe(true);
+  expect(fromDb.openPrice.eq(calculated.open.round(21))).toBe(true);
+  expect(fromDb.closePrice.eq(calculated.close.round(21))).toBe(true);
+  expect(fromDb.volume).toEqual(calculated.volume);
+};
+
 describe("ensures arena candlesticks work", () => {
   const emojicoin = new EmojicoinClient();
 
@@ -46,169 +57,134 @@ describe("ensures arena candlesticks work", () => {
     // the two initial markets, or one of the funded accounts (0x000 to 0xfff).
     const account = getFundedAccount("667");
 
-    let resReg = await emojicoin.register(getFundedAccount("667"), emojis[0]);
-    let market = resReg.registration.event;
+    const registerResponse = await emojicoin.register(getFundedAccount("667"), emojis[0]);
+    const { marketID } = registerResponse.registration.event;
 
-    await waitForProcessor(resReg);
+    await waitForProcessor(registerResponse);
 
     let candlesticks: CandlestickModel[] | null = null;
     let fifteenSecondCandlesticks: CandlestickModel[] = [];
-    let expectedVolume = 0n;
     let state: MarketLatestStateEventModel = {} as MarketLatestStateEventModel;
 
-    const refreshCandlesticksData = async () => {
+    const refreshCandlesticksAndStateData = async () => {
       candlesticks = await postgrest
         .from(TableName.Candlesticks)
         .select("*")
-        .eq("market_id", market.marketID)
+        .eq("market_id", marketID)
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toCandlestickModel)));
-    };
-    const refreshStateData = async () => {
       state = await postgrest
         .from(TableName.MarketLatestStateEvent)
         .select("*")
-        .eq("market_id", market.marketID)
+        .eq("market_id", marketID)
         .single()
         .then((r) => r.data)
         .then((r) => toMarketLatestStateEventModel(r));
     };
 
-    await refreshCandlesticksData();
-    await refreshStateData();
+    await refreshCandlesticksAndStateData();
 
     expect(candlesticks).not.toBeNull();
     expect(candlesticks!.length).toBeGreaterThan(0);
 
     expect(state.lastSwap.avgExecutionPriceQ64).toEqual(0n);
+    expect(state.lastSwap.quoteVolume).toEqual(0n);
 
     const firstPrice = calculateCurvePrice(state.state);
 
-    let expectedPrices = {
-        open: firstPrice,
-        close: firstPrice,
-        low: firstPrice,
-        high: firstPrice,
+    let firstCandlestick = {
+      open: firstPrice,
+      close: firstPrice,
+      low: firstPrice,
+      high: firstPrice,
+      volume: state.lastSwap.quoteVolume,
     };
 
-    const updateOhlc = () => {
+    const updateFirstCandlestickOHLCV = () => {
       const price = calculateCurvePrice(state.state);
-      expectedPrices = {
-        open: expectedPrices.open,
+      firstCandlestick = {
+        open: firstCandlestick.open,
         close: price,
-        low: expectedPrices.low.lt(price) ? expectedPrices.low : price,
-        high: expectedPrices.high.gt(price) ? expectedPrices.high : price,
-      }
-    }
+        low: firstCandlestick.low.lt(price) ? firstCandlestick.low : price,
+        high: firstCandlestick.high.gt(price) ? firstCandlestick.high : price,
+        volume: firstCandlestick.volume + state.lastSwap.quoteVolume,
+      };
+    };
 
+    // ---------------------------------------------------------------------------------------------
     // Check initial state of candlesticks.
-
+    // ---------------------------------------------------------------------------------------------
     fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
 
     expect(fifteenSecondCandlesticks).toHaveLength(1);
-    expect(fifteenSecondCandlesticks[0].lowPrice.toString()).toEqual(expectedPrices.low.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].highPrice.toString()).toEqual(expectedPrices.high.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].openPrice.toString()).toEqual(expectedPrices.open.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].closePrice.toString()).toEqual(expectedPrices.close.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].volume).toEqual(expectedVolume);
+    expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
 
+    // ---------------------------------------------------------------------------------------------
     // Check candlesticks after a buy.
-
+    // ---------------------------------------------------------------------------------------------
     const buyRes = await emojicoin.buy(account, emojis[0], ONE_APT_BIGINT);
     await waitForProcessor(buyRes);
+    await refreshCandlesticksAndStateData();
 
-    await refreshCandlesticksData();
-    await refreshStateData();
+    updateFirstCandlestickOHLCV();
 
     expect(candlesticks).not.toBeNull();
-
     fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
-
-    updateOhlc();
-
-    expectedVolume = buyRes.swap.event.quoteVolume;
-
     expect(fifteenSecondCandlesticks).toHaveLength(1);
-    expect(fifteenSecondCandlesticks[0].lowPrice.toString()).toEqual(expectedPrices.low.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].highPrice.toString()).toEqual(expectedPrices.high.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].openPrice.toString()).toEqual(expectedPrices.open.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].closePrice.toString()).toEqual(expectedPrices.close.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].volume).toEqual(expectedVolume);
+    expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
 
+    // ---------------------------------------------------------------------------------------------
     // Check candlesticks after a sell.
-
+    // ---------------------------------------------------------------------------------------------
     const sellRes = await emojicoin.sell(account, emojis[0], buyRes.swap.event.netProceeds / 2n);
-
     await waitForProcessor(sellRes);
+    await refreshCandlesticksAndStateData();
 
-    await refreshCandlesticksData();
-    await refreshStateData();
-
-    updateOhlc();
-
-    expectedVolume += sellRes.swap.event.quoteVolume;
+    updateFirstCandlestickOHLCV();
 
     expect(candlesticks).not.toBeNull();
-
     fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
-
     expect(fifteenSecondCandlesticks).toHaveLength(1);
-    expect(fifteenSecondCandlesticks[0].lowPrice.toString()).toEqual(expectedPrices.low.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].highPrice.toString()).toEqual(expectedPrices.high.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].openPrice.toString()).toEqual(expectedPrices.open.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].closePrice.toString()).toEqual(expectedPrices.close.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].volume).toEqual(expectedVolume);
+    expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
 
+    // ---------------------------------------------------------------------------------------------
     // Check old candlesticks aren't affected when trading on new candlesticks.
-
+    // ---------------------------------------------------------------------------------------------
     await waitForNew15sPeriodBoundary();
-
     await waitForProcessor(await emojicoin.buy(account, emojis[0], ONE_APT_BIGINT));
-
-    await refreshCandlesticksData();
-    await refreshStateData();
+    await refreshCandlesticksAndStateData();
 
     const newPrice = calculateCurvePrice(state.state);
-    let newExpectedPrices = {
+    // Use a fresh candlestick since a new period boundary has started.
+    const secondCandlestick = {
       open: newPrice,
       close: newPrice,
       high: newPrice,
       low: newPrice,
-    }
+      volume: state.lastSwap.quoteVolume,
+    };
+
+    expect(candlesticks).not.toBeNull();
+    fifteenSecondCandlesticks = candlesticks!
+      .filter((c) => c.period === ArenaPeriod.Period15S)
+      .toSorted((a, b) => a.startTime.getTime() - b.startTime.getTime());
+
+    expect(fifteenSecondCandlesticks).toHaveLength(2);
+    expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
+    expectEqualOHLCV(fifteenSecondCandlesticks[1], secondCandlestick);
+
+    // ---------------------------------------------------------------------------------------------
+    // Check data isn't affected by trading on another market.
+    // ---------------------------------------------------------------------------------------------
+    await emojicoin.register(account, emojis[1]);
+    await waitForProcessor(await emojicoin.buy(account, emojis[1], ONE_APT_BIGINT));
+    await refreshCandlesticksAndStateData();
 
     fifteenSecondCandlesticks = candlesticks!
       .filter((c) => c.period === ArenaPeriod.Period15S)
       .toSorted((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
     expect(fifteenSecondCandlesticks).toHaveLength(2);
-    expect(fifteenSecondCandlesticks[0].lowPrice.toString()).toEqual(expectedPrices.low.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].highPrice.toString()).toEqual(expectedPrices.high.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].openPrice.toString()).toEqual(expectedPrices.open.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].closePrice.toString()).toEqual(expectedPrices.close.round(21).toString());
-    expect(fifteenSecondCandlesticks[0].volume).toEqual(expectedVolume);
-
-    expect(fifteenSecondCandlesticks[1].lowPrice.toString()).toEqual(newExpectedPrices.low.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].highPrice.toString()).toEqual(newExpectedPrices.high.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].openPrice.toString()).toEqual(newExpectedPrices.open.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].closePrice.toString()).toEqual(newExpectedPrices.close.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].volume).toEqual(state.lastSwap.quoteVolume);
-
-    // Check data isn't affected by trading on another market.
-
-    await emojicoin.register(account, emojis[1]);
-    await waitForProcessor(await emojicoin.buy(account, emojis[1], ONE_APT_BIGINT));
-
-    await refreshCandlesticksData();
-    await refreshStateData();
-
-    fifteenSecondCandlesticks = candlesticks!
-      .filter((c) => c.period === ArenaPeriod.Period15S)
-      .toSorted((a, b) => a.startTime.getTime() - b.startTime.getTime());
-
-    expect(fifteenSecondCandlesticks[1].lowPrice.toString()).toEqual(newExpectedPrices.low.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].highPrice.toString()).toEqual(newExpectedPrices.high.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].openPrice.toString()).toEqual(newExpectedPrices.open.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].closePrice.toString()).toEqual(newExpectedPrices.close.round(21).toString());
-    expect(fifteenSecondCandlesticks[1].volume).toEqual(state.lastSwap.quoteVolume);
+    expectEqualOHLCV(fifteenSecondCandlesticks[1], secondCandlestick);
   }, 30000);
 });
