@@ -56,16 +56,11 @@ export default defineConfig({
       use: { ...devices["Desktop Firefox"] },
       dependencies: ["setup"],
     },
+
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
       dependencies: ["setup"],
-    },
-    {
-      name: "nosetup",
-      use: { ...devices["Desktop Chrome"] },
-      testDir: "./tests/e2e/nosetup",
-      timeout: 120000,
     },
   ],
 });

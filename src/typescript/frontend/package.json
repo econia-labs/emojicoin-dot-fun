@@ -116,7 +116,6 @@
     "start": "next start --port 3001",
     "submodule": "./submodule.sh",
     "test:e2e": "playwright test --project=firefox",
-    "test:e2e:nosetup": "playwright test --project=nosetup",
     "test:unit": "pnpm jest tests/unit",
     "vercel-install": "./submodule.sh && pnpm i"
   },
