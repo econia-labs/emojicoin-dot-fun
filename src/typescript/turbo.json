@@ -72,6 +72,10 @@
       "cache": false,
       "outputs": []
     },
+    "test:e2e:candlesticks": {
+      "cache": false,
+      "outputs": []
+    },
     "test:e2e:arena-candlesticks": {
       "cache": false,
       "outputs": []

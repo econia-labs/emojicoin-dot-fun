@@ -49,6 +49,7 @@
     "test:sdk:e2e:arena": "pnpm run test:sdk:e2e:arena-general && pnpm run test:sdk:e2e:arena-ws && pnpm run test:sdk:e2e:arena-candlesticks",
     "test:sdk:e2e:base-general": "pnpm run load-env:test -- turbo run test:e2e:base-general --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
     "test:sdk:e2e:base-ws": "pnpm run load-env:test -- turbo run test:e2e:base-ws --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
+    "test:sdk:e2e:candlesticks": "pnpm run load-env:test -- turbo run test:e2e:candlesticks --filter @econia-labs/emojicoin-sdk --log-prefix none",
     "test:sdk:e2e:arena-candlesticks": "pnpm run load-env:test -- turbo run test:e2e:arena-candlesticks --filter @econia-labs/emojicoin-sdk --log-prefix none",
     "test:sdk:e2e:arena-general": "pnpm run load-env:test -- turbo run test:e2e:arena-general --filter @econia-labs/emojicoin-sdk --log-prefix none",
     "test:sdk:e2e:arena-ws": "pnpm run load-env:test -- turbo run test:e2e:arena-ws --filter @econia-labs/emojicoin-sdk --log-prefix none",

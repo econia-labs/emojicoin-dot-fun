@@ -24,7 +24,6 @@ import {
   toArenaLeaderboardHistoryModel,
   toArenaPositionModel,
   toArenaSwapModel,
-  waitForEmojicoinIndexer,
 } from "../../../src/indexer-v2";
 import {
   fetchArenaMeleeView,
@@ -37,10 +36,9 @@ import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
-  PROCESSING_WAIT_TIME,
-  waitForProcessor,
 } from "./utils";
 import { getPublisher } from "../../utils/helpers";
+import { waitForProcessor } from "../helpers";
 
 const getEmojicoinLockedDiffFromSwapRes = (
   swapRes: Awaited<ReturnType<typeof EmojicoinClient.prototype.arena.swap>>,
@@ -435,7 +433,7 @@ describe("ensures leaderboard history is working", () => {
     await waitUntilCurrentMeleeEnds();
     await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
       melee = res.melee;
-      return waitForEmojicoinIndexer(res.version, PROCESSING_WAIT_TIME);
+      return waitForProcessor(res);
     });
   }, 30000);
 
@@ -722,7 +720,7 @@ describe("ensures arena info is working", () => {
     await waitUntilCurrentMeleeEnds();
     await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
       melee = res.melee;
-      return waitForEmojicoinIndexer(res.version, PROCESSING_WAIT_TIME);
+      return waitForProcessor(res);
     });
   }, 30000);
 
@@ -906,7 +904,7 @@ describe("ensures arena works in edge cases", () => {
     await waitUntilCurrentMeleeEnds();
     await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
       melee = res.melee;
-      return waitForEmojicoinIndexer(res.version, PROCESSING_WAIT_TIME);
+      return waitForProcessor(res);
     });
   }, 30000);
 
