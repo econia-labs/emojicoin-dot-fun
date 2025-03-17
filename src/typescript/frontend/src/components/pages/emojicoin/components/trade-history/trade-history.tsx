@@ -74,7 +74,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
       },
       {
-        text: props.data.symbol,
+        text: <Emoji emojis={props.data.symbol} />,
         id: "amount",
         width: 100,
         renderCell: (item) => (

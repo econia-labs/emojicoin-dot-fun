@@ -5,7 +5,7 @@ import { cn } from "lib/utils/class-name";
 import { type FC } from "react";
 
 interface SortableHeadProps {
-  text: string;
+  text: string | React.ReactNode;
   id: string;
   index: number;
   columnsCount: number;
