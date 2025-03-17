@@ -22,7 +22,8 @@ import { useRouter } from "next/navigation";
 
 export const useDatafeed = (symbol: string) => {
   const router = useRouter();
-  const showEmptyBars = useUserSettings((s) => s.showEmptyBars);
+  // Use a stable getter function for `showEmptyBars` lest the entire chart re-render on toggle.
+  const getShowEmptyBars = useUserSettings((s) => s.getShowEmptyBars);
   const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
@@ -48,7 +49,7 @@ export const useDatafeed = (symbol: string) => {
         // If `has_empty_bars` has any value, check if it's `true`.
         // Otherwise, use `showEmptyBars`, the value from local storage.
         const isTruthy = !!has_empty_bars;
-        const emptyBars = isTruthy ? has_empty_bars === "true" : showEmptyBars;
+        const emptyBars = isTruthy ? has_empty_bars === "true" : getShowEmptyBars();
 
         const { primarySymbol, secondarySymbol } = decodeSymbolsForChart(baseChartSymbol);
         // Navigate to a different page if there's only one symbol and it doesn't match the initial
@@ -164,13 +165,14 @@ export const useDatafeed = (symbol: string) => {
       },
     }),
     [
-      getRegisteredMarketMap, // Stable reference to a zustand function.
-      setLatestBars, // Stable reference to a zustand function.
-      subscribeToPeriod, // Stable reference to a zustand function.
-      unsubscribeFromPeriod, // Stable reference to a zustand function.
-      getMeleeMap, // Stable reference to a zustand function.
+      // All the functions below are stable references to zustand functions.
+      getRegisteredMarketMap,
+      setLatestBars,
+      subscribeToPeriod,
+      unsubscribeFromPeriod,
+      getMeleeMap,
+      getShowEmptyBars,
       symbol,
-      showEmptyBars,
       router,
     ]
   );
