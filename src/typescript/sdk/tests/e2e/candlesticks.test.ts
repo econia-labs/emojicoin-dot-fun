@@ -79,7 +79,7 @@ describe("ensures arena candlesticks work", () => {
         .eq("market_id", marketID)
         .single()
         .then((r) => r.data)
-        .then((r) => toMarketLatestStateEventModel(r));
+        .then(toMarketLatestStateEventModel);
     };
 
     await refreshCandlesticksAndStateData();
