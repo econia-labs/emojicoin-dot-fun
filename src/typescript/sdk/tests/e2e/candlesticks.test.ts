@@ -32,10 +32,10 @@ const expectEqualOHLCV = (
   fromDb: CandlestickModel,
   calculated: { open: Big; high: Big; low: Big; close: Big; volume: bigint }
 ) => {
-  expect(fromDb.lowPrice.eq(calculated.low.round(21))).toBe(true);
-  expect(fromDb.highPrice.eq(calculated.high.round(21))).toBe(true);
-  expect(fromDb.openPrice.eq(calculated.open.round(21))).toBe(true);
-  expect(fromDb.closePrice.eq(calculated.close.round(21))).toBe(true);
+  expect(fromDb.lowPrice.toString()).toEqual(calculated.low.round(21).toString());
+  expect(fromDb.highPrice.toString()).toEqual(calculated.high.round(21).toString());
+  expect(fromDb.openPrice.toString()).toEqual(calculated.open.round(21).toString());
+  expect(fromDb.closePrice.toString()).toEqual(calculated.close.round(21).toString());
   expect(fromDb.volume).toEqual(calculated.volume);
 };
 
