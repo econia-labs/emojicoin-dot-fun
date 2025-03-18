@@ -10,7 +10,7 @@ export const GET = async (req: Request) => {
   const params = Object.fromEntries(searchParams.entries());
   const { page, sender, limit, marketID, orderBy, symbolEmojis } = GetTradesSchema.parse(params);
   if (!sender && !marketID && !symbolEmojis) {
-    return new Response("At least one of address, marketID or symbolEmojis is required", {
+    return new NextResponse("At least one of address, marketID or symbolEmojis is required", {
       status: 400,
     });
   }
@@ -24,5 +24,5 @@ export const GET = async (req: Request) => {
     symbolEmojis,
   });
 
-  return new Response(stringifyJSON(swaps));
+  return new NextResponse(stringifyJSON(swaps));
 };
