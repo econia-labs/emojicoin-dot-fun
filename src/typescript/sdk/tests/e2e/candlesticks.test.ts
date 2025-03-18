@@ -1,4 +1,3 @@
-import type Big from "big.js";
 import {
   ArenaPeriod,
   calculateCurvePrice,
@@ -30,12 +29,12 @@ const waitForNew15sPeriodBoundary = async () => {
 
 const expectEqualOHLCV = (
   fromDb: CandlestickModel,
-  calculated: { open: Big; high: Big; low: Big; close: Big; volume: bigint }
+  calculated: { open: number; high: number; low: number; close: number; volume: bigint }
 ) => {
-  expect(fromDb.lowPrice.toString()).toEqual(calculated.low.round(21).toString());
-  expect(fromDb.highPrice.toString()).toEqual(calculated.high.round(21).toString());
-  expect(fromDb.openPrice.toString()).toEqual(calculated.open.round(21).toString());
-  expect(fromDb.closePrice.toString()).toEqual(calculated.close.round(21).toString());
+  expect(fromDb.lowPrice).toEqual(calculated.low);
+  expect(fromDb.highPrice).toEqual(calculated.high);
+  expect(fromDb.openPrice).toEqual(calculated.open);
+  expect(fromDb.closePrice).toEqual(calculated.close);
   expect(fromDb.volume).toEqual(calculated.volume);
 };
 
@@ -90,7 +89,7 @@ describe("ensures arena candlesticks work", () => {
     expect(state.lastSwap.avgExecutionPriceQ64).toEqual(0n);
     expect(state.lastSwap.quoteVolume).toEqual(0n);
 
-    const firstPrice = calculateCurvePrice(state.state);
+    const firstPrice = calculateCurvePrice(state.state).toNumber();
 
     let firstCandlestick = {
       open: firstPrice,
@@ -101,12 +100,12 @@ describe("ensures arena candlesticks work", () => {
     };
 
     const updateFirstCandlestickOHLCV = () => {
-      const price = calculateCurvePrice(state.state);
+      const price = calculateCurvePrice(state.state).toNumber();
       firstCandlestick = {
         open: firstCandlestick.open,
         close: price,
-        low: firstCandlestick.low.lt(price) ? firstCandlestick.low : price,
-        high: firstCandlestick.high.gt(price) ? firstCandlestick.high : price,
+        low: Math.min(firstCandlestick.low, price),
+        high: Math.max(firstCandlestick.high, price),
         volume: firstCandlestick.volume + state.lastSwap.quoteVolume,
       };
     };
@@ -154,7 +153,7 @@ describe("ensures arena candlesticks work", () => {
     await waitForProcessor(await emojicoin.buy(account, emojis[0], ONE_APT_BIGINT));
     await refreshCandlesticksAndStateData();
 
-    const newPrice = calculateCurvePrice(state.state);
+    const newPrice = calculateCurvePrice(state.state).toNumber();
     // Use a fresh candlestick since a new period boundary has started.
     const secondCandlestick = {
       open: newPrice,
