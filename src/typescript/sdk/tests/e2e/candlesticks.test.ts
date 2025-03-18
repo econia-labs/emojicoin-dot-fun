@@ -1,3 +1,5 @@
+// cspell:word OHLCV
+
 import {
   ArenaPeriod,
   calculateCurvePrice,
