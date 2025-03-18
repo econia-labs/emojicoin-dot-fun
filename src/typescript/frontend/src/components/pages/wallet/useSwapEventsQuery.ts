@@ -21,9 +21,9 @@ export const useSwapEventsQuery = (args: z.input<typeof GetTradesSchema>, disabl
         return parseJSON<SwapEvent[]>(await r.text());
       }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage?.length === LIMIT ? allPages.length + 1 : undefined,
-    //Disable the query when neither sender nor marketID is provided
+    getNextPageParam: (lastPageResponse, allPageResponses) =>
+      lastPageResponse?.length === LIMIT ? allPageResponses.length + 1 : undefined,
+    // Disable the query when neither sender nor marketID is provided
     enabled: !disabled && (!!args.sender || !!args.marketID),
   });
 
