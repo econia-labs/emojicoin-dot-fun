@@ -13,10 +13,10 @@ import { toNominal } from "@sdk/utils";
 
 export type Bar = {
   time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
+  open: Big;
+  high: Big;
+  low: Big;
+  close: Big;
   volume: number;
 };
 
@@ -32,10 +32,10 @@ export const periodicStateTrackerToLatestBar = (
   const { startTime } = tracker;
   return {
     time: Big(startTime.toString()).div(1000).toNumber(),
-    open: q64ToBig(tracker.openPriceQ64).toNumber(),
-    high: q64ToBig(tracker.highPriceQ64).toNumber(),
-    low: q64ToBig(tracker.lowPriceQ64).toNumber(),
-    close: q64ToBig(tracker.closePriceQ64).toNumber(),
+    open: q64ToBig(tracker.openPriceQ64),
+    high: q64ToBig(tracker.highPriceQ64),
+    low: q64ToBig(tracker.lowPriceQ64),
+    close: q64ToBig(tracker.closePriceQ64),
     volume: toNominal(tracker.volumeQuote),
     period: rawPeriodToEnum(tracker.period),
     nonce,
@@ -63,10 +63,10 @@ export function toBar(event: PeriodicStateEventModel | ArenaCandlestickModel): B
   return isPeriodicStateEventModel(event)
     ? {
         time: Number(event.periodicMetadata.startTime / 1000n),
-        open: q64ToBig(event.periodicState.openPriceQ64).toNumber(),
-        high: q64ToBig(event.periodicState.highPriceQ64).toNumber(),
-        low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
-        close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
+        open: q64ToBig(event.periodicState.openPriceQ64),
+        high: q64ToBig(event.periodicState.highPriceQ64),
+        low: q64ToBig(event.periodicState.lowPriceQ64),
+        close: q64ToBig(event.periodicState.closePriceQ64),
         volume: toNominal(event.periodicState.volumeQuote),
       }
     : {
@@ -82,10 +82,10 @@ export function toBar(event: PeriodicStateEventModel | ArenaCandlestickModel): B
 export const createBarFromSwap = (
   event: SwapEventModel,
   period: Period,
-  previousClose?: number
+  previousClose?: Big
 ): LatestBar => {
   const { swap, market } = event;
-  const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
+  const price = q64ToBig(swap.avgExecutionPriceQ64);
   const periodStartTime = getPeriodStartTimeFromTime(market.time, period);
   return {
     time: Number(periodStartTime / 1000n),
@@ -103,11 +103,11 @@ export const createBarFromSwap = (
 
 export const createBarFromPeriodicState = (
   event: PeriodicStateEventModel,
-  previousClose?: number
+  previousClose?: Big
 ): LatestBar => {
   const { market, periodicMetadata, periodicState } = event;
   const { period } = periodicMetadata;
-  const price = q64ToBig(periodicState.closePriceQ64).toNumber();
+  const price = q64ToBig(periodicState.closePriceQ64);
   return {
     time: periodEnumToRawDuration(period) / 1000,
     // Only use previousClose if it's a truthy value, otherwise, new bars that follow bars with no

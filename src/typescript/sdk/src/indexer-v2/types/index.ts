@@ -254,10 +254,10 @@ const toArenaCandlestickFromDatabase = (
   volume: BigInt(data.volume),
   period: toArenaPeriod(data.period),
   startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
-  openPrice: Number(data.open_price),
-  closePrice: Number(data.close_price),
-  highPrice: Number(data.high_price),
-  lowPrice: Number(data.low_price),
+  openPrice: Big(data.open_price),
+  closePrice: Big(data.close_price),
+  highPrice: Big(data.high_price),
+  lowPrice: Big(data.low_price),
   nSwaps: BigInt(data.n_swaps),
 });
 

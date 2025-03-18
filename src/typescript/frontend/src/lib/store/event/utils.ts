@@ -54,11 +54,11 @@ export const handleLatestBarForSwapEvent = (
     } else if (!data.latestBar) {
       throw new Error("This should never occur. It is a type guard/hint.");
     } else if (event.market.marketNonce >= data.latestBar.nonce) {
-      const price = q64ToBig(event.swap.avgExecutionPriceQ64).toNumber();
+      const price = q64ToBig(event.swap.avgExecutionPriceQ64);
       data.latestBar.time = Number(getPeriodStartTimeFromTime(event.market.time, period) / 1000n);
       data.latestBar.close = price;
-      data.latestBar.high = Math.max(data.latestBar.high, price);
-      data.latestBar.low = Math.min(data.latestBar.low, price);
+      data.latestBar.high = data.latestBar.high.gt(price) ? data.latestBar.high : price;
+      data.latestBar.low = data.latestBar.low.lt(price) ? data.latestBar.low : price;
       data.latestBar.nonce = event.market.marketNonce;
       data.latestBar.volume += toNominal(event.swap.quoteVolume);
       // Note this results in `time order violation` errors if we set `has_empty_bars`
@@ -96,11 +96,11 @@ export const handleLatestBarForPeriodicStateEvent = (
       // hence why we use `>=` instead of just `>`.
       if (swapInTimeRange && swapEvent.market.marketNonce >= data.latestBar.nonce) {
         if (!data.latestBar) throw new Error("This should never occur. It is a type guard/hint.");
-        const price = q64ToBig(innerSwap.avgExecutionPriceQ64).toNumber();
+        const price = q64ToBig(innerSwap.avgExecutionPriceQ64);
         data.latestBar.time = Number(getPeriodStartTimeFromTime(innerMarket.time, period) / 1000n);
         data.latestBar.close = price;
-        data.latestBar.high = Math.max(data.latestBar.high, price);
-        data.latestBar.low = Math.min(data.latestBar.low, price);
+        data.latestBar.high = data.latestBar.high.gt(price) ? data.latestBar.high : price;
+        data.latestBar.low = data.latestBar.low.lt(price) ? data.latestBar.low : price;
         data.latestBar.nonce = innerMarket.marketNonce;
         data.latestBar.volume += toNominal(innerSwap.quoteVolume);
       }

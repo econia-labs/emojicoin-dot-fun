@@ -100,8 +100,8 @@ export const handleLatestBarForArenaCandlestick = (
     current.latestBar = {
       time: model.startTime.getTime(),
       open: current.latestBar?.open ?? model.openPrice,
-      high: Math.max(current.latestBar?.high, model.highPrice),
-      low: Math.min(current.latestBar?.low, model.lowPrice),
+      high: current.latestBar?.high.gt(model.highPrice) ? current.latestBar?.high : model.highPrice,
+      low: current.latestBar?.low.lt(model.lowPrice) ? current.latestBar?.low : model.lowPrice,
       close: model.closePrice,
       volume: (current.latestBar.volume += toNominal(model.volume)),
       period,

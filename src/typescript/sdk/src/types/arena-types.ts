@@ -173,10 +173,10 @@ export type ArenaTypes = {
     version: bigint;
     period: ArenaPeriod;
     startTime: Date;
-    openPrice: number;
-    closePrice: number;
-    highPrice: number;
-    lowPrice: number;
+    openPrice: Big;
+    closePrice: Big;
+    highPrice: Big;
+    lowPrice: Big;
     volume: bigint;
     nSwaps: bigint;
   };
