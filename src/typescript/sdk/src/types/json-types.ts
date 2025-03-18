@@ -201,6 +201,7 @@ type JsonTypes = ArenaJsonTypes & {
     time: Uint64String;
     market_nonce: Uint64String;
     swapper: AccountAddressString;
+    sender: AccountAddressString;
     input_amount: Uint64String;
     is_sell: boolean;
     integrator: AccountAddressString;
