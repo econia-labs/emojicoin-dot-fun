@@ -19,5 +19,5 @@ export const addSearchParams = (url: string, searchParams: SearchParamsRecord) =
     }
   });
 
-  return `${url}?${search.toString()}`;
+  return search.size ? `${url}?${search.toString()}` : url;
 };
