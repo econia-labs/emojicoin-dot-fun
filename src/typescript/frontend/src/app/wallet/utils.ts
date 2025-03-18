@@ -16,12 +16,12 @@ type PossibleResponses =
   | {
       // Input resolves to a valid address but has no corresponding ANS name.
       address: `0x${string}` | `0x${string}...`;
-      name?: undefined;
+      name: undefined;
     }
   | {
       // Input is invalid. It's not an address or an Aptos name.
-      address?: undefined;
-      name?: undefined;
+      address: undefined;
+      name: undefined;
     };
 
 const resolveOwnerName = async (input: string): Promise<PossibleResponses> => {
