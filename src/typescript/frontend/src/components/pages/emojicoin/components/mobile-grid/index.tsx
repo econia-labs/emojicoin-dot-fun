@@ -35,12 +35,7 @@ const MobileGrid = (props: GridProps) => {
         {DISPLAY_HEADER_ABOVE_CHART && <StyledMobileContentHeader></StyledMobileContentHeader>}
         <StyledMobileContentInner className={HEIGHT}>
           <Suspense fallback={<Loading />}>
-            <ChartContainer
-              symbol={props.data.symbol}
-              emojis={props.data.emojis}
-              marketID={props.data.marketID.toString()}
-              marketAddress={props.data.marketAddress}
-            />
+            <ChartContainer symbol={props.data.symbol} className="relative w-full h-[420px]" />
           </Suspense>
         </StyledMobileContentInner>
       </StyledMobileContentBlock>

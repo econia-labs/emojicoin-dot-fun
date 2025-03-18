@@ -59,7 +59,7 @@ export function getPeriodStartTime(
   event: Types["SwapEvent"] | Types["StateEvent"] | Types["PeriodicStateEvent"],
   periodIn: PeriodDuration | bigint | number
 ) {
-  // All CandlestickPeriods are in microseconds.
+  // All PeriodDurations are in microseconds.
   let time: bigint;
   if (isSwapEvent(event)) {
     time = event.time;
