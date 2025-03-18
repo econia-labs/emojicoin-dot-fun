@@ -4,8 +4,7 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Explore the cult",
-  description: `Explore the emojicoin cult`,
+  title: "Wallet Portfolio",
 };
 
 export default async function WalletPage({ params }: { params: { address: string } }) {
