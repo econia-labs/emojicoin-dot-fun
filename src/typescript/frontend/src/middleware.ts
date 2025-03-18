@@ -10,6 +10,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
+const walletRegex = new RegExp(`^${ROUTES.wallet}/(.*).apt$`);
+
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
   if (pathname === ROUTES["launching-soon"]) {
@@ -28,6 +30,13 @@ export default async function middleware(request: NextRequest) {
     dexscreenerRoutes.includes(pathname)
   ) {
     return NextResponse.next();
+  }
+
+  // If path matches `/wallet/matt.apt`
+  if (walletRegex.test(pathname)) {
+    // redirect to `/wallet/matt`
+    const url = new URL(pathname.slice(0, -4), request.url);
+    return NextResponse.redirect(url);
   }
 
   // This will replace emojis in the path name with their actual text names. Since this occurs
