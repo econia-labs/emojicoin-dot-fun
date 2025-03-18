@@ -30,7 +30,7 @@ module favorites::emojicoin_dot_fun_favorites {
     has drop, key;
 
     #[view]
-    public fun favorites(user: address): vector<address> acquires FavoriteData {
+    public fun view_favorites(user: address): vector<address> acquires FavoriteData {
         if (exists<FavoriteData>(user)) {
             let favorites = borrow_global_mut<FavoriteData>(user);
             favorites.markets.keys()
@@ -131,8 +131,8 @@ module favorites::emojicoin_dot_fun_favorites {
         add_favorite(&account_1_signer, market_1_address);
         add_favorite(&account_2_signer, market_2_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
-        let account_2_favorites = favorites(ACCOUNT_2);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
+        let account_2_favorites = view_favorites(ACCOUNT_2);
 
         assert!(account_1_favorites.length() == 1);
         assert!(account_1_favorites.contains(&market_1_address));
@@ -141,16 +141,16 @@ module favorites::emojicoin_dot_fun_favorites {
 
         remove_favorite(&account_1_signer, market_1_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
-        let account_2_favorites = favorites(ACCOUNT_2);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
+        let account_2_favorites = view_favorites(ACCOUNT_2);
 
         assert!(account_1_favorites.length() == 0);
         assert!(account_2_favorites.length() == 1);
 
         remove_favorite(&account_2_signer, market_2_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
-        let account_2_favorites = favorites(ACCOUNT_2);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
+        let account_2_favorites = view_favorites(ACCOUNT_2);
 
         assert!(account_1_favorites.length() == 0);
         assert!(account_2_favorites.length() == 0);
@@ -165,7 +165,7 @@ module favorites::emojicoin_dot_fun_favorites {
 
         add_favorite(&account_1_signer, market_1_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
 
         assert!(account_1_favorites.length() == 1);
         assert!(account_1_favorites.contains(&market_1_address));
@@ -182,7 +182,7 @@ module favorites::emojicoin_dot_fun_favorites {
         add_favorite(&account_1_signer, market_1_address);
         add_favorite(&account_1_signer, market_2_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
 
         assert!(account_1_favorites.length() == 2);
         assert!(account_1_favorites.contains(&market_1_address));
@@ -211,7 +211,7 @@ module favorites::emojicoin_dot_fun_favorites {
         add_favorite(&account_1_signer, market_2_address);
         remove_favorite(&account_1_signer, market_1_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
 
         assert!(account_1_favorites.length() == 1);
         assert!(account_1_favorites.contains(&market_2_address));
@@ -228,7 +228,7 @@ module favorites::emojicoin_dot_fun_favorites {
         add_favorite(&account_1_signer, market_1_address);
         remove_favorite(&account_1_signer, market_2_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
 
         assert!(account_1_favorites.length() == 1);
         assert!(account_1_favorites.contains(&market_1_address));
@@ -244,7 +244,7 @@ module favorites::emojicoin_dot_fun_favorites {
 
         remove_favorite(&account_1_signer, market_1_address);
 
-        let account_1_favorites = favorites(ACCOUNT_1);
+        let account_1_favorites = view_favorites(ACCOUNT_1);
 
         assert!(account_1_favorites.length() == 0);
     }
