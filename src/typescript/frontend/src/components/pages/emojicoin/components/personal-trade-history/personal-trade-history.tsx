@@ -30,6 +30,7 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
         renderCell: (item) => (
           <FormattedNumber
             className={item.swap.isSell ? "text-pink" : "text-green"}
+            prefix={item.swap.isSell ? "- " : "+ "}
             value={item.swap.baseVolume}
             nominalize
           />
