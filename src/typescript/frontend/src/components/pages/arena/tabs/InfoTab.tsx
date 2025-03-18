@@ -8,12 +8,12 @@ const INFO: Info[] = [
   {
     title: "What is an emojicoin.fun melee?",
     paragraph:
-      "The emojicoin.fun arena is a dynamic trading environment where users participate " +
-      "in daily melees, each featuring two randomly selected emojicoins. A melee lasts " +
-      "for 24 hours, during which participants can trade exclusively " +
-      "between the two emojicoins with reduced fees. Users can also choose to " +
+      "An emojicoin.fun melee is a 24-hour trading event featuring two randomly " +
+      "selected emojicoins. During a melee, participants can trade exclusively " +
+      "between these two emojicoins for reduced fees. Users can also choose to " +
       '"lock in" for the full duration, receiving matched APT amounts based on ' +
-      "how early they lock in and while rewards last.",
+      "how early they lock in and while rewards last. " +
+      "The arena refers to the ongoing series of daily melees.",
   },
   {
     title: "How long does a melee last?",
