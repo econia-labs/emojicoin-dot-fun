@@ -1,6 +1,10 @@
 import { type MarketEmojiData, toMarketEmojiData } from "@sdk/emoji_data";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { type ArenaInfoModel, type ArenaModelWithMeleeID } from "@sdk/indexer-v2";
+import {
+  type ArenaCandlestickModel,
+  type ArenaInfoModel,
+  type ArenaModelWithMeleeID,
+} from "@sdk/indexer-v2";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,
@@ -8,6 +12,11 @@ import {
   isArenaMeleeModel,
   isArenaSwapModel,
 } from "@sdk/types/arena-types";
+import { toNominal } from "@sdk/utils";
+import { type WritableDraft } from "immer";
+import { toBar } from "../event/candlestick-bars";
+import { callbackClonedLatestBarIfSubscribed } from "../utils";
+import { type MeleeState } from "./store";
 
 export type ArenaMarketPair = {
   market0: {
@@ -67,4 +76,37 @@ export const getMeleeIDFromArenaModel = (model: ArenaModelWithMeleeID): bigint =
     return model.meleeID;
   }
   throw new Error("Invalid arena model for `getMeleeID`: ", model);
+};
+
+/**
+ * Arena candlestick model data is already validated by the db, so use the data if it's newer than
+ * what's in the current latest bar.
+ */
+export const handleLatestBarForArenaCandlestick = (
+  melee: WritableDraft<MeleeState>,
+  model: ArenaCandlestickModel
+) => {
+  // Arena candlesticks are emitted once per transaction block, so the comparator nonce can just be
+  // the candlestick's latest transaction version.
+  const { period, version: nonce } = model;
+  const current = melee[period];
+  if (!current.latestBar) {
+    current.latestBar = {
+      ...toBar(model),
+      period,
+      nonce,
+    };
+  } else if (current.latestBar.nonce < nonce) {
+    current.latestBar = {
+      time: model.startTime.getTime(),
+      open: current.latestBar?.open ?? model.openPrice,
+      high: Math.max(current.latestBar?.high, model.highPrice),
+      low: Math.min(current.latestBar?.low, model.lowPrice),
+      close: model.closePrice,
+      volume: (current.latestBar.volume += toNominal(model.volume)),
+      period,
+      nonce,
+    };
+    callbackClonedLatestBarIfSubscribed(current.callback, current.latestBar);
+  }
 };

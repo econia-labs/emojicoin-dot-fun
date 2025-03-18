@@ -1,26 +1,15 @@
 import { Period, NON_ARENA_PERIODS, periodEnumToRawDuration } from "@sdk/const";
-import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
-import {
-  type EventState,
-  type CandlestickData,
-  type MarketEventStore,
-  type MarketStoreMetadata,
-} from "./types";
+import { type EventState, type MarketEventStore, type MarketStoreMetadata } from "./types";
 import {
   type PeriodicStateEventModel,
   type SwapEventModel,
   type EventModelWithMarket,
 } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
+import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";
 import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
-import { type ArenaState, createInitialMeleeState } from "../arena/store";
-
-export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
-  callback: undefined,
-  latestBar: undefined,
-});
+import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } from "../utils";
 
 export const createInitialMarketState = (
   marketMetadata: MarketStoreMetadata
@@ -46,12 +35,6 @@ export const ensureMarketInStore = (
   const key = market.symbolData.symbol;
   if (!state.markets.has(key)) {
     state.markets.set(key, createInitialMarketState(market));
-  }
-};
-
-export const ensureMeleeInStore = (state: WritableDraft<ArenaState>, meleeID: bigint) => {
-  if (!state.melees.has(meleeID)) {
-    state.melees.set(meleeID, createInitialMeleeState());
   }
 };
 
@@ -126,32 +109,6 @@ export const handleLatestBarForPeriodicStateEvent = (
     // Note this will result in a time order violation if we set the `has_empty_bars`
     // value to `true` in the `LibrarySymbolInfo` configuration.
     callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar);
-  }
-};
-
-/**
- * A helper function to clone the latest bar and call the callback with it. This is necessary
- * because the TradingView SubscribeBarsCallback function (cb) will mutate the object passed to it.
- * This for some reason causes issues with zustand, so we have this function as a workaround.
- * @param cb the SubscribeBarsCallback to call, from the TradingView charting API
- * @param latestBar the latest bar to clone and pass to the callback. We reduce the scope/type to
- * only the fields that the callback needs, aka `Bar`, a subset of `LatestBar`.
- */
-export const callbackClonedLatestBarIfSubscribed = (
-  cb: SubscribeBarsCallback | undefined,
-  latestBar: WritableDraft<LatestBar>
-) => {
-  if (cb) {
-    cb({
-      // NOTE: Do _not_ alter or normalize any data here- this is solely to clone the bar data.
-      // The data should already be in its end format by the time it gets to this function.
-      time: latestBar.time,
-      open: latestBar.open,
-      high: latestBar.high,
-      low: latestBar.low,
-      close: latestBar.close,
-      volume: latestBar.volume,
-    });
   }
 };
 

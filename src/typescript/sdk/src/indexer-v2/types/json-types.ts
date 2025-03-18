@@ -187,6 +187,7 @@ type MarketRegistrationEventData = {
 
 type SwapEventData = {
   swapper: AccountAddressString;
+  sender: AccountAddressString;
   integrator: AccountAddressString;
   integrator_fee: Uint64String;
   input_amount: Uint64String;
@@ -566,7 +567,6 @@ export type DatabaseJsonType = {
   [TableName.ArenaPosition]: ArenaPositionData;
   [TableName.ArenaInfo]: ArenaInfoData;
   [TableName.ArenaCandlesticks]: ArenaCandlestickData;
-
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
   [TableName.ArenaLeaderboardHistoryWithArenaInfo]: Flatten<ArenaLeaderboardHistoryWithArenaInfoData>;
