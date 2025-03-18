@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${owner}'s wallet`,
-    description: `👀 peep what's inside ${owner}'s wallet— are they stacking, trading, or just vibing?`,
+    description: `👀 Peep what's inside ${owner}'s wallet— are they stacking, trading, or just vibing?`,
   };
 }
 export default async function WalletPage({ params }: Props) {
