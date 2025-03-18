@@ -12,8 +12,8 @@ const INFO: Info[] = [
       "in daily melees, each featuring two randomly selected emojicoins. A melee lasts " +
       "for 24 hours, during which participants can trade exclusively " +
       "between the two emojicoins with reduced fees. Users can also choose to " +
-      "\"lock in\" for the full duration, receiving matched APT amounts based on " +
-      "how early they lock in and while rewards last."
+      '"lock in" for the full duration, receiving matched APT amounts based on ' +
+      "how early they lock in and while rewards last.",
   },
   {
     title: "How long does a melee last?",
@@ -35,7 +35,7 @@ const INFO: Info[] = [
       "during the entering process. The matched amount percentage decreases" +
       "over time for each melee, so locking in earlier yields a higher matched" +
       "deposit amount. Deposits are only matched if there are rewards remaining." +
-      "Once locked in, you can only exit when the melee ends or by \"tapping out\"." +
+      'Once locked in, you can only exit when the melee ends or by "tapping out".' +
       "Tapping out means exiting before the melee ends by returning the APT amount" +
       "you were matched upon deposit. For example, let's say you enter " +
       "a melee with 2 APT, and you get matched 1 APT, and 3 APT gets you " +
@@ -50,7 +50,7 @@ const INFO: Info[] = [
     paragraph:
       "Trades you make in the arena incur 50% less fees than manually swapping between" +
       "two emojicoins individually. Your profits and losses are tracked as percentages for" +
-      "each individual melee you participate in. The arena's \"lock in\" feature is a" +
+      'each individual melee you participate in. The arena\'s "lock in" feature is a' +
       "rewards mechanism in which your APT deposits are matched up to a certain amount.",
   },
   {
