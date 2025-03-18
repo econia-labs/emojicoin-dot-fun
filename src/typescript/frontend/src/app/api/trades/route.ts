@@ -11,9 +11,12 @@ export const GET = async (req: Request) => {
   const params = Object.fromEntries(searchParams.entries());
   const { page, sender, limit, marketID, orderBy, symbolEmojis } = GetTradesSchema.parse(params);
   if (!sender && !marketID && !symbolEmojis) {
-    return new NextResponse("At least one of address, marketID or symbolEmojis is required", {
-      status: 400,
-    });
+    return NextResponse.json(
+      { error: "At least one of address, marketID or symbolEmojis is required" },
+      {
+        status: 400,
+      }
+    );
   }
 
   const swaps = await fetchSwapEvents({
