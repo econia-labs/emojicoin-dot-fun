@@ -5,7 +5,7 @@ export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "cult",
-  description: `The emojicoin cult awaits...🩸`,
+  description: `The emojicoin cult awaits...👹`,
 };
 
 export default function CultPage() {
