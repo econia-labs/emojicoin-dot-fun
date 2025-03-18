@@ -1,6 +1,7 @@
 import { type Uint64String, type AccountAddressString } from "../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
+  CANDLESTICK_NAME,
   EVENT_NAMES,
   type Flatten,
   toCumulativeStats,
@@ -498,6 +499,7 @@ export type Market1MPeriodsInLastDayModel = ReturnType<typeof toMarket1MPeriodsI
 export type MarketStateModel = ReturnType<typeof toMarketStateModel>;
 export type ProcessorStatusModel = ReturnType<typeof toProcessorStatus>;
 export type PriceFeedModel = ReturnType<typeof toPriceFeed>;
+export type CandlestickModel = ReturnType<typeof toCandlestickModel>;
 export type ArenaMeleeModel = ReturnType<typeof toArenaMeleeModel>;
 export type ArenaEnterModel = ReturnType<typeof toArenaEnterModel>;
 export type ArenaExitModel = ReturnType<typeof toArenaExitModel>;
@@ -644,6 +646,11 @@ export const GuidGetters = {
     eventName: EVENT_NAMES.State,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
   }),
+  candlestick: ({ market_id, start_time, period }: DatabaseJsonType["candlesticks"]) => ({
+    // Not a real contract event, but used to classify the type of data.
+    eventName: CANDLESTICK_NAME,
+    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
+  }),
   arenaEnterEvent: ({
     melee_id,
     transaction_version: version,
@@ -777,6 +784,21 @@ export const toMarketStateModel = (data: DatabaseJsonType["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
   dailyBaseVolume: BigInt(data.daily_base_volume),
+});
+
+const toCandlestickFromDatabase = (
+  data: DatabaseStructType["Candlestick"]
+): Types["Candlestick"] => ({
+  marketID: BigInt(data.market_id),
+  version: BigInt(data.last_transaction_version),
+  volume: BigInt(data.volume),
+  period: toArenaPeriod(data.period),
+  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  openPrice: Number(data.open_price),
+  closePrice: Number(data.close_price),
+  highPrice: Number(data.high_price),
+  lowPrice: Number(data.low_price),
+  symbolEmojis: data.symbol_emojis,
 });
 
 export const toTransactionMetadataForUserLiquidityPools = (
@@ -922,6 +944,11 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
   ...toPriceFeedData(data),
 });
 
+export const toCandlestickModel = (data: DatabaseJsonType["candlesticks"]) => ({
+  ...toCandlestickFromDatabase(data),
+  ...GuidGetters.candlestick(data),
+});
+
 export const toAggregateMarketState = (data: DatabaseJsonType["aggregate_market_state"]) => ({
   lastEmojicoinTransactionVersion: BigInt(data.last_emojicoin_transaction_version),
   cumulativeChatMessages: BigInt(data.cumulative_chat_messages),
@@ -958,6 +985,7 @@ export const DatabaseTypeConverter = {
   [TableName.MarketState]: toMarketStateModel,
   [TableName.ProcessorStatus]: toProcessorStatus,
   [TableName.PriceFeed]: toPriceFeed,
+  [TableName.Candlesticks]: toCandlestickModel,
   [TableName.ArenaEnterEvents]: toArenaEnterModel,
   [TableName.ArenaMeleeEvents]: toArenaMeleeModel,
   [TableName.ArenaExitEvents]: toArenaExitModel,
@@ -987,6 +1015,7 @@ export type DatabaseModels = {
   [TableName.MarketState]: MarketStateModel;
   [TableName.ProcessorStatus]: ProcessorStatusModel;
   [TableName.PriceFeed]: PriceFeedModel;
+  [TableName.Candlesticks]: CandlestickModel;
   [TableName.ArenaMeleeEvents]: ArenaMeleeModel;
   [TableName.ArenaEnterEvents]: ArenaEnterModel;
   [TableName.ArenaExitEvents]: ArenaExitModel;
@@ -1019,6 +1048,7 @@ export type BrokerEventModels =
   | DatabaseModels[TableName.MarketLatestStateEvent]
   | DatabaseModels[TableName.LiquidityEvents]
   | DatabaseModels[TableName.GlobalStateEvents]
+  | DatabaseModels[TableName.Candlesticks]
   | DatabaseModels[TableName.ArenaEnterEvents]
   | DatabaseModels[TableName.ArenaMeleeEvents]
   | DatabaseModels[TableName.ArenaExitEvents]
