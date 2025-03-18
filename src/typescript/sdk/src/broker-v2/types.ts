@@ -10,7 +10,7 @@ import {
   TableName,
 } from "../indexer-v2/types/json-types";
 import { type ARENA_CANDLESTICK_NAME } from "../types/arena-types";
-import { type AnyNumberString } from "../types/types";
+import { type CANDLESTICK_NAME, type AnyNumberString } from "../types/types";
 
 export type BrokerEvent = SubscribableBrokerEvents | BrokerArenaEvent;
 
@@ -21,7 +21,8 @@ export type SubscribableBrokerEvents =
   | "MarketLatestState"
   | "GlobalState"
   | "PeriodicState"
-  | "MarketRegistration";
+  | "MarketRegistration"
+  | typeof CANDLESTICK_NAME;
 
 export type BrokerArenaEvent =
   | "ArenaEnter"
@@ -38,6 +39,7 @@ const MarketLatestState = TableName.MarketLatestStateEvent;
 const GlobalState = TableName.GlobalStateEvents;
 const PeriodicState = TableName.PeriodicStateEvents;
 const MarketRegistration = TableName.MarketRegistrationEvents;
+const Candlestick = TableName.Candlesticks;
 const ArenaEnter = TableName.ArenaEnterEvents;
 const ArenaExit = TableName.ArenaExitEvents;
 const ArenaMelee = TableName.ArenaMeleeEvents;
@@ -51,6 +53,7 @@ type MarketLatestStateType = DatabaseJsonType[typeof MarketLatestState];
 type GlobalStateType = DatabaseJsonType[typeof GlobalState];
 type PeriodicStateType = DatabaseJsonType[typeof PeriodicState];
 type MarketRegistrationType = DatabaseJsonType[typeof MarketRegistration];
+type CandlestickType = DatabaseJsonType[typeof Candlestick];
 type ArenaEnterType = DatabaseJsonType[typeof ArenaEnter];
 type ArenaExitType = DatabaseJsonType[typeof ArenaExit];
 type ArenaMeleeType = DatabaseJsonType[typeof ArenaMelee];
@@ -66,6 +69,7 @@ export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => Brok
   GlobalState: (d) => DatabaseTypeConverter[GlobalState](d as GlobalStateType),
   PeriodicState: (d) => DatabaseTypeConverter[PeriodicState](d as PeriodicStateType),
   MarketRegistration: (d) => DatabaseTypeConverter[MarketRegistration](d as MarketRegistrationType),
+  Candlestick: (d) => DatabaseTypeConverter[Candlestick](d as CandlestickType),
   ArenaEnter: (d) => DatabaseTypeConverter[ArenaEnter](d as ArenaEnterType),
   ArenaExit: (d) => DatabaseTypeConverter[ArenaExit](d as ArenaExitType),
   ArenaMelee: (d) => DatabaseTypeConverter[ArenaMelee](d as ArenaMeleeType),
