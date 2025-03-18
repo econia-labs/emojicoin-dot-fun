@@ -23,9 +23,9 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
   const emojis = useEmojiPicker((s) => s.emojis);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
 
+  // Replace the address in the router URL if the name is defined.
   const router = useRouter();
   const pathname = usePathname();
-
   useEffectOnce(() => {
     if (name && name !== address && pathname.endsWith(address)) {
       router.replace(`${ROUTES.wallet}/${name}`);
