@@ -8,7 +8,7 @@ import {
   type Trigger,
   type EMOJICOIN_DOT_FUN_MODULE_NAME,
   rawTriggerToEnum,
-  ArenaPeriod,
+  type ArenaPeriod,
 } from "../const";
 import {
   type AnyEmojicoinJSONEvent,
