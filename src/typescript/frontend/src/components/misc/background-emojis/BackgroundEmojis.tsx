@@ -1,8 +1,8 @@
 "use client";
 
 import { getRandomSymbolEmoji } from "@sdk/emoji_data";
-import React, { useMemo } from "react";
-import { useWindowScroll, useWindowSize } from "react-use";
+import React, { useEffect, useMemo, useState } from "react";
+import { useWindowSize } from "react-use";
 import { Emoji } from "utils/emoji";
 
 const MemoizedRandomEmoji = React.memo(OneRandomEmoji);
@@ -23,8 +23,8 @@ function OneRandomEmoji({ emoji }: { emoji: string }) {
         marginTop: `${mt}%`,
         marginLeft: `${ml}%`,
         transform: `rotate(${rotate}deg)`,
-        filter: "blur(17px)",
-        opacity: "0.4",
+        filter: "blur(7px)",
+        opacity: 0.1,
       }}
     >
       <Emoji emojis={emoji} />
@@ -34,12 +34,21 @@ function OneRandomEmoji({ emoji }: { emoji: string }) {
 
 const CHANCE = 1 / 8;
 const maybeRandomEmoji = () => (Math.random() < CHANCE ? getRandomSymbolEmoji().emoji : undefined);
-
-const PARALLAX_STRENGTH = 0.2;
+const PARALLAX_STRENGTH = 0.3;
 
 export function BackgroundEmojis() {
   const { width, height } = useWindowSize();
-  const { y: scrollY } = useWindowScroll();
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => setScrollY((e.target as HTMLElement).scrollTop);
+
+    // The page doesn't actually scroll on the `window`, it scrolls inside the content-wrapper.
+    const doc = document.getElementById("content-wrapper");
+
+    doc?.addEventListener("scroll", handleScroll);
+    return () => doc?.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { rows, cols, emojis } = useMemo(() => {
     // 1x the width, 3x the height, based on the element dimensions. (h-300% w-100%)
@@ -60,7 +69,7 @@ export function BackgroundEmojis() {
         style={{
           gridTemplateRows: `repeat(${rows}, 1fr)`,
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          perspective: "20px",
+          perspective: "1000px",
           translate: `0 ${scrollY * -PARALLAX_STRENGTH}px`,
         }}
       >
