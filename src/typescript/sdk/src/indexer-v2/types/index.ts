@@ -1,6 +1,7 @@
 import { type Uint64String, type AccountAddressString } from "../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
+  CANDLESTICK_NAME,
   EVENT_NAMES,
   type Flatten,
   toCumulativeStats,
@@ -643,10 +644,10 @@ export const GuidGetters = {
     eventName: EVENT_NAMES.State,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
   }),
-  candlestick: ({ market_id, start_time, period }: DatabaseJsonType["normal_candlesticks"]) => ({
+  candlestick: ({ market_id, start_time, period }: DatabaseJsonType["candlesticks"]) => ({
     // Not a real contract event, but used to classify the type of data.
-    eventName: ARENA_CANDLESTICK_NAME,
-    guid: `${ARENA_CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
+    eventName: CANDLESTICK_NAME,
+    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
   }),
   arenaEnterEvent: ({
     melee_id,
@@ -791,10 +792,10 @@ const toCandlestickFromDatabase = (
   volume: BigInt(data.volume),
   period: toArenaPeriod(data.period),
   startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
-  openPrice: Big(data.open_price),
-  closePrice: Big(data.close_price),
-  highPrice: Big(data.high_price),
-  lowPrice: Big(data.low_price),
+  openPrice: Number(data.open_price),
+  closePrice: Number(data.close_price),
+  highPrice: Number(data.high_price),
+  lowPrice: Number(data.low_price),
   symbolEmojis: data.symbol_emojis,
 });
 
@@ -941,7 +942,7 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
   ...toPriceFeedData(data),
 });
 
-export const toCandlestickModel = (data: DatabaseJsonType["normal_candlesticks"]) => ({
+export const toCandlestickModel = (data: DatabaseJsonType["candlesticks"]) => ({
   ...toCandlestickFromDatabase(data),
   ...GuidGetters.candlestick(data),
 });

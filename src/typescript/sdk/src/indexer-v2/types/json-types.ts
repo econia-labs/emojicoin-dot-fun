@@ -454,7 +454,7 @@ export enum TableName {
   MarketState = "market_state",
   ProcessorStatus = "processor_status",
   PriceFeed = "price_feed",
-  Candlesticks = "normal_candlesticks",
+  Candlesticks = "candlesticks",
   ArenaMeleeEvents = "arena_melee_events",
   ArenaEnterEvents = "arena_enter_events",
   ArenaExitEvents = "arena_exit_events",

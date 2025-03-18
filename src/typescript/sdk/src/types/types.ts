@@ -30,6 +30,8 @@ const strToBigInt = (data: string): bigint => BigInt(data);
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
 
+export const CANDLESTICK_NAME = "Candlestick";
+
 export const EVENT_NAMES = {
   GlobalState: "GlobalState",
   PeriodicState: "PeriodicState",
@@ -385,10 +387,10 @@ export type Types = ArenaTypes & {
     version: bigint;
     period: ArenaPeriod;
     startTime: Date;
-    openPrice: Big;
-    closePrice: Big;
-    highPrice: Big;
-    lowPrice: Big;
+    openPrice: number;
+    closePrice: number;
+    highPrice: number;
+    lowPrice: number;
     volume: bigint;
     symbolEmojis: SymbolEmoji[];
   };
