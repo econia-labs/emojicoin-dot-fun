@@ -3,12 +3,11 @@ export type ValidAptosName = string & {
 };
 
 /**
- * The jist of this is:
- *  - Only lowercase characters `a-z`, digits `0-9`, or a hyphen `-`
- *  - Doesn't start with a hyphen
- *  - Doesn't end with a hyphen
- *  - At least 3 characters
- *  - At most 63 characters
+ * - Only lowercase characters `a-z`, digits `0-9`, or a hyphen `-`
+ * - Doesn't start with a hyphen
+ * - Doesn't end with a hyphen
+ * - At least 3 characters
+ * - At most 63 characters
  */
 const APTOS_NAME_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
 
