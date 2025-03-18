@@ -34,9 +34,7 @@ const DesktopGrid = (props: GridProps) => {
               <Suspense fallback={<Loading numEmojis={20} />}>
                 <ChartContainer
                   symbol={props.data.symbolData.symbol}
-                  emojis={props.data.emojis}
-                  marketID={props.data.marketID.toString()}
-                  marketAddress={props.data.marketView.metadata.marketAddress}
+                  className="relative w-full h-[420px]"
                 />
               </Suspense>
             </StyledBlockWrapper>

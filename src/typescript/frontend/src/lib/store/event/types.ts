@@ -11,6 +11,7 @@ import { type WritableDraft } from "immer";
 import { type ClientState, type ClientActions } from "../websocket/store";
 import { type ArenaActions, type ArenaState } from "../arena/store";
 import { type Flatten } from "@sdk-types";
+import { type ArenaChartSymbol } from "lib/chart-utils";
 
 // Aliased to avoid repeating the type names over and over.
 type Swap = DatabaseModels["swap_events"];
@@ -57,7 +58,7 @@ export type EventState = {
 };
 
 export type PeriodSubscription = {
-  marketEmojis: SymbolEmoji[];
+  symbol: string | ArenaChartSymbol;
   period: AnyPeriod;
   cb: SubscribeBarsCallback;
 };
@@ -70,12 +71,13 @@ export type SetLatestBarsArgs = {
 export type EventActions = {
   getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
+  getMeleeMap: () => Readonly<ArenaState["meleeMap"]>;
   loadMarketStateFromServer: (states: DatabaseModels["market_state"][]) => void;
   loadEventsFromServer: (events: BrokerEventModels[]) => void;
   pushEventsFromClient: (event: BrokerEventModels[], pushToLocalStorage?: boolean) => void;
   setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => void;
-  subscribeToPeriod: ({ marketEmojis, period, cb }: PeriodSubscription) => void;
-  unsubscribeFromPeriod: ({ marketEmojis, period }: Omit<PeriodSubscription, "cb">) => void;
+  subscribeToPeriod: ({ symbol, period, cb }: PeriodSubscription) => void;
+  unsubscribeFromPeriod: ({ symbol, period }: Omit<PeriodSubscription, "cb">) => void;
 };
 
 export type EventStore = EventState & EventActions & ArenaState & ArenaActions;
