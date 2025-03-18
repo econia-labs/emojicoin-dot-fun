@@ -1,8 +1,7 @@
 "use client";
 
-import { useNameResolver } from "@hooks/use-name-resolver";
 import AptosIconBlack from "@icons/AptosBlack";
-import { formatDisplayName } from "@sdk/utils";
+import { formatDisplayName, type ValidAptosName } from "@sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
@@ -14,8 +13,8 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { type SymbolEmoji } from "@sdk/emoji_data";
 import { useState } from "react";
 
-export const WalletClientPage = ({ address }: { address: string }) => {
-  const resolvedName = useNameResolver(address);
+export const WalletClientPage = ({ address, name }: { address: string; name?: ValidAptosName }) => {
+  const resolvedName = name ?? address;
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
   const [tab, setTab] = useState<string>("portfolio");
 
