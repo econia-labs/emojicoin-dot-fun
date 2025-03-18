@@ -2,7 +2,8 @@
 
 # `emojicoin-dot-fun` favorites
 
-This package contains functions to set, get and unset favorite markets per user.
+This package contains functions to add, remove, and view favorite a user's
+favorite emojicoin markets.
 
 ## Publish commands
 
@@ -29,41 +30,41 @@ aptos move publish \
     --profile $PROFILE
 ```
 
-## Set favorite
+## Add favorite
 
 ```sh
 MARKET_ADDRESS=0xccc...
 FAVORITES=0xaaa...
-PROFILE_NAME=my-profile
+PROFILE=my-profile
 
 aptos move run \
   --args address:$MARKET_ADDRESS \
-  --function-id $FAVORITES::emojicoin_dot_fun_favorites::set_favorite \
-  --profile $PROFILE_NAME
+  --function-id $FAVORITES::emojicoin_dot_fun_favorites::add_favorite \
+  --profile $PROFILE
 ```
 
-## Unset favorite
+## Remove favorite
 
 ```sh
 MARKET_ADDRESS=0xccc...
 FAVORITES=0xaaa...
-PROFILE_NAME=my-profile
+PROFILE=my-profile
 
 aptos move run \
   --args address:$MARKET_ADDRESS \
-  --function-id $FAVORITES::emojicoin_dot_fun_favorites::unset_favorite \
-  --profile $PROFILE_NAME
+  --function-id $FAVORITES::emojicoin_dot_fun_favorites::remove_favorite \
+  --profile $PROFILE
 ```
 
-## Get favorites
+## View favorites
 
 ```sh
 USER_ADDRESS=0xccc...
 FAVORITES=0xaaa...
-PROFILE_NAME=my-profile
+PROFILE=my-profile
 
 aptos move view \
   --args address:$USER_ADDRESS \
-  --function-id $FAVORITES::emojicoin_dot_fun_favorites::favorites \
-  --profile $PROFILE_NAME
+  --function-id $FAVORITES::emojicoin_dot_fun_favorites::view_favorites \
+  --profile $PROFILE
 ```

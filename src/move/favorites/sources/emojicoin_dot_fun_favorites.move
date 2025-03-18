@@ -39,19 +39,18 @@ module favorites::emojicoin_dot_fun_favorites {
         }
     }
 
-    /// Set the market as a user's favorite.
+    /// Add the market to the user's favorite markets.
     ///
     /// An error will be returned if:
     ///
     /// - The market does not exist.
     /// - The market is already a favorite.
-    public entry fun set_favorite(user: &signer, market: address) acquires FavoriteData {
+    public entry fun add_favorite(user: &signer, market: address) acquires FavoriteData {
         assert!(
             option::is_some(&emojicoin_dot_fun::market_metadata_by_market_address(market)),
             E_MARKET_NOT_FOUND
         );
         let user_address = signer::address_of(user);
-        event::emit(Favorite { user: user_address, market, is_favorite: true });
         if (exists<FavoriteData>(user_address)) {
             let favorites = borrow_global_mut<FavoriteData>(user_address);
             assert!(
@@ -64,17 +63,17 @@ module favorites::emojicoin_dot_fun_favorites {
             map.add(market, Nil {});
             let favorites = FavoriteData { markets: map };
             move_to<FavoriteData>(user, favorites);
-        }
+        };
+        event::emit(Favorite { user: user_address, market, is_favorite: true });
     }
 
-    /// Remove the market from the user's favorite.
+    /// Remove the market from the user's favorite markets.
     ///
     /// An error will be returned if:
     ///
     /// - The market is not a favorite.
-    public entry fun unset_favorite(user: &signer, market: address) acquires FavoriteData {
+    public entry fun remove_favorite(user: &signer, market: address) acquires FavoriteData {
         let user_address = signer::address_of(user);
-        event::emit(Favorite { user: user_address, market, is_favorite: false });
         assert!(
             exists<FavoriteData>(user_address),
             E_NOT_FAVORITE
@@ -87,7 +86,8 @@ module favorites::emojicoin_dot_fun_favorites {
         favorites.markets.remove(&market);
         if (favorites.markets.length() == 0) {
             move_from<FavoriteData>(user_address);
-        }
+        };
+        event::emit(Favorite { user: user_address, market, is_favorite: false });
     }
 
     #[test_only]
@@ -128,8 +128,8 @@ module favorites::emojicoin_dot_fun_favorites {
         let market_1_address = get_market_address(MARKET_1);
         let market_2_address = get_market_address(MARKET_2);
 
-        set_favorite(&account_1_signer, market_1_address);
-        set_favorite(&account_2_signer, market_2_address);
+        add_favorite(&account_1_signer, market_1_address);
+        add_favorite(&account_2_signer, market_2_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
         let account_2_favorites = favorites(ACCOUNT_2);
@@ -139,7 +139,7 @@ module favorites::emojicoin_dot_fun_favorites {
         assert!(account_2_favorites.length() == 1);
         assert!(account_2_favorites.contains(&market_2_address));
 
-        unset_favorite(&account_1_signer, market_1_address);
+        remove_favorite(&account_1_signer, market_1_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
         let account_2_favorites = favorites(ACCOUNT_2);
@@ -147,7 +147,7 @@ module favorites::emojicoin_dot_fun_favorites {
         assert!(account_1_favorites.length() == 0);
         assert!(account_2_favorites.length() == 1);
 
-        unset_favorite(&account_2_signer, market_2_address);
+        remove_favorite(&account_2_signer, market_2_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
         let account_2_favorites = favorites(ACCOUNT_2);
@@ -157,13 +157,13 @@ module favorites::emojicoin_dot_fun_favorites {
     }
 
     #[test]
-    fun test_set_favorite() acquires FavoriteData {
+    fun test_add_favorite() acquires FavoriteData {
         init_emojicoin();
         let account_1_signer = get_signer(ACCOUNT_1);
 
         let market_1_address = get_market_address(MARKET_1);
 
-        set_favorite(&account_1_signer, market_1_address);
+        add_favorite(&account_1_signer, market_1_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
 
@@ -179,8 +179,8 @@ module favorites::emojicoin_dot_fun_favorites {
         let market_1_address = get_market_address(MARKET_1);
         let market_2_address = get_market_address(MARKET_2);
 
-        set_favorite(&account_1_signer, market_1_address);
-        set_favorite(&account_1_signer, market_2_address);
+        add_favorite(&account_1_signer, market_1_address);
+        add_favorite(&account_1_signer, market_2_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
 
@@ -190,26 +190,26 @@ module favorites::emojicoin_dot_fun_favorites {
     }
 
     #[test, expected_failure(abort_code = E_MARKET_NOT_FOUND)]
-    fun test_set_favorite_nonexistent_market() acquires FavoriteData {
+    fun test_add_favorite_nonexistent_market() acquires FavoriteData {
         init_emojicoin();
         let account_1_signer = get_signer(ACCOUNT_1);
 
         let nonexistent_market_address = @0x1234;
 
-        set_favorite(&account_1_signer, nonexistent_market_address);
+        add_favorite(&account_1_signer, nonexistent_market_address);
     }
 
     #[test]
-    fun test_unset_favorite() acquires FavoriteData {
+    fun test_remove_favorite() acquires FavoriteData {
         init_emojicoin();
         let account_1_signer = get_signer(ACCOUNT_1);
 
         let market_1_address = get_market_address(MARKET_1);
         let market_2_address = get_market_address(MARKET_2);
 
-        set_favorite(&account_1_signer, market_1_address);
-        set_favorite(&account_1_signer, market_2_address);
-        unset_favorite(&account_1_signer, market_1_address);
+        add_favorite(&account_1_signer, market_1_address);
+        add_favorite(&account_1_signer, market_2_address);
+        remove_favorite(&account_1_signer, market_1_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
 
@@ -218,15 +218,15 @@ module favorites::emojicoin_dot_fun_favorites {
     }
 
     #[test, expected_failure(abort_code = E_NOT_FAVORITE)]
-    fun test_unset_non_favorite() acquires FavoriteData {
+    fun test_remove_non_favorite() acquires FavoriteData {
         init_emojicoin();
         let account_1_signer = get_signer(ACCOUNT_1);
 
         let market_1_address = get_market_address(MARKET_1);
         let market_2_address = get_market_address(MARKET_2);
 
-        set_favorite(&account_1_signer, market_1_address);
-        unset_favorite(&account_1_signer, market_2_address);
+        add_favorite(&account_1_signer, market_1_address);
+        remove_favorite(&account_1_signer, market_2_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
 
@@ -235,14 +235,14 @@ module favorites::emojicoin_dot_fun_favorites {
     }
 
     #[test, expected_failure(abort_code = E_NOT_FAVORITE)]
-    fun test_unset_no_favorites() acquires FavoriteData {
+    fun test_remove_no_favorites() acquires FavoriteData {
         init_emojicoin();
 
         let account_1_signer = get_signer(ACCOUNT_1);
 
         let market_1_address = get_market_address(MARKET_1);
 
-        unset_favorite(&account_1_signer, market_1_address);
+        remove_favorite(&account_1_signer, market_1_address);
 
         let account_1_favorites = favorites(ACCOUNT_1);
 
@@ -250,14 +250,14 @@ module favorites::emojicoin_dot_fun_favorites {
     }
 
     #[test, expected_failure(abort_code = E_ALREADY_FAVORITE)]
-    fun test_set_favorite_twice() acquires FavoriteData {
+    fun test_add_favorite_twice() acquires FavoriteData {
         init_emojicoin();
 
         let account_1_signer = get_signer(ACCOUNT_1);
 
         let market_1_address = get_market_address(MARKET_1);
 
-        set_favorite(&account_1_signer, market_1_address);
-        set_favorite(&account_1_signer, market_1_address);
+        add_favorite(&account_1_signer, market_1_address);
+        add_favorite(&account_1_signer, market_1_address);
     }
 }
