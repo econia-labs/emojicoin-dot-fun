@@ -1,8 +1,8 @@
-import { AnyNumberString, BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
+import { type AnyNumberString, BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
 import postgres from "postgres";
 import Big from "big.js";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
-import { UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 
 export const getDbConnection = () => {
