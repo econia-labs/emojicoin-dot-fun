@@ -35,19 +35,11 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
 
-  if (pathname.startsWith(ROUTES.api["."])) {
+  if (pathname.startsWith(ROUTES.api["."]) && process.env.RATE_LIMITING_ENABLED === "1") {
     const ip = request.ip ?? "127.0.0.1";
 
-    let limit: number;
-    let reset: number;
-    let remaining: number;
-    let success: boolean;
-
     const ratelimitRes = await ratelimit.limit(ip);
-    limit = ratelimitRes.limit;
-    reset = ratelimitRes.reset;
-    remaining = ratelimitRes.remaining;
-    success = ratelimitRes.success;
+    const {limit, reset, remaining, success } = ratelimitRes;
 
     const headers = {
       "X-RateLimit-Limit": limit.toString(),
@@ -56,7 +48,7 @@ export default async function middleware(request: NextRequest) {
     };
 
     if (!success) {
-      return new Response("", {
+      return new NextResponse("", {
         status: 429,
         headers,
       });

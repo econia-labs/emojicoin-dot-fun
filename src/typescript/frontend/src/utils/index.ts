@@ -40,11 +40,11 @@ export const emoji = (name: AnyEmojiName) =>
 export const isNumber = (s: string) => !isNaN(parseInt(s));
 
 /**
- * Fetch the specified {@link endpoint}, and handle the case where the fetch gets rate limitted.
+ * Fetch the specified {@link endpoint}, and handle the case where the fetch gets rate limited.
  *
- * Will throw an error if the fetch gets rate limitted more than {@link retries} times.
+ * Will throw an error if the fetch gets rate limited more than {@link retries} times.
  */
-export async function fetchRateLimitted<T>(endpoint: string, retries = 3): Promise<T> {
+export async function fetchRateLimited<T>(endpoint: string, retries = 3): Promise<T> {
   let data: T;
   let retriesLeft = retries;
   while (retriesLeft > 0) {
