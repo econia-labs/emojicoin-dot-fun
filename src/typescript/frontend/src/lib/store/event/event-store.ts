@@ -16,12 +16,9 @@ import {
   ensureMarketInStore,
   handleLatestBarForPeriodicStateEvent,
   handleLatestBarForSwapEvent,
-  pushPeriodicStateEvents,
   toMappedMarketEvents,
   initialState,
-  ensureMeleeInStore,
 } from "./utils";
-import { periodEnumToRawDuration } from "@sdk/const";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 import {
@@ -30,15 +27,22 @@ import {
   clearLocalStorage,
   LOCAL_STORAGE_EVENT_TYPES,
 } from "./local-storage";
-import { initializeArenaStore } from "../arena/store";
+import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
 import {
+  isArenaCandlestickModel,
   isArenaEnterModel,
-  isArenaEventModelWithMeleeID,
+  isArenaModelWithMeleeID,
   isArenaExitModel,
   isArenaMeleeModel,
   isArenaSwapModel,
 } from "@sdk/types/arena-types";
-import { getMeleeIDFromArenaModel, toMappedMelees } from "../arena/utils";
+import {
+  getMeleeIDFromArenaModel,
+  handleLatestBarForArenaCandlestick,
+  toMappedMelees,
+} from "../arena/utils";
+import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
+import { periodToPeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
@@ -49,9 +53,18 @@ export const createEventStore = () => {
       getRegisteredMarkets: () => {
         return get().markets;
       },
+      getMeleeMap: () => {
+        return get().meleeMap;
+      },
       loadArenaInfoFromServer: (info) => {
         set((state) => {
           state.arenaInfoFromServer = info;
+          const arenaSymbol = encodeSymbolsForChart(
+            info.emojicoin0Symbols.join(""),
+            info.emojicoin1Symbols.join("")
+          );
+          ensureMeleeInStore(state, info.meleeID);
+          state.meleeMap.set(arenaSymbol, info.meleeID);
         });
       },
       loadMarketStateFromServer: (states) => {
@@ -96,11 +109,12 @@ export const createEventStore = () => {
             market.chatEvents.push(...extractFilter(marketEvents, isChatEventModel));
             market.liquidityEvents.push(...extractFilter(marketEvents, isLiquidityEventModel));
             market.stateEvents.push(...extractFilter(marketEvents, isMarketLatestStateEventModel));
-            pushPeriodicStateEvents(market, extractFilter(marketEvents, isPeriodicStateEventModel));
+            // Drain the rest of the periodic state events to satisfy the assertion.
+            const _ = extractFilter(marketEvents, isPeriodicStateEventModel);
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
 
-          const arenaEvents = events.filter(isArenaEventModelWithMeleeID);
+          const arenaEvents = events.filter(isArenaModelWithMeleeID);
           const arenaMap = toMappedMelees(arenaEvents);
           Array.from(arenaMap.entries()).forEach(([meleeID, events]) => {
             ensureMeleeInStore(state, meleeID);
@@ -108,6 +122,11 @@ export const createEventStore = () => {
             melee.enters.push(...extractFilter(events, isArenaEnterModel));
             melee.exits.push(...extractFilter(events, isArenaExitModel));
             melee.swaps.push(...extractFilter(events, isArenaSwapModel));
+            // Update all the latest bars for arena candlesticks.
+            extractFilter(events, isArenaCandlestickModel).forEach((candlestick) => {
+              handleLatestBarForArenaCandlestick(melee, candlestick);
+            });
+            DEBUG_ASSERT(() => events.length === 0);
           });
           state.meleeEvents.push(...extractFilter(arenaEvents, isArenaMeleeModel));
         });
@@ -142,13 +161,11 @@ export const createEventStore = () => {
                   state.stateFirehose.unshift(event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "market", event);
                 } else if (isPeriodicStateEventModel(event)) {
-                  const period = periodEnumToRawDuration(event.periodicMetadata.period);
-                  market[period].candlesticks.unshift(event);
                   handleLatestBarForPeriodicStateEvent(market, event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
                 }
               } else {
-                if (isArenaEventModelWithMeleeID(event)) {
+                if (isArenaModelWithMeleeID(event)) {
                   const meleeID = getMeleeIDFromArenaModel(event);
                   ensureMeleeInStore(state, meleeID);
                   const melee = state.melees.get(meleeID)!;
@@ -160,6 +177,8 @@ export const createEventStore = () => {
                     melee.exits.unshift(event);
                   } else if (isArenaSwapModel(event)) {
                     melee.swaps.unshift(event);
+                  } else if (isArenaCandlestickModel(event)) {
+                    handleLatestBarForArenaCandlestick(melee, event);
                   }
                 }
               }
@@ -188,21 +207,43 @@ export const createEventStore = () => {
           });
         });
       },
-      subscribeToPeriod: ({ marketEmojis, period, cb }) => {
-        const symbol = marketEmojis.join("");
-        if (!get().markets.has(symbol)) return;
-        set((state) => {
-          const market = state.markets.get(symbol)!;
-          market[period].callback = cb;
-        });
+      subscribeToPeriod: ({ symbol, period, cb }) => {
+        if (isArenaChartSymbol(symbol)) {
+          const meleeID = get().meleeMap.get(symbol);
+          const melee = meleeID !== undefined && get().melees.has(meleeID);
+          if (!melee) return;
+          set((state) => {
+            const melee = state.melees.get(meleeID)!;
+            melee[period].callback = cb;
+            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
+            state.client.subscribeToArenaPeriod(brokerPeriodType);
+          });
+        } else {
+          if (!get().markets.has(symbol)) return;
+          set((state) => {
+            const market = state.markets.get(symbol)!;
+            market[period].callback = cb;
+          });
+        }
       },
-      unsubscribeFromPeriod: ({ marketEmojis, period }) => {
-        const symbol = marketEmojis.join("");
-        if (!get().markets.has(symbol)) return;
-        set((state) => {
-          const market = state.markets.get(symbol)!;
-          market[period].callback = undefined;
-        });
+      unsubscribeFromPeriod: ({ symbol, period }) => {
+        if (isArenaChartSymbol(symbol)) {
+          const meleeID = get().meleeMap.get(symbol);
+          const melee = meleeID !== undefined && get().melees.has(meleeID);
+          if (!melee) return;
+          set((state) => {
+            const melee = state.melees.get(meleeID)!;
+            melee[period].callback = undefined;
+            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
+            state.client.unsubscribeFromArenaPeriod(brokerPeriodType);
+          });
+        } else {
+          if (!get().markets.has(symbol)) return;
+          set((state) => {
+            const market = state.markets.get(symbol)!;
+            market[period].callback = undefined;
+          });
+        }
       },
       ...createWebSocketClientStore(set, get),
     }))

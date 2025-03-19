@@ -4,7 +4,12 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JsonTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { standardizeAddress } from "../utils/account-address";
-import { type Trigger, type EMOJICOIN_DOT_FUN_MODULE_NAME, rawTriggerToEnum } from "../const";
+import {
+  type Trigger,
+  type EMOJICOIN_DOT_FUN_MODULE_NAME,
+  rawTriggerToEnum,
+  type ArenaPeriod,
+} from "../const";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -18,11 +23,14 @@ import {
 import { type STRUCT_STRINGS } from "../utils";
 import { type Flatten } from ".";
 import { type ArenaTypes } from "./arena-types";
+import { type SymbolEmoji } from "../emoji_data";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
+
+export const CANDLESTICK_NAME = "Candlestick";
 
 export const EVENT_NAMES = {
   GlobalState: "GlobalState",
@@ -233,6 +241,7 @@ export type Types = ArenaTypes & {
         time: bigint;
         marketNonce: bigint;
         swapper: AccountAddressString;
+        sender: AccountAddressString;
         inputAmount: bigint;
         isSell: boolean;
         integrator: AccountAddressString;
@@ -372,6 +381,19 @@ export type Types = ArenaTypes & {
   EmojicoinDotFunRewards: {
     swap: Types["SwapEvent"];
     octasRewardAmount: bigint;
+  };
+
+  Candlestick: {
+    marketID: bigint;
+    version: bigint;
+    period: ArenaPeriod;
+    startTime: Date;
+    openPrice: number;
+    closePrice: number;
+    highPrice: number;
+    lowPrice: number;
+    volume: bigint;
+    symbolEmojis: SymbolEmoji[];
   };
 };
 
@@ -573,13 +595,15 @@ export const toStateMetadata = (data: JsonTypes["StateMetadata"]): Types["StateM
 
 export const toSwapEvent = (
   data: JsonTypes["SwapEvent"],
-  version: number | string
+  version: number | string,
+  sender?: string
 ): Types["SwapEvent"] => ({
   version: Number(version),
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
   swapper: standardizeAddress(data.swapper),
+  sender: standardizeAddress(sender || data.swapper),
   inputAmount: BigInt(data.input_amount),
   isSell: data.is_sell,
   integrator: standardizeAddress(data.integrator),
@@ -722,9 +746,10 @@ export const toRegistrantGracePeriodFlag = (data: JsonTypes["RegistrantGracePeri
 
 export const toEmojicoinDotFunRewards = (
   data: JsonTypes["EmojicoinDotFunRewards"],
-  version: number | string
+  version: number | string,
+  sender?: string
 ) => ({
-  swap: toSwapEvent(data.swap, version),
+  swap: toSwapEvent(data.swap, version, sender),
   octasRewardAmount: BigInt(data.octas_reward_amount),
 });
 
@@ -833,10 +858,12 @@ export interface WithTime {
 export function toEmojicoinEvent(
   type: (typeof STRUCT_STRINGS)[keyof typeof STRUCT_STRINGS],
   data: AnyEmojicoinJSONEvent,
+  sender: string,
   version?: number
 ): AnyEmojicoinEvent {
   const event = { type, data };
-  if (isJSONSwapEvent(event)) return toSwapEvent(data as JsonTypes["SwapEvent"], version ?? -1);
+  if (isJSONSwapEvent(event))
+    return toSwapEvent(data as JsonTypes["SwapEvent"], version ?? -1, sender);
   if (isJSONChatEvent(event)) return toChatEvent(data as JsonTypes["ChatEvent"], version ?? -1);
   if (isJSONMarketRegistrationEvent(event))
     return toMarketRegistrationEvent(data as JsonTypes["MarketRegistrationEvent"], version ?? -1);

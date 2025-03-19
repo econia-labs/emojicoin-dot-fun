@@ -1,25 +1,33 @@
 // cspell:word datafeeds
 import Script from "next/script";
 import { type ChartContainerProps } from "./types";
-import React, { Suspense } from "react";
+import React, { Suspense, useMemo } from "react";
 import Loading from "components/loading";
 import PrivateChart from "./PrivateChart";
+import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
 
-export const Chart = PrivateChart;
-const MemoizedChart = React.memo(Chart);
+const MemoizedChart = React.memo(PrivateChart);
 
-export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">) => {
+export const ChartContainer = (props: ChartContainerProps) => {
   const [isScriptReady, setIsScriptReady] = React.useState(false);
+
+  const emojiData = useMemo(
+    () =>
+      [props.symbol, props.secondarySymbol ?? ""]
+        .map(symbolToEmojis)
+        .map((v) => v.emojis)
+        .flat(),
+    [props.symbol, props.secondarySymbol]
+  );
 
   return (
     <>
       {isScriptReady && (
-        <Suspense fallback={<Loading emojis={props.emojis} />}>
+        <Suspense fallback={<Loading emojis={emojiData} />}>
           <MemoizedChart
-            marketID={props.marketID}
-            emojis={props.emojis}
-            marketAddress={props.marketAddress}
             symbol={props.symbol}
+            secondarySymbol={props.secondarySymbol}
+            className={props.className}
           />
         </Suspense>
       )}

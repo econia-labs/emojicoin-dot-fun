@@ -2,6 +2,7 @@
 
 import {
   type AnyNumberString,
+  type AnyPeriod,
   getPeriodStartTimeFromTime,
   type Period,
   PeriodDuration,
@@ -25,15 +26,15 @@ import { type CandlesticksSearchParams } from "./search-params-schema";
  */
 export const PARCEL_SIZE = 500;
 
-export const indexToParcelStartDate = (index: number, period: Period): Date =>
+export const indexToParcelStartDate = (index: number, period: AnyPeriod): Date =>
   new Date((PARCEL_SIZE * (index * periodEnumToRawDuration(period))) / 1000);
-export const indexToParcelEndDate = (index: number, period: Period): Date =>
+export const indexToParcelEndDate = (index: number, period: AnyPeriod): Date =>
   new Date((PARCEL_SIZE * ((index + 1) * periodEnumToRawDuration(period))) / 1000);
 
-export const getPeriodDurationSeconds = (period: Period) =>
+export const getPeriodDurationSeconds = (period: AnyPeriod) =>
   (periodEnumToRawDuration(period) / PeriodDuration.PERIOD_1M) * 60;
 
-export const toIndex = (end: number, period: Period): number => {
+export const toIndex = (end: number, period: AnyPeriod): number => {
   const periodDuration = getPeriodDurationSeconds(period);
   const parcelDuration = periodDuration * PARCEL_SIZE;
 
@@ -134,7 +135,7 @@ const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["candlestic
   revalidate: NORMAL_CACHE_DURATION,
 });
 
-const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
+export const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
   getLatestProcessedEmojicoinTimestamp,
   ["processor-timestamp"],
   { revalidate: 5 }

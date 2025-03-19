@@ -154,6 +154,8 @@ export const INITIAL_REAL_RESERVES: Types["Reserves"] = {
   quote: 0n,
 };
 
+export type AnyPeriod = Period | ArenaPeriod;
+
 export enum Period {
   Period1M = "period_1m",
   Period5M = "period_5m",
@@ -166,13 +168,13 @@ export enum Period {
 
 export enum ArenaPeriod {
   Period15S = "period_15s",
-  Period1M = "period_1m",
-  Period5M = "period_5m",
-  Period15M = "period_15m",
-  Period30M = "period_30m",
-  Period1H = "period_1h",
-  Period4H = "period_4h",
-  Period1D = "period_1d",
+  Period1M = Period.Period1M,
+  Period5M = Period.Period5M,
+  Period15M = Period.Period15M,
+  Period30M = Period.Period30M,
+  Period1H = Period.Period1H,
+  Period4H = Period.Period4H,
+  Period1D = Period.Period1D,
 }
 
 /// As defined in the database, aka the enum string.
@@ -229,7 +231,7 @@ export const toArenaPeriod = (s: DatabaseStructType["ArenaCandlestick"]["period"
     OneHour: ArenaPeriod.Period1H,
     FourHours: ArenaPeriod.Period4H,
     OneDay: ArenaPeriod.Period1D,
-  })[s as ValueOf<typeof Period>] ??
+  })[s as ValueOf<typeof ArenaPeriod>] ??
   (() => {
     throw new Error(`Unknown period: ${s}`);
   })();
@@ -273,6 +275,7 @@ export enum TriggerFromContract {
  * are all referred to interchangeably throughout this codebase.
  */
 export enum PeriodDuration {
+  PERIOD_15S = 15000000,
   PERIOD_1M = 60000000,
   PERIOD_5M = 300000000,
   PERIOD_15M = 900000000,
@@ -282,7 +285,8 @@ export enum PeriodDuration {
   PERIOD_1D = 86400000000,
 }
 
-export const periodEnumToRawDuration = (period: Period): PeriodDuration => {
+export const periodEnumToRawDuration = (period: Period | ArenaPeriod): PeriodDuration => {
+  if (period === ArenaPeriod.Period15S) return PeriodDuration.PERIOD_15S;
   if (period === Period.Period1M) return PeriodDuration.PERIOD_1M;
   if (period === Period.Period5M) return PeriodDuration.PERIOD_5M;
   if (period === Period.Period15M) return PeriodDuration.PERIOD_15M;
@@ -340,13 +344,13 @@ export const MAX_SYMBOL_LENGTH = 10;
 // The default grace period time for a new market registrant to trade on a new market before
 // non-registrants can trade. Note that this period is ended early once the registrant makes a
 // single trade.
-export const GRACE_PERIOD_TIME = BigInt(PeriodDuration.PERIOD_5M.valueOf());
+export const GRACE_PERIOD_TIME = BigInt(PeriodDuration.PERIOD_5M);
 
 /**
- * A helper object to convert from an untyped number to a PeriodDuration enum value.
- * If the number is invalid, the value returned will be undefined.
+ * A helper function to convert from an untyped number to a PeriodDuration enum value.
  */
 export const toPeriodDuration = (num: number | bigint): PeriodDuration => {
+  if (Number(num) === PeriodDuration.PERIOD_15S) return PeriodDuration.PERIOD_15S;
   if (Number(num) === PeriodDuration.PERIOD_1M) return PeriodDuration.PERIOD_1M;
   if (Number(num) === PeriodDuration.PERIOD_5M) return PeriodDuration.PERIOD_5M;
   if (Number(num) === PeriodDuration.PERIOD_15M) return PeriodDuration.PERIOD_15M;
@@ -357,7 +361,7 @@ export const toPeriodDuration = (num: number | bigint): PeriodDuration => {
   throw new Error(`Invalid candlestick period duration: ${num}`);
 };
 
-export const PERIODS = [
+export const NON_ARENA_PERIODS = new Set([
   Period.Period1M,
   Period.Period5M,
   Period.Period15M,
@@ -365,4 +369,7 @@ export const PERIODS = [
   Period.Period1H,
   Period.Period4H,
   Period.Period1D,
-];
+]);
+
+export const isNonArenaPeriod = (period: Period | ArenaPeriod): period is Period =>
+  (NON_ARENA_PERIODS as Set<string>).has(period);

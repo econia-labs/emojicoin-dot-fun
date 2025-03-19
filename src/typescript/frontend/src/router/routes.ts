@@ -8,6 +8,7 @@ export const ROUTES = expandRoutes({
     arena: {
       position: _,
       "historical-positions": _,
+      candlesticks: _,
     },
     candlesticks: _,
     dexscreener: {
@@ -17,6 +18,7 @@ export const ROUTES = expandRoutes({
       "latest-block": _,
     },
     pools: _,
+    trades: _,
     trending: _,
   },
   arena: _,

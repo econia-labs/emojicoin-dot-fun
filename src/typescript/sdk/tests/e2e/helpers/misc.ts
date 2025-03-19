@@ -1,7 +1,9 @@
-import { BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
+import { type AnyNumberString, BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
 import postgres from "postgres";
 import Big from "big.js";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
+import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 
 export const getDbConnection = () => {
   return postgres(process.env.DB_URL!);
@@ -46,3 +48,15 @@ export const getExactTransitionInputAmount = (
 
   return BigInt(rounded.toString());
 };
+
+export const PROCESSING_WAIT_TIME = 2 * 1000;
+
+export const waitForProcessor = <
+  T extends { version: AnyNumberString } | { response: UserTransactionResponse },
+>(
+  res: T
+) =>
+  waitForEmojicoinIndexer(
+    "version" in res ? res.version : res.response.version,
+    PROCESSING_WAIT_TIME
+  );

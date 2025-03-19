@@ -18,8 +18,9 @@ import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import { CoinHolders } from "../holders/coin-holders";
 import { TradeHistory } from "../trade-history/trade-history";
+import { PersonalTradeHistory } from "../personal-trade-history/personal-trade-history";
 
-const tabs = ["Trade History", "Top Holders"] as const;
+const tabs = ["Trade History", "My Trade History", "Top Holders"] as const;
 
 const DesktopGrid = (props: GridProps) => {
   const [currentTab, setCurrentTab] = useState<(typeof tabs)[number]>("Trade History");
@@ -34,9 +35,7 @@ const DesktopGrid = (props: GridProps) => {
               <Suspense fallback={<Loading numEmojis={20} />}>
                 <ChartContainer
                   symbol={props.data.symbolData.symbol}
-                  emojis={props.data.emojis}
-                  marketID={props.data.marketID.toString()}
-                  marketAddress={props.data.marketView.metadata.marketAddress}
+                  className="relative w-full h-[420px]"
                 />
               </Suspense>
             </StyledBlockWrapper>
@@ -69,6 +68,7 @@ const DesktopGrid = (props: GridProps) => {
               ))}
             </FlexGap>
             <StyledBlockWrapper>
+              {currentTab === "My Trade History" && <PersonalTradeHistory data={props.data} />}
               {currentTab === "Trade History" && <TradeHistory data={props.data} />}
               {currentTab === "Top Holders" && (
                 <CoinHolders

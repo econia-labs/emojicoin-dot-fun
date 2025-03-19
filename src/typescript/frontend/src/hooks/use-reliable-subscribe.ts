@@ -2,10 +2,10 @@ import { type SubscribableBrokerEvents } from "@/broker/types";
 import { useEventStore } from "context/event-store-context/hooks";
 import { useEffect } from "react";
 
+// Note that we let the charting library handle the subscription to arena periods.
 export type ReliableSubscribeArgs = {
   eventTypes: Array<SubscribableBrokerEvents>;
   arena?: boolean;
-  arenaCandlesticks?: boolean;
 };
 
 /**
@@ -13,7 +13,7 @@ export type ReliableSubscribeArgs = {
  * mounted. It automatically cleans up subscriptions when the component is unmounted.
  */
 export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
-  const { eventTypes, arena, arenaCandlesticks } = args;
+  const { eventTypes, arena } = args;
   const subscribeEvents = useEventStore((s) => s.subscribeEvents);
   const unsubscribeEvents = useEventStore((s) => s.unsubscribeEvents);
 
@@ -23,7 +23,6 @@ export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
     const timeout = window.setTimeout(() => {
       subscribeEvents(eventTypes, {
         baseEvents: arena,
-        candlesticks: arenaCandlesticks,
       });
     }, 250);
 
@@ -32,8 +31,7 @@ export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
       clearTimeout(timeout);
       unsubscribeEvents(eventTypes, {
         baseEvents: arena,
-        candlesticks: arenaCandlesticks,
       });
     };
-  }, [eventTypes, arena, arenaCandlesticks, subscribeEvents, unsubscribeEvents]);
+  }, [eventTypes, arena, subscribeEvents, unsubscribeEvents]);
 };

@@ -1,5 +1,6 @@
 import { type AnyNumberString, waitFor } from "../../../src";
 import {
+  type ArenaPeriodRequest,
   type BrokerEvent,
   type BrokerMessage,
   brokerMessageConverter,
@@ -98,13 +99,13 @@ export const subscribe = (
   markets: AnyNumberString[],
   eventTypes: SubscribableBrokerEvents[],
   arena: boolean = false,
-  arenaCandlesticks: boolean = false
+  arenaPeriod?: ArenaPeriodRequest
 ) => {
   const outgoingMessage: SubscriptionMessage = {
     markets: markets.map((n) => Number(n)),
     event_types: eventTypes,
     arena,
-    arena_candlesticks: arenaCandlesticks,
+    arena_period: arenaPeriod,
   };
   const json = JSON.stringify(outgoingMessage);
   client.send(json);

@@ -5,6 +5,7 @@ import {
   type Period,
   periodEnumToRawDuration,
   toPeriodDuration,
+  type AnyPeriod,
 } from "../const";
 import {
   type AnyNumberString,
@@ -58,7 +59,7 @@ export function getPeriodStartTime(
   event: Types["SwapEvent"] | Types["StateEvent"] | Types["PeriodicStateEvent"],
   periodIn: PeriodDuration | bigint | number
 ) {
-  // All CandlestickPeriods are in microseconds.
+  // All PeriodDurations are in microseconds.
   let time: bigint;
   if (isSwapEvent(event)) {
     time = event.time;
@@ -97,7 +98,7 @@ export function getPeriodStartTime(
  */
 export function getPeriodStartTimeFromTime(
   microseconds: AnyNumberString,
-  period: PeriodDuration | Period
+  period: PeriodDuration | AnyPeriod
 ) {
   const periodDuration = typeof period !== "number" ? periodEnumToRawDuration(period) : period;
   const time = BigInt(microseconds);

@@ -124,7 +124,10 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 )}
                 <AnimatedDropdownItem
                   key="my-emojicoins-dropdown"
-                  onClick={() => router.push(`${ROUTES.wallet}/${account?.address}`)}
+                  onClick={() => {
+                    router.push(`${ROUTES.wallet}/${account?.address}`);
+                    setIsOpen(false);
+                  }}
                   title="My emojicoins"
                   icon={<UserRound className={IconClass} />}
                   controls={subMenuControls}

@@ -9,9 +9,10 @@ import { IS_ALLOWLIST_ENABLED } from "lib/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
-
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+
+const walletRegex = new RegExp(`^${ROUTES.wallet}/(.*).apt$`);
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL,
@@ -79,6 +80,13 @@ export default async function middleware(request: NextRequest) {
     dexscreenerRoutes.includes(pathname)
   ) {
     return NextResponse.next();
+  }
+
+  // If path matches `/wallet/matt.apt`
+  if (walletRegex.test(pathname)) {
+    // redirect to `/wallet/matt`
+    const url = new URL(pathname.slice(0, -4), request.url);
+    return NextResponse.redirect(url);
   }
 
   // This will replace emojis in the path name with their actual text names. Since this occurs
