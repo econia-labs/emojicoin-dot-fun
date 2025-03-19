@@ -1,8 +1,7 @@
 "use client";
 
-import { useNameResolver } from "@hooks/use-name-resolver";
 import AptosIconBlack from "@icons/AptosBlack";
-import { formatDisplayName } from "@sdk/utils";
+import { formatDisplayName, type ValidAptosName } from "@sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
@@ -13,14 +12,25 @@ import SearchBar from "components/inputs/search-bar";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { type SymbolEmoji } from "@sdk/emoji_data";
 import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { ROUTES } from "router/routes";
+import { useEffectOnce } from "react-use";
 
-export const WalletClientPage = ({ address }: { address: string }) => {
-  const resolvedName = useNameResolver(address);
+export const WalletClientPage = ({ address, name }: { address: string; name?: ValidAptosName }) => {
+  const resolvedName = name ?? address;
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
   const [tab, setTab] = useState<string>("portfolio");
-
   const emojis = useEmojiPicker((s) => s.emojis);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
+
+  // Replace the address in the router URL if the name is defined.
+  const router = useRouter();
+  const pathname = usePathname();
+  useEffectOnce(() => {
+    if (name && name !== address && pathname.endsWith(address)) {
+      router.replace(`${ROUTES.wallet}/${name}`);
+    }
+  });
 
   return (
     <div className="max-w-[100vw] px-2 sm:min-w-[80vw] md:min-w-[800px]">
