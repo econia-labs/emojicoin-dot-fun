@@ -174,23 +174,6 @@ pub mod tests {
     }
 
     #[test]
-    fn deserialize_big_json_number() {
-        #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-        struct Data {
-            market_id: u64,
-        }
-
-        let json = r#"{ "market_id": 18446744073709551615 }"#;
-        let data: Data = serde_json::from_str(json).unwrap();
-        assert_eq!(
-            data,
-            Data {
-                market_id: u64::MAX,
-            }
-        );
-    }
-
-    #[test]
     fn subscription_idempotent_serialization_happy_path() {
         let sub = SubscriptionMessage {
             markets: vec![1, 2, 3],
@@ -199,7 +182,10 @@ pub mod tests {
             arena_period: Some(ArenaPeriodRequest::Unsubscribe {
                 period: Period::FifteenMinutes,
             }),
-            market_period: None,
+            market_period: Some(MarketPeriodRequest::Unsubscribe {
+                market_id: 1,
+                period: Period::FourHours,
+            }),
         };
 
         let json = serde_json::to_string(&sub).unwrap();

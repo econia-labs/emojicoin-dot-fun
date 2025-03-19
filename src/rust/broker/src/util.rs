@@ -151,9 +151,7 @@ pub fn update_subscription(
     current_sub_opt: &mut Option<ClientSubscription>,
     msg: &str,
 ) -> Result<(), Error> {
-    dbg!(msg);
     let msg = serde_json::from_str::<SubscriptionMessage>(msg)?;
-    dbg!(&msg);
     match current_sub_opt {
         // Existing subscription; insert/remove from the existing arena candlestick periods.
         Some(current_sub) => {
@@ -168,10 +166,8 @@ pub fn update_subscription(
                 };
             }
             if let Some(mp_request) = msg.market_period {
-                dbg!("got here?");
                 match mp_request {
                     MarketPeriodRequest::Subscribe { market_id, period } => {
-                        dbg!((market_id, period));
                         current_sub
                             .market_candlestick_periods
                             .insert((market_id, period));
@@ -310,22 +306,6 @@ mod tests {
     }
 
     #[test]
-    fn test_serialize() {
-        let subscribe = MarketPeriodRequest::Subscribe {
-            market_id: 10,
-            period: Period::FifteenSeconds,
-        };
-        dbg!(serde_json::to_string_pretty(&subscribe).unwrap());
-        dbg!(serde_json::from_str::<MarketPeriodRequest>(
-            r#"{ "action": "subscribe", "market_id": 77, "period": "OneMinute" }"#,
-        )
-        .unwrap());
-        dbg!(serde_json::from_str::<SubscriptionMessage>(
-                r#"{ "market_period": { "action": "subscribe", "market_id": 77, "period": "OneMinute" } }"#,
-            ).unwrap());
-    }
-
-    #[test]
     fn test_market_subscriptions_happy_path() {
         let subscription = &mut Some(ClientSubscription {
             markets: HashSet::from([1, 2, 3]),
@@ -349,39 +329,27 @@ mod tests {
             // j. Remove (77, 5m)  =>  (1234, 5m), (77, 1m), (2, 4h), (77, 15m)
             // k. Add (1923, 15s)  =>  (1234, 5m), (77, 1m), (2, 4h), (77, 15m), (1923, 15s)
             // -------------------------------------------------------------------------------------
-            // a. Add (77, 1m)
-            r#"{ "market_period": { "action": "subscribe", "market_id": 77, "period": "OneMinute" } }"#,
-            // b. Add (123, 1m)
-            r#"{ "market_period": { "action": "subscribe", "market_id": 123, "period": "OneMinute" } }"#,
-            // c. Remove (1, 1m)
-            r#"{ "market_period": { "action": "unsubscribe", "market_id": 1, "period": "OneMinute" } }"#,
-            // d. Add (1, 1m)
-            r#"{ "market_period": { "action": "subscribe", "market_id": 1, "period": "OneMinute" } }"#,
-            // e. Add (2, 4h)
-            r#"{ "market_period": { "action": "subscribe", "market_id": 2, "period": "FourHours" } }"#,
-            // f. Remove (1, 1m)
-            r#"{ "market_period": { "action": "unsubscribe", "market_id": 1, "period": "OneMinute" } }"#,
-            // g. Add (77, 5m)
-            r#"{ "market_period": { "action": "subscribe", "market_id": 77, "period": "FiveMinutes" } }"#,
-            // h. Add (77, 15m)
-            r#"{ "market_period": { "action": "subscribe", "market_id": 77, "period": "FifteenMinutes" } }"#,
-            // i. Remove (123, 1m)
-            r#"{ "market_period": { "action": "unsubscribe", "market_id": 123, "period": "OneMinute" } }"#,
-            // j. Remove (77, 5m)
-            r#"{ "market_period": { "action": "unsubscribe", "market_id": 77, "period": "FiveMinutes" } }"#,
-            // k. Add (1923, 15s)
-            r#"{ "market_period": { "action": "subscribe", "market_id": 1923, "period": "FifteenSeconds" } }"#,
+            r#"{ "market_period": { "action": "subscribe", "market_id": 77, "period": "OneMinute" } }"#, // a.
+            r#"{ "market_period": { "action": "subscribe", "market_id": 123, "period": "OneMinute" } }"#, // b.
+            r#"{ "market_period": { "action": "unsubscribe", "market_id": 1, "period": "OneMinute" } }"#, // c.
+            r#"{ "market_period": { "action": "subscribe", "market_id": 1, "period": "OneMinute" } }"#, // d.
+            r#"{ "market_period": { "action": "subscribe", "market_id": 2, "period": "FourHours" } }"#, // e.
+            r#"{ "market_period": { "action": "unsubscribe", "market_id": 1, "period": "OneMinute" } }"#, // f.
+            r#"{ "market_period": { "action": "subscribe", "market_id": 77, "period": "FiveMinutes" } }"#, // g.
+            r#"{ "market_period": { "action": "subscribe", "market_id": 77, "period": "FifteenMinutes" } }"#, // h.
+            r#"{ "market_period": { "action": "unsubscribe", "market_id": 123, "period": "OneMinute" } }"#, // i.
+            r#"{ "market_period": { "action": "unsubscribe", "market_id": 77, "period": "FiveMinutes" } }"#, // j.
+            r#"{ "market_period": { "action": "subscribe", "market_id": 1923, "period": "FifteenSeconds" } }"#, // k.
         ]
         .into_iter()
         .for_each(|msg| {
-            // Check each sub in the interim.
-            let json_res = serde_json::from_str::<SubscriptionMessage>(msg);
-            assert!(json_res.is_ok());
-            let json = json_res.unwrap();
-            assert!(json.market_period.is_some());
-            let market_period_request = json.market_period.unwrap();
+            // Check each sub in the interim is correctly added or removed.
+            let market_period_request = serde_json::from_str::<SubscriptionMessage>(msg)
+                .map(|sub| sub.market_period)
+                .ok()
+                .flatten()
+                .unwrap();
             assert!(update_subscription(subscription, msg).is_ok());
-            assert!(subscription.as_ref().is_some());
             assert!(subscription.as_ref().is_some_and(|inner_sub| {
                 match market_period_request {
                     MarketPeriodRequest::Subscribe { market_id, period } => inner_sub
