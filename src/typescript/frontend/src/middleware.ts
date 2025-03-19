@@ -41,8 +41,8 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
 
-  console.log({pathname, ROUTES, enabled: process.env.RATE_LIMITING_ENABLED});
-  if (pathname.startsWith(ROUTES.api["."]) && process.env.RATE_LIMITING_ENABLED === "1") {
+  console.log({pathname, enabled: process.env.RATE_LIMITING_ENABLED});
+  if (pathname.startsWith("/api") && process.env.RATE_LIMITING_ENABLED === "1") {
     const ip = request.ip ?? "127.0.0.1";
 
     let ratelimitRes: Awaited<ReturnType<typeof ratelimiter.limit>>;

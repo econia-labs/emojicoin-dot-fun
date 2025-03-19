@@ -37,8 +37,6 @@ export const emoji = (name: AnyEmojiName) =>
     ? SYMBOL_EMOJI_DATA.byStrictName(name).emoji
     : CHAT_EMOJI_DATA.byStrictName(name).emoji;
 
-export const isNumber = (s: string) => !isNaN(parseInt(s));
-
 /**
  * Fetch the specified {@link endpoint}, and handle the case where the fetch gets rate limited.
  *
