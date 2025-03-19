@@ -1,17 +1,15 @@
 // cspell:word funder
 
 import { EmojicoinArena } from "@/contract-apis";
-import type { UserTransactionResponse, Account } from "@aptos-labs/ts-sdk";
+import type { Account } from "@aptos-labs/ts-sdk";
 import {
   type SymbolEmoji,
   fetchArenaRegistryView,
   fetchArenaMeleeView,
   fetchMeleeEmojiData,
-  type AnyNumberString,
 } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { getPublisher, getAptosClient } from "../../utils";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 
 /**
  * Have the publisher register a third market and trade on all three markets to unlock them for
@@ -114,15 +112,3 @@ export const depositToVault = async (funder: Account, amount: bigint) =>
     funder,
     amount,
   });
-
-export const PROCESSING_WAIT_TIME = 2 * 1000;
-
-export const waitForProcessor = <
-  T extends { version: AnyNumberString } | { response: UserTransactionResponse },
->(
-  res: T
-) =>
-  waitForEmojicoinIndexer(
-    "version" in res ? res.version : res.response.version,
-    PROCESSING_WAIT_TIME
-  );
