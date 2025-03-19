@@ -92,6 +92,10 @@
       "cache": false,
       "outputs": []
     },
+    "test:e2e:candlesticks": {
+      "cache": false,
+      "outputs": []
+    },
     "test:unit": {
       "cache": false,
       "outputs": []

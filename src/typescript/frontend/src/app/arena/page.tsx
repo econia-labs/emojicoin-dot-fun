@@ -3,8 +3,14 @@ import { ArenaClient } from "components/pages/arena/ArenaClient";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
 import { fetchSpecificMarkets } from "@sdk/indexer-v2";
+import { type Metadata } from "next/types";
 
 export const revalidate = 2;
+
+export const metadata: Metadata = {
+  title: "arena",
+  description: "⚔️ Step into the Emojicoin Arena! Trade, battle and rise to glory.",
+};
 
 const logAndReturnValue = <T extends [] | undefined | null | Record<string, unknown>>(
   dataType: string,
