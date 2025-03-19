@@ -1,4 +1,4 @@
-import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { sum, toAccountAddressString } from "@sdk/utils";
 import { useQuery } from "@tanstack/react-query";
 import { fetchOwnerEmojicoinBalances } from "lib/queries/aptos-indexer/fetch-owner-emojicoin-balances";
@@ -79,6 +79,7 @@ export const useUserEmojicoinBalances = (owner: AccountAddressInput, max?: numbe
     queryFn: () =>
       withResponseError(fetchOwnerEmojicoinBalances({ ownerAddress, max }).then(toFullCoinData)),
     staleTime: STALE_TIME,
+    enabled: AccountAddress.isValid({ input: owner }).valid,
   });
 
   return {
