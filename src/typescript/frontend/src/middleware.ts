@@ -18,9 +18,14 @@ const redis = new Redis({
   token: process.env.KV_REST_API_TOKEN,
 });
 
-const ratelimit = new Ratelimit({
+const ratelimiter = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(5, "10 s"),
+});
+
+const candlesticksRatelimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.tokenBucket(10, "30 s", 20),
 });
 
 export default async function middleware(request: NextRequest) {
@@ -35,16 +40,28 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
 
+  console.log({pathname, ROUTES, enabled: process.env.RATE_LIMITING_ENABLED});
   if (pathname.startsWith(ROUTES.api["."]) && process.env.RATE_LIMITING_ENABLED === "1") {
     const ip = request.ip ?? "127.0.0.1";
 
-    const ratelimitRes = await ratelimit.limit(ip);
+    let ratelimitRes: Awaited<ReturnType<typeof ratelimiter.limit>>;
+    let domain: "api" | "candlesticks";
+
+    if (pathname.startsWith(ROUTES.api.candlesticks)) {
+      ratelimitRes = await candlesticksRatelimiter.limit(ip);
+      domain = "candlesticks";
+    } else {
+      ratelimitRes = await ratelimiter.limit(ip);
+      domain = "api";
+    }
+
     const { limit, reset, remaining, success } = ratelimitRes;
 
     const headers = {
       "X-RateLimit-Limit": limit.toString(),
       "X-RateLimit-Remaining": remaining.toString(),
       "X-RateLimit-Reset": reset.toString(),
+      "X-RateLimit-Domain": domain,
     };
 
     if (!success) {
