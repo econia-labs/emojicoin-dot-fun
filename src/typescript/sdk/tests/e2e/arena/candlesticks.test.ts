@@ -13,7 +13,6 @@ import {
   TableName,
   toArenaCandlestickModel,
   toMarketLatestStateEventModel,
-  waitForEmojicoinIndexer,
 } from "../../../src/indexer-v2";
 import {
   fetchArenaMeleeView,
@@ -25,11 +24,10 @@ import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
-  PROCESSING_WAIT_TIME,
-  waitForProcessor,
 } from "./utils";
 import { getPublisher } from "../../utils/helpers";
 import type { Account } from "@aptos-labs/ts-sdk";
+import { waitForProcessor } from "../helpers";
 
 const TWO_SECONDS = 2000;
 
@@ -64,7 +62,7 @@ describe("ensures arena candlesticks work", () => {
     await waitUntilCurrentMeleeEnds();
     await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
       melee = res.melee;
-      return waitForEmojicoinIndexer(res.version, PROCESSING_WAIT_TIME);
+      return waitForProcessor(res);
     });
   }, 70000);
 

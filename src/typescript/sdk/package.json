@@ -110,6 +110,7 @@
     "prepublishOnly": "pnpm clean && pnpm i && pnpm check && pnpm build:publish",
     "test:e2e:base-general": "pnpm jest tests/e2e --testPathIgnorePatterns=\"(arena/|broker/)\"",
     "test:e2e:base-ws": "pnpm jest tests/e2e/broker --testPathIgnorePatterns=\"arena\" --runInBand",
+    "test:e2e:candlesticks": "pnpm jest tests/e2e/candlesticks.test.ts --runInBand",
     "test:e2e:arena-candlesticks": "pnpm jest tests/e2e/arena/candlesticks.test.ts --runInBand",
     "test:e2e:arena-general": "pnpm jest tests/e2e/arena/general.test.ts --runInBand",
     "test:e2e:arena-ws": "pnpm jest tests/e2e/arena/websockets.test.ts --runInBand",

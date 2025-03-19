@@ -47,6 +47,7 @@ jobs:
         - pretty-suffix: 'sdk, e2e, arena-general'
         - pretty-suffix: 'sdk, e2e, arena-ws'
         - pretty-suffix: 'sdk, e2e, arena-candlesticks'
+        - pretty-suffix: 'sdk, e2e, candlesticks'
     timeout-minutes: 15
 name: 'Run test suite'
 'on':
