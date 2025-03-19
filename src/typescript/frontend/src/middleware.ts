@@ -39,7 +39,7 @@ export default async function middleware(request: NextRequest) {
     const ip = request.ip ?? "127.0.0.1";
 
     const ratelimitRes = await ratelimit.limit(ip);
-    const {limit, reset, remaining, success } = ratelimitRes;
+    const { limit, reset, remaining, success } = ratelimitRes;
 
     const headers = {
       "X-RateLimit-Limit": limit.toString(),

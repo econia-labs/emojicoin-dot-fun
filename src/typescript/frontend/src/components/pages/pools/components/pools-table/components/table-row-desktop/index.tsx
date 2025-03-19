@@ -40,9 +40,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
     <Tr hover selected={selected} onClick={onClick}>
       <Td p="7px 12px" width={{ _: "25%", tablet: "11.5%" }}>
         <Popup content="go to market">
-          <Link
-            href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}
-          >
+          <Link href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}>
             <Flex justifyContent="space-between" className="cursor-pointer">
               <div className="font-pixelar font-sm text-ec-blue">{"{"}</div>
               <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>

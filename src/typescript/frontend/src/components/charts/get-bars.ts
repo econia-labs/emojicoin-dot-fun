@@ -30,8 +30,9 @@ export const fetchCandlesticksForChart = async ({
     countBack: periodParams.countBack.toString(),
     to: periodParams.to.toString(),
   });
-  return await fetchRateLimitted<PeriodicStateEventModel[]>(`${ROUTES.api.candlesticks}?${params.toString()}`)
-  .then((res) =>
+  return await fetchRateLimitted<PeriodicStateEventModel[]>(
+    `${ROUTES.api.candlesticks}?${params.toString()}`
+  ).then((res) =>
     res
       .sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime))
       .map(toBar)
