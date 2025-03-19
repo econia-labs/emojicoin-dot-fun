@@ -49,12 +49,13 @@ export const fetchCandlesticksForChart = async ({
 
   return await fetchRateLimited<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(
     `${route}?${params.toString()}`
-  ).then((res) =>
-    res
-      .map(toBar)
-        .sort((a, b) => a.time - b.time)
-      .reduce(curriedBarsReducer(periodParams.to), [])
   )
+    .then((res) =>
+      res
+        .map(toBar)
+        .sort((a, b) => a.time - b.time)
+        .reduce(curriedBarsReducer(periodParams.to), [])
+    )
     .catch((error) => {
       console.error(`Couldn't fetch candlesticks from ${route}: ${error}`);
       return [];

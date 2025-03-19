@@ -41,7 +41,7 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
 
-  console.log({pathname, enabled: process.env.RATE_LIMITING_ENABLED});
+  console.log({ pathname, enabled: process.env.RATE_LIMITING_ENABLED });
   if (pathname.startsWith("/api") && process.env.RATE_LIMITING_ENABLED === "1") {
     const ip = request.ip ?? "127.0.0.1";
 
