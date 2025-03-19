@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useCallback, useMemo } from "react";
 import { useMarketRegisterTransactionBuilder } from "lib/hooks/transaction-builders/use-market-register-builder";
+import {RegisterMarket_v2} from "@/contract-apis";
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {
@@ -62,12 +63,18 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
         };
       }
       try {
-        const r = await RegisterMarket.getGasCost({
+        const version2 = (emojiBytes.length > 10 && emojiBytes.length <=32)
+        const r = (version2 ? await RegisterMarket_v2.getGasCost({
           aptosConfig: aptos.config,
           registrant: account.address,
           registrantPubKey: publicKey,
           emojis: numMarkets === 0 ? [SYMBOL_EMOJI_DATA.byName("Virgo")!.bytes] : emojiBytes,
-        });
+        }):await RegisterMarket.getGasCost({
+          aptosConfig: aptos.config,
+          registrant: account.address,
+          registrantPubKey: publicKey,
+          emojis: numMarkets === 0 ? [SYMBOL_EMOJI_DATA.byName("Virgo")!.bytes] : emojiBytes,
+        }));
         return r;
       } catch (e) {
         console.error(e);

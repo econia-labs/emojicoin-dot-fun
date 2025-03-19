@@ -68,8 +68,9 @@ export default function EmojiPicker(
       if (!emoji || typeof emoji !== "string" || mode === "chat" || mode === "search") {
         return false;
       }
+
       const pickerInputBytes = getEmojiData(emoji)?.bytes.length ?? 0;
-      return !isSymbolEmoji(emoji) || currentBytes + pickerInputBytes > MAX_SYMBOL_LENGTH;
+      return !isSymbolEmoji(emoji) || currentBytes + pickerInputBytes > MAX_SYMBOL_LENGTH || emojis.length >3;
     },
     [mode, currentBytes]
   );

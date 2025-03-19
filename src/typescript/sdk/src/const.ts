@@ -10,6 +10,7 @@ import { type ValueOf } from "./utils/utility-types";
 import { type DatabaseStructType } from "./indexer-v2/types/json-types";
 import { type Types } from "./types";
 
+
 export const VERCEL = process.env.VERCEL === "1";
 let vercelTargetEnv: "production" | "preview" | "development" | "release-preview";
 if (
@@ -30,6 +31,7 @@ if (
   !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS ||
   !process.env.NEXT_PUBLIC_APTOS_NETWORK
+
 ) {
   const missing = [
     ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
@@ -38,6 +40,7 @@ if (
     ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
     ["NEXT_PUBLIC_APTOS_NETWORK", process.env.NEXT_PUBLIC_APTOS_NETWORK],
+
   ].filter(([_, value]) => !value);
   missing.forEach(([key, _]) => {
     console.error(`Missing environment variables ${key}`);
@@ -82,6 +85,12 @@ export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
 // var for API keys when changing environments- we just need to provide them all every time, which
 // is much simpler.
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
+export const VERSION_2_MODULE_ADDRESS = (() =>{
+  if(process.env.VERSION_2_EMOJICOIN_DOT_FUN_ADDRESS != undefined){
+      return AccountAddress.from(process.env.VERSION_2_EMOJICOIN_DOT_FUN_ADDRESS )
+  }else{return AccountAddress.from(process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS)}
+})();
+
 export const ARENA_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
@@ -335,7 +344,7 @@ Big.PE = NUM_DECIMALS_BEFORE_SCIENTIFIC_NOTATION;
 
 // Emoji sequence length constraints.
 export const MAX_NUM_CHAT_EMOJIS = 100;
-export const MAX_SYMBOL_LENGTH = 10;
+export const MAX_SYMBOL_LENGTH = 32;
 
 // The default grace period time for a new market registrant to trade on a new market before
 // non-registrants can trade. Note that this period is ended early once the registrant makes a

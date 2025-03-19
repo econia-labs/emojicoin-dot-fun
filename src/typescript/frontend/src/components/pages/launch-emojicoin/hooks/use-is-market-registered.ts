@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEventStore } from "context/event-store-context";
 import { SYMBOL_EMOJI_DATA, type SymbolEmoji } from "@sdk/emoji_data";
+import {MarketMetadataByEmojiBytes_version2} from "@/contract-apis/emojicoin-dot-fun_v2";
 
 const encoder = new TextEncoder();
 
@@ -14,12 +15,14 @@ export const useIsMarketRegistered = () => {
   const getMarket = useEventStore((state) => state.getMarket);
   const { aptos } = useAptos();
   const emojiBytes = normalizeHex(encoder.encode(emojis.join("")));
+  const length = sumBytes(emojis);
+  const version_2 = (length > 10 && length <= 32);
 
   const { data } = useQuery({
-    queryKey: [MarketMetadataByEmojiBytes.prototype.functionName, aptos.config.network, emojiBytes],
+    queryKey: [version_2?MarketMetadataByEmojiBytes_version2.prototype.functionName:MarketMetadataByEmojiBytes.prototype.functionName, aptos.config.network, emojiBytes],
     queryFn: async () => {
-      const length = sumBytes(emojis);
-      const invalidLength = length === 0 || length > 10;
+
+      const invalidLength = length === 0 || length > 32;
       // If not all of the emojis are in the symbol data map, then it can't have been registered.
       if (!emojis.every(SYMBOL_EMOJI_DATA.byEmoji)) {
         return {
@@ -39,10 +42,17 @@ export const useIsMarketRegistered = () => {
           registered: inSymbolMap ? true : undefined,
         };
       }
-      const registered = await MarketMetadataByEmojiBytes.view({
+
+
+      const registered = (version_2 ?  await MarketMetadataByEmojiBytes_version2.view({
         aptos: aptos.config,
         emojiBytes,
-      }).then((res) => typeof res.vec.at(0) !== "undefined");
+      }).then((res) => typeof res.vec.at(0) !== "undefined")
+    : await MarketMetadataByEmojiBytes.view({
+        aptos: aptos.config,
+        emojiBytes,
+      }).then((res) => typeof res.vec.at(0) !== "undefined")
+     )
 
       return {
         invalid: invalidLength || registered,

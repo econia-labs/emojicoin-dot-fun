@@ -3,7 +3,7 @@ import { toPriceFeed } from "@sdk/indexer-v2/types";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import StatsPageComponent from "./StatsPage";
 import { compareNumber, getAptosClient } from "@sdk/utils";
-import { RegistryView } from "@/contract-apis";
+import {RegistryView, RegistryView_v2} from "@/contract-apis";
 import { toRegistryView } from "@sdk-types";
 import { ORDER_BY } from "@sdk/indexer-v2/const";
 
@@ -53,7 +53,9 @@ export default async function Stats() {
   const tvlDataPromise = paginateAll(SortMarketsBy.Tvl);
   const registryResourcePromise = RegistryView.view({ aptos: getAptosClient() }).then(
     toRegistryView
-  );
+  ).catch(()=>RegistryView_v2.view({ aptos: getAptosClient() }).then(
+      toRegistryView
+  ));
   const [
     dailyVolumeData,
     priceFeedData,

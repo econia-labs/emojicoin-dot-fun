@@ -1,6 +1,6 @@
 import { type LedgerVersionArg, type TypeTag } from "@aptos-labs/ts-sdk";
 import { toMarketEmojiData, type SymbolEmoji } from "../emoji_data";
-import { EmojicoinArena, getMarketAddress, MarketView } from "../emojicoin_dot_fun";
+import {EmojicoinArena, getMarketAddress, MarketView, MarketView_v2} from "../emojicoin_dot_fun";
 import { toCoinTypesForEntry } from "./utils";
 import { getAptosClient } from "../utils";
 import { toArenaMeleeEvent, toArenaRegistry } from "../types/arena-types";
@@ -71,17 +71,31 @@ export const fetchMeleeEmojiData = async (
   view: Awaited<ReturnType<typeof fetchArenaMeleeView>>
 ) => {
   const [symbol1, symbol2] = await Promise.all(
-    [view.emojicoin0MarketAddress, view.emojicoin1MarketAddress].map((marketAddress) =>
-      MarketView.view({
-        aptos: getAptosClient(),
-        marketAddress,
-      })
-        .then(toMarketView)
-        .then(({ metadata }) => ({
-          marketID: metadata.marketID,
-          marketAddress: metadata.marketAddress,
-          ...toMarketEmojiData(metadata.emojiBytes),
-        }))
+    [view.emojicoin0MarketAddress, view.emojicoin1MarketAddress].map((marketAddress) => {
+            try {
+                return MarketView.view({
+                    aptos: getAptosClient(),
+                    marketAddress,
+                })
+                    .then(toMarketView)
+                    .then(({metadata}) => ({
+                        marketID: metadata.marketID,
+                        marketAddress: metadata.marketAddress,
+                        ...toMarketEmojiData(metadata.emojiBytes),
+                    }))
+            } catch (e: unknown) {
+                return MarketView_v2.view({
+                    aptos: getAptosClient(),
+                    marketAddress,
+                })
+                    .then(toMarketView)
+                    .then(({metadata}) => ({
+                        marketID: metadata.marketID,
+                        marketAddress: metadata.marketAddress,
+                        ...toMarketEmojiData(metadata.emojiBytes),
+                    }))
+            }
+        }
     )
   );
   const [coin0, lp0, coin1, lp1] = toArenaCoinTypes({

@@ -1,6 +1,6 @@
 "use client";
 
-import { MarketMetadataByMarketAddress, MarketProperties } from "@/contract-apis";
+import {MarketMetadataByMarketAddress, MarketMetadataByMarketAddress_v2, MarketProperties} from "@/contract-apis";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -98,6 +98,16 @@ const MetadataPage = () => {
           "Failed to call the emojicoin_dot_fun::MarketMetadataByMarketAddress view function.",
           e
         );
+        try {
+          const market = await MarketMetadataByMarketAddress_v2.view({
+            aptos,
+            marketAddress,
+          });
+          return market.vec.length !== 0;
+        } catch (errorV2: any) {
+          console.error("V2 呼叫失敗", errorV2);
+          return false;
+        }
         return false;
       }
     },

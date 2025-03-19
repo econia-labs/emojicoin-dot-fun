@@ -18,7 +18,7 @@ import {
   type UserTransactionResponse,
   type LedgerVersionArg,
   SimpleTransaction,
-  type PublicKey,
+  type PublicKey, Ed25519PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -33,11 +33,11 @@ import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
 } from "../payload-builders";
-import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../../const";
+import {  REWARDS_MODULE_ADDRESS ,VERSION_2_MODULE_ADDRESS} from "../../const";
 import type JsonTypes from "../../types/json-types";
 import { getAptosClient } from "../../utils/aptos-client";
 
-export type ChatPayloadMoveArguments = {
+export type ChatPayloadMoveArguments_v2 = {
   marketAddress: AccountAddress;
   emojiBytes: MoveVector<MoveVector<U8>>;
   emojiIndicesSequence: MoveVector<U8>;
@@ -54,14 +54,14 @@ export type ChatPayloadMoveArguments = {
  *```
  * */
 
-export class Chat extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class Chat_v2 extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "chat";
 
-  public readonly args: ChatPayloadMoveArguments;
+  public readonly args: ChatPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
@@ -130,7 +130,7 @@ export class Chat extends EntryFunctionPayloadBuilder {
   }): Promise<UserTransactionResponse> {
     const { user: primarySigner, waitForTransactionOptions, feePayer } = args;
 
-    const transactionBuilder = await Chat.builder({
+    const transactionBuilder = await Chat_v2.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
       user: primarySigner.accountAddress,
@@ -144,7 +144,7 @@ export class Chat extends EntryFunctionPayloadBuilder {
   }
 }
 
-export type ProvideLiquidityPayloadMoveArguments = {
+export type ProvideLiquidityPayloadMoveArguments_v2 = {
   marketAddress: AccountAddress;
   quoteAmount: U64;
   minLpCoinsOut: U64;
@@ -161,14 +161,14 @@ export type ProvideLiquidityPayloadMoveArguments = {
  *```
  * */
 
-export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class ProvideLiquidity_v2 extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "provide_liquidity";
 
-  public readonly args: ProvideLiquidityPayloadMoveArguments;
+  public readonly args: ProvideLiquidityPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
@@ -237,7 +237,7 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
   }): Promise<UserTransactionResponse> {
     const { provider: primarySigner, waitForTransactionOptions, feePayer } = args;
 
-    const transactionBuilder = await ProvideLiquidity.builder({
+    const transactionBuilder = await ProvideLiquidity_v2.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
       provider: primarySigner.accountAddress,
@@ -251,7 +251,7 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
   }
 }
 
-export type RegisterMarketPayloadMoveArguments = {
+export type RegisterMarketPayloadMoveArguments_v2 = {
   emojis: MoveVector<MoveVector<U8>>;
   integrator: AccountAddress;
 };
@@ -266,14 +266,14 @@ export type RegisterMarketPayloadMoveArguments = {
  *```
  * */
 
-export class RegisterMarket extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class RegisterMarket_v2 extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "register_market";
 
-  public readonly args: RegisterMarketPayloadMoveArguments;
+  public readonly args: RegisterMarketPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -301,10 +301,10 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   }
 
   static async getGasCost(args: {
+    emojis: Uint8Array[];
     aptosConfig: AptosConfig;
-    registrant: AccountAddressInput; // &signer
-    registrantPubKey: PublicKey;
-    emojis: Array<HexInput>; // vector<vector<u8>>
+    registrant: string;
+    registrantPubKey: Ed25519PublicKey
   }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
     const { aptosConfig } = args;
 
@@ -367,7 +367,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   }): Promise<UserTransactionResponse> {
     const { registrant: primarySigner, waitForTransactionOptions, feePayer } = args;
 
-    const transactionBuilder = await RegisterMarket.builder({
+    const transactionBuilder = await RegisterMarket_v2.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
       registrant: primarySigner.accountAddress,
@@ -381,7 +381,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   }
 }
 
-export type RemoveLiquidityPayloadMoveArguments = {
+export type RemoveLiquidityPayloadMoveArguments_v2 = {
   marketAddress: AccountAddress;
   lpCoinAmount: U64;
   minQuoteOut: U64;
@@ -398,14 +398,14 @@ export type RemoveLiquidityPayloadMoveArguments = {
  *```
  * */
 
-export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class RemoveLiquidity_v2 extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "remove_liquidity";
 
-  public readonly args: RemoveLiquidityPayloadMoveArguments;
+  public readonly args: RemoveLiquidityPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
@@ -474,7 +474,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
   }): Promise<UserTransactionResponse> {
     const { provider: primarySigner, waitForTransactionOptions, feePayer } = args;
 
-    const transactionBuilder = await RemoveLiquidity.builder({
+    const transactionBuilder = await RemoveLiquidity_v2.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
       provider: primarySigner.accountAddress,
@@ -488,7 +488,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
   }
 }
 
-export type SwapPayloadMoveArguments = {
+export type SwapPayloadMoveArguments_v2 = {
   marketAddress: AccountAddress;
   inputAmount: U64;
   isSell: Bool;
@@ -511,14 +511,14 @@ export type SwapPayloadMoveArguments = {
  *```
  * */
 
-export class Swap extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class Swap_v2 extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "swap";
 
-  public readonly args: SwapPayloadMoveArguments;
+  public readonly args: SwapPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
@@ -609,7 +609,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
   }): Promise<UserTransactionResponse> {
     const { swapper: primarySigner, waitForTransactionOptions, feePayer } = args;
 
-    const transactionBuilder = await Swap.builder({
+    const transactionBuilder = await Swap_v2.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
       swapper: primarySigner.accountAddress,
@@ -660,7 +660,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
   }
 }
 
-export type SwapWithRewardsPayloadMoveArguments = {
+export type SwapWithRewardsPayloadMoveArguments_v2 = {
   marketAddress: AccountAddress;
   inputAmount: U64;
   isSell: Bool;
@@ -679,14 +679,14 @@ export type SwapWithRewardsPayloadMoveArguments = {
  *```
  * */
 
-export class SwapWithRewards extends EntryFunctionPayloadBuilder {
+export class SwapWithRewards_v2 extends EntryFunctionPayloadBuilder {
   public readonly moduleAddress = REWARDS_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun_rewards";
 
   public readonly functionName = "swap_with_rewards";
 
-  public readonly args: SwapWithRewardsPayloadMoveArguments;
+  public readonly args: SwapWithRewardsPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
@@ -760,7 +760,7 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
   }): Promise<UserTransactionResponse> {
     const { swapper: primarySigner, waitForTransactionOptions, feePayer } = args;
 
-    const transactionBuilder = await SwapWithRewards.builder({
+    const transactionBuilder = await SwapWithRewards_v2.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
       swapper: primarySigner.accountAddress,
@@ -774,7 +774,7 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
   }
 }
 
-export type IsASupplementalChatEmojiPayloadMoveArguments = {
+export type IsASupplementalChatEmojiPayloadMoveArguments_v2 = {
   hexBytes: MoveVector<U8>;
 };
 
@@ -787,14 +787,14 @@ export type IsASupplementalChatEmojiPayloadMoveArguments = {
  *```
  * */
 
-export class IsASupplementalChatEmoji extends ViewFunctionPayloadBuilder<[boolean]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class IsASupplementalChatEmoji_v2 extends ViewFunctionPayloadBuilder<[boolean]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "is_a_supplemental_chat_emoji";
 
-  public readonly args: IsASupplementalChatEmojiPayloadMoveArguments;
+  public readonly args: IsASupplementalChatEmojiPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -814,12 +814,12 @@ export class IsASupplementalChatEmoji extends ViewFunctionPayloadBuilder<[boolea
     hexBytes: HexInput; // vector<u8>
     options?: LedgerVersionArg;
   }): Promise<boolean> {
-    const [res] = await new IsASupplementalChatEmoji(args).view(args);
+    const [res] = await new IsASupplementalChatEmoji_v2(args).view(args);
     return res;
   }
 }
 
-export type IsASupportedChatEmojiPayloadMoveArguments = {
+export type IsASupportedChatEmojiPayloadMoveArguments_v2 = {
   hexBytes: MoveVector<U8>;
 };
 
@@ -832,14 +832,14 @@ export type IsASupportedChatEmojiPayloadMoveArguments = {
  *```
  * */
 
-export class IsASupportedChatEmoji extends ViewFunctionPayloadBuilder<[boolean]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class IsASupportedChatEmoji_v2 extends ViewFunctionPayloadBuilder<[boolean]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "is_a_supported_chat_emoji";
 
-  public readonly args: IsASupportedChatEmojiPayloadMoveArguments;
+  public readonly args: IsASupportedChatEmojiPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -859,12 +859,12 @@ export class IsASupportedChatEmoji extends ViewFunctionPayloadBuilder<[boolean]>
     hexBytes: HexInput; // vector<u8>
     options?: LedgerVersionArg;
   }): Promise<boolean> {
-    const [res] = await new IsASupportedChatEmoji(args).view(args);
+    const [res] = await new IsASupportedChatEmoji_v2(args).view(args);
     return res;
   }
 }
 
-export type IsASupportedSymbolEmojiPayloadMoveArguments = {
+export type IsASupportedSymbolEmojiPayloadMoveArguments_v2 = {
   hexBytes: MoveVector<U8>;
 };
 
@@ -877,14 +877,14 @@ export type IsASupportedSymbolEmojiPayloadMoveArguments = {
  *```
  * */
 
-export class IsASupportedSymbolEmoji extends ViewFunctionPayloadBuilder<[boolean]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class IsASupportedSymbolEmoji_v2 extends ViewFunctionPayloadBuilder<[boolean]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "is_a_supported_symbol_emoji";
 
-  public readonly args: IsASupportedSymbolEmojiPayloadMoveArguments;
+  public readonly args: IsASupportedSymbolEmojiPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -904,12 +904,12 @@ export class IsASupportedSymbolEmoji extends ViewFunctionPayloadBuilder<[boolean
     hexBytes: HexInput; // vector<u8>
     options?: LedgerVersionArg;
   }): Promise<boolean> {
-    const [res] = await new IsASupportedSymbolEmoji(args).view(args);
+    const [res] = await new IsASupportedSymbolEmoji_v2(args).view(args);
     return res;
   }
 }
 
-export type MarketMetadataByEmojiBytesPayloadMoveArguments = {
+export type MarketMetadataByEmojiBytesPayloadMoveArguments_v2 = {
   emojiBytes: MoveVector<U8>;
 };
 
@@ -922,16 +922,16 @@ export type MarketMetadataByEmojiBytesPayloadMoveArguments = {
  *```
  * */
 
-export class MarketMetadataByEmojiBytes extends ViewFunctionPayloadBuilder<
-  [Option<JsonTypes["MarketMetadata"]>]
+export class MarketMetadataByEmojiBytes_version2 extends ViewFunctionPayloadBuilder<
+    [Option<JsonTypes["MarketMetadata"]>]
 > {
-  public readonly moduleAddress =MODULE_ADDRESS;
+  public readonly moduleAddress =VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "market_metadata_by_emoji_bytes";
 
-  public readonly args: MarketMetadataByEmojiBytesPayloadMoveArguments;
+  public readonly args: MarketMetadataByEmojiBytesPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -951,16 +951,13 @@ export class MarketMetadataByEmojiBytes extends ViewFunctionPayloadBuilder<
     emojiBytes: HexInput; // vector<u8>
     options?: LedgerVersionArg;
   }): Promise<Option<JsonTypes["MarketMetadata"]>> {
-    const [res] = await new MarketMetadataByEmojiBytes(args).view(args);
+    const [res] = await new MarketMetadataByEmojiBytes_version2(args).view(args);
     return res;
   }
 }
 
 
-
-
-
-export type MarketMetadataByMarketAddressPayloadMoveArguments = {
+export type MarketMetadataByMarketAddressPayloadMoveArguments_v2 = {
   marketAddress: AccountAddress;
 };
 
@@ -973,16 +970,16 @@ export type MarketMetadataByMarketAddressPayloadMoveArguments = {
  *```
  * */
 
-export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<
+export class MarketMetadataByMarketAddress_v2 extends ViewFunctionPayloadBuilder<
   [Option<JsonTypes["MarketMetadata"]>]
 > {
-  public readonly moduleAddress = MODULE_ADDRESS;
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "market_metadata_by_market_address";
 
-  public readonly args: MarketMetadataByMarketAddressPayloadMoveArguments;
+  public readonly args: MarketMetadataByMarketAddressPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -1002,12 +999,12 @@ export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<
     marketAddress: AccountAddressInput; // address
     options?: LedgerVersionArg;
   }): Promise<Option<JsonTypes["MarketMetadata"]>> {
-    const [res] = await new MarketMetadataByMarketAddress(args).view(args);
+    const [res] = await new MarketMetadataByMarketAddress_v2(args).view(args);
     return res;
   }
 }
 
-export type MarketMetadataByMarketIDPayloadMoveArguments = {
+export type MarketMetadataByMarketIDPayloadMoveArguments_v2 = {
   marketID: U64;
 };
 
@@ -1020,16 +1017,16 @@ export type MarketMetadataByMarketIDPayloadMoveArguments = {
  *```
  * */
 
-export class MarketMetadataByMarketID extends ViewFunctionPayloadBuilder<
+export class MarketMetadataByMarketID_v2 extends ViewFunctionPayloadBuilder<
   [Option<JsonTypes["MarketMetadata"]>]
 > {
-  public readonly moduleAddress = MODULE_ADDRESS;
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "market_metadata_by_market_id";
 
-  public readonly args: MarketMetadataByMarketIDPayloadMoveArguments;
+  public readonly args: MarketMetadataByMarketIDPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -1049,12 +1046,12 @@ export class MarketMetadataByMarketID extends ViewFunctionPayloadBuilder<
     marketID: Uint64; // u64
     options?: LedgerVersionArg;
   }): Promise<Option<JsonTypes["MarketMetadata"]>> {
-    const [res] = await new MarketMetadataByMarketID(args).view(args);
+    const [res] = await new MarketMetadataByMarketID_v2(args).view(args);
     return res;
   }
 }
 
-export type MarketViewPayloadMoveArguments = {
+export type MarketViewPayloadMoveArguments_v2 = {
   marketAddress: AccountAddress;
 };
 
@@ -1067,14 +1064,14 @@ export type MarketViewPayloadMoveArguments = {
  *```
  * */
 
-export class MarketView extends ViewFunctionPayloadBuilder<[JsonTypes["MarketView"]]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class MarketView_v2 extends ViewFunctionPayloadBuilder<[JsonTypes["MarketView"]]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "market_view";
 
-  public readonly args: MarketViewPayloadMoveArguments;
+  public readonly args: MarketViewPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
@@ -1101,7 +1098,7 @@ export class MarketView extends ViewFunctionPayloadBuilder<[JsonTypes["MarketVie
     const marketAddress = AccountAddress.from(args.marketAddress);
     const emojicoin = parseTypeTag(`${marketAddress.toString()}::coin_factory::Emojicoin`);
     const emojicoinLP = parseTypeTag(`${marketAddress.toString()}::coin_factory::EmojicoinLP`);
-    const [res] = await new MarketView({
+    const [res] = await new MarketView_v2({
       ...args,
       typeTags: [emojicoin, emojicoinLP],
     }).view(args);
@@ -1116,8 +1113,8 @@ export class MarketView extends ViewFunctionPayloadBuilder<[JsonTypes["MarketVie
  *```
  * */
 
-export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressString]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class RegistryAddress_v2 extends ViewFunctionPayloadBuilder<[AccountAddressString]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
@@ -1137,7 +1134,7 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
     aptos: Aptos | AptosConfig;
     options?: LedgerVersionArg;
   }): Promise<AccountAddressString> {
-    const [res] = await new RegistryAddress().view(args);
+    const [res] = await new RegistryAddress_v2().view(args);
     return res;
   }
 }
@@ -1149,8 +1146,8 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
  *```
  * */
 
-export class RegistryView extends ViewFunctionPayloadBuilder<[JsonTypes["RegistryView"]]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class RegistryView_v2 extends ViewFunctionPayloadBuilder<[JsonTypes["RegistryView"]]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
@@ -1170,12 +1167,12 @@ export class RegistryView extends ViewFunctionPayloadBuilder<[JsonTypes["Registr
     aptos: Aptos | AptosConfig;
     options?: LedgerVersionArg;
   }): Promise<JsonTypes["RegistryView"]> {
-    const [res] = await new RegistryView().view(args);
+    const [res] = await new RegistryView_v2().view(args);
     return res;
   }
 }
 
-export type SimulateProvideLiquidityPayloadMoveArguments = {
+export type SimulateProvideLiquidityPayloadMoveArguments_v2 = {
   provider: AccountAddress;
   marketAddress: AccountAddress;
   quoteAmount: U64;
@@ -1192,16 +1189,16 @@ export type SimulateProvideLiquidityPayloadMoveArguments = {
  *```
  * */
 
-export class SimulateProvideLiquidity extends ViewFunctionPayloadBuilder<
+export class SimulateProvideLiquidity_v2 extends ViewFunctionPayloadBuilder<
   [JsonTypes["LiquidityEvent"]]
 > {
-  public readonly moduleAddress = MODULE_ADDRESS;
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "simulate_provide_liquidity";
 
-  public readonly args: SimulateProvideLiquidityPayloadMoveArguments;
+  public readonly args: SimulateProvideLiquidityPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -1227,12 +1224,12 @@ export class SimulateProvideLiquidity extends ViewFunctionPayloadBuilder<
     quoteAmount: Uint64; // u64
     options?: LedgerVersionArg;
   }): Promise<JsonTypes["LiquidityEvent"]> {
-    const [res] = await new SimulateProvideLiquidity(args).view(args);
+    const [res] = await new SimulateProvideLiquidity_v2(args).view(args);
     return res;
   }
 }
 
-export type SimulateRemoveLiquidityPayloadMoveArguments = {
+export type SimulateRemoveLiquidityPayloadMoveArguments_v2 = {
   provider: AccountAddress;
   marketAddress: AccountAddress;
   lpCoinAmount: U64;
@@ -1249,16 +1246,16 @@ export type SimulateRemoveLiquidityPayloadMoveArguments = {
  *```
  * */
 
-export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<
+export class SimulateRemoveLiquidity_v2 extends ViewFunctionPayloadBuilder<
   [JsonTypes["LiquidityEvent"]]
 > {
-  public readonly moduleAddress = MODULE_ADDRESS;
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "simulate_remove_liquidity";
 
-  public readonly args: SimulateRemoveLiquidityPayloadMoveArguments;
+  public readonly args: SimulateRemoveLiquidityPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag]; // [Emojicoin]
 
@@ -1289,12 +1286,12 @@ export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<
     typeTags: [TypeTagInput]; // [Emojicoin]
     options?: LedgerVersionArg;
   }): Promise<JsonTypes["LiquidityEvent"]> {
-    const [res] = await new SimulateRemoveLiquidity(args).view(args);
+    const [res] = await new SimulateRemoveLiquidity_v2(args).view(args);
     return res;
   }
 }
 
-export type SimulateSwapPayloadMoveArguments = {
+export type SimulateSwapPayloadMoveArguments_v2 = {
   swapper: AccountAddress;
   marketAddress: AccountAddress;
   inputAmount: U64;
@@ -1317,14 +1314,14 @@ export type SimulateSwapPayloadMoveArguments = {
  *```
  * */
 
-export class SimulateSwap extends ViewFunctionPayloadBuilder<[JsonTypes["SwapEvent"]]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class SimulateSwap_v2 extends ViewFunctionPayloadBuilder<[JsonTypes["SwapEvent"]]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "simulate_swap";
 
-  public readonly args: SimulateSwapPayloadMoveArguments;
+  public readonly args: SimulateSwapPayloadMoveArguments_v2;
 
   public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
@@ -1372,12 +1369,12 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JsonTypes["SwapEve
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     options?: LedgerVersionArg;
   }): Promise<JsonTypes["SwapEvent"]> {
-    const [res] = await new SimulateSwap(args).view(args);
+    const [res] = await new SimulateSwap_v2(args).view(args);
     return res;
   }
 }
 
-export type VerifiedSymbolEmojiBytesPayloadMoveArguments = {
+export type VerifiedSymbolEmojiBytesPayloadMoveArguments_v2 = {
   emojis: MoveVector<MoveVector<U8>>;
 };
 
@@ -1390,14 +1387,14 @@ export type VerifiedSymbolEmojiBytesPayloadMoveArguments = {
  *```
  * */
 
-export class VerifiedSymbolEmojiBytes extends ViewFunctionPayloadBuilder<[HexString]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+export class VerifiedSymbolEmojiBytes_v2 extends ViewFunctionPayloadBuilder<[HexString]> {
+  public readonly moduleAddress = VERSION_2_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
   public readonly functionName = "verified_symbol_emoji_bytes";
 
-  public readonly args: VerifiedSymbolEmojiBytesPayloadMoveArguments;
+  public readonly args: VerifiedSymbolEmojiBytesPayloadMoveArguments_v2;
 
   public readonly typeTags: [] = [];
 
@@ -1417,7 +1414,7 @@ export class VerifiedSymbolEmojiBytes extends ViewFunctionPayloadBuilder<[HexStr
     emojis: Array<HexInput>; // vector<vector<u8>>
     options?: LedgerVersionArg;
   }): Promise<HexString> {
-    const [res] = await new VerifiedSymbolEmojiBytes(args).view(args);
+    const [res] = await new VerifiedSymbolEmojiBytes_v2(args).view(args);
     return res;
   }
 }

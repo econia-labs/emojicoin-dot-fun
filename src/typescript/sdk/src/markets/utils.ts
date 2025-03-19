@@ -18,7 +18,7 @@ import {
   EmojicoinDotFun,
   MarketView,
   REGISTRY_ADDRESS,
-  getMarketAddress,
+  getMarketAddress, MarketView_v2,
 } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
@@ -399,7 +399,18 @@ export const fetchCirculatingSupply = async (
   })
     .then(toMarketView)
     .then(calculateCirculatingSupply)
-    .catch(() => undefined);
+    .catch(()=>MarketView_v2.view({
+      aptos: getAptosClient(),
+      marketAddress: getMarketAddress(emojis),
+      options: ledgerVersion
+          ? {
+            ledgerVersion: BigInt(ledgerVersion),
+          }
+          : {},
+    })
+        .then(toMarketView)
+        .then(calculateCirculatingSupply)
+        .catch(() => undefined));
 
 /**
  * Calculates the real reserves of a market based on the given market state.
@@ -464,7 +475,18 @@ export const fetchRealReserves = async (
   })
     .then(toMarketView)
     .then(calculateRealReserves)
-    .catch(() => undefined);
+    .catch(() => MarketView_v2.view({
+      aptos: getAptosClient(),
+      marketAddress: getMarketAddress(emojis),
+      options: ledgerVersion
+          ? {
+            ledgerVersion: BigInt(ledgerVersion),
+          }
+          : {},
+    })
+        .then(toMarketView)
+        .then(calculateRealReserves)
+        .catch(() => undefined));
 
 /**
  * @see {@link https://mikemcl.github.io/big.js/#faq}

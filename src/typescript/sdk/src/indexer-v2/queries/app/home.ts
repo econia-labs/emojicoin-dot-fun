@@ -1,3 +1,5 @@
+import {RegistryView_v2} from "@/contract-apis";
+
 if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
@@ -125,7 +127,13 @@ export const fetchNumRegisteredMarkets = async () => {
   } catch (e: unknown) {
     // If the view function fails for some reason, find the largest market id in the database for a
     // cheap fetch of the number of registered markets. Also because `count: exact` does not work.
-    return await fetchLargestMarketID();
+    const numRegisteredMarkets = await RegistryView_v2.view({
+      aptos,
+      options: {
+        ledgerVersion: latestVersion,
+      },
+    }).then((r) => toRegistryView(r).numMarkets).catch(async()=> {return await fetchLargestMarketID()})
+    return Number(numRegisteredMarkets)
   }
 };
 

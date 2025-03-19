@@ -96,7 +96,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           <MarketValidityIndicator
             className={
               emojis.length !== 0 &&
-              numBytes <= 10 &&
+              numBytes <= 32 &&
               (registered || typeof registered === "undefined")
                 ? "opacity-[0.65]"
                 : ""

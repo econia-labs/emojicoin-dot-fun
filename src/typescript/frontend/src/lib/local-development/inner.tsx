@@ -72,6 +72,7 @@ export const InnerDisplayDebugData = () => {
     const iterEmojis: SymbolEmoji[] = ["⚽", "🎐", "🍧", "🏔️", "🌨️", "❄️"];
     for (const emojis of iterEmojis.map((v) => [v])) {
       try {
+
         // This is not robust. Just for testing.
         const exists = await MarketMetadataByMarketAddress.view({
           aptos: getAptosClient().config,

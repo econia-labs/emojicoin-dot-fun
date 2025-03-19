@@ -15,6 +15,7 @@
       <excludeFolder url="file://$MODULE_DIR$/src/move/test_coin_factories/yin_yang/build" />
       <excludeFolder url="file://$MODULE_DIR$/src/move/test_coin_factories/zebra/build" />
       <excludeFolder url="file://$MODULE_DIR$/src/move/test_coin_factories/zombie/build" />
+      <excludeFolder url="file://$MODULE_DIR$/src/move/emojicoin_dot_fun_v2/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

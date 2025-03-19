@@ -11,7 +11,14 @@ import {
   type LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
-import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
+import {
+  Chat_v2,
+  EmojicoinArena,
+  EmojicoinDotFun,
+  getEvents, MarketView_v2,
+  ProvideLiquidity_v2,
+  RegisterMarket_v2, RemoveLiquidity_v2, Swap_v2
+} from "../emojicoin_dot_fun";
 import {
   Chat,
   ProvideLiquidity,
@@ -27,7 +34,7 @@ import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
-import { waitFor } from "../utils";
+import {sumBytes, waitFor} from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
 import { toMarketView, toRegistryView, toSwapEvent, type AnyNumberString } from "../types";
@@ -247,7 +254,10 @@ export class EmojicoinClient {
     transactionOptions?: Options
   ) {
     const { feePayer, waitForTransactionOptions, options } = transactionOptions ?? {};
-    const response = await RegisterMarket.submit({
+    const emojiBytes = sumBytes( symbolEmojis);
+    const version2 = (emojiBytes > 10 && emojiBytes <=32)
+
+    const response = (version2 ? await RegisterMarket_v2.submit({
       aptosConfig: this.aptos.config,
       registrant,
       emojis: this.emojisToHexStrings(symbolEmojis),
@@ -258,7 +268,19 @@ export class EmojicoinClient {
       },
       feePayer,
       waitForTransactionOptions,
-    });
+    }):
+        await RegisterMarket.submit({
+          aptosConfig: this.aptos.config,
+          registrant,
+          emojis: this.emojisToHexStrings(symbolEmojis),
+          integrator: this.integrator,
+          options: {
+            ...DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+            ...options,
+          },
+          feePayer,
+          waitForTransactionOptions,
+        }));
     const res = this.getTransactionEventData(response);
     const marketID = res.events.marketRegistrationEvents[0].marketID;
     if (this.alwaysWaitForIndexer) {
@@ -284,15 +306,27 @@ export class EmojicoinClient {
       typeof message === "string"
         ? toChatMessageEntryFunctionArgs(message)
         : toChatMessageEntryFunctionArgs(message.join(""));
-
-    const response = await Chat.submit({
+    const version_2 = (emojiBytes.length > 10 && emojiBytes.length <= 32);
+    const response = (version_2 ?
+        //  10 < x <= 32
+        await Chat_v2.submit({
       aptosConfig: this.aptos.config,
       user,
       emojiBytes,
       emojiIndicesSequence,
       ...options,
       ...this.getEmojicoinInfo(symbolEmojis),
-    });
+    })
+        :
+        // x <= 10
+        await Chat.submit({
+          aptosConfig: this.aptos.config,
+          user,
+          emojiBytes,
+          emojiIndicesSequence,
+          ...options,
+          ...this.getEmojicoinInfo(symbolEmojis),
+        }));
     const res = this.getTransactionEventData(response);
     const { emitMarketNonce, marketID } = res.events.chatEvents[0];
     if (this.alwaysWaitForIndexer) {
@@ -417,7 +451,11 @@ export class EmojicoinClient {
       marketAddress,
       aptos: this.aptos,
       options,
-    }).then(toMarketView);
+    }).then(toMarketView).catch(async ()=> await  MarketView_v2.view(({
+      marketAddress,
+      aptos: this.aptos,
+      options,
+    })).then(toMarketView))
   }
 
   private async swap(
@@ -432,13 +470,22 @@ export class EmojicoinClient {
     },
     options?: Options
   ) {
-    const response = await Swap.submit({
+    const length = sumBytes(symbolEmojis)
+    const version2 = (length > 10 && length <=32)
+
+    const response = (version2 ? await Swap_v2.submit({
       aptosConfig: this.aptos.config,
       swapper,
       ...args,
       ...options,
       ...this.getEmojicoinInfo(symbolEmojis),
-    });
+    }):await Swap.submit({
+      aptosConfig: this.aptos.config,
+      swapper,
+      ...args,
+      ...options,
+      ...this.getEmojicoinInfo(symbolEmojis),
+    }));
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.swapEvents[0];
     if (this.alwaysWaitForIndexer) {
@@ -518,14 +565,24 @@ export class EmojicoinClient {
     quoteAmount: bigint | number,
     options?: Options
   ) {
-    const response = await ProvideLiquidity.submit({
+    const length = sumBytes(symbolEmojis);
+    const response =((length > 10 && length <=32 )?
+        await ProvideLiquidity_v2.submit({
+          aptosConfig: this.aptos.config,
+          provider,
+          quoteAmount,
+          minLpCoinsOut: this.minOutputAmount,
+          ...options,
+          ...this.getEmojicoinInfo(symbolEmojis),
+        })
+    : await ProvideLiquidity.submit({
       aptosConfig: this.aptos.config,
       provider,
       quoteAmount,
       minLpCoinsOut: this.minOutputAmount,
       ...options,
       ...this.getEmojicoinInfo(symbolEmojis),
-    });
+    }));
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.liquidityEvents[0];
     if (this.alwaysWaitForIndexer) {
@@ -546,14 +603,23 @@ export class EmojicoinClient {
     lpCoinAmount: bigint | number,
     options?: Options
   ) {
-    const response = await RemoveLiquidity.submit({
+    const length = sumBytes(symbolEmojis)
+    const version2 = (length > 10 && length <=32)
+    const response = (version2 ? await RemoveLiquidity_v2.submit({
       aptosConfig: this.aptos.config,
       provider,
       lpCoinAmount,
       minQuoteOut: this.minOutputAmount,
       ...options,
       ...this.getEmojicoinInfo(symbolEmojis),
-    });
+    }):await RemoveLiquidity.submit({
+      aptosConfig: this.aptos.config,
+      provider,
+      lpCoinAmount,
+      minQuoteOut: this.minOutputAmount,
+      ...options,
+      ...this.getEmojicoinInfo(symbolEmojis),
+    }));
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.liquidityEvents[0];
     if (this.alwaysWaitForIndexer) {

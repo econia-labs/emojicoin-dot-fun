@@ -48,7 +48,7 @@ export const MarketValidityIndicator = ({
       {mode === "register" && (
         <div className="uppercase pixel-heading-4">
           {invalidLength ? (
-            length > 10 ? (
+            length > 32 ? (
               <div className="text-error">Too many bytes</div>
             ) : null
           ) : typeof registered === "undefined" ? (
