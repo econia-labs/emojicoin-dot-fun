@@ -11,6 +11,7 @@ const expanded = expandRoutes({
       candlesticks: _,
     },
     candlesticks: _,
+    chats: _,
     dexscreener: {
       asset: _,
       pair: _,

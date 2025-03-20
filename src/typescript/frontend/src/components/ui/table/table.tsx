@@ -92,57 +92,72 @@ TableCaption.displayName = "TableCaption";
 
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
-  HTMLMotionProps<"tr"> & { noHover?: boolean; isHeader?: boolean; index?: number; height?: number }
->(({ className, height = 33, noHover, isHeader = false, index = 0, ...props }, ref) => {
-  // Shorter duration for rows further down, to avoid them taking forever to animate in.
-  const delay = React.useMemo(() => {
-    // Start with minimal delay and increase logarithmically
-    const baseDelay = 0.08;
-    const maxDelay = 0.5;
-    return Math.min(baseDelay + Math.log10(index + 1) * 0.08, maxDelay);
-  }, [index]);
+  HTMLMotionProps<"tr"> & {
+    animateInsertion?: boolean;
+    noHover?: boolean;
+    isHeader?: boolean;
+    index?: number;
+    height?: number;
+  }
+>(
+  (
+    { animateInsertion, className, height = 33, noHover, isHeader = false, index = 0, ...props },
+    ref
+  ) => {
+    // Shorter duration for rows further down, to avoid them taking forever to animate in.
+    const delay = React.useMemo(() => {
+      // Start with minimal delay and increase logarithmically
+      const baseDelay = 0.08;
+      const maxDelay = 0.5;
+      return Math.min(baseDelay + Math.log10(index + 1) * 0.08, maxDelay);
+    }, [index]);
 
-  return (
-    <motion.tr
-      initial={{
-        filter: "brightness(1) saturate(1)",
-        boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
-        opacity: 0,
-      }}
-      animate={{
-        opacity: 1,
-        transition: {
-          opacity: {
-            type: "just",
-            delay,
+    return (
+      <motion.tr
+        initial={{
+          filter: "brightness(1) saturate(1)",
+          boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
+          y: animateInsertion ? "-100%" : undefined,
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+          x: 0,
+          y: 0,
+          transition: {
+            opacity: {
+              type: "just",
+              delay,
+            },
+            y: { type: "just", delay: 0.05 },
           },
-        },
-      }}
-      whileHover={
-        !isHeader
-          ? {
-              filter: "brightness(1.05) saturate(1.1)",
-              boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-              transition: {
-                filter: { duration: 0.05 },
-                boxShadow: { duration: 0.05 },
-              },
-            }
-          : {}
-      }
-      ref={ref}
-      style={{ height, ...props.style }}
-      className={cn(
-        "relative w-full",
-        !isHeader && !noHover ? "transition-colors border-2 hover:z-2 group" : "",
-        className
-      )}
-      {...props}
-    >
-      {props.children as React.ReactNode}
-    </motion.tr>
-  );
-});
+        }}
+        whileHover={
+          !isHeader
+            ? {
+                filter: "brightness(1.05) saturate(1.1)",
+                boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
+                transition: {
+                  filter: { duration: 0.05 },
+                  boxShadow: { duration: 0.05 },
+                },
+              }
+            : {}
+        }
+        ref={ref}
+        style={{ height, ...props.style }}
+        className={cn(
+          "relative w-full",
+          !isHeader && !noHover ? "transition-colors border-2 hover:z-2 group" : "",
+          className
+        )}
+        {...props}
+      >
+        {props.children as React.ReactNode}
+      </motion.tr>
+    );
+  }
+);
 TableRow.displayName = "TableRow";
 
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
