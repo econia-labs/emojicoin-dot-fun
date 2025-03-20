@@ -9,7 +9,7 @@ import {
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
 import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER } from "lib/server-env";
-import { IS_ALLOWLIST_ENABLED } from "lib/env";
+import { IS_ALLOWLIST_ENABLED, RATE_LIMITING_ENABLED } from "lib/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
@@ -45,13 +45,16 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
 
-  if (pathname.startsWith(ROUTES.api["."]) && process.env.RATE_LIMITING_ENABLED === "1") {
+  if (pathname.startsWith(ROUTES.api["."]) && RATE_LIMITING_ENABLED) {
     const ip = request.ip ?? "127.0.0.1";
 
     let ratelimitRes: Awaited<ReturnType<typeof ratelimiter.limit>>;
     let domain: "api" | "candlesticks";
 
-    if (pathname.startsWith(ROUTES.api.candlesticks)) {
+    if (
+      pathname.startsWith(ROUTES.api.candlesticks) ||
+      pathname.startsWith(ROUTES.api.arena.candlesticks)
+    ) {
       ratelimitRes = await candlesticksRatelimiter.limit(ip);
       domain = "candlesticks";
     } else {

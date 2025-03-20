@@ -48,7 +48,7 @@ export const fetchCandlesticksForChart = async ({
     marketID !== undefined ? ROUTES.api["candlesticks"] : ROUTES.api["arena"]["candlesticks"];
 
   return await fetchRateLimited<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(
-    `${route}?${params.toString()}`
+    `${route}?${params}`
   )
     .then((res) =>
       res
