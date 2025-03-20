@@ -46,7 +46,7 @@ if (
 
 export const MAINTENANCE_MODE: boolean = process.env.MAINTENANCE_MODE === "true";
 
-export const RATE_LIMITING = (() => {
+export const RATE_LIMITER = (() => {
   const { KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
   const enabled = process.env.RATE_LIMITING_ENABLED === "true";
   if (enabled) {

@@ -8,7 +8,7 @@ import {
   COOKIE_FOR_HASHED_ADDRESS,
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
-import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITING } from "lib/server-env";
+import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITER } from "lib/server-env";
 import { IS_ALLOWLIST_ENABLED } from "lib/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
@@ -19,10 +19,10 @@ import { Redis } from "@upstash/redis";
 const walletRegex = new RegExp(`^${ROUTES.wallet}/(.*).apt$`);
 
 const rateLimiters = (() => {
-  if (RATE_LIMITING.enabled) {
+  if (RATE_LIMITER.enabled) {
     const redis = new Redis({
-      url: RATE_LIMITING.api.url,
-      token: RATE_LIMITING.api.token,
+      url: RATE_LIMITER.api.url,
+      token: RATE_LIMITER.api.token,
     });
     return {
       basic: new Ratelimit({
