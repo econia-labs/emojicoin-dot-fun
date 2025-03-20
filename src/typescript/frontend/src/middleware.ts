@@ -1,4 +1,8 @@
 // cspell:word dexscreener
+// cspell:word ratelimiter
+// cspell:word ratelimit
+// cspell:word upstash
+
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
   COOKIE_FOR_HASHED_ADDRESS,
@@ -42,7 +46,7 @@ export default async function middleware(request: NextRequest) {
   }
 
   console.log({ pathname, enabled: process.env.RATE_LIMITING_ENABLED });
-  if (pathname.startsWith("/api") && process.env.RATE_LIMITING_ENABLED === "1") {
+  if (pathname.startsWith(ROUTES.api["."]) && process.env.RATE_LIMITING_ENABLED === "1") {
     const ip = request.ip ?? "127.0.0.1";
 
     let ratelimitRes: Awaited<ReturnType<typeof ratelimiter.limit>>;
