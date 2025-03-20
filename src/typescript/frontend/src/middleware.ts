@@ -18,13 +18,13 @@ import { Redis } from "@upstash/redis";
 
 const walletRegex = new RegExp(`^${ROUTES.wallet}/(.*).apt$`);
 
-const redis = new Redis({
-  url: RATE_LIMITING.api.url,
-  token: RATE_LIMITING.api.token,
-});
-
-const rateLimiters = RATE_LIMITING.enabled
-  ? {
+const rateLimiters = (() => {
+  if (RATE_LIMITING.enabled) {
+    const redis = new Redis({
+      url: RATE_LIMITING.api.url,
+      token: RATE_LIMITING.api.token,
+    });
+    return {
       basic: new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(5, "10 s"),
@@ -33,8 +33,10 @@ const rateLimiters = RATE_LIMITING.enabled
         redis,
         limiter: Ratelimit.tokenBucket(10, "30 s", 20),
       }),
-    }
-  : undefined;
+    };
+  }
+  return undefined;
+})();
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
