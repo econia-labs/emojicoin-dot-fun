@@ -17,6 +17,7 @@ import { GlobeIcon } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { darkColors } from "theme";
+import FEATURE_FLAGS from "lib/feature-flags";
 
 const EVENT_TYPES: SubscribableBrokerEvents[] = ["Chat", "PeriodicState", "Swap"];
 
@@ -40,7 +41,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
 
   return (
     <Box>
-      {props.isInMelee && (
+      {FEATURE_FLAGS.Arena && props.isInMelee && (
         <Carousel gap={16}>
           <div className="flex flex-row items-center gap-[16px]">
             <Link href={ROUTES.arena}>

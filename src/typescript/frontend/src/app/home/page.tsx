@@ -8,8 +8,8 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { getCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 import { fetchCachedPriceFeed } from "lib/queries/price-feed";
-import { ARENA_MODULE_ADDRESS } from "@sdk/const";
-import { fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
+import { fetchCachedMeleeData } from "./fetch-melee-data";
+import FEATURE_FLAGS from "lib/feature-flags";
 
 export const revalidate = 2;
 
@@ -52,34 +52,18 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   const aptPricePromise = getAptPrice();
 
-  const meleeDataPromise = (async () => {
-    if (ARENA_MODULE_ADDRESS) {
-      const melee = await fetchArenaInfo({});
-      if (!melee) {
-        console.error("Arena is enabled, but arena info couldn't be fetched from the database.");
-        return null;
-      }
-      const [market0, market1] = await Promise.all([
-        fetchMarketStateByAddress({ address: melee.emojicoin0MarketAddress }),
-        fetchMarketStateByAddress({ address: melee.emojicoin1MarketAddress }),
-      ]);
-      if (!market0 || !market1) {
-        console.error(
-          "Arena info found, but one or both of the arena markets aren't in the market state table."
-        );
-        return null;
-      }
-      return { melee, market0, market1 };
-    }
-    return null;
-  })();
+  const meleeDataPromise = FEATURE_FLAGS.Arena
+    ? fetchCachedMeleeData()
+        .then((res) => (res.arenaInfo ? meleeData : null))
+        .catch(() => null)
+    : null;
 
   const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
     priceFeedPromise.catch(() => []),
     marketsPromise.catch(() => []),
     numMarketsPromise.catch(() => 0),
     aptPricePromise.catch(() => undefined),
-    meleeDataPromise.catch(() => null),
+    meleeDataPromise,
   ]);
 
   return (
