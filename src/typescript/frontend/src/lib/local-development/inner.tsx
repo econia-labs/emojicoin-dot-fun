@@ -25,6 +25,7 @@ import { getAptosClient } from "@sdk/utils";
 import { getEvents, getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { encodeEmojis, type SymbolEmoji } from "@sdk/emoji_data";
 import { getLocalPublisher } from "@/components/pages/test-utils/local-publisher";
+import FEATURE_FLAGS from "lib/feature-flags";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
@@ -155,12 +156,14 @@ export const InnerDisplayDebugData = () => {
               <span className="lowercase">{"test-utils"}</span>
             </a>
             <button
+              disabled={!FEATURE_FLAGS.Arena}
               onClick={forceConnectOrRunFunction(handleCrank)}
               className={debugButtonClassName}
             >
               {"Crank melee"}
             </button>
             <button
+              disabled={!FEATURE_FLAGS.Arena}
               onClick={forceConnectOrRunFunction(initializeArena)}
               className={debugButtonClassName}
               title="Initialize arena stuff for test"

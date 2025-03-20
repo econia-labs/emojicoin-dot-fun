@@ -10,6 +10,7 @@ import { AptPriceContextProvider } from "context/AptPrice";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { fetchMelee } from "@/queries/arena";
+import FEATURE_FLAGS from "lib/feature-flags";
 
 export const revalidate = 2;
 
@@ -94,9 +95,11 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       wrappedCachedContractMarketView(marketAddress),
       getAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
       fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
-      fetchMelee({})
-        .then((res) => (res ? res.melee : null))
-        .catch(() => logAndReturnValue("arena melee data", null)),
+      FEATURE_FLAGS.Arena
+        ? fetchMelee({})
+            .then((res) => (res ? res.melee : null))
+            .catch(() => logAndReturnValue("arena melee data", null))
+        : null,
     ]);
 
     const isInMelee =
