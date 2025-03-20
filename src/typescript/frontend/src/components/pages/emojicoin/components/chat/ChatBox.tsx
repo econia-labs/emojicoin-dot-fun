@@ -15,6 +15,7 @@ import { useChatTransactionBuilder } from "lib/hooks/transaction-builders/use-ch
 import { useChatEventsQuery } from "./useChatEventsQuery";
 import _ from "lodash";
 import { LoadMore } from "@/components/ui/table/loadMore";
+import Loading from "@/components/loading";
 
 const ChatBox = (props: ChatProps) => {
   const { submit } = useAptos();
@@ -68,6 +69,8 @@ const ChatBox = (props: ChatProps) => {
       shouldAnimateAsInsertion: i === 0 && !initialLoad.current,
     }));
   }, [chatsFromStore, chatsQuery.data?.pages]);
+
+  if (chatsQuery.isLoading) return <Loading />;
 
   return (
     <Column className="relative" width="100%" flexGrow={1}>
