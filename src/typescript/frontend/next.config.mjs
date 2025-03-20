@@ -22,6 +22,15 @@ const debugConfigOptions = {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  /**
+   * For 'joule-cc-swap'.
+   * @see {@link https://github.com/WalletConnect/walletconnect-monorepo/issues/4466#issuecomment-2520872647}
+   * @see {@link https://docs.reown.com/appkit/next/core/installation#extra-configuration}
+   */
+  webpack: (config) => {
+    config.externals.push("pino-pretty");
+    return config;
+  },
   env: {
     // This is the publisher private key used in test. Hard code a fallback for convenience, since
     // an incorrect value would be an obvious, trivial fix that only affects local development.
