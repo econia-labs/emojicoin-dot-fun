@@ -44,21 +44,6 @@ jobs:
     - uses: './.github/actions/pnpm-install'
     - run: 'pnpm run check'
 
-  check-app-paths-manifest:
-    runs-on: 'ubuntu-latest'
-    defaults:
-      run:
-        working-directory: './frontend'
-    steps:
-    - uses: 'actions/checkout@v4'
-      with:
-        submodules: 'false'
-    - uses: './.github/actions/pnpm-install'
-    - name: 'build app-paths-manifest.json'
-      run: 'pnpm run build:no-ssg'
-    - name: 'check routes.ts paths'
-      run: 'echo "not implemented yet"'
-
   tests:
     name: 'test suite / (${{ matrix.pretty-suffix }})'
     runs-on: 'ubuntu-latest'
