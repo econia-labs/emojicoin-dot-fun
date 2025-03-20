@@ -1,5 +1,5 @@
-import { latestBlock, type LatestBlockResponse } from "lib/dexscreener";
 import type { NextRequest, NextResponse } from "next/server";
+import { latestBlock, type LatestBlockResponse } from "lib/dexscreener";
 
 export const revalidate = 1;
 
