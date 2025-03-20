@@ -63,9 +63,11 @@ const walkDir = <T extends Record<string, any> | string>(
   }
 
   return (
+    // Validate paths like ROUTES.api["."]
     Object.keys(currValue)
       .filter((k) => k === ".")
       .every((k) => validateDotNotation(currPath, currValue[k])) &&
+    // Walk the dir for all other ROUTES values and validate with `walkDir`, recursively.
     Object.entries(currValue)
       .filter(([k, _v]) => k !== ".")
       .map(([_k, innerVal]) => {
