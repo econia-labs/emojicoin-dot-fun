@@ -45,3 +45,27 @@ if (
 }
 
 export const MAINTENANCE_MODE: boolean = process.env.MAINTENANCE_MODE === "true";
+
+export const RATE_LIMITER = (() => {
+  const { KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
+  const enabled = process.env.RATE_LIMITING_ENABLED === "true";
+  if (enabled) {
+    if (!KV_REST_API_URL || !KV_REST_API_TOKEN) {
+      throw new Error("Rate limiting is enabled but there was no URL/token provided for KV.");
+    }
+    return {
+      enabled: true,
+      api: {
+        url: KV_REST_API_URL,
+        token: KV_REST_API_TOKEN,
+      },
+    } as const;
+  }
+  return {
+    enabled: false,
+    api: {
+      url: undefined,
+      token: undefined,
+    },
+  } as const;
+})();
