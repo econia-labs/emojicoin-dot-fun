@@ -15,6 +15,8 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import { useEffectOnce } from "react-use";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import { useHotkey } from "context/Hotkeys";
 
 export const WalletClientPage = ({ address, name }: { address: string; name?: ValidAptosName }) => {
   const resolvedName = name ?? address;
@@ -31,6 +33,18 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
       router.replace(`${ROUTES.wallet}/${name}`);
     }
   });
+
+  const explorerLink = toExplorerLink({ value: address, linkType: "account" });
+
+  useHotkey(
+    "x",
+    "goto",
+    () => {
+      router.push(explorerLink);
+    },
+    {},
+    [router]
+  );
 
   return (
     <div className="max-w-[100vw] px-2 sm:min-w-[80vw] md:min-w-[800px]">

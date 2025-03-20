@@ -196,3 +196,17 @@ export const generateRandomSymbol = () => {
 
 export const namesToEmojis = (...names: SymbolEmojiName[]) =>
   names.map((name) => SYMBOL_EMOJI_DATA.byStrictName(name).emoji);
+
+export function toCodePoint(emoji: AnyEmoji): string;
+export function toCodePoint(emoji: AnyEmoji[]): string;
+export function toCodePoint(emoji: AnyEmoji[] | AnyEmoji) {
+  if (typeof emoji === "string") {
+    const codepoints: number[] = [];
+    for (const c of emoji) {
+      codepoints.push(c.codePointAt(0)!);
+    }
+    return codepoints.map((c) => c.toString(16)).join("_");
+  } else {
+    return emoji.map((e) => toCodePoint(e)).join("+");
+  }
+}
