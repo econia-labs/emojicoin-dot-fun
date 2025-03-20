@@ -1,6 +1,5 @@
 # yamllint disable rule:empty-lines
 # yamllint disable rule:key-ordering
-
 ---
 name: 'TS Checks'
 
