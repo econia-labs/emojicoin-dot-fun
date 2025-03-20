@@ -1,3 +1,6 @@
+# yamllint disable rule:empty-lines
+# yamllint disable rule:key-ordering
+
 ---
 name: 'TS Checks'
 
@@ -20,29 +23,29 @@ jobs:
     steps:
     - uses: 'actions/checkout@v4'
       with:
-       submodules: 'false'
+        submodules: 'false'
     - uses: './.github/actions/pnpm-install'
     - run: 'pnpm run lint'
-  
+
   format:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
       with:
-       submodules: 'false'
+        submodules: 'false'
     - uses: './.github/actions/pnpm-install'
     - run: 'pnpm run format:check'
-  
+
   tsc-check:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
       with:
-       submodules: 'false'
+        submodules: 'false'
     - uses: './.github/actions/pnpm-install'
     - run: 'pnpm run check'
 
-  check-app-paths-manifest: 
+  check-app-paths-manifest:
     runs-on: 'ubuntu-latest'
     defaults:
       run:
@@ -50,13 +53,12 @@ jobs:
     steps:
     - uses: 'actions/checkout@v4'
       with:
-       submodules: 'false'
+        submodules: 'false'
     - uses: './.github/actions/pnpm-install'
     - name: 'build app-paths-manifest.json'
       run: 'pnpm run build:no-ssg'
     - name: 'check routes.ts paths'
       run: 'echo "not implemented yet"'
-
 
   tests:
     name: 'test suite / (${{ matrix.pretty-suffix }})'
@@ -64,7 +66,7 @@ jobs:
     steps:
     - uses: 'actions/checkout@v4'
       with:
-       submodules: 'false'
+        submodules: 'false'
     - uses: './.github/actions/pnpm-install'
     - env:
         EMOJICOIN_ARENA_MODULE_ADDRESS: >-
