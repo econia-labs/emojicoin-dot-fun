@@ -41,7 +41,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       ),
       (i) => i.transaction.version.toString(),
       "desc"
-    ).map((s) => toTableItem(s));
+    ).map(toTableItem);
   }, [swapsQuery.data?.pages, swapsFromStore]);
 
   const columns: EcTableColumn<(typeof sortedSwaps)[number]>[] = useMemo(

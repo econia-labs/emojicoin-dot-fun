@@ -23,7 +23,7 @@ export const useChatEventsQuery = (args: z.input<typeof GetChatsSchema>) => {
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
       lastPage?.length === LIMIT ? allPages.length + 1 : undefined,
-    //Disable the query when neither sender nor marketID is provided
+    // Disable the query when a marketID isn't provided
     enabled: !!args.marketID,
   });
 
