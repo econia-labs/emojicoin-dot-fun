@@ -50,7 +50,7 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
 
-  if (pathname.startsWith(ROUTES.api["."]) && rateLimiters) {
+  if (rateLimiters && pathname.startsWith(ROUTES.api["."])) {
     const ip = request.ip ?? "127.0.0.1";
 
     const isCandlesticksRoute =
