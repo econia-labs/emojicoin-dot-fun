@@ -61,6 +61,7 @@ if (process.env.NEXT_PUBLIC_CDN_URL) {
   }
 }
 
+const RATE_LIMITING_ENABLED = process.env.RATE_LIMITING_ENABLED === "true";
 const VERSION = parse(packageInfo.version);
 
 export {
@@ -71,5 +72,6 @@ export {
   INTEGRATOR_FEE_RATE_BPS,
   IS_ALLOWLIST_ENABLED,
   BROKER_URL,
+  RATE_LIMITING_ENABLED,
   VERSION,
 };
