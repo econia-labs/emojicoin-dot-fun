@@ -4,7 +4,7 @@ import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
 const logAndDefault = (e: unknown) => {
-  console.error("Unexpected error:", e);
+  console.error(e);
   return {
     arenaInfo: null,
     market0: null,
