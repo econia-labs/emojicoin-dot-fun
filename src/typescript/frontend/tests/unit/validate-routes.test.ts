@@ -30,6 +30,28 @@ const validateRoutePath = (fullPath: string) => {
   return res;
 };
 
+/**
+ * Any key: value in `ROUTES` that resembles ".": "/some/string" must not be a page and must be
+ * a directory.
+ *
+ * @example
+ * ROUTES.api["."] => /api
+ */
+const validateDotNotation = (currPath: string, newValue: string | object) => {
+  const isString = typeof newValue === "string";
+  expect(isString).toBe(true);
+  if (!isString) throw "Never.";
+  const fullPath = path.join(currPath, newValue);
+  const fullPathExists = fs.existsSync(fullPath);
+  const isDirectory = fs.statSync(fullPath).isDirectory();
+  expect(fullPathExists).toBe(true);
+  expect(isDirectory).toBe(true);
+  const files = fs.readdirSync(fullPath);
+  const isNotPage = !files.includes("page.tsx");
+  expect(isNotPage).toBe(true);
+  return isString && fullPathExists && isDirectory && isNotPage;
+};
+
 const walkDir = <T extends Record<string, any> | string>(
   currValue: T,
   currPath: string
@@ -40,13 +62,21 @@ const walkDir = <T extends Record<string, any> | string>(
     return validateRoutePath(newPath);
   }
 
-  return Object.values(currValue)
-    .map((innerVal) => {
-      const res = walkDir(innerVal, currPath);
-      expect(res).toBe(true);
-      return res;
-    })
-    .every((v) => v);
+  return (
+    // Validate paths like ROUTES.api["."]
+    Object.keys(currValue)
+      .filter((k) => k === ".")
+      .every((k) => validateDotNotation(currPath, currValue[k])) &&
+    // Walk the dir for all other ROUTES values and validate with `walkDir`, recursively.
+    Object.entries(currValue)
+      .filter(([k, _v]) => k !== ".")
+      .map(([_k, innerVal]) => {
+        const res = walkDir(innerVal, currPath);
+        expect(res).toBe(true);
+        return res;
+      })
+      .every((v) => v)
+  );
 };
 
 const gitRoot = getGitRoot();
