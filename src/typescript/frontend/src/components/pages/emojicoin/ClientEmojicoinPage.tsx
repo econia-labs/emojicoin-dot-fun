@@ -28,9 +28,9 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const setLatestBars = useEventStore((s) => s.setLatestBars);
 
   useEffect(() => {
-    const { chats, swaps, state, marketView } = props.data;
+    const { swaps, state, marketView } = props.data;
     loadMarketStateFromServer([state]);
-    loadEventsFromServer([...chats, ...swaps]);
+    loadEventsFromServer([...swaps]);
     const latestBars = marketToLatestBars(marketView);
     setLatestBars({ marketMetadata: state.market, latestBars });
 

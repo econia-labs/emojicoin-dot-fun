@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { EcTableHead } from "./ecTableHead";
 import { Table, TableHeader, TableRow } from "./table";
 import _ from "lodash";
@@ -15,7 +15,7 @@ export interface EcTableColumn<T> {
   /** Unique identifier for the column */
   id: string;
   /** Display text for the column header */
-  text: string;
+  text: string | ReactNode;
   /** Optional width of the column in pixels */
   width?: number;
   /** Optional CSS class name for both header and body cells */
