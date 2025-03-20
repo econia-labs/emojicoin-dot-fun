@@ -4,13 +4,16 @@ import { MarketAddressConversionForm } from "@/components/pages/test-utils/marke
 import { SetMeleeDurationForm } from "@/components/pages/test-utils/SetNewMeleeDuration";
 import { Network } from "@aptos-labs/ts-sdk";
 import { APTOS_NETWORK } from "@sdk/const";
+import FEATURE_FLAGS from "lib/feature-flags";
 
 export default function TestUtilsPage() {
   return (
     <>
       {APTOS_NETWORK !== Network.MAINNET && (
         <div className="w-full h-full flex flex-col">
-          {APTOS_NETWORK === Network.LOCAL && <SetMeleeDurationForm className="" />}
+          {APTOS_NETWORK === Network.LOCAL && FEATURE_FLAGS.Arena && (
+            <SetMeleeDurationForm className="" />
+          )}
           <MarketAddressConversionForm />
         </div>
       )}
