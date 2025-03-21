@@ -3,7 +3,7 @@
 // cspell:word martianwallet
 // cspell:word pontem
 // cspell:word okwallet
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
 import ThemeContextProvider, { useThemeContext } from "./theme-context";
@@ -16,10 +16,7 @@ import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import StyledToaster from "styles/StyledToaster";
-import {
-  EventStoreProvider,
-  UserSettingsProvider,
-} from "./event-store-context/StateStoreContextProviders";
+import { UserSettingsProvider } from "./event-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
@@ -52,10 +49,7 @@ enableMapSet();
 
 const queryClient = new QueryClient();
 
-const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
-  userAgent,
-  children,
-}) => {
+const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsWithChildren) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
@@ -67,9 +61,9 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <EventStoreProvider>
+    <ThemeContextProvider>
+      <ThemeProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
           <UserSettingsProvider userAgent={userAgent}>
             <AptosWalletAdapterProvider
               plugins={wallets}
@@ -103,30 +97,9 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
               </WalletModalContextProvider>
             </AptosWalletAdapterProvider>
           </UserSettingsProvider>
-        </EventStoreProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  );
-};
-
-const Providers: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
-  userAgent,
-  children,
-}) => {
-  const [p, setP] = useState(false);
-
-  // Hack for now because I'm unsure how to get rid of the warning.
-  // Not sure if this is even the wrong way to do it, actually.
-  useEffect(() => {
-    setP(true);
-  }, []);
-
-  return (
-    p && (
-      <ThemeContextProvider>
-        <ThemedApp userAgent={userAgent}>{children}</ThemedApp>
-      </ThemeContextProvider>
-    )
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ThemeContextProvider>
   );
 };
 
