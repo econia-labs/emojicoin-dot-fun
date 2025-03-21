@@ -20,6 +20,7 @@
     "build": "pnpm i && pnpm load-env -- turbo run build",
     "build:debug": "pnpm i && pnpm load-env -- turbo run build:debug",
     "build:no-checks": "pnpm i && pnpm load-env -- turbo run build:no-checks",
+    "build:no-ssg": "pnpm run --prefix frontend build:no-ssg",
     "build:test": "pnpm i && pnpm load-env:test -- turbo run build:no-checks",
     "check": "turbo run check",
     "clean": "turbo run clean --no-cache --force && rm -rf .turbo",
