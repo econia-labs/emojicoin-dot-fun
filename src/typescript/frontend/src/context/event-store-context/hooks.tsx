@@ -1,32 +1,12 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
 
-import type { EventStore } from "@/store/event/types";
-import type { NameStore } from "@/store/name-store";
+import { createEventStore } from "@/store/event/event-store";
+import type { EventAndClientStore } from "@/store/event/types";
+import { createNameStore, type NameStore } from "@/store/name-store";
 import type { UserSettingsStore } from "@/store/user-settings-store";
-import type { WebSocketClientStore } from "@/store/websocket/store";
 
-import { EventStoreContext, UserSettingsContext } from "./StateStoreContextProviders";
-
-export const useEventStore = <T,>(selector: (store: EventStore & WebSocketClientStore) => T): T => {
-  const eventStoreContext = useContext(EventStoreContext);
-
-  if (eventStoreContext === null || eventStoreContext.events === null) {
-    throw new Error("useEventStore must be used within a EventStoreProvider");
-  }
-
-  return useStore(eventStoreContext.events, selector);
-};
-
-export const useNameStore = <T,>(selector: (store: NameStore) => T): T => {
-  const nameStoreContext = useContext(EventStoreContext);
-
-  if (nameStoreContext === null || nameStoreContext.events === null) {
-    throw new Error("useNameStore must be used within a EventStoreProvider");
-  }
-
-  return useStore(nameStoreContext.names, selector);
-};
+import { UserSettingsContext } from "./StateStoreContextProviders";
 
 export const useUserSettings = <T,>(selector: (store: UserSettingsStore) => T): T => {
   const userSettingsContext = useContext(UserSettingsContext);
@@ -37,3 +17,12 @@ export const useUserSettings = <T,>(selector: (store: UserSettingsStore) => T): 
 
   return useStore(userSettingsContext, selector);
 };
+
+export const globalNameStore = createNameStore();
+export const globalEventStore = createEventStore();
+
+export const useNameStore = <T,>(selector: (store: NameStore) => T): T =>
+  useStore(globalNameStore, selector);
+
+export const useEventStore = <T,>(selector: (store: EventAndClientStore) => T): T =>
+  useStore(globalEventStore, selector);

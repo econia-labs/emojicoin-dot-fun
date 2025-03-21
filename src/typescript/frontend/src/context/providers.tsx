@@ -9,32 +9,29 @@ import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Footer from "components/footer";
-import { GeoblockedBanner } from "components/geoblocking";
-import Header from "components/header";
-import { HeaderSpacer } from "components/header-spacer";
-import Loader from "components/loader";
-import type { EmojiMartData } from "components/pages/emoji-picker/types";
 import { init } from "emoji-mart";
-import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
 import { enableMapSet } from "immer";
 import { APTOS_NETWORK } from "lib/env";
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
 import StyledToaster from "styles/StyledToaster";
 import { completePickerData } from "utils/picker-data/complete-picker-data";
 
+import Footer from "@/components/footer";
+import { GeoblockedBanner } from "@/components/geoblocking";
+import Header from "@/components/header";
+import { HeaderSpacer } from "@/components/header-spacer";
+import Loader from "@/components/loader";
+import type { EmojiMartData } from "@/components/pages/emoji-picker/types";
+import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import { getAptosApiKey } from "@/sdk/const";
 
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import ContentWrapper from "./ContentWrapper";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
-import {
-  EventStoreProvider,
-  UserSettingsProvider,
-} from "./event-store-context/StateStoreContextProviders";
+import { UserSettingsProvider } from "./event-store-context/StateStoreContextProviders";
 import ThemeContextProvider, { useThemeContext } from "./theme-context";
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
@@ -54,7 +51,7 @@ enableMapSet();
 
 const queryClient = new QueryClient();
 
-const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
+const Providers: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
   userAgent,
   children,
 }) => {
@@ -69,9 +66,9 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <EventStoreProvider>
+    <ThemeContextProvider>
+      <ThemeProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
           <UserSettingsProvider userAgent={userAgent}>
             <AptosWalletAdapterProvider
               plugins={wallets}
@@ -105,30 +102,9 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
               </WalletModalContextProvider>
             </AptosWalletAdapterProvider>
           </UserSettingsProvider>
-        </EventStoreProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  );
-};
-
-const Providers: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
-  userAgent,
-  children,
-}) => {
-  const [p, setP] = useState(false);
-
-  // Hack for now because I'm unsure how to get rid of the warning.
-  // Not sure if this is even the wrong way to do it, actually.
-  useEffect(() => {
-    setP(true);
-  }, []);
-
-  return (
-    p && (
-      <ThemeContextProvider>
-        <ThemedApp userAgent={userAgent}>{children}</ThemedApp>
-      </ThemeContextProvider>
-    )
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ThemeContextProvider>
   );
 };
 

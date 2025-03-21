@@ -84,7 +84,7 @@ type EventActions = {
 
 export type EventStore = EventState & EventActions & ArenaState & ArenaActions;
 
-type EventAndClientStore = EventState & EventActions & ClientState & ClientActions & ArenaState;
+export type EventAndClientStore = EventState & EventActions & ClientState & ClientActions & ArenaState;
 
 export type ImmerSetEventAndClientStore = (
   nextStateOrUpdater:
