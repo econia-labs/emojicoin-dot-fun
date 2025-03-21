@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useMatchBreakpoints } from "hooks";
 import { Box } from "@containers";
 import DesktopGrid from "./components/desktop-grid";
@@ -18,6 +18,11 @@ import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { darkColors } from "theme";
 import FEATURE_FLAGS from "lib/feature-flags";
+import { toCodePoint } from "@econia-labs/emojicoin-sdk";
+import { toast } from "react-toastify";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import { useRouter } from "next/navigation";
+import { useHotkey } from "context/Hotkeys";
 
 const EVENT_TYPES: SubscribableBrokerEvents[] = ["Chat", "PeriodicState", "Swap"];
 
@@ -38,6 +43,71 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
   }, [props.data]);
 
   useReliableSubscribe({ eventTypes: EVENT_TYPES });
+
+  const router = useRouter();
+
+  const explorerLink = useMemo(
+    () =>
+      toExplorerLink({
+        linkType: "coin",
+        value: `${props.data.marketAddress}::coin_factory::Emojicoin`,
+      }),
+    [props.data.marketAddress]
+  );
+
+  useHotkey(
+    "e",
+    "cmd",
+    () => {
+      navigator.clipboard.writeText(props.data.symbolEmojis.join(""));
+      toast("Copied symbol emojis to clipboard.");
+    },
+    {},
+    [props.data.symbolEmojis]
+  );
+
+  useHotkey(
+    "c",
+    "cmd",
+    () => {
+      navigator.clipboard.writeText(toCodePoint(props.data.symbolEmojis));
+      toast("Copied symbol codepoints to clipboard.");
+    },
+    {},
+    [props.data.symbolEmojis]
+  );
+
+  useHotkey(
+    "a",
+    "cmd",
+    () => {
+      navigator.clipboard.writeText(props.data.marketAddress);
+      toast("Copied market address to clipboard.");
+    },
+    {},
+    [props.data.marketAddress]
+  );
+
+  useHotkey(
+    "x",
+    "cmd",
+    () => {
+      navigator.clipboard.writeText(explorerLink);
+      toast("Copied explorer address to clipboard.");
+    },
+    {},
+    [explorerLink]
+  );
+
+  useHotkey(
+    "x",
+    "goto",
+    () => {
+      router.push(explorerLink);
+    },
+    {},
+    [explorerLink]
+  );
 
   return (
     <Box>
