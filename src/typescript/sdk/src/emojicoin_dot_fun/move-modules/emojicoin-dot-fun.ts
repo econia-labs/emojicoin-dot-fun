@@ -1130,10 +1130,7 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
     this.args = {};
   }
 
-  static async view(args: {
-    aptos: Aptos | AptosConfig;
-    options?: LedgerVersionArg;
-  }): Promise<AccountAddressString> {
+  static async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }) {
     const [res] = await new RegistryAddress().view(args);
     return res;
   }
