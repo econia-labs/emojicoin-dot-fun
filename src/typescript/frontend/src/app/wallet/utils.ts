@@ -7,51 +7,57 @@ import {
 } from "@sdk/utils";
 import { cache } from "react";
 
+const INVALID_INPUT_RESULT = {
+  address: undefined,
+  name: undefined,
+};
+
 type PossibleResponses =
   | {
       // Input resolves to a valid ANS name, which means they have a valid address.
-      address: `0x${string}` | `0x${string}...`;
+      address: `0x${string}`;
       name: ValidAptosName;
     }
   | {
       // Input resolves to a valid address but has no corresponding ANS name.
-      address: `0x${string}` | `0x${string}...`;
+      address: `0x${string}`;
       name: undefined;
     }
-  | {
-      // Input is invalid. It's not an address or an Aptos name.
-      address: undefined;
-      name: undefined;
-    };
+  // Input is invalid. It's not an address or an Aptos name.
+  | typeof INVALID_INPUT_RESULT;
 
-const resolveOwnerName = async (input: string): Promise<PossibleResponses> => {
+const resolveOwnerName = async (input?: AccountAddressInput | null): Promise<PossibleResponses> => {
+  if (!input) return INVALID_INPUT_RESULT;
+
   const aptos = getAptosClient();
 
-  if (AccountAddress.isValid({ input }).valid) {
-    const address = AccountAddress.from(input);
-    const name = await aptos.ans.getPrimaryName({ address });
-    return {
-      address: address.toString(),
-      name: name ? (name as ValidAptosName) : undefined,
-    };
-  }
+  try {
+    if (isValidAptosName(input)) {
+      const name = input;
+      const address = await aptos.ans.getOwnerAddress({ name }).then((res) => res?.toString());
+      if (address) {
+        return {
+          address,
+          name,
+        };
+      }
+    }
 
-  if (isValidAptosName(input)) {
-    const name = input;
-    // Check if the name provided has a valid a corresponding address.
-    const address = await aptos.ans.getOwnerAddress({ name }).then((res) => res?.toString());
-    if (address) {
+    if (AccountAddress.isValid({ input }).valid) {
+      const address = AccountAddress.from(input);
+      const name = await aptos.ans.getPrimaryName({ address });
       return {
-        address,
-        name,
+        address: address.toString(),
+        name: name ? (name as ValidAptosName) : undefined,
       };
+    }
+  } catch (e) {
+    if (isValidAptosName(input) || AccountAddress.isValid({ input })) {
+      console.warn(`${input} is a valid ANS name or account address but still threw an error ${e}`);
     }
   }
 
-  return {
-    address: undefined,
-    name: undefined,
-  };
+  return INVALID_INPUT_RESULT;
 };
 
 /**

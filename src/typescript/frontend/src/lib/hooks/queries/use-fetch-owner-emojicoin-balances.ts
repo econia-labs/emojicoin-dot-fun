@@ -72,14 +72,22 @@ const toFullCoinData = async (balances: AssetBalance[]) => {
  * @returns the @see FullCoinData[] and wallet stats total value
  */
 export const useUserEmojicoinBalances = (owner: AccountAddressInput, max?: number) => {
-  const ownerAddress = useMemo(() => toAccountAddressString(owner), [owner]);
+  const ownerAddress = useMemo(
+    () => owner && AccountAddress.isValid({ input: owner }).valid && toAccountAddressString(owner),
+    [owner]
+  );
 
   const { data, isLoading } = useQuery({
     queryKey: ["user-emojicoin-balances", ownerAddress, max],
     queryFn: () =>
-      withResponseError(fetchOwnerEmojicoinBalances({ ownerAddress, max }).then(toFullCoinData)),
+      withResponseError(
+        (ownerAddress
+          ? fetchOwnerEmojicoinBalances({ ownerAddress, max })
+          : Promise.resolve([])
+        ).then(toFullCoinData)
+      ),
     staleTime: STALE_TIME,
-    enabled: AccountAddress.isValid({ input: owner }).valid,
+    enabled: !!owner && AccountAddress.isValid({ input: owner }).valid,
   });
 
   return {
