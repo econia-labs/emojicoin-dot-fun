@@ -1,14 +1,13 @@
 import {
   type TypeTagStruct,
   parseTypeTag,
-  type AccountAddressInput,
   type Aptos,
   type UserTransactionResponse,
   type MoveResource,
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import { type ArenaJsonTypes } from "../../types/arena-json-types";
-import { getAccountResourcesWithInfo } from "../aptos-client";
+import { getAccountResourcesWithInfo, getAptosClient } from "../aptos-client";
 import { type OptionType, collectSome, None, Option } from "../option";
 import { STRUCT_STRINGS } from "../type-tags";
 import { toEscrowResource } from "../../types/arena-types";
@@ -76,7 +75,7 @@ export const parseResourceForEscrow = <T extends MoveResource>({
   return None();
 };
 
-export const findEscrows = ({ version, changes }: UserTransactionResponse) =>
+export const findEscrowsInTxn = ({ version, changes }: UserTransactionResponse) =>
   changes
     .filter(isWriteSetChangeWriteResource)
     .filter(isEscrowWritesetChange)
@@ -91,20 +90,17 @@ export const findEscrows = ({ version, changes }: UserTransactionResponse) =>
 /**
  * Fetch all Escrow resources the user owns.
  */
-export const fetchUserArenaEscrows = async (userAddress: AccountAddressInput, aptosIn?: Aptos) => {
-  const address = toStandardizedAddress(userAddress);
-  const resources = await getAccountResourcesWithInfo({
+export const fetchUserArenaEscrows = async (
+  accountAddress: StandardizedAddress,
+  aptosIn: Aptos = getAptosClient()
+) =>
+  await getAccountResourcesWithInfo({
     aptosConfig: aptosIn?.config,
-    accountAddress: address,
-  });
-
-  return collectSome(
-    resources.map((r) =>
-      parseResourceForEscrow({ address, ...r }).map((escrow) => ({
-        version: r.version,
-        timestamp: r.timestamp,
-        escrow,
-      }))
+    accountAddress,
+  }).then((resources) =>
+    collectSome(
+      resources
+        .map((resource) => ({ address: accountAddress, ...resource }))
+        .map(parseResourceForEscrow)
     )
   );
-};

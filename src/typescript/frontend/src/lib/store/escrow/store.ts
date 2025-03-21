@@ -1,4 +1,4 @@
-import { findEscrows, type UserEscrow } from "@sdk/utils/arena/escrow";
+import { findEscrowsInTxn, type UserEscrow } from "@sdk/utils/arena/escrow";
 import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { Option } from "@sdk/utils";
@@ -54,7 +54,7 @@ export const createEscrowStore = () =>
       pushTransactions(...txns) {
         txns
           .filter(({ version }) => !get().processedTransactions.has(BigInt(version)))
-          .flatMap(findEscrows)
+          .flatMap(findEscrowsInTxn)
           .forEach((escrow) => {
             get().push(escrow.user, escrow);
             set((state) => {
