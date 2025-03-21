@@ -24,6 +24,7 @@ import {
   EntryFunctionTransactionBuilder,
 } from "../payload-builders";
 import { ARENA_MODULE_ADDRESS } from "../../const";
+import { type JsonTypes } from "../../types";
 
 export type FundVaultPayloadMoveArguments = {
   amount: U64;
@@ -835,7 +836,7 @@ export class Exit extends EntryFunctionPayloadBuilder {
  *```
  * */
 
-export class Registry extends ViewFunctionPayloadBuilder<[MoveValue]> {
+export class Registry extends ViewFunctionPayloadBuilder<[JsonTypes["ArenaRegistry"]]> {
   public readonly moduleAddress = ARENA_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_arena";
@@ -852,10 +853,7 @@ export class Registry extends ViewFunctionPayloadBuilder<[MoveValue]> {
     this.args = {};
   }
 
-  static async view(args: {
-    aptos: Aptos | AptosConfig;
-    options?: LedgerVersionArg;
-  }): Promise<MoveValue> {
+  static async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }) {
     const [res] = await new Registry().view(args);
     return res;
   }
@@ -955,7 +953,7 @@ export class EscrowExists extends ViewFunctionPayloadBuilder<[boolean]> {
     participant: AccountAddressInput; // address
     typeTags: [TypeTagInput, TypeTagInput, TypeTagInput, TypeTagInput]; // [Coin0, LP0, Coin1, LP1]
     options?: LedgerVersionArg;
-  }): Promise<boolean> {
+  }) {
     const [res] = await new EscrowExists(args).view(args);
     return res;
   }
@@ -974,7 +972,7 @@ export type ExchangeRatePayloadMoveArguments = {
  *```
  * */
 
-export class ExchangeRate extends ViewFunctionPayloadBuilder<[MoveValue]> {
+export class ExchangeRate extends ViewFunctionPayloadBuilder<[JsonTypes["ExchangeRate"]]> {
   public readonly moduleAddress = ARENA_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_arena";
@@ -1005,7 +1003,7 @@ export class ExchangeRate extends ViewFunctionPayloadBuilder<[MoveValue]> {
     marketAddress: AccountAddressInput; // address
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     options?: LedgerVersionArg;
-  }): Promise<MoveValue> {
+  }) {
     const [res] = await new ExchangeRate(args).view(args);
     return res;
   }
@@ -1014,7 +1012,7 @@ export class ExchangeRate extends ViewFunctionPayloadBuilder<[MoveValue]> {
 export type MatchAmountPayloadMoveArguments = {
   participant: AccountAddress;
   inputAmount: U64;
-  meleeId: U64;
+  meleeID: U64;
 };
 
 /**
@@ -1042,16 +1040,16 @@ export class MatchAmount extends ViewFunctionPayloadBuilder<[Uint64String]> {
   constructor(args: {
     participant: AccountAddressInput; // address
     inputAmount: Uint64; // u64
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput, TypeTagInput, TypeTagInput]; // [Coin0, LP0, Coin1, LP1]
   }) {
     super();
-    const { participant, inputAmount, meleeId, typeTags } = args;
+    const { participant, inputAmount, meleeID, typeTags } = args;
 
     this.args = {
       participant: AccountAddress.from(participant),
       inputAmount: new U64(inputAmount),
-      meleeId: new U64(meleeId),
+      meleeID: new U64(meleeID),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -1062,17 +1060,17 @@ export class MatchAmount extends ViewFunctionPayloadBuilder<[Uint64String]> {
     aptos: Aptos | AptosConfig;
     participant: AccountAddressInput; // address
     inputAmount: Uint64; // u64
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput, TypeTagInput, TypeTagInput]; // [Coin0, LP0, Coin1, LP1]
     options?: LedgerVersionArg;
-  }): Promise<Uint64String> {
+  }) {
     const [res] = await new MatchAmount(args).view(args);
     return res;
   }
 }
 
 export type MeleePayloadMoveArguments = {
-  meleeId: U64;
+  meleeID: U64;
 };
 
 /**
@@ -1084,7 +1082,7 @@ export type MeleePayloadMoveArguments = {
  *```
  * */
 
-export class Melee extends ViewFunctionPayloadBuilder<[MoveValue]> {
+export class Melee extends ViewFunctionPayloadBuilder<[JsonTypes["ArenaMeleeEvent"]]> {
   public readonly moduleAddress = ARENA_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_arena";
@@ -1096,21 +1094,21 @@ export class Melee extends ViewFunctionPayloadBuilder<[MoveValue]> {
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
   }) {
     super();
-    const { meleeId } = args;
+    const { meleeID } = args;
 
     this.args = {
-      meleeId: new U64(meleeId),
+      meleeID: new U64(meleeID),
     };
   }
 
   static async view(args: {
     aptos: Aptos | AptosConfig;
-    meleeId: Uint64; // u64
+    meleeID: Uint64; // u64
     options?: LedgerVersionArg;
-  }): Promise<MoveValue> {
+  }) {
     const [res] = await new Melee(args).view(args);
     return res;
   }

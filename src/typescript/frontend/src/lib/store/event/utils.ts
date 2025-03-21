@@ -1,29 +1,18 @@
-import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
-import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
+import { Period, NON_ARENA_PERIODS, periodEnumToRawDuration } from "@sdk/const";
 import { type WritableDraft } from "immer";
-import { type EventState, type CandlestickData, type MarketEventStore } from "./types";
+import { type EventState, type MarketEventStore, type MarketStoreMetadata } from "./types";
 import {
-  type MarketMetadataModel,
   type PeriodicStateEventModel,
   type SwapEventModel,
-  type DatabaseModels,
   type EventModelWithMarket,
 } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
-import { q64ToBig } from "@sdk/utils/nominal-price";
-import { toNominal } from "lib/utils/decimals";
-
-type PeriodicState = DatabaseModels["periodic_state_events"];
-
-export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
-  candlesticks: [] as PeriodicState[],
-  callback: undefined,
-  latestBar: undefined,
-});
+import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";
+import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
+import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } from "../utils";
 
 export const createInitialMarketState = (
-  marketMetadata: MarketMetadataModel
+  marketMetadata: MarketStoreMetadata
 ): WritableDraft<MarketEventStore> => ({
   marketMetadata,
   swapEvents: [],
@@ -41,7 +30,7 @@ export const createInitialMarketState = (
 
 export const ensureMarketInStore = (
   state: WritableDraft<EventState>,
-  market: MarketMetadataModel
+  market: MarketStoreMetadata
 ) => {
   const key = market.symbolData.symbol;
   if (!state.markets.has(key)) {
@@ -49,21 +38,11 @@ export const ensureMarketInStore = (
   }
 };
 
-export const pushPeriodicStateEvents = (
-  market: WritableDraft<MarketEventStore>,
-  periodicStateEvents: PeriodicState[]
-) => {
-  periodicStateEvents.forEach((p) => {
-    const { period } = p.periodicMetadata;
-    market[period].candlesticks.push(p);
-  });
-};
-
 export const handleLatestBarForSwapEvent = (
   market: WritableDraft<MarketEventStore>,
   event: SwapEventModel
 ) => {
-  for (const period of PERIODS) {
+  for (const period of NON_ARENA_PERIODS) {
     const data = market[period];
     const swapPeriodStart = getPeriodStartTimeFromTime(event.market.time, period);
     const latestBarPeriodStart = BigInt(data.latestBar?.time ?? -1n) * 1000n;
@@ -74,13 +53,13 @@ export const handleLatestBarForSwapEvent = (
       callbackClonedLatestBarIfSubscribed(data.callback, newBar);
     } else if (!data.latestBar) {
       throw new Error("This should never occur. It is a type guard/hint.");
-    } else if (event.market.marketNonce >= data.latestBar.marketNonce) {
+    } else if (event.market.marketNonce >= data.latestBar.nonce) {
       const price = q64ToBig(event.swap.avgExecutionPriceQ64).toNumber();
       data.latestBar.time = Number(getPeriodStartTimeFromTime(event.market.time, period) / 1000n);
       data.latestBar.close = price;
       data.latestBar.high = Math.max(data.latestBar.high, price);
       data.latestBar.low = Math.min(data.latestBar.low, price);
-      data.latestBar.marketNonce = event.market.marketNonce;
+      data.latestBar.nonce = event.market.marketNonce;
       data.latestBar.volume += toNominal(event.swap.quoteVolume);
       // Note this results in `time order violation` errors if we set `has_empty_bars`
       // to `true` in the `LibrarySymbolInfo` configuration.
@@ -99,7 +78,7 @@ export const handleLatestBarForPeriodicStateEvent = (
   // Check if the new bar would be newer than the current latest bar.
   if (
     !data.latestBar ||
-    (data.latestBar.marketNonce < newBar.marketNonce && data.latestBar.time <= newBar.time)
+    (data.latestBar.nonce < newBar.nonce && data.latestBar.time <= newBar.time)
   ) {
     data.latestBar = newBar;
     // We need to update the latest bar for all periods with any existing swap
@@ -115,14 +94,14 @@ export const handleLatestBarForPeriodicStateEvent = (
       // NOTE: When a new periodic state event is emitted, the market nonce
       // for the swap event is actually exactly the same as the periodic state event,
       // hence why we use `>=` instead of just `>`.
-      if (swapInTimeRange && swapEvent.market.marketNonce >= data.latestBar.marketNonce) {
+      if (swapInTimeRange && swapEvent.market.marketNonce >= data.latestBar.nonce) {
         if (!data.latestBar) throw new Error("This should never occur. It is a type guard/hint.");
         const price = q64ToBig(innerSwap.avgExecutionPriceQ64).toNumber();
         data.latestBar.time = Number(getPeriodStartTimeFromTime(innerMarket.time, period) / 1000n);
         data.latestBar.close = price;
         data.latestBar.high = Math.max(data.latestBar.high, price);
         data.latestBar.low = Math.min(data.latestBar.low, price);
-        data.latestBar.marketNonce = innerMarket.marketNonce;
+        data.latestBar.nonce = innerMarket.marketNonce;
         data.latestBar.volume += toNominal(innerSwap.quoteVolume);
       }
     }
@@ -130,32 +109,6 @@ export const handleLatestBarForPeriodicStateEvent = (
     // Note this will result in a time order violation if we set the `has_empty_bars`
     // value to `true` in the `LibrarySymbolInfo` configuration.
     callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar);
-  }
-};
-
-/**
- * A helper function to clone the latest bar and call the callback with it. This is necessary
- * because the TradingView SubscribeBarsCallback function (cb) will mutate the object passed to it.
- * This for some reason causes issues with zustand, so we have this function as a workaround.
- * @param cb the SubscribeBarsCallback to call, from the TradingView charting API
- * @param latestBar the latest bar to clone and pass to the callback. We reduce the scope/type to
- * only the fields that the callback needs, aka `Bar`, a subset of `LatestBar`.
- */
-export const callbackClonedLatestBarIfSubscribed = (
-  cb: SubscribeBarsCallback | undefined,
-  latestBar: WritableDraft<LatestBar>
-) => {
-  if (cb) {
-    cb({
-      // NOTE: Do _not_ alter or normalize any data here- this is solely to clone the bar data.
-      // The data should already be in its end format by the time it gets to this function.
-      time: latestBar.time,
-      open: latestBar.open,
-      high: latestBar.high,
-      low: latestBar.low,
-      close: latestBar.close,
-      volume: latestBar.volume,
-    });
   }
 };
 

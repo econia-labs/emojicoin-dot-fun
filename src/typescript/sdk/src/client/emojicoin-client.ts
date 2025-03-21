@@ -11,7 +11,7 @@ import {
   type LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
-import { EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
+import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
 import {
   Chat,
   ProvideLiquidity,
@@ -31,6 +31,12 @@ import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
 import { toMarketView, toRegistryView, toSwapEvent, type AnyNumberString } from "../types";
+import { toArenaCoinTypes } from "../markets/arena-utils";
+import { type ArenaEvents } from "../emojicoin_dot_fun/arena-events";
+import {
+  type ArenaEventsModels,
+  getArenaEventsAsProcessorModels,
+} from "../indexer-v2/mini-processor/arena-events-to-models";
 
 const { expect, Expect } = customExpect;
 
@@ -40,7 +46,7 @@ type Options = {
   waitForTransactionOptions?: WaitForTransactionOptions;
 };
 
-const waitForEventProcessed = async (
+const waitForEmojicoinEventProcessed = async (
   marketID: bigint,
   marketNonce: bigint,
   tableName: TableName
@@ -60,6 +66,45 @@ const waitForEventProcessed = async (
     errorMessage: "Event did not register on time.",
   });
 };
+
+async function waitForArenaEventProcessed(
+  transactionVersion: AnyNumberString,
+  eventIndex: AnyNumberString,
+  tableName: TableName.ArenaMeleeEvents,
+  meleeID: bigint
+): Promise<boolean>;
+async function waitForArenaEventProcessed(
+  transactionVersion: AnyNumberString,
+  eventIndex: AnyNumberString,
+  tableName: TableName.ArenaEnterEvents | TableName.ArenaExitEvents | TableName.ArenaSwapEvents
+): Promise<boolean>;
+async function waitForArenaEventProcessed(
+  transactionVersion: AnyNumberString,
+  eventIndex: AnyNumberString,
+  tableName:
+    | TableName.ArenaMeleeEvents
+    | TableName.ArenaEnterEvents
+    | TableName.ArenaExitEvents
+    | TableName.ArenaSwapEvents,
+  meleeID?: bigint
+) {
+  return waitFor({
+    condition: async () => {
+      const data =
+        tableName === TableName.ArenaMeleeEvents
+          ? await postgrest.from(tableName).select("*").eq("melee_id", meleeID)
+          : await postgrest
+              .from(tableName)
+              .select("*")
+              .eq("transaction_version", transactionVersion)
+              .eq("event_index", Number(eventIndex));
+      return data.error === null && data.data?.length === 1;
+    },
+    interval: 500,
+    maxWaitTime: 30000,
+    errorMessage: "Arena event did not register on time.",
+  });
+}
 
 /**
  * A helper class intended to streamline the process of submitting transactions and using utility
@@ -111,6 +156,16 @@ export class EmojicoinClient {
     remove: this.removeLiquidity.bind(this),
   };
 
+  public arena = {
+    enter: this.arenaEnter.bind(this),
+    exit: this.arenaExit.bind(this),
+    swap: this.arenaSwap.bind(this),
+    /**
+     * Note that `duration` is in microseconds.
+     */
+    setNextMeleeDuration: this.arenaSetNextMeleeDuration.bind(this),
+  };
+
   public utils = {
     emojisToHexStrings: this.emojisToHexStrings.bind(this),
     emojisToHexSymbol: this.emojisToHexSymbol.bind(this),
@@ -118,10 +173,7 @@ export class EmojicoinClient {
     getTransactionEventData: this.getTransactionEventData.bind(this),
   };
 
-  public rewards: {
-    buy: typeof EmojicoinClient.prototype.buyWithRewards;
-    sell: typeof EmojicoinClient.prototype.sellWithRewards;
-  } = {
+  public rewards = {
     buy: this.buyWithRewards.bind(this),
     sell: this.sellWithRewards.bind(this),
   };
@@ -202,7 +254,7 @@ export class EmojicoinClient {
     const res = this.getTransactionEventData(response);
     const marketID = res.events.marketRegistrationEvents[0].marketID;
     if (this.alwaysWaitForIndexer) {
-      await waitForEventProcessed(marketID, 1n, TableName.MarketRegistrationEvents);
+      await waitForEmojicoinEventProcessed(marketID, 1n, TableName.MarketRegistrationEvents);
     }
     return {
       ...res,
@@ -236,7 +288,7 @@ export class EmojicoinClient {
     const res = this.getTransactionEventData(response);
     const { emitMarketNonce, marketID } = res.events.chatEvents[0];
     if (this.alwaysWaitForIndexer) {
-      await waitForEventProcessed(marketID, emitMarketNonce, TableName.ChatEvents);
+      await waitForEmojicoinEventProcessed(marketID, emitMarketNonce, TableName.ChatEvents);
     }
     return {
       ...res,
@@ -329,7 +381,7 @@ export class EmojicoinClient {
         ledgerVersion,
       },
     });
-    return toSwapEvent(res, -1);
+    return toSwapEvent(res, -1, swapper.toString());
   }
 
   private async isMarketRegisteredView(
@@ -382,7 +434,7 @@ export class EmojicoinClient {
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.swapEvents[0];
     if (this.alwaysWaitForIndexer) {
-      await waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents);
+      await waitForEmojicoinEventProcessed(marketID, marketNonce, TableName.SwapEvents);
     }
     return {
       ...res,
@@ -441,7 +493,7 @@ export class EmojicoinClient {
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.swapEvents[0];
     if (this.alwaysWaitForIndexer) {
-      await waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents);
+      await waitForEmojicoinEventProcessed(marketID, marketNonce, TableName.SwapEvents);
     }
     return {
       ...res,
@@ -469,7 +521,7 @@ export class EmojicoinClient {
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.liquidityEvents[0];
     if (this.alwaysWaitForIndexer) {
-      await waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents);
+      await waitForEmojicoinEventProcessed(marketID, marketNonce, TableName.LiquidityEvents);
     }
     return {
       ...res,
@@ -497,7 +549,7 @@ export class EmojicoinClient {
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.liquidityEvents[0];
     if (this.alwaysWaitForIndexer) {
-      await waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents);
+      await waitForEmojicoinEventProcessed(marketID, marketNonce, TableName.LiquidityEvents);
     }
     return {
       ...res,
@@ -506,6 +558,121 @@ export class EmojicoinClient {
         model: expect(res.models.liquidityEvents.at(0), Expect.Liquidity.Model),
       },
     };
+  }
+
+  private async arenaSwap(
+    swapper: Account,
+    symbol1: SymbolEmoji[],
+    symbol2: SymbolEmoji[],
+    options?: Options
+  ) {
+    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const response = await EmojicoinArena.Swap.submit({
+      aptosConfig: this.aptos.config,
+      swapper,
+      typeTags,
+      ...options,
+    });
+    const res = this.getTransactionEventData(response);
+    const { version, eventIndex } = res.events.arenaSwapEvents[0];
+    if (this.alwaysWaitForIndexer) {
+      await waitForArenaEventProcessed(version, eventIndex, TableName.ArenaSwapEvents);
+    }
+    return {
+      ...res,
+      arena: {
+        event: expect(res.events.arenaSwapEvents.at(0), Expect.ArenaSwap.Event),
+        model: expect(res.models.arenaSwapEvents.at(0), Expect.ArenaSwap.Model),
+      },
+    };
+  }
+
+  private async arenaEnter(
+    entrant: Account,
+    inputAmount: bigint,
+    lockIn: boolean,
+    symbol1: SymbolEmoji[],
+    symbol2: SymbolEmoji[],
+    escrowCoin: "symbol1" | "symbol2",
+    options?: Options
+  ) {
+    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const escrowType = escrowCoin === "symbol1" ? typeTags[0] : typeTags[2];
+    const response = await EmojicoinArena.Enter.submit({
+      aptosConfig: this.aptos.config,
+      entrant,
+      inputAmount,
+      lockIn,
+      typeTags: [...typeTags, escrowType],
+      ...options,
+    });
+    const res = this.getTransactionEventData(response);
+
+    // Sometimes, the arena enter event only pulls the crank to end the current melee and start a
+    // new one. In that case, there will be a `Melee` event, not an `Enter` event.
+    const arena = res.events.arenaMeleeEvents.at(0)
+      ? {
+          event: expect(res.events.arenaMeleeEvents.at(0), Expect.ArenaMelee.Event),
+          model: expect(res.models.arenaMeleeEvents.at(0), Expect.ArenaMelee.Model),
+        }
+      : {
+          event: expect(res.events.arenaEnterEvents.at(0), Expect.ArenaEnter.Event),
+          model: expect(res.models.arenaEnterEvents.at(0), Expect.ArenaEnter.Model),
+        };
+
+    const { version, eventIndex } = arena.event;
+    if (this.alwaysWaitForIndexer) {
+      if (arena.event.eventName === "ArenaMelee") {
+        await waitForArenaEventProcessed(
+          version,
+          eventIndex,
+          TableName.ArenaMeleeEvents,
+          arena.event.meleeID
+        );
+      } else {
+        await waitForArenaEventProcessed(version, eventIndex, TableName.ArenaEnterEvents);
+      }
+    }
+
+    return {
+      ...res,
+      arena,
+    };
+  }
+
+  private async arenaExit(
+    participant: Account,
+    symbol1: SymbolEmoji[],
+    symbol2: SymbolEmoji[],
+    options?: Options
+  ) {
+    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const response = await EmojicoinArena.Exit.submit({
+      aptosConfig: this.aptos.config,
+      participant,
+      typeTags,
+      ...options,
+    });
+    const res = this.getTransactionEventData(response);
+    const { version, eventIndex } = res.events.arenaExitEvents[0];
+    if (this.alwaysWaitForIndexer) {
+      await waitForArenaEventProcessed(version, eventIndex, TableName.ArenaExitEvents);
+    }
+    return {
+      ...res,
+      arena: {
+        event: expect(res.events.arenaExitEvents.at(0), Expect.ArenaExit.Event),
+        model: expect(res.models.arenaExitEvents.at(0), Expect.ArenaExit.Model),
+      },
+    };
+  }
+
+  private async arenaSetNextMeleeDuration(arenaPublisher: Account, duration: bigint) {
+    return await EmojicoinArena.SetNextMeleeDuration.submit({
+      aptosConfig: this.aptos.config,
+      emojicoinArena: arenaPublisher,
+      duration,
+    });
   }
 
   private emojisToHexStrings(symbolEmojis: SymbolEmoji[]) {
@@ -532,11 +699,14 @@ export class EmojicoinClient {
 
   private getTransactionEventData(response: UserTransactionResponse): {
     response: UserTransactionResponse;
-    events: Events;
-    models: EventsModels;
+    events: Events & ArenaEvents;
+    models: EventsModels & ArenaEventsModels;
   } {
     const events = getEvents(response);
-    const models = getEventsAsProcessorModelsFromResponse(response, events);
+    const models = {
+      ...getEventsAsProcessorModelsFromResponse(response, events),
+      ...getArenaEventsAsProcessorModels(response),
+    };
     return {
       response,
       events,

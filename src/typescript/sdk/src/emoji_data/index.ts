@@ -4,3 +4,4 @@ export * from "./emoji-data";
 export * from "./symbol-emojis";
 export * from "./types";
 export * from "./utils";
+export * from "./valid-market-symbol";

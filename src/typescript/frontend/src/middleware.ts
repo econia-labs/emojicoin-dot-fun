@@ -10,19 +10,33 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
+const walletRegex = new RegExp(`^${ROUTES.wallet}/(.*).apt$`);
+
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
-  if (pathname === ROUTES.launching_soon) {
+  if (pathname === ROUTES["launching-soon"]) {
     return NextResponse.next();
   }
-  if (PRE_LAUNCH_TEASER && pathname !== ROUTES.launching_soon) {
-    return NextResponse.redirect(new URL(ROUTES.launching_soon, request.url));
+  if (PRE_LAUNCH_TEASER && pathname !== ROUTES["launching-soon"]) {
+    return NextResponse.redirect(new URL(ROUTES["launching-soon"], request.url));
   }
   if (MAINTENANCE_MODE && pathname !== ROUTES.maintenance) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
-  if (pathname === "/test" || pathname === "/verify_status" || pathname === ROUTES.dexscreener) {
+  const dexscreenerRoutes = Object.keys(ROUTES.api.dexscreener);
+  if (
+    pathname === ROUTES.test ||
+    pathname === ROUTES.dev["verify-status"] ||
+    dexscreenerRoutes.includes(pathname)
+  ) {
     return NextResponse.next();
+  }
+
+  // If path matches `/wallet/matt.apt`
+  if (walletRegex.test(pathname)) {
+    // redirect to `/wallet/matt`
+    const url = new URL(pathname.slice(0, -4), request.url);
+    return NextResponse.redirect(url);
   }
 
   // This will replace emojis in the path name with their actual text names. Since this occurs
@@ -60,5 +74,5 @@ export default async function middleware(request: NextRequest) {
 // Note this must be a static string- we can't dynamically construct it.
 export const config = {
   /* eslint-disable-next-line */
-  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|webclip.png|social-preview.png|manifest.json|images/wallets).*)`,
+  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|social-preview.png|manifest.json|images/wallets).*)`,
 };

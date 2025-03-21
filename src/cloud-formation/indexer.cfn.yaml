@@ -56,6 +56,9 @@ Conditions:
   EnableWafRulesWebSocket: !Equals
   - !Ref 'EnableWafRulesWebSocket'
   - 'true'
+  IndexArena: !Equals
+  - !Ref 'IndexArena'
+  - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -202,6 +205,12 @@ Parameters:
     - 'true'
     Type: 'String'
   Environment:
+    Type: 'String'
+  IndexArena:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Default: 'true'
     Type: 'String'
   Network:
     AllowedValues:
@@ -1418,9 +1427,12 @@ Resources:
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
           Value: !Sub
             '{{resolve:ssm:/emojicoin/package-address/${Network}}}'
-        - Name: 'EMOJICOIN_ARENA_MODULE_ADDRESS'
-          Value: !Sub
-            '{{resolve:ssm:/emojicoin/arena-package-address/${Network}}}'
+        - !If
+          - 'IndexArena'
+          - Name: 'EMOJICOIN_ARENA_MODULE_ADDRESS'
+            Value: !Sub
+              '{{resolve:ssm:/emojicoin/arena-package-address/${Network}}}'
+          - !Ref 'AWS::NoValue'
         - Name: 'WS_PORT'
           Value: !FindInMap
           - 'Constants'

@@ -43,7 +43,8 @@ const Button = <E extends React.ElementType = "button">({
     textScale: "pixelHeading4" as const,
     color: isDisabled || fakeDisabled ? ("darkGray" as const) : ("econiaBlue" as const),
     textTransform: "uppercase" as const,
-    fontSize: scale === "sm" ? ("20px" as const) : ("24px" as const),
+    fontSize:
+      scale === "sm" ? ("20px" as const) : scale === "lg" ? ("24px" as const) : ("36px" as const),
   };
 
   return (

@@ -1,0 +1,14 @@
+---
+jobs:
+  pr-size:
+    name: 'Code owners'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'econia-labs/common/.github/actions/codeowners@main'
+      with:
+        github_access_token: '${{ secrets.CODEOWNERS_VALIDATOR_GITHUB_TOKEN }}'
+name: 'Code owners'
+'on':
+  merge_group: null
+  pull_request: null
+...

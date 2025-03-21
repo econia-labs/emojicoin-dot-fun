@@ -1,18 +1,42 @@
+import { expandRoutes } from "./utils";
+
+const _ = "";
+
 // cspell:word dexscreener
-export const ROUTES = {
-  root: "/",
-  // Alphabetized after this.
-  api: "/api",
-  cult: "/cult",
-  dexscreener: "/dexscreener",
-  docs: "https://docs.emojicoin.fun/category/--start-here",
-  home: "/home",
-  launch: "/launch",
-  launching_soon: "/launching",
-  maintenance: "/maintenance",
-  market: "/market",
-  notFound: "/not-found",
-  pools: "/pools",
-  verify: "/verify",
-  wallet: "/wallet",
-} as const;
+export const ROUTES = expandRoutes({
+  api: {
+    arena: {
+      position: _,
+      "historical-positions": _,
+      candlesticks: _,
+    },
+    candlesticks: _,
+    dexscreener: {
+      asset: _,
+      pair: _,
+      events: _,
+      "latest-block": _,
+    },
+    pools: _,
+    trades: _,
+    trending: _,
+  },
+  arena: _,
+  cult: _,
+  dev: {
+    metadata: _,
+    "verify-status": _,
+    "verify-api-keys": _,
+  },
+  home: _,
+  launch: _,
+  "launching-soon": _,
+  maintenance: _,
+  market: _,
+  "not-found": _,
+  pools: _,
+  test: _,
+  "test-utils": _,
+  verify: _,
+  wallet: _,
+} as const);

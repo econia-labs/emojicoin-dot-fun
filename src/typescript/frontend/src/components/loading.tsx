@@ -19,21 +19,18 @@ export const Loading = ({
   numEmojis?: number;
 }) => {
   const pathname = usePathname();
-  // Use the emojis in the path if we're on the `market` page.
-  const emojisInPath = pathname
-    .split("/market/")
-    .at(1)
-    ?.split(";")
-    .map(unpathify)
-    .filter((e) => typeof e !== "undefined");
-
   const emojiCycle = useMemo(() => {
-    if (emojisInPath?.length || emojis?.length) {
-      // Note the `emojis!` below is because TypeScript can't infer that it's defined, but it definitely is.
-      return emojisInPath?.length ? emojisInPath : emojis!;
-    }
+    const emojisInPath = pathname
+      .split("/market/")
+      .at(1)
+      ?.split(";")
+      .map(unpathify)
+      .filter((e) => typeof e !== "undefined");
+
+    if (emojisInPath?.length) return emojisInPath;
+    if (emojis?.length) return emojis;
     return Array.from({ length: 20 }, getRandomSymbolEmoji);
-  }, [emojisInPath, emojis]);
+  }, [pathname, emojis]);
 
   const [emojiName, setEmojiName] = React.useState(emojiCycle[0].name);
   const [emoji, setEmoji] = React.useState(emojiCycle[0].emoji);

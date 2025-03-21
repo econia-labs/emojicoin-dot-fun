@@ -20,6 +20,7 @@
   left: 61%;
   transform: translateX(-50%);
   padding-top: 8px;
+  line-height: 1.5em;
 }
 
 .styled-single-emoji {

@@ -315,6 +315,6 @@ This will allow Vercel to run the `frontend/vercel-install` script in order to
 download the charting library from your private personal fork.
 
 [aptos api key documentation]: https://developers.aptoslabs.com/docs/api-access/api-keys
-[cdn setup guide]: https://github.com/econia-labs/cloud-infra/blob/main/doc/cdn.md
+[cdn setup guide]: https://github.com/econia-labs/common/blob/main/doc/cdn.md
 [fonts.ts]: ./frontend/src/styles/fonts.ts
 [privatechart.tsx]: ./frontend/src/components/charts/PrivateChart.tsx

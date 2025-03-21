@@ -1,4 +1,4 @@
-import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { sum, toAccountAddressString } from "@sdk/utils";
 import { useQuery } from "@tanstack/react-query";
 import { fetchOwnerEmojicoinBalances } from "lib/queries/aptos-indexer/fetch-owner-emojicoin-balances";
@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { withResponseError } from "./client";
 import { getSymbolEmojisInString, toMarketEmojiData } from "@sdk/emoji_data/utils";
 import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { fetchSpecificMarketsAction } from "components/pages/wallet/fetch-specific-markets-action";
 
@@ -79,6 +79,7 @@ export const useUserEmojicoinBalances = (owner: AccountAddressInput, max?: numbe
     queryFn: () =>
       withResponseError(fetchOwnerEmojicoinBalances({ ownerAddress, max }).then(toFullCoinData)),
     staleTime: STALE_TIME,
+    enabled: AccountAddress.isValid({ input: owner }).valid,
   });
 
   return {

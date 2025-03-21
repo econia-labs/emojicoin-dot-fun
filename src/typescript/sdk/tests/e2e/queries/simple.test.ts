@@ -7,7 +7,7 @@ import {
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
-import RowEqualityChecks from "./equality-checks";
+import checkRows from "../helpers/equality-checks";
 import { queryHelper } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/json-types";
 import { getFundedAccounts } from "../../utils/test-accounts";
@@ -50,7 +50,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     });
     const marketLatestStateRow = marketLatestStateRes[0];
 
-    RowEqualityChecks.MarketLatestState(marketLatestStateRow, response);
+    checkRows.MarketLatestState(marketLatestStateRow, response);
   });
 
   it("performs a simple swap fetch accurately", async () => {
@@ -76,7 +76,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const queryRes = await fetchSwapEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
-    RowEqualityChecks.Swap(row, res);
+    checkRows.Swap(row, res);
   });
 
   it("performs a simple chat fetch accurately", async () => {
@@ -101,7 +101,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
-    RowEqualityChecks.Chat(row, res);
+    checkRows.Chat(row, res);
   });
 
   it("performs a simple liquidity fetch accurately", async () => {
@@ -174,7 +174,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const foundInUserPools = userPoolQueryRes.find((row) => row.market.marketID === marketID);
     const row = liquidityEventsQueryRes[0];
 
-    RowEqualityChecks.Liquidity(row, liquidityRes);
+    checkRows.Liquidity(row, liquidityRes);
     expect(foundMarketInLatestStateTable).toBe(true);
     expect(foundInMarketsWithPools).toBeTruthy();
     expect(foundInUserPools).toBeTruthy();
