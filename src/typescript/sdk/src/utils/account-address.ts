@@ -32,5 +32,5 @@ export const toAccountAddressString = (input: AnyAccount | AccountAddressInput) 
  */
 export const removeLeadingZeros = (input: `0x${string}` | AccountAddressInput) => {
   const address = toAccountAddressString(input);
-  return address.replace(/^0x0*([0-9a-fA-F]+)$/, "0x$1");
+  return address.replace(/^0x0*([0-9a-fA-F]+)$/, "0x$1") as `0x${string}`;
 };

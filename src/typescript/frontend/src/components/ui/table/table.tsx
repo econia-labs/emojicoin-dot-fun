@@ -4,9 +4,11 @@ import * as React from "react";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
-    </div>
+    <table
+      ref={ref}
+      className={cn("w-full caption-bottom text-sm border-separate bg-black", className)}
+      {...props}
+    />
   )
 );
 Table.displayName = "Table";
@@ -18,9 +20,8 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "text-ec-blue body-lg bg-black uppercase text-center sticky -top-[1px] z-10",
-      "[&_td]:!border [&_td]:!border-dark-gray [&_td]:before:absolute [&_td]:before:top-0",
-      "[&_td]:before:h-[1px] [&_td]:before:w-full [&_td]:before:bg-dark-gray",
+      "text-ec-blue body-lg bg-black uppercase text-center sticky top-0 z-10",
+
       className
     )}
     {...props}
@@ -32,7 +33,14 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn("table-body", className)} {...props} />
+  <tbody
+    ref={ref}
+    className={cn(
+      "table-body [&>tr:last-child>td]:border-b [&>tr:last-child>td]:border-b-dark-gray [&>tr:hover+tr>td]:border-t-ec-blue",
+      className
+    )}
+    {...props}
+  />
 ));
 TableBody.displayName = "TableBody";
 
@@ -51,7 +59,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-8 align-middle tracking-wide font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "h-8 align-middle tracking-wide font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border-y border-solid border-dark-gray",
       className
     )}
     {...props}
@@ -66,7 +74,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "text-light-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "text-light-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border-solid border-t border-dark-gray group-hover:border-ec-blue first:border-l last:border-r first:border-l-black last:border-r-black",
       className
     )}
     {...props}
@@ -88,27 +96,26 @@ const TableRow = React.forwardRef<
 >(({ className, height = 33, noHover, isHeader = false, index = 0, ...props }, ref) => {
   // Shorter duration for rows further down, to avoid them taking forever to animate in.
   const delay = React.useMemo(() => {
-    if (index <= 30) {
-      return index * 0.025;
-    }
-    const first30 = 30 * 0.025;
-    const after30 = (index % 30) * 0.01;
-    return first30 + after30;
+    // Start with minimal delay and increase logarithmically
+    const baseDelay = 0.08;
+    const maxDelay = 0.5;
+    return Math.min(baseDelay + Math.log10(index + 1) * 0.08, maxDelay);
   }, [index]);
 
   return (
     <motion.tr
-      layout
       initial={{
-        opacity: 0,
         filter: "brightness(1) saturate(1)",
         boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
+        opacity: 0,
       }}
       animate={{
         opacity: 1,
         transition: {
-          type: "just",
-          delay,
+          opacity: {
+            type: "just",
+            delay,
+          },
         },
       }}
       whileHover={
@@ -116,31 +123,23 @@ const TableRow = React.forwardRef<
           ? {
               filter: "brightness(1.05) saturate(1.1)",
               boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-              transition: { duration: 0.05 },
+              transition: {
+                filter: { duration: 0.05 },
+                boxShadow: { duration: 0.05 },
+              },
             }
           : {}
       }
       ref={ref}
       style={{ height, ...props.style }}
       className={cn(
-        "relative w-full group",
-        !isHeader ? "border-solid border-b border-dark-gray" : "",
+        "relative w-full",
+        !isHeader && !noHover ? "transition-colors border-2 hover:z-2 group" : "",
         className
       )}
       {...props}
     >
       {props.children as React.ReactNode}
-      {
-        <td
-          className={cn(
-            "absolute bg-transparent z-[1] inline-flex left-0 w-full h-full pointer-events-none",
-            !isHeader &&
-              !noHover &&
-              "group-hover:border-solid group-hover:border-ec-blue border-[2px]",
-            isHeader && "border-solid border-[1px] border-dark-gray border-t"
-          )}
-        />
-      }
     </motion.tr>
   );
 });

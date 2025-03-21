@@ -4,7 +4,12 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JsonTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { standardizeAddress } from "../utils/account-address";
-import { type Trigger, type EMOJICOIN_DOT_FUN_MODULE_NAME, rawTriggerToEnum } from "../const";
+import {
+  type Trigger,
+  type EMOJICOIN_DOT_FUN_MODULE_NAME,
+  rawTriggerToEnum,
+  type ArenaPeriod,
+} from "../const";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -17,19 +22,30 @@ import {
 } from "./json-types";
 import { type STRUCT_STRINGS } from "../utils";
 import { type Flatten } from ".";
+import { type ArenaTypes } from "./arena-types";
 import { type SymbolEmoji } from "../emoji_data";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);
 
-export type EventName =
-  | "Swap"
-  | "Chat"
-  | "MarketRegistration"
-  | "PeriodicState"
-  | "State"
-  | "GlobalState"
-  | "Liquidity";
+export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
+
+export const CANDLESTICK_NAME = "Candlestick";
+
+export const EVENT_NAMES = {
+  GlobalState: "GlobalState",
+  PeriodicState: "PeriodicState",
+  MarketRegistration: "MarketRegistration",
+  Swap: "Swap",
+  Chat: "Chat",
+  Liquidity: "Liquidity",
+  State: "State",
+  ArenaEnter: "ArenaEnter",
+  ArenaExit: "ArenaExit",
+  ArenaMelee: "ArenaMelee",
+  ArenaSwap: "ArenaSwap",
+  ArenaVaultBalanceUpdate: "ArenaVaultBalanceUpdate",
+} as const;
 
 export type WithVersionAndGUID = {
   version: number | string;
@@ -40,7 +56,7 @@ export type WithMarketID = {
   marketID: bigint;
 };
 
-export type Types = {
+export type Types = ArenaTypes & {
   EmojicoinInfo: {
     marketAddress: AccountAddress;
     emojicoin: TypeTag;
@@ -225,6 +241,7 @@ export type Types = {
         time: bigint;
         marketNonce: bigint;
         swapper: AccountAddressString;
+        sender: AccountAddressString;
         inputAmount: bigint;
         isSell: boolean;
         integrator: AccountAddressString;
@@ -366,104 +383,17 @@ export type Types = {
     octasRewardAmount: bigint;
   };
 
-  ArenaMelee: {
-    meleeId: bigint;
-    emojicoin0MarketAddress: AccountAddressString;
-    emojicoin1MarketAddress: AccountAddressString;
-    startTime: bigint;
-    duration: bigint;
-    maxMatchPercentage: bigint;
-    maxMatchAmount: bigint;
-    availableRewards: bigint;
-  };
-
-  ArenaEnter: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    inputAmount: bigint;
-    quoteVolume: bigint;
-    integratorFee: bigint;
-    matchAmount: bigint;
-    emojicoin0Proceeds: bigint;
-    emojicoin1Proceeds: bigint;
-    emojicoin0ExchangeRateBase: bigint;
-    emojicoin0ExchangeRateQuote: bigint;
-    emojicoin1ExchangeRateBase: bigint;
-    emojicoin1ExchangeRateQuote: bigint;
-  };
-
-  ArenaExit: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    tapOutFee: bigint;
-    emojicoin0Proceeds: bigint;
-    emojicoin1Proceeds: bigint;
-    emojicoin0ExchangeRateBase: bigint;
-    emojicoin0ExchangeRateQuote: bigint;
-    emojicoin1ExchangeRateBase: bigint;
-    emojicoin1ExchangeRateQuote: bigint;
-  };
-
-  ArenaSwap: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    quoteVolume: bigint;
-    integratorFee: bigint;
-    emojicoin0Proceeds: bigint;
-    emojicoin1Proceeds: bigint;
-    emojicoin0ExchangeRateBase: bigint;
-    emojicoin0ExchangeRateQuote: bigint;
-    emojicoin1ExchangeRateBase: bigint;
-    emojicoin1ExchangeRateQuote: bigint;
-  };
-
-  ArenaVaultBalanceUpdate: {
-    newBalance: bigint;
-  };
-
-  ArenaPositions: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    open: boolean;
-    emojicoin0Balance: bigint;
-    emojicoin1Balance: bigint;
-    withdrawals: bigint;
-    deposits: bigint;
-  };
-
-  ArenaLeaderboardHistory: {
-    user: AccountAddressString;
-    meleeId: bigint;
-    profits: bigint;
-    losses: bigint;
-  };
-
-  ArenaLeaderboard: {
-    user: AccountAddressString;
-    open: boolean;
-    emojicoin0Balance: bigint;
-    emojicoin1Balance: bigint;
-    profits: bigint;
-    losses: bigint;
-    pnlPercent: number;
-    pnlOctas: number;
-  };
-
-  ArenaInfo: {
-    meleeId: bigint;
+  Candlestick: {
+    marketID: bigint;
+    version: bigint;
+    period: ArenaPeriod;
+    startTime: Date;
+    openPrice: number;
+    closePrice: number;
+    highPrice: number;
+    lowPrice: number;
     volume: bigint;
-    rewardsRemaining: bigint;
-    aptLocked: bigint;
-    emojicoin0MarketAddress: AccountAddressString;
-    emojicoin0Symbols: SymbolEmoji[];
-    emojicoin0MarketID: bigint;
-    emojicoin1MarketAddress: AccountAddressString;
-    emojicoin1Symbols: SymbolEmoji[];
-    emojicoin1MarketID: bigint;
-    startTime: bigint;
-    duration: bigint;
-    maxMatchPercentage: bigint;
-    maxMatchAmount: bigint;
+    symbolEmojis: SymbolEmoji[];
   };
 };
 
@@ -665,13 +595,15 @@ export const toStateMetadata = (data: JsonTypes["StateMetadata"]): Types["StateM
 
 export const toSwapEvent = (
   data: JsonTypes["SwapEvent"],
-  version: number | string
+  version: number | string,
+  sender?: string
 ): Types["SwapEvent"] => ({
   version: Number(version),
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
   swapper: standardizeAddress(data.swapper),
+  sender: standardizeAddress(sender || data.swapper),
   inputAmount: BigInt(data.input_amount),
   isSell: data.is_sell,
   integrator: standardizeAddress(data.integrator),
@@ -814,9 +746,10 @@ export const toRegistrantGracePeriodFlag = (data: JsonTypes["RegistrantGracePeri
 
 export const toEmojicoinDotFunRewards = (
   data: JsonTypes["EmojicoinDotFunRewards"],
-  version: number | string
+  version: number | string,
+  sender?: string
 ) => ({
-  swap: toSwapEvent(data.swap, version),
+  swap: toSwapEvent(data.swap, version, sender),
   octasRewardAmount: BigInt(data.octas_reward_amount),
 });
 
@@ -918,17 +851,6 @@ export function toEventWithTime<T extends AnyEmojicoinEvent>(e: T): T & WithTime
   };
 }
 
-export function getEventTypeName(e: AnyEmojicoinEvent): EventName {
-  if (isSwapEvent(e)) return "Swap";
-  if (isChatEvent(e)) return "Chat";
-  if (isMarketRegistrationEvent(e)) return "MarketRegistration";
-  if (isPeriodicStateEvent(e)) return "PeriodicState";
-  if (isStateEvent(e)) return "State";
-  if (isGlobalStateEvent(e)) return "GlobalState";
-  if (isLiquidityEvent(e)) return "Liquidity";
-  throw new Error(`Unknown event type: ${e}`);
-}
-
 export interface WithTime {
   time: bigint;
 }
@@ -936,10 +858,12 @@ export interface WithTime {
 export function toEmojicoinEvent(
   type: (typeof STRUCT_STRINGS)[keyof typeof STRUCT_STRINGS],
   data: AnyEmojicoinJSONEvent,
+  sender: string,
   version?: number
 ): AnyEmojicoinEvent {
   const event = { type, data };
-  if (isJSONSwapEvent(event)) return toSwapEvent(data as JsonTypes["SwapEvent"], version ?? -1);
+  if (isJSONSwapEvent(event))
+    return toSwapEvent(data as JsonTypes["SwapEvent"], version ?? -1, sender);
   if (isJSONChatEvent(event)) return toChatEvent(data as JsonTypes["ChatEvent"], version ?? -1);
   if (isJSONMarketRegistrationEvent(event))
     return toMarketRegistrationEvent(data as JsonTypes["MarketRegistrationEvent"], version ?? -1);

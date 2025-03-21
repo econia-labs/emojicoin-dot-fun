@@ -1,41 +1,24 @@
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import HomePageComponent from "./HomePage";
-import { fetchMarkets, fetchMarketsWithCount, fetchPriceFeedWithMarketState } from "@/queries/home";
+import { fetchMarkets, fetchMarketsWithCount } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { unstable_cache } from "next/cache";
-import { parseJSON, stringifyJSON } from "utils";
 import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
-import { type DatabaseJsonType } from "@sdk/indexer-v2/types/json-types";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
-import { ORDER_BY } from "@sdk/indexer-v2/const";
 import { getCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import { fetchCachedPriceFeed } from "lib/queries/price-feed";
+import { ARENA_MODULE_ADDRESS } from "@sdk/const";
+import { fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
 
 export const revalidate = 2;
-
-const NUM_MARKETS_ON_PRICE_FEED = 25;
-
-const stringifiedFetchPriceFeedData = () =>
-  fetchPriceFeedWithMarketState({
-    sortBy: SortMarketsBy.DailyVolume,
-    orderBy: ORDER_BY.DESC,
-    pageSize: NUM_MARKETS_ON_PRICE_FEED,
-  }).then((res) => stringifyJSON(res));
-
-const getCachedPriceFeedData = unstable_cache(
-  stringifiedFetchPriceFeedData,
-  ["price-feed-with-market-data"],
-  { revalidate: 10 }
-);
 
 export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
-  const priceFeedPromise = getCachedPriceFeedData()
-    .then((res) => parseJSON<DatabaseJsonType["price_feed"][]>(res).map((p) => toPriceFeed(p)))
+  const priceFeedPromise = fetchCachedPriceFeed()
+    .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
@@ -69,20 +52,35 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   const aptPricePromise = getAptPrice();
 
-  const [priceFeedData, markets, numMarkets, aptPrice] = await Promise.all([
-    priceFeedPromise,
-    marketsPromise,
-    numMarketsPromise,
-    aptPricePromise,
-  ]).catch((e) => {
-    console.error(e);
-    return [
-      [] as DatabaseModels["price_feed"][],
-      [] as DatabaseModels["market_state"][],
-      0,
-      undefined,
-    ] as const;
-  });
+  const meleeDataPromise = (async () => {
+    if (ARENA_MODULE_ADDRESS) {
+      const melee = await fetchArenaInfo({});
+      if (!melee) {
+        console.error("Arena is enabled, but arena info couldn't be fetched from the database.");
+        return null;
+      }
+      const [market0, market1] = await Promise.all([
+        fetchMarketStateByAddress({ address: melee.emojicoin0MarketAddress }),
+        fetchMarketStateByAddress({ address: melee.emojicoin1MarketAddress }),
+      ]);
+      if (!market0 || !market1) {
+        console.error(
+          "Arena info found, but one or both of the arena markets aren't in the market state table."
+        );
+        return null;
+      }
+      return { melee, market0, market1 };
+    }
+    return null;
+  })();
+
+  const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
+    priceFeedPromise.catch(() => []),
+    marketsPromise.catch(() => []),
+    numMarketsPromise.catch(() => 0),
+    aptPricePromise.catch(() => undefined),
+    meleeDataPromise.catch(() => null),
+  ]);
 
   return (
     <AptPriceContextProvider aptPrice={aptPrice}>
@@ -93,6 +91,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         sortBy={sortBy}
         searchBytes={q}
         priceFeed={priceFeedData}
+        meleeData={meleeData}
       />
     </AptPriceContextProvider>
   );

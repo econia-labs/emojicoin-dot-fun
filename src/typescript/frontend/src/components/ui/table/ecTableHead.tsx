@@ -30,7 +30,7 @@ export const EcTableHead: FC<SortableHeadProps> = ({
 
   return (
     <TableHead
-      className={cn(setSort ? "cursor-pointer hover:brightness-[1.5]" : "")}
+      className={cn(setSort ? "cursor-pointer group" : "")}
       onClick={
         isSortable
           ? () => setSort({ column: id, direction: currDirection === "desc" ? "asc" : "desc" })
@@ -40,6 +40,7 @@ export const EcTableHead: FC<SortableHeadProps> = ({
       <span
         style={{ minWidth: width ? `${width}px` : undefined }}
         className={cn(
+          "group-hover:brightness-[1.5]",
           "w-full flex gap-1 items-center",
           index === 0 ? "pl-4" : index === columnsCount - 1 ? "pr-6" : "",
           index === 0 ? "justify-start" : "justify-end",

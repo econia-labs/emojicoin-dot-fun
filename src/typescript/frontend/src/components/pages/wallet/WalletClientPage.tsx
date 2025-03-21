@@ -1,66 +1,46 @@
 "use client";
 
-import { useNameResolver } from "@hooks/use-name-resolver";
 import AptosIconBlack from "@icons/AptosBlack";
-import { formatDisplayName } from "@sdk/utils";
+import { formatDisplayName, type ValidAptosName } from "@sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
-import { PortfolioRow } from "./PortfolioRow";
 import { FormattedNumber } from "components/FormattedNumber";
-import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import {
-  type FullCoinData,
-  useUserEmojicoinBalances,
-} from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
-import AnimatedLoadingBoxes from "../launch-emojicoin/animated-loading-boxes";
-import { cn } from "lib/utils/class-name";
+import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
+import { WalletTransactionTable } from "./WalletTransactionTable";
+import { WalletPortfolioTable } from "./WalletPortfolioTable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs/tabs";
+import SearchBar from "components/inputs/search-bar";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import { type SymbolEmoji } from "@sdk/emoji_data";
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { ROUTES } from "router/routes";
+import { useEffectOnce } from "react-use";
 
-const COLUMNS: EcTableColumn<FullCoinData>[] = [
-  { id: "emoji", text: "Emoji", width: 80 },
-  {
-    id: "percentage",
-    text: "percent",
-    width: 105,
-    sortCallback: (coin) => coin.percentage,
-  },
-  {
-    id: "amount",
-    text: "Amount",
-    width: 130,
-    sortCallback: (coin) => coin.amount,
-  },
-  {
-    id: "marketCap",
-    text: "Market cap",
-    width: 145,
-    sortCallback: (coin) => coin.marketCap,
-  },
-  {
-    id: "usdValue",
-    text: "USD Value",
-    width: 130,
-    sortCallback: (coin) => coin.ownedValue,
-  },
-  {
-    id: "ownedValue",
-    text: "Value",
-    width: 110,
-    sortCallback: (coin) => coin.ownedValue,
-  },
-];
-
-export const WalletClientPage = ({ address }: { address: string }) => {
+export const WalletClientPage = ({ address, name }: { address: string; name?: ValidAptosName }) => {
+  const resolvedName = name ?? address;
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
-  const resolvedName = useNameResolver(address);
+  const [tab, setTab] = useState<string>("portfolio");
+  const emojis = useEmojiPicker((s) => s.emojis);
+  const setEmojis = useEmojiPicker((s) => s.setEmojis);
+
+  // Replace the address in the router URL if the name is defined.
+  const router = useRouter();
+  const pathname = usePathname();
+  useEffectOnce(() => {
+    if (name && name !== address && pathname.endsWith(address)) {
+      router.replace(`${ROUTES.wallet}/${name}`);
+    }
+  });
 
   return (
-    <>
-      <span className="pixel-heading-2">
+    <div className="max-w-[100vw] px-2 sm:min-w-[80vw] md:min-w-[800px]">
+      <span className="pixel-heading-2 mobile-sm:px-4 sm:px-0 flex flex-wrap gap-x-2 mb-4">
         Portfolio of{" "}
         <ExplorerLink className="text-ec-blue hover:underline" type="account" value={address}>
           {formatDisplayName(resolvedName, { noTruncateANSName: true })}
         </ExplorerLink>
       </span>
-      <div className="flex justify-between w-full mb-4">
+      <div className="flex justify-between w-full mb-4 flex-wrap gap-x-2 mobile-sm:px-4 sm:px-0">
         <span className="pixel-heading-3b">
           {"Total value: "}
           {isLoading ? (
@@ -76,28 +56,25 @@ export const WalletClientPage = ({ address }: { address: string }) => {
           Unique owned: {isLoading ? "?" : ownedCoins.length}
         </span>
       </div>
-      <div className="w-full overflow-x-auto">
-        {isLoading ? (
-          <div className="flex mobile-sm:min-w-[calc(100vw-20px)] sm:min-w-[80vw] md:min-w-[700px] h-[100px]">
-            <div className="flex m-auto">
-              <AnimatedLoadingBoxes numSquares={11} />
-            </div>
-          </div>
-        ) : (
-          <EcTable
-            className={cn(
-              "flex mobile-sm:max-w-[calc(100vw-20px)] sm:max-w-[80vw] h-[60dvh] m-auto",
-              "overflow-auto shadow-[0_0_0_1px_var(--dark-gray)]"
-            )}
-            columns={COLUMNS}
-            items={ownedCoins}
-            getKey={(coin) => coin.symbol}
-            renderRow={(item, i) => (
-              <PortfolioRow key={item.symbol} index={i} coinData={item} totalValue={totalValue} />
-            )}
+      <Tabs value={tab} onValueChange={(v) => setTab(v)}>
+        <div className="flex min-h-[45px] items-end justify-between w-full flex-wrap">
+          <TabsList>
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="trade-history">Trade History</TabsTrigger>
+          </TabsList>
+          {tab === "trade-history" && <SearchBar />}
+        </div>
+        <TabsContent value="portfolio">
+          <WalletPortfolioTable address={address} />
+        </TabsContent>
+        <TabsContent value="trade-history">
+          <WalletTransactionTable
+            address={address}
+            emojis={emojis as SymbolEmoji[]}
+            setEmojis={(emojis) => setEmojis(emojis)}
           />
-        )}
-      </div>
-    </>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };

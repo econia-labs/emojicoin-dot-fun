@@ -7,21 +7,28 @@ import {
   type ImmerSetEventAndClientStore,
 } from "@/store/event/types";
 import { WebSocketClient, type WebSocketClientArgs } from "@/broker/client";
-import { type WebSocketSubscriptions } from "@/broker/types";
-import { type BrokerEvent } from "@/broker/types";
+import { type SubscribableBrokerEvents } from "@/broker/types";
 import { immerable } from "immer";
+import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 
 export type ClientState = {
   client: WebSocketClient;
   connected: boolean;
   received: number;
-  subscriptions: WebSocketSubscriptions;
 };
 
 export type ClientActions = {
   close: () => void;
-  subscribeEvents: (events: BrokerEvent[]) => void;
-  unsubscribeEvents: (events: BrokerEvent[]) => void;
+  subscribeEvents: (
+    events: SubscribableBrokerEvents[],
+    arena?: { baseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
+  ) => void;
+  unsubscribeEvents: (
+    events: SubscribableBrokerEvents[],
+    arena?: { baseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
+  ) => void;
+  subscribeToArenaPeriod: (period: PeriodTypeFromBroker) => void;
+  unsubscribeFromArenaPeriod: (period: PeriodTypeFromBroker) => void;
 };
 
 export type WebSocketClientStore = ClientState & ClientActions;
@@ -49,10 +56,6 @@ export const createWebSocketClientStore = (
   set: ImmerSetEventAndClientStore,
   get: ImmerGetEventAndClientStore
 ): WebSocketClientStore => ({
-  subscriptions: {
-    marketIDs: new Set(),
-    eventTypes: new Set(),
-  },
   received: 0,
   client: getSingletonClient({
     url: BROKER_URL,
@@ -81,16 +84,20 @@ export const createWebSocketClientStore = (
   close: () => {
     get().client.client.close();
   },
-  subscribeEvents: (e) => {
+  subscribeToArenaPeriod: (period) => {
+    get().client.subscribeToArenaPeriod(period);
+  },
+  unsubscribeFromArenaPeriod: (period) => {
+    get().client.unsubscribeFromArenaPeriod(period);
+  },
+  subscribeEvents: (e, arena) => {
     set((state) => {
-      state.client.subscribeEvents(e);
-      state.subscriptions = state.client.subscriptions;
+      state.client.subscribeEvents(e, arena);
     });
   },
-  unsubscribeEvents: (e) => {
+  unsubscribeEvents: (e, arena) => {
     set((state) => {
-      state.client.unsubscribeEvents(e);
-      state.subscriptions = state.client.subscriptions;
+      state.client.unsubscribeEvents(e, arena);
     });
   },
 });

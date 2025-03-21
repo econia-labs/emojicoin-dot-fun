@@ -1,6 +1,7 @@
 // cspell:word Kolkata
 // cspell:word Fakaofo
 
+import { isValidMarketSymbol } from "@sdk/emoji_data";
 import { type Bar } from "@static/charting_library/datafeed-api";
 
 /**
@@ -76,3 +77,140 @@ export function getClientTimezone() {
 
 export const hasTradingActivity = (bar: Bar) =>
   [bar.open, bar.high, bar.low, bar.close].some((price) => price !== 0);
+
+/**
+ * Parses a symbol name with URL-like parameters.
+ * Example: "BTC?has_empty_bars=true&another_param=value"
+ *
+ * #### NOTE: the symbol input can be an arena symbol.
+ * @see {@link isArenaChartSymbol}
+ * @see {@link encodeSymbolsForChart}
+ * @see {@link decodeSymbolsForChart}
+ *
+ * @param chartSymbolWithParams - The TradingView chart symbol with optional URL-like parameters
+ * @returns An object containing the base chart symbol and parsed parameters
+ * @throws Will not throw, but returns empty object for invalid inputs
+ */
+export function parseSymbolWithParams(chartSymbolWithParams: string): {
+  baseChartSymbol: string | ArenaChartSymbol;
+  params: Record<string, string>;
+} {
+  if (!chartSymbolWithParams || typeof chartSymbolWithParams !== "string") {
+    return { baseChartSymbol: "", params: {} };
+  }
+  const [baseChartSymbol = "", paramString = ""] = chartSymbolWithParams.split("?");
+  if (!paramString) {
+    return { baseChartSymbol, params: {} };
+  }
+
+  // Parse parameters.
+  const params = paramString.split("&").reduce(
+    (acc, param) => {
+      if (!param) return acc;
+
+      try {
+        const [key, value] = param.split("=");
+        if (!key) return acc;
+        const decodedKey = decodeURIComponent(key);
+        // If no value provided, default to "true". Value is always a string.
+        const decodedValue = value === undefined ? "true" : decodeURIComponent(value);
+        acc[decodedKey] = decodedValue;
+      } catch (error) {
+        // Silently ignore malformed parameters.
+        // This prevents URL decoding errors from breaking the function.
+      }
+
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
+  return { baseChartSymbol, params };
+}
+
+/**
+ * Formats a symbol name with URL-like parameters.
+ * Example: formatSymbolWithParams("BTC", { has_empty_bars: true }) => "BTC?has_empty_bars=true"
+ *
+ * #### NOTE: the input symbol name can be an arena symbol.
+ * @see {@link isArenaChartSymbol}
+ * @see {@link encodeSymbolsForChart}
+ * @see {@link decodeSymbolsForChart}
+ *
+ * @param baseChartSymbol - The TradingView chart base symbol
+ * @param params - An object containing the parameters to add
+ * @returns A formatted symbol string with URL-like parameters
+ */
+export function formatSymbolWithParams(
+  baseChartSymbol: string | ArenaChartSymbol,
+  params: Record<string, string | boolean | number> = {}
+): string {
+  if (!baseChartSymbol) {
+    return "";
+  }
+
+  if (!params || Object.keys(params).length === 0) {
+    return baseChartSymbol;
+  }
+
+  const paramString = Object.entries(params)
+    .filter(([_, value]) => value !== undefined && value !== null)
+    // Encode both key and value
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .join("&");
+
+  return paramString ? `${baseChartSymbol}?${paramString}` : baseChartSymbol;
+}
+
+export const ARENA_CHART_SYMBOL_DELIMITER = "/" as const;
+export type ArenaChartSymbol = `${string}${typeof ARENA_CHART_SYMBOL_DELIMITER}${string}`;
+
+/**
+ * Encode one or two symbols into one string for the chart implementation.
+ * This is to support the custom arena symbol for the chart, where it displays the price ratio
+ * of two symbols against each other as a single chart series.
+ */
+export function encodeSymbolsForChart(symbol: string, secondarySymbol: string): ArenaChartSymbol;
+export function encodeSymbolsForChart(symbol: string, secondarySymbol?: string | undefined): string;
+export function encodeSymbolsForChart(
+  symbol: string,
+  secondarySymbol?: string | undefined
+): string | ArenaChartSymbol {
+  return [symbol, secondarySymbol].filter((v) => !!v).join(ARENA_CHART_SYMBOL_DELIMITER) as
+    | ArenaChartSymbol
+    | string;
+}
+
+/**
+ * Decode a symbol name into one or more symbols for the chart implementation.
+ * @see encodeSymbolsForChart
+ */
+export function decodeSymbolsForChart(symbol: ArenaChartSymbol): {
+  primarySymbol: string;
+  secondarySymbol: string;
+};
+export function decodeSymbolsForChart(symbol: string): {
+  primarySymbol: string;
+  secondarySymbol?: undefined;
+};
+export function decodeSymbolsForChart(symbol: ArenaChartSymbol | string) {
+  if (isArenaChartSymbol(symbol)) {
+    const res = symbol.split("/");
+    return {
+      primarySymbol: res[0],
+      secondarySymbol: res[1],
+    };
+  }
+  return {
+    primarySymbol: symbol,
+    secondarySymbol: undefined,
+  };
+}
+
+/**
+ * Validates that a symbol string is a valid chart arena symbol.
+ * @param symbol
+ * @returns symbol is ArenaChartSymbol
+ */
+export const isArenaChartSymbol = (symbol: string): symbol is ArenaChartSymbol =>
+  symbol.includes("/") && symbol.split("/").every(isValidMarketSymbol);

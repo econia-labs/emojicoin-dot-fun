@@ -4,6 +4,6 @@ import DiscordOutlineIcon from "@icons/DiscordOutlineIcon";
 import { ROUTES } from "router/routes";
 
 export const SOCIAL_ICONS = [
-  { icon: DiscordOutlineIcon, href: LINKS?.discord ?? ROUTES.notFound },
-  { icon: TwitterOutlineIcon, href: LINKS?.x ?? ROUTES.notFound },
+  { icon: DiscordOutlineIcon, href: LINKS?.discord ?? ROUTES["not-found"] },
+  { icon: TwitterOutlineIcon, href: LINKS?.x ?? ROUTES["not-found"] },
 ];

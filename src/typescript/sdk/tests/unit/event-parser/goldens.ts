@@ -20,6 +20,9 @@ const Swap: Types["SwapEvent"] = {
   swapper: toAccountAddressString(
     "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe"
   ),
+  sender: toAccountAddressString(
+    "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe"
+  ),
   inputAmount: 100000000n,
   isSell: false,
   integrator: toAccountAddressString(
@@ -218,7 +221,6 @@ const BondingCurveStates: {
         time: 1728034178690850n,
         marketNonce: 2n,
         trigger: toTrigger("swap_buy"),
-        symbolEmojis: ["😉", "🙃"],
         marketAddress: "0xa8f7c8ced47426d7c3762d0b5a9840487cde820b7a5a4a4751ecaf32f790fa82",
         ...toMarketEmojiData(encodeToHexString("😉🙃")),
       },
@@ -277,7 +279,6 @@ const BondingCurveStates: {
         time: 1727970932080509n,
         marketNonce: 47668n,
         trigger: toTrigger("provide_liquidity"),
-        symbolEmojis: ["💻", "⚡"],
         marketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
         ...toMarketEmojiData(encodeToHexString("💻⚡")),
       },

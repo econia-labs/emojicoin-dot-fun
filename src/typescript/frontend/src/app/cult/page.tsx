@@ -4,8 +4,8 @@ import CultClientPage from "components/pages/cult/CultClientPage";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Explore the cult",
-  description: `Explore the emojicoin cult`,
+  title: "cult",
+  description: `The emojicoin cult awaits...👹`,
 };
 
 export default function CultPage() {

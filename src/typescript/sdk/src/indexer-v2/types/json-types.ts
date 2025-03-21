@@ -4,13 +4,13 @@ import { type SymbolEmoji } from "../../emoji_data";
 import type {
   UnsizedDecimalString,
   AccountAddressString,
-  HexString,
   Uint128String,
   Uint64String,
 } from "../../emojicoin_dot_fun/types";
-import { type Flatten } from "../../types";
+import { type JsonTypes, type Flatten } from "../../types";
 
 export type PeriodTypeFromDatabase =
+  | "period_15s"
   | "period_1m"
   | "period_5m"
   | "period_15m"
@@ -20,6 +20,7 @@ export type PeriodTypeFromDatabase =
   | "period_1d";
 
 export type PeriodTypeFromBroker =
+  | "FifteenSeconds"
   | "OneMinute"
   | "FiveMinutes"
   | "FifteenMinutes"
@@ -118,7 +119,7 @@ export const postgresTimestampToDate = (timestamp: PostgresTimestamp): Date => {
 
 // `inserted_at` is omitted if the data comes from the broker.
 type TransactionMetadata = {
-  transaction_version: Uint64String;
+  transaction_version: Uint64String | number;
   sender: AccountAddressString;
   entry_function?: string | null;
   transaction_timestamp: PostgresTimestamp;
@@ -130,9 +131,12 @@ export type BlockAndEventIndexMetadata = {
   event_index: number;
 };
 
+type PostgresBytes = `\\x${string}`;
+type BrokerBytes = number[];
+
 type MarketAndStateMetadata = {
   market_id: Uint64String;
-  symbol_bytes: HexString;
+  symbol_bytes: PostgresBytes | BrokerBytes;
   symbol_emojis: SymbolEmoji[];
   bump_time: PostgresTimestamp;
   market_nonce: Uint64String;
@@ -183,6 +187,7 @@ type MarketRegistrationEventData = {
 
 type SwapEventData = {
   swapper: AccountAddressString;
+  sender: AccountAddressString;
   integrator: AccountAddressString;
   integrator_fee: Uint64String;
   input_amount: Uint64String;
@@ -250,59 +255,46 @@ type GlobalStateEventData = {
   cumulative_chat_messages: Uint64String;
 };
 
-type ArenaMeleeEventData = {
-  event_index: Uint64String;
-  melee_id: Uint64String;
-  emojicoin_0_market_address: string;
-  emojicoin_1_market_address: string;
+// Utility type for converting the fullnode JSON type data to flattened Database JSON type data.
+type FlattenedExchangeRateWithEventIndex<T extends keyof JsonTypes> = Flatten<
+  Omit<JsonTypes[T], keyof JsonTypes["ExchangeRate"]> & {
+    event_index: Uint64String;
+    emojicoin_0_exchange_rate_base: Uint64String;
+    emojicoin_0_exchange_rate_quote: Uint64String;
+    emojicoin_1_exchange_rate_base: Uint64String;
+    emojicoin_1_exchange_rate_quote: Uint64String;
+  }
+>;
+type CandlestickData = {
+  market_id: Uint64String;
+  last_transaction_version: Uint64String;
+  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
   start_time: PostgresTimestamp;
-  duration: Uint64String;
-  max_match_percentage: Uint64String;
-  max_match_amount: Uint64String;
-  available_rewards: Uint64String;
+
+  open_price: number;
+  close_price: number;
+  high_price: number;
+  low_price: number;
+
+  symbol_emojis: SymbolEmoji[];
+
+  volume: Uint64String;
 };
 
-type ArenaEnterEventData = {
-  event_index: Uint64String;
-  user: string;
-  melee_id: Uint64String;
-  input_amount: Uint64String;
-  quote_volume: Uint64String;
-  integrator_fee: Uint64String;
-  match_amount: Uint64String;
-  emojicoin_0_proceeds: Uint64String;
-  emojicoin_1_proceeds: Uint64String;
-  emojicoin_0_exchange_rate_base: Uint64String;
-  emojicoin_0_exchange_rate_quote: Uint64String;
-  emojicoin_1_exchange_rate_base: Uint64String;
-  emojicoin_1_exchange_rate_quote: Uint64String;
-};
+type ArenaMeleeEventData = Flatten<
+  Omit<JsonTypes["ArenaMeleeEvent"], "start_time"> & {
+    event_index: Uint64String;
+    start_time: PostgresTimestamp;
+  }
+>;
 
-type ArenaExitEventData = {
-  event_index: Uint64String;
-  user: string;
-  melee_id: Uint64String;
-  tap_out_fee: Uint64String;
-  emojicoin_0_proceeds: Uint64String;
-  emojicoin_1_proceeds: Uint64String;
-  emojicoin_0_exchange_rate_base: Uint64String;
-  emojicoin_0_exchange_rate_quote: Uint64String;
-  emojicoin_1_exchange_rate_base: Uint64String;
-  emojicoin_1_exchange_rate_quote: Uint64String;
+type ArenaEnterEventData = FlattenedExchangeRateWithEventIndex<"ArenaEnterEvent">;
+type ArenaExitEventData = FlattenedExchangeRateWithEventIndex<"ArenaExitEvent"> & {
+  apt_proceeds: Uint64String;
+  during_melee: boolean;
 };
-
-type ArenaSwapEventData = {
-  event_index: Uint64String;
-  user: string;
-  melee_id: Uint64String;
-  quote_volume: Uint64String;
-  integrator_fee: Uint64String;
-  emojicoin_0_proceeds: Uint64String;
-  emojicoin_1_proceeds: Uint64String;
-  emojicoin_0_exchange_rate_base: Uint64String;
-  emojicoin_0_exchange_rate_quote: Uint64String;
-  emojicoin_1_exchange_rate_base: Uint64String;
-  emojicoin_1_exchange_rate_quote: Uint64String;
+type ArenaSwapEventData = FlattenedExchangeRateWithEventIndex<"ArenaSwapEvent"> & {
+  during_melee: boolean;
 };
 
 type ArenaVaultBalanceUpdateEventData = {
@@ -310,25 +302,30 @@ type ArenaVaultBalanceUpdateEventData = {
   new_balance: Uint64String;
 };
 
-type ArenaPositionsData = {
-  user: string;
+type ArenaPositionData = {
+  user: AccountAddressString;
+  last_transaction_version: Uint64String;
   melee_id: Uint64String;
   open: boolean;
   emojicoin_0_balance: Uint64String;
   emojicoin_1_balance: Uint64String;
   withdrawals: Uint64String;
   deposits: Uint64String;
+  last_exit_0: string | null;
+  match_amount: Uint64String;
 };
 
 type ArenaInfoData = {
   melee_id: Uint64String;
+  last_transaction_version: Uint64String;
   volume: Uint64String;
   rewards_remaining: Uint64String;
-  apt_locked: Uint64String;
-  emojicoin_0_market_address: string;
+  emojicoin_0_locked: Uint64String;
+  emojicoin_1_locked: Uint64String;
+  emojicoin_0_market_address: AccountAddressString;
   emojicoin_0_symbols: SymbolEmoji[];
   emojicoin_0_market_id: Uint64String;
-  emojicoin_1_market_address: string;
+  emojicoin_1_market_address: AccountAddressString;
   emojicoin_1_symbols: SymbolEmoji[];
   emojicoin_1_market_id: Uint64String;
   start_time: PostgresTimestamp;
@@ -338,14 +335,47 @@ type ArenaInfoData = {
 };
 
 type ArenaLeaderboardHistoryData = {
-  user: string;
+  user: AccountAddressString;
+  last_transaction_version: Uint64String;
   melee_id: Uint64String;
   profits: Uint64String;
   losses: Uint64String;
+  last_exit_0: boolean | null;
+  emojicoin_0_balance: Uint64String;
+  emojicoin_1_balance: Uint64String;
+  exited: boolean;
+  withdrawals: Uint64String;
 };
 
+type ArenaLeaderboardHistoryWithArenaInfoData = Flatten<
+  Pick<
+    ArenaLeaderboardHistoryData,
+    | "user"
+    | "melee_id"
+    | "profits"
+    | "losses"
+    | "withdrawals"
+    | "emojicoin_0_balance"
+    | "emojicoin_1_balance"
+    | "exited"
+    | "last_exit_0"
+  > &
+    Pick<
+      ArenaInfoData,
+      | "emojicoin_0_symbols"
+      | "emojicoin_1_symbols"
+      | "emojicoin_0_market_address"
+      | "emojicoin_1_market_address"
+      | "emojicoin_0_market_id"
+      | "emojicoin_1_market_id"
+      | "start_time"
+      | "duration"
+    >
+>;
+
 type ArenaLeaderboardData = {
-  user: string;
+  user: AccountAddressString;
+  last_transaction_version: Uint64String;
   open: boolean;
   emojicoin_0_balance: Uint64String;
   emojicoin_1_balance: Uint64String;
@@ -353,6 +383,22 @@ type ArenaLeaderboardData = {
   losses: Uint64String;
   pnl_percent: number;
   pnl_octas: number;
+  withdrawals: Uint64String;
+};
+
+type ArenaCandlestickData = {
+  melee_id: Uint64String;
+  last_transaction_version: Uint64String;
+  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
+  start_time: PostgresTimestamp;
+
+  open_price: number;
+  close_price: number;
+  high_price: number;
+  low_price: number;
+
+  volume: Uint64String;
+  n_swaps: Uint64String;
 };
 
 export type DatabaseStructType = {
@@ -367,25 +413,32 @@ export type DatabaseStructType = {
   ChatEventData: ChatEventData;
   StateEventData: StateEventData;
   GlobalStateEventData: GlobalStateEventData;
+  Candlestick: CandlestickData;
   ArenaMelee: ArenaMeleeEventData;
   ArenaEnter: ArenaEnterEventData;
   ArenaExit: ArenaExitEventData;
   ArenaSwap: ArenaSwapEventData;
   ArenaVaultBalanceUpdate: ArenaVaultBalanceUpdateEventData;
-  ArenaPositions: ArenaPositionsData;
+  ArenaPosition: ArenaPositionData;
   ArenaLeaderboard: ArenaLeaderboardData;
   ArenaLeaderboardHistory: ArenaLeaderboardHistoryData;
   ArenaInfo: ArenaInfoData;
+  ArenaCandlestick: ArenaCandlestickData;
 };
 
-export type AnyEventDatabaseRow =
+export type BrokerJsonTypes =
   | DatabaseJsonType["global_state_events"]
   | DatabaseJsonType["periodic_state_events"]
   | DatabaseJsonType["market_registration_events"]
   | DatabaseJsonType["swap_events"]
   | DatabaseJsonType["chat_events"]
   | DatabaseJsonType["liquidity_events"]
-  | DatabaseJsonType["market_latest_state_event"];
+  | DatabaseJsonType["market_latest_state_event"]
+  | DatabaseJsonType["arena_enter_events"]
+  | DatabaseJsonType["arena_melee_events"]
+  | DatabaseJsonType["arena_exit_events"]
+  | DatabaseJsonType["arena_swap_events"]
+  | DatabaseJsonType["arena_vault_balance_update_events"];
 
 // Technically some of these are views, but may as well be tables in the context of the indexer.
 export enum TableName {
@@ -402,17 +455,21 @@ export enum TableName {
   MarketState = "market_state",
   ProcessorStatus = "processor_status",
   PriceFeed = "price_feed",
+  Candlesticks = "candlesticks",
   ArenaMeleeEvents = "arena_melee_events",
   ArenaEnterEvents = "arena_enter_events",
   ArenaExitEvents = "arena_exit_events",
   ArenaSwapEvents = "arena_swap_events",
   ArenaVaultBalanceUpdateEvents = "arena_vault_balance_update_events",
-  ArenaPositions = "arena_positions",
+  ArenaPosition = "arena_position",
   ArenaInfo = "arena_info",
+  ArenaCandlesticks = "arena_candlesticks",
   // The view for the current arena leaderboard, all users.
   ArenaLeaderboard = "arena_leaderboard",
   // The table for a user's historic arena pnl.
   ArenaLeaderboardHistory = "arena_leaderboard_history",
+  // A user's leaderboard history combined with the arena info.
+  ArenaLeaderboardHistoryWithArenaInfo = "arena_leaderboard_history_with_arena_info",
 }
 
 export enum DatabaseRpc {
@@ -499,6 +556,7 @@ export type DatabaseJsonType = {
       close_price_q64: Uint64String;
     }
   >;
+  [TableName.Candlesticks]: CandlestickData;
   [TableName.ArenaMeleeEvents]: Flatten<TransactionMetadata & ArenaMeleeEventData>;
   [TableName.ArenaEnterEvents]: Flatten<TransactionMetadata & ArenaEnterEventData>;
   [TableName.ArenaExitEvents]: Flatten<TransactionMetadata & ArenaExitEventData>;
@@ -506,11 +564,12 @@ export type DatabaseJsonType = {
   [TableName.ArenaVaultBalanceUpdateEvents]: Flatten<
     TransactionMetadata & ArenaVaultBalanceUpdateEventData
   >;
-  [TableName.ArenaPositions]: ArenaPositionsData;
+  [TableName.ArenaPosition]: ArenaPositionData;
   [TableName.ArenaInfo]: ArenaInfoData;
-
+  [TableName.ArenaCandlesticks]: ArenaCandlestickData;
   [TableName.ArenaLeaderboard]: ArenaLeaderboardData;
   [TableName.ArenaLeaderboardHistory]: ArenaLeaderboardHistoryData;
+  [TableName.ArenaLeaderboardHistoryWithArenaInfo]: Flatten<ArenaLeaderboardHistoryWithArenaInfoData>;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
@@ -559,8 +618,9 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaExitEvents] &
   DatabaseJsonType[TableName.ArenaSwapEvents] &
   DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
-  DatabaseJsonType[TableName.ArenaPositions] &
+  DatabaseJsonType[TableName.ArenaPosition] &
   DatabaseJsonType[TableName.ArenaInfo] &
+  DatabaseJsonType[TableName.ArenaCandlesticks] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[DatabaseRpc.UserPools] &

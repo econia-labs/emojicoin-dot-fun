@@ -9,6 +9,7 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
+import { fetchMelee } from "@/queries/arena";
 
 export const revalidate = 2;
 
@@ -27,6 +28,11 @@ interface EmojicoinPageProps {
 }
 
 const EVENTS_ON_PAGE_LOAD = 25;
+
+const logAndReturnValue = <T extends [] | undefined | null>(dataType: string, onFailure: T) => {
+  console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
+  return onFailure;
+};
 
 export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
   const { market: marketSlug } = params;
@@ -78,13 +84,25 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const { marketID } = state.market;
     const marketAddress = getMarketAddress(emojis).toString();
 
-    const [chats, swaps, marketView, aptPrice, holders] = await Promise.all([
-      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
-      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+    const [chats, swaps, marketView, aptPrice, holders, melee] = await Promise.all([
+      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
+        logAndReturnValue("chat events", [])
+      ),
+      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
+        logAndReturnValue("swap events", [])
+      ),
       wrappedCachedContractMarketView(marketAddress),
-      getAptPrice(),
-      fetchCachedTopHolders(marketAddress),
+      getAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
+      fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
+      fetchMelee({})
+        .then((res) => (res ? res.melee : null))
+        .catch(() => logAndReturnValue("arena melee data", null)),
     ]);
+
+    const isInMelee =
+      !!melee &&
+      (melee.emojicoin0MarketAddress === state.market.marketAddress ||
+        melee.emojicoin1MarketAddress === state.market.marketAddress);
 
     return (
       <AptPriceContextProvider aptPrice={aptPrice}>
@@ -98,6 +116,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
             holders,
             ...state.market,
           }}
+          isInMelee={isInMelee}
         />
       </AptPriceContextProvider>
     );

@@ -3,7 +3,7 @@
 import { type SymbolEmoji } from "@sdk/emoji_data";
 import { fetchSpecificMarkets } from "@sdk/indexer-v2/queries";
 import { calculateCurvePrice } from "@sdk/markets";
-import { toNominal } from "lib/utils/decimals";
+import { toNominal } from "@sdk/utils";
 
 /**
  * Wrapper to make `fetchSpecificMarkets` into a single server action. Only return the data required
@@ -11,14 +11,7 @@ import { toNominal } from "lib/utils/decimals";
  *
  * @see {@link fetchSpecificMarkets}
  */
-export async function fetchSpecificMarketsAction(symbols: SymbolEmoji[][]): Promise<
-  {
-    symbol: string;
-    nominalCurvePrice: number;
-    nominalMarketCap: number;
-    inBondingCurve: boolean;
-  }[]
-> {
+export async function fetchSpecificMarketsAction(symbols: SymbolEmoji[][]) {
   return await fetchSpecificMarkets(symbols).then((markets) =>
     markets.map((market) => {
       const curvePrice = calculateCurvePrice(market.state).toNumber();
@@ -29,6 +22,7 @@ export async function fetchSpecificMarketsAction(symbols: SymbolEmoji[][]): Prom
         nominalCurvePrice: curvePrice,
         nominalMarketCap: toNominal(marketCap),
         inBondingCurve: market.inBondingCurve,
+        marketID: market.market.marketID,
       };
     })
   );
