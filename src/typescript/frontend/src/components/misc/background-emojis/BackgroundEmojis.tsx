@@ -8,24 +8,20 @@ import { Emoji } from "utils/emoji";
 const MemoizedRandomEmoji = React.memo(OneRandomEmoji);
 
 function OneRandomEmoji({ emoji }: { emoji: string }) {
-  const { mt, ml, rotate } = useMemo(
+  const style = useMemo(
     () => ({
-      mt: Math.random() * 100,
-      ml: Math.random() * 100,
-      rotate: Math.round(Math.random() * 50 - 25),
+      marginTop: Math.random() * 100,
+      marginLeft: Math.random() * 100,
+      transform: `rotate(${Math.round(Math.random() * 50 - 25)}deg)`,
+      filter: "blur(9px)",
+      opacity: 0.2,
     }),
     []
   );
   return (
     <div
       className="flex flex-col w-min h-min text-8xl place-items-center select-none transition-all"
-      style={{
-        marginTop: `${mt}%`,
-        marginLeft: `${ml}%`,
-        transform: `rotate(${rotate}deg)`,
-        filter: "blur(7px)",
-        opacity: 0.1,
-      }}
+      style={style}
     >
       <Emoji emojis={emoji} />
     </div>
@@ -34,7 +30,7 @@ function OneRandomEmoji({ emoji }: { emoji: string }) {
 
 const CHANCE = 1 / 8;
 const maybeRandomEmoji = () => (Math.random() < CHANCE ? getRandomSymbolEmoji().emoji : undefined);
-const PARALLAX_STRENGTH = 0.3;
+const PARALLAX_STRENGTH = 0.15;
 
 export function BackgroundEmojis() {
   const { width, height } = useWindowSize();
