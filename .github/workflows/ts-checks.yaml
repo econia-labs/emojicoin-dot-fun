@@ -1,7 +1,7 @@
 # yamllint disable rule:empty-lines
 # yamllint disable rule:key-ordering
 ---
-name: 'TS Checks'
+name: 'typescript'
 
 'on':
   merge_group: null
