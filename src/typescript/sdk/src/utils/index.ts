@@ -6,6 +6,7 @@ export * from "./compare-bigint";
 export * from "./hex";
 export * from "./misc";
 export * from "./nominal-price";
+export * from "./option";
 export * from "./parse-changes-for-balances";
 export * from "./sum-emoji-bytes";
 export * from "./type-tags";

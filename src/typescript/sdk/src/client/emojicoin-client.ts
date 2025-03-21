@@ -31,7 +31,7 @@ import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
 import { toMarketView, toRegistryView, toSwapEvent, type AnyNumberString } from "../types";
-import { toArenaCoinTypes } from "../markets/arena-utils";
+import { toArenaCoinTypes } from "../utils/arena";
 import { type ArenaEvents } from "../emojicoin_dot_fun/arena-events";
 import {
   type ArenaEventsModels,
