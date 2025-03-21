@@ -6,6 +6,7 @@ export const NAVIGATE_LINKS = [
   { title: "arena", path: ROUTES.arena } as const,
   { title: "pools", path: ROUTES.pools } as const,
   { title: "launch", path: ROUTES.launch } as const,
+  { title: "bridge", path: ROUTES.bridge },
   { title: "cult", path: ROUTES.cult } as const,
   { title: "docs", path: EXTERNAL_LINKS.docs } as const,
 ].filter(({ title }) => {
