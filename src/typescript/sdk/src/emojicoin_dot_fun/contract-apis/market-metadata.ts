@@ -20,7 +20,7 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import { type MoveJsonOption, type AccountAddressString } from "../types";
+import { type MoveJsonOption as Option, type AccountAddressString } from "../types";
 
 export type AddAdminPayloadMoveArguments = {
   newAdmin: AccountAddress;
@@ -543,7 +543,7 @@ export type MarketPropertiesPayloadMoveArguments = {
  *```
  * */
 
-export class MarketProperties extends ViewFunctionPayloadBuilder<[MoveJsonOption<MoveValue>]> {
+export class MarketProperties extends ViewFunctionPayloadBuilder<[Option<MoveValue>]> {
   public readonly moduleAddress = MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun_market_metadata";
@@ -569,7 +569,7 @@ export class MarketProperties extends ViewFunctionPayloadBuilder<[MoveJsonOption
     aptos: Aptos | AptosConfig;
     market: AccountAddressInput; // address
     options?: LedgerVersionArg;
-  }): Promise<MoveJsonOption<MoveValue>> {
+  }): Promise<Option<MoveValue>> {
     const [res] = await new MarketProperties(args).view(args);
     return res;
   }
@@ -590,7 +590,7 @@ export type MarketPropertyPayloadMoveArguments = {
  *```
  * */
 
-export class MarketProperty extends ViewFunctionPayloadBuilder<[MoveJsonOption<string>]> {
+export class MarketProperty extends ViewFunctionPayloadBuilder<[Option<string>]> {
   public readonly moduleAddress = MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun_market_metadata";
@@ -619,7 +619,7 @@ export class MarketProperty extends ViewFunctionPayloadBuilder<[MoveJsonOption<s
     market: AccountAddressInput; // address
     property: string; // String
     options?: LedgerVersionArg;
-  }): Promise<MoveJsonOption<string>> {
+  }): Promise<Option<string>> {
     const [res] = await new MarketProperty(args).view(args);
     return res;
   }

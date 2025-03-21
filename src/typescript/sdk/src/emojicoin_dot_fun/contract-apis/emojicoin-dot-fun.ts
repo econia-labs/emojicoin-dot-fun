@@ -21,7 +21,7 @@ import {
   type PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
-  type MoveJsonOption,
+  type MoveJsonOption as Option,
   type TypeTagInput,
   type Uint8,
   type Uint64,
@@ -923,7 +923,7 @@ export type MarketMetadataByEmojiBytesPayloadMoveArguments = {
  * */
 
 export class MarketMetadataByEmojiBytes extends ViewFunctionPayloadBuilder<
-  [MoveJsonOption<JsonTypes["MarketMetadata"]>]
+  [Option<JsonTypes["MarketMetadata"]>]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -950,7 +950,7 @@ export class MarketMetadataByEmojiBytes extends ViewFunctionPayloadBuilder<
     aptos: Aptos | AptosConfig;
     emojiBytes: HexInput; // vector<u8>
     options?: LedgerVersionArg;
-  }): Promise<MoveJsonOption<JsonTypes["MarketMetadata"]>> {
+  }): Promise<Option<JsonTypes["MarketMetadata"]>> {
     const [res] = await new MarketMetadataByEmojiBytes(args).view(args);
     return res;
   }
@@ -970,7 +970,7 @@ export type MarketMetadataByMarketAddressPayloadMoveArguments = {
  * */
 
 export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<
-  [MoveJsonOption<JsonTypes["MarketMetadata"]>]
+  [Option<JsonTypes["MarketMetadata"]>]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -997,7 +997,7 @@ export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<
     aptos: Aptos | AptosConfig;
     marketAddress: AccountAddressInput; // address
     options?: LedgerVersionArg;
-  }): Promise<MoveJsonOption<JsonTypes["MarketMetadata"]>> {
+  }): Promise<Option<JsonTypes["MarketMetadata"]>> {
     const [res] = await new MarketMetadataByMarketAddress(args).view(args);
     return res;
   }
@@ -1017,7 +1017,7 @@ export type MarketMetadataByMarketIDPayloadMoveArguments = {
  * */
 
 export class MarketMetadataByMarketID extends ViewFunctionPayloadBuilder<
-  [MoveJsonOption<JsonTypes["MarketMetadata"]>]
+  [Option<JsonTypes["MarketMetadata"]>]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -1044,7 +1044,7 @@ export class MarketMetadataByMarketID extends ViewFunctionPayloadBuilder<
     aptos: Aptos | AptosConfig;
     marketID: Uint64; // u64
     options?: LedgerVersionArg;
-  }): Promise<MoveJsonOption<JsonTypes["MarketMetadata"]>> {
+  }): Promise<Option<JsonTypes["MarketMetadata"]>> {
     const [res] = await new MarketMetadataByMarketID(args).view(args);
     return res;
   }
