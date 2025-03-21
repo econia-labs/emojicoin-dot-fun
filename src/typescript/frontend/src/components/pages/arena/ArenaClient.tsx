@@ -122,7 +122,6 @@ export const ArenaClient = (props: ArenaProps) => {
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const escrows = useArenaEscrows();
 
-
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
   const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);

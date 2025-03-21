@@ -37,7 +37,7 @@ export const EscrowStoreProvider = ({ children }: React.PropsWithChildren) => {
       ),
     [account]
   );
-  
+
   return <EscrowContext.Provider value={escrowStore.current}>{children}</EscrowContext.Provider>;
 };
 

@@ -1,7 +1,4 @@
-import {
-  type LedgerVersionArg,
-  type TypeTag,
-} from "@aptos-labs/ts-sdk";
+import { type LedgerVersionArg, type TypeTag } from "@aptos-labs/ts-sdk";
 import { toMarketEmojiData, type SymbolEmoji } from "../../emoji_data";
 import { EmojicoinArena, getMarketAddress, MarketView } from "../../emojicoin_dot_fun";
 import { toCoinTypesForEntry } from "../../markets/utils";

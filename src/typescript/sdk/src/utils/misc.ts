@@ -1,6 +1,5 @@
 import {
   AccountAddress,
-  validateNumberInRange,
   type InputGenerateTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";

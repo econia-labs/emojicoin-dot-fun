@@ -48,7 +48,7 @@ export const getCoinBalanceFromChanges = ({
     if (changeCoinType !== toCoinStore(coinType).toString()) return false;
 
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    const changeData = (change).data.data as any;
+    const changeData = change.data.data as any;
     return typeof changeData.coin.value === "string";
   }) as WriteSetChangeWriteResource | undefined;
 
