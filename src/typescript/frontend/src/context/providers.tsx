@@ -16,10 +16,7 @@ import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import StyledToaster from "styles/StyledToaster";
-import {
-  EventStoreProvider,
-  UserSettingsProvider,
-} from "./event-store-context/StateStoreContextProviders";
+import { UserSettingsProvider } from "./event-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
@@ -67,41 +64,39 @@ const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsW
     <ThemeContextProvider>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
-          <EventStoreProvider>
-            <UserSettingsProvider userAgent={userAgent}>
-              <AptosWalletAdapterProvider
-                plugins={wallets}
-                autoConnect={true}
-                dappConfig={{
-                  aptosApiKey: getAptosApiKey(),
-                  network: APTOS_NETWORK,
-                }}
-              >
-                <WalletModalContextProvider>
-                  <AptosContextProvider>
-                    <EmojiPickerProvider
-                      initialState={{
-                        nativePicker: isMobile || isTablet,
-                      }}
-                    >
-                      <GlobalStyle />
-                      <ConnectToWebSockets />
-                      <Suspense fallback={<Loader />}>
-                        <StyledToaster />
-                        <ContentWrapper>
-                          <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                          <HeaderSpacer />
-                          <GeoblockedBanner />
-                          {children}
-                          <Footer />
-                        </ContentWrapper>
-                      </Suspense>
-                    </EmojiPickerProvider>
-                  </AptosContextProvider>
-                </WalletModalContextProvider>
-              </AptosWalletAdapterProvider>
-            </UserSettingsProvider>
-          </EventStoreProvider>
+          <UserSettingsProvider userAgent={userAgent}>
+            <AptosWalletAdapterProvider
+              plugins={wallets}
+              autoConnect={true}
+              dappConfig={{
+                aptosApiKey: getAptosApiKey(),
+                network: APTOS_NETWORK,
+              }}
+            >
+              <WalletModalContextProvider>
+                <AptosContextProvider>
+                  <EmojiPickerProvider
+                    initialState={{
+                      nativePicker: isMobile || isTablet,
+                    }}
+                  >
+                    <GlobalStyle />
+                    <ConnectToWebSockets />
+                    <Suspense fallback={<Loader />}>
+                      <StyledToaster />
+                      <ContentWrapper>
+                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                        <HeaderSpacer />
+                        <GeoblockedBanner />
+                        {children}
+                        <Footer />
+                      </ContentWrapper>
+                    </Suspense>
+                  </EmojiPickerProvider>
+                </AptosContextProvider>
+              </WalletModalContextProvider>
+            </AptosWalletAdapterProvider>
+          </UserSettingsProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ThemeContextProvider>
