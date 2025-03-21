@@ -31,7 +31,7 @@ const AnsNameSchema = z
   .transform((s) => s.replace(/\.apt$/, ""))
   .refine((nameWithoutSuffix) => {
     const parts = nameWithoutSuffix.split(".");
-    return parts.length > 2 && parts.every((p) => AnsSegmentSchema.safeParse(p).success);
+    return parts.length <= 2 && parts.every((p) => AnsSegmentSchema.safeParse(p).success);
   });
 
 export const isValidAptosName = (name: unknown): name is ValidAptosName =>
