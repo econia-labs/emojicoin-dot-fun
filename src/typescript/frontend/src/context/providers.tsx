@@ -36,7 +36,6 @@ import { GeoblockedBanner } from "components/geoblocking";
 import { completePickerData } from "utils/picker-data/complete-picker-data";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { init } from "emoji-mart";
-import { TransactionStoreProvider } from "../lib/store/transaction/context-provider";
 import { EscrowStoreProvider } from "@/store/escrow/context-provider";
 
 /**
@@ -88,22 +87,20 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
                       nativePicker: isMobile || isTablet,
                     }}
                   >
-                    <TransactionStoreProvider>
-                      <EscrowStoreProvider>
-                        <GlobalStyle />
-                        <ConnectToWebSockets />
-                        <Suspense fallback={<Loader />}>
-                          <StyledToaster />
-                          <ContentWrapper>
-                            <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                            <HeaderSpacer />
-                            <GeoblockedBanner />
-                            {children}
-                            <Footer />
-                          </ContentWrapper>
-                        </Suspense>
-                      </EscrowStoreProvider>
-                    </TransactionStoreProvider>
+                    <EscrowStoreProvider>
+                      <GlobalStyle />
+                      <ConnectToWebSockets />
+                      <Suspense fallback={<Loader />}>
+                        <StyledToaster />
+                        <ContentWrapper>
+                          <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                          <HeaderSpacer />
+                          <GeoblockedBanner />
+                          {children}
+                          <Footer />
+                        </ContentWrapper>
+                      </Suspense>
+                    </EscrowStoreProvider>
                   </EmojiPickerProvider>
                 </AptosContextProvider>
               </WalletModalContextProvider>

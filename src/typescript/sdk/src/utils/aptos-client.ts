@@ -77,15 +77,16 @@ type GetAccountResourceResponseHeaders = {
  *
  * @see {@link https://github.com/aptos-labs/aptos-ts-sdk/blob/4503a0a1e783491290257544ff11fd4d33656237/src/client/get.ts#L268}
  */
-export async function paginateWithObfuscatedCursorAndHeaders<Res extends object[]>(
-  options: GetAptosRequestOptions
-): Promise<{ version: bigint; timestamp: bigint; data: Res[number] }[]> {
-  const out = [];
+export async function paginateWithObfuscatedCursorAndHeaders<
+  FullnodeResponse extends Record<string, unknown>[],
+>(options: GetAptosRequestOptions) {
+  const out: { version: bigint; timestamp: bigint; data: FullnodeResponse[number] }[] = [];
+
   let cursor: string | undefined;
   const requestParams = options.params as { offset?: string; limit?: number };
   const totalLimit = requestParams.limit;
   do {
-    const response = await get<NonNullable<unknown>, Res>({
+    const response = await get<NonNullable<unknown>, FullnodeResponse>({
       type: AptosApiType.FULLNODE,
       aptosConfig: options.aptosConfig,
       originMethod: options.originMethod,

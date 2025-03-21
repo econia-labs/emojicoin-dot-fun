@@ -1,44 +1,58 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import { useStore, type StoreApi } from "zustand";
 import { createEscrowStore, type EscrowStore } from "./store";
-import { useTransactionStore } from "../transaction/context-provider";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { Option } from "@sdk/utils";
-import { findEscrows } from "@sdk/markets";
+import { useTransactionStore } from "../transaction";
 
 export const EscrowContext = createContext<StoreApi<EscrowStore> | null>(null);
 
 export const EscrowStoreProvider = ({ children }: React.PropsWithChildren) => {
-  const store = useRef<StoreApi<EscrowStore>>();
+  const escrowStore = useRef<StoreApi<EscrowStore>>();
 
-  if (!store.current) {
-    store.current = createEscrowStore();
+  if (!escrowStore.current) {
+    escrowStore.current = createEscrowStore();
   }
-  return <EscrowContext.Provider value={store.current}>{children}</EscrowContext.Provider>;
+
+  const { account: maybeAccount } = useAptos();
+  const account = useMemo(() => Option(maybeAccount), [maybeAccount]);
+  const transactionsRef = useRef(
+    account.andThen(({ address }) => useTransactionStore.getState().accounts.get(address))
+  );
+
+  useEffect(
+    () =>
+      useTransactionStore.subscribe(
+        (state) =>
+          (transactionsRef.current = account.map(({ address }) => state.accounts.get(address))),
+        (txns, _prevTxnStore) => {
+          Option(escrowStore.current)
+            .zip(txns)
+            .map(([escrowStore, txns]) => {
+              escrowStore.getState().pushTransactions(...txns);
+            });
+        }
+      ),
+    [account]
+  );
+  
+  return <EscrowContext.Provider value={escrowStore.current}>{children}</EscrowContext.Provider>;
 };
 
-export const useEscrowStore = <T,>(selector: (store: EscrowStore) => T): T => {
+const useEscrowStore = <T,>(selector: (store: EscrowStore) => T): T => {
   const escrowStore = useContext(EscrowContext);
 
   if (escrowStore === null) {
     throw new Error("useEscrowStore must be used within an EscrowContextProvider");
   }
 
-  const { account } = useAptos();
-  const transactions = useTransactionStore((s) =>
-    Option(account)
-      .map(({ address }) => s.accounts.get(address))
-      .unwrapOr([])
-  );
-
-  useEffect(() => {
-    transactions.map(findEscrows).forEach((v) => {
-      // escrowStore.getState().
-    });
-  }, [transactions]);
-  const asdf = escrowStore.getState();
-
   return useStore(escrowStore, selector);
+};
+
+export const useUserEscrows = () => {
+  const { account } = useAptos();
+
+  return useEscrowStore((s) => s.escrows.get(account?.address ?? "0x"));
 };

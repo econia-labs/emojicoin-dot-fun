@@ -40,7 +40,7 @@ import {
   setCoinTypeHelper,
 } from "./utils";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
-import { useTransactionStore } from "@/store/transaction/context-provider";
+import { useTransactionStore } from "@/store/transaction";
 
 export type SubmissionResponse = Promise<{
   response: PendingTransactionResponse | UserTransactionResponse | null;
@@ -92,7 +92,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [lastResponse, setLastResponse] = useState<ResponseType>(null);
   const pushEventsFromClient = useEventStore((s) => s.pushEventsFromClient);
-  const pushTransactions = useTransactionStore((s) => s.push);
   const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
   const [emojicoinType, setEmojicoinType] = useState<string>();
   const geoblocked = useIsUserGeoblocked();
@@ -190,7 +189,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       // Store any relevant events in the state event store for all components to see.
       if (response && isUserTransactionResponse(response)) {
-        pushTransactions(response.sender as `0x${string}`);
+        useTransactionStore.getState().push(response.sender as `0x${string}`, response);
         const flattenedEvents = getFlattenedEventModelsFromResponse(response);
         pushEventsFromClient(flattenedEvents, true);
         parseChangesAndSetBalances(response);
@@ -198,14 +197,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
       return { response, error };
     },
-    [
-      markSequenceNumberStale,
-      pushEventsFromClient,
-      parseChangesAndSetBalances,
-      aptos,
-      network,
-      pushTransactions,
-    ]
+    [markSequenceNumberStale, pushEventsFromClient, parseChangesAndSetBalances, aptos, network]
   );
 
   const submit: AptosContextState["submit"] = useCallback(

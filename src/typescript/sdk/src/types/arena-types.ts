@@ -16,6 +16,7 @@ import {
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
 import type JsonTypes from "./json-types";
+import { type MeleeID } from "./nominal-types";
 import { type AnyNumberString, type Types } from "./types";
 
 export const ARENA_CANDLESTICK_NAME = "ArenaCandlestick";
@@ -333,7 +334,7 @@ export const toArenaRegistry = (data: JsonTypes["ArenaRegistry"]) => ({
 });
 
 export const toEscrowResource = ({ data }: JsonTypes["Escrow"]) => ({
-  meleeID: BigInt(data.melee_id),
+  meleeID: BigInt(data.melee_id).toString() as MeleeID,
   matchAmount: BigInt(data.match_amount),
   emojicoin0: BigInt(data.emojicoin_0.value),
   emojicoin1: BigInt(data.emojicoin_1.value),

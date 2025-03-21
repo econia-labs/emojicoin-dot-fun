@@ -2,10 +2,11 @@ import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { Option } from "@sdk/utils";
 import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { subscribeWithSelector } from "zustand/middleware";
 
 type Actions = {
   insert: (addr: `0x${string}`) => void;
-  push: (addr: `0x${string}`) => void;
+  push: (addr: `0x${string}`, ...transactions: UserTransactionResponse[]) => void;
 };
 
 type State = {
@@ -14,8 +15,8 @@ type State = {
 
 export type TransactionStore = Actions & State;
 
-export const createTransactionStore = () =>
-  createStore<TransactionStore>()(
+export const useTransactionStore = createStore<TransactionStore>()(
+  subscribeWithSelector(
     immer((set, get) => ({
       insert: (user: `0x${string}`) => {
         if (!get().accounts.get(user)) {
@@ -35,4 +36,5 @@ export const createTransactionStore = () =>
       },
       accounts: new Map(),
     }))
-  );
+  )
+);

@@ -78,6 +78,8 @@ export type ArenaStructName =
   | "ArenaVaultBalanceUpdateEvent"
   | "Escrow";
 
+export type ArenaEventName = Extract<ArenaStructName, `${string}Event`>;
+
 export type StructTagString = `0x${string}::${string}::${string}`;
 
 type AnyEmojicoinDotFunStructName = EmojicoinStructName | ArenaStructName;

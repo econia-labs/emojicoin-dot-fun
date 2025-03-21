@@ -3,15 +3,22 @@ import {
   parseTypeTag,
   type AccountAddressInput,
   type Aptos,
-  AccountAddress,
   type UserTransactionResponse,
+  type MoveResource,
+  type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import { type ArenaJsonTypes } from "../../types/arena-json-types";
 import { getAccountResourcesWithInfo } from "../aptos-client";
-import { type OptionType, None, Option } from "../option";
+import { type OptionType, collectSome, None, Option } from "../option";
 import { STRUCT_STRINGS } from "../type-tags";
 import { toEscrowResource } from "../../types/arena-types";
-import { type Address, isWriteSetChangeWriteResource, type MeleeID } from "../../types";
+import {
+  type StandardizedAddress,
+  isWriteSetChangeWriteResource,
+  type MeleeID,
+  type AnyNumberString,
+} from "../../types";
+import { toStandardizedAddress } from "../account-address";
 
 const isEscrowStruct = ({ value }: TypeTagStruct) => {
   const { address, moduleName, name } = value;
@@ -19,24 +26,36 @@ const isEscrowStruct = ({ value }: TypeTagStruct) => {
   return STRUCT_STRINGS["Escrow"] === structString;
 };
 
-type Escrow = {
-  meleeID: bigint;
+export type UserEscrow = {
+  version: bigint;
+  user: StandardizedAddress;
+  meleeID: MeleeID;
   emojicoin0: bigint;
   emojicoin1: bigint;
   matchAmount: bigint;
   coinTypes: [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct];
 };
 
-export const isEscrowResource = (resource: {
-  data: unknown;
-  type: string;
-}): resource is ArenaJsonTypes["Escrow"] =>
+export const isEscrowResource = (resource: MoveResource): resource is ArenaJsonTypes["Escrow"] =>
   /^0x([a-zA-Z0-9])+::emojicoin_arena::Escrow<0x.*LP>$/.test(resource.type);
 
-export const parseResourceForEscrow = (resource: {
-  data: unknown;
-  type: string;
-}): OptionType<Escrow> => {
+export const isEscrowWritesetChange = (
+  change: WriteSetChangeWriteResource
+): change is WriteSetChangeWriteResource & {
+  data: ArenaJsonTypes["Escrow"];
+} => {
+  return isEscrowResource(change.data);
+};
+
+export const parseResourceForEscrow = <T extends MoveResource>({
+  address,
+  version,
+  data: resource,
+}: {
+  address: StandardizedAddress;
+  version: AnyNumberString;
+  data: T;
+}): OptionType<UserEscrow> => {
   const { type } = resource;
   if (isEscrowResource(resource)) {
     const escrow = toEscrowResource(resource);
@@ -46,6 +65,8 @@ export const parseResourceForEscrow = (resource: {
       if (innerTags.every((v) => v.isStruct()) && innerTags.length === 4) {
         return Option({
           ...escrow,
+          user: address,
+          version: BigInt(version),
           coinTypes: innerTags as [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct],
         });
       }
@@ -55,34 +76,35 @@ export const parseResourceForEscrow = (resource: {
   return None();
 };
 
-export const findEscrows = (
-  response: UserTransactionResponse
-): { meleeID: MeleeID; user: Address; escrow: Escrow }[] =>
-  response.changes
+export const findEscrows = ({ version, changes }: UserTransactionResponse) =>
+  changes
     .filter(isWriteSetChangeWriteResource)
-    .filter((v) => isEscrowResource(v))
-    .map(({ address, data, type }) => ({
-      meleeID: data.melee_id as MeleeID,
-      user: AccountAddress.from(address).toString() as Address,
-      escrow: parseResourceForEscrow({ data, type }).expect("Escrow should exist."),
-    }));
+    .filter(isEscrowWritesetChange)
+    .map(({ address, data }) =>
+      parseResourceForEscrow({
+        address: toStandardizedAddress(address),
+        version,
+        data,
+      }).expect("Escrow should exist.")
+    );
 
 /**
  * Fetch all Escrow resources the user owns.
  */
-export const fetchUserArenaEscrows = async (user: AccountAddressInput, aptosIn?: Aptos) => {
+export const fetchUserArenaEscrows = async (userAddress: AccountAddressInput, aptosIn?: Aptos) => {
+  const address = toStandardizedAddress(userAddress);
   const resources = await getAccountResourcesWithInfo({
     aptosConfig: aptosIn?.config,
-    accountAddress: user,
+    accountAddress: address,
   });
-  return resources
-    .map((r) =>
-      parseResourceForEscrow(r.data).map((escrow) => ({
+
+  return collectSome(
+    resources.map((r) =>
+      parseResourceForEscrow({ address, ...r }).map((escrow) => ({
         version: r.version,
         timestamp: r.timestamp,
         escrow,
       }))
     )
-    .filter((v) => v.isSome())
-    .map((v) => v.unwrap());
+  );
 };
