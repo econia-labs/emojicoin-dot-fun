@@ -415,4 +415,23 @@ export class Balance extends ViewFunctionPayloadBuilder<[Uint64String]> {
     const [res] = await new Balance(args).view(args);
     return res;
   }
+
+  static async viewWithVersion(args: {
+    aptos: Aptos | AptosConfig;
+    owner: AccountAddressInput; // address
+    typeTags: [TypeTagInput]; // [CoinType]
+    options?: LedgerVersionArg;
+  }) {
+    const { data, headers } = await new Balance(args).view({
+      ...args,
+      options: {
+        ledgerVersion: args.options?.ledgerVersion,
+        returnHeaders: true,
+      },
+    });
+    return {
+      balance: data[0],
+      headers,
+    };
+  }
 }
