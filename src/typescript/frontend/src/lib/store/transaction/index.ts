@@ -15,7 +15,7 @@ type State = {
 
 export type TransactionStore = Actions & State;
 
-export const useTransactionStore = createStore<TransactionStore>()(
+export const globalTransactionStore = createStore<TransactionStore>()(
   subscribeWithSelector(
     immer((set, get) => ({
       insert: (user: `0x${string}`) => {

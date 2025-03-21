@@ -5,7 +5,7 @@ import { useStore, type StoreApi } from "zustand";
 import { createEscrowStore, type EscrowStore } from "./store";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { Option } from "@sdk/utils";
-import { useTransactionStore } from "../transaction";
+import { globalTransactionStore } from "../transaction";
 
 export const EscrowContext = createContext<StoreApi<EscrowStore> | null>(null);
 
@@ -19,12 +19,12 @@ export const EscrowStoreProvider = ({ children }: React.PropsWithChildren) => {
   const { account: maybeAccount } = useAptos();
   const account = useMemo(() => Option(maybeAccount), [maybeAccount]);
   const transactionsRef = useRef(
-    account.andThen(({ address }) => useTransactionStore.getState().accounts.get(address))
+    account.andThen(({ address }) => globalTransactionStore.getState().accounts.get(address))
   );
 
   useEffect(
     () =>
-      useTransactionStore.subscribe(
+      globalTransactionStore.subscribe(
         (state) =>
           (transactionsRef.current = account.map(({ address }) => state.accounts.get(address))),
         (txns, _prevTxnStore) => {

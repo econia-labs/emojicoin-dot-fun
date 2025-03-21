@@ -40,7 +40,7 @@ import {
   setCoinTypeHelper,
 } from "./utils";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
-import { useTransactionStore } from "@/store/transaction";
+import { globalTransactionStore } from "@/store/transaction";
 
 export type SubmissionResponse = Promise<{
   response: PendingTransactionResponse | UserTransactionResponse | null;
@@ -189,7 +189,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       // Store any relevant events in the state event store for all components to see.
       if (response && isUserTransactionResponse(response)) {
-        useTransactionStore.getState().push(response.sender as `0x${string}`, response);
+        globalTransactionStore.getState().push(response.sender as `0x${string}`, response);
         const flattenedEvents = getFlattenedEventModelsFromResponse(response);
         pushEventsFromClient(flattenedEvents, true);
         parseChangesAndSetBalances(response);
