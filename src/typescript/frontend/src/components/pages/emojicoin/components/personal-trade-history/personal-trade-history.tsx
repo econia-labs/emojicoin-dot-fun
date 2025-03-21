@@ -9,6 +9,7 @@ import { TimeCell } from "components/ui/table-cells/time-cell";
 import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useSwapEventsQuery";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { toNominal } from "@sdk/utils";
+import { Emoji } from "utils/emoji";
 
 export const PersonalTradeHistory = (props: TradeHistoryProps) => {
   const { account, connected } = useWallet();
@@ -25,7 +26,7 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
     () => [
       {
         id: "change",
-        text: props.data.symbol,
+        text: <Emoji emojis={props.data.symbol} />,
         width: 100,
         renderCell: (item) => (
           <FormattedNumber

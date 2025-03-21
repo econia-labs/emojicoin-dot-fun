@@ -1,4 +1,5 @@
 import { type AnyEmojiName, CHAT_EMOJI_DATA, SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+import { sleep } from "@sdk/utils";
 
 export { checkIsEllipsis } from "./check-is-ellipsis";
 export { getFileNameFromSrc } from "./get-file-name-from-src";
@@ -35,3 +36,33 @@ export const emoji = (name: AnyEmojiName) =>
   SYMBOL_EMOJI_DATA.hasName(name)
     ? SYMBOL_EMOJI_DATA.byStrictName(name).emoji
     : CHAT_EMOJI_DATA.byStrictName(name).emoji;
+
+/**
+ * Fetch the specified {@link endpoint}, and handle the case where the fetch gets rate limited.
+ *
+ * Will throw an error if the fetch gets rate limited more than {@link retries} times.
+ */
+export async function fetchRateLimited<T>(endpoint: string, retries = 3): Promise<T> {
+  let data: T;
+  let retriesLeft = retries;
+  while (retriesLeft > 0) {
+    try {
+      data = await fetch(endpoint)
+        .then(async (res) => {
+          if (res.status === 429 && res.headers.get("X-RateLimit-Reset")) {
+            throw new Error(res.headers.get("X-RateLimit-Reset")!);
+          }
+          return res.text();
+        })
+        .then((res) => parseJSON<T>(res));
+      return data;
+    } catch (e) {
+      const reset = Number((e as Error).message);
+      const now = new Date().getTime();
+      const waitTime = reset - now;
+      await sleep(waitTime + 1000);
+      retriesLeft--;
+    }
+  }
+  throw new Error(`Could not get data after retrying ${retries} times.`);
+}

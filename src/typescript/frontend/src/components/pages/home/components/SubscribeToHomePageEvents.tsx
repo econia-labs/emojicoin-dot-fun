@@ -4,6 +4,7 @@ import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { type ArenaInfoModel } from "@sdk/indexer-v2";
 import { useEventStore } from "context/event-store-context";
+import FEATURE_FLAGS from "lib/feature-flags";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -12,13 +13,13 @@ export const SubscribeToHomePageEvents = ({ info }: { info?: ArenaInfoModel }) =
   const router = useRouter();
 
   useEffect(() => {
-    if (info) {
+    if (FEATURE_FLAGS.Arena && info) {
       loadArenaInfoFromServer(info);
     }
   }, [loadArenaInfoFromServer, info]);
 
   useReliableSubscribe({
-    arena: true,
+    arena: FEATURE_FLAGS.Arena,
     eventTypes: ["MarketLatestState"],
   });
 
