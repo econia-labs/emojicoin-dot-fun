@@ -1,5 +1,6 @@
 export const isNullish = <T>(v: T): v is Extract<T, null | undefined> =>
   v === null || typeof v === "undefined";
+
 /**
  * @see {@link Option}
  */
@@ -126,6 +127,31 @@ class _Option<T> {
   }
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * A decorator to lazily evaluate functions that operate on an Option, short-circuiting and
+ * returning None if the current Option value is None.
+ */
+function Lazy(
+  _target: any,
+  _propertyKey: string,
+  descriptor: PropertyDescriptor
+): PropertyDescriptor {
+  const originalMethod = descriptor.value;
+
+  descriptor.value = function (...args: any[]) {
+    // Short-circuit if the current value is nullish.
+    if (isNullish(this.value)) {
+      return _Option.none();
+    }
+
+    return originalMethod.apply(this, args);
+  };
+
+  return descriptor;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 /**
  * A Rust-inspired Option type for safer nullish handling in TypeScript.
  *
@@ -152,29 +178,3 @@ export type OptionType<T> = ReturnType<typeof Option<T>>;
 
 export const collectSome = <T>(arr: OptionType<T>[]): T[] =>
   arr.filter((opt) => opt.isSome()).map((some) => some.unwrap());
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/**
- * A decorator to lazily evaluate functions that operate on an Option, short-circuiting and
- * returning None if the current Option value is None.
- */
-function Lazy(
-  _target: any,
-  _propertyKey: string,
-  descriptor: PropertyDescriptor
-): PropertyDescriptor {
-  const originalMethod = descriptor.value;
-
-  descriptor.value = function (...args: any[]) {
-    // Short-circuit if the current value is nullish.
-    if (isNullish(this.value)) {
-      return _Option.none();
-    }
-
-    return originalMethod.apply(this, args);
-  };
-
-  return descriptor;
-}
-/* eslint-enable @typescript-eslint/no-explicit-any */
