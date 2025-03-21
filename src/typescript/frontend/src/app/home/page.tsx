@@ -54,7 +54,7 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchCachedMeleeData()
-        .then((res) => (res.arenaInfo ? meleeData : null))
+        .then((res) => (res.arenaInfo ? res : null))
         .catch(() => null)
     : null;
 
