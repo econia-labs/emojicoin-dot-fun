@@ -3,13 +3,14 @@ import EmojiNotFoundPage from "./not-found";
 import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
-import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
+import { fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { type Metadata } from "next";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { fetchMelee } from "@/queries/arena";
+import FEATURE_FLAGS from "lib/feature-flags";
 
 export const revalidate = 2;
 
@@ -84,19 +85,18 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const { marketID } = state.market;
     const marketAddress = getMarketAddress(emojis).toString();
 
-    const [chats, swaps, marketView, aptPrice, holders, melee] = await Promise.all([
-      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
-        logAndReturnValue("chat events", [])
-      ),
+    const [swaps, marketView, aptPrice, holders, melee] = await Promise.all([
       fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
         logAndReturnValue("swap events", [])
       ),
       wrappedCachedContractMarketView(marketAddress),
       getAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
       fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
-      fetchMelee({})
-        .then((res) => (res ? res.melee : null))
-        .catch(() => logAndReturnValue("arena melee data", null)),
+      FEATURE_FLAGS.Arena
+        ? fetchMelee({})
+            .then((res) => (res ? res.melee : null))
+            .catch(() => logAndReturnValue("arena melee data", null))
+        : null,
     ]);
 
     const isInMelee =
@@ -110,7 +110,6 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
           data={{
             symbol: state.market.symbolData.symbol,
             swaps,
-            chats,
             state,
             marketView,
             holders,

@@ -1,9 +1,9 @@
-import { fetchArenaInfo } from "@/queries/arena";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
-import { fetchSpecificMarkets } from "@sdk/indexer-v2";
 import { type Metadata } from "next/types";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { fetchCachedMeleeData } from "app/home/fetch-melee-data";
 
 export const revalidate = 2;
 
@@ -12,44 +12,12 @@ export const metadata: Metadata = {
   description: "⚔️ Step into the Emojicoin Arena! Trade, battle and rise to glory.",
 };
 
-const logAndReturnValue = <T extends [] | undefined | null | Record<string, unknown>>(
-  dataType: string,
-  onFailure: T
-) => {
-  console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
-  return onFailure;
-};
-
 export default async function Arena() {
-  let arenaInfo: Awaited<ReturnType<typeof fetchArenaInfo>> = null;
+  if (!FEATURE_FLAGS.Arena) redirect(ROUTES.home);
 
-  try {
-    arenaInfo = await fetchArenaInfo({});
-  } catch (e) {
-    console.warn("Could not get melee data.");
-    redirect(ROUTES.home);
-  }
+  const { arenaInfo, market0, market1 } = await fetchCachedMeleeData();
 
-  if (!arenaInfo) {
-    redirect(ROUTES.home);
-  }
-
-  const { market0, market1 } = await fetchSpecificMarkets([
-    arenaInfo.emojicoin0Symbols,
-    arenaInfo.emojicoin1Symbols,
-  ])
-    .then((res) => ({
-      market0: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin0MarketAddress),
-      market1: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin1MarketAddress),
-    }))
-    .catch(() =>
-      logAndReturnValue("arena market0 and market1", { market0: undefined, market1: undefined })
-    );
-
-  if (!market0 || !market1) {
-    console.warn("Couldn't fetch market state for one of the arena markets.");
-    redirect(ROUTES.home);
-  }
+  if (!arenaInfo || !market0 || !market1) redirect(ROUTES.home);
 
   return <ArenaClient arenaInfo={arenaInfo} market0={market0} market1={market1} />;
 }

@@ -24,7 +24,7 @@ import { type XOR } from "@sdk/utils/utility-types";
 import { type Bar, type PeriodParams } from "@static/charting_library";
 import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { fetchRateLimited } from "utils";
 
 export const fetchCandlesticksForChart = async ({
   marketID,
@@ -47,9 +47,9 @@ export const fetchCandlesticksForChart = async ({
   const route =
     marketID !== undefined ? ROUTES.api["candlesticks"] : ROUTES.api["arena"]["candlesticks"];
 
-  return await fetch(`${route}?${params}`)
-    .then((res) => res.text())
-    .then((res) => parseJSON<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(res))
+  return await fetchRateLimited<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(
+    `${route}?${params}`
+  )
     .then((res) =>
       res
         .map(toBar)

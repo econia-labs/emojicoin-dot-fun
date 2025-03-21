@@ -9,18 +9,21 @@ import { useEventStore } from "context/event-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { motion } from "framer-motion";
 import { useChatTransactionBuilder } from "lib/hooks/transaction-builders/use-chat-builder";
-
-const HARD_LIMIT = 500;
+import { useChatEventsQuery } from "./useChatEventsQuery";
+import _ from "lodash";
+import { LoadMore } from "@/components/ui/table/loadMore";
+import Loading from "@/components/loading";
 
 const ChatBox = (props: ChatProps) => {
   const { submit } = useAptos();
   const clear = useEmojiPicker((state) => state.clear);
   const setMode = useEmojiPicker((state) => state.setMode);
-  const chats = useEventStore((s) => s.getMarket(props.data.symbolEmojis)?.chatEvents ?? []);
+  const chatsFromStore = useEventStore(
+    (s) => s.getMarket(props.data.symbolEmojis)?.chatEvents ?? []
+  );
   const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
 
   useEffect(() => {
@@ -46,28 +49,28 @@ const ChatBox = (props: ChatProps) => {
     initialLoad.current = false;
   }, []);
 
-  // TODO: Add infinite scroll to this.
-  // For now just don't render more than `HARD_LIMIT` chats.
-  const sortedChats = useMemo(
-    () =>
-      memoizedSortedDedupedEvents({
-        a: props.data.chats,
-        b: chats,
-        order: "desc",
-        limit: HARD_LIMIT,
-        canAnimateAsInsertion: !initialLoad.current,
-      }).map(({ chat, transaction, shouldAnimateAsInsertion }) => ({
-        message: {
-          sender: chat.user,
-          text: chat.message,
-          senderRank: getRankFromEvent(chat).rankIcon,
-          version: transaction.version,
-        },
-        shouldAnimateAsInsertion,
-      })),
-    /* eslint-disable react-hooks/exhaustive-deps */
-    [props.data.chats.length, chats.length]
-  );
+  const chatsQuery = useChatEventsQuery({ marketID: props.data.marketID.toString() });
+
+  const sortedChats = useMemo(() => {
+    return _.orderBy(
+      _.uniqBy(
+        [...chatsFromStore, ...(chatsQuery.data?.pages.flat() || [])],
+        (i) => i.transaction.version
+      ),
+      (i) => i.transaction.version,
+      "desc"
+    ).map((s, i) => ({
+      message: {
+        sender: s.chat.user,
+        text: s.chat.message,
+        senderRank: getRankFromEvent(s.chat).rankIcon,
+        version: s.transaction.version,
+      },
+      shouldAnimateAsInsertion: i === 0 && !initialLoad.current,
+    }));
+  }, [chatsFromStore, chatsQuery.data?.pages]);
+
+  if (chatsQuery.isLoading) return <Loading />;
 
   return (
     <Column className="relative" width="100%" flexGrow={1}>
@@ -85,11 +88,16 @@ const ChatBox = (props: ChatProps) => {
           {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
             <MessageContainer
               message={message}
-              key={sortedChats.length - index}
+              key={message.version}
               index={sortedChats.length - index}
               shouldAnimateAsInsertion={shouldAnimateAsInsertion}
             />
           ))}
+          <LoadMore
+            query={chatsQuery}
+            className="mt-2 mb-4"
+            endOfListText="This is the beginning of the chat"
+          />
         </motion.div>
       </Flex>
 
