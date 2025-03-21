@@ -9,7 +9,7 @@ export type ValidAptosName = string & {
  * - At least 3 characters
  * - At most 63 characters
  */
-const APTOS_NAME_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
+const APTOS_NAME_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9](\.[a-z0-9]+)?$/;
 
 /**
  * Checks to see that an ANS name is valid. This means we can skip API calls to the Aptos Name
