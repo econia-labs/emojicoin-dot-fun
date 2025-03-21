@@ -36,6 +36,7 @@ import { GeoblockedBanner } from "components/geoblocking";
 import { completePickerData } from "utils/picker-data/complete-picker-data";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { init } from "emoji-mart";
+import { DevModeContextProvider } from "./DevMode";
 
 /**
  * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
@@ -71,37 +72,39 @@ const ThemedApp: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
       <QueryClientProvider client={queryClient}>
         <EventStoreProvider>
           <UserSettingsProvider userAgent={userAgent}>
-            <AptosWalletAdapterProvider
-              plugins={wallets}
-              autoConnect={true}
-              dappConfig={{
-                aptosApiKey: getAptosApiKey(),
-                network: APTOS_NETWORK,
-              }}
-            >
-              <WalletModalContextProvider>
-                <AptosContextProvider>
-                  <EmojiPickerProvider
-                    initialState={{
-                      nativePicker: isMobile || isTablet,
-                    }}
-                  >
-                    <GlobalStyle />
-                    <ConnectToWebSockets />
-                    <Suspense fallback={<Loader />}>
-                      <StyledToaster />
-                      <ContentWrapper>
-                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                        <HeaderSpacer />
-                        <GeoblockedBanner />
-                        {children}
-                        <Footer />
-                      </ContentWrapper>
-                    </Suspense>
-                  </EmojiPickerProvider>
-                </AptosContextProvider>
-              </WalletModalContextProvider>
-            </AptosWalletAdapterProvider>
+            <DevModeContextProvider>
+              <AptosWalletAdapterProvider
+                plugins={wallets}
+                autoConnect={true}
+                dappConfig={{
+                  aptosApiKey: getAptosApiKey(),
+                  network: APTOS_NETWORK,
+                }}
+              >
+                <WalletModalContextProvider>
+                  <AptosContextProvider>
+                    <EmojiPickerProvider
+                      initialState={{
+                        nativePicker: isMobile || isTablet,
+                      }}
+                    >
+                      <GlobalStyle />
+                      <ConnectToWebSockets />
+                      <Suspense fallback={<Loader />}>
+                        <StyledToaster />
+                        <ContentWrapper>
+                          <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                          <HeaderSpacer />
+                          <GeoblockedBanner />
+                          {children}
+                          <Footer />
+                        </ContentWrapper>
+                      </Suspense>
+                    </EmojiPickerProvider>
+                  </AptosContextProvider>
+                </WalletModalContextProvider>
+              </AptosWalletAdapterProvider>
+            </DevModeContextProvider>
           </UserSettingsProvider>
         </EventStoreProvider>
       </QueryClientProvider>

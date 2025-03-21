@@ -4,6 +4,7 @@ import { createStore } from "zustand";
 export type UserSettingsState = {
   animate: boolean;
   showEmptyBars: boolean;
+  devMode: boolean;
 };
 
 export type UserSettingsActions = {
@@ -12,6 +13,7 @@ export type UserSettingsActions = {
   userAgent: string;
   toggleAnimate: () => void;
   getShowEmptyBars: () => boolean;
+  toggleDevMode: () => void;
 };
 
 export type UserSettingsStore = UserSettingsState & UserSettingsActions;
@@ -23,9 +25,13 @@ const saveSettings = (state: UserSettingsState) => {
 const defaultValues: UserSettingsState = {
   animate: true,
   showEmptyBars: true,
+  devMode: false,
 };
 
-const readSettings = (): UserSettingsState => readLocalStorageCache("settings") ?? defaultValues;
+const readSettings = (): UserSettingsState => ({
+  ...defaultValues,
+  ...(readLocalStorageCache<UserSettingsState>("settings") ?? defaultValues),
+});
 
 export const createUserSettingsStore = (userAgent: string) =>
   createStore<UserSettingsStore>()((set, get) => ({
@@ -50,6 +56,13 @@ export const createUserSettingsStore = (userAgent: string) =>
         saveSettings(newState);
         return newState;
       }),
+    toggleDevMode: () => {
+      set((state) => {
+        const newState = { ...state, devMode: !state.devMode };
+        saveSettings(newState);
+        return newState;
+      })
+    }
   }));
 
 export default createUserSettingsStore;
