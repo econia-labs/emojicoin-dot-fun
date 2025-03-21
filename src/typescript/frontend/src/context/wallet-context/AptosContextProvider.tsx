@@ -40,6 +40,7 @@ import {
   setCoinTypeHelper,
 } from "./utils";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
+import { globalTransactionStore } from "@/store/transaction";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -189,6 +190,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       // Store any relevant events in the state event store for all components to see.
       if (response && isUserTransactionResponse(response)) {
+        globalTransactionStore.getState().pushTransactions(response);
         const flattenedEvents = getFlattenedEventModelsFromResponse(response);
         pushEventsFromClient(flattenedEvents, true);
         parseChangesAndSetBalances(response);
