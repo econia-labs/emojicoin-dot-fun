@@ -1,5 +1,3 @@
-<!-- cspell:word permissioned -->
-
 # `emojicoin-dot-fun` favorites
 
 This package contains functions to add, remove, and view favorite a user's

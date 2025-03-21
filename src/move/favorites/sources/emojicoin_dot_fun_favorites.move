@@ -1,4 +1,3 @@
-// cspell:word upsert
 module favorites::emojicoin_dot_fun_favorites {
     use aptos_framework::event;
     use aptos_framework::ordered_map::{Self, OrderedMap};
@@ -41,7 +40,7 @@ module favorites::emojicoin_dot_fun_favorites {
 
     /// Add the market to the user's favorite markets.
     ///
-    /// An error will be returned if:
+    /// Aborts if:
     ///
     /// - The market does not exist.
     /// - The market is already a favorite.
@@ -69,7 +68,7 @@ module favorites::emojicoin_dot_fun_favorites {
 
     /// Remove the market from the user's favorite markets.
     ///
-    /// An error will be returned if:
+    /// Aborts if:
     ///
     /// - The market is not a favorite.
     public entry fun remove_favorite(user: &signer, market: address) acquires FavoriteData {
