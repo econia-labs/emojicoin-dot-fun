@@ -3,14 +3,17 @@ import { motion } from "framer-motion";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { hexToRgba } from "utils/hex-to-rgba";
+import { useDevMode } from "./DevMode";
 
 export const ConnectToWebSockets = () => {
   const connected = useEventStore((s) => s.connected);
   const received = useEventStore((s) => s.received);
 
+  const devMode = useDevMode();
+
   return (
     <>
-      {process.env.NODE_ENV === "development" && (
+      {devMode && (
         <div className="relative w-full h-full">
           <div className="absolute top-4 right-4 z-[100] flex flex-col">
             <Emoji
