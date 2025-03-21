@@ -107,6 +107,6 @@ export const handleLatestBarForArenaCandlestick = (
       period,
       nonce,
     };
-    callbackClonedLatestBarIfSubscribed(current.callback, current.latestBar);
   }
+  callbackClonedLatestBarIfSubscribed(current.callback, current.latestBar);
 };
