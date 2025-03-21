@@ -1,9 +1,7 @@
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { type TradeHistoryProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
-import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
-import { getRankFromEvent } from "lib/utils/get-user-rank";
 import Popup from "components/popup";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
@@ -13,8 +11,11 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { toNominal } from "@sdk/utils";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
-import { type SwapEventModel } from "@sdk/indexer-v2/types";
 import { TimeCell } from "components/ui/table-cells/time-cell";
+import { useSwapEventsQuery } from "@/components/pages/wallet/useSwapEventsQuery";
+import _ from "lodash";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
+import { type SwapEventModel } from "@sdk/indexer-v2";
 
 const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),
@@ -28,31 +29,20 @@ const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   guid,
 });
 
-const HARD_LIMIT = 500;
-
 export const TradeHistory = (props: TradeHistoryProps) => {
-  const swaps = useEventStore((s) => s.markets.get(props.data.symbol)?.swapEvents ?? []);
+  const swapsFromStore = useEventStore((s) => s.markets.get(props.data.symbol)?.swapEvents ?? []);
 
-  const initialLoad = useRef(true);
-  useEffect(() => {
-    initialLoad.current = false;
-    return () => {
-      initialLoad.current = true;
-    };
-  }, []);
+  const swapsQuery = useSwapEventsQuery({ marketID: props.data.marketID.toString() });
 
-  const sortedSwaps = useMemo(
-    () =>
-      memoizedSortedDedupedEvents({
-        a: props.data.swaps,
-        b: swaps,
-        order: "desc",
-        limit: HARD_LIMIT,
-        canAnimateAsInsertion: !initialLoad.current,
-      }).map(toTableItem),
-    /* eslint-disable react-hooks/exhaustive-deps */
-    [props.data.swaps.length, swaps.length]
-  );
+  const sortedSwaps = useMemo(() => {
+    return _.orderBy(
+      _.uniqBy([...swapsFromStore, ...(swapsQuery.data?.pages.flat() || [])], (i) =>
+        i.transaction.version.toString()
+      ),
+      (i) => i.transaction.version.toString(),
+      "desc"
+    ).map(toTableItem);
+  }, [swapsQuery.data?.pages, swapsFromStore]);
 
   const columns: EcTableColumn<(typeof sortedSwaps)[number]>[] = useMemo(
     () => [
@@ -84,7 +74,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
       },
       {
-        text: props.data.symbol,
+        text: <Emoji emojis={props.data.symbol} />,
         id: "amount",
         width: 100,
         renderCell: (item) => (
@@ -135,8 +125,9 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       }
       textFormat="body-sm"
       columns={columns}
-      getKey={(item) => item.guid}
+      getKey={(item) => item.version.toString()}
       items={sortedSwaps}
+      pagination={swapsQuery}
     />
   );
 };

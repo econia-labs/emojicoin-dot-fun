@@ -1,16 +1,42 @@
 // cspell:word dexscreener
+// cspell:word ratelimiter
+// cspell:word ratelimit
+// cspell:word upstash
+
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
   COOKIE_FOR_HASHED_ADDRESS,
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
-import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER } from "lib/server-env";
+import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITER } from "lib/server-env";
 import { IS_ALLOWLIST_ENABLED } from "lib/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const walletRegex = new RegExp(`^${ROUTES.wallet}/(.*).apt$`);
+
+const rateLimiters = (() => {
+  if (RATE_LIMITER.enabled) {
+    const redis = new Redis({
+      url: RATE_LIMITER.api.url,
+      token: RATE_LIMITER.api.token,
+    });
+    return {
+      basic: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(5, "10 s"),
+      }),
+      candlesticks: new Ratelimit({
+        redis,
+        limiter: Ratelimit.tokenBucket(10, "30 s", 20),
+      }),
+    };
+  }
+  return undefined;
+})();
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
@@ -23,6 +49,41 @@ export default async function middleware(request: NextRequest) {
   if (MAINTENANCE_MODE && pathname !== ROUTES.maintenance) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
+
+  if (rateLimiters && pathname.startsWith(ROUTES.api["."])) {
+    const ip = request.ip ?? "127.0.0.1";
+
+    const isCandlesticksRoute =
+      pathname.startsWith(ROUTES.api.candlesticks) ||
+      pathname.startsWith(ROUTES.api.arena.candlesticks);
+
+    const { rateLimitResponse, domain } = isCandlesticksRoute
+      ? {
+          rateLimitResponse: await rateLimiters.candlesticks.limit(ip),
+          domain: "api-candlesticks",
+        }
+      : {
+          rateLimitResponse: await rateLimiters.basic.limit(ip),
+          domain: "api-basic",
+        };
+
+    const { limit, reset, remaining, success } = rateLimitResponse;
+
+    const headers = {
+      "X-RateLimit-Limit": limit.toString(),
+      "X-RateLimit-Remaining": remaining.toString(),
+      "X-RateLimit-Reset": reset.toString(),
+      "X-RateLimit-Domain": domain,
+    };
+
+    if (!success) {
+      return new NextResponse("", {
+        status: 429,
+        headers,
+      });
+    }
+  }
+
   const dexscreenerRoutes = Object.keys(ROUTES.api.dexscreener);
   if (
     pathname === ROUTES.test ||
@@ -74,5 +135,6 @@ export default async function middleware(request: NextRequest) {
 // Note this must be a static string- we can't dynamically construct it.
 export const config = {
   /* eslint-disable-next-line */
-  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|social-preview.png|manifest.json|images/wallets).*)`,
+  matcher: `/((?!verify|_next/static|_next/image|favicon.ico|logo192.png|icon.png|social-preview.png|manifest.json|images/wallets).*)`,
+  runtime: "experimental-edge",
 };

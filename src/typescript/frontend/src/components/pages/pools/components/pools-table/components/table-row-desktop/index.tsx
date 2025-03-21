@@ -32,9 +32,14 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
   const { isMobile } = useMatchBreakpoints();
   const bigDailyTvl = Number(item.dailyTvlPerLPCoinGrowth);
 
-  const dpr = useMemo(() => formatXPR(1, bigDailyTvl), [bigDailyTvl]);
-  const wpr = useMemo(() => formatXPR(DAYS_IN_WEEK, bigDailyTvl), [bigDailyTvl]);
-  const apr = useMemo(() => formatXPR(DAYS_IN_YEAR, bigDailyTvl), [bigDailyTvl]);
+  const { dpr, wpr, apr } = useMemo(
+    () => ({
+      dpr: formatXPR(1, bigDailyTvl),
+      wpr: formatXPR(DAYS_IN_WEEK, bigDailyTvl),
+      apr: formatXPR(DAYS_IN_YEAR, bigDailyTvl),
+    }),
+    [bigDailyTvl]
+  );
 
   return (
     <Tr hover selected={selected} onClick={onClick}>

@@ -28,9 +28,16 @@ const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageC
     [connectedWalletName, senderAddressName]
   );
 
+  const delay = React.useMemo(() => {
+    // Start with minimal delay and increase logarithmically
+    const baseDelay = 0.08;
+    const maxDelay = 0.5;
+    return Math.min(baseDelay + Math.log10(index + 1) * 0.08, maxDelay);
+  }, [index]);
+
   return (
     <motion.div
-      layout
+      layout={shouldAnimateAsInsertion}
       initial={{
         opacity: 0,
       }}
@@ -38,7 +45,7 @@ const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageC
         opacity: 1,
         transition: {
           type: "just",
-          delay: shouldAnimateAsInsertion ? 0.2 : index * 0.02,
+          delay: delay,
         },
       }}
     >

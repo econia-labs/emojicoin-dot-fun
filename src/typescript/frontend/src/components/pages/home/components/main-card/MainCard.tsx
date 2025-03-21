@@ -14,11 +14,11 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import "./module.css";
 import { PriceDelta } from "components/price-feed/inner";
-import { sortByValue } from "lib/utils/sort-events";
 import { AnimatePresence, motion } from "framer-motion";
 import { useInterval } from "react-use";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
+import _ from "lodash";
 
 export interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
@@ -31,9 +31,7 @@ const MAX_NUM_FEATURED_MARKETS = 5;
 
 const MainCard = (props: MainCardProps) => {
   const featuredMarkets = useMemo(() => {
-    const sorted = props.featuredMarkets.toSorted((a, b) =>
-      sortByValue(a.deltaPercentage, b.deltaPercentage, "desc")
-    );
+    const sorted = _.orderBy(props.featuredMarkets, (i) => i.deltaPercentage, "desc");
     const positives = sorted.filter(({ deltaPercentage }) => deltaPercentage > 0);
     const notPositives = sorted.filter(({ deltaPercentage }) => deltaPercentage <= 0);
     return positives.length

@@ -11,7 +11,6 @@ export interface WithVersion {
 type DataProps = MarketMetadataModel & {
   symbol: SymbolString;
   swaps: Array<DatabaseModels["swap_events"]>;
-  chats: Array<DatabaseModels["chat_events"]>;
   state: DatabaseModels["market_state"];
   marketView: Types["MarketView"];
   holders: AssetBalance[];
@@ -23,7 +22,7 @@ export interface EmojicoinProps {
 }
 
 export interface MainInfoProps {
-  data: Omit<DataProps, "swaps" | "chats">;
+  data: Omit<DataProps, "swaps">;
 }
 
 export interface GridProps {
@@ -40,5 +39,5 @@ export interface SwapComponentProps {
   initNumSwaps: number;
 }
 export interface TradeHistoryProps {
-  data: Omit<DataProps, "chats">;
+  data: DataProps;
 }
