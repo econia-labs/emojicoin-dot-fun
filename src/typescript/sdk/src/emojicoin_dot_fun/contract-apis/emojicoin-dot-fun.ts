@@ -16,9 +16,9 @@ import {
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
   type UserTransactionResponse,
-  type LedgerVersionArg,
   SimpleTransaction,
   type PublicKey,
+  type LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -1129,10 +1129,7 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
     this.args = {};
   }
 
-  static async view(args: {
-    aptos: Aptos | AptosConfig;
-    options?: LedgerVersionArg;
-  }): Promise<AccountAddressString> {
+  static async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }) {
     const [res] = await new RegistryAddress().view(args);
     return res;
   }

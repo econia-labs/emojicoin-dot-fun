@@ -1,6 +1,5 @@
 import {
   AccountAddress,
-  type TypeTag,
   type AccountAddressInput,
   type WriteSetChangeWriteResource,
   parseTypeTag,
@@ -22,9 +21,11 @@ export const getFeeStatement = (response: UserTransactionResponse) => {
   return toFeeStatement(jsonFeeStatement);
 };
 
+export type CoinStoreString = `0x1::coin::CoinStore<${string}>`;
+
 /* eslint-disable-next-line import/no-unused-modules */
-export const toCoinStore = (type: TypeTagInput) =>
-  parseTypeTag(`0x1::coin::CoinStore<${type.toString()}>`);
+export const toCoinStoreString = (type: TypeTagInput) =>
+  parseTypeTag(`0x1::coin::CoinStore<${type.toString()}>`).toString() as CoinStoreString;
 
 export const getCoinBalanceFromChanges = ({
   response,
@@ -33,7 +34,7 @@ export const getCoinBalanceFromChanges = ({
 }: {
   response: UserTransactionResponse;
   userAddress: AccountAddressInput;
-  coinType: TypeTag;
+  coinType: TypeTagInput;
 }) => {
   const { changes } = response;
   const coinBalanceChange = changes.find((change) => {
@@ -45,7 +46,7 @@ export const getCoinBalanceFromChanges = ({
     const resourceType = change.data.type;
     // Normalize the coin type, otherwise leading zeros can cause the comparison to fail.
     const changeCoinType = parseTypeTag(resourceType).toString();
-    if (changeCoinType !== toCoinStore(coinType).toString()) return false;
+    if (changeCoinType !== toCoinStoreString(coinType).toString()) return false;
 
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const changeData = change.data.data as any;

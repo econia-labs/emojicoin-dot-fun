@@ -30,6 +30,7 @@ import {
 import { toConfig } from "../utils/aptos-utils";
 import serializeEntryArgsToJsonArray from "./serialize-entry-args-to-json";
 import { type StructTagString } from "../utils/type-tags";
+import { type Flatten } from "..";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
@@ -192,7 +193,18 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
   }
 }
 
-export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
+type ReturnHeadersArg = { returnHeaders?: boolean };
+type AptosResponseHeaders = Record<string, unknown> & { "x-aptos-ledger-version": number };
+/**
+ * Defaults to headers that includes the ledger version on-chain at the time of the view function
+ * response. If a type is specified, the object resolves to those extra `key: values` as well.
+ */
+type WithHeaders<T, H extends AptosResponseHeaders> = Flatten<{
+  data: T;
+  headers: Flatten<H>;
+}>;
+
+export abstract class ViewFunctionPayloadBuilder<T extends MoveValue[]> {
   public abstract readonly moduleAddress: AccountAddress;
 
   public abstract readonly moduleName: string;
@@ -211,7 +223,26 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
     };
   }
 
-  async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }): Promise<T> {
+  /**
+   * Executes a view function with the provided arguments.
+   * @param args Object containing aptos client/config and options
+   * @returns When `options.returnHeaders` is true, returns `{ data: T, headers: H }`
+   * @returns When `options.returnHeaders` is not true, returns `T`
+   */
+  async view<H extends AptosResponseHeaders>(args: {
+    aptos: Aptos | AptosConfig;
+    options: LedgerVersionArg & ReturnHeadersArg & { returnHeaders: true };
+  }): Promise<WithHeaders<T, H>>;
+  async view(args: {
+    aptos: Aptos | AptosConfig;
+    options?: Omit<LedgerVersionArg & ReturnHeadersArg, "returnHeaders"> & {
+      returnHeaders?: false | undefined;
+    };
+  }): Promise<T>;
+  async view<H extends AptosResponseHeaders>(args: {
+    aptos: Aptos | AptosConfig;
+    options?: LedgerVersionArg & ReturnHeadersArg;
+  }): Promise<T | WithHeaders<T, H>> {
     const entryFunction = EntryFunction.build(
       `${this.moduleAddress.toString()}::${this.moduleName}`,
       this.functionName,
@@ -219,12 +250,15 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
       this.argsToArray()
     );
     const { aptos, options } = args;
-    const viewRequest = await postBCSViewFunction<T>({
+    const viewRequest = await postBCSViewFunction<T, H>({
       aptosConfig: aptos,
       payload: entryFunction,
       options,
     });
-    return viewRequest as T;
+    if (options?.returnHeaders) {
+      return viewRequest;
+    }
+    return viewRequest.data;
   }
 
   argsToArray(): Array<EntryFunctionArgumentTypes> {
@@ -233,17 +267,16 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
 }
 
 /* eslint-disable-next-line import/no-unused-modules */
-export async function postBCSViewFunction<T extends Array<MoveValue>>(args: {
-  aptosConfig: Aptos | AptosConfig;
-  payload: EntryFunction;
-  options?: LedgerVersionArg;
-}): Promise<T> {
+export async function postBCSViewFunction<
+  T extends MoveValue[],
+  Headers extends Record<string, unknown> = Record<string, never>,
+>(args: { aptosConfig: Aptos | AptosConfig; payload: EntryFunction; options?: LedgerVersionArg }) {
   const { payload, options } = args;
   const aptosConfig = toConfig(args.aptosConfig);
   const serializer = new Serializer();
   payload.serialize(serializer);
   const bytes = serializer.toUint8Array();
-  const { data } = await postAptosFullNode<Uint8Array, MoveValue[]>({
+  const { data, headers } = await postAptosFullNode<Uint8Array, T>({
     aptosConfig,
     path: "view",
     originMethod: "view",
@@ -251,5 +284,15 @@ export async function postBCSViewFunction<T extends Array<MoveValue>>(args: {
     params: { ledger_version: options?.ledgerVersion },
     body: bytes,
   });
-  return data as T;
+  return {
+    data: data as T,
+    headers: headers as Headers,
+  };
 }
+
+// postBCSViewFunction<
+//   boolean[]
+// >(0 as any).then((res) => {
+//   const { data, headers } = res;
+// headers.
+// });

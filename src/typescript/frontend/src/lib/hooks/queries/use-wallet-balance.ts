@@ -5,6 +5,51 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { Balance } from "@/contract-apis";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { type CoinStoreString, getAptosClient } from "@sdk/utils";
+
+/* eslint-disable-next-line */ // So we can link the import in the doc comment.
+import { type useLatestBalance } from "@/store/latest-balance/store";
+
+const STALE_TIME = 10000;
+
+/**
+ * Used in conjunction with {@link useLatestBalance}; not intended to be used alone unless you don't
+ * plan on tracking coin balances anywhere else.
+ */
+export const useFetchWalletBalanceQuery = (
+  accountAddress: `0x${string}` | undefined,
+  coinType: CoinStoreString
+) => {
+  const { data, isFetching, refetch, isStale } = useQuery({
+    queryKey: ["fetch-wallet-balance-query", accountAddress, coinType],
+    queryFn: () => {
+      if (!accountAddress || !coinType) return null;
+      return withResponseError(
+        Balance.viewWithVersion({
+          aptos: getAptosClient(),
+          owner: accountAddress,
+          typeTags: [coinType],
+        }).then(({ balance, headers }) => ({
+          balance: BigInt(balance),
+          version: BigInt(headers["x-aptos-ledger-version"]),
+        }))
+      );
+    },
+    staleTime: STALE_TIME,
+    enabled: !!accountAddress && !!coinType,
+  });
+
+  const refetchIfStale = useCallback(() => {
+    if (isStale) refetch();
+  }, [refetch, isStale]);
+
+  return {
+    balance: BigInt(data?.balance ?? 0),
+    version: BigInt(data?.version ?? -1n),
+    isFetching,
+    refetchIfStale,
+  };
+};
 
 /**
  * __NOTE: If you're using this for a connected user's APT balance, you should use__

@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unused-modules */
 import {
+  type LedgerVersionArg,
   type AccountAddress,
   type AccountAddressInput,
   type AccountAuthenticator,

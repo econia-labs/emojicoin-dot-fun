@@ -6,7 +6,7 @@ import {
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   createContext,
   type PropsWithChildren,
@@ -41,8 +41,8 @@ import {
 } from "./utils";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import { globalTransactionStore } from "@/store/transaction";
+import { useLatestBalance } from "@/store/latest-balance/store";
 
-type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
   response: PendingTransactionResponse | UserTransactionResponse | null;
   error: unknown;
@@ -64,7 +64,7 @@ export type AptosContextState = {
   signThenSubmit: (
     transactionBuilder: EntryFunctionTransactionBuilder | null
   ) => SubmissionResponse;
-  account: WalletContextState["account"];
+  account: (AccountInfo & { address: `0x${string}` }) | null;
   copyAddress: () => void;
   status: TransactionStatus;
   lastResponse: ResponseType;
@@ -74,10 +74,7 @@ export type AptosContextState = {
   aptBalance: bigint;
   emojicoinBalance: bigint;
   emojicoinLPBalance: bigint;
-  isFetching(coinType: TrackedCoinType): boolean;
-  forceRefetch(coinType: TrackedCoinType): void;
   refetchIfStale(coinType: TrackedCoinType): void;
-  setBalance(coinType: TrackedCoinType, n: bigint): void;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -85,11 +82,12 @@ export const AptosContext = createContext<AptosContextState | undefined>(undefin
 export function AptosContextProvider({ children }: PropsWithChildren) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
-    account,
+    account: untypedAccount,
     network,
     submitTransaction,
     signTransaction,
   } = useWallet();
+  const account = untypedAccount as AptosContextState["account"];
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [lastResponse, setLastResponse] = useState<ResponseType>(null);
   const pushEventsFromClient = useEventStore((s) => s.pushEventsFromClient);
@@ -114,6 +112,10 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   }, [network]);
 
   const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
+
+  const aptHelper1 = useLatestBalance(account?.address, APTOS_COIN);
+  const emojicoinHelper1 = useLatestBalance(account?.address, emojicoin);
+  const emojicoinLPHelper1 = useLatestBalance(account?.address, emojicoinLP);
 
   const aptHelper = useWalletBalance({ aptos, account, coinType: APTOS_COIN });
   const emojicoinHelper = useWalletBalance({ aptos, account, coinType: emojicoin });
@@ -243,7 +245,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   const value: AptosContextState = {
     aptos,
-    account,
+    account: account as AptosContextState["account"], // force the `0x${string}` type on `address`.
     submit,
     signThenSubmit,
     copyAddress,
@@ -255,24 +257,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     emojicoinLPBalance: emojicoinLPHelper.balance,
     addressName,
     setEmojicoinType: (type?: TypeTagInput) => setCoinTypeHelper(setEmojicoinType, type),
-    setBalance: (coinType: TrackedCoinType, n: bigint) => {
-      if (coinType === "apt") aptHelper.setBalance(n);
-      else if (coinType === "emojicoin") emojicoinHelper.setBalance(n);
-      else if (coinType === "emojicoinLP") emojicoinLPHelper.setBalance(n);
-      else throw new Error(`Invalid coin type: ${coinType}`);
-    },
-    isFetching: (coinType: TrackedCoinType) => {
-      if (coinType === "apt") return aptHelper.isFetching;
-      else if (coinType === "emojicoin") return emojicoinHelper.isFetching;
-      else if (coinType === "emojicoinLP") return emojicoinLPHelper.isFetching;
-      else throw new Error(`Invalid coin type: ${coinType}`);
-    },
-    forceRefetch: (coinType: TrackedCoinType) => {
-      if (coinType === "apt") aptHelper.forceRefetch();
-      else if (coinType === "emojicoin") emojicoinHelper.forceRefetch();
-      else if (coinType === "emojicoinLP") emojicoinLPHelper.forceRefetch();
-      else throw new Error(`Invalid coin type: ${coinType}`);
-    },
     refetchIfStale: (coinType: TrackedCoinType) => {
       if (coinType === "apt") aptHelper.refetchIfStale();
       else if (coinType === "emojicoin") emojicoinHelper.refetchIfStale();
