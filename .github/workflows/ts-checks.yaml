@@ -14,6 +14,7 @@ defaults:
 
 jobs:
   lint:
+    name: 'TS lint'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
@@ -23,6 +24,7 @@ jobs:
     - run: 'pnpm run lint'
 
   format:
+    name: 'TS format'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
@@ -32,6 +34,7 @@ jobs:
     - run: 'pnpm run format:check'
 
   tsc-check:
+    name: 'TS compile check'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
