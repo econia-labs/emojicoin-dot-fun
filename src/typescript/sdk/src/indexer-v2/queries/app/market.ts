@@ -56,13 +56,21 @@ const selectChatsByMarketID = ({
   marketID,
   page = 1,
   pageSize = LIMIT,
-}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
-  postgrest
+}: { marketID: AnyNumberString | AnyNumberString[] } & MarketStateQueryArgs) => {
+  const query = postgrest
     .from(TableName.ChatEvents)
     .select("*")
-    .eq("market_id", marketID)
-    .order("market_nonce", ORDER_BY.DESC)
+    .order("transaction_timestamp", ORDER_BY.DESC)
     .range((page - 1) * pageSize, page * pageSize - 1);
+
+  if (Array.isArray(marketID)) {
+    query.in("market_id", marketID);
+  } else {
+    query.eq("market_id", marketID);
+  }
+
+  return query;
+};
 
 // This query uses `offset` instead of `page` because the periodic state events query requires
 // more granular pagination due to the requirements of the private TradingView charting library.

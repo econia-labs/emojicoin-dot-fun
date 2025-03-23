@@ -18,7 +18,7 @@ export const StyledMessageInner = styled.div`
   margin: 0 7px 11px 7px;
 `;
 
-export const StyledMessageWrapper = styled(motion.div)<{ fromAnotherUser: boolean }>`
+export const StyledMessageWrapper = styled(motion.div)<{ alignLeft: boolean }>`
   display: flex;
   flex-direction: column;
   margin-bottom: 11px;
@@ -29,32 +29,36 @@ export const StyledMessageWrapper = styled(motion.div)<{ fromAnotherUser: boolea
     max-width: 317px;
   }
 
-  align-items: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};
+  align-items: ${({ alignLeft }) => (alignLeft ? "start" : "end")};
 `;
 
 export const StyledUserNameWrapper = styled.div`
   display: flex;
 `;
 
-export const StyledMessageContainer = styled(motion.div)<{ fromAnotherUser: boolean }>`
+export const StyledMessageContainer = styled(motion.div)<{
+  alignLeft: boolean;
+  backgroundColor?: string;
+}>`
   display: flex;
   width: 100%;
-  justify-content: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};
+  justify-content: ${({ alignLeft }) => (alignLeft ? "start" : "end")};
 
   ${Arrow} {
-    background: ${({ theme, fromAnotherUser }) =>
-      fromAnotherUser ? theme.colors.econiaBlue : theme.colors.blue};
-    left: ${({ fromAnotherUser }) => (fromAnotherUser ? "-4px" : undefined)};
-    right: ${({ fromAnotherUser }) => (fromAnotherUser ? undefined : "-5px")};
+    background: ${({ theme, alignLeft }) =>
+      alignLeft ? theme.colors.econiaBlue : theme.colors.blue};
+    left: ${({ alignLeft }) => (alignLeft ? "-4px" : undefined)};
+    right: ${({ alignLeft }) => (alignLeft ? undefined : "-5px")};
   }
 
   ${StyledUserNameWrapper} {
-    justify-content: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};
+    justify-content: ${({ alignLeft }) => (alignLeft ? "start" : "end")};
   }
 
   ${StyledMessageInner} {
     width: fit-content;
-    background-color: ${({ theme, fromAnotherUser }) =>
-      fromAnotherUser ? theme.colors.econiaBlue : theme.colors.blue};
+    background: ${({ backgroundColor }) => backgroundColor};
+    background-color: ${({ theme, alignLeft, backgroundColor }) =>
+      backgroundColor ? backgroundColor : alignLeft ? theme.colors.econiaBlue : theme.colors.blue};
   }
 `;
