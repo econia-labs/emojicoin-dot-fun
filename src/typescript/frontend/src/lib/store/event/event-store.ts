@@ -42,7 +42,7 @@ import {
   toMappedMelees,
 } from "../arena/utils";
 import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
-import { periodToPeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
+import { periodToPeriodTypeFromBroker } from "@sdk/broker-v2/types";
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(

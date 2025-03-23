@@ -9,7 +9,7 @@ import {
 import { WebSocketClient, type WebSocketClientArgs } from "@/broker/client";
 import { type SubscribableBrokerEvents } from "@/broker/types";
 import { immerable } from "immer";
-import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
+import { type PeriodTypeFromBroker } from "@sdk/indexer-v2/types";
 
 export type ClientState = {
   client: WebSocketClient;

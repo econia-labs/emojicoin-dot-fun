@@ -87,9 +87,10 @@ import {
 import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
 import { DECIMALS } from "@sdk/const";
 import { symbolEmojisToPairId } from "../util";
-import { compareBigInt, type Flatten } from "@econia-labs/emojicoin-sdk";
 import { type XOR } from "@sdk/utils/utility-types";
 import { toCoinDecimalString } from "lib/utils/decimals";
+import { type Flatten } from "@sdk-types";
+import { compareBigInt } from "@sdk/utils";
 
 export type Asset0In1Out = {
   asset0In: number | string;

@@ -1,4 +1,4 @@
-import { isValidMarketSymbol, SymbolEmoji } from "@econia-labs/emojicoin-sdk";
+import { isValidMarketSymbol, SymbolEmoji } from "@sdk/emoji_data";
 import {
   ARENA_CHART_SYMBOL_DELIMITER,
   decodeSymbolsForChart,
