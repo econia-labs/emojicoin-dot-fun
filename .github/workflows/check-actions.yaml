@@ -10,5 +10,4 @@ name: 'Check actions'
 'on':
   merge_group: null
   pull_request: null
-  pull_request_review: null
 ...
