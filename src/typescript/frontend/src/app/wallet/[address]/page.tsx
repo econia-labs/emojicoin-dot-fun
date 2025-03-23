@@ -5,6 +5,7 @@ import { AptPriceContextProvider } from "context/AptPrice";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { type Metadata } from "next";
 import { customTruncateAddress, resolveOwnerNameCached } from "../utils";
+import UserNotFound from "./error";
 
 type Props = {
   params: { address: string };
@@ -22,13 +23,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 export default async function WalletPage({ params }: Props) {
-  const aptPrice = await getAptPrice();
   const { address, name } = await resolveOwnerNameCached(params.address);
+
+  if (!(address || name)) {
+    return <UserNotFound />;
+  }
+
+  const aptPrice = await getAptPrice();
 
   return (
     <div className="mx-auto">
       <AptPriceContextProvider aptPrice={aptPrice}>
-        <WalletClientPage address={address ?? "invalid address"} name={name} />
+        <WalletClientPage address={address} name={name} />
       </AptPriceContextProvider>
     </div>
   );
