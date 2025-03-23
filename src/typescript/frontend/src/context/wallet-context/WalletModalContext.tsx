@@ -5,7 +5,7 @@ export type WalletModalContextState = {
   openWalletModal: () => void;
 };
 
-export const WalletModalContext = createContext<WalletModalContextState | undefined>(undefined);
+const WalletModalContext = createContext<WalletModalContextState | undefined>(undefined);
 
 export function WalletModalContextProvider({ children }: PropsWithChildren) {
   const [open, setOpen] = useState<boolean>(false);

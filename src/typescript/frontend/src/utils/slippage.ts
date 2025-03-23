@@ -1,8 +1,8 @@
 import { DEFAULT_MAX_SLIPPAGE } from "../const";
 
 export type MaxSlippageMode = "auto" | "custom";
-export const LOCALSTORAGE_MAX_SLIPPAGE_KEY = "maxSlippage";
-export const LOCALSTORAGE_MAX_SLIPPAGE_MODE_KEY = "maxSlippageMode";
+const LOCALSTORAGE_MAX_SLIPPAGE_KEY = "maxSlippage";
+const LOCALSTORAGE_MAX_SLIPPAGE_MODE_KEY = "maxSlippageMode";
 
 export const getMaxSlippageSettings = () => {
   let maxSlippageModeFromLocalStorage = localStorage.getItem(

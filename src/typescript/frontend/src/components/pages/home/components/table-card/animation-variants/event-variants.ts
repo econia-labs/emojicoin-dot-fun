@@ -13,11 +13,11 @@ import {
 } from "@sdk/indexer-v2/types";
 import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
 
-export const transitionIn = {
+const transitionIn = {
   duration: 0,
 };
 
-export const transitionOut = {
+const transitionOut = {
   duration: 1.5,
 };
 
@@ -132,7 +132,7 @@ export const eventToVariant = (
   throw new Error("Unknown event type");
 };
 
-export const stateEventToVariant = (
+const stateEventToVariant = (
   event: MarketLatestStateEventModel
 ): AnyNonGridTableCardVariant => {
   if (event.market.trigger === Trigger.MarketRegistration) return "register";

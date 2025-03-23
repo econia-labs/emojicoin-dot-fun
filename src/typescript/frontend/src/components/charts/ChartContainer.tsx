@@ -8,7 +8,7 @@ import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
 
 const MemoizedChart = React.memo(PrivateChart);
 
-export const ChartContainer = (props: ChartContainerProps) => {
+const ChartContainer = (props: ChartContainerProps) => {
   const [isScriptReady, setIsScriptReady] = React.useState(false);
 
   const emojiData = useMemo(

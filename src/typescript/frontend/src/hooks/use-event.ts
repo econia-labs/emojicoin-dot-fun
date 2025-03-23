@@ -12,7 +12,7 @@ import { useCallback, useInsertionEffect, useRef } from "react";
  * this hook.
  */
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export function useEvent<T extends any[]>(fn: (...args: T) => void) {
+function useEvent<T extends any[]>(fn: (...args: T) => void) {
   const ref = useRef<((...args: T) => void) | null>(null);
 
   useInsertionEffect(() => {

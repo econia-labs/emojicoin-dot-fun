@@ -27,7 +27,7 @@ const defaultValues: UserSettingsState = {
 
 const readSettings = (): UserSettingsState => readLocalStorageCache("settings") ?? defaultValues;
 
-export const createUserSettingsStore = (userAgent: string) =>
+const createUserSettingsStore = (userAgent: string) =>
   createStore<UserSettingsStore>()((set, get) => ({
     ...readSettings(),
     userAgent,

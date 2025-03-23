@@ -6,7 +6,7 @@ import { type Colors } from "theme/types";
 import { type SvgProps } from "components/svg/types";
 import { type PolymorphicComponentProps } from "types";
 
-export const variants = {
+const variants = {
   OUTLINE: "outline",
 } as const;
 

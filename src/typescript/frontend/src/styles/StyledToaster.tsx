@@ -1,7 +1,7 @@
 import { CloseIcon } from "components/svg";
 import { ToastContainer } from "react-toastify";
 
-export const StyledToaster = () => {
+const StyledToaster = () => {
   return (
     <ToastContainer
       style={{ width: "500px" }}

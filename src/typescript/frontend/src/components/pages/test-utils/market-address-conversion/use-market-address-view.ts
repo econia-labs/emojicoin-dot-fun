@@ -7,7 +7,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "lib/hooks/queries/client";
 import { useMemo } from "react";
 
-export const fetchSymbol = async (args: { aptos: Aptos; marketAddress: string }) =>
+const fetchSymbol = async (args: { aptos: Aptos; marketAddress: string }) =>
   await withResponseError(
     MarketMetadataByMarketAddress.view(args)
       .then(async ({ vec }) => vec.pop())

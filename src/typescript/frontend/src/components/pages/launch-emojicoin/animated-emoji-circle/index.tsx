@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import React, { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
-export const AnimatedEmojiCircle = ({
+const AnimatedEmojiCircle = ({
   numEmojis = 14,
   className,
 }: {

@@ -110,7 +110,7 @@ export const EmptyTr = styled.tr<TrProps>`
   ${layout}
 `;
 
-export const TrWrapper = styled(Flex)`
+const TrWrapper = styled(Flex)`
   width: 100%;
 
   &:last-child {

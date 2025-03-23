@@ -1,4 +1,4 @@
-export const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
+const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       id="content-wrapper"

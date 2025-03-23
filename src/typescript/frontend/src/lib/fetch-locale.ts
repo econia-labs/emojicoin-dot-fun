@@ -1,10 +1,10 @@
 import { cache } from "react";
 
-export const preload = (id: string) => {
+const preload = (id: string) => {
   void fetchLocale(`language-dictionary-${id}`);
 };
 
-export const fetchLocale = cache(async (locale: string) => {
+const fetchLocale = cache(async (locale: string) => {
   try {
     const response = await fetch(`/locales/${locale}.json`);
 

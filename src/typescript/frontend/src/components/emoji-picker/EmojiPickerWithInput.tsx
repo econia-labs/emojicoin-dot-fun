@@ -47,7 +47,7 @@ const ConditionalWrapper = ({
   return mode === "chat" ? <ChatInputBox>{children}</ChatInputBox> : <>{children}</>;
 };
 
-export const EmojiPickerWithInput = ({
+const EmojiPickerWithInput = ({
   handleClick,
   pickerButtonClassName,
   inputGroupProps,

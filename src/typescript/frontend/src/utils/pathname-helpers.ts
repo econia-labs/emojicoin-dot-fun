@@ -2,14 +2,14 @@ import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data/emoji-data";
 import { languageList } from "configs";
 import { ROUTES } from "router/routes";
 
-export const removeLangParamFromPathname = (pathname: string, language?: string) => {
+const removeLangParamFromPathname = (pathname: string, language?: string) => {
   return pathname
     .split("/")
     .filter((item) => item !== language)
     .join("/");
 };
 
-export const cutLocaleFromRoute = (pathname: string) => {
+const cutLocaleFromRoute = (pathname: string) => {
   const currentLang = getLocaleFromRoute(pathname);
   if (currentLang) {
     return removeLangParamFromPathname(pathname, currentLang);
@@ -17,7 +17,7 @@ export const cutLocaleFromRoute = (pathname: string) => {
   return pathname;
 };
 
-export const getLocaleFromRoute = (pathname: string) => {
+const getLocaleFromRoute = (pathname: string) => {
   const maybeLanguageParam = pathname.split("/").filter((item) => !!item)[0];
   if (languageList.some((item) => item.locale === maybeLanguageParam)) {
     return maybeLanguageParam;
@@ -25,7 +25,7 @@ export const getLocaleFromRoute = (pathname: string) => {
   return "";
 };
 
-export const removeTrailingSlashIfExists = (path: string) => {
+const removeTrailingSlashIfExists = (path: string) => {
   if (path.endsWith("/")) {
     return path.slice(0, -1);
   }
@@ -36,7 +36,7 @@ export const removeTrailingSlashIfExists = (path: string) => {
  * The delimiter for multiple emoji names; i.e.,
  * for splitting "emoji_name_1;emoji_name_2"
  */
-export const EMOJI_PATH_DELIMITER = ";";
+const EMOJI_PATH_DELIMITER = ";";
 
 /**
  * The delimiter for intra-segment emoji names; i.e.,
@@ -46,7 +46,7 @@ export const EMOJI_PATH_INTRA_SEGMENT_DELIMITER = "_";
 
 export const ONE_SPACE = " ";
 
-export const emojisToPath = (emojis: string[]) => {
+const emojisToPath = (emojis: string[]) => {
   const names = emojis
     .map((x) => SYMBOL_EMOJI_DATA.byEmoji(x)?.name)
     .filter((x) => typeof x !== "undefined") as string[];

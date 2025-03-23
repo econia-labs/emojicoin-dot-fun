@@ -11,7 +11,7 @@ import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bar
 import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
 import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } from "../utils";
 
-export const createInitialMarketState = (
+const createInitialMarketState = (
   marketMetadata: MarketStoreMetadata
 ): WritableDraft<MarketEventStore> => ({
   marketMetadata,

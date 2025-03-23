@@ -20,7 +20,7 @@ import { cn } from "lib/utils/class-name";
  * {@link https://github.com/econia-labs/emojicoin-dot-fun/tree/main/src/typescript/frontend/src/components/charts/README.md}
  * for a more detailed explanation of the architectural data flow.
  */
-export const Chart = ({
+const Chart = ({
   symbol,
   secondarySymbol = undefined,
   className = "",

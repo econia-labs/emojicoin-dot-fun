@@ -21,7 +21,7 @@ export const StyledTHFilters = styled.div`
   }
 `;
 
-export const StyledSearch = styled(Flex)`
+const StyledSearch = styled(Flex)`
   width: ${EMOJI_GRID_ITEM_WIDTH - 20}px;
   margin: 0;
   padding: 0;
@@ -41,7 +41,7 @@ export const StyledGrid = styled.div`
   width: 100%;
 `;
 
-export const GridRowBorders = styled(StyledGrid)`
+const GridRowBorders = styled(StyledGrid)`
   position: absolute;
 `;
 
@@ -94,7 +94,7 @@ while (width < MAX_WIDTH) {
   width += EMOJI_GRID_ITEM_WIDTH;
 }
 
-export const Header = styled.div`
+const Header = styled.div`
   display: flex;
   position: relative;
   width: 100%;
