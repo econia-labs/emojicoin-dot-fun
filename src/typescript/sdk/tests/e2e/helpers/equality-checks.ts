@@ -137,10 +137,7 @@ const compareMarketAndStateMetadata = <
     ],
   ]);
 
-const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
-  row: T,
-  event: Types["SwapEvent"]
-) =>
+const compareSwapEvents = <T extends Indexer["SwapEventData"]>(row: T, event: Types["SwapEvent"]) =>
   checkTuples([
     ["row.swap.swapper", row.swap.swapper, event.swapper],
     ["row.swap.integrator", row.swap.integrator, event.integrator],
