@@ -71,4 +71,3 @@ export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBl
   );
 };
 
-export default ButtonsBlock;

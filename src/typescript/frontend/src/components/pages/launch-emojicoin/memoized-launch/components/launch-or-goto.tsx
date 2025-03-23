@@ -7,7 +7,7 @@ import path from "path";
 import { ROUTES } from "router/routes";
 import { useMemo } from "react";
 
-export const LaunchButtonOrGoToMarketLink = ({
+const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,
   registered,
   invalid,

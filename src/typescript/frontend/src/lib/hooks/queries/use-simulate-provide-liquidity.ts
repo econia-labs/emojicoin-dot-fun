@@ -8,7 +8,7 @@ import {
   SimulateRemoveLiquidity,
 } from "@/contract-apis/emojicoin-dot-fun";
 
-export const simulateProvideLiquidity = async (args: {
+const simulateProvideLiquidity = async (args: {
   aptos: Aptos;
   marketAddress: AccountAddressString;
   quoteAmount: AnyNumber;
@@ -54,7 +54,7 @@ export const useSimulateProvideLiquidity = (args: {
   return data;
 };
 
-export const simulateRemoveLiquidity = async (args: {
+const simulateRemoveLiquidity = async (args: {
   aptos: Aptos;
   marketAddress: AccountAddressString;
   lpCoinAmount: AnyNumber;

@@ -5,7 +5,7 @@ import { ROUTES } from "router/routes";
  * The delimiter for multiple emoji names; i.e.,
  * for splitting "emoji_name_1;emoji_name_2"
  */
-export const EMOJI_PATH_DELIMITER = ";";
+const EMOJI_PATH_DELIMITER = ";";
 
 /**
  * The delimiter for intra-segment emoji names; i.e.,
@@ -15,7 +15,7 @@ export const EMOJI_PATH_INTRA_SEGMENT_DELIMITER = "_";
 
 export const ONE_SPACE = " ";
 
-export const emojisToPath = (emojis: string[]) => {
+const emojisToPath = (emojis: string[]) => {
   const names = emojis
     .map((x) => SYMBOL_EMOJI_DATA.byEmoji(x)?.name)
     .filter((x) => typeof x !== "undefined") as string[];

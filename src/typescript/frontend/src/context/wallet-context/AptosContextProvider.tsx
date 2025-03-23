@@ -79,7 +79,7 @@ export type AptosContextState = {
   setBalance(coinType: TrackedCoinType, n: bigint): void;
 };
 
-export const AptosContext = createContext<AptosContextState | undefined>(undefined);
+const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
 export function AptosContextProvider({ children }: PropsWithChildren) {
   const {

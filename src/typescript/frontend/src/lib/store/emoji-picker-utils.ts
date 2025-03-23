@@ -1,7 +1,7 @@
 import { type EmojiPickerStore } from "./emoji-picker-store";
 import { getEmojisInString, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
 
-export const calculateEmojiIndices = (emojis: string[]) => {
+const calculateEmojiIndices = (emojis: string[]) => {
   return emojis.reduce(
     (acc, emoji) => {
       acc.push(acc[acc.length - 1] + emoji.length);
@@ -14,7 +14,7 @@ export const calculateEmojiIndices = (emojis: string[]) => {
 // Convert cursor position to emoji index by accumulating the total # of bytes at each position.
 // For example, if we have three emojis, respectively 2, 3, and 4 bytes long, then indices is:
 // [0, 2, 5, 9]
-export const calculateIndicesFromSelection = (
+const calculateIndicesFromSelection = (
   emojis: string[],
   selectionStart: number,
   selectionEnd: number

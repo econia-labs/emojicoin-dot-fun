@@ -65,7 +65,7 @@ const useGetGas = (args: Args) => {
   return data;
 };
 
-export const simulateSwap = async (args: {
+const simulateSwap = async (args: {
   aptos: Aptos;
   account: AccountInfo | null;
   swapper: AccountAddressString;
@@ -96,7 +96,7 @@ export const simulateSwap = async (args: {
  * @deprecated in favor of calculating the swap price client-side instead of from the fullnode.
  * @see {@link useCalculateSwapPrice}
  */
-export const useSimulateSwap = (args: {
+const useSimulateSwap = (args: {
   marketAddress: AccountAddressString;
   inputAmount: bigint | number | string;
   isSell: boolean;

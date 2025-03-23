@@ -27,4 +27,3 @@ const StyledSkeleton = styled(Box).attrs<SkeletonProps>(
   ${({ animation }) => variantStyles(animation)};
 `;
 
-export default StyledSkeleton;

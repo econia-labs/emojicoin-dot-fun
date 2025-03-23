@@ -6,7 +6,7 @@ export type MarketDataSortByHomePage =
   | SortMarketsBy.DailyVolume
   | SortMarketsBy.AllTimeVolume;
 
-export const sortByFilters = {
+const sortByFilters = {
   [SortMarketsBy.MarketCap]: {
     forPageQueryParams: "market_cap",
     forPostgrestQuery: "market_cap",
@@ -54,7 +54,7 @@ export type SortByPostgrestQueryParams =
   | "one_day_tvl_per_lp_coin_growth_q64"
   | "cpamm_real_reserves_quote";
 
-export const toMarketDataSortBy = (
+const toMarketDataSortBy = (
   sortBy?: SortByPostgrestQueryParams | SortMarketsBy | SortByPageQueryParams
 ): SortMarketsBy => {
   for (const key of Object.keys(sortByFilters)) {

@@ -32,7 +32,7 @@ export type FilterOptionsComponentProps = {
   onChange: (value: SortMarketsBy) => void;
 };
 
-export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
+const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
   const selectedOption = options.find((x) => x.value === filter)!;
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();

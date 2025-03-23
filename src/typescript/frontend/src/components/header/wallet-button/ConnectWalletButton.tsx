@@ -22,7 +22,7 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
 
 const CONNECT_WALLET = "Connect Wallet";
 
-export const ButtonWithConnectWalletFallback = ({
+const ButtonWithConnectWalletFallback = ({
   mobile,
   children,
   className,

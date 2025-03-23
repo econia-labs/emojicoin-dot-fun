@@ -2,7 +2,7 @@
 
 import InnerDisplayDebugData from "./inner";
 
-export const DisplayDebugData = () => {
+const DisplayDebugData = () => {
   return <>{process.env.NODE_ENV === "development" && <InnerDisplayDebugData />}</>;
 };
 

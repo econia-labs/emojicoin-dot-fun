@@ -1,4 +1,4 @@
-export const ALLOWED_KEYBOARD_EVENT_KEYS = new Set([
+const ALLOWED_KEYBOARD_EVENT_KEYS = new Set([
   "Backspace",
   "ArrowLeft",
   "ArrowRight",

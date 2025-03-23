@@ -124,4 +124,3 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
   );
 };
 
-export default MultipleSelect;

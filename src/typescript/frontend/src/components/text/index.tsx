@@ -4,7 +4,7 @@ import { fontWeights, textStyles } from "./theme";
 
 import { type scales, type TextProps, type ThemedProps } from "./types";
 
-export const getEllipsis = ({ ellipsis }: ThemedProps) => {
+const getEllipsis = ({ ellipsis }: ThemedProps) => {
   if (ellipsis) {
     return css`
       white-space: nowrap;
@@ -14,7 +14,7 @@ export const getEllipsis = ({ ellipsis }: ThemedProps) => {
   }
 };
 
-export const wordBreak = ({ wordBreak }: ThemedProps) => {
+const wordBreak = ({ wordBreak }: ThemedProps) => {
   if (wordBreak) {
     return css`
       word-break: ${wordBreak};

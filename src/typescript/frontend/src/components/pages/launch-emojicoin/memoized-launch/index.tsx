@@ -20,7 +20,7 @@ import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number"
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
-export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
+const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   const { t } = translationFunction();
   const emojis = useEmojiPicker((state) => state.emojis);
   const setIsLoadingRegisteredMarket = useEmojiPicker(

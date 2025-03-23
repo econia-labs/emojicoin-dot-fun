@@ -6,7 +6,7 @@ import { getAptosClient } from "@sdk/utils/aptos-client";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
-export const fetchContractMarketView = async (marketAddress: `0x${string}`) => {
+const fetchContractMarketView = async (marketAddress: `0x${string}`) => {
   const aptos = getAptosClient();
   const res = await MarketView.view({
     aptos,

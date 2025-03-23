@@ -14,7 +14,7 @@ import { LINKS } from "lib/env";
 import { ROUTES } from "router/routes";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 
-export const ClientVerifyPage = () => {
+const ClientVerifyPage = () => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [verified, setVerified] = useState<boolean | null>(null);

@@ -31,7 +31,7 @@ export type ArenaMarketPair = {
   } & MarketEmojiData;
 };
 
-export const toArenaMarketPair = (info: ArenaInfoModel): ArenaMarketPair => {
+const toArenaMarketPair = (info: ArenaInfoModel): ArenaMarketPair => {
   const symbol0 = info.emojicoin0Symbols.join("");
   const symbol1 = info.emojicoin1Symbols.join("");
   return {

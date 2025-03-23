@@ -53,7 +53,7 @@ const defaultValues: EmojiPickerState = {
   onClickOutside: (_e) => {},
 };
 
-export const setInputHelper = ({
+const setInputHelper = ({
   textAreaRef,
   emojis,
   selectionStart,
@@ -95,7 +95,7 @@ export const setInputHelper = ({
   };
 };
 
-export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
+const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
   createStore<EmojiPickerStore>()((set, get) => ({
     ...defaultValues,
     ...initial,

@@ -29,7 +29,7 @@ const getPadding = (scale: Scales, hasIcon: boolean) => {
   }
 };
 
-export const variantStyles = ({ theme, variant }: ThemedProps) => {
+const variantStyles = ({ theme, variant }: ThemedProps) => {
   return {
     fantom: css`
       display: flex;
