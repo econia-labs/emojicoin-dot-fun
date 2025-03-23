@@ -5,7 +5,9 @@ const SAME_COLOR_THRESHOLD = 30;
 
 // Set up the canvas
 const canvas: OffscreenCanvas = new OffscreenCanvas(CANVAS_SIZE, CANVAS_SIZE);
-const ctx: OffscreenCanvasRenderingContext2D | null = canvas.getContext("2d");
+const ctx: OffscreenCanvasRenderingContext2D | null = canvas.getContext("2d", {
+  willReadFrequently: true,
+});
 
 // Function to get color distance (for grouping similar colors)
 function getColorDistance(color1: string, color2: string): number {
@@ -146,7 +148,11 @@ export function getEmojiDominantColor(emoji: string) {
   // Get final image data
   const imageData = ctx!.getImageData(0, 0, canvas.width, canvas.height);
   const colorGroups = groupSimilarColors(imageData);
-  const { r, g, b } = findDominantColor(colorGroups);
+  const rgb = findDominantColor(colorGroups);
+  return formatRgb(rgb);
+}
+
+export function formatRgb({ r, g, b }: { r: number; g: number; b: number }) {
   return {
     rgb: { r, g, b },
     rgbString: `rgb(${r}, ${g}, ${b})`,
