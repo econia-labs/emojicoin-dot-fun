@@ -1,0 +1,14 @@
+---
+jobs:
+  check-actions:
+    name: 'Check actions'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - if: '${{ github.event_name != ''merge_group'' }}'
+      uses: 'econia-labs/common/.github/actions/check-actions@ECO-3009'
+name: 'Check actions'
+'on':
+  merge_group: null
+  pull_request: null
+  pull_request_review: null
+...
