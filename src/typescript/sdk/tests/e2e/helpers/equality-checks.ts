@@ -111,7 +111,7 @@ export const compareTransactionMetadata = <T extends Indexer["TransactionMetadat
     ["row.transaction.time", row.transaction.time, BigInt(response.timestamp)],
   ]);
 
-export const compareMarketAndStateMetadata = <
+const compareMarketAndStateMetadata = <
   T extends
     | Indexer["MarketAndStateMetadataAndBumpTime"]
     | Indexer["MarketAndStateMetadataAndEmitTime"],
@@ -137,7 +137,7 @@ export const compareMarketAndStateMetadata = <
     ],
   ]);
 
-export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
+const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
   row: T,
   event: Types["SwapEvent"]
 ) =>
@@ -171,7 +171,7 @@ export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
     ],
   ]);
 
-export const compareStateEvents = <T extends Indexer["StateEventData"]>(
+const compareStateEvents = <T extends Indexer["StateEventData"]>(
   row: T,
   event: Types["StateEvent"]
 ) =>

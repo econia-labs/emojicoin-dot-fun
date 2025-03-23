@@ -1,13 +1,8 @@
 import { type AnyNumberString, BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
-import postgres from "postgres";
 import Big from "big.js";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
-
-export const getDbConnection = () => {
-  return postgres(process.env.DB_URL!);
-};
 
 /**
  * NOTE: This function *WILL NOT* work if the INTEGRATOR_FEE_RATE_BPS results in a fee output that

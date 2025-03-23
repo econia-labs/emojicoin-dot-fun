@@ -7,12 +7,7 @@ import {
 import { promisify } from "node:util";
 import { type ContainerName, printLogs } from "./logs";
 
-export interface ContainerStatus {
-  isRunning: boolean;
-  isHealthy: boolean;
-}
-
-export type ContainerStateJSON = {
+type ContainerStateJSON = {
   Status: string;
   Running: boolean;
   Paused: boolean;
