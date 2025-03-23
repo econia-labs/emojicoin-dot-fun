@@ -11,13 +11,7 @@ import { EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE } from "utils/pathname-he
 const unpathify = (pathEmojiName: string) =>
   SYMBOL_EMOJI_DATA.byName(pathEmojiName.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE));
 
-const Loading = ({
-  emojis,
-  numEmojis,
-}: {
-  emojis?: SymbolEmojiData[];
-  numEmojis?: number;
-}) => {
+const Loading = ({ emojis, numEmojis }: { emojis?: SymbolEmojiData[]; numEmojis?: number }) => {
   const pathname = usePathname();
   const emojiCycle = useMemo(() => {
     const emojisInPath = pathname

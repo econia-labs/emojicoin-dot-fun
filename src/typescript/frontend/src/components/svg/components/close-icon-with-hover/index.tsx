@@ -33,4 +33,3 @@ const CloseIconWithHover = (props: SVGProps<SVGSVGElement>) => {
     </StyledCloseIcon>
   );
 };
-

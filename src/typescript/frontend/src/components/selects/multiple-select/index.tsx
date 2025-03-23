@@ -123,4 +123,3 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
     />
   );
 };
-

@@ -1,6 +1,4 @@
-export { darkColors,  } from "./colors";
-;
-;
+export { darkColors } from "./colors";
 export { appearanceAnimationVariants, appearanceAnimationMap, scaleAnimation } from "./animations";
 
 import {

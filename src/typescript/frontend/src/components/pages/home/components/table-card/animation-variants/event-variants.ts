@@ -132,9 +132,7 @@ export const eventToVariant = (
   throw new Error("Unknown event type");
 };
 
-const stateEventToVariant = (
-  event: MarketLatestStateEventModel
-): AnyNonGridTableCardVariant => {
+const stateEventToVariant = (event: MarketLatestStateEventModel): AnyNonGridTableCardVariant => {
   if (event.market.trigger === Trigger.MarketRegistration) return "register";
   if (event.market.trigger === Trigger.RemoveLiquidity) return "sell";
   if (event.market.trigger === Trigger.ProvideLiquidity) return "buy";

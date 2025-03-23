@@ -38,13 +38,4 @@ const DropdownSeparator = forwardRef<
 ));
 DropdownSeparator.displayName = PrimitiveSeparator.displayName;
 
-export {
-  DropdownMenu,
-  DropdownTrigger,
-  
-  
-  DropdownArrow,
-  DropdownItem,
-  DropdownContent,
-  
-};
+export { DropdownMenu, DropdownTrigger, DropdownArrow, DropdownItem, DropdownContent };

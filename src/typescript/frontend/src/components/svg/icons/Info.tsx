@@ -13,4 +13,3 @@ const Icon: React.FC<SvgProps> = ({ color = "blue", ...props }) => {
     </Svg>
   );
 };
-
