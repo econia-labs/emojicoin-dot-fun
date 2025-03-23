@@ -44,7 +44,7 @@ export const getExactTransitionInputAmount = (
   return BigInt(rounded.toString());
 };
 
-export const PROCESSING_WAIT_TIME = 2 * 1000;
+const PROCESSING_WAIT_TIME = 2 * 1000;
 
 export const waitForProcessor = <
   T extends { version: AnyNumberString } | { response: UserTransactionResponse },
