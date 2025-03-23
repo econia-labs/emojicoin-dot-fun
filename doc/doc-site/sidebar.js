@@ -1,3 +1,5 @@
+// cspell:word geckoterminal
+
 module.exports = {
   docs: [
     {

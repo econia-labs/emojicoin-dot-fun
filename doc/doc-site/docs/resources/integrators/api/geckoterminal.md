@@ -5,6 +5,10 @@ hide_title: false
 description: GeckoTerminal API
 ---
 
+<!---
+cspell:word geckoterminal
+-->
+
 The GeckoTerminal API is implemented according to [the GeckoTerminal adapter
 specification][geckoterminal spec].
 
