@@ -8,8 +8,6 @@ const PrimitiveSeparator = DropdownMenuPrimitives.Separator;
 
 const DropdownMenu = DropdownMenuPrimitives.Root;
 const DropdownTrigger = DropdownMenuPrimitives.Trigger;
-const DropdownGroup = DropdownMenuPrimitives.Group;
-const DropdownPortal = DropdownMenuPrimitives.Portal;
 const DropdownArrow = DropdownMenuPrimitives.Arrow;
 
 const DropdownItem = forwardRef<

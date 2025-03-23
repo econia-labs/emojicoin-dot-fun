@@ -7,8 +7,6 @@ import { cn } from "lib/utils/class-name";
 
 const Select = SelectPrimitive.Root;
 
-const SelectGroup = SelectPrimitive.Group;
-
 const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<

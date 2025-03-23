@@ -10,7 +10,6 @@ import { ArenaPeriod, Period } from "@sdk/const";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
 import { CDN_URL } from "lib/env";
-import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 
 export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
   "15S",
@@ -37,17 +36,6 @@ export const ResolutionStringToPeriod: { [key: string]: Period | ArenaPeriod } =
   "60": Period.Period1H,
   "240": Period.Period4H,
   "1D": Period.Period1D,
-};
-
-const ResolutionStringToBrokerPeriod: { [key: string]: PeriodTypeFromBroker } = {
-  "15S": "FifteenSeconds",
-  "1": "OneMinute",
-  "5": "FiveMinutes",
-  "15": "FifteenMinutes",
-  "30": "ThirtyMinutes",
-  "60": "OneHour",
-  "240": "FourHours",
-  "1D": "OneDay",
 };
 
 export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;

@@ -5,7 +5,6 @@ import { border, layout, position, space, flexbox } from "styled-system";
 import React, { type PropsWithChildren } from "react";
 import {
   type ColumnProps,
-  type RowProps,
   type BoxProps,
   type FlexGapProps,
   type FlexProps,
@@ -57,18 +56,6 @@ export const Container: React.FC<PropsWithChildren<BoxProps>> = ({ children, ...
 
 export const FlexGap = styled(Flex)<FlexGapProps>`
   ${gap}
-`;
-
-/**
- * Defining Row here to avoid circular dependencies.
- */
-const Row = styled(Flex)<RowProps>`
-  width: 100%;
-  flex-wrap: wrap;
-`;
-
-const RowBetween = styled(Row)<RowProps>`
-  justify-content: space-between;
 `;
 
 /**

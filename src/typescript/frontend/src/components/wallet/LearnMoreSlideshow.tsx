@@ -4,8 +4,6 @@ import DottedStar from "components/svg/slideshow/DottedStar";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { type SlideState } from "./WalletModal";
 
-const Slide = () => {};
-
 type SlideshowProps = {
   slide: number;
   increment: () => void;

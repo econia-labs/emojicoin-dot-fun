@@ -11,7 +11,6 @@ import {
 } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
-import { SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
@@ -23,10 +22,6 @@ import { MAX_SYMBOL_LENGTH } from "@sdk/const";
 import { notoColorEmoji } from "styles/fonts";
 
 export type SearchResult = Array<EmojiPickerSearchData>;
-
-const search = async (value: string): Promise<SearchResult> => {
-  return await SearchIndex.search(value);
-};
 
 /**
  * Checks if an emoji-mart input is a valid symbol emoji.
