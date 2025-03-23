@@ -1,4 +1,4 @@
-import { type TranslationKey } from "context/language-context/types";
+import { type TranslationKey } from "lib/utils/language";
 
 export type MenuItemProps = {
   title: TranslationKey;

@@ -6,7 +6,6 @@ export { default as Button } from "./button/index";
 export { default as Svg } from "./svg/Svg";
 export { Input, InputGroup, InputNumeric, Textarea } from "./inputs";
 export { default as Skeleton } from "./skeleton";
-export { default as Image } from "./image";
 export { Switcher } from "./switcher";
 export { default as Header } from "./header";
 export { default as Footer } from "./footer";
