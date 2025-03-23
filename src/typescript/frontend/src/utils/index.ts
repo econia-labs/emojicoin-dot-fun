@@ -1,9 +1,6 @@
 import { type AnyEmojiName, CHAT_EMOJI_DATA, SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { sleep } from "@sdk/utils";
-
 export { checkIsEllipsis } from "./check-is-ellipsis";
-;
-export { getStylesFromResponsiveValue } from "./styled-components-helpers";
 export { isDisallowedEventKey } from "./check-is-disallowed-event-key";
 export { getEmptyListTr } from "./get-empty-list-tr";
 
