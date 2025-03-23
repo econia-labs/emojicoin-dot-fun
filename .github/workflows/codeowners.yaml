@@ -4,12 +4,11 @@ jobs:
     name: 'Code owners'
     runs-on: 'ubuntu-latest'
     steps:
-    - uses: 'econia-labs/common/.github/actions/codeowners@ECO-3009'
+    - uses: 'econia-labs/common/.github/actions/codeowners@main'
       with:
         github_access_token: '${{ secrets.CODEOWNERS_VALIDATOR_GITHUB_TOKEN }}'
 name: 'Code owners'
 'on':
   merge_group: null
   pull_request: null
-  pull_request_review: null
 ...
