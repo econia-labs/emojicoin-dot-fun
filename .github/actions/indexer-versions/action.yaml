@@ -6,7 +6,6 @@ runs:
   - uses: 'econia-labs/common/.github/actions/check-workflow@ECO-3009'
     with:
       action_path: '${{ github.action_path }}'
-  - uses: 'actions/checkout@v4'
   - id: 'check-deploy-files'
     run: 'sh ${{ github.action_path }}/sh/check-deploy-files.sh'
     shell: 'sh'
