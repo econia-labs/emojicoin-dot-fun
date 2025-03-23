@@ -24,10 +24,9 @@ const options: Array<Option> = [
   { title: titleFromValue[SortMarketsBy.BumpOrder], value: SortMarketsBy.BumpOrder },
   { title: titleFromValue[SortMarketsBy.DailyVolume], value: SortMarketsBy.DailyVolume },
   { title: titleFromValue[SortMarketsBy.AllTimeVolume], value: SortMarketsBy.AllTimeVolume },
-  // TODO: Add price..?
 ];
 
-export type FilterOptionsComponentProps = {
+type FilterOptionsComponentProps = {
   filter: SortMarketsBy;
   onChange: (value: SortMarketsBy) => void;
 };

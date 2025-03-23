@@ -11,7 +11,7 @@ import Popup from "components/popup";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 
-export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
+interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
   onClick?: () => void;
   arrow?: boolean;

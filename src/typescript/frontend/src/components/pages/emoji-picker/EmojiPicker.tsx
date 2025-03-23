@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
-import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
+import { type EmojiMartData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
 import RoundButton from "@icons/Minimize";
@@ -20,8 +20,6 @@ import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { MAX_SYMBOL_LENGTH } from "@sdk/const";
 import { notoColorEmoji } from "styles/fonts";
-
-export type SearchResult = Array<EmojiPickerSearchData>;
 
 /**
  * Checks if an emoji-mart input is a valid symbol emoji.

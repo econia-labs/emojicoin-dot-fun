@@ -16,7 +16,7 @@ import type { OrderByStrings } from "@sdk/indexer-v2/const";
 import useElementDimensions from "@hooks/use-element-dimensions";
 import { type PoolsData } from "../../ClientPoolsPage";
 
-export interface PoolsTableProps {
+interface PoolsTableProps {
   data: PoolsData[];
   index: number | undefined;
   sortBy: (sortBy: SortByPageQueryParams) => void;

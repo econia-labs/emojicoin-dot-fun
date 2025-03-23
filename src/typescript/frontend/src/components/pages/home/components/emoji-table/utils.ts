@@ -5,10 +5,10 @@ import { type HomePageProps } from "app/home/HomePage";
 import { type EventStore } from "@/store/event/types";
 import { type SymbolEmoji } from "@sdk/emoji_data";
 
-export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
+type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
 };
-export type PropsWithTimeAndIndex = TableCardProps & {
+type PropsWithTimeAndIndex = TableCardProps & {
   time: number;
   searchEmojisKey: string;
 };

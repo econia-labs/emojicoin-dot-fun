@@ -80,7 +80,7 @@ export const tableCardVariants = {
   }),
 };
 
-export type TableCardVariants = keyof typeof tableCardVariants;
+type TableCardVariants = keyof typeof tableCardVariants;
 
 // Set the `symbol` <span> value to `variant` to view these variants in action and how they work.
 export const determineGridAnimationVariant = ({
@@ -140,12 +140,12 @@ export const determineGridAnimationVariant = ({
   };
 };
 
-export type GridCoordinateHistory = {
+type GridCoordinateHistory = {
   prev?: GridCoordinate;
   curr: GridCoordinate;
 };
 
-export type GridCoordinate = {
+type GridCoordinate = {
   row: number;
   col: number;
   index: number;

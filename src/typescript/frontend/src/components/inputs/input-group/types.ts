@@ -9,7 +9,7 @@ export const variants = {
   FANTOM: "fantom",
 } as const;
 
-export type Variant = (typeof variants)[keyof typeof variants];
+type Variant = (typeof variants)[keyof typeof variants];
 
 export interface InputGroupProps extends SpaceProps, LayoutProps {
   scale?: Scales;

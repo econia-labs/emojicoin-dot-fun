@@ -14,7 +14,7 @@ import createEmojiPickerStore from "@/store/emoji-picker-store";
  */
 export const EmojiPickerContext = createContext<StoreApi<EmojiPickerStore> | null>(null);
 
-export interface EmojiPickerProviderProps {
+interface EmojiPickerProviderProps {
   children: ReactNode;
   initialState?: Partial<EmojiPickerStore>;
 }

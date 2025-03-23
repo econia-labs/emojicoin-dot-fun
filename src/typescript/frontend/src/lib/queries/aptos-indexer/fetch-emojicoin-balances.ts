@@ -12,7 +12,7 @@ export type AssetBalance = {
   };
 };
 
-export type FetchEmojicoinBalancesResponse = {
+type FetchEmojicoinBalancesResponse = {
   current_fungible_asset_balances: AssetBalance[];
 };
 

@@ -4,7 +4,7 @@ import { Arrow } from "components/svg";
 import { StyledBtn } from "./styled";
 import { useMatchBreakpoints } from "@hooks/index";
 
-export type ButtonsBlockProps = {
+type ButtonsBlockProps = {
   value: number;
   numPages: number;
   onChange: (page: number) => void;

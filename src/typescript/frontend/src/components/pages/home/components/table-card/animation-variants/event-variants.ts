@@ -21,11 +21,11 @@ const transitionOut = {
   duration: 1.5,
 };
 
-export type AnyNonGridTableCardVariant =
+type AnyNonGridTableCardVariant =
   | TableCardGlowVariants
   | TableCardTextVariants
   | TableCardBorderVariants;
-export type TableCardGlowVariants = keyof typeof glowVariants;
+type TableCardGlowVariants = keyof typeof glowVariants;
 
 export const glowVariants = {
   initial: {
@@ -55,7 +55,7 @@ export const glowVariants = {
   },
 };
 
-export type TableCardTextVariants = keyof typeof textVariants;
+type TableCardTextVariants = keyof typeof textVariants;
 
 export const textVariants = {
   initial: {
@@ -75,7 +75,7 @@ export const textVariants = {
   },
 };
 
-export type TableCardBorderVariants = keyof typeof borderVariants;
+type TableCardBorderVariants = keyof typeof borderVariants;
 
 export const borderVariants = {
   initial: {

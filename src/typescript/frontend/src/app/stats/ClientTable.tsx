@@ -6,7 +6,7 @@ import { Column, TableData } from "./TableData";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-export type ClientTableProps = {
+type ClientTableProps = {
   price: DatabaseModels["market_state"][];
   allTimeVolume: DatabaseModels["market_state"][];
   priceDelta: DatabaseModels["price_feed"][];

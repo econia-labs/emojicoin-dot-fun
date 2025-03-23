@@ -3,7 +3,7 @@ import { parse } from "semver";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { type Network } from "@aptos-labs/ts-sdk";
 
-export type Links = {
+type Links = {
   x: string;
   github: string;
   discord: string;

@@ -3,7 +3,7 @@ import { useEventStore } from "context/event-store-context/hooks";
 import { useEffect } from "react";
 
 // Note that we let the charting library handle the subscription to arena periods.
-export type ReliableSubscribeArgs = {
+type ReliableSubscribeArgs = {
   eventTypes: Array<SubscribableBrokerEvents>;
   arena?: boolean;
 };

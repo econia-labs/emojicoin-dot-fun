@@ -16,7 +16,7 @@ import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-ex
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMatchBreakpoints } from "@hooks/index";
 
-export type ProfileTabProps = {
+type ProfileTabProps = {
   position?: ArenaPositionModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;

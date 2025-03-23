@@ -5,9 +5,6 @@ import { type MarketMetadataModel, type DatabaseModels } from "@sdk/indexer-v2/t
 import { type Types } from "@sdk/types";
 import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
 
-export interface WithVersion {
-  version: number;
-}
 type DataProps = MarketMetadataModel & {
   symbol: SymbolString;
   swaps: Array<DatabaseModels["swap_events"]>;

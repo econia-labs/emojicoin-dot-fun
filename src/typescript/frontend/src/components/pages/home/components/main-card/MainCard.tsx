@@ -20,7 +20,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
 import _ from "lodash";
 
-export interface MainCardProps {
+interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
   page: HomePageProps["page"];
   sortBy: HomePageProps["sortBy"];

@@ -9,7 +9,7 @@ const handleReplay = (enabled: boolean, replay: () => void) => {
   }
 };
 
-export type WalletDropdownItemProps = {
+type WalletDropdownItemProps = {
   onSelect?: () => void;
   scrambleText: string;
   icon: ReactElement;

@@ -1,8 +1,6 @@
 import styled, { css, type DefaultTheme } from "styled-components";
-
 import { Box } from "@containers";
 import { Text } from "components/text";
-
 import {
   type InputGroupProps,
   type InputIconProps,
@@ -11,9 +9,10 @@ import {
 } from "./types";
 import { type Scales, scales as inputScales } from "components/inputs/input/types";
 
-export interface ThemedProps extends Pick<InputGroupProps, "variant"> {
+interface ThemedProps extends Pick<InputGroupProps, "variant"> {
   theme: DefaultTheme;
 }
+
 const getPadding = (scale: Scales, hasIcon: boolean) => {
   if (!hasIcon) {
     return "16px";
