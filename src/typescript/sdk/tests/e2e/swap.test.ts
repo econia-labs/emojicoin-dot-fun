@@ -4,10 +4,10 @@ import {
   type TypeTag,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { ONE_APT } from "../../src/const";
+
 import { SYMBOL_EMOJI_DATA } from "../../src";
+import { ONE_APT } from "../../src/const";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getPublishHelpers } from "../utils";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   getRegistrationGracePeriodFlag,
@@ -18,6 +18,7 @@ import {
   getCoinBalanceFromChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
+import { getPublishHelpers } from "../utils";
 import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(90000);

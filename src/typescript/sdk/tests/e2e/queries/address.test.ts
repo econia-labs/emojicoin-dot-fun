@@ -1,10 +1,11 @@
-import { getEvents, toCoinTypesForEntry } from "../../../src";
 import { Chat } from "@/contract-apis/emojicoin-dot-fun";
+
+import { getEvents, toCoinTypesForEntry } from "../../../src";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { fetchChatEvents } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
-import checkRows from "../helpers/equality-checks";
 import { getFundedAccount } from "../../utils/test-accounts";
-import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+import checkRows from "../helpers/equality-checks";
 
 jest.setTimeout(20000);
 

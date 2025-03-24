@@ -1,30 +1,31 @@
 // cspell:word funder
 /* eslint-disable max-classes-per-file */
 import {
-  AccountAddress,
-  type TypeTag,
-  U64,
-  Bool,
   type Account,
+  AccountAddress,
+  type AccountAddressInput,
   Aptos,
   type AptosConfig,
-  type AccountAddressInput,
-  parseTypeTag,
+  Bool,
   buildTransaction,
   type InputGenerateTransactionOptions,
-  type WaitForTransactionOptions,
-  type UserTransactionResponse,
-  type MoveValue,
   type LedgerVersionArg,
+  type MoveValue,
+  parseTypeTag,
+  type TypeTag,
+  U64,
+  type UserTransactionResponse,
+  type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
-import { type TypeTagInput, type Uint64, type Uint64String } from "../types";
-import {
-  ViewFunctionPayloadBuilder,
-  EntryFunctionPayloadBuilder,
-  EntryFunctionTransactionBuilder,
-} from "../payload-builders";
+
 import { ARENA_MODULE_ADDRESS } from "../../const";
 import { type JsonTypes } from "../../types";
+import {
+  EntryFunctionPayloadBuilder,
+  EntryFunctionTransactionBuilder,
+  ViewFunctionPayloadBuilder,
+} from "../payload-builders";
+import { type TypeTagInput, type Uint64, type Uint64String } from "../types";
 
 export type FundVaultPayloadMoveArguments = {
   amount: U64;

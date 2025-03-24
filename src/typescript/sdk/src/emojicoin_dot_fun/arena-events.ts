@@ -1,4 +1,4 @@
-import { type Types, type AnyNumberString } from "../types";
+import { type AnyNumberString, type Types } from "../types";
 import { type ArenaJsonTypes } from "../types/arena-json-types";
 import {
   toArenaEnterEvent,
@@ -8,7 +8,7 @@ import {
   toArenaVaultBalanceUpdateEvent,
 } from "../types/arena-types";
 import { type ArenaStructName } from "../utils/type-tags";
-import { type RemovePlurality, type PascalToCamelCase } from "./events";
+import { type PascalToCamelCase, type RemovePlurality } from "./events";
 
 type FullArenaEventName = keyof typeof fullArenaEventNames;
 

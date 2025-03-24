@@ -1,12 +1,13 @@
 import {
   Aptos,
   AptosConfig,
+  type ClientConfig,
   NetworkToFaucetAPI,
   NetworkToIndexerAPI,
   NetworkToNetworkName,
   NetworkToNodeAPI,
-  type ClientConfig,
 } from "@aptos-labs/ts-sdk";
+
 import { APTOS_NETWORK, getAptosApiKey } from "../const";
 
 export const APTOS_CONFIG: Partial<ClientConfig> = {

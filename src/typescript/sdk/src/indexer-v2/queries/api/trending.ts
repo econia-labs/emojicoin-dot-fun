@@ -1,9 +1,10 @@
-import { deserializeToHexString, toNominal } from "../../../utils";
-import { type DatabaseJsonType, toPriceFeedData } from "../../types";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
+
 import { DECIMALS } from "../../../const"; /* eslint-disable-line */
 import { calculateCirculatingSupply, calculateCurvePrice } from "../../../markets";
 import { toReserves } from "../../../types";
-import { AccountAddress } from "@aptos-labs/ts-sdk";
+import { deserializeToHexString, toNominal } from "../../../utils";
+import { type DatabaseJsonType, toPriceFeedData } from "../../types";
 
 export type TrendingMarket = ReturnType<typeof toTrendingMarket>;
 export type TrendingMarketArgs = DatabaseJsonType["price_feed"] & { apt_price?: number };

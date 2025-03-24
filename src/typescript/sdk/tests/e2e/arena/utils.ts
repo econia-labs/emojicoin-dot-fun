@@ -1,15 +1,17 @@
 // cspell:word funder
 
-import { EmojicoinArena } from "@/contract-apis";
 import type { Account } from "@aptos-labs/ts-sdk";
+
+import { EmojicoinArena } from "@/contract-apis";
+
 import {
-  type SymbolEmoji,
-  fetchArenaRegistryView,
   fetchArenaMeleeView,
+  fetchArenaRegistryView,
   fetchMeleeEmojiData,
+  type SymbolEmoji,
 } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import { getPublisher, getAptosClient } from "../../utils";
+import { getAptosClient, getPublisher } from "../../utils";
 
 /**
  * Have the publisher register a third market and trade on all three markets to unlock them for

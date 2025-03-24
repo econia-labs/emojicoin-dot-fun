@@ -1,10 +1,7 @@
 import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import {
-  INTEGRATOR_FEE_RATE_BPS,
-  ONE_APT,
-  INITIAL_REAL_RESERVES,
-  INITIAL_VIRTUAL_RESERVES,
-} from "../../src/const";
+
+import { TransferCoins } from "@/contract-apis";
+
 import {
   type AnyNumberString,
   getMarketResource,
@@ -13,13 +10,18 @@ import {
   toCoinTypes,
   zip,
 } from "../../src";
+import { EmojicoinClient } from "../../src/client/emojicoin-client";
+import {
+  INITIAL_REAL_RESERVES,
+  INITIAL_VIRTUAL_RESERVES,
+  INTEGRATOR_FEE_RATE_BPS,
+  ONE_APT,
+} from "../../src/const";
 import { calculateSwapNetProceeds, getMarketAddress } from "../../src/emojicoin_dot_fun";
+import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
 import { getPublishHelpers } from "../utils/helpers";
 import { getFundedAccounts } from "../utils/test-accounts";
-import { EmojicoinClient } from "../../src/client/emojicoin-client";
-import { TransferCoins } from "@/contract-apis";
 import { getExactTransitionInputAmount } from "./helpers/misc";
-import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
 
 jest.setTimeout(30000);
 

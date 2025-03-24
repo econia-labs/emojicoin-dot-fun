@@ -1,3 +1,5 @@
+import Big from "big.js";
+
 import {
   BASE_VIRTUAL_FLOOR,
   BASIS_POINTS_PER_UNIT,
@@ -8,7 +10,6 @@ import {
   QUOTE_VIRTUAL_CEILING,
 } from "../const";
 import { type AnyNumberString, type Types } from "../types";
-import Big from "big.js";
 
 export class CustomCalculatedSwapError extends Error {
   constructor(msg: string) {

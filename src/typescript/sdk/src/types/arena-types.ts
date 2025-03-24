@@ -2,15 +2,15 @@ import type { ArenaPeriod } from "../const";
 import { type SymbolEmoji } from "../emoji_data";
 import { type AccountAddressString } from "../emojicoin_dot_fun";
 import {
-  type BrokerEventModels,
+  type ArenaCandlestickModel,
   type ArenaEnterModel,
+  type ArenaEventModels,
   type ArenaExitModel,
   type ArenaMeleeModel,
+  type ArenaModelWithMeleeID,
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
-  type ArenaEventModels,
-  type ArenaModelWithMeleeID,
-  type ArenaCandlestickModel,
+  type BrokerEventModels,
   // Note that if you import anything more than a type here, you'll get lots of import issues.
 } from "../indexer-v2/types";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";

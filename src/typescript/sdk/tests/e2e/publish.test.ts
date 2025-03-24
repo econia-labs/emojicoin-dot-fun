@@ -1,4 +1,4 @@
-import { getAptosClient, EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../../src";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, getAptosClient, MODULE_ADDRESS } from "../../src";
 
 describe("ensures the emojicoin_dot_fun.move contract is published on the local network", () => {
   const aptos = getAptosClient();

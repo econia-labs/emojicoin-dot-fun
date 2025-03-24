@@ -1,4 +1,5 @@
-import type { Ed25519Account, Account } from "@aptos-labs/ts-sdk";
+import type { Account, Ed25519Account } from "@aptos-labs/ts-sdk";
+
 import {
   ARENA_MODULE_ADDRESS,
   EmojicoinArena,
@@ -31,14 +32,14 @@ import {
   fetchMeleeEmojiData,
   type MeleeEmojiData,
 } from "../../../src/markets/arena-utils";
+import { getPublisher } from "../../utils/helpers";
 import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
+import { waitForProcessor } from "../helpers";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
-import { getPublisher } from "../../utils/helpers";
-import { waitForProcessor } from "../helpers";
 
 const getEmojicoinLockedDiffFromSwapRes = (
   swapRes: Awaited<ReturnType<typeof EmojicoinClient.prototype.arena.swap>>,

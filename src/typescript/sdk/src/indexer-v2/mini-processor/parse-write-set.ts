@@ -3,13 +3,14 @@ import {
   type HexInput,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
+
+import { Period, rawPeriodToEnum } from "../../const";
 import { getEvents } from "../../emojicoin_dot_fun/utils";
 import {
   calculateTvlGrowth,
   getEmojicoinMarketAddressAndTypeTags,
   getMarketResourceFromWriteSet,
 } from "../../markets/utils";
-import { Period, rawPeriodToEnum } from "../../const";
 import { getCoinBalanceFromChanges } from "../../utils/parse-changes-for-balances";
 
 export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransactionResponse) => {

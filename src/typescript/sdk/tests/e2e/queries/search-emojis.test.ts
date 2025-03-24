@@ -1,8 +1,8 @@
-import { type SymbolEmojiName, namesToEmojis } from "../../../src";
-import { registerMarketHelper } from "../../utils";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import { namesToEmojis, type SymbolEmojiName } from "../../../src";
 import { fetchMarkets } from "../../../src/indexer-v2/queries/app/home";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
+import { registerMarketHelper } from "../../utils";
+import { getFundedAccounts } from "../../utils/test-accounts";
 
 jest.setTimeout(20000);
 

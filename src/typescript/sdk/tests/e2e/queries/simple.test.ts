@@ -1,17 +1,18 @@
-import { type SymbolEmojiName, getEvents, ONE_APT } from "../../../src";
-import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketHelper } from "../../utils/helpers";
 import { Chat, ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
+
+import { getEvents, ONE_APT, type SymbolEmojiName } from "../../../src";
 import {
   fetchChatEvents,
   fetchSwapEvents,
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
-import { getAptosClient } from "../../utils";
-import checkRows from "../helpers/equality-checks";
+import { postgrest } from "../../../src/indexer-v2/queries/client";
 import { queryHelper } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/json-types";
+import { getAptosClient } from "../../utils";
+import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
-import { postgrest } from "../../../src/indexer-v2/queries/client";
+import checkRows from "../helpers/equality-checks";
 import { fetchLatestStateEventForMarket, fetchLiquidityEvents } from ".";
 
 jest.setTimeout(20000);
