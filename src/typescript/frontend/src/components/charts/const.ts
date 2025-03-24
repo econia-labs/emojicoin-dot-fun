@@ -1,7 +1,6 @@
 // cspell:word localstorage
 
 import { ArenaPeriod, Period } from "@sdk/const";
-import type { PeriodTypeFromBroker } from "@sdk/indexer-v2/types/json-types";
 import type {
   ChartingLibraryWidgetOptions,
   LanguageCode,
