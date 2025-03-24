@@ -1,9 +1,10 @@
-import { type IChartingLibraryWidget, type Timezone, widget } from "@static/charting_library";
 import { createSwitch } from "components/charts/EmptyCandlesSwitch";
 import { useUserSettings } from "context/event-store-context";
 import { encodeSymbolsForChart, formatSymbolWithParams } from "lib/chart-utils";
 import { cn } from "lib/utils/class-name";
 import { useEffect, useRef } from "react";
+
+import { type IChartingLibraryWidget, type Timezone, widget } from "@/static/charting_library";
 
 import { BrowserNotSupported } from "./BrowserNotSupported";
 import { WIDGET_OPTIONS } from "./const";

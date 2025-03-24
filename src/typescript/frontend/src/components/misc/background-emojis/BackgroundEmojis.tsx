@@ -1,9 +1,10 @@
 "use client";
 
-import { getRandomSymbolEmoji } from "@sdk/emoji_data";
 import React, { useEffect, useMemo, useState } from "react";
 import { useWindowSize } from "react-use";
 import { Emoji } from "utils/emoji";
+
+import { getRandomSymbolEmoji } from "@/sdk/emoji_data";
 
 const MemoizedRandomEmoji = React.memo(OneRandomEmoji);
 

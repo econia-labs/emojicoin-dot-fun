@@ -1,4 +1,3 @@
-import type { ArenaInfoModel, DatabaseModels, MarketStateModel } from "@sdk/indexer-v2/types";
 import { ArenaCard } from "components/pages/home/components/arena-card";
 import EmojiTable from "components/pages/home/components/emoji-table";
 import MainCard from "components/pages/home/components/main-card/MainCard";
@@ -8,6 +7,7 @@ import FEATURE_FLAGS from "lib/feature-flags";
 import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
 import { SubscribeToHomePageEvents } from "@/components/pages/home/components/SubscribeToHomePageEvents";
+import type { ArenaInfoModel, DatabaseModels, MarketStateModel } from "@/sdk/indexer-v2/types";
 
 export interface HomePageProps {
   markets: Array<DatabaseModels["market_state"]>;

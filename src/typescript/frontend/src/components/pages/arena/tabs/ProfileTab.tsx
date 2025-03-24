@@ -1,11 +1,3 @@
-import { useMatchBreakpoints } from "@hooks/index";
-import type {
-  ArenaInfoModel,
-  ArenaLeaderboardHistoryWithArenaInfoModel,
-  ArenaPositionModel,
-  MarketStateModel,
-} from "@sdk/indexer-v2/types";
-import { q64ToBig } from "@sdk/utils";
 import Big from "big.js";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
@@ -14,6 +6,15 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { useMemo, useState } from "react";
 import { Emoji } from "utils/emoji";
+
+import { useMatchBreakpoints } from "@/hooks/index";
+import type {
+  ArenaInfoModel,
+  ArenaLeaderboardHistoryWithArenaInfoModel,
+  ArenaPositionModel,
+  MarketStateModel,
+} from "@/sdk/indexer-v2/types";
+import { q64ToBig } from "@/sdk/utils";
 
 import styles from "./ProfileTab.module.css";
 

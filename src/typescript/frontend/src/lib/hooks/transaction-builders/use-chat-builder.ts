@@ -1,11 +1,11 @@
-import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
-import { toChatMessageEntryFunctionArgs } from "@sdk/emoji_data/chat-message";
-import { toCoinTypesForEntry } from "@sdk/markets";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { Chat } from "@/contract-apis/emojicoin-dot-fun";
+import { MAX_NUM_CHAT_EMOJIS } from "@/sdk/const";
+import { toChatMessageEntryFunctionArgs } from "@/sdk/emoji_data/chat-message";
+import { toCoinTypesForEntry } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 

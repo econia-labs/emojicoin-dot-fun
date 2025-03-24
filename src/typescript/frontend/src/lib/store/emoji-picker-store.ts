@@ -1,5 +1,6 @@
-import type { AnyEmoji, SymbolEmojiData } from "@sdk/emoji_data";
 import { createStore } from "zustand";
+
+import type { AnyEmoji, SymbolEmojiData } from "@/sdk/emoji_data";
 
 import { insertEmojiTextInputHelper, removeEmojiTextInputHelper } from "./emoji-picker-utils";
 

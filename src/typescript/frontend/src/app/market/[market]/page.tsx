@@ -1,5 +1,3 @@
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
-import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
@@ -11,6 +9,8 @@ import { pathToEmojiNames } from "utils/pathname-helpers";
 
 import { fetchMelee } from "@/queries/arena";
 import { fetchMarketState, fetchSwapEvents } from "@/queries/market";
+import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
+import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 
 import EmojiNotFoundPage from "./not-found";
 

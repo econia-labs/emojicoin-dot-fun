@@ -1,4 +1,3 @@
-import { Flex } from "@containers";
 import styled, { css } from "styled-components";
 import {
   layout,
@@ -8,6 +7,8 @@ import {
   typography,
   type TypographyProps,
 } from "styled-system";
+
+import { Flex } from "@/containers";
 
 interface TdProps extends TypographyProps, SpaceProps, LayoutProps {}
 

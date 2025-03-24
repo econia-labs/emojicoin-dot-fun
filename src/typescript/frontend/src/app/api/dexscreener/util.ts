@@ -1,4 +1,4 @@
-import { type SymbolEmoji, toMarketEmojiData } from "@sdk/emoji_data";
+import { type SymbolEmoji, toMarketEmojiData } from "@/sdk/emoji_data";
 
 function pairIdToSymbolEmojiString(pairId: string): string {
   return pairId.split("-")[0];

@@ -1,6 +1,5 @@
 "use client";
 
-import { Container, Flex, FlexGap } from "@containers";
 import { Badge } from "components/Badge";
 import Button from "components/button";
 import MenuItem from "components/header/components/menu-item";
@@ -13,6 +12,8 @@ import Link, { type LinkProps } from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
 import { ROUTES } from "router/routes";
+
+import { Container, Flex, FlexGap } from "@/containers";
 
 import CloseIcon from "../svg/icons/Close";
 import LogoIcon from "../svg/icons/LogoIcon";

@@ -1,14 +1,15 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@headlessui/react";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
-import Arrow from "@icons/Arrow";
-import { formatDisplayName } from "@sdk/utils/misc";
 import Popup from "components/popup";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { type PropsWithChildren, useMemo, useState } from "react";
 import { useScramble } from "use-scramble";
+
+import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
+import Arrow from "@/icons/Arrow";
+import { formatDisplayName } from "@/sdk/utils/misc";
 
 import OuterConnectText from "./OuterConnectText";
 

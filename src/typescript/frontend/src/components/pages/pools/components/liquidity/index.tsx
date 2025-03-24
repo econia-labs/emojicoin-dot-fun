@@ -1,9 +1,6 @@
 "use client";
 
 import { TypeTag } from "@aptos-labs/ts-sdk";
-import { Column, Flex, FlexGap } from "@containers";
-import { useMatchBreakpoints } from "@hooks/index";
-import { toCoinTypes } from "@sdk/markets/utils";
 import { Button, InputNumeric, Text } from "components";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
@@ -25,6 +22,10 @@ import { useLiquidityTransactionBuilder } from "lib/hooks/transaction-builders/u
 import { toActualCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
 import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
+
+import { Column, Flex, FlexGap } from "@/containers";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { toCoinTypes } from "@/sdk/markets/utils";
 
 import type { PoolsData } from "../../ClientPoolsPage";
 import { StyledAddLiquidityWrapper } from "./styled";

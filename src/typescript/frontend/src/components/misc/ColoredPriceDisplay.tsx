@@ -1,9 +1,10 @@
-import type { AnyNumber } from "@sdk/emojicoin_dot_fun/types";
-import { toNominalPrice } from "@sdk/utils";
 import type { ClassValue } from "clsx";
 import { cn } from "lib/utils/class-name";
 import { formatNumberString, type FormatNumberStringProps } from "lib/utils/format-number-string";
 import React, { type HTMLAttributes } from "react";
+
+import type { AnyNumber } from "@/sdk/emojicoin_dot_fun/types";
+import { toNominalPrice } from "@/sdk/utils";
 
 type PriceColors = "neutral" | "buy" | "sell";
 export const PriceColors: { [key in PriceColors]: { color: ClassValue; brightness: ClassValue } } =

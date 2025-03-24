@@ -1,10 +1,10 @@
-import { toOrderBy } from "@sdk/indexer-v2/const";
-import type { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { stringifyJSON } from "utils";
 
 import { fetchMarkets } from "@/queries/home";
 import { fetchUserLiquidityPools } from "@/queries/pools";
+import { toOrderBy } from "@/sdk/indexer-v2/const";
+import type { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 export async function getPoolData(
   page: number,

@@ -1,10 +1,15 @@
-import type { AnyPeriod, Period } from "@sdk/const";
-import type { SymbolEmoji } from "@sdk/emoji_data";
-import type { BrokerEventModels, DatabaseModels, MarketMetadataModel } from "@sdk/indexer-v2/types";
-import type { Flatten } from "@sdk-types";
-import type { SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import type { WritableDraft } from "immer";
 import type { ArenaChartSymbol } from "lib/chart-utils";
+
+import type { AnyPeriod, Period } from "@/sdk/const";
+import type { SymbolEmoji } from "@/sdk/emoji_data";
+import type {
+  BrokerEventModels,
+  DatabaseModels,
+  MarketMetadataModel,
+} from "@/sdk/indexer-v2/types";
+import type { Flatten } from "@/sdk-types";
+import type { SubscribeBarsCallback } from "@/static/charting_library/datafeed-api";
 
 import type { ArenaActions, ArenaState } from "../arena/store";
 import type { ClientActions, ClientState } from "../websocket/store";

@@ -1,8 +1,5 @@
 "use client";
 
-import { Flex, FlexGap } from "@containers";
-import { useTooltip } from "@hooks/index";
-import { toCoinTypes } from "@sdk/markets/utils";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { InputNumeric } from "components/inputs";
@@ -23,6 +20,10 @@ import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { getMaxSlippageSettings } from "utils/slippage";
+
+import { Flex, FlexGap } from "@/containers";
+import { useTooltip } from "@/hooks/index";
+import { toCoinTypes } from "@/sdk/markets/utils";
 
 import FlipInputsArrow from "./FlipInputsArrow";
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";

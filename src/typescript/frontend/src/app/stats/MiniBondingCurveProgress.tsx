@@ -1,6 +1,7 @@
-import type { StateEventData } from "@sdk/indexer-v2/types";
-import { getBondingCurveProgress } from "@sdk/utils";
 import { Progress } from "components/ui/Progress";
+
+import type { StateEventData } from "@/sdk/indexer-v2/types";
+import { getBondingCurveProgress } from "@/sdk/utils";
 
 export const MiniBondingCurveProgress = ({ state }: { state: StateEventData }) => {
   const progress = getBondingCurveProgress(state.clammVirtualReserves.quote);

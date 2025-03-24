@@ -1,10 +1,11 @@
 "use server";
 
-import type { AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { isAllowListed } from "lib/utils/allowlist";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
+
+import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
 
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,

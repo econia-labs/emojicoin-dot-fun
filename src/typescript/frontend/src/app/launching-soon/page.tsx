@@ -1,9 +1,10 @@
 "use client";
 
-import { getRandomChatEmoji } from "@sdk/emoji_data";
 import { Text } from "components";
 import React, { useMemo } from "react";
 import { useScramble } from "use-scramble";
+
+import { getRandomChatEmoji } from "@/sdk/emoji_data";
 
 import MatrixRain from "../maintenance/matrix";
 

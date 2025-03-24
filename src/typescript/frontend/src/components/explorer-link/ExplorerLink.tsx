@@ -1,5 +1,6 @@
-import type { AnyNumberString } from "@sdk-types";
 import { toExplorerLink } from "lib/utils/explorer-link";
+
+import type { AnyNumberString } from "@/sdk-types";
 
 import { EXTERNAL_LINK_PROPS } from "../link/const";
 

@@ -1,11 +1,11 @@
 "use client";
 
 import { Network } from "@aptos-labs/ts-sdk";
-import { APTOS_NETWORK } from "@sdk/const";
 import FEATURE_FLAGS from "lib/feature-flags";
 
 import { MarketAddressConversionForm } from "@/components/pages/test-utils/market-address-conversion";
 import { SetMeleeDurationForm } from "@/components/pages/test-utils/SetNewMeleeDuration";
+import { APTOS_NETWORK } from "@/sdk/const";
 
 export default function TestUtilsPage() {
   return (

@@ -1,6 +1,7 @@
 import type { Network } from "@aptos-labs/ts-sdk";
-import type { AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { parse } from "semver";
+
+import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
 
 import packageInfo from "../../package.json";
 

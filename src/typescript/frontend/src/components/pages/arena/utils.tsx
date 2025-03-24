@@ -1,14 +1,15 @@
-import { useMatchBreakpoints } from "@hooks/index";
+import type { ClassValue } from "clsx";
+import React, { useState } from "react";
+import darkTheme from "theme/dark";
+import { GlowingEmoji } from "utils/emoji";
+
+import { useMatchBreakpoints } from "@/hooks/index";
 import type {
   ArenaInfoModel,
   ArenaLeaderboardHistoryWithArenaInfoModel,
   ArenaPositionModel,
   MarketStateModel,
-} from "@sdk/indexer-v2/types";
-import type { ClassValue } from "clsx";
-import React, { useState } from "react";
-import darkTheme from "theme/dark";
-import { GlowingEmoji } from "utils/emoji";
+} from "@/sdk/indexer-v2/types";
 
 export type ArenaProps = {
   arenaInfo: ArenaInfoModel;

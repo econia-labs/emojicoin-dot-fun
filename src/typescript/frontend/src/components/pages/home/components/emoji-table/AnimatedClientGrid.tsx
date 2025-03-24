@@ -2,12 +2,13 @@
 
 import "./module.css";
 
-import useEvent from "@hooks/use-event";
 import type { HomePageProps } from "app/home/HomePage";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+
+import useEvent from "@/hooks/use-event";
 
 import { ANIMATION_DEBOUNCE_TIME } from "../table-card/animation-variants/grid-variants";
 import TableCard from "../table-card/TableCard";

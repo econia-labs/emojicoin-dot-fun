@@ -3,7 +3,6 @@ import {
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { formatDisplayName } from "@sdk/utils/misc";
 import {
   DropdownArrow,
   DropdownContent,
@@ -20,6 +19,8 @@ import { ROUTES } from "router/routes";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+
+import { formatDisplayName } from "@/sdk/utils/misc";
 
 import { WalletDropdownItem } from "./WalletDropdownItem";
 

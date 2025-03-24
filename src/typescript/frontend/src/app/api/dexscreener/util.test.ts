@@ -2,7 +2,8 @@
 import { describe, it } from "node:test";
 
 import { expect } from "@playwright/test";
-import type { SymbolEmoji } from "@sdk/emoji_data";
+
+import type { SymbolEmoji } from "@/sdk/emoji_data";
 
 import { pairIdToSymbolEmojis, symbolEmojisToPairId, symbolEmojisToString } from "./util";
 

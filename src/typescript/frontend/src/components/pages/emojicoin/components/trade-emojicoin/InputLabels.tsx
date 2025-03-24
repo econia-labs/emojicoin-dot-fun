@@ -1,5 +1,6 @@
-import AptosIconBlack from "@icons/AptosBlack";
 import { Emoji } from "utils/emoji";
+
+import AptosIconBlack from "@/icons/AptosBlack";
 
 export const AptosInputLabel = () => (
   <div className="pixel-heading-4 md:pixel-heading-3 text-light-gray">

@@ -1,5 +1,3 @@
-import type { SwapEventModel } from "@sdk/indexer-v2";
-import { toNominal } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import Popup from "components/popup";
@@ -16,6 +14,8 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
 import { useSwapEventsQuery } from "@/components/pages/wallet/useSwapEventsQuery";
+import type { SwapEventModel } from "@/sdk/indexer-v2";
+import { toNominal } from "@/sdk/utils";
 
 import type { TradeHistoryProps } from "../../types";
 

@@ -1,5 +1,9 @@
 // cspell:word timespan
 
+import { unstable_cache } from "next/cache";
+import { parseJSON, stringifyJSON } from "utils";
+
+import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
 import {
   type AnyNumberString,
   type AnyPeriod,
@@ -7,12 +11,8 @@ import {
   type Period,
   PeriodDuration,
   periodEnumToRawDuration,
-} from "@sdk/index";
-import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
-import { unstable_cache } from "next/cache";
-import { parseJSON, stringifyJSON } from "utils";
-
-import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
+} from "@/sdk/index";
+import { getLatestProcessedEmojicoinTimestamp } from "@/sdk/indexer-v2/queries/utils";
 
 import type { CandlesticksSearchParams } from "./search-params-schema";
 

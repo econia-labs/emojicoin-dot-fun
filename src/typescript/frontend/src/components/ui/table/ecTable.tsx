@@ -1,8 +1,9 @@
-import type { OrderByStrings } from "@sdk/indexer-v2/const";
 import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
 import { cn } from "lib/utils/class-name";
 import _ from "lodash";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
+
+import type { OrderByStrings } from "@/sdk/indexer-v2/const";
 
 import { EcTableBody } from "./ecTableBody";
 import { EcTableHead } from "./ecTableHead";

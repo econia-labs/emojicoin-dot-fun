@@ -5,12 +5,13 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import type { TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import { getEventsAsProcessorModelsFromResponse } from "@sdk/indexer-v2/mini-processor";
-import { getAptBalanceFromChanges, getCoinBalanceFromChanges } from "@sdk/utils";
 import type { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 import { emoji } from "utils";
+
+import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun";
+import { getEventsAsProcessorModelsFromResponse } from "@/sdk/indexer-v2/mini-processor";
+import { getAptBalanceFromChanges, getCoinBalanceFromChanges } from "@/sdk/utils";
 
 export const setBalancesFromWriteset = ({
   response,

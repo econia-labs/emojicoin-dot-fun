@@ -1,7 +1,8 @@
-import { FlexGap } from "@containers";
-import { useMatchBreakpoints } from "@hooks/index";
 import { Arrow } from "components/svg";
 import React from "react";
+
+import { FlexGap } from "@/containers";
+import { useMatchBreakpoints } from "@/hooks/index";
 
 import { StyledBtn } from "./styled";
 

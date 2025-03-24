@@ -1,5 +1,6 @@
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data/emoji-data";
 import { ROUTES } from "router/routes";
+
+import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data/emoji-data";
 
 /**
  * The delimiter for multiple emoji names; i.e.,

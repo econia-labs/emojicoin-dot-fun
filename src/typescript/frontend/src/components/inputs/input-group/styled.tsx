@@ -1,7 +1,8 @@
-import { Box } from "@containers";
 import { type Scales, scales as inputScales } from "components/inputs/input/types";
 import Text from "components/text";
 import styled, { css, type DefaultTheme } from "styled-components";
+
+import { Box } from "@/containers";
 
 import type {
   InputGroupProps,

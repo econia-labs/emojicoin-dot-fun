@@ -1,5 +1,6 @@
-import { getAptosClient } from "@sdk/utils/aptos-client";
 import { NextResponse } from "next/server";
+
+import { getAptosClient } from "@/sdk/utils/aptos-client";
 
 export const revalidate = 2;
 export const fetchCache = "default-cache";

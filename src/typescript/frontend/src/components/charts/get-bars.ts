@@ -1,26 +1,26 @@
+import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "lib/chart-utils";
+import { ROUTES } from "router/routes";
+import { fetchRateLimited } from "utils";
+
 import {
   type ArenaPeriod,
   type Period,
   type PeriodDuration,
   periodEnumToRawDuration,
   Trigger,
-} from "@sdk/const";
-import { toMarketEmojiData } from "@sdk/emoji_data/utils";
+} from "@/sdk/const";
+import { toMarketEmojiData } from "@/sdk/emoji_data/utils";
 import type {
   ArenaCandlestickModel,
   MarketMetadataModel,
   PeriodicStateEventModel,
-} from "@sdk/indexer-v2";
-import { getMarketResource } from "@sdk/markets/utils";
-import { getAptosClient } from "@sdk/utils/aptos-client";
-import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
-import type { XOR } from "@sdk/utils/utility-types";
-import type { Flatten, Types } from "@sdk-types";
-import type { Bar, PeriodParams } from "@static/charting_library";
-import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "lib/chart-utils";
-import { ROUTES } from "router/routes";
-import { fetchRateLimited } from "utils";
-
+} from "@/sdk/indexer-v2";
+import { getMarketResource } from "@/sdk/markets/utils";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
+import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
+import type { XOR } from "@/sdk/utils/utility-types";
+import type { Flatten, Types } from "@/sdk-types";
+import type { Bar, PeriodParams } from "@/static/charting_library";
 import {
   marketToLatestBars,
   periodicStateTrackerToLatestBar,

@@ -3,7 +3,6 @@ import {
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { Badge } from "components/Badge";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { EXTERNAL_LINK_PROPS, Link } from "components/link";
@@ -14,6 +13,8 @@ import { Copy, LogOut, User, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { ROUTES } from "router/routes";
+
+import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
 
 import { MobileMenuItem } from "../index";
 import { slideVariants } from "./animations";

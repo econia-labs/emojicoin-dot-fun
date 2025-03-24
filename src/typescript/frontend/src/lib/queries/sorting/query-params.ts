@@ -1,6 +1,7 @@
-import type { OrderByStrings } from "@sdk/indexer-v2/const";
-import { DEFAULT_SORT_BY, type SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { safeParsePageWithDefault } from "lib/routes/home-page-params";
+
+import type { OrderByStrings } from "@/sdk/indexer-v2/const";
+import { DEFAULT_SORT_BY, type SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import { type SortByPageQueryParams, toMarketDataSortByHomePage } from "./types";
 

@@ -1,9 +1,10 @@
-import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
 import { FormattedNumber } from "components/FormattedNumber";
 import ProgressBar from "components/ProgressBar";
 import { useEventStore } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import React, { useEffect, useState } from "react";
+
+import { getBondingCurveProgress } from "@/sdk/utils/bonding-curve";
 
 import type { MainInfoProps } from "../../types";
 

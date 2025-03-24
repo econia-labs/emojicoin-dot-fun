@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import useNodeDimensions from "@hooks/use-node-dimensions";
-import { getRandomSymbolEmoji, type SymbolEmoji } from "@sdk/emoji_data";
 import React, { useEffect, useRef, useState } from "react";
 import { useInterval } from "react-use";
+
+import useNodeDimensions from "@/hooks/use-node-dimensions";
+import { getRandomSymbolEmoji, type SymbolEmoji } from "@/sdk/emoji_data";
 
 // Constants
 const STREAM_MUTATION_ODDS = 0.02;

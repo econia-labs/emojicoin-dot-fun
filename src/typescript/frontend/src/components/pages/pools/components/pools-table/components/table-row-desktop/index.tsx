@@ -1,4 +1,3 @@
-import { Flex } from "@containers";
 import { Td, Text, Tr } from "components";
 import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";
@@ -9,6 +8,8 @@ import React, { useMemo } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { emojiNamesToPath } from "utils/pathname-helpers";
+
+import { Flex } from "@/containers";
 
 import type { TableRowDesktopProps } from "./types";
 import { XprPopup } from "./XprPopup";

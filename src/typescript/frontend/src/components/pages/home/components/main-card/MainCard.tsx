@@ -2,8 +2,6 @@
 
 import "./module.css";
 
-import { FlexGap } from "@containers";
-import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
 import type { HomePageProps } from "app/home/HomePage";
 import { FormattedNumber } from "components/FormattedNumber";
 import { PriceDelta } from "components/price-feed/inner";
@@ -19,6 +17,9 @@ import { ROUTES } from "router/routes";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { emojiNamesToPath } from "utils/pathname-helpers";
+
+import { FlexGap } from "@/containers";
+import { useUsdMarketCap } from "@/hooks/use-usd-market-cap";
 
 import planetHome from "../../../../../../public/images/planet-home.png";
 

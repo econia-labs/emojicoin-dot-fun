@@ -2,9 +2,6 @@
 
 import "./module.css";
 
-import { Column, Flex } from "@containers";
-import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { FormattedNumber } from "components/FormattedNumber";
 import { Arrow } from "components/svg";
 import Text from "components/text";
@@ -14,6 +11,10 @@ import { motion, type MotionProps, useAnimationControls, useMotionValue } from "
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Emoji } from "utils/emoji";
+
+import { Column, Flex } from "@/containers";
+import { useUsdMarketCap } from "@/hooks/use-usd-market-cap";
+import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import {
   borderVariants,

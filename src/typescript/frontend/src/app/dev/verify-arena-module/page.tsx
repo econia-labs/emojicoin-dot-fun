@@ -1,5 +1,6 @@
-import { VERCEL } from "@sdk/const";
 import FEATURE_FLAGS from "lib/feature-flags";
+
+import { VERCEL } from "@/sdk/const";
 
 import runArenaChecks from "./check";
 

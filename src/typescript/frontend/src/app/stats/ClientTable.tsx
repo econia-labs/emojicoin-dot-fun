@@ -1,9 +1,10 @@
 "use client";
 
-import AptosIconBlack from "@icons/AptosBlack";
-import type { DatabaseModels } from "@sdk/indexer-v2/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
+
+import AptosIconBlack from "@/icons/AptosBlack";
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
 
 import { Column, TableData } from "./TableData";
 

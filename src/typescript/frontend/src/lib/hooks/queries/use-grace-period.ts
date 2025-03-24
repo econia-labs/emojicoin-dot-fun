@@ -1,9 +1,10 @@
-import { getRegistrationGracePeriodFlag } from "@sdk/markets/utils";
-import { standardizeAddress } from "@sdk/utils/account-address";
 import { useQuery } from "@tanstack/react-query";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useMemo, useState } from "react";
+
+import { getRegistrationGracePeriodFlag } from "@/sdk/markets/utils";
+import { standardizeAddress } from "@/sdk/utils/account-address";
 
 // -------------------------------------------------------------------------------------------------
 //                        Utilities for calculating the number of seconds left.

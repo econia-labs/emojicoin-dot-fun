@@ -20,13 +20,13 @@
  // }
  **/
 
-import { EMOJICOIN_SUPPLY } from "@sdk/const";
-import { toMarketEmojiData } from "@sdk/emoji_data";
-import { calculateCirculatingSupply } from "@sdk/markets";
-import { toNominal } from "@sdk/utils";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchMarketState } from "@/queries/market";
+import { EMOJICOIN_SUPPLY } from "@/sdk/const";
+import { toMarketEmojiData } from "@/sdk/emoji_data";
+import { calculateCirculatingSupply } from "@/sdk/markets";
+import { toNominal } from "@/sdk/utils";
 
 import { symbolEmojiStringToArray } from "../util";
 

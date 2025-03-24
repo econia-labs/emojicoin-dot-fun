@@ -1,11 +1,12 @@
-import type { fetchChatEvents } from "@sdk/indexer-v2";
-import { LIMIT } from "@sdk/indexer-v2/const";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { GetChatsSchema } from "app/api/chats/schema";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 import { addSearchParams } from "utils/url-utils";
 import type { z } from "zod";
+
+import type { fetchChatEvents } from "@/sdk/indexer-v2";
+import { LIMIT } from "@/sdk/indexer-v2/const";
 
 type ChatEvent = Awaited<ReturnType<typeof fetchChatEvents>>[number];
 

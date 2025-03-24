@@ -1,7 +1,5 @@
 import type { Aptos, TypeTag } from "@aptos-labs/ts-sdk";
 import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import type { AccountAddressString, AnyNumber, TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import { toCoinTypes } from "@sdk/markets/utils";
 import { useQuery } from "@tanstack/react-query";
 import Big from "big.js";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -10,6 +8,8 @@ import { useMemo } from "react";
 
 import { tryEd25519PublicKey } from "@/components/pages/launch-emojicoin/hooks/use-register-market";
 import { Swap } from "@/contract-apis/emojicoin-dot-fun";
+import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
+import { toCoinTypes } from "@/sdk/markets/utils";
 
 type Args = {
   aptos: Aptos;

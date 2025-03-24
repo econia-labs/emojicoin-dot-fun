@@ -1,7 +1,3 @@
-import { useMatchBreakpoints } from "@hooks/index";
-import { useUsdMarketCap, useUSDValue } from "@hooks/use-usd-market-cap";
-import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
-import { isMarketStateModel } from "@sdk/indexer-v2/types";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";
@@ -20,6 +16,10 @@ import type { Colors } from "theme/types";
 import { Emoji } from "utils/emoji";
 
 import { MarketProperties } from "@/contract-apis";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { useUsdMarketCap, useUSDValue } from "@/hooks/use-usd-market-cap";
+import TelegramOutlineIcon from "@/icons/TelegramOutlineIcon";
+import { isMarketStateModel } from "@/sdk/indexer-v2/types";
 
 import { Switcher } from "../../../../switcher";
 import type { MainInfoProps } from "../../types";

@@ -1,5 +1,6 @@
-import type { AnyNumberString } from "@sdk-types";
 import { APTOS_NETWORK } from "lib/env";
+
+import type { AnyNumberString } from "@/sdk-types";
 
 const linkTypes = {
   coin: "coin",

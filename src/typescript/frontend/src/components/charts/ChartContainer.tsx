@@ -1,8 +1,9 @@
 // cspell:word datafeeds
-import { symbolToEmojis } from "@sdk/emoji_data/utils";
 import Loading from "components/loading";
 import Script from "next/script";
 import React, { Suspense, useMemo } from "react";
+
+import { symbolToEmojis } from "@/sdk/emoji_data/utils";
 
 import PrivateChart from "./PrivateChart";
 import type { ChartContainerProps } from "./types";

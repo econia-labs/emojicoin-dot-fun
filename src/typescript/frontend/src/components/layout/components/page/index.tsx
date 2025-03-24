@@ -1,7 +1,8 @@
 "use client";
 
-import { Container } from "@containers";
 import React from "react";
+
+import { Container } from "@/containers";
 
 import type { PageProps } from "../types";
 

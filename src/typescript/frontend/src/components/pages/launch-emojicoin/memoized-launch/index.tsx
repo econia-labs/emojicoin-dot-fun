@@ -1,6 +1,3 @@
-import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@sdk/const";
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
-import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { MarketValidityIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import Info from "components/info";
@@ -14,6 +11,10 @@ import React, { useEffect, useMemo } from "react";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+
+import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@/sdk/const";
+import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
+import { sumBytes } from "@/sdk/utils/sum-emoji-bytes";
 
 import { useIsMarketRegistered } from "../hooks/use-is-market-registered";
 import { useRegisterMarket } from "../hooks/use-register-market";

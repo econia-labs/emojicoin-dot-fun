@@ -1,9 +1,10 @@
-import { Flex } from "@containers";
 import { Text } from "components";
 import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
 import { translationFunction } from "context/language-context";
 import React, { Suspense, useState } from "react";
+
+import { Flex } from "@/containers";
 
 import type { GridProps } from "../../types";
 import ChatBox from "../chat/ChatBox";
