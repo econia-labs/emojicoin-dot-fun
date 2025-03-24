@@ -25,7 +25,7 @@ export type EmojiMartData = {
   };
 };
 
-type EmojiPickerSearchData = {
+export type EmojiPickerSearchData = {
   id: string;
   keywords: string[];
   name: string;

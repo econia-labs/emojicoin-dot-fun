@@ -1,7 +1,7 @@
 "use client";
 
 import CheckIcon from "components/svg/icons/Check";
-import { Text } from "components/text";
+import Text from "components/text";
 import React from "react";
 
 import { CustomCheckbox, StyledCheckbox, StyledInput } from "./styled";

@@ -4,11 +4,11 @@ import type { AccountAddressString, AnyNumber, TypeTagInput } from "@sdk/emojico
 import { toCoinTypes } from "@sdk/markets/utils";
 import { useQuery } from "@tanstack/react-query";
 import Big from "big.js";
-import { tryEd25519PublicKey } from "components/pages/launch-emojicoin/hooks/use-register-market";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { useMemo } from "react";
 
+import { tryEd25519PublicKey } from "@/components/pages/launch-emojicoin/hooks/use-register-market";
 import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 
 type Args = {

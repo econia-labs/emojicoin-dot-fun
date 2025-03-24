@@ -1,5 +1,5 @@
 import { Flex } from "@containers";
-import { Text } from "components/text";
+import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";

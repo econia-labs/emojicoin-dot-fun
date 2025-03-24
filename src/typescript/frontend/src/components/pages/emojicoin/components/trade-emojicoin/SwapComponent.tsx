@@ -15,7 +15,7 @@ import { useEventStore } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { AnimatePresence, motion } from "framer-motion";
-import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-simulate-swap";
+import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-get-swap-gas";
 import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";

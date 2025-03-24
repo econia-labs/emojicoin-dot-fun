@@ -7,7 +7,7 @@ import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { FormattedNumber } from "components/FormattedNumber";
 import { Arrow } from "components/svg";
-import { Text } from "components/text";
+import Text from "components/text";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";

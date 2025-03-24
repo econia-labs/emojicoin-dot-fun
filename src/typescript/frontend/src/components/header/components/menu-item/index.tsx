@@ -1,5 +1,5 @@
 import { FlexGap } from "@containers";
-import { Text } from "components/text";
+import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import React from "react";
 import { useScramble } from "use-scramble";

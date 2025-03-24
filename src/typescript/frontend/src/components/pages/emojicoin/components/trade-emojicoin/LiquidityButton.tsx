@@ -3,7 +3,7 @@ import { useMatchBreakpoints } from "@hooks/index";
 import { isInBondingCurve } from "@sdk/utils/bonding-curve";
 import Button from "components/button";
 import type { GridProps } from "components/pages/emojicoin/types";
-import { Text } from "components/text";
+import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Link from "next/link";

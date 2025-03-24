@@ -4,7 +4,7 @@ import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Flex } from "@containers";
 import type { AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { Text } from "components/text";
+import Text from "components/text";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
 import { LINKS } from "lib/env";
