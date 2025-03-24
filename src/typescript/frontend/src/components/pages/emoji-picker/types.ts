@@ -25,6 +25,7 @@ export type EmojiMartData = {
   };
 };
 
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 type EmojiPickerSearchData = {
   id: string;
   keywords: string[];
