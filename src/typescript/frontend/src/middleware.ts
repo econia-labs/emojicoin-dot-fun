@@ -16,8 +16,6 @@ import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-const walletRegex = new RegExp(`^${ROUTES.wallet}/(.*).apt$`);
-
 const rateLimiters = (() => {
   if (RATE_LIMITER.enabled) {
     const redis = new Redis({
@@ -93,8 +91,12 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // If path matches `/wallet/matt.apt`
-  if (walletRegex.test(pathname)) {
+  // If path matches `/wallet/matt.apt`, but not `/wallet/matt.apt.apt`:
+  if (
+    pathname.startsWith(`${ROUTES.wallet}/`) &&
+    pathname.endsWith(".apt") &&
+    !pathname.endsWith(".apt.apt")
+  ) {
     // redirect to `/wallet/matt`
     const url = new URL(pathname.slice(0, -4), request.url);
     return NextResponse.redirect(url);
