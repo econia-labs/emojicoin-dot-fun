@@ -1,16 +1,16 @@
 "use client";
 
+import styled, { css } from "styled-components";
+import { border, layout, position, space, flexbox } from "styled-system";
+import React, { type PropsWithChildren } from "react";
 import {
-  type BoxProps,
-  type BoxThemedProps,
   type ColumnProps,
+  type BoxProps,
   type FlexGapProps,
   type FlexProps,
-  type RowProps,
+  type BoxThemedProps,
 } from "@containers";
-import React, { type PropsWithChildren } from "react";
-import styled, { css } from "styled-components";
-import { border, flexbox, layout, position, space, system } from "styled-system";
+import { system } from "styled-system";
 import { siteWidth } from "theme/base";
 
 const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
@@ -56,18 +56,6 @@ export const Container: React.FC<PropsWithChildren<BoxProps>> = ({ children, ...
 
 export const FlexGap = styled(Flex)<FlexGapProps>`
   ${gap}
-`;
-
-/**
- * Defining Row here to avoid circular dependencies.
- */
-const Row = styled(Flex)<RowProps>`
-  width: 100%;
-  flex-wrap: wrap;
-`;
-
-const RowBetween = styled(Row)<RowProps>`
-  justify-content: space-between;
 `;
 
 /**

@@ -1,8 +1,7 @@
-import { MS_IN_ONE_DAY } from "components/charts/const";
-import { parse, satisfies, type SemVer } from "semver";
 import { parseJSON, stringifyJSON } from "utils";
-
 import packages from "../../package.json";
+import { MS_IN_ONE_DAY } from "components/charts/const";
+import { satisfies, type SemVer, parse } from "semver";
 
 const LOCAL_STORAGE_KEYS = {
   theme: `${packages.name}_theme`,
@@ -29,7 +28,7 @@ export const LOCAL_STORAGE_CACHE_TIME: {
   settings: Infinity,
 };
 
-export type LocalStorageCache<T> = {
+type LocalStorageCache<T> = {
   expiry: number;
   data: T | null;
   version: string | undefined;

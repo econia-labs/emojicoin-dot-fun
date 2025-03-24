@@ -1,4 +1,3 @@
-import { Flex } from "@containers";
 import styled, { css } from "styled-components";
 import {
   layout,
@@ -8,6 +7,7 @@ import {
   typography,
   type TypographyProps,
 } from "styled-system";
+import { Flex } from "@containers";
 
 interface TdProps extends TypographyProps, SpaceProps, LayoutProps {}
 
@@ -108,22 +108,6 @@ export const EmptyTr = styled.tr<TrProps>`
   }
 
   ${layout}
-`;
-
-const TrWrapper = styled(Flex)`
-  width: 100%;
-
-  &:last-child {
-    ${Tr} {
-      border-bottom: none;
-    }
-  }
-
-  &:first-child {
-    ${Tr} {
-      border-top: none;
-    }
-  }
 `;
 
 export const Td = styled.td<TdProps>`
