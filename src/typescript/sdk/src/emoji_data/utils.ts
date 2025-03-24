@@ -1,16 +1,17 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
+
+import { MAX_SYMBOL_LENGTH } from "../const";
 import { normalizeHex } from "../utils/hex";
 import { CHAT_EMOJI_DATA, getRandomSymbolEmoji, SYMBOL_EMOJI_DATA } from "./emoji-data";
 import {
-  type SymbolEmojiData,
-  type SymbolEmojiName,
-  type SymbolData,
-  type SymbolEmoji,
   type AnyEmoji,
   type AnyEmojiData,
+  type SymbolData,
+  type SymbolEmoji,
+  type SymbolEmojiData,
+  type SymbolEmojiName,
 } from "./types";
-import { MAX_SYMBOL_LENGTH } from "../const";
 
 export const getEmojisInString = (symbols: string): Array<AnyEmoji> => {
   const regex = emojiRegex();

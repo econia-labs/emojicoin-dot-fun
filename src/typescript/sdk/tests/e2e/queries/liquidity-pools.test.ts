@@ -1,14 +1,16 @@
 /* eslint-disable no-await-in-loop */
 
 import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+
+import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
+
 import { maxBigInt, type SymbolEmoji } from "../../../src";
+import { LIMIT } from "../../../src/indexer-v2/const";
+import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
+import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
+import { getAptosClient } from "../../utils";
 import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
-import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../utils";
-import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
-import { LIMIT } from "../../../src/indexer-v2/const";
 
 jest.setTimeout(20000);
 

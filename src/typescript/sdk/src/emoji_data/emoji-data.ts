@@ -1,14 +1,15 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
+
 import { normalizeHex } from "../utils/hex";
-import { SYMBOL_EMOJIS } from "./symbol-emojis";
 import { CHAT_EMOJIS } from "./chat-emojis";
+import { SYMBOL_EMOJIS } from "./symbol-emojis";
 import {
-  type SymbolEmojiName,
+  type ChatEmoji,
+  type ChatEmojiData,
+  type ChatEmojiName,
   type SymbolEmoji,
   type SymbolEmojiData,
-  type ChatEmoji,
-  type ChatEmojiName,
-  type ChatEmojiData,
+  type SymbolEmojiName,
 } from "./types";
 
 const encoder = new TextEncoder();

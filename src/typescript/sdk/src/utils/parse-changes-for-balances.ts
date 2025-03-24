@@ -1,14 +1,15 @@
 import {
   AccountAddress,
-  type TypeTag,
   type AccountAddressInput,
-  type WriteSetChangeWriteResource,
   parseTypeTag,
+  type TypeTag,
   type UserTransactionResponse,
+  type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
+
 import { APTOS_COIN_TYPE_TAG } from "../const";
-import { type JSONFeeStatement, toFeeStatement } from "../types/core";
 import { type TypeTagInput } from "../emojicoin_dot_fun/types";
+import { type JSONFeeStatement, toFeeStatement } from "../types/core";
 
 /* eslint-disable-next-line import/no-unused-modules */
 export const getFeeStatement = (response: UserTransactionResponse) => {

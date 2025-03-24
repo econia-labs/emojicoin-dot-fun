@@ -27,7 +27,7 @@ module.exports = {
     sourceType: "module",
     warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "unused-imports", "import"],
+  plugins: ["@typescript-eslint", "unused-imports", "import", "simple-import-sort"],
   rules: {
     "import/no-cycle": [
       "error",
@@ -91,6 +91,11 @@ module.exports = {
       "error",
       { prefer: "type-imports", fixStyle: "inline-type-imports" },
     ],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error",
   },
   settings: {
     "import/parsers": {

@@ -1,15 +1,20 @@
-import { hexToBytes } from "@noble/hashes/utils";
 import { type AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
-import { type AccountAddressString } from "../emojicoin_dot_fun/types";
-import type JsonTypes from "./json-types";
-import { fromAggregatorSnapshot } from "./core";
-import { standardizeAddress } from "../utils/account-address";
+import { hexToBytes } from "@noble/hashes/utils";
+
 import {
-  type Trigger,
+  type ArenaPeriod,
   type EMOJICOIN_DOT_FUN_MODULE_NAME,
   rawTriggerToEnum,
-  type ArenaPeriod,
+  type Trigger,
 } from "../const";
+import { type SymbolEmoji } from "../emoji_data";
+import { type AccountAddressString } from "../emojicoin_dot_fun/types";
+import { type STRUCT_STRINGS } from "../utils";
+import { standardizeAddress } from "../utils/account-address";
+import { type Flatten } from ".";
+import { type ArenaTypes } from "./arena-types";
+import { fromAggregatorSnapshot } from "./core";
+import type JsonTypes from "./json-types";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -20,10 +25,6 @@ import {
   isJSONStateEvent,
   isJSONSwapEvent,
 } from "./json-types";
-import { type STRUCT_STRINGS } from "../utils";
-import { type Flatten } from ".";
-import { type ArenaTypes } from "./arena-types";
-import { type SymbolEmoji } from "../emoji_data";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);

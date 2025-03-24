@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   AccountAddress,
+  type EntryFunctionArgumentTypes,
+  FixedBytes,
   MoveOption,
   MoveVector,
-  FixedBytes,
-  type EntryFunctionArgumentTypes,
 } from "@aptos-labs/ts-sdk";
 
 export type Primitive = boolean | number | string | bigint | undefined | null;

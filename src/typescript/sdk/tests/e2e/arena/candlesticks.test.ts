@@ -1,3 +1,5 @@
+import type { Account } from "@aptos-labs/ts-sdk";
+
 import {
   ArenaPeriod,
   calculateCurvePrice,
@@ -19,15 +21,14 @@ import {
   fetchMeleeEmojiData,
   type MeleeEmojiData,
 } from "../../../src/markets/arena-utils";
+import { getPublisher } from "../../utils/helpers";
 import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
+import { waitForProcessor } from "../helpers";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
-import { getPublisher } from "../../utils/helpers";
-import type { Account } from "@aptos-labs/ts-sdk";
-import { waitForProcessor } from "../helpers";
 
 const TWO_SECONDS = 2000;
 
