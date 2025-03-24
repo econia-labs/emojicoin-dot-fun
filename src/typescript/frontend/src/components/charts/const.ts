@@ -1,7 +1,7 @@
 // cspell:word localstorage
 
-import type { PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 import { ArenaPeriod, Period } from "@sdk/const";
+import type { PeriodTypeFromBroker } from "@sdk/indexer-v2/types/json-types";
 import type {
   ChartingLibraryWidgetOptions,
   LanguageCode,

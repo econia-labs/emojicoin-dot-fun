@@ -1,4 +1,3 @@
-import { periodToPeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 import {
   type BrokerEventModels,
   isChatEventModel,
@@ -22,6 +21,8 @@ import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
 import { immer } from "zustand/middleware/immer";
 import { createStore } from "zustand/vanilla";
+
+import { periodToPeriodTypeFromBroker } from "@/broker/index";
 
 import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
 import {
