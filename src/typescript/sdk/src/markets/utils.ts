@@ -225,7 +225,6 @@ export function isRegistrationGracePeriodOver(flag: Types["RegistrantGracePeriod
   return now - GRACE_PERIOD_TIME > flag.marketRegistrationTime;
 }
 
-
 export const registerMarketAndGetEmojicoinInfo = async (args: {
   aptos: Aptos | AptosConfig;
   registryAddress: AccountAddressInput;
