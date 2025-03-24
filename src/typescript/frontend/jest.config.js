@@ -3,11 +3,6 @@
  * For a detailed explanation regarding each configuration property, visit:
  * https://jestjs.io/docs/configuration
  */
-import nextJest from "next/jest";
-const createJestConfig = nextJest({
-  dir: "./",
-});
-
 /** @type {import('jest').Config} */
 const config = {
   clearMocks: true,
@@ -31,4 +26,9 @@ const config = {
     },
   },
 };
-export default createJestConfig(config);
+
+const nextJest = require("next/jest").default;
+const createJestConfig = nextJest({
+  dir: "./",
+});
+module.exports = createJestConfig(config);
