@@ -1,4 +1,5 @@
 import { css, keyframes } from "styled-components";
+
 import { type Animation } from "./types";
 
 const waves = keyframes`

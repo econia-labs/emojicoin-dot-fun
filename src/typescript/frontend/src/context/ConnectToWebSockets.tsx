@@ -1,8 +1,9 @@
-import { useEventStore } from "./event-store-context/hooks";
 import { motion } from "framer-motion";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { hexToRgba } from "utils/hex-to-rgba";
+
+import { useEventStore } from "./event-store-context/hooks";
 
 export const ConnectToWebSockets = () => {
   const connected = useEventStore((s) => s.connected);

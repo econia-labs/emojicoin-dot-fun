@@ -1,20 +1,21 @@
 "use client";
 
+import { type AnyEmoji, encodeEmojis, type SymbolEmoji } from "@sdk/emoji_data";
+import type { OrderByStrings } from "@sdk/indexer-v2/const";
+import { toNominal } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
+import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { TimeCell } from "components/ui/table-cells/time-cell";
-import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import _ from "lodash";
-import { Emoji } from "utils/emoji";
-import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
-import { useState } from "react";
-import type { OrderByStrings } from "@sdk/indexer-v2/const";
-import { encodeEmojis, type AnyEmoji, type SymbolEmoji } from "@sdk/emoji_data";
-import { ROUTES } from "router/routes";
-import { emojiNamesToPath } from "utils/pathname-helpers";
 import { toExplorerLink } from "lib/utils/explorer-link";
-import { toNominal } from "@sdk/utils";
+import _ from "lodash";
+import { useState } from "react";
+import { ROUTES } from "router/routes";
+import { Emoji } from "utils/emoji";
+import { emojiNamesToPath } from "utils/pathname-helpers";
+
+import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {

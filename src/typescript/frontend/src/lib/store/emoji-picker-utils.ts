@@ -1,5 +1,6 @@
-import { type EmojiPickerStore } from "./emoji-picker-store";
 import { getEmojisInString, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
+
+import { type EmojiPickerStore } from "./emoji-picker-store";
 
 export const calculateEmojiIndices = (emojis: string[]) => {
   return emojis.reduce(

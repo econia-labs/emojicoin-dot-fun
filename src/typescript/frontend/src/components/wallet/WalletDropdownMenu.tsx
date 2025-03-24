@@ -20,6 +20,7 @@ import { ROUTES } from "router/routes";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+
 import { WalletDropdownItem } from "./WalletDropdownItem";
 
 const WIDTH = "24ch";

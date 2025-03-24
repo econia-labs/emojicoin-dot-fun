@@ -1,9 +1,11 @@
+import { type TypeTag } from "@aptos-labs/ts-sdk";
 import { toCoinTypes } from "@sdk/markets";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
-import { useTransactionBuilder } from "./use-transaction-builder";
+
 import { Swap } from "@/contract-apis/emojicoin-arena";
-import { type TypeTag } from "@aptos-labs/ts-sdk";
+
+import { useTransactionBuilder } from "./use-transaction-builder";
 
 /**
  * The individual args here must be passed to avoid re-renders due to a new object of args being

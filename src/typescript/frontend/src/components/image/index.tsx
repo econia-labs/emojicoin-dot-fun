@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import Skeleton from "components/skeleton";
 import { ResponsiveBox } from "components/layout/components/responsive-box";
-import { StyledImage } from "./styled";
+import Skeleton from "components/skeleton";
+import React, { useState } from "react";
 import { getFileNameFromSrc } from "utils";
+
+import { StyledImage } from "./styled";
 import { type ImageProps } from "./types";
 
 const Image: React.FC<ImageProps> = ({

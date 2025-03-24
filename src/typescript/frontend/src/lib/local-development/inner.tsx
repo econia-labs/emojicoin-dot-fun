@@ -1,31 +1,32 @@
 // cspell:word mkts
 "use client";
 
+import { Network } from "@aptos-labs/ts-sdk";
+import { type AccountInfo, useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
+import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@sdk/const";
+import { encodeEmojis, type SymbolEmoji } from "@sdk/emoji_data";
+import { getEvents, getMarketAddress } from "@sdk/emojicoin_dot_fun";
+import { fetchAllCurrentMeleeData, toArenaCoinTypes, toCoinTypesForEntry } from "@sdk/markets";
+import { getAptosClient } from "@sdk/utils";
+import { useEventStore } from "context/event-store-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { APTOS_NETWORK } from "lib/env";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { cn } from "lib/utils/class-name";
+import { Minus, X } from "lucide-react";
+import { useCallback, useState } from "react";
+import { toast } from "react-toastify";
+import { ROUTES } from "router/routes";
+import { emoji } from "utils";
+
+import { getLocalPublisher } from "@/components/pages/test-utils/local-publisher";
+import { successfulTransactionToast } from "@/components/wallet/toasts";
 import {
   EmojicoinArena,
   MarketMetadataByMarketAddress,
   RegisterMarket,
   Swap,
 } from "@/contract-apis";
-import { type AccountInfo, useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
-import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@sdk/const";
-import { fetchAllCurrentMeleeData, toArenaCoinTypes, toCoinTypesForEntry } from "@sdk/markets";
-import { useEventStore } from "context/event-store-context";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { APTOS_NETWORK } from "lib/env";
-import { cn } from "lib/utils/class-name";
-import { Minus, X } from "lucide-react";
-import { useCallback, useState } from "react";
-import { ROUTES } from "router/routes";
-import { emoji } from "utils";
-import { Network } from "@aptos-labs/ts-sdk";
-import { successfulTransactionToast } from "@/components/wallet/toasts";
-import { toast } from "react-toastify";
-import { getAptosClient } from "@sdk/utils";
-import { getEvents, getMarketAddress } from "@sdk/emojicoin_dot_fun";
-import { encodeEmojis, type SymbolEmoji } from "@sdk/emoji_data";
-import { getLocalPublisher } from "@/components/pages/test-utils/local-publisher";
-import FEATURE_FLAGS from "lib/feature-flags";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =

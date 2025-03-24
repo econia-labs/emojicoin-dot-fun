@@ -1,4 +1,5 @@
 import { type DefaultTheme } from "styled-components";
+
 import base from "./base";
 import { lightColors } from "./colors";
 

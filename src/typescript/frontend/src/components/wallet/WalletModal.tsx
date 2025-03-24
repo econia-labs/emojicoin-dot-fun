@@ -1,19 +1,20 @@
 import {
+  AptosPrivacyPolicy,
   getAptosConnectWallets,
   partitionWallets,
   useWallet,
-  AptosPrivacyPolicy,
 } from "@aptos-labs/wallet-adapter-react";
-import { BaseModal } from "components/modal/BaseModal";
-import { DEFAULT_TOAST_CONFIG } from "const";
-import { toast } from "react-toastify";
-import { WalletItem, isSupportedWallet, walletSort } from "context/wallet-context/WalletItem";
-import { AptosConnectWalletRow } from "./AptosConnectWalletRow";
 import EmojicoinLogo from "@icons/EmojicoinLogo";
+import { BaseModal } from "components/modal/BaseModal";
 import { Arrow } from "components/svg";
-import LearnMoreSlideshow, { SLIDE_INDICES } from "./LearnMoreSlideshow";
+import { DEFAULT_TOAST_CONFIG } from "const";
+import { isSupportedWallet, WalletItem, walletSort } from "context/wallet-context/WalletItem";
+import { motion, type MotionProps, type PanInfo } from "framer-motion";
 import { type Dispatch, type SetStateAction, useState } from "react";
-import { type MotionProps, motion, type PanInfo } from "framer-motion";
+import { toast } from "react-toastify";
+
+import { AptosConnectWalletRow } from "./AptosConnectWalletRow";
+import LearnMoreSlideshow, { SLIDE_INDICES } from "./LearnMoreSlideshow";
 
 const WalletItemClassName =
   "relative flex h-[45px] w-full items-center p-4 text-neutral-600" +

@@ -1,15 +1,14 @@
 "use client";
 
+import { FlexGap } from "@containers";
+import { EXTERNAL_LINK_PROPS } from "components/link";
+import SpinnerIcon from "components/svg/icons/Spinner";
+import { Text } from "components/text";
 import React from "react";
 import { useScramble, type UseScrambleProps } from "use-scramble";
 
 import StyledButton from "./styled";
-import SpinnerIcon from "components/svg/icons/Spinner";
-import { Text } from "components/text";
-import { FlexGap } from "@containers";
-
 import { type ButtonProps } from "./types";
-import { EXTERNAL_LINK_PROPS } from "components/link";
 
 const Button = <E extends React.ElementType = "button">({
   startIcon,

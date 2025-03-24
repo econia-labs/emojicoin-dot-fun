@@ -1,10 +1,11 @@
 "use client";
 
+import { Flex } from "@containers";
 import styled from "styled-components";
 import base, { breakpointsArray, mediaQueries } from "theme/base";
 import { darkColors } from "theme/colors";
+
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH, PADDING } from "../const";
-import { Flex } from "@containers";
 
 export const StyledTHFilters = styled.div`
   display: flex;

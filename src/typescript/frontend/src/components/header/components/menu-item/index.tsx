@@ -1,8 +1,9 @@
+import { FlexGap } from "@containers";
+import { Text } from "components/text";
+import { translationFunction } from "context/language-context";
 import React from "react";
 import { useScramble } from "use-scramble";
-import { translationFunction } from "context/language-context";
-import { Text } from "components/text";
-import { FlexGap } from "@containers";
+
 import { type MenuItemProps } from "./types";
 
 const MenuItem = ({ title, onClick = () => {}, pill }: MenuItemProps) => {

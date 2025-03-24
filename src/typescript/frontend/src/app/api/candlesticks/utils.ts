@@ -8,10 +8,12 @@ import {
   PeriodDuration,
   periodEnumToRawDuration,
 } from "@sdk/index";
-import { unstable_cache } from "next/cache";
 import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
+import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
+
 import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
+
 import { type CandlesticksSearchParams } from "./search-params-schema";
 
 /**

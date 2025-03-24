@@ -1,11 +1,13 @@
-import { fetchMarkets, fetchPriceFeedWithMarketState } from "@/queries/home";
+import { ORDER_BY } from "@sdk/indexer-v2/const";
 import { toPriceFeed } from "@sdk/indexer-v2/types";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import StatsPageComponent from "./StatsPage";
 import { compareNumber, getAptosClient } from "@sdk/utils";
-import { RegistryView } from "@/contract-apis";
 import { toRegistryView } from "@sdk-types";
-import { ORDER_BY } from "@sdk/indexer-v2/const";
+
+import { RegistryView } from "@/contract-apis";
+import { fetchMarkets, fetchPriceFeedWithMarketState } from "@/queries/home";
+
+import StatsPageComponent from "./StatsPage";
 
 export const revalidate = 60;
 export const dynamic = "force-static";

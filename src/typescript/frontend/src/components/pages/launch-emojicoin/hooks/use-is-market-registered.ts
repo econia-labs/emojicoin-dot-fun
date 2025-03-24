@@ -1,11 +1,12 @@
-import { MarketMetadataByEmojiBytes } from "@/contract-apis/emojicoin-dot-fun";
+import { SYMBOL_EMOJI_DATA, type SymbolEmoji } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
-import { useEmojiPicker } from "context/emoji-picker-context";
 import { useQuery } from "@tanstack/react-query";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
-import { SYMBOL_EMOJI_DATA, type SymbolEmoji } from "@sdk/emoji_data";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+
+import { MarketMetadataByEmojiBytes } from "@/contract-apis/emojicoin-dot-fun";
 
 const encoder = new TextEncoder();
 
