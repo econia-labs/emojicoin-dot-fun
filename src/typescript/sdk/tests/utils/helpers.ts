@@ -14,6 +14,7 @@ import {
   type Types,
 } from "../../src";
 import { type Events } from "../../src/emojicoin_dot_fun/events";
+import { type XOR } from "../../src/utils/utility-types";
 
 // The exact amount of APT to trigger a transition out of the bonding curve. Note that the
 // fee integrator rate BPs must be set to 0 for this to work.
@@ -82,30 +83,15 @@ const bytesFromNameOrEmoji = (nameOrEmoji: SymbolEmojiName | SymbolEmoji) => {
   throw new Error(`Invalid name or emoji passed: ${nameOrEmoji}`);
 };
 
-async function registerMarketFromEmojis(args: {
-  registrant: Account;
-  emojis: Array<SymbolEmoji>;
-  integrator?: Account;
-}) {
-  return registerMarketFromEmojisOrNames({ ...args, inputs: args.emojis });
-}
-
-async function registerMarketFromNames(args: {
-  registrant: Account;
-  emojiNames: Array<SymbolEmojiName>;
-  integrator?: Account;
-}) {
-  return registerMarketFromEmojisOrNames({ ...args, inputs: args.emojiNames });
-}
-
-async function registerMarketFromEmojisOrNames(args: {
-  registrant: Account;
-  inputs: Array<SymbolEmoji | SymbolEmojiName>;
-  integrator?: Account;
-}): Promise<RegisterMarketHelper & { registerResponse: UserTransactionResponse }> {
+export async function registerMarketHelper(
+  args: {
+    registrant: Account;
+    integrator?: Account;
+  } & XOR<{ emojis: SymbolEmoji[] }, { emojiNames: SymbolEmojiName[] }>
+): Promise<RegisterMarketHelper & { registerResponse: UserTransactionResponse }> {
   const { aptos } = getPublishHelpers();
-  const { registrant, inputs, integrator = registrant } = args;
-  const symbolBytes = new Uint8Array(inputs.flatMap(bytesFromNameOrEmoji));
+  const { registrant, emojis, emojiNames, integrator = registrant } = args;
+  const symbolBytes = new Uint8Array((emojis ?? emojiNames).flatMap(bytesFromNameOrEmoji));
   const symbol = toMarketEmojiData(symbolBytes);
 
   const response = await EmojicoinDotFun.RegisterMarket.submit({
@@ -130,11 +116,3 @@ async function registerMarketFromEmojisOrNames(args: {
     events: getEvents(response),
   };
 }
-
-// So as not to pollute the global scope, we export the test helpers as a single object.
-const TestHelpers = {
-  registerMarketFromNames,
-  registerMarketFromEmojis,
-};
-
-export default TestHelpers;

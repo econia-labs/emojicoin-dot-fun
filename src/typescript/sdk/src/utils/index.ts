@@ -4,6 +4,7 @@ export * from "./aptos-utils";
 export * from "./bonding-curve";
 export * from "./compare-bigint";
 export * from "./hex";
+export * from "./get-resource-from-writeset";
 export * from "./misc";
 export * from "./nominal-price";
 export * from "./parse-changes-for-balances";
