@@ -2,7 +2,7 @@ import Svg from "components/svg/Svg";
 import { useThemeContext } from "context";
 import React from "react";
 
-import { type SvgProps } from "../types";
+import type { SvgProps } from "../types";
 
 const SortArrow: React.FC<SvgProps> = ({ color = "darkGray", ...props }) => {
   const { theme } = useThemeContext();

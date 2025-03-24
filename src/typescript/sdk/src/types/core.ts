@@ -9,8 +9,8 @@ import {
   type WriteSetChangeWriteTableItem,
 } from "@aptos-labs/ts-sdk";
 
-import { type AccountAddressString } from "../emojicoin_dot_fun/types";
-import { type Flatten } from ".";
+import type { AccountAddressString } from "../emojicoin_dot_fun/types";
+import type { Flatten } from ".";
 
 // JSON representation of the Event data from a UserTransactionResponse.
 // We allow `guid` and `sequence_number` to be optional because we don't

@@ -1,9 +1,9 @@
 import { useMatchBreakpoints } from "@hooks/index";
-import {
-  type ArenaInfoModel,
-  type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionModel,
-  type MarketStateModel,
+import type {
+  ArenaInfoModel,
+  ArenaLeaderboardHistoryWithArenaInfoModel,
+  ArenaPositionModel,
+  MarketStateModel,
 } from "@sdk/indexer-v2/types";
 import { q64ToBig } from "@sdk/utils";
 import Big from "big.js";

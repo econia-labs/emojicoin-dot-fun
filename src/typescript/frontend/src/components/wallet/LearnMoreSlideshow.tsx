@@ -3,7 +3,7 @@ import DottedLink from "components/svg/slideshow/DottedLink";
 import DottedStar from "components/svg/slideshow/DottedStar";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 
-import { type SlideState } from "./WalletModal";
+import type { SlideState } from "./WalletModal";
 
 export const Slide = () => {};
 

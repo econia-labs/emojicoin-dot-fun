@@ -1,15 +1,15 @@
 import { ArenaPeriod, Period } from "@sdk/const";
-import {
-  type ArenaEnterModel,
-  type ArenaExitModel,
-  type ArenaInfoModel,
-  type ArenaMeleeModel,
-  type ArenaSwapModel,
+import type {
+  ArenaEnterModel,
+  ArenaExitModel,
+  ArenaInfoModel,
+  ArenaMeleeModel,
+  ArenaSwapModel,
 } from "@sdk/indexer-v2";
-import { type WritableDraft } from "immer";
-import { type ArenaChartSymbol } from "lib/chart-utils";
+import type { WritableDraft } from "immer";
+import type { ArenaChartSymbol } from "lib/chart-utils";
 
-import { type CandlestickData } from "../event/types";
+import type { CandlestickData } from "../event/types";
 import { createInitialCandlestickData } from "../utils";
 
 export type MeleeState = {

@@ -1,8 +1,4 @@
-import {
-  type AccountAddressInput,
-  type HexInput,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import type { AccountAddressInput, HexInput, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { Period, rawPeriodToEnum } from "../../const";
 import { getEvents } from "../../emojicoin_dot_fun/utils";

@@ -1,4 +1,4 @@
-import { type ResponsiveValue } from "styled-system";
+import type { ResponsiveValue } from "styled-system";
 import { breakpointMap } from "theme/base";
 
 const createMediaQuery = (n: number) => `@media screen and (min-width: ${n}px)`;

@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { maxBigInt, ONE_APT, type SymbolEmoji, toSequenceNumberOptions } from "../../../../src";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";

@@ -1,4 +1,4 @@
-import { type SymbolEmoji } from "../../../emoji_data";
+import type { SymbolEmoji } from "../../../emoji_data";
 import { LIMIT } from "../../const";
 import {
   toLiquidityEventModel,

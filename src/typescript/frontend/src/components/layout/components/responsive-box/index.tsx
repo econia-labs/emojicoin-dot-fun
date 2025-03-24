@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 
 import { ContentWrapper, ResponsiveBoxWrapper } from "./styled";
-import { type ResponsiveBoxProps } from "./types";
+import type { ResponsiveBoxProps } from "./types";
 
 export const ResponsiveBox = forwardRef<HTMLDivElement, ResponsiveBoxProps>(
   ({ width, aspectRatio, children, ...props }, ref) => {

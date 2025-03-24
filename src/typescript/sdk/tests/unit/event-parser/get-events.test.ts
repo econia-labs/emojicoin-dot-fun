@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word goldens
-import {
-  type EntryFunctionPayloadResponse,
-  type TransactionEd25519Signature,
-  type TransactionResponseType,
-  type UserTransactionResponse,
+import type {
+  EntryFunctionPayloadResponse,
+  TransactionEd25519Signature,
+  TransactionResponseType,
+  UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 
 import {

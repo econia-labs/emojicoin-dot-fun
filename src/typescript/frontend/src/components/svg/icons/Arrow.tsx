@@ -4,7 +4,7 @@ import Svg from "components/svg/Svg";
 import React from "react";
 import { darkColors } from "theme";
 
-import { type SvgProps } from "../types";
+import type { SvgProps } from "../types";
 
 const Icon: React.FC<SvgProps> = ({ color = "darkGray", ...props }) => {
   return (

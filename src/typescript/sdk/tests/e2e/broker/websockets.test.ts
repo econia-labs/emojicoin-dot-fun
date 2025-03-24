@@ -19,7 +19,7 @@ import {
   zip,
 } from "../../../src";
 import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
-import { type BrokerEvent } from "../../../src/broker-v2/types";
+import type { BrokerEvent } from "../../../src/broker-v2/types";
 import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import {

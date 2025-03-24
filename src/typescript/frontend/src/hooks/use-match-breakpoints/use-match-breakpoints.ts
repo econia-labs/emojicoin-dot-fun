@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { breakpointMap } from "theme/base";
-import { type MediaQueries } from "theme/types";
+import type { MediaQueries } from "theme/types";
 
 type State = {
   [key: string]: boolean;

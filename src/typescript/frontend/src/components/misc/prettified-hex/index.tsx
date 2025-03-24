@@ -1,6 +1,6 @@
 import { cn } from "lib/utils/class-name";
 import { prettifyHex } from "lib/utils/prettify-hex";
-import { type HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
 import { useScramble, type UseScrambleProps } from "use-scramble";
 
 export const PrettyHex = ({

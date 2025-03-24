@@ -9,10 +9,10 @@ import {
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { useNameResolver } from "@hooks/use-name-resolver";
-import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import {
-  type EntryFunctionTransactionBuilder,
-  type WalletInputTransactionData,
+import type { TypeTagInput } from "@sdk/emojicoin_dot_fun";
+import type {
+  EntryFunctionTransactionBuilder,
+  WalletInputTransactionData,
 } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { sleep } from "@sdk/utils";
 import { getAptosClient } from "@sdk/utils/aptos-client";
@@ -65,7 +65,7 @@ export type AptosContextState = {
     transactionBuilder: EntryFunctionTransactionBuilder | null
   ) => SubmissionResponse;
   account: WalletContextState["account"];
-  copyAddress: () => void;
+  copyAddress: () => Promise<void>;
   status: TransactionStatus;
   lastResponse: ResponseType;
   lastResponseStoredAt: number;

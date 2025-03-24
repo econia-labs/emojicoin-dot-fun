@@ -10,7 +10,7 @@ import {
 
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
 import { encodeEmojis, type SymbolEmoji } from "../emoji_data";
-import type JsonTypes from "../types/json-types";
+import type { JsonTypes } from "../types/json-types";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
 import { typeTagInputToStructName } from "../utils/type-tags";
 import {

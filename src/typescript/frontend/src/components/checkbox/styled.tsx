@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { space } from "styled-system";
 
-import { type CheckProps } from "./types";
+import type { CheckProps } from "./types";
 
 export const StyledCheckbox = styled.label<{ disabled?: boolean }>`
   display: flex;

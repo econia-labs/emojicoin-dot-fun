@@ -1,4 +1,4 @@
-import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import type { AccountAddressInput } from "@aptos-labs/ts-sdk";
 
 import { TransferCoins } from "@/contract-apis";
 

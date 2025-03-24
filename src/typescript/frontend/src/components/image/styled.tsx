@@ -1,5 +1,5 @@
 import { ResponsiveBox } from "components/layout/components/responsive-box";
-import { type SkeletonProps } from "components/skeleton/types";
+import type { SkeletonProps } from "components/skeleton/types";
 import styled from "styled-components";
 
 export const StyledImage = styled.img<{ variant?: SkeletonProps["variant"] }>`

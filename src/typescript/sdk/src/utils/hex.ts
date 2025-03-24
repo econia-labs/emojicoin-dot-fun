@@ -1,4 +1,4 @@
-import { type HexInput } from "@aptos-labs/ts-sdk";
+import type { HexInput } from "@aptos-labs/ts-sdk";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
 // -------------------------------------------------------------------------------------------------

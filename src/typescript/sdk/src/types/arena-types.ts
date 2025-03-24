@@ -1,22 +1,22 @@
 import type { ArenaPeriod } from "../const";
-import { type SymbolEmoji } from "../emoji_data";
-import { type AccountAddressString } from "../emojicoin_dot_fun";
-import {
-  type ArenaCandlestickModel,
-  type ArenaEnterModel,
-  type ArenaEventModels,
-  type ArenaExitModel,
-  type ArenaMeleeModel,
-  type ArenaModelWithMeleeID,
-  type ArenaSwapModel,
-  type ArenaVaultBalanceUpdateModel,
-  type BrokerEventModels,
+import type { SymbolEmoji } from "../emoji_data";
+import type { AccountAddressString } from "../emojicoin_dot_fun";
+import type {
+  ArenaCandlestickModel,
+  ArenaEnterModel,
+  ArenaEventModels,
+  ArenaExitModel,
+  ArenaMeleeModel,
+  ArenaModelWithMeleeID,
+  ArenaSwapModel,
+  ArenaVaultBalanceUpdateModel,
+  BrokerEventModels,
   // Note that if you import anything more than a type here, you'll get lots of import issues.
 } from "../indexer-v2/types";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
-import type JsonTypes from "./json-types";
-import { type AnyNumberString, type Types } from "./types";
+import type { JsonTypes } from "./json-types";
+import type { AnyNumberString, Types } from "./types";
 
 export const ARENA_CANDLESTICK_NAME = "ArenaCandlestick";
 

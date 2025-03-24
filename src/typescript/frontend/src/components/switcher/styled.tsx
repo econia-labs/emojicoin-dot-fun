@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { space } from "styled-system";
 
 import { styles } from "./theme";
-import { type Scale } from "./types";
+import type { Scale } from "./types";
 
 export const StyledSwitcher = styled.label<{ checked: boolean; scale?: Scale }>`
   position: relative;

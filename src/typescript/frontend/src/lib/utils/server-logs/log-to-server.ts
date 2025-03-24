@@ -1,5 +1,5 @@
 "use server";
-import { type logToServer } from "./wrapper";
+import type { logToServer } from "./wrapper";
 
 /**
  * This function is *NOT* intended to be called directly.

@@ -7,9 +7,9 @@ import {
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 
-import { type DatabaseStructType } from "./indexer-v2/types/json-types";
-import { type Types } from "./types";
-import { type ValueOf } from "./utils/utility-types";
+import type { DatabaseStructType } from "./indexer-v2/types/json-types";
+import type { Types } from "./types";
+import type { ValueOf } from "./utils/utility-types";
 
 export const VERCEL = process.env.VERCEL === "1";
 let vercelTargetEnv: "production" | "preview" | "development" | "release-preview";

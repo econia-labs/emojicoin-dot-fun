@@ -117,7 +117,7 @@ export const InnerDisplayDebugData = () => {
 
   // Curry a function to force a connection if the wallet isn't connected or call the original function otherwise.
   const forceConnectOrRunFunction = useCallback(
-    (functionToCallIfConnected: (definedAccount: AccountInfo) => void) => () =>
+    (functionToCallIfConnected: (definedAccount: AccountInfo) => Promise<void>) => () =>
       account && connected
         ? functionToCallIfConnected(account)
         : connect(wallet?.name ?? ("Petra" as WalletName)),
@@ -139,14 +139,14 @@ export const InnerDisplayDebugData = () => {
           <>
             <button
               className={debugButtonClassName}
-              onClick={forceConnectOrRunFunction((definedAccount) => {
+              onClick={forceConnectOrRunFunction((definedAccount) =>
                 aptos
                   .fundAccount({
                     accountAddress: definedAccount.address,
                     amount: ONE_APT * 10000000,
                   })
-                  .then(() => forceRefetch("apt"));
-              })}
+                  .then(() => forceRefetch("apt"))
+              )}
             >
               <span className="justify-start">
                 {"Fund me"} {emoji("money bag")}

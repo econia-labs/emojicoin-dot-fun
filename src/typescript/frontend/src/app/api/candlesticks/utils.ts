@@ -14,7 +14,7 @@ import { parseJSON, stringifyJSON } from "utils";
 
 import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
 
-import { type CandlesticksSearchParams } from "./search-params-schema";
+import type { CandlesticksSearchParams } from "./search-params-schema";
 
 /**
  * Parcel size is the amount of candlestick periods that will be in a single parcel.

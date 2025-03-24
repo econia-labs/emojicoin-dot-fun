@@ -38,8 +38,8 @@ import {
   MarketView,
   REGISTRY_ADDRESS,
 } from "../emojicoin_dot_fun";
-import { type Flatten } from "../types";
-import type JsonTypes from "../types/json-types";
+import type { Flatten } from "../types";
+import type { JsonTypes } from "../types/json-types";
 import {
   type AnyNumberString,
   toMarketResource,
@@ -52,7 +52,7 @@ import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
 import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
-import { type AtLeastOne } from "../utils/utility-types";
+import type { AtLeastOne } from "../utils/utility-types";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;

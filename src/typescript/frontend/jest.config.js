@@ -1,13 +1,10 @@
+// @ts-check
 /**
  * For a detailed explanation regarding each configuration property, visit:
  * https://jestjs.io/docs/configuration
  */
-import type { Config } from "jest";
-import nextJest from "next/jest";
-const createJestConfig = nextJest({
-  dir: "./",
-});
-const config: Config = {
+/** @type {import('jest').Config} */
+const config = {
   clearMocks: true,
   collectCoverage: false,
   coverageDirectory: "coverage",
@@ -29,4 +26,9 @@ const config: Config = {
     },
   },
 };
-export default createJestConfig(config);
+
+const nextJest = require("next/jest").default;
+const createJestConfig = nextJest({
+  dir: "./",
+});
+module.exports = createJestConfig(config);

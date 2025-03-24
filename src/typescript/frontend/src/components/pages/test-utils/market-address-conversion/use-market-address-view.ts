@@ -1,4 +1,4 @@
-import { type Aptos } from "@aptos-labs/ts-sdk";
+import type { Aptos } from "@aptos-labs/ts-sdk";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { REGISTRY_ADDRESS } from "@sdk/emojicoin_dot_fun";
 import { useQuery } from "@tanstack/react-query";

@@ -10,7 +10,7 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
-import { type TradeHistoryProps } from "../../types";
+import type { TradeHistoryProps } from "../../types";
 
 export const PersonalTradeHistory = (props: TradeHistoryProps) => {
   const { account, connected } = useWallet();

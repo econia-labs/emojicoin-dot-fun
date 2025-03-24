@@ -6,7 +6,7 @@ import { getDefaultMetadata } from "configs/meta";
 import Providers from "context/providers";
 import DisplayDebugData from "lib/local-development/DisplayDebugData";
 import StyledComponentsRegistry from "lib/registry";
-import { type Metadata, type Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
 

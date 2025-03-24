@@ -1,4 +1,4 @@
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 

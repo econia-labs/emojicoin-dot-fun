@@ -7,7 +7,7 @@ import { useMatchBreakpoints } from "hooks";
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { type TableHeaderProps } from "./types";
+import type { TableHeaderProps } from "./types";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   const { t } = translationFunction();

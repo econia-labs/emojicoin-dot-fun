@@ -20,7 +20,7 @@ import { slideVariants } from "./animations";
 import AnimatedDropdownItem from "./components/animated-dropdown-item";
 import { MobileSocialLinks } from "./components/mobile-social-links";
 import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
-import { type MobileMenuProps } from "./types";
+import type { MobileMenuProps } from "./types";
 
 const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-black";
 

@@ -2,7 +2,7 @@
 
 import { readLocalStorageCache, writeLocalStorageCache } from "configs/local-storage-keys";
 import React, { createContext, type PropsWithChildren, useContext, useState } from "react";
-import { type DefaultTheme } from "styled-components";
+import type { DefaultTheme } from "styled-components";
 import dark from "theme/dark";
 import light from "theme/light";
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { type SymbolEmoji } from "@sdk/emoji_data";
+import type { SymbolEmoji } from "@sdk/emoji_data";
 import { fetchSpecificMarkets } from "@sdk/indexer-v2/queries";
 import { calculateCurvePrice } from "@sdk/markets";
 import { toNominal } from "@sdk/utils";

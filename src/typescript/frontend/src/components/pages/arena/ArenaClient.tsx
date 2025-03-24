@@ -3,11 +3,11 @@
 import { useMatchBreakpoints } from "@hooks/index";
 import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
-import {
-  type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionModel,
+import type {
+  ArenaLeaderboardHistoryWithArenaInfoModel,
+  ArenaPositionModel,
 } from "@sdk/indexer-v2/types";
-import { type ClassValue } from "clsx";
+import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useEventStore } from "context/event-store-context/hooks";

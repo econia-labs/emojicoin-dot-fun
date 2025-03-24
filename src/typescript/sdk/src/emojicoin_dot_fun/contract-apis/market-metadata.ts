@@ -21,7 +21,7 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import { type AccountAddressString, type Option } from "../types";
+import type { AccountAddressString, Option } from "../types";
 
 export type AddAdminPayloadMoveArguments = {
   newAdmin: AccountAddress;

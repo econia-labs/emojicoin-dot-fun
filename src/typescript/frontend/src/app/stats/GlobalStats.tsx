@@ -1,14 +1,14 @@
 import AptosIconBlack from "@icons/AptosBlack";
 import { ONE_APT_BIGINT } from "@sdk/const";
 import { compareBigInt, compareNumber, sum } from "@sdk/utils";
-import { type AnyNumberString, type Types } from "@sdk-types";
+import type { AnyNumberString, Types } from "@sdk-types";
 import Big from "big.js";
 import { MS_IN_ONE_DAY } from "components/charts/const";
 import { cn } from "lib/utils/class-name";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { useMemo } from "react";
 
-import { type StatsPageProps } from "./StatsPage";
+import type { StatsPageProps } from "./StatsPage";
 
 const formatter = new Intl.NumberFormat("en-us", { maximumFractionDigits: 2 });
 const fmt = (n: number | bigint) => formatter.format(n);

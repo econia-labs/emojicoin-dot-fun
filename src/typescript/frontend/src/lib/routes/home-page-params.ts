@@ -1,6 +1,6 @@
 import { toOrderBy } from "@sdk/indexer-v2/const";
 import { Schemas } from "@sdk/utils";
-import { type HomePageSearchParams } from "lib/queries/sorting/query-params";
+import type { HomePageSearchParams } from "lib/queries/sorting/query-params";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 
 export interface HomePageParams {

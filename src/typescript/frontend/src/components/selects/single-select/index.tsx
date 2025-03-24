@@ -1,12 +1,12 @@
 import { Arrow } from "components/svg";
 import { useThemeContext } from "context";
 import { useTooltip } from "hooks";
-import { type TooltipOptions } from "hooks/use-tooltip/types";
+import type { TooltipOptions } from "hooks/use-tooltip/types";
 import React from "react";
 
 import { Select } from "../select";
 import { getTooltipStyles } from "../theme";
-import { type Option, type SingleSelectProps } from "../types";
+import type { Option, SingleSelectProps } from "../types";
 
 const SingleSelect: React.FC<SingleSelectProps> = ({
   title,

@@ -1,9 +1,9 @@
 /* eslint-disable import/no-unused-modules */
-import {
-  type AccountAddress,
-  type AccountAddressInput,
-  type AccountAuthenticator,
-  type TypeTag,
+import type {
+  AccountAddress,
+  AccountAddressInput,
+  AccountAuthenticator,
+  TypeTag,
 } from "@aptos-labs/ts-sdk";
 
 export type Option<T> = {

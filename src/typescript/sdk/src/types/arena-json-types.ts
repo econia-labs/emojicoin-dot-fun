@@ -1,6 +1,6 @@
-import { type AccountAddressString, type Uint64String } from "../emojicoin_dot_fun";
-import { type DatabaseStructType } from "../indexer-v2";
-import type JsonTypes from "./json-types";
+import type { AccountAddressString, Uint64String } from "../emojicoin_dot_fun";
+import type { DatabaseStructType } from "../indexer-v2";
+import type { JsonTypes } from "./json-types";
 
 export type ArenaJsonTypes = {
   ExchangeRate: {

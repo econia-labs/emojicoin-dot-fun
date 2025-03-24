@@ -1,6 +1,6 @@
 import { AccountAddress, type TransactionPayloadResponse } from "@aptos-labs/ts-sdk";
 
-import { type AccountAddressString } from "../../../emojicoin_dot_fun";
+import type { AccountAddressString } from "../../../emojicoin_dot_fun";
 import {
   type AnyNumberString,
   isChatEvent,

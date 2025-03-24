@@ -1,4 +1,4 @@
-import { type AnyNumberString } from "@sdk-types";
+import type { AnyNumberString } from "@sdk-types";
 
 const parseBigInt = (value: AnyNumberString): bigint | null => {
   try {

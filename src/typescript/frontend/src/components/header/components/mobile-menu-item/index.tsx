@@ -6,7 +6,7 @@ import React from "react";
 import { useScramble } from "use-scramble";
 
 import { StyledItemWrapper } from "./styled";
-import { type MobileMenuItemProps } from "./types";
+import type { MobileMenuItemProps } from "./types";
 
 const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
   withIcon,

@@ -1,7 +1,4 @@
-import {
-  type EntryFunctionPayloadResponse,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import type { EntryFunctionPayloadResponse, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import {
   type AnyEmojicoinEvent,
@@ -14,28 +11,28 @@ import {
   standardizeAddress,
   type Types,
 } from "../../../src";
-import {
-  type ChatEventModel,
-  type GlobalStateEventModel,
-  type LiquidityEventModel,
-  type MarketLatestStateEventModel,
-  type MarketRegistrationEventModel,
-  type PeriodicStateEventModel,
-  type SwapEventModel,
-  type withChatEventData,
-  type withGlobalStateEventData,
-  type withLastSwap,
-  type withLiquidityEventData,
-  type withMarketAndStateMetadataAndBumpTime,
-  type withMarketAndStateMetadataAndEmitTime,
-  type withMarketRegistrationEventData,
-  type withPeriodicStateEventData,
-  type withPeriodicStateMetadata,
-  type withStateEventData,
-  type withSwapEventData,
-  type withTransactionMetadata,
+import type {
+  ChatEventModel,
+  GlobalStateEventModel,
+  LiquidityEventModel,
+  MarketLatestStateEventModel,
+  MarketRegistrationEventModel,
+  PeriodicStateEventModel,
+  SwapEventModel,
+  withChatEventData,
+  withGlobalStateEventData,
+  withLastSwap,
+  withLiquidityEventData,
+  withMarketAndStateMetadataAndBumpTime,
+  withMarketAndStateMetadataAndEmitTime,
+  withMarketRegistrationEventData,
+  withPeriodicStateEventData,
+  withPeriodicStateMetadata,
+  withStateEventData,
+  withSwapEventData,
+  withTransactionMetadata,
 } from "../../../src/indexer-v2/types";
-import { type JsonValue } from "../../../src/types/json-types";
+import type { JsonValue } from "../../../src/types/json-types";
 
 type Indexer = {
   TransactionMetadata: ReturnType<typeof withTransactionMetadata>;

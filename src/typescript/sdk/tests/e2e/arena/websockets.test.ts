@@ -2,7 +2,7 @@
 
 import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import { type MeleeEmojiData } from "../../../src/markets/arena-utils";
+import type { MeleeEmojiData } from "../../../src/markets/arena-utils";
 import {
   isArenaEnterModel,
   isArenaExitModel,

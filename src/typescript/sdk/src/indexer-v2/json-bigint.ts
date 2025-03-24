@@ -2,7 +2,7 @@
 import Big from "big.js";
 import parse from "json-bigint";
 
-import { type AnyColumnName } from "./types/json-types";
+import type { AnyColumnName } from "./types/json-types";
 import { bigintColumns, floatColumns, integerColumns } from "./types/postgres-numeric-types";
 
 const JSON_BIGINT = parse({

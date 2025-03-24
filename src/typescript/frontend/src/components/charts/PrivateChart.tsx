@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 
 import { BrowserNotSupported } from "./BrowserNotSupported";
 import { WIDGET_OPTIONS } from "./const";
-import { type ChartContainerProps } from "./types";
+import type { ChartContainerProps } from "./types";
 import { useDatafeed } from "./use-datafeed";
 
 /**

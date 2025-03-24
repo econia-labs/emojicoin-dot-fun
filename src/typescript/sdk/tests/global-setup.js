@@ -1,7 +1,6 @@
-/* eslint-disable no-underscore-dangle */
-import WebSocket from "ws";
-
-import { DockerTestHarness } from "./utils/docker/docker-test-harness";
+/* eslint-disable @typescript-eslint/no-var-requires, import/no-commonjs */
+const WebSocket = require("ws");
+const { DockerTestHarness } = require("./utils/docker/docker-test-harness");
 
 // If you'd like to see the processor, broker, and postgres logs while the tests are running,
 // set `process.env.SHOW_TEST_LOGS_IN_DEVELOPMENT="true"` before/while running the tests.
@@ -10,7 +9,7 @@ import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 // and ["🔥"], to ensure that it's possible to publish the emojicoin arena module.
 // Without these two, the `init_module` function will loop infinitely and time out.
 // You can find the relevant publication code in `deployer/sh`.
-export default async function setup() {
+module.exports = async function setup() {
   // @ts-expect-error Using `globalThis` as any for a polyfill for `WebSocket` in node.js.
   globalThis.WebSocket = WebSocket;
 
@@ -36,4 +35,4 @@ export default async function setup() {
             ["broker", "processor", "postgres"],
     });
   }
-}
+};

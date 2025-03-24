@@ -1,5 +1,5 @@
 import translations from "../../../public/locales/en-US.json";
-import { type TranslationKey } from "./types";
+import type { TranslationKey } from "./types";
 
 export const simpleTranslation = (s: TranslationKey) => translations[s];
 
