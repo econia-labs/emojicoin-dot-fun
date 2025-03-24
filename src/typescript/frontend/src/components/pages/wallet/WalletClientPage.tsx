@@ -1,20 +1,21 @@
 "use client";
 
 import AptosIconBlack from "@icons/AptosBlack";
+import { type SymbolEmoji } from "@sdk/emoji_data";
 import { formatDisplayName, type ValidAptosName } from "@sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "components/FormattedNumber";
-import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
-import { WalletTransactionTable } from "./WalletTransactionTable";
-import { WalletPortfolioTable } from "./WalletPortfolioTable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs/tabs";
 import SearchBar from "components/inputs/search-bar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs/tabs";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { type SymbolEmoji } from "@sdk/emoji_data";
-import { useState } from "react";
+import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
 import { usePathname, useRouter } from "next/navigation";
-import { ROUTES } from "router/routes";
+import { useState } from "react";
 import { useEffectOnce } from "react-use";
+import { ROUTES } from "router/routes";
+
+import { WalletPortfolioTable } from "./WalletPortfolioTable";
+import { WalletTransactionTable } from "./WalletTransactionTable";
 
 export const WalletClientPage = ({ address, name }: { address: string; name?: ValidAptosName }) => {
   const resolvedName = name ?? address;

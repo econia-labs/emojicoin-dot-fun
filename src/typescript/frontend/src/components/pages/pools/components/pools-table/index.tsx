@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-
-import { useMatchBreakpoints } from "hooks";
-
-import { TableRowDesktop, TableHeader } from "./components";
-import { Table, Th, EmptyTr, ThInner, HeaderTr, TBody } from "components";
-import { StyledPoolsWrapper } from "./styled";
-
-import { HEADERS, MOBILE_HEADERS } from "./constants";
-
-import { getEmptyListTr } from "utils";
-import type { SortByPageQueryParams } from "lib/queries/sorting/types";
-import type { OrderByStrings } from "@sdk/indexer-v2/const";
 import useElementDimensions from "@hooks/use-element-dimensions";
+import type { OrderByStrings } from "@sdk/indexer-v2/const";
+import { EmptyTr, HeaderTr, Table, TBody, Th, ThInner } from "components";
+import { useMatchBreakpoints } from "hooks";
+import type { SortByPageQueryParams } from "lib/queries/sorting/types";
+import React, { useRef, useState } from "react";
+import { getEmptyListTr } from "utils";
+
 import { type PoolsData } from "../../ClientPoolsPage";
+import { TableHeader, TableRowDesktop } from "./components";
+import { HEADERS, MOBILE_HEADERS } from "./constants";
+import { StyledPoolsWrapper } from "./styled";
 
 export interface PoolsTableProps {
   data: PoolsData[];

@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import TableCard from "../table-card/TableCard";
-import { useEventStore } from "context/event-store-context";
-import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "./utils";
-import { useEmojiPicker } from "context/emoji-picker-context";
-import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import useEvent from "@hooks/use-event";
-import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
-import { ANIMATION_DEBOUNCE_TIME } from "../table-card/animation-variants/grid-variants";
-import { type HomePageProps } from "app/home/HomePage";
 import "./module.css";
+
+import useEvent from "@hooks/use-event";
+import { type HomePageProps } from "app/home/HomePage";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import { useEventStore } from "context/event-store-context";
+import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+
+import { ANIMATION_DEBOUNCE_TIME } from "../table-card/animation-variants/grid-variants";
+import TableCard from "../table-card/TableCard";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "./utils";
 
 // TODO: Consider queueing up the changes by storing each state update in a queue and then updating the state
 // by popping off the queue. This would allow us to update the state in a more controlled manner and avoid lots of

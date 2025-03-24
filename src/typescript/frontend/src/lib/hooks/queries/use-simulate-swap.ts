@@ -1,19 +1,21 @@
-import { SimulateSwap, Swap } from "@/contract-apis/emojicoin-dot-fun";
-import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
+import { type Aptos, type TypeTag } from "@aptos-labs/ts-sdk";
+import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import {
-  type AnyNumber,
   type AccountAddressString,
+  type AnyNumber,
   type TypeTagInput,
 } from "@sdk/emojicoin_dot_fun";
-import { type TypeTag, type Aptos } from "@aptos-labs/ts-sdk";
-import { useQuery } from "@tanstack/react-query";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { withResponseError } from "./client";
-import Big from "big.js";
-import { useMemo } from "react";
 import { toCoinTypes } from "@sdk/markets/utils";
-import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { useQuery } from "@tanstack/react-query";
+import Big from "big.js";
 import { tryEd25519PublicKey } from "components/pages/launch-emojicoin/hooks/use-register-market";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
+import { useMemo } from "react";
+
+import { SimulateSwap, Swap } from "@/contract-apis/emojicoin-dot-fun";
+
+import { withResponseError } from "./client";
 
 type Args = {
   aptos: Aptos;

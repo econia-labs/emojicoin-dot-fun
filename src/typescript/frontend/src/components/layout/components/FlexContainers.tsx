@@ -1,4 +1,4 @@
-import { type PropsWithChildren, type HTMLAttributes } from "react";
+import { type HTMLAttributes, type PropsWithChildren } from "react";
 
 export const Column = (props: HTMLAttributes<HTMLDivElement> & PropsWithChildren) => (
   <div {...props} className={`flex flex-col ${props.className ?? ""}`}>

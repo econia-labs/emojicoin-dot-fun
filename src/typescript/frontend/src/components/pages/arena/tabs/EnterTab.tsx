@@ -1,24 +1,25 @@
-import type { ArenaPositionModel, MarketStateModel } from "@sdk/indexer-v2/types";
-import { EmojiTitle, lockedTernary, marketTernary } from "../utils";
-import React, { type PropsWithChildren, useCallback, useEffect, useState } from "react";
-import { AptosInputLabel } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
-import { InputNumeric } from "components/inputs";
-import Button from "components/button";
-import { Switcher } from "components/switcher";
-import { GlowingEmoji } from "utils/emoji";
-import ProgressBar from "components/ProgressBar";
-import { FormattedNumber } from "components/FormattedNumber";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { CloseIcon } from "components/svg";
 import { isUserTransactionResponse, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { ARENA_MODULE_ADDRESS } from "@sdk/const";
-import { emoji } from "utils";
+import type { ArenaPositionModel, MarketStateModel } from "@sdk/indexer-v2/types";
 import { q64ToBig } from "@sdk/utils";
+import Button from "components/button";
+import { FormattedNumber } from "components/FormattedNumber";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { InputNumeric } from "components/inputs";
 import Loading from "components/loading";
+import { AptosInputLabel } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
+import ProgressBar from "components/ProgressBar";
+import { CloseIcon } from "components/svg";
+import { Switcher } from "components/switcher";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useArenaSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-arena-swap-builder";
 import { useEnterTransactionBuilder } from "lib/hooks/transaction-builders/use-enter-builder";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
-import { useArenaSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-arena-swap-builder";
+import React, { type PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { emoji } from "utils";
+import { GlowingEmoji } from "utils/emoji";
+
+import { EmojiTitle, lockedTernary, marketTernary } from "../utils";
 
 const InnerWrapper = ({ children }: React.PropsWithChildren) => (
   <div

@@ -1,8 +1,8 @@
-import { system, type Config } from "styled-system";
-
-import { scales } from "./types";
+import { type Config, system } from "styled-system";
 import { fontWeight } from "theme/base";
 import { type FontWeight } from "theme/types";
+
+import { scales } from "./types";
 
 export const textStyles = (k: keyof typeof scales) => {
   const st = {

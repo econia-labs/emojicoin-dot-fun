@@ -1,6 +1,10 @@
 import { parseJSON, stringifyJSON } from "utils";
-import { type ArenaCandlestickModel, toArenaCandlestickModel } from "../../../sdk/src";
-import { type DatabaseJsonType } from "../../../sdk/src";
+
+import {
+  type ArenaCandlestickModel,
+  type DatabaseJsonType,
+  toArenaCandlestickModel,
+} from "../../../sdk/src";
 
 // NOTE: These currently don't properly serialize/deserialize Uint8Arrays.
 //       Those should be added at some point, as they're used as emoji hex bytes frequently.

@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
 import Svg from "components/svg/Svg";
-import { type SvgProps } from "../types";
+import React from "react";
 import { darkColors } from "theme";
+
+import { type SvgProps } from "../types";
 
 const Icon: React.FC<SvgProps> = ({ color = "darkGray", ...props }) => {
   return (

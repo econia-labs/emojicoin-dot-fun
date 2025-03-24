@@ -1,4 +1,4 @@
-import { Ed25519PrivateKey, Hex, Account, Network } from "@aptos-labs/ts-sdk";
+import { Account, Ed25519PrivateKey, Hex, Network } from "@aptos-labs/ts-sdk";
 import { APTOS_NETWORK } from "@sdk/const";
 
 /**

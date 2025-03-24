@@ -1,25 +1,26 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
-import { useMatchBreakpoints } from "hooks";
+import { Container, Flex, FlexGap } from "@containers";
+import { Badge } from "components/Badge";
 import Button from "components/button";
-import { Flex, FlexGap, Container } from "@containers";
-import LogoIcon from "../svg/icons/LogoIcon";
-import CloseIcon from "../svg/icons/Close";
 import MenuItem from "components/header/components/menu-item";
 import { MobileMenu } from "components/header/components/mobile-menu";
-import { StyledContainer, StyledClickItem, StyledMobileHeader, StyledCloseIcon } from "./styled";
-import { ROUTES } from "router/routes";
-import { NAVIGATE_LINKS } from "./constants";
-import { slideTopVariants } from "./animations";
-import { type HeaderProps } from "./types";
-import { translationFunction } from "context/language-context";
 import WalletDropdownMenu from "components/wallet/WalletDropdownMenu";
-import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
-import { useSearchParams } from "next/navigation";
-import Link, { type LinkProps } from "next/link";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { Badge } from "components/Badge";
+import { translationFunction } from "context/language-context";
+import { useMatchBreakpoints } from "hooks";
+import Link, { type LinkProps } from "next/link";
+import { useSearchParams } from "next/navigation";
+import React, { useCallback, useMemo, useState } from "react";
+import { ROUTES } from "router/routes";
+
+import CloseIcon from "../svg/icons/Close";
+import LogoIcon from "../svg/icons/LogoIcon";
+import { slideTopVariants } from "./animations";
+import { NAVIGATE_LINKS } from "./constants";
+import { StyledClickItem, StyledCloseIcon, StyledContainer, StyledMobileHeader } from "./styled";
+import { type HeaderProps } from "./types";
+import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
 
 const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
   const { isDesktop } = useMatchBreakpoints();

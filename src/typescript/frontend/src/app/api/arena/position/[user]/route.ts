@@ -1,9 +1,10 @@
 // cspell:word timespan
 
-import { fetchLatestPosition } from "@/queries/arena";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { type NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
+
+import { fetchLatestPosition } from "@/queries/arena";
 
 export const fetchCache = "force-no-store";
 

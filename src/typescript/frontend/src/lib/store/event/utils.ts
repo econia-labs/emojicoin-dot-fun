@@ -1,15 +1,16 @@
-import { Period, NON_ARENA_PERIODS, periodEnumToRawDuration } from "@sdk/const";
-import { type WritableDraft } from "immer";
-import { type EventState, type MarketEventStore, type MarketStoreMetadata } from "./types";
+import { NON_ARENA_PERIODS, Period, periodEnumToRawDuration } from "@sdk/const";
 import {
+  type EventModelWithMarket,
   type PeriodicStateEventModel,
   type SwapEventModel,
-  type EventModelWithMarket,
 } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";
 import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
+import { type WritableDraft } from "immer";
+
 import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } from "../utils";
+import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";
+import { type EventState, type MarketEventStore, type MarketStoreMetadata } from "./types";
 
 export const createInitialMarketState = (
   marketMetadata: MarketStoreMetadata

@@ -1,30 +1,32 @@
 "use client";
 
 import { useMatchBreakpoints } from "@hooks/index";
-import { Countdown } from "components/Countdown";
-import { FormattedNumber } from "components/FormattedNumber";
-import React, { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { parseJSON } from "utils";
-import {
-  Box,
-  EmojiTitle,
-  type ArenaPropsWithPositionHistoryAndEmojiData,
-  type ArenaProps,
-} from "./utils";
-import { BottomNavigation, TabContainer } from "./tabs";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import {
   type ArenaLeaderboardHistoryWithArenaInfoModel,
   type ArenaPositionModel,
 } from "@sdk/indexer-v2/types";
-import { ROUTES } from "router/routes";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
-import { useRouter } from "next/navigation";
-import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
-import ChartContainer from "@/components/charts/ChartContainer";
 import { type ClassValue } from "clsx";
+import { Countdown } from "components/Countdown";
+import { FormattedNumber } from "components/FormattedNumber";
 import { useEventStore } from "context/event-store-context/hooks";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { ROUTES } from "router/routes";
+import { parseJSON } from "utils";
+
+import ChartContainer from "@/components/charts/ChartContainer";
+
+import { BottomNavigation, TabContainer } from "./tabs";
+import {
+  type ArenaProps,
+  type ArenaPropsWithPositionHistoryAndEmojiData,
+  Box,
+  EmojiTitle,
+} from "./utils";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();

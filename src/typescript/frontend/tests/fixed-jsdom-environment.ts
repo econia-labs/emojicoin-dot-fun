@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import JSDOMEnvironment from "jest-environment-jsdom";
-import { TextEncoder, TextDecoder } from "util";
+import { TextDecoder, TextEncoder } from "util";
 
 /**
  * Extends the JSDOM test environment to add missing globals that Jest does not provide by default.

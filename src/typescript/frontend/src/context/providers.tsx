@@ -3,39 +3,40 @@
 // cspell:word martianwallet
 // cspell:word pontem
 // cspell:word okwallet
+import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
+import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
+import { PontemWallet } from "@pontem/wallet-adapter-plugin";
+import { RiseWallet } from "@rise-wallet/wallet-adapter";
+import { getAptosApiKey } from "@sdk/const";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Footer from "components/footer";
+import { GeoblockedBanner } from "components/geoblocking";
+import Header from "components/header";
+import { HeaderSpacer } from "components/header-spacer";
+import Loader from "components/loader";
+import { type EmojiMartData } from "components/pages/emoji-picker/types";
+import { init } from "emoji-mart";
+import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
+import { enableMapSet } from "immer";
+import { APTOS_NETWORK } from "lib/env";
 import React, { Suspense, useEffect, useMemo, useState } from "react";
+import { isMobile, isTablet } from "react-device-detect";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
-import ThemeContextProvider, { useThemeContext } from "./theme-context";
-import Loader from "components/loader";
-import Header from "components/header";
-import Footer from "components/footer";
-import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
-import ContentWrapper from "./ContentWrapper";
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import StyledToaster from "styles/StyledToaster";
+import { completePickerData } from "utils/picker-data/complete-picker-data";
+
+import { ConnectToWebSockets } from "./ConnectToWebSockets";
+import ContentWrapper from "./ContentWrapper";
+import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import {
   EventStoreProvider,
   UserSettingsProvider,
 } from "./event-store-context/StateStoreContextProviders";
-import { enableMapSet } from "immer";
-import { ConnectToWebSockets } from "./ConnectToWebSockets";
-import { APTOS_NETWORK } from "lib/env";
+import ThemeContextProvider, { useThemeContext } from "./theme-context";
+import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
-import { PontemWallet } from "@pontem/wallet-adapter-plugin";
-import { RiseWallet } from "@rise-wallet/wallet-adapter";
-import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
-import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
-import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
-import { isMobile, isTablet } from "react-device-detect";
-import { getAptosApiKey } from "@sdk/const";
-import { HeaderSpacer } from "components/header-spacer";
-import { GeoblockedBanner } from "components/geoblocking";
-import { completePickerData } from "utils/picker-data/complete-picker-data";
-import { type EmojiMartData } from "components/pages/emoji-picker/types";
-import { init } from "emoji-mart";
 
 /**
  * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.

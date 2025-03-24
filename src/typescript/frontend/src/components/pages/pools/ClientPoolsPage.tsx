@@ -1,28 +1,28 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useMatchBreakpoints } from "hooks";
 import { FlexGap } from "@containers";
+import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
+import { DEFAULT_POOLS_SORT_BY } from "@sdk/indexer-v2/queries/query-params";
+import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
+import SearchBar from "components/inputs/search-bar";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
 import {
-  StyledWrapper,
   StyledHeader,
   StyledHeaderInner,
-  StyledPoolsPage,
   StyledInner,
+  StyledPoolsPage,
   StyledSubHeader,
+  StyledWrapper,
 } from "components/pages/pools/styled";
-import { parseJSON } from "utils";
-import type { SortByPageQueryParams } from "lib/queries/sorting/types";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEmojiPicker } from "context/emoji-picker-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useMatchBreakpoints } from "hooks";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { useSearchParams } from "next/navigation";
-import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
-import SearchBar from "components/inputs/search-bar";
-import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
-import { DEFAULT_POOLS_SORT_BY } from "@sdk/indexer-v2/queries/query-params";
+import React, { useEffect, useState } from "react";
 import { ROUTES } from "router/routes";
+import { parseJSON } from "utils";
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 

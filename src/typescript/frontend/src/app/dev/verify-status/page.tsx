@@ -1,5 +1,6 @@
-import VerifyStatusPage from "@/components/pages/verify-status/VerifyStatusPage";
 import { headers } from "next/headers";
+
+import VerifyStatusPage from "@/components/pages/verify-status/VerifyStatusPage";
 
 const Verify = async () => {
   const country = headers().get("x-vercel-ip-country");

@@ -1,8 +1,9 @@
-import { toReserves } from "@sdk-types";
+import "server-only";
+
 import { type Uint64String } from "@sdk/emojicoin_dot_fun";
 import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
+import { toReserves } from "@sdk-types";
 import Big from "big.js";
-import "server-only";
 
 export const estimateLiquidityInUSD = (
   e: {

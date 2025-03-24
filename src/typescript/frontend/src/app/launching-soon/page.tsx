@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useMemo } from "react";
-import MatrixRain from "../maintenance/matrix";
-import { useScramble } from "use-scramble";
-import { Text } from "components";
 import { getRandomChatEmoji } from "@sdk/emoji_data";
+import { Text } from "components";
+import React, { useMemo } from "react";
+import { useScramble } from "use-scramble";
+
+import MatrixRain from "../maintenance/matrix";
 
 export default function LaunchingPage() {
   const catchPhrase = useMemo(() => {

@@ -3,18 +3,18 @@
 // cspell:word ratelimit
 // cspell:word upstash
 
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
   COOKIE_FOR_HASHED_ADDRESS,
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
-import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITER } from "lib/server-env";
 import { IS_ALLOWLIST_ENABLED } from "lib/env";
-import { NextResponse, type NextRequest } from "next/server";
+import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITER } from "lib/server-env";
+import { type NextRequest, NextResponse } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 
 const rateLimiters = (() => {
   if (RATE_LIMITER.enabled) {

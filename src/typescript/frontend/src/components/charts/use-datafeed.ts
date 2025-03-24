@@ -1,24 +1,25 @@
 import { isNonArenaPeriod, periodEnumToRawDuration } from "@sdk/const";
 import { type Bar, type IBasicDataFeed } from "@static/charting_library";
-import { useUserSettings, useEventStore } from "context/event-store-context";
+import { useEventStore, useUserSettings } from "context/event-store-context";
 import { decodeSymbolsForChart, isArenaChartSymbol, parseSymbolWithParams } from "lib/chart-utils";
+import { useRouter } from "next/navigation";
 import path from "path";
 import { useMemo } from "react";
 import { ROUTES } from "router/routes";
+
 import { ResolutionStringToPeriod } from "./const";
 import {
+  createDummyBar,
   fetchCandlesticksForChart,
   fetchLatestBarsFromMarketResource,
   updateLastTwoBars,
-  createDummyBar,
 } from "./get-bars";
 import {
   CONFIGURATION_DATA,
-  searchSymbolsFromRegisteredMarketMap,
   constructLibrarySymbolInfo,
+  searchSymbolsFromRegisteredMarketMap,
   symbolInfoToSymbol,
 } from "./trading-view-utils";
-import { useRouter } from "next/navigation";
 
 export const useDatafeed = (symbol: string) => {
   const router = useRouter();

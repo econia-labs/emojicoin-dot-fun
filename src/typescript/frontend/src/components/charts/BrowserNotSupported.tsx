@@ -1,5 +1,5 @@
 import { cn } from "lib/utils/class-name";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 

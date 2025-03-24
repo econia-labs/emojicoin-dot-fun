@@ -1,8 +1,7 @@
+import { Box } from "@containers";
 import styled from "styled-components";
 
-import { Box } from "@containers";
 import { variantStyles } from "./theme";
-
 import { animation as animation$1, type SkeletonProps, variant as VARIANT } from "./types";
 
 const StyledSkeleton = styled(Box).attrs<SkeletonProps>(

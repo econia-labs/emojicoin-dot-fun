@@ -1,10 +1,12 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
-import type { NameStore } from "@/store/name-store";
-import { UserSettingsContext, EventStoreContext } from "./StateStoreContextProviders";
-import { type UserSettingsStore } from "@/store/user-settings-store";
+
 import { type EventStore } from "@/store/event/types";
+import type { NameStore } from "@/store/name-store";
+import { type UserSettingsStore } from "@/store/user-settings-store";
 import { type WebSocketClientStore } from "@/store/websocket/store";
+
+import { EventStoreContext, UserSettingsContext } from "./StateStoreContextProviders";
 
 export const useEventStore = <T,>(selector: (store: EventStore & WebSocketClientStore) => T): T => {
   const eventStoreContext = useContext(EventStoreContext);

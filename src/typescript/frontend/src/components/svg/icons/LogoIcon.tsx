@@ -1,11 +1,11 @@
-import React from "react";
-import Svg from "components/svg/Svg";
-
-import { VERSION } from "lib/env";
-import { type SvgProps } from "../types";
-import { useThemeContext } from "context";
-import type { Colors } from "theme/types";
 import { Badge } from "components/Badge";
+import Svg from "components/svg/Svg";
+import { useThemeContext } from "context";
+import { VERSION } from "lib/env";
+import React from "react";
+import type { Colors } from "theme/types";
+
+import { type SvgProps } from "../types";
 
 const VersionBadge: React.FC<{ color: keyof Colors }> = ({ color }) =>
   // prettier-ignore

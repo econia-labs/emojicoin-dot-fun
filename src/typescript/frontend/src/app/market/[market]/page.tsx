@@ -1,16 +1,18 @@
-import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
-import EmojiNotFoundPage from "./not-found";
-import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
-import { pathToEmojiNames } from "utils/pathname-helpers";
-import { fetchMarketState, fetchSwapEvents } from "@/queries/market";
-import { type Metadata } from "next";
-import { getAptPrice } from "lib/queries/get-apt-price";
-import { AptPriceContextProvider } from "context/AptPrice";
-import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
-import { fetchMelee } from "@/queries/arena";
+import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
+import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
+import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
+import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
+import { getAptPrice } from "lib/queries/get-apt-price";
+import { type Metadata } from "next";
+import { pathToEmojiNames } from "utils/pathname-helpers";
+
+import { fetchMelee } from "@/queries/arena";
+import { fetchMarketState, fetchSwapEvents } from "@/queries/market";
+
+import EmojiNotFoundPage from "./not-found";
 
 export const revalidate = 2;
 

@@ -1,8 +1,8 @@
 import Button from "components/button";
-import { type FC, useEffect, useState } from "react";
-import { useInView } from "react-intersection-observer";
 import Text from "components/text";
 import { cn } from "lib/utils/class-name";
+import { type FC, useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
 
 interface Props {
   className?: string;

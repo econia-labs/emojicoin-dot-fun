@@ -1,21 +1,20 @@
 "use client";
 
-import TextCarousel from "components/text-carousel/TextCarousel";
-import { useEmojiPicker } from "context/emoji-picker-context";
-import { startTransition, useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { getEmojisInString } from "@sdk/emoji_data";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { ROUTES } from "router/routes";
-import { useRouter } from "next/navigation";
-import path from "path";
-import { getEvents } from "@sdk/emojicoin_dot_fun";
 import {
   isUserTransactionResponse,
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { getEmojisInString, symbolBytesToEmojis } from "@sdk/emoji_data";
+import { getEvents } from "@sdk/emojicoin_dot_fun";
+import TextCarousel from "components/text-carousel/TextCarousel";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useRouter, useSearchParams } from "next/navigation";
+import path from "path";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import { ROUTES } from "router/routes";
+
 import MemoizedLaunchAnimation from "./memoized-launch";
 
 const LOADING_TIME = 2000;

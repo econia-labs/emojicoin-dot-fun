@@ -1,7 +1,8 @@
 import DottedInbox from "components/svg/slideshow/DottedInbox";
 import DottedLink from "components/svg/slideshow/DottedLink";
 import DottedStar from "components/svg/slideshow/DottedStar";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+
 import { type SlideState } from "./WalletModal";
 
 export const Slide = () => {};

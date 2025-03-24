@@ -1,13 +1,14 @@
-import { useEffect, useRef } from "react";
-import { WIDGET_OPTIONS } from "./const";
 import { type IChartingLibraryWidget, type Timezone, widget } from "@static/charting_library";
-import { encodeSymbolsForChart, formatSymbolWithParams } from "lib/chart-utils";
-import { type ChartContainerProps } from "./types";
-import { useUserSettings } from "context/event-store-context";
-import { BrowserNotSupported } from "./BrowserNotSupported";
 import { createSwitch } from "components/charts/EmptyCandlesSwitch";
-import { useDatafeed } from "./use-datafeed";
+import { useUserSettings } from "context/event-store-context";
+import { encodeSymbolsForChart, formatSymbolWithParams } from "lib/chart-utils";
 import { cn } from "lib/utils/class-name";
+import { useEffect, useRef } from "react";
+
+import { BrowserNotSupported } from "./BrowserNotSupported";
+import { WIDGET_OPTIONS } from "./const";
+import { type ChartContainerProps } from "./types";
+import { useDatafeed } from "./use-datafeed";
 
 /**
  * The TradingView Chart component. This component is responsible for rendering the TradingView chart with the usage of

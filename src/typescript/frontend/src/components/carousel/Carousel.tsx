@@ -1,10 +1,10 @@
 "use client";
 
-import styles from "./Carousel.module.css";
-
-import { useEffect, useRef, useState } from "react";
 import useNodeDimensions from "@hooks/use-node-dimensions";
+import { useEffect, useRef, useState } from "react";
 import { useWindowSize } from "react-use";
+
+import styles from "./Carousel.module.css";
 
 export const Carousel = ({ children, gap = 0 }: React.PropsWithChildren<{ gap?: number }>) => {
   const carouselRef = useRef<HTMLDivElement>(null);

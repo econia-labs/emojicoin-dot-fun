@@ -1,8 +1,8 @@
 import { useMatchBreakpoints } from "@hooks/index";
 import {
+  type ArenaInfoModel,
   type ArenaLeaderboardHistoryWithArenaInfoModel,
   type ArenaPositionModel,
-  type ArenaInfoModel,
   type MarketStateModel,
 } from "@sdk/indexer-v2/types";
 import { type ClassValue } from "clsx";

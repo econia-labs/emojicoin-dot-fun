@@ -1,9 +1,8 @@
 // cspell:word istouched
-import { type ReactElement } from "react";
-import { type SpaceProps, type LayoutProps, type ResponsiveValue } from "styled-system";
-
 import { type Scales } from "components/inputs/input/types";
 import { type Scales as TextScales } from "components/text/types";
+import { type ReactElement } from "react";
+import { type LayoutProps, type ResponsiveValue, type SpaceProps } from "styled-system";
 
 export const variants = {
   FANTOM: "fantom",

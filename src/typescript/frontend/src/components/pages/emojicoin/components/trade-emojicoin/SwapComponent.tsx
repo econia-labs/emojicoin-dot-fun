@@ -1,31 +1,32 @@
 "use client";
 
-import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import { type PropsWithChildren, useEffect, useState, useMemo } from "react";
-import FlipInputsArrow from "./FlipInputsArrow";
-import { Column, Row } from "components/layout/components/FlexContainers";
-import { SwapButton } from "./SwapButton";
-import { type SwapComponentProps } from "components/pages/emojicoin/types";
-import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
-import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-simulate-swap";
-import { useEventStore } from "context/event-store-context";
+import { Flex, FlexGap } from "@containers";
 import { useTooltip } from "@hooks/index";
-import { useSearchParams } from "next/navigation";
+import { toCoinTypes } from "@sdk/markets/utils";
+import { EmojiPill } from "components/EmojiPill";
+import { FormattedNumber } from "components/FormattedNumber";
+import { InputNumeric } from "components/inputs";
+import { Column, Row } from "components/layout/components/FlexContainers";
+import { type SwapComponentProps } from "components/pages/emojicoin/types";
+import { getTooltipStyles } from "components/selects/theme";
+import { TradeOptions } from "components/selects/trade-options";
+import { useThemeContext } from "context";
+import { useEventStore } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { AnimatePresence, motion } from "framer-motion";
-import { toCoinTypes } from "@sdk/markets/utils";
-import { Flex, FlexGap } from "@containers";
-import { InputNumeric } from "components/inputs";
-import { emoji } from "utils";
-import { getTooltipStyles } from "components/selects/theme";
-import { useThemeContext } from "context";
-import { TradeOptions } from "components/selects/trade-options";
-import { getMaxSlippageSettings } from "utils/slippage";
-import { Emoji } from "utils/emoji";
-import { EmojiPill } from "components/EmojiPill";
+import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-simulate-swap";
 import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
-import { FormattedNumber } from "components/FormattedNumber";
+import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
+import { useSearchParams } from "next/navigation";
+import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+import { getMaxSlippageSettings } from "utils/slippage";
+
+import FlipInputsArrow from "./FlipInputsArrow";
+import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
+import { SwapButton } from "./SwapButton";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>

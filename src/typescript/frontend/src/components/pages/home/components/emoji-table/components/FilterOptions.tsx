@@ -1,13 +1,14 @@
 import { FlexGap } from "@containers";
-import { SingleSelect, DropdownMenu } from "components/selects";
-import { Switcher } from "components/switcher";
-import { translationFunction } from "context/language-context";
-import { StyledTHFilters } from "../styled";
-import { useMatchBreakpoints } from "hooks";
-import { Text } from "components/text";
-import { type Option } from "components/selects/types";
-import { useUserSettings } from "context/event-store-context";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { DropdownMenu, SingleSelect } from "components/selects";
+import { type Option } from "components/selects/types";
+import { Switcher } from "components/switcher";
+import { Text } from "components/text";
+import { useUserSettings } from "context/event-store-context";
+import { translationFunction } from "context/language-context";
+import { useMatchBreakpoints } from "hooks";
+
+import { StyledTHFilters } from "../styled";
 
 const titleFromValue: Record<SortMarketsBy, string> = {
   [SortMarketsBy.MarketCap]: "Market Cap",

@@ -1,23 +1,25 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useMatchBreakpoints } from "hooks";
 import { Box } from "@containers";
-import DesktopGrid from "./components/desktop-grid";
-import MobileGrid from "./components/mobile-grid";
-import { type EmojicoinProps } from "./types";
-import { useEventStore } from "context/event-store-context";
-import MainInfo from "./components/main-info/MainInfo";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
-import { type SubscribableBrokerEvents } from "@/broker/types";
-import { marketToLatestBars } from "@/store/event/candlestick-bars";
-import Carousel from "components/carousel";
 import { Text } from "components";
+import Carousel from "components/carousel";
+import { useEventStore } from "context/event-store-context";
+import { useMatchBreakpoints } from "hooks";
+import FEATURE_FLAGS from "lib/feature-flags";
 import { GlobeIcon } from "lucide-react";
 import Link from "next/link";
+import React, { useEffect } from "react";
 import { ROUTES } from "router/routes";
 import { darkColors } from "theme";
-import FEATURE_FLAGS from "lib/feature-flags";
+
+import { type SubscribableBrokerEvents } from "@/broker/types";
+import { marketToLatestBars } from "@/store/event/candlestick-bars";
+
+import DesktopGrid from "./components/desktop-grid";
+import MainInfo from "./components/main-info/MainInfo";
+import MobileGrid from "./components/mobile-grid";
+import { type EmojicoinProps } from "./types";
 
 const EVENT_TYPES: SubscribableBrokerEvents[] = ["Chat", "PeriodicState", "Swap"];
 

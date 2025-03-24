@@ -1,15 +1,17 @@
-import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
-import HomePageComponent from "./HomePage";
-import { fetchMarkets, fetchMarketsWithCount } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
-import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { getAptPrice } from "lib/queries/get-apt-price";
 import { getCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 import { fetchCachedPriceFeed } from "lib/queries/price-feed";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
+
+import { fetchMarkets, fetchMarketsWithCount } from "@/queries/home";
+
 import { fetchCachedMeleeData } from "./fetch-melee-data";
-import FEATURE_FLAGS from "lib/feature-flags";
+import HomePageComponent from "./HomePage";
 
 export const revalidate = 2;
 

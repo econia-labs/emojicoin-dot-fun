@@ -1,6 +1,6 @@
 export type {
-  ThemedProps,
   AsProps,
   MergeProps,
   PolymorphicComponentProps,
+  ThemedProps,
 } from "./styled-components-types";

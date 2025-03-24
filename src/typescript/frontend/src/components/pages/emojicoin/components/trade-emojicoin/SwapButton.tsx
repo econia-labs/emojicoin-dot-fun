@@ -1,18 +1,19 @@
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { STRUCT_STRINGS } from "@sdk/utils";
 import Button from "components/button";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import Popup from "components/popup";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { STRUCT_STRINGS } from "@sdk/utils";
 import { useAnimationControls } from "framer-motion";
-import { RewardsAnimation } from "./RewardsAnimation";
-import { toast } from "react-toastify";
-import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
-import Popup from "components/popup";
 import { useSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-swap-builder";
+import { type Dispatch, type SetStateAction, useCallback, useEffect } from "react";
+import { toast } from "react-toastify";
+
+import { CongratulationsToast } from "./CongratulationsToast";
+import { RewardsAnimation } from "./RewardsAnimation";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +

@@ -1,12 +1,30 @@
 import {
+  type Aptos,
   APTOS_COIN,
   AptosApiError,
   isUserTransactionResponse,
-  type Aptos,
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { useNameResolver } from "@hooks/use-name-resolver";
+import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
+import {
+  type EntryFunctionTransactionBuilder,
+  type WalletInputTransactionData,
+} from "@sdk/emojicoin_dot_fun/payload-builders";
+import { sleep } from "@sdk/utils";
+import { getAptosClient } from "@sdk/utils/aptos-client";
+import {
+  checkNetworkAndToast,
+  parseAPIErrorAndToast,
+  successfulTransactionToast,
+} from "components/wallet/toasts";
+import { DEFAULT_TOAST_CONFIG } from "const";
+import { useEventStore } from "context/event-store-context";
+import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
+import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import {
   createContext,
   type PropsWithChildren,
@@ -16,30 +34,13 @@ import {
   useState,
 } from "react";
 import { toast } from "react-toastify";
-import {
-  type WalletInputTransactionData,
-  type EntryFunctionTransactionBuilder,
-} from "@sdk/emojicoin_dot_fun/payload-builders";
-import {
-  checkNetworkAndToast,
-  parseAPIErrorAndToast,
-  successfulTransactionToast,
-} from "components/wallet/toasts";
-import { useEventStore } from "context/event-store-context";
-import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import { DEFAULT_TOAST_CONFIG } from "const";
-import { sleep } from "@sdk/utils";
-import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
-import { getAptosClient } from "@sdk/utils/aptos-client";
-import { useNameResolver } from "@hooks/use-name-resolver";
+
 import {
   copyAddressHelper,
   getFlattenedEventModelsFromResponse,
   setBalancesFromWriteset,
   setCoinTypeHelper,
 } from "./utils";
-import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{

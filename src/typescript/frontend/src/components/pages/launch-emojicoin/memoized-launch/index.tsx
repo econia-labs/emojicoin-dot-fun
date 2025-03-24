@@ -1,22 +1,23 @@
+import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@sdk/const";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { MarketValidityIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
-import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useMemo } from "react";
+import Info from "components/info";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
-import { useRegisterMarket } from "../hooks/use-register-market";
-import { useIsMarketRegistered } from "../hooks/use-is-market-registered";
-import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
-import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { AnimatePresence, motion } from "framer-motion";
+import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@sdk/const";
-import Info from "components/info";
-import { Emoji } from "utils/emoji";
+import React, { useEffect, useMemo } from "react";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
-import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
+import { Emoji } from "utils/emoji";
+
+import { useIsMarketRegistered } from "../hooks/use-is-market-registered";
+import { useRegisterMarket } from "../hooks/use-register-market";
+import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 

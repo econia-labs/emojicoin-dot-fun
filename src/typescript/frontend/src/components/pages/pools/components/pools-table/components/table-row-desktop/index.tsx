@@ -1,16 +1,17 @@
-import React, { useMemo } from "react";
-import { useMatchBreakpoints } from "hooks";
 import { Flex } from "@containers";
-import { Text, Tr, Td } from "components";
-import { type TableRowDesktopProps } from "./types";
-import { toCoinDecimalString } from "lib/utils/decimals";
-import { XprPopup } from "./XprPopup";
-import { Emoji } from "utils/emoji";
-import Link from "next/link";
-import Popup from "components/popup";
-import { emojiNamesToPath } from "utils/pathname-helpers";
+import { Td, Text, Tr } from "components";
 import { FormattedNumber } from "components/FormattedNumber";
+import Popup from "components/popup";
+import { useMatchBreakpoints } from "hooks";
+import { toCoinDecimalString } from "lib/utils/decimals";
+import Link from "next/link";
+import React, { useMemo } from "react";
 import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+import { emojiNamesToPath } from "utils/pathname-helpers";
+
+import { type TableRowDesktopProps } from "./types";
+import { XprPopup } from "./XprPopup";
 
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
