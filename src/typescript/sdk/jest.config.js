@@ -1,5 +1,16 @@
 const { pathsToModuleNameMapper } = require("ts-jest");
-const { compilerOptions } = require("./tsconfig");
+const { compilerOptions } = require("./tests/tsconfig.json");
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
+console.warn(compilerOptions);
 
 /** @type {import("jest").Config} */
 module.exports = {
