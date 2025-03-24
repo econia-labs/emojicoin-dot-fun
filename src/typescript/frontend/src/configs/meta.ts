@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { emoji } from "utils";
 
-export const DEFAULT_TITLE = "emojicoin.fun";
+const DEFAULT_TITLE = "emojicoin.fun";
 const DEFAULT_DESCRIPTION = `Give your wallet the personality it deserves ${emoji("zany face")}${emoji("sparkles")}`;
 const OG_IMAGES = "/social-preview.png";
 const OG_TYPE = "website";

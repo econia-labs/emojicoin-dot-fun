@@ -46,4 +46,4 @@ type GapProps = {
   columnGap?: ResponsiveValue<CSS.Property.ColumnGap>;
 };
 
-export interface RowProps extends FlexProps {}
+interface RowProps extends FlexProps {}

@@ -20,7 +20,7 @@ import { useCallback, useMemo } from "react";
 
 import { RegisterMarket } from "@/contract-apis/emojicoin-dot-fun";
 
-export const tryEd25519PublicKey = (account: AccountInfo) => {
+const tryEd25519PublicKey = (account: AccountInfo) => {
   try {
     return new Ed25519PublicKey(
       typeof account.publicKey === "string" ? account.publicKey : account.publicKey[0]

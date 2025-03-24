@@ -8,4 +8,4 @@ export { type BoxProps } from "./types";
 export { type BoxThemedProps } from "./types";
 export { type FlexProps } from "./types";
 export { type FlexGapProps } from "./types";
-export { type RowProps } from "./types";
+;

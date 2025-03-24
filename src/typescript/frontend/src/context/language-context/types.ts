@@ -1,6 +1,6 @@
 import type translations from "../../../public/locales/en-US.json";
 
-export interface Language {
+interface Language {
   code: string;
   language: string;
   locale: string;
