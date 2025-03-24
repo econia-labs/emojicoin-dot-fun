@@ -1,9 +1,7 @@
 import { Account, Ed25519PrivateKey, Hex, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import path from "path";
 import findGitRoot from "find-git-root";
-import { getAptosClient } from "../../src/utils/aptos-client";
-import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
-import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
+import path from "path";
+
 import {
   type MarketEmojiData,
   ONE_APT,
@@ -13,7 +11,10 @@ import {
   toMarketEmojiData,
   type Types,
 } from "../../src";
+import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
 import { type Events } from "../../src/emojicoin_dot_fun/events";
+import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
+import { getAptosClient } from "../../src/utils/aptos-client";
 import { type XOR } from "../../src/utils/utility-types";
 
 // The exact amount of APT to trigger a transition out of the bonding curve. Note that the

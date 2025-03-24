@@ -1,8 +1,9 @@
 import { AccountAddress, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { type TransactionMetadata, type DatabaseModels, GuidGetters } from "../types";
+
 import { getEvents } from "../../emojicoin_dot_fun";
-import { getTxnInfo } from "./event-groups/builder";
 import { type Types } from "../../types/types";
+import { type DatabaseModels, GuidGetters, type TransactionMetadata } from "../types";
+import { getTxnInfo } from "./event-groups/builder";
 
 export type ArenaEventsModels = {
   arenaMeleeEvents: DatabaseModels["arena_melee_events"][];

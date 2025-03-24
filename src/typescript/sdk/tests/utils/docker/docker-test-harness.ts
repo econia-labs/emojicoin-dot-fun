@@ -1,22 +1,23 @@
 // eslint-disable no-await-in-loop
 // cspell:word localnet
 
-import path from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
+import path from "node:path";
 import { kill } from "node:process";
+
+import { TableName } from "../../../src/indexer-v2/types/json-types";
+import { EMOJICOIN_INDEXER_URL } from "../../../src/server/env";
 import { waitFor } from "../../../src/utils";
 import { getGitRoot } from "../helpers";
 import { type ContainerName } from "./logs";
 import {
-  getContainerState,
-  isRunningAndHealthy,
   type ContainerState,
   execPromise,
+  getContainerState,
+  isRunningAndHealthy,
   spawnWrapper,
 } from "./utils";
-import { EMOJICOIN_INDEXER_URL } from "../../../src/server/env";
-import { TableName } from "../../../src/indexer-v2/types/json-types";
-import { readFileSync, writeFileSync } from "node:fs";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
 const LOCAL_ENV_PATH = path.join(getGitRoot(), "src/docker", "example.local.env");

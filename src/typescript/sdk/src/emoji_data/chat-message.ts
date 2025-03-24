@@ -1,4 +1,5 @@
 import emojiRegex from "emoji-regex";
+
 import {
   CHAT_EMOJI_DATA,
   isSymbolEmoji,

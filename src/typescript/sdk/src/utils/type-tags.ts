@@ -1,17 +1,18 @@
 import {
-  type AccountAddressInput,
   AccountAddress,
+  type AccountAddressInput,
   parseTypeTag,
   type TypeTag,
   type TypeTagStruct,
 } from "@aptos-labs/ts-sdk";
+
 import {
-  MODULE_ADDRESS,
-  EMOJICOIN_DOT_FUN_MODULE_NAME,
-  REWARDS_MODULE_NAME,
-  REWARDS_MODULE_ADDRESS,
   ARENA_MODULE_ADDRESS,
   ARENA_MODULE_NAME,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+  MODULE_ADDRESS,
+  REWARDS_MODULE_ADDRESS,
+  REWARDS_MODULE_NAME,
 } from "../const";
 import { type TypeTagInput } from "../emojicoin_dot_fun";
 import { removeLeadingZeros } from "./account-address";

@@ -1,3 +1,7 @@
+import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
+
+import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/contract-apis";
+
 import {
   compareBigInt,
   encodeEmojis,
@@ -14,10 +18,10 @@ import {
   type Types,
   zip,
 } from "../../../src";
-import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/contract-apis";
-import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
 import { type BrokerEvent } from "../../../src/broker-v2/types";
+import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
+import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import {
   isChatEventModel,
   isMarketLatestStateEventModel,
@@ -25,11 +29,9 @@ import {
   isSwapEventModel,
   isTransactionEventModel,
 } from "../../../src/indexer-v2/types";
-import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
-import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
-import { connectNewClient, compareParsedData, subscribe, customWaitFor } from "./utils";
-import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
+import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
+import { getFundedAccounts } from "../../utils/test-accounts";
+import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "./utils";
 
 jest.setTimeout(20000);
 

@@ -1,15 +1,16 @@
+import { type Account } from "@aptos-labs/ts-sdk";
+
 import {
   chunk,
   getAptosClient,
   SYMBOL_EMOJI_DATA,
   SYMBOL_EMOJIS,
-  toSequenceNumberOptions,
   type SymbolEmoji,
+  toSequenceNumberOptions,
 } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { fetchSpecificMarkets, waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 import { getFundedAccounts } from "../../utils/test-accounts";
-import { type Account } from "@aptos-labs/ts-sdk";
 
 jest.setTimeout(30000);
 
