@@ -8,7 +8,7 @@ import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 
 import { getEvents, maxBigInt, sum, sumByKey } from "../../../src";
 import { type Events } from "../../../src/emojicoin_dot_fun/events";
-import { getAptosClient , registerMarketHelper } from "../../utils";
+import { getAptosClient, registerMarketHelper } from "../../utils";
 import { getTxnBatchHighestVersion } from "../../utils/get-txn-batch-highest-version";
 import { getFundedAccounts } from "../../utils/test-accounts";
 import { fetchDailyVolumeForMarket, fetchSwapEventsBySwapper } from ".";

@@ -1,6 +1,6 @@
 import { Chat, ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
 
-import { getEvents,ONE_APT, type SymbolEmojiName } from "../../../src";
+import { getEvents, ONE_APT, type SymbolEmojiName } from "../../../src";
 import {
   fetchChatEvents,
   fetchSwapEvents,

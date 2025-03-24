@@ -9,7 +9,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
-import { encodeEmojis,type SymbolEmoji } from "../emoji_data";
+import { encodeEmojis, type SymbolEmoji } from "../emoji_data";
 import type JsonTypes from "../types/json-types";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
 import { typeTagInputToStructName } from "../utils/type-tags";

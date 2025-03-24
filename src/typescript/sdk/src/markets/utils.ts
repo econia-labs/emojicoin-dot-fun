@@ -48,7 +48,7 @@ import {
   toRegistryResource,
   type Types,
 } from "../types/types";
-import { getResourceFromWriteSet,STRUCT_STRINGS, TYPE_TAGS } from "../utils";
+import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
 import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";

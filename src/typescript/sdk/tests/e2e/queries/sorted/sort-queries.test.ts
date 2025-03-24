@@ -14,7 +14,7 @@ import {
 import { fetchMarkets } from "../../../../src/indexer-v2/queries/app/home";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { SortMarketsBy } from "../../../../src/indexer-v2/types/common";
-import { getAptosClient,registerMarketHelper  } from "../../../utils";
+import { getAptosClient, registerMarketHelper } from "../../../utils";
 import { getFundedAccounts } from "../../../utils/test-accounts";
 import {
   checkOrder,

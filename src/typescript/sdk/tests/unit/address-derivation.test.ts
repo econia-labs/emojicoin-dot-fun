@@ -1,6 +1,6 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 
-import { getMarketAddress,type SymbolEmoji } from "../../src";
+import { getMarketAddress, type SymbolEmoji } from "../../src";
 
 describe("it derives emojicoin addresses", () => {
   it("derives the named object address from hex string emojis", async () => {
