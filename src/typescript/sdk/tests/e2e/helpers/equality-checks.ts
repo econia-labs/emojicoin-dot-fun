@@ -109,7 +109,7 @@ export const compareTransactionMetadata = <T extends Indexer["TransactionMetadat
     ["row.transaction.time", row.transaction.time, BigInt(response.timestamp)],
   ]);
 
-export const compareMarketAndStateMetadata = <
+const compareMarketAndStateMetadata = <
   T extends
     | Indexer["MarketAndStateMetadataAndBumpTime"]
     | Indexer["MarketAndStateMetadataAndEmitTime"],
@@ -135,10 +135,7 @@ export const compareMarketAndStateMetadata = <
     ],
   ]);
 
-export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
-  row: T,
-  event: Types["SwapEvent"]
-) =>
+const compareSwapEvents = <T extends Indexer["SwapEventData"]>(row: T, event: Types["SwapEvent"]) =>
   checkTuples([
     ["row.swap.swapper", row.swap.swapper, event.swapper],
     ["row.swap.integrator", row.swap.integrator, event.integrator],
@@ -169,7 +166,7 @@ export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
     ],
   ]);
 
-export const compareStateEvents = <T extends Indexer["StateEventData"]>(
+const compareStateEvents = <T extends Indexer["StateEventData"]>(
   row: T,
   event: Types["StateEvent"]
 ) =>
