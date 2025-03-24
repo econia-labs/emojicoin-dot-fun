@@ -1,3 +1,4 @@
+// cspell:word nofunc
 // cspell:word tsup
 
 module.exports = {
