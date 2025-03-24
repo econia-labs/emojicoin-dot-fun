@@ -1,3 +1,5 @@
+import type { WritableDraft } from "immer";
+
 import type { ArenaCandlestickModel, ArenaModelWithMeleeID } from "@/sdk/indexer-v2";
 import {
   isArenaCandlestickModel,
@@ -7,7 +9,6 @@ import {
   isArenaSwapModel,
 } from "@/sdk/types/arena-types";
 import { toNominal } from "@/sdk/utils";
-import type { WritableDraft } from "immer";
 
 import { toBar } from "../event/candlestick-bars";
 import { callbackClonedLatestBarIfSubscribed } from "../utils";

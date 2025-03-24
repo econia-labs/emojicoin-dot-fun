@@ -1,3 +1,7 @@
+import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "lib/chart-utils";
+import { ROUTES } from "router/routes";
+import { fetchRateLimited } from "utils";
+
 import {
   type ArenaPeriod,
   type Period,
@@ -17,10 +21,6 @@ import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { XOR } from "@/sdk/utils/utility-types";
 import type { Flatten, Types } from "@/sdk-types";
 import type { Bar, PeriodParams } from "@/static/charting_library";
-import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "lib/chart-utils";
-import { ROUTES } from "router/routes";
-import { fetchRateLimited } from "utils";
-
 import {
   marketToLatestBars,
   periodicStateTrackerToLatestBar,

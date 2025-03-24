@@ -1,5 +1,6 @@
 // cspell:word ilike
 import { AccountAddress } from "@aptos-labs/ts-sdk";
+
 import { getAptosClient, removeLeadingZerosFromStructString } from "@/sdk/utils";
 
 export type AssetBalance = {

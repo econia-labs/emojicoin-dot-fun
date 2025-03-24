@@ -1,6 +1,7 @@
+import { z } from "zod";
+
 import { Period } from "@/sdk/const";
 import { Schemas } from "@/sdk/utils";
-import { z } from "zod";
 
 export const CandlesticksSearchParamsSchema = z.object({
   marketID: Schemas["PositiveInteger"].describe("`marketID` must be a positive integer."),
