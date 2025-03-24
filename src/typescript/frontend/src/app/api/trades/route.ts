@@ -1,7 +1,9 @@
-import { fetchSwapEvents } from "@/queries/market";
-import { stringifyJSON } from "utils";
-import { GetTradesSchema } from "./schema";
 import { NextResponse } from "next/server";
+import { stringifyJSON } from "utils";
+
+import { fetchSwapEvents } from "@/queries/market";
+
+import { GetTradesSchema } from "./schema";
 
 // Don't cache this route's response.
 export const revalidate = 0;

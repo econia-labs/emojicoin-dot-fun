@@ -1,16 +1,15 @@
 "use client";
 
-import React from "react";
-
-import { languageList, EN } from "configs";
 import { Container } from "@containers";
-
-import { type PageProps } from "../types";
+import { EN, languageList } from "configs";
 import { DEFAULT_TITLE, getDefaultMetadata } from "configs/meta";
 import { getLanguageCodeFromLocalStorage } from "context/language-context/helpers";
-import { type ResolvingMetadata, type Metadata } from "next";
-import { type AlternateLinkDescriptor } from "next/dist/lib/metadata/types/alternative-urls-types";
 import translateWithDefault from "lib/translate-with-default";
+import { type Metadata, type ResolvingMetadata } from "next";
+import { type AlternateLinkDescriptor } from "next/dist/lib/metadata/types/alternative-urls-types";
+import React from "react";
+
+import { type PageProps } from "../types";
 
 type Props = {
   params: { id: string };

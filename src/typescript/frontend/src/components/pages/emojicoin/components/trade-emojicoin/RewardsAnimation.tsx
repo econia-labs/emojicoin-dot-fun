@@ -1,9 +1,9 @@
-import { type AnimationControls, type HTMLMotionProps, motion } from "framer-motion";
-import { useWindowSize } from "react-use";
-import Confetti from "react-confetti";
-import { type Dispatch, type MutableRefObject, type SetStateAction, useRef, useState } from "react";
 import { sleep } from "@sdk/utils";
+import { type AnimationControls, type HTMLMotionProps, motion } from "framer-motion";
+import { type Dispatch, type MutableRefObject, type SetStateAction, useRef, useState } from "react";
+import Confetti from "react-confetti";
 import { createPortal } from "react-dom";
+import { useWindowSize } from "react-use";
 
 /**
  * The tween duration for the confetti animation is very inaccurate- a few stray confetti fall after 1/3 of the way

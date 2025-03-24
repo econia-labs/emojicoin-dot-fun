@@ -1,9 +1,9 @@
-import { ArenaClient } from "components/pages/arena/ArenaClient";
-import { redirect } from "next/navigation";
-import { ROUTES } from "router/routes";
-import { type Metadata } from "next/types";
-import FEATURE_FLAGS from "lib/feature-flags";
 import { fetchCachedMeleeData } from "app/home/fetch-melee-data";
+import { ArenaClient } from "components/pages/arena/ArenaClient";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { redirect } from "next/navigation";
+import { type Metadata } from "next/types";
+import { ROUTES } from "router/routes";
 
 export const revalidate = 2;
 

@@ -1,21 +1,23 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
-import { Flex, Column } from "@containers";
-import { MessageContainer } from "./components";
-import { type ChatProps } from "../../types";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useEventStore } from "context/event-store-context";
-import { useEmojiPicker } from "context/emoji-picker-context";
-import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
-import { getRankFromEvent } from "lib/utils/get-user-rank";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { Column, Flex } from "@containers";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import { useEventStore } from "context/event-store-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
 import { useChatTransactionBuilder } from "lib/hooks/transaction-builders/use-chat-builder";
-import { useChatEventsQuery } from "./useChatEventsQuery";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
 import _ from "lodash";
-import { LoadMore } from "@/components/ui/table/loadMore";
+import React, { useEffect, useMemo, useRef } from "react";
+
 import Loading from "@/components/loading";
+import { LoadMore } from "@/components/ui/table/loadMore";
+
+import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
+import { type ChatProps } from "../../types";
+import { MessageContainer } from "./components";
+import { useChatEventsQuery } from "./useChatEventsQuery";
 
 const ChatBox = (props: ChatProps) => {
   const { submit } = useAptos();

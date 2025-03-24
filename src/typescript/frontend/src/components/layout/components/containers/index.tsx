@@ -1,17 +1,16 @@
 "use client";
 
-import styled, { css } from "styled-components";
-import { border, layout, position, space, flexbox } from "styled-system";
-import React, { type PropsWithChildren } from "react";
 import {
-  type ColumnProps,
-  type RowProps,
   type BoxProps,
+  type BoxThemedProps,
+  type ColumnProps,
   type FlexGapProps,
   type FlexProps,
-  type BoxThemedProps,
+  type RowProps,
 } from "@containers";
-import { system } from "styled-system";
+import React, { type PropsWithChildren } from "react";
+import styled, { css } from "styled-components";
+import { border, flexbox, layout, position, space, system } from "styled-system";
 import { siteWidth } from "theme/base";
 
 export const getEllipsis = ({ ellipsis }: BoxThemedProps) => {

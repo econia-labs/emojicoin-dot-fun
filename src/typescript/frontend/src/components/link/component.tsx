@@ -1,6 +1,7 @@
 import React from "react";
-import { StyledLink, RouterLink } from "./styled";
+
 import { EXTERNAL_LINK_PROPS } from "./const";
+import { RouterLink, StyledLink } from "./styled";
 import { type LinkProps } from "./types";
 
 const Link: React.FC<LinkProps> = ({ external, href, underline = false, target, ...props }) => {

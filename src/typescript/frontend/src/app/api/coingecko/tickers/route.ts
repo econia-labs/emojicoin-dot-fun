@@ -1,12 +1,12 @@
 import { APTOS_COIN_TYPE_TAG } from "@sdk/const";
 import { postgrest } from "@sdk/indexer-v2/queries/client";
 import { TableName } from "@sdk/indexer-v2/types";
-import { toNominalPrice } from "@sdk/utils";
-import { toNominal } from "@sdk/utils";
+import { toNominal, toNominalPrice } from "@sdk/utils";
+import { getAptPrice } from "lib/queries/get-apt-price";
 import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
+
 import { estimateLiquidityInUSD } from "./utils";
-import { getAptPrice } from "lib/queries/get-apt-price";
 
 // Since this is a public endpoint, set revalidate to 1 to ensure it can't spam the indexer.
 export const revalidate = 1;

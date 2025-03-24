@@ -1,4 +1,5 @@
-import { test, expect, type Response } from "@playwright/test";
+import { expect, type Response, test } from "@playwright/test";
+
 import { REVALIDATE_TEST } from "../../src/const";
 
 const sleep = (ms: number) => {

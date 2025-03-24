@@ -1,6 +1,5 @@
-import React from "react";
-
 import BondingCurveArrow from "@icons/BondingCurveArrow";
+import React from "react";
 import { emoji } from "utils";
 import { EmojiAsImage } from "utils/emoji";
 

@@ -1,4 +1,5 @@
-import { type ReactElement, type PropsWithChildren } from "react";
+import { type PropsWithChildren, type ReactElement } from "react";
+
 import type translations from "../../../public/locales/en-US.json";
 
 export type ContextData = {

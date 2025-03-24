@@ -1,5 +1,6 @@
 import { type AnyEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
 import { createStore } from "zustand";
+
 import { insertEmojiTextInputHelper, removeEmojiTextInputHelper } from "./emoji-picker-utils";
 
 export type EmojiPickerState = {

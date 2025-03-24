@@ -1,14 +1,14 @@
 "use client";
 
+import { AnimatePresence } from "framer-motion";
 import React, { useState } from "react";
 import { usePopper } from "react-popper";
-import { AnimatePresence } from "framer-motion";
+import { appearanceAnimationMap, appearanceAnimationVariants } from "theme";
+import { checkIsEllipsis } from "utils";
 
 import { Arrow, StyledTooltip } from "./styled";
 import { type TooltipOptions } from "./types";
 import { useSubscriptionEventsHandlers } from "./use-subscription-events-handlers";
-import { checkIsEllipsis } from "utils";
-import { appearanceAnimationMap, appearanceAnimationVariants } from "theme";
 /**
  * Is used to display a tooltip when an element is hovered over.
  */

@@ -1,14 +1,15 @@
 "use client";
 
-import { translationFunction } from "context/language-context";
-import communityProjects from "../../../../public/community-projects.json";
 import { TitleBar } from "@react95/core";
-import { Clippy } from "./Clippy";
-import { useWindowSize } from "react-use";
-import { CommunityCreationWinDesktopItem, WinDesktopItem, WinIcons } from "./WinDesktopItem";
-import { useState, useMemo } from "react";
+import { translationFunction } from "context/language-context";
 import { shuffle } from "lodash";
+import { useMemo, useState } from "react";
+import { useWindowSize } from "react-use";
+
+import communityProjects from "../../../../public/community-projects.json";
+import { Clippy } from "./Clippy";
 import { StyledAlert } from "./StyledAlert";
+import { CommunityCreationWinDesktopItem, WinDesktopItem, WinIcons } from "./WinDesktopItem";
 
 const JSON_FILE_GITHUB_URL =
   "https://github.com/econia-labs/emojicoin-dot-fun/blob/main/src/typescript/frontend/public/community-projects.json";

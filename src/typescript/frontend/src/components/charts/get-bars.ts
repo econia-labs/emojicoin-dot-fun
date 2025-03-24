@@ -1,15 +1,9 @@
 import {
-  marketToLatestBars,
-  periodicStateTrackerToLatestBar,
-  toBar,
-} from "@/store/event/candlestick-bars";
-import { type Flatten, type Types } from "@sdk-types";
-import {
-  Trigger,
-  type Period,
-  periodEnumToRawDuration,
-  type PeriodDuration,
   type ArenaPeriod,
+  type Period,
+  type PeriodDuration,
+  periodEnumToRawDuration,
+  Trigger,
 } from "@sdk/const";
 import { toMarketEmojiData } from "@sdk/emoji_data/utils";
 import {
@@ -21,10 +15,17 @@ import { getMarketResource } from "@sdk/markets/utils";
 import { getAptosClient } from "@sdk/utils/aptos-client";
 import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
 import { type XOR } from "@sdk/utils/utility-types";
+import { type Flatten, type Types } from "@sdk-types";
 import { type Bar, type PeriodParams } from "@static/charting_library";
 import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "lib/chart-utils";
 import { ROUTES } from "router/routes";
 import { fetchRateLimited } from "utils";
+
+import {
+  marketToLatestBars,
+  periodicStateTrackerToLatestBar,
+  toBar,
+} from "@/store/event/candlestick-bars";
 
 export const fetchCandlesticksForChart = async ({
   marketID,

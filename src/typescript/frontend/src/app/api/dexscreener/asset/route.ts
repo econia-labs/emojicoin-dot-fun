@@ -20,13 +20,15 @@
  // }
  **/
 
-import { type NextRequest, NextResponse } from "next/server";
-import { toMarketEmojiData } from "@sdk/emoji_data";
 import { EMOJICOIN_SUPPLY } from "@sdk/const";
+import { toMarketEmojiData } from "@sdk/emoji_data";
 import { calculateCirculatingSupply } from "@sdk/markets";
-import { symbolEmojiStringToArray } from "../util";
-import { fetchMarketState } from "@/queries/market";
 import { toNominal } from "@sdk/utils";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { fetchMarketState } from "@/queries/market";
+
+import { symbolEmojiStringToArray } from "../util";
 
 /**
  * - In most cases, asset ids will correspond to contract addresses. Ids are case-sensitive.

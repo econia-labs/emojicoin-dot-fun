@@ -3,8 +3,7 @@
 import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
 import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
 import { cn } from "lib/utils/class-name";
-import React, { useCallback, useMemo } from "react";
-import { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { emoji } from "utils";
 
 export type StaggerSpeed = 1 | 2 | 3 | 4 | 5;

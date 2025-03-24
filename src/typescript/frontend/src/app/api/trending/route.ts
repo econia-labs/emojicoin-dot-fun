@@ -1,15 +1,16 @@
-import { NextResponse } from "next/server";
+// Disable to allow for doc-comment links and sorted imports.
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { type AccountAddress } from "@aptos-labs/ts-sdk";
+import { type DECIMALS } from "@sdk/const";
 import {
   toTrendingMarket,
   type TrendingMarket,
   type TrendingMarketArgs,
 } from "@sdk/indexer-v2/queries";
+import { type q64ToBig } from "@sdk/utils";
 import { getAptPrice } from "lib/queries/get-apt-price";
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { DECIMALS } from "@sdk/const";
-import { q64ToBig } from "@sdk/utils";
-import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
-import { type AccountAddress } from "@aptos-labs/ts-sdk";
+import { fetchCachedPriceFeed, type NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
+import { NextResponse } from "next/server";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 export const revalidate = 10;

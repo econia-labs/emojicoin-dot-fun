@@ -1,28 +1,29 @@
-import React, { useEffect, useState } from "react";
-
-import { translationFunction } from "context/language-context";
-import AptosIconBlack from "components/svg/icons/AptosBlack";
-import { type MainInfoProps } from "../../types";
-import { useEventStore } from "context/event-store-context";
-import { isMarketStateModel } from "@sdk/indexer-v2/types";
-import BondingProgress from "./BondingProgress";
-import { useThemeContext } from "context";
 import { useMatchBreakpoints } from "@hooks/index";
-import { Emoji } from "utils/emoji";
-import Link from "next/link";
-import { toExplorerLink } from "lib/utils/explorer-link";
-import { FormattedNumber } from "components/FormattedNumber";
-import Button from "components/button";
-import { Planet, TwitterOutlineIcon } from "components/svg";
-import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
-import { motion } from "framer-motion";
-import { MarketProperties } from "@/contract-apis";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import type { Colors } from "theme/types";
-import Popup from "components/popup";
-import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
 import { useUsdMarketCap, useUSDValue } from "@hooks/use-usd-market-cap";
+import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
+import { isMarketStateModel } from "@sdk/indexer-v2/types";
+import Button from "components/button";
+import { FormattedNumber } from "components/FormattedNumber";
+import Popup from "components/popup";
+import { Planet, TwitterOutlineIcon } from "components/svg";
+import AptosIconBlack from "components/svg/icons/AptosBlack";
+import { useThemeContext } from "context";
+import { useEventStore } from "context/event-store-context";
+import { translationFunction } from "context/language-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { motion } from "framer-motion";
+import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import type { Colors } from "theme/types";
+import { Emoji } from "utils/emoji";
+
+import { MarketProperties } from "@/contract-apis";
+
 import { Switcher } from "../../../../switcher";
+import { type MainInfoProps } from "../../types";
+import BondingProgress from "./BondingProgress";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 

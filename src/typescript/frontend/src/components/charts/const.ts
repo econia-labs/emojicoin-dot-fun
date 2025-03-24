@@ -1,16 +1,16 @@
 // cspell:word localstorage
 
+import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
+import { ArenaPeriod, Period } from "@sdk/const";
 import {
   type ChartingLibraryWidgetOptions,
   type LanguageCode,
   type ResolutionString,
   type ThemeName,
 } from "@static/charting_library";
-import { ArenaPeriod, Period } from "@sdk/const";
+import { CDN_URL } from "lib/env";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
-import { CDN_URL } from "lib/env";
-import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 
 export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
   "15S",

@@ -1,4 +1,4 @@
-import { type Placement, type Padding } from "@popperjs/core";
+import { type Padding, type Placement } from "@popperjs/core";
 import { type CSSProperties } from "react";
 import { type Colors } from "theme/types";
 

@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
-import { space, typography, layout, opacity, flexbox } from "styled-system";
-import { fontWeights, textStyles } from "./theme";
+import { flexbox, layout, opacity, space, typography } from "styled-system";
 
+import { fontWeights, textStyles } from "./theme";
 import { type scales, type TextProps, type ThemedProps } from "./types";
 
 export const getEllipsis = ({ ellipsis }: ThemedProps) => {

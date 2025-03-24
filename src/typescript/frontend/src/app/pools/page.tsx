@@ -1,10 +1,10 @@
-import ClientPoolsPage, { type PoolsData } from "components/pages/pools/ClientPoolsPage";
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
+import { getValidSortByForPoolsPage } from "@sdk/indexer-v2/queries/query-params";
+import { getPoolData } from "app/api/pools/getPoolDataQuery";
+import ClientPoolsPage, { type PoolsData } from "components/pages/pools/ClientPoolsPage";
+import { handleEmptySearchBytes, safeParsePageWithDefault } from "lib/routes/home-page-params";
 import { type Metadata } from "next";
 import { emoji, parseJSON } from "utils";
-import { getValidSortByForPoolsPage } from "@sdk/indexer-v2/queries/query-params";
-import { safeParsePageWithDefault, handleEmptySearchBytes } from "lib/routes/home-page-params";
-import { getPoolData } from "app/api/pools/getPoolDataQuery";
 
 export const revalidate = 2;
 

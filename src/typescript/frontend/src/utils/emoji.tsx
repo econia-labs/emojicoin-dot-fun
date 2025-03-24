@@ -1,6 +1,6 @@
 import { type AnyEmojiData, getEmojisInString } from "@sdk/index";
 import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
-import { useMemo, type DetailedHTMLProps, type HTMLAttributes } from "react";
+import { type DetailedHTMLProps, type HTMLAttributes, useMemo } from "react";
 import { type CSSProperties } from "styled-components";
 
 /**

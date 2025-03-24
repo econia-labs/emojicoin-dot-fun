@@ -1,38 +1,37 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
-
-import { ButtonsBlock } from "./components/buttons-block";
-import {
-  InnerGridContainer,
-  SearchWrapper,
-  OuterContainer,
-  FilterOptionsWrapper,
-  OutermostContainer,
-  StyledGrid,
-  GRID_PADDING,
-} from "./styled";
-import SearchBar from "components/inputs/search-bar";
-import FilterOptions from "./components/FilterOptions";
-import { ClientGrid } from "./ClientGrid";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { useRouter } from "next/navigation";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { useEmojiPicker } from "context/emoji-picker-context";
-import { encodeEmojis } from "@sdk/emoji_data";
-import { useEventStore, useUserSettings } from "context/event-store-context";
-import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
-import { constructURLForHomePage } from "lib/queries/sorting/query-params";
-import { AnimatePresence, motion } from "framer-motion";
-import { EMOJI_GRID_ITEM_WIDTH } from "../const";
-import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import { Text } from "components/text";
-import Link from "next/link";
-import { ROUTES } from "router/routes";
-import { type HomePageProps } from "app/home/HomePage";
+import { encodeEmojis, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { type HomePageProps } from "app/home/HomePage";
+import SearchBar from "components/inputs/search-bar";
+import { Text } from "components/text";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import { useEventStore, useUserSettings } from "context/event-store-context";
+import { AnimatePresence, motion } from "framer-motion";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { constructURLForHomePage } from "lib/queries/sorting/query-params";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useMemo } from "react";
+import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
+
+import { EMOJI_GRID_ITEM_WIDTH } from "../const";
+import { LiveClientGrid } from "./AnimatedClientGrid";
+import { ClientGrid } from "./ClientGrid";
+import { ButtonsBlock } from "./components/buttons-block";
+import FilterOptions from "./components/FilterOptions";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import {
+  FilterOptionsWrapper,
+  GRID_PADDING,
+  InnerGridContainer,
+  OuterContainer,
+  OutermostContainer,
+  SearchWrapper,
+  StyledGrid,
+} from "./styled";
 
 export interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}

@@ -1,6 +1,5 @@
 "use client";
 
-import { MarketMetadataByMarketAddress, MarketProperties } from "@/contract-apis";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -12,6 +11,8 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { MarketMetadataByMarketAddress, MarketProperties } from "@/contract-apis";
 
 const PLACEHOLDERS = new Map([
   ["Discord", "https://discord.gg/..."],

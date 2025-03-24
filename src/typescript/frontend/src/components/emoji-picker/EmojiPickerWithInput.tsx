@@ -1,23 +1,25 @@
+import "./triangle.css";
+
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Flex } from "@containers";
-import { useEmojiPicker } from "context/emoji-picker-context";
+import ClosePixelated from "@icons/ClosePixelated";
+import { getEmojisInString } from "@sdk/emoji_data";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { InputGroup, Textarea } from "components/inputs";
-import { Arrow } from "components/svg";
-import ClosePixelated from "@icons/ClosePixelated";
-import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
-import { motion, useDragControls } from "framer-motion";
-import React, { useRef, useEffect, useCallback } from "react";
-import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
-import { MarketValidityIndicator } from "./ColoredBytesIndicator";
-import { variants } from "./animation-variants";
-import { checkTargetAndStopDefaultPropagation } from "./utils";
-import { getEmojisInString } from "@sdk/emoji_data";
-import { createPortal } from "react-dom";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import "./triangle.css";
-import { cn } from "lib/utils/class-name";
+import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
+import { Arrow } from "components/svg";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import { motion, useDragControls } from "framer-motion";
 import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
+import { cn } from "lib/utils/class-name";
+import React, { useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { isDisallowedEventKey } from "utils";
+
+import { variants } from "./animation-variants";
+import { MarketValidityIndicator } from "./ColoredBytesIndicator";
+import { checkTargetAndStopDefaultPropagation } from "./utils";
 
 const ChatInputBox = ({ children }: { children: React.ReactNode }) => {
   const { connected } = useWallet();

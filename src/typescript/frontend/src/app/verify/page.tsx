@@ -1,9 +1,9 @@
-import VerifyPage from "components/pages/verify/VerifyPage";
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
   COOKIE_FOR_HASHED_ADDRESS,
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
+import VerifyPage from "components/pages/verify/VerifyPage";
 import { type Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

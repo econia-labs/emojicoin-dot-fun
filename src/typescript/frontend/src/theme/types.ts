@@ -1,13 +1,13 @@
 import {
-  type mediaQueries,
-  type shadows,
-  type radii,
-  type zIndices,
-  type fontWeight,
-  type fonts,
   type breakpoints,
+  type fonts,
+  type fontWeight,
   type gradients,
+  type mediaQueries,
+  type radii,
+  type shadows,
   type transitions,
+  type zIndices,
 } from "./base";
 import { type baseColors, type darkColors } from "./colors";
 
