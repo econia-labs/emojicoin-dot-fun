@@ -1,4 +1,4 @@
-import { toOrderBy } from "@sdk/indexer-v2";
+import { toOrderBy } from "@/sdk/indexer-v2";
 import { z } from "zod";
 
 export const PaginationSchema = z.object({

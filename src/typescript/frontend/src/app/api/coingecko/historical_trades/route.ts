@@ -1,5 +1,5 @@
-import { postgrest } from "@sdk/indexer-v2/queries/client";
-import { TableName } from "@sdk/indexer-v2/types";
+import { postgrest } from "@/sdk/indexer-v2/queries/client";
+import { TableName } from "@/sdk/indexer-v2/types";
 import Big from "big.js";
 import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";

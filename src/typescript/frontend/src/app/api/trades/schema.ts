@@ -1,5 +1,5 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { isValidEmojiHex, symbolBytesToEmojis } from "@sdk/emoji_data";
+import { isValidEmojiHex, symbolBytesToEmojis } from "@/sdk/emoji_data";
 import { PaginationSchema } from "lib/api/schemas/api-pagination";
 import { z } from "zod";
 

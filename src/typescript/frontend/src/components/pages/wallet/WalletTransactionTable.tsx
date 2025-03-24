@@ -1,8 +1,8 @@
 "use client";
 
-import { type AnyEmoji, encodeEmojis, type SymbolEmoji } from "@sdk/emoji_data";
-import type { OrderByStrings } from "@sdk/indexer-v2/const";
-import { toNominal } from "@sdk/utils";
+import { type AnyEmoji, encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
+import type { OrderByStrings } from "@/sdk/indexer-v2/const";
+import { toNominal } from "@/sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";

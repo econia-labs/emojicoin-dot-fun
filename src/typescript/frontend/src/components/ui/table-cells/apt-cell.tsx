@@ -1,4 +1,4 @@
-import AptosIconBlack from "@icons/AptosBlack";
+import AptosIconBlack from "@/icons/AptosBlack";
 import { FormattedNumber } from "components/FormattedNumber";
 import type { FormatNumberStringProps } from "lib/utils/format-number-string";
 

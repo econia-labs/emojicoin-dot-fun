@@ -1,5 +1,5 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { toNominal } from "@sdk/utils";
+import { toNominal } from "@/sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useSwapEventsQuery";

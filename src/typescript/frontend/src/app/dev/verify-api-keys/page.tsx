@@ -1,6 +1,6 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { VERCEL } from "@sdk/const";
-import { getAptosClient } from "@sdk/utils/aptos-client";
+import { VERCEL } from "@/sdk/const";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { CDN_URL } from "lib/env";
 import { getAptPrice } from "lib/queries/get-apt-price";
 

@@ -1,4 +1,4 @@
-import type { ArenaInfoModel, DatabaseModels, MarketStateModel } from "@sdk/indexer-v2/types";
+import type { ArenaInfoModel, DatabaseModels, MarketStateModel } from "@/sdk/indexer-v2/types";
 import { ArenaCard } from "components/pages/home/components/arena-card";
 import EmojiTable from "components/pages/home/components/emoji-table";
 import MainCard from "components/pages/home/components/main-card/MainCard";

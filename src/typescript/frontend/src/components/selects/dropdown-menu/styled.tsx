@@ -1,4 +1,4 @@
-import { Box } from "@containers";
+import { Box } from "@/containers";
 import styled from "styled-components";
 
 export const DropdownMenuWrapper = styled(Box)`

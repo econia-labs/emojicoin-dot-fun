@@ -1,12 +1,12 @@
 "use client";
 
-import { useMatchBreakpoints } from "@hooks/index";
-import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
+import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
 import type {
   ArenaLeaderboardHistoryWithArenaInfoModel,
   ArenaPositionModel,
-} from "@sdk/indexer-v2/types";
+} from "@/sdk/indexer-v2/types";
 import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";

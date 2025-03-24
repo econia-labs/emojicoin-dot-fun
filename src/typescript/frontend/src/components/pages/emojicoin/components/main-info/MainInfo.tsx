@@ -1,7 +1,7 @@
-import { useMatchBreakpoints } from "@hooks/index";
-import { useUsdMarketCap, useUSDValue } from "@hooks/use-usd-market-cap";
-import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
-import { isMarketStateModel } from "@sdk/indexer-v2/types";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { useUsdMarketCap, useUSDValue } from "@/hooks/use-usd-market-cap";
+import TelegramOutlineIcon from "@/icons/TelegramOutlineIcon";
+import { isMarketStateModel } from "@/sdk/indexer-v2/types";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";

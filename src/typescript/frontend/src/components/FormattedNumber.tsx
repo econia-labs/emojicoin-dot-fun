@@ -1,4 +1,4 @@
-import { useLabelScrambler } from "@hooks/use-label-scrambler";
+import { useLabelScrambler } from "@/hooks/use-label-scrambler";
 import { formatNumberString, type FormatNumberStringProps } from "lib/utils/format-number-string";
 import { useEffect, useMemo } from "react";
 

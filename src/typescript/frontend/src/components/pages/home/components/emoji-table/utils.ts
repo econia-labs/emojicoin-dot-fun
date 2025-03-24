@@ -1,4 +1,4 @@
-import type { SymbolEmoji } from "@sdk/emoji_data";
+import type { SymbolEmoji } from "@/sdk/emoji_data";
 import type { HomePageProps } from "app/home/HomePage";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 

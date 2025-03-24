@@ -1,4 +1,4 @@
-import { getEmojisInString, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
+import { getEmojisInString, isSymbolEmoji, isValidChatMessageEmoji } from "@/sdk/emoji_data";
 
 import type { EmojiPickerStore } from "./emoji-picker-store";
 

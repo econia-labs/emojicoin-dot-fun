@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, FlexGap } from "@containers";
+import { Flex, FlexGap } from "@/containers";
 import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import React, { useEffect, useState } from "react";

@@ -9,8 +9,8 @@ import {
   MARKET_REGISTRATION_FEE,
   MARKET_REGISTRATION_GAS_ESTIMATION_FIRST,
   MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST,
-} from "@sdk/const";
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+} from "@/sdk/const";
+import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { useQuery } from "@tanstack/react-query";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";

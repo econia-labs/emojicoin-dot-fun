@@ -6,13 +6,13 @@ import {
   type Wallet,
   WalletReadyState,
 } from "@aptos-labs/wallet-adapter-react";
-import BitgetIcon from "@icons/BitgetIcon";
-import MartianIcon from "@icons/MartianIcon";
-import NightlyIcon from "@icons/NightlyIcon";
-import OKXIcon from "@icons/OKXIcon";
-import PetraIcon from "@icons/PetraIcon";
-import PontemIcon from "@icons/PontemIcon";
-import RiseIcon from "@icons/RiseIcon";
+import BitgetIcon from "@/icons/BitgetIcon";
+import MartianIcon from "@/icons/MartianIcon";
+import NightlyIcon from "@/icons/NightlyIcon";
+import OKXIcon from "@/icons/OKXIcon";
+import PetraIcon from "@/icons/PetraIcon";
+import PontemIcon from "@/icons/PontemIcon";
+import RiseIcon from "@/icons/RiseIcon";
 import { Arrow } from "components/svg";
 import { type MouseEventHandler, type ReactElement, useCallback, useEffect, useState } from "react";
 import { useScramble } from "use-scramble";

@@ -1,5 +1,5 @@
-import type { SymbolEmoji } from "@sdk/emoji_data/types";
-import { isValidMarketSymbol } from "@sdk/emoji_data/valid-market-symbol";
+import type { SymbolEmoji } from "@/sdk/emoji_data/types";
+import { isValidMarketSymbol } from "@/sdk/emoji_data/valid-market-symbol";
 
 import {
   ARENA_CHART_SYMBOL_DELIMITER,

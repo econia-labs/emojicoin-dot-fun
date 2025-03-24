@@ -22,9 +22,9 @@
  // }
  **/
 
-import { INTEGRATOR_FEE_RATE_BPS } from "@sdk/const";
-import { fetchMarketRegistrationEventBySymbolEmojis } from "@sdk/indexer-v2/queries/app/dexscreener";
-import { getAptosClient } from "@sdk/utils/aptos-client";
+import { INTEGRATOR_FEE_RATE_BPS } from "@/sdk/const";
+import { fetchMarketRegistrationEventBySymbolEmojis } from "@/sdk/indexer-v2/queries/app/dexscreener";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { pairIdToSymbolEmojis, symbolEmojisToString } from "../util";

@@ -7,8 +7,8 @@ import {
   type Period,
   PeriodDuration,
   periodEnumToRawDuration,
-} from "@sdk/index";
-import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
+} from "@/sdk/index";
+import { getLatestProcessedEmojicoinTimestamp } from "@/sdk/indexer-v2/queries/utils";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 

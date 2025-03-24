@@ -1,5 +1,5 @@
-import { type AnyEmojiName, CHAT_EMOJI_DATA, SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
-import { sleep } from "@sdk/utils";
+import { type AnyEmojiName, CHAT_EMOJI_DATA, SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
+import { sleep } from "@/sdk/utils";
 
 export { isDisallowedEventKey } from "./check-is-disallowed-event-key";
 export { checkIsEllipsis } from "./check-is-ellipsis";

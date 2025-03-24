@@ -3,7 +3,7 @@ import type { InputGenerateTransactionOptions } from "@aptos-labs/wallet-adapter
 import type {
   EntryFunctionTransactionBuilder,
   WalletInputTransactionData,
-} from "@sdk/emojicoin_dot_fun/payload-builders";
+} from "@/sdk/emojicoin_dot_fun/payload-builders";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useState } from "react";
 

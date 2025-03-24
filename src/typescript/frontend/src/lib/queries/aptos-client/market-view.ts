@@ -1,7 +1,7 @@
 "use server";
 
-import { getAptosClient } from "@sdk/utils/aptos-client";
-import { toMarketView } from "@sdk-types";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
+import { toMarketView } from "@/sdk-types";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 

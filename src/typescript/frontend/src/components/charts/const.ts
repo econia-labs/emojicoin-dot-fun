@@ -1,12 +1,12 @@
 // cspell:word localstorage
 
-import { ArenaPeriod, Period } from "@sdk/const";
+import { ArenaPeriod, Period } from "@/sdk/const";
 import type {
   ChartingLibraryWidgetOptions,
   LanguageCode,
   ResolutionString,
   ThemeName,
-} from "@static/charting_library";
+} from "@/static/charting_library";
 import { CDN_URL } from "lib/env";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";

@@ -8,7 +8,7 @@ import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
-import { getAptosApiKey } from "@sdk/const";
+import { getAptosApiKey } from "@/sdk/const";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Footer from "components/footer";
 import { GeoblockedBanner } from "components/geoblocking";

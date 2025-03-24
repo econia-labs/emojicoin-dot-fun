@@ -1,6 +1,6 @@
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import type { AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { STRUCT_STRINGS } from "@sdk/utils";
+import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
+import { STRUCT_STRINGS } from "@/sdk/utils";
 import Button from "components/button";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import Popup from "components/popup";

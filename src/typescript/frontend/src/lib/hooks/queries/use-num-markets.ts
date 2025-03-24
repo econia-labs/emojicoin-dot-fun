@@ -1,4 +1,4 @@
-import { getAptosClient } from "@sdk/utils/aptos-client";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { useQuery } from "@tanstack/react-query";
 import { useEventStore } from "context/event-store-context";
 

@@ -3,7 +3,7 @@ import {
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { formatDisplayName } from "@sdk/utils/misc";
+import { formatDisplayName } from "@/sdk/utils/misc";
 import {
   DropdownArrow,
   DropdownContent,

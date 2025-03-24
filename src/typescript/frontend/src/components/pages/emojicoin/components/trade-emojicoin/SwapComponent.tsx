@@ -1,8 +1,8 @@
 "use client";
 
-import { Flex, FlexGap } from "@containers";
-import { useTooltip } from "@hooks/index";
-import { toCoinTypes } from "@sdk/markets/utils";
+import { Flex, FlexGap } from "@/containers";
+import { useTooltip } from "@/hooks/index";
+import { toCoinTypes } from "@/sdk/markets/utils";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { InputNumeric } from "components/inputs";

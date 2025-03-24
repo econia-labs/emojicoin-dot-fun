@@ -1,4 +1,4 @@
-import type { DatabaseModels } from "@sdk/indexer-v2/types";
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
 
 import { PriceFeedInner } from "./inner";
 

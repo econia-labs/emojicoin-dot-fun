@@ -1,4 +1,4 @@
-import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
+import { getBondingCurveProgress } from "@/sdk/utils/bonding-curve";
 import { FormattedNumber } from "components/FormattedNumber";
 import ProgressBar from "components/ProgressBar";
 import { useEventStore } from "context/event-store-context";

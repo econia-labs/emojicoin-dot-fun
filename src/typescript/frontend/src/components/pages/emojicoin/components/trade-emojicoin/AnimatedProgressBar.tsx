@@ -1,5 +1,5 @@
-import { useMatchBreakpoints } from "@hooks/index";
-import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { getBondingCurveProgress } from "@/sdk/utils/bonding-curve";
 import { Text } from "components";
 import type { GridProps } from "components/pages/emojicoin/types";
 import { useEventStore } from "context/event-store-context";

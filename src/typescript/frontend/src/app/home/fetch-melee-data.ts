@@ -1,4 +1,4 @@
-import { fetchArenaInfo, fetchSpecificMarkets } from "@sdk/indexer-v2";
+import { fetchArenaInfo, fetchSpecificMarkets } from "@/sdk/indexer-v2";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";

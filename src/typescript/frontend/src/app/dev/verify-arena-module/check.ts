@@ -1,6 +1,6 @@
-import { ARENA_MODULE_ADDRESS, ARENA_MODULE_NAME } from "@sdk/const";
-import { toArenaRegistry } from "@sdk/types/arena-types";
-import { getAptosClient } from "@sdk/utils";
+import { ARENA_MODULE_ADDRESS, ARENA_MODULE_NAME } from "@/sdk/const";
+import { toArenaRegistry } from "@/sdk/types/arena-types";
+import { getAptosClient } from "@/sdk/utils";
 
 import { EmojicoinArena } from "@/contract-apis";
 

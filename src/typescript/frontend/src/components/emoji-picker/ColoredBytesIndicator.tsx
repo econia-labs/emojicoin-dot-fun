@@ -1,4 +1,4 @@
-import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import { sumBytes } from "@/sdk/utils/sum-emoji-bytes";
 import { MAX_NUM_CHAT_EMOJIS, MAX_SYMBOL_LENGTH } from "components/pages/emoji-picker/const";
 import { AnimatedLoadingBoxes } from "components/pages/launch-emojicoin/animated-loading-boxes";
 import { useEmojiPicker } from "context/emoji-picker-context";

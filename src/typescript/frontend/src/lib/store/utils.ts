@@ -1,4 +1,4 @@
-import type { SubscribeBarsCallback } from "@static/charting_library";
+import type { SubscribeBarsCallback } from "@/static/charting_library";
 import type { WritableDraft } from "immer";
 
 import type { LatestBar } from "./event/candlestick-bars";

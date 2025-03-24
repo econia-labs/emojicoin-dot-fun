@@ -7,7 +7,7 @@ import type {
   LibrarySymbolInfo,
   SearchSymbolResultItem,
   Timezone,
-} from "@static/charting_library";
+} from "@/static/charting_library";
 import { getClientTimezone } from "lib/chart-utils";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 

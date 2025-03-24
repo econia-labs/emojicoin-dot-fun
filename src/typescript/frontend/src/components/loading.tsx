@@ -1,7 +1,7 @@
 "use client";
 // cspell:word unpathify
 
-import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@sdk/emoji_data";
+import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@/sdk/emoji_data";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import { Emoji } from "utils/emoji";

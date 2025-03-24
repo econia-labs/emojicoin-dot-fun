@@ -1,6 +1,6 @@
 "use client";
 
-import useNodeDimensions from "@hooks/use-node-dimensions";
+import useNodeDimensions from "@/hooks/use-node-dimensions";
 import { useEffect, useRef, useState } from "react";
 import { useWindowSize } from "react-use";
 

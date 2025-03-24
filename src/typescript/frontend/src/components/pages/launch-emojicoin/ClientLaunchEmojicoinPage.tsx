@@ -5,8 +5,8 @@ import {
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { getEmojisInString, symbolBytesToEmojis } from "@sdk/emoji_data";
-import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { getEmojisInString, symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { getEvents } from "@/sdk/emojicoin_dot_fun";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";

@@ -4,7 +4,7 @@ import type {
   MarketLatestStateEventModel,
   MarketRegistrationEventModel,
   SwapEventModel,
-} from "@sdk/indexer-v2/types";
+} from "@/sdk/indexer-v2/types";
 
 export const ANIMATION_DEBOUNCE_TIME = 1111;
 

@@ -1,11 +1,11 @@
-import { useMatchBreakpoints } from "@hooks/index";
+import { useMatchBreakpoints } from "@/hooks/index";
 import type {
   ArenaInfoModel,
   ArenaLeaderboardHistoryWithArenaInfoModel,
   ArenaPositionModel,
   MarketStateModel,
-} from "@sdk/indexer-v2/types";
-import { q64ToBig } from "@sdk/utils";
+} from "@/sdk/indexer-v2/types";
+import { q64ToBig } from "@/sdk/utils";
 import Big from "big.js";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";

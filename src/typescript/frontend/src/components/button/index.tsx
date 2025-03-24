@@ -1,6 +1,6 @@
 "use client";
 
-import { FlexGap } from "@containers";
+import { FlexGap } from "@/containers";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import SpinnerIcon from "components/svg/icons/Spinner";
 import Text from "components/text";

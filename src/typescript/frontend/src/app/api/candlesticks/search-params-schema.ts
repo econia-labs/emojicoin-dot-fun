@@ -1,5 +1,5 @@
-import { Period } from "@sdk/const";
-import { Schemas } from "@sdk/utils";
+import { Period } from "@/sdk/const";
+import { Schemas } from "@/sdk/utils";
 import { z } from "zod";
 
 export const CandlesticksSearchParamsSchema = z.object({

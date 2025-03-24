@@ -1,7 +1,7 @@
 "use client";
 
-import useElementDimensions from "@hooks/use-element-dimensions";
-import type { OrderByStrings } from "@sdk/indexer-v2/const";
+import useElementDimensions from "@/hooks/use-element-dimensions";
+import type { OrderByStrings } from "@/sdk/indexer-v2/const";
 import { EmptyTr, HeaderTr, Table, TBody, Th, ThInner } from "components";
 import { useMatchBreakpoints } from "hooks";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";

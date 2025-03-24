@@ -1,7 +1,7 @@
 // cspell:word immerable
 "use client";
 
-import type { PeriodTypeFromBroker } from "@sdk/indexer-v2/types/json-types";
+import type { PeriodTypeFromBroker } from "@/sdk/indexer-v2/types/json-types";
 import { immerable } from "immer";
 import { BROKER_URL } from "lib/env";
 

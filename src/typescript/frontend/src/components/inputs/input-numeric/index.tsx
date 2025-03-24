@@ -1,4 +1,4 @@
-import { countDigitsAfterDecimal, isNumberInConstruction, sanitizeNumber } from "@sdk/utils";
+import { countDigitsAfterDecimal, isNumberInConstruction, sanitizeNumber } from "@/sdk/utils";
 import Big from "big.js";
 import React, { useEffect, useState } from "react";
 

@@ -1,4 +1,4 @@
-import type { SymbolEmojiData } from "@sdk/emoji_data/types";
+import type { SymbolEmojiData } from "@/sdk/emoji_data/types";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import React from "react";

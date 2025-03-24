@@ -1,6 +1,6 @@
-import { Flex } from "@containers";
-import { useMatchBreakpoints } from "@hooks/index";
-import { isInBondingCurve } from "@sdk/utils/bonding-curve";
+import { Flex } from "@/containers";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { isInBondingCurve } from "@/sdk/utils/bonding-curve";
 import Button from "components/button";
 import type { GridProps } from "components/pages/emojicoin/types";
 import Text from "components/text";

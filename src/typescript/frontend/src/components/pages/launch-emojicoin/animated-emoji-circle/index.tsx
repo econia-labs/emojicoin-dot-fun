@@ -1,4 +1,4 @@
-import { getRandomSymbolEmoji } from "@sdk/emoji_data";
+import { getRandomSymbolEmoji } from "@/sdk/emoji_data";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
 import { Emoji } from "utils/emoji";

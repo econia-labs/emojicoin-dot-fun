@@ -1,4 +1,4 @@
-import { Flex } from "@containers";
+import { Flex } from "@/containers";
 import { Text } from "components";
 import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";

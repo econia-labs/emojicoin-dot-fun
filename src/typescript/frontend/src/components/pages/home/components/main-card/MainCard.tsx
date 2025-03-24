@@ -2,8 +2,8 @@
 
 import "./module.css";
 
-import { FlexGap } from "@containers";
-import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
+import { FlexGap } from "@/containers";
+import { useUsdMarketCap } from "@/hooks/use-usd-market-cap";
 import type { HomePageProps } from "app/home/HomePage";
 import { FormattedNumber } from "components/FormattedNumber";
 import { PriceDelta } from "components/price-feed/inner";

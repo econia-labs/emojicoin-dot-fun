@@ -1,4 +1,4 @@
-import DiscordOutlineIcon from "@icons/DiscordOutlineIcon";
+import DiscordOutlineIcon from "@/icons/DiscordOutlineIcon";
 import TwitterOutlineIcon from "components/svg/icons/TwitterOutlineIcon";
 import { LINKS } from "lib/env";
 import { ROUTES } from "router/routes";

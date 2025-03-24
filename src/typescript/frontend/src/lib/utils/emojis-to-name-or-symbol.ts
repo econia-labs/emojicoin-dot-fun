@@ -1,4 +1,4 @@
-import type { SymbolEmojiData } from "@sdk/emoji_data";
+import type { SymbolEmojiData } from "@/sdk/emoji_data";
 
 /**
  * Converts an array of SymbolEmojiData to a string of names.

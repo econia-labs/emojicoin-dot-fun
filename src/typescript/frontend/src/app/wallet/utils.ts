@@ -4,7 +4,7 @@ import {
   isValidAptosName,
   removeLeadingZeros,
   type ValidAptosName,
-} from "@sdk/utils";
+} from "@/sdk/utils";
 import { cache } from "react";
 
 const INVALID_INPUT_RESULT = {

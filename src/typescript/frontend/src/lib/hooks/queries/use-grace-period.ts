@@ -1,5 +1,5 @@
-import { getRegistrationGracePeriodFlag } from "@sdk/markets/utils";
-import { standardizeAddress } from "@sdk/utils/account-address";
+import { getRegistrationGracePeriodFlag } from "@/sdk/markets/utils";
+import { standardizeAddress } from "@/sdk/utils/account-address";
 import { useQuery } from "@tanstack/react-query";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";

@@ -1,6 +1,6 @@
 "use client";
 
-import { getRandomSymbolEmoji } from "@sdk/emoji_data";
+import { getRandomSymbolEmoji } from "@/sdk/emoji_data";
 import React, { useEffect, useMemo, useState } from "react";
 import { useWindowSize } from "react-use";
 import { Emoji } from "utils/emoji";

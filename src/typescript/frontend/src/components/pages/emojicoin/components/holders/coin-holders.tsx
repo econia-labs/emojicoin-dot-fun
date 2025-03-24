@@ -1,6 +1,6 @@
-import { calculateCirculatingSupply } from "@sdk/markets";
-import { toNominal, toNominalPrice } from "@sdk/utils";
-import type { Types } from "@sdk-types";
+import { calculateCirculatingSupply } from "@/sdk/markets";
+import { toNominal, toNominalPrice } from "@/sdk/utils";
+import type { Types } from "@/sdk-types";
 import { FormattedNumber } from "components/FormattedNumber";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 import { AptCell } from "components/ui/table-cells/apt-cell";

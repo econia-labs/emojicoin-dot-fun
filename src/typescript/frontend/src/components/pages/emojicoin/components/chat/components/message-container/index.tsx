@@ -1,6 +1,6 @@
-import { FlexGap } from "@containers";
-import { useNameResolver } from "@hooks/use-name-resolver";
-import { formatDisplayName } from "@sdk/utils";
+import { FlexGap } from "@/containers";
+import { useNameResolver } from "@/hooks/use-name-resolver";
+import { formatDisplayName } from "@/sdk/utils";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";

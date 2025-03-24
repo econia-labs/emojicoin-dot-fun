@@ -1,8 +1,8 @@
 "use client";
 
-import AptosIconBlack from "@icons/AptosBlack";
-import type { SymbolEmoji } from "@sdk/emoji_data";
-import { formatDisplayName, type ValidAptosName } from "@sdk/utils";
+import AptosIconBlack from "@/icons/AptosBlack";
+import type { SymbolEmoji } from "@/sdk/emoji_data";
+import { formatDisplayName, type ValidAptosName } from "@/sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "components/FormattedNumber";
 import SearchBar from "components/inputs/search-bar";

@@ -1,5 +1,5 @@
-import type { fetchChatEvents } from "@sdk/indexer-v2";
-import { LIMIT } from "@sdk/indexer-v2/const";
+import type { fetchChatEvents } from "@/sdk/indexer-v2";
+import { LIMIT } from "@/sdk/indexer-v2/const";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { GetChatsSchema } from "app/api/chats/schema";
 import { ROUTES } from "router/routes";

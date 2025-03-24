@@ -2,10 +2,10 @@
 
 import "./module.css";
 
-import { FlexGap } from "@containers";
-import { useMatchBreakpoints } from "@hooks/index";
-import { getEmojisInString } from "@sdk/emoji_data";
-import { toTotalAptLocked } from "@sdk/indexer-v2/types";
+import { FlexGap } from "@/containers";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { getEmojisInString } from "@/sdk/emoji_data";
+import { toTotalAptLocked } from "@/sdk/indexer-v2/types";
 import type { HomePageProps } from "app/home/HomePage";
 import Button from "components/button";
 import { Countdown } from "components/Countdown";

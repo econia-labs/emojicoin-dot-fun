@@ -1,7 +1,7 @@
 import { isUserTransactionResponse, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { ARENA_MODULE_ADDRESS } from "@sdk/const";
-import type { ArenaPositionModel, MarketStateModel } from "@sdk/indexer-v2/types";
-import { q64ToBig } from "@sdk/utils";
+import { ARENA_MODULE_ADDRESS } from "@/sdk/const";
+import type { ArenaPositionModel, MarketStateModel } from "@/sdk/indexer-v2/types";
+import { q64ToBig } from "@/sdk/utils";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";

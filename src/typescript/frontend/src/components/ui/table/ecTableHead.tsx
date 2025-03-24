@@ -1,4 +1,4 @@
-import SortArrow from "@icons/SortArrow";
+import SortArrow from "@/icons/SortArrow";
 import { Arrows } from "components/svg";
 import { TableHead } from "components/ui/table/table";
 import { cn } from "lib/utils/class-name";

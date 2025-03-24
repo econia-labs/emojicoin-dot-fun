@@ -1,4 +1,4 @@
-import { toCoinTypesForEntry } from "@sdk/markets";
+import { toCoinTypesForEntry } from "@/sdk/markets";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 

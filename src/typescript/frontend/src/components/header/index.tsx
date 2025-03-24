@@ -1,6 +1,6 @@
 "use client";
 
-import { Container, Flex, FlexGap } from "@containers";
+import { Container, Flex, FlexGap } from "@/containers";
 import { Badge } from "components/Badge";
 import Button from "components/button";
 import MenuItem from "components/header/components/menu-item";

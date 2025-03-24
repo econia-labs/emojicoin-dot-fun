@@ -1,4 +1,4 @@
-import { getAptosClient } from "@sdk/utils/aptos-client";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { NextResponse } from "next/server";
 
 export const revalidate = 2;

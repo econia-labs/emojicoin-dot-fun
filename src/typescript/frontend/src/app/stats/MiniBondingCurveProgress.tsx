@@ -1,5 +1,5 @@
-import type { StateEventData } from "@sdk/indexer-v2/types";
-import { getBondingCurveProgress } from "@sdk/utils";
+import type { StateEventData } from "@/sdk/indexer-v2/types";
+import { getBondingCurveProgress } from "@/sdk/utils";
 import { Progress } from "components/ui/Progress";
 
 export const MiniBondingCurveProgress = ({ state }: { state: StateEventData }) => {

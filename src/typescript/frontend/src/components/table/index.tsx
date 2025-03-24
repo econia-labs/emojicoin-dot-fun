@@ -1,4 +1,4 @@
-import { Flex } from "@containers";
+import { Flex } from "@/containers";
 import styled, { css } from "styled-components";
 import {
   layout,

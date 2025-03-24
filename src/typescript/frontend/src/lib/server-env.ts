@@ -1,6 +1,6 @@
 import "server-only";
 
-import { EMOJICOIN_INDEXER_URL } from "@sdk/server/env";
+import { EMOJICOIN_INDEXER_URL } from "@/sdk/server/env";
 
 import { APTOS_NETWORK, IS_ALLOWLIST_ENABLED } from "./env";
 

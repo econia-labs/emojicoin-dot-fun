@@ -1,4 +1,4 @@
-import { DEFAULT_SORT_BY, SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { DEFAULT_SORT_BY, SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 export type MarketDataSortByHomePage =
   | SortMarketsBy.MarketCap

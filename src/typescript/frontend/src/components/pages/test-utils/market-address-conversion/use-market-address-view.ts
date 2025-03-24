@@ -1,6 +1,6 @@
 import type { Aptos } from "@aptos-labs/ts-sdk";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { REGISTRY_ADDRESS } from "@sdk/emojicoin_dot_fun";
+import { symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { REGISTRY_ADDRESS } from "@/sdk/emojicoin_dot_fun";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "lib/hooks/queries/client";

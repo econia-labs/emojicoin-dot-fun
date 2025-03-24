@@ -1,4 +1,4 @@
-import { Flex } from "@containers";
+import { Flex } from "@/containers";
 import styled from "styled-components";
 
 export const StyledContentWrapper = styled.div`

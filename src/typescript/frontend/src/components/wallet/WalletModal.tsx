@@ -4,7 +4,7 @@ import {
   partitionWallets,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import EmojicoinLogo from "@icons/EmojicoinLogo";
+import EmojicoinLogo from "@/icons/EmojicoinLogo";
 import { BaseModal } from "components/modal/BaseModal";
 import { Arrow } from "components/svg";
 import { DEFAULT_TOAST_CONFIG } from "const";

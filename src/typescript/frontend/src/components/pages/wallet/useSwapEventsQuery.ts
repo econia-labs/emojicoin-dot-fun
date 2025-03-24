@@ -1,4 +1,4 @@
-import { LIMIT } from "@sdk/indexer-v2/const";
+import { LIMIT } from "@/sdk/indexer-v2/const";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { GetTradesSchema } from "app/api/trades/schema";
 import { ROUTES } from "router/routes";

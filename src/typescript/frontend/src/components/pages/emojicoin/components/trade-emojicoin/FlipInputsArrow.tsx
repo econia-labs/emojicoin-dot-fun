@@ -1,4 +1,4 @@
-import BidirectionalArrowIcon from "@icons/BidirectionalArrow";
+import BidirectionalArrowIcon from "@/icons/BidirectionalArrow";
 import { useState } from "react";
 
 const arrowWrapper = `

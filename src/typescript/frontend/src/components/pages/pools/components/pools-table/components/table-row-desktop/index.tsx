@@ -1,4 +1,4 @@
-import { Flex } from "@containers";
+import { Flex } from "@/containers";
 import { Td, Text, Tr } from "components";
 import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";

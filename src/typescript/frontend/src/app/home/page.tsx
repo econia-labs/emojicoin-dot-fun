@@ -1,5 +1,5 @@
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
+import { symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
 import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { getAptPrice } from "lib/queries/get-apt-price";

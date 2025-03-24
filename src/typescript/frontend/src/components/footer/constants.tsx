@@ -1,4 +1,4 @@
-import Discord from "@icons/Discord";
+import Discord from "@/icons/Discord";
 import Twitter from "components/svg/icons/Twitter";
 import { LINKS } from "lib/env";
 import { ROUTES } from "router/routes";

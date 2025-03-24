@@ -1,4 +1,4 @@
-import AptosIconBlack from "@icons/AptosBlack";
+import AptosIconBlack from "@/icons/AptosBlack";
 import { Emoji } from "utils/emoji";
 
 export const AptosInputLabel = () => (

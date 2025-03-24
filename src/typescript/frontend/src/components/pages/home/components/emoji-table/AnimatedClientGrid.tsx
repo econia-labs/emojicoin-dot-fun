@@ -2,7 +2,7 @@
 
 import "./module.css";
 
-import useEvent from "@hooks/use-event";
+import useEvent from "@/hooks/use-event";
 import type { HomePageProps } from "app/home/HomePage";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";

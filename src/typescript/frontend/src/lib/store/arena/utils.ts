@@ -1,12 +1,12 @@
-import type { ArenaCandlestickModel, ArenaModelWithMeleeID } from "@sdk/indexer-v2";
+import type { ArenaCandlestickModel, ArenaModelWithMeleeID } from "@/sdk/indexer-v2";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,
   isArenaExitModel,
   isArenaMeleeModel,
   isArenaSwapModel,
-} from "@sdk/types/arena-types";
-import { toNominal } from "@sdk/utils";
+} from "@/sdk/types/arena-types";
+import { toNominal } from "@/sdk/utils";
 import type { WritableDraft } from "immer";
 
 import { toBar } from "../event/candlestick-bars";

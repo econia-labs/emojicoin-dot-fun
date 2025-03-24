@@ -1,4 +1,4 @@
-import { sleep } from "@sdk/utils";
+import { sleep } from "@/sdk/utils";
 import { type AnimationControls, type HTMLMotionProps, motion } from "framer-motion";
 import { type Dispatch, type MutableRefObject, type SetStateAction, useRef, useState } from "react";
 import Confetti from "react-confetti";

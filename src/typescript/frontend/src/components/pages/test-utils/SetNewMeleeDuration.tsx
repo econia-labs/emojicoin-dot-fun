@@ -1,7 +1,7 @@
 "use client";
 
 import { Network } from "@aptos-labs/ts-sdk";
-import { isNumberInConstruction } from "@sdk/utils";
+import { isNumberInConstruction } from "@/sdk/utils";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { cn } from "lib/utils/class-name";
 import { useState } from "react";

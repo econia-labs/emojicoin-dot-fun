@@ -1,4 +1,4 @@
-import { Flex, FlexGap } from "@containers";
+import { Flex, FlexGap } from "@/containers";
 import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
 import Text from "components/text";

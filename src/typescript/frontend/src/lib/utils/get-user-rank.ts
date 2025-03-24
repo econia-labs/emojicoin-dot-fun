@@ -1,5 +1,5 @@
-import type { ChatEventModel, SwapEventModel } from "@sdk/indexer-v2/types";
-import { q64ToBig } from "@sdk/utils/nominal-price";
+import type { ChatEventModel, SwapEventModel } from "@/sdk/indexer-v2/types";
+import { q64ToBig } from "@/sdk/utils/nominal-price";
 
 enum RankIcon {
   based = "🐳",

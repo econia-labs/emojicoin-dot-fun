@@ -1,4 +1,4 @@
-import { Trigger } from "@sdk/const";
+import { Trigger } from "@/sdk/const";
 import {
   type ChatEventModel,
   isChatEventModel,
@@ -10,7 +10,7 @@ import {
   type MarketLatestStateEventModel,
   type MarketRegistrationEventModel,
   type SwapEventModel,
-} from "@sdk/indexer-v2/types";
+} from "@/sdk/indexer-v2/types";
 import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
 
 const transitionIn = {

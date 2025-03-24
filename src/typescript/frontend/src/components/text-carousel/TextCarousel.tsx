@@ -1,4 +1,4 @@
-import Planet from "@icons/Planet";
+import Planet from "@/icons/Planet";
 import Carousel from "components/carousel";
 
 const Item = ({ children }: { children: React.ReactNode }) => {

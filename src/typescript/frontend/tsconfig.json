@@ -40,22 +40,22 @@
       "@/store/*": [
         "lib/store/*"
       ],
-      "@containers": [
+      "@/containers": [
         "components/layout/components/index.ts"
       ],
-      "@hooks/*": [
+      "@/hooks/*": [
         "hooks/*"
       ],
-      "@icons/*": [
+      "@/icons/*": [
         "components/svg/icons/*"
       ],
-      "@sdk-types": [
+      "@/sdk-types": [
         "../../sdk/src/types/index.ts"
       ],
-      "@sdk/*": [
+      "@/sdk/*": [
         "../../sdk/src/*"
       ],
-      "@static/*": [
+      "@/static/*": [
         "../public/static/*"
       ]
     },

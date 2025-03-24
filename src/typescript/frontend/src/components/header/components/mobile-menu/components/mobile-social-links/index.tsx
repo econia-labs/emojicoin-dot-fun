@@ -1,4 +1,4 @@
-import { FlexGap } from "@containers";
+import { FlexGap } from "@/containers";
 import type { FlexGapProps } from "components/layout/components/types";
 import React from "react";
 

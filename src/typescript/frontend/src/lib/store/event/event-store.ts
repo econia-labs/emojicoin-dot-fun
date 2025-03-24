@@ -8,7 +8,7 @@ import {
   isMarketRegistrationEventModel,
   isPeriodicStateEventModel,
   isSwapEventModel,
-} from "@sdk/indexer-v2/types";
+} from "@/sdk/indexer-v2/types";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,
@@ -16,8 +16,8 @@ import {
   isArenaMeleeModel,
   isArenaModelWithMeleeID,
   isArenaSwapModel,
-} from "@sdk/types/arena-types";
-import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
+} from "@/sdk/types/arena-types";
+import { DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
 import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
 import { immer } from "zustand/middleware/immer";
 import { createStore } from "zustand/vanilla";

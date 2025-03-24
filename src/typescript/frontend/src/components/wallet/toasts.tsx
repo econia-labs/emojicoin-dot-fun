@@ -6,8 +6,8 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import type { NetworkInfo } from "@aptos-labs/wallet-adapter-react";
-import { PeriodDuration } from "@sdk/const";
-import { getPeriodStartTimeFromTime, truncateAddress } from "@sdk/utils/misc";
+import { PeriodDuration } from "@/sdk/const";
+import { getPeriodStartTimeFromTime, truncateAddress } from "@/sdk/utils/misc";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { APTOS_NETWORK } from "lib/env";

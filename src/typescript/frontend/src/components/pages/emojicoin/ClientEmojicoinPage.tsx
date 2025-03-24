@@ -1,7 +1,7 @@
 "use client";
 
-import { Box } from "@containers";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import { Box } from "@/containers";
+import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
 import { Text } from "components";
 import Carousel from "components/carousel";
 import { useEventStore } from "context/event-store-context";

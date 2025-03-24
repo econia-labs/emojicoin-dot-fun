@@ -1,5 +1,5 @@
-import { ArenaPeriod } from "@sdk/const";
-import { Schemas } from "@sdk/utils";
+import { ArenaPeriod } from "@/sdk/const";
+import { Schemas } from "@/sdk/utils";
 import { z } from "zod";
 
 export const ArenaCandlesticksSearchParamsSchema = z.object({
