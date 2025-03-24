@@ -17,7 +17,7 @@ import { SYMBOL_EMOJIS } from "../../src/emoji_data/symbol-emojis";
 import { ORDER_BY } from "../../src/indexer-v2/const";
 import { waitForEmojicoinIndexer } from "../../src/indexer-v2/queries";
 import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
-import { getPublishHelpers , registerMarketHelper } from "../utils/helpers";
+import { getPublishHelpers, registerMarketHelper } from "../utils/helpers";
 import { getFundedAccount } from "../utils/test-accounts";
 import { fetchMarketRegistrationEvents } from "./queries";
 

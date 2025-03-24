@@ -1,4 +1,4 @@
-import { namesToEmojis,type SymbolEmojiName } from "../../../src";
+import { namesToEmojis, type SymbolEmojiName } from "../../../src";
 import { fetchMarkets } from "../../../src/indexer-v2/queries/app/home";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 import { registerMarketHelper } from "../../utils";

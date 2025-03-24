@@ -3,7 +3,7 @@ import emojiRegex from "emoji-regex";
 
 import { MAX_SYMBOL_LENGTH } from "../const";
 import { normalizeHex } from "../utils/hex";
-import { CHAT_EMOJI_DATA, getRandomSymbolEmoji,SYMBOL_EMOJI_DATA } from "./emoji-data";
+import { CHAT_EMOJI_DATA, getRandomSymbolEmoji, SYMBOL_EMOJI_DATA } from "./emoji-data";
 import {
   type AnyEmoji,
   type AnyEmojiData,

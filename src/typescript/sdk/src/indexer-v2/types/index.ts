@@ -1,9 +1,9 @@
 import Big from "big.js";
 
-import { type Period, toArenaPeriod, toPeriod, toTrigger,type Trigger } from "../../const";
+import { type Period, toArenaPeriod, toPeriod, toTrigger, type Trigger } from "../../const";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
 import { type AccountAddressString, type Uint64String } from "../../emojicoin_dot_fun";
-import { calculateCurvePrice,type ReservesAndBondingCurveState } from "../../markets";
+import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
 import {
   type AnyNumberString,
   CANDLESTICK_NAME,

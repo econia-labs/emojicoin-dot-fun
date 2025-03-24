@@ -1,7 +1,7 @@
 import { type LedgerVersionArg, type TypeTag } from "@aptos-labs/ts-sdk";
 
 import { type SymbolEmoji, toMarketEmojiData } from "../emoji_data";
-import { EmojicoinArena, getMarketAddress,MarketView } from "../emojicoin_dot_fun";
+import { EmojicoinArena, getMarketAddress, MarketView } from "../emojicoin_dot_fun";
 import { toMarketView } from "../types";
 import { toArenaMeleeEvent, toArenaRegistry } from "../types/arena-types";
 import { getAptosClient } from "../utils";

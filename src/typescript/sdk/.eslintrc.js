@@ -95,7 +95,7 @@ module.exports = {
     "simple-import-sort/exports": "error",
     "import/first": "error",
     "import/newline-after-import": "error",
-    "import/no-duplicates": "error"
+    "import/no-duplicates": "error",
   },
   settings: {
     "import/parsers": {

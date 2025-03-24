@@ -4,7 +4,7 @@ import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
 
-import { maxBigInt,type SymbolEmoji } from "../../../src";
+import { maxBigInt, type SymbolEmoji } from "../../../src";
 import { LIMIT } from "../../../src/indexer-v2/const";
 import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
