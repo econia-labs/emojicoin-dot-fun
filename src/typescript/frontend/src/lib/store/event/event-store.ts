@@ -36,7 +36,7 @@ import {
   LOCAL_STORAGE_EVENT_TYPES,
   maybeUpdateLocalStorage,
 } from "./local-storage";
-import { type EventStore, type SetLatestBarsArgs } from "./types";
+import type { EventStore, SetLatestBarsArgs } from "./types";
 import {
   ensureMarketInStore,
   handleLatestBarForPeriodicStateEvent,

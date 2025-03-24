@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
 
-import { type EmojiPickerStore } from "@/store/emoji-picker-store";
+import type { EmojiPickerStore } from "@/store/emoji-picker-store";
 
 import { EmojiPickerContext } from "./EmojiPickerContextProvider";
 

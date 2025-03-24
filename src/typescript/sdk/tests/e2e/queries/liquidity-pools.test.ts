@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 
-import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { TypeTag, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
 

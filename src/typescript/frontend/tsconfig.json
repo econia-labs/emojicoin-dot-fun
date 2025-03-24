@@ -71,7 +71,8 @@
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "esnext"
+    "target": "esnext",
+    "verbatimModuleSyntax": true
   },
   "exclude": [
     "node_modules",

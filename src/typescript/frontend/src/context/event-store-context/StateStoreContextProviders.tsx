@@ -1,13 +1,13 @@
 "use client";
 
 import { createContext, type ReactNode, useRef } from "react";
-import { type StoreApi } from "zustand";
+import type { StoreApi } from "zustand";
 
 import { createEventStore } from "@/store/event/event-store";
-import { type EventStore } from "@/store/event/types";
+import type { EventStore } from "@/store/event/types";
 import { createNameStore, type NameStore } from "@/store/name-store";
 import createUserSettingsStore, { type UserSettingsStore } from "@/store/user-settings-store";
-import { type WebSocketClientStore } from "@/store/websocket/store";
+import type { WebSocketClientStore } from "@/store/websocket/store";
 
 /**
  *

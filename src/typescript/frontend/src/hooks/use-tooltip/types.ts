@@ -1,6 +1,6 @@
-import { type Padding, type Placement } from "@popperjs/core";
-import { type CSSProperties } from "react";
-import { type Colors } from "theme/types";
+import type { Padding, Placement } from "@popperjs/core";
+import type { CSSProperties } from "react";
+import type { Colors } from "theme/types";
 
 export interface TooltipRefs {
   targetRef: React.Dispatch<React.SetStateAction<HTMLElement | null>>;

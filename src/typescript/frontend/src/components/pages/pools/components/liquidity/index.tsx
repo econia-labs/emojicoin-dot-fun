@@ -26,7 +26,7 @@ import { toActualCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
 import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 
-import { type PoolsData } from "../../ClientPoolsPage";
+import type { PoolsData } from "../../ClientPoolsPage";
 import { StyledAddLiquidityWrapper } from "./styled";
 
 type LiquidityProps = {

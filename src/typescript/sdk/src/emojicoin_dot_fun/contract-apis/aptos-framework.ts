@@ -18,7 +18,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 
 import { getAptosClient } from "../../utils/aptos-client";
-import { type TypeTagInput, type Uint64String } from "..";
+import type { TypeTagInput, Uint64String } from "..";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,

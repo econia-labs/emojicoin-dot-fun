@@ -3,7 +3,7 @@
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { getAptPrice } from "lib/queries/get-apt-price";
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 
 import { customTruncateAddress, resolveOwnerNameCached } from "../utils";
 import UserNotFound from "./error";

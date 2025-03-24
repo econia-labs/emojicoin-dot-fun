@@ -1,6 +1,6 @@
 // cspell:word bigserial
 // cspell:word smallserial
-import { type AnyColumnName } from "./json-types";
+import type { AnyColumnName } from "./json-types";
 
 const floats: Set<string> = new Set(["numeric", "decimal", "double precision", "real"]);
 const bigints: Set<string> = new Set(["bigint", "bigserial"]);

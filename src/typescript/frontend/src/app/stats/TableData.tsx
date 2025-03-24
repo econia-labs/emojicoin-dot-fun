@@ -1,4 +1,4 @@
-import { type DatabaseModels } from "@sdk/indexer-v2/types";
+import type { DatabaseModels } from "@sdk/indexer-v2/types";
 import { calculateCirculatingSupply, calculateCurvePrice } from "@sdk/markets";
 import { toNominal, toNominalPrice } from "@sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";

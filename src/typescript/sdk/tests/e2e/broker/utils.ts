@@ -1,4 +1,4 @@
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { type AnyNumberString, waitFor } from "../../../src";
 import {
@@ -10,8 +10,8 @@ import {
   type SubscriptionMessage,
 } from "../../../src/broker-v2/types";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
-import { type BrokerEventModels } from "../../../src/indexer-v2/types";
-import { type BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
+import type { BrokerEventModels } from "../../../src/indexer-v2/types";
+import type { BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import checkArenaRows from "../helpers/arena-equality-checks";
 import checkRows from "../helpers/equality-checks";
 

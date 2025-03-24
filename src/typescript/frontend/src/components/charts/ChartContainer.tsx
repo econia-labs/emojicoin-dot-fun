@@ -5,7 +5,7 @@ import Script from "next/script";
 import React, { Suspense, useMemo } from "react";
 
 import PrivateChart from "./PrivateChart";
-import { type ChartContainerProps } from "./types";
+import type { ChartContainerProps } from "./types";
 
 const MemoizedChart = React.memo(PrivateChart);
 

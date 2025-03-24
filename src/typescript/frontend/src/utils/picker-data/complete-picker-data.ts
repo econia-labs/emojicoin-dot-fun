@@ -1,4 +1,4 @@
-import { type EmojiMartData } from "components/pages/emoji-picker/types";
+import type { EmojiMartData } from "components/pages/emoji-picker/types";
 
 // Stub
 // TODO: Add the missing emojis to this.

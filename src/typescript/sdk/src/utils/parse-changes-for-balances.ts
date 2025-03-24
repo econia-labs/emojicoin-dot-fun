@@ -8,7 +8,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 
 import { APTOS_COIN_TYPE_TAG } from "../const";
-import { type TypeTagInput } from "../emojicoin_dot_fun/types";
+import type { TypeTagInput } from "../emojicoin_dot_fun/types";
 import { type JSONFeeStatement, toFeeStatement } from "../types/core";
 
 /* eslint-disable-next-line import/no-unused-modules */

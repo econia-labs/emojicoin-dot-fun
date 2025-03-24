@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
 
-import { type EventStore } from "@/store/event/types";
+import type { EventStore } from "@/store/event/types";
 import type { NameStore } from "@/store/name-store";
-import { type UserSettingsStore } from "@/store/user-settings-store";
-import { type WebSocketClientStore } from "@/store/websocket/store";
+import type { UserSettingsStore } from "@/store/user-settings-store";
+import type { WebSocketClientStore } from "@/store/websocket/store";
 
 import { EventStoreContext, UserSettingsContext } from "./StateStoreContextProviders";
 

@@ -4,7 +4,7 @@ import {
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import {
   MARKET_REGISTRATION_FEE,
   MARKET_REGISTRATION_GAS_ESTIMATION_FIRST,

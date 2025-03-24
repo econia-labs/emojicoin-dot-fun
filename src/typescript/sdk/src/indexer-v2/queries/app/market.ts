@@ -1,9 +1,9 @@
 import "server-only";
 
-import { type AccountAddress } from "@aptos-labs/ts-sdk";
+import type { AccountAddress } from "@aptos-labs/ts-sdk";
 
-import { type SymbolEmoji } from "../../../emoji_data/types";
-import { type AnyNumberString } from "../../../types";
+import type { SymbolEmoji } from "../../../emoji_data/types";
+import type { AnyNumberString } from "../../../types";
 import { LIMIT, ORDER_BY } from "../../const";
 import {
   toChatEventModel,
@@ -12,7 +12,7 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import { type MarketStateQueryArgs, type PeriodicStateEventQueryArgs } from "../../types/common";
+import type { MarketStateQueryArgs, PeriodicStateEventQueryArgs } from "../../types/common";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";

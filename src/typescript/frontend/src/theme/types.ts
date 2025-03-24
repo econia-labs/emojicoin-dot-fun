@@ -1,15 +1,15 @@
-import {
-  type breakpoints,
-  type fonts,
-  type fontWeight,
-  type gradients,
-  type mediaQueries,
-  type radii,
-  type shadows,
-  type transitions,
-  type zIndices,
+import type {
+  breakpoints,
+  fonts,
+  fontWeight,
+  gradients,
+  mediaQueries,
+  radii,
+  shadows,
+  transitions,
+  zIndices,
 } from "./base";
-import { type baseColors, type darkColors } from "./colors";
+import type { baseColors, darkColors } from "./colors";
 
 export type MediaQueries = typeof mediaQueries;
 

@@ -1,4 +1,4 @@
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 import { emoji } from "utils";
 
 export const DEFAULT_TITLE = "emojicoin.fun";

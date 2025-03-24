@@ -85,11 +85,11 @@ import {
   type toSwapEventModel,
 } from "@sdk/indexer-v2/types";
 import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
-import { type XOR } from "@sdk/utils/utility-types";
+import type { XOR } from "@sdk/utils/utility-types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { type Block } from "../latest-block/route";
+import type { Block } from "../latest-block/route";
 import { symbolEmojisToPairId } from "../util";
 
 export type Asset0In1Out = {

@@ -5,7 +5,7 @@ import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import React, { Suspense, useState } from "react";
 
-import { type GridProps } from "../../types";
+import type { GridProps } from "../../types";
 import ChatBox from "../chat/ChatBox";
 import { CoinHolders } from "../holders/coin-holders";
 import { PersonalTradeHistory } from "../personal-trade-history/personal-trade-history";

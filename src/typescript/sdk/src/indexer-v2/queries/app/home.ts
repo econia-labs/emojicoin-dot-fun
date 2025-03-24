@@ -1,6 +1,6 @@
 import "server-only";
 
-import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
 

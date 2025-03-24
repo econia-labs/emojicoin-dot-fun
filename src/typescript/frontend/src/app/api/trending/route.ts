@@ -1,13 +1,13 @@
 // Disable to allow for doc-comment links and sorted imports.
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { type AccountAddress } from "@aptos-labs/ts-sdk";
-import { type DECIMALS } from "@sdk/const";
+import type { AccountAddress } from "@aptos-labs/ts-sdk";
+import type { DECIMALS } from "@sdk/const";
 import {
   toTrendingMarket,
   type TrendingMarket,
   type TrendingMarketArgs,
 } from "@sdk/indexer-v2/queries";
-import { type q64ToBig } from "@sdk/utils";
+import type { q64ToBig } from "@sdk/utils";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { fetchCachedPriceFeed, type NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
 import { NextResponse } from "next/server";

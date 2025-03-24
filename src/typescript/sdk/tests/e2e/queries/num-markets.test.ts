@@ -1,7 +1,7 @@
 import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
 
 import { getRegistryResourceFromWriteSet, toRegistryView } from "../../../src";
-import { type SymbolEmojiName } from "../../../src/emoji_data/types";
+import type { SymbolEmojiName } from "../../../src/emoji_data/types";
 import {
   fetchLargestMarketID,
   postgrest,

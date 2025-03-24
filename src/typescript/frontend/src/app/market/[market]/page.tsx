@@ -6,7 +6,7 @@ import FEATURE_FLAGS from "lib/feature-flags";
 import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { getAptPrice } from "lib/queries/get-apt-price";
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 
 import { fetchMelee } from "@/queries/arena";

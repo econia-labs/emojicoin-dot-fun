@@ -1,6 +1,6 @@
 import { EN } from "configs";
 import { getLanguageCodeFromLocalStorage } from "context/language-context/helpers";
-import { type TranslationKey } from "context/language-context/types";
+import type { TranslationKey } from "context/language-context/types";
 
 import fetchLocale from "./fetch-locale";
 

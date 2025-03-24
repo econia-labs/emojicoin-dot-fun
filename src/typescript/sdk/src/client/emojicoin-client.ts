@@ -22,10 +22,10 @@ import {
 
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
-import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
+import type { ChatEmoji, SymbolEmoji } from "../emoji_data/types";
 import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
-import { type ArenaEvents } from "../emojicoin_dot_fun/arena-events";
-import { type Events } from "../emojicoin_dot_fun/events";
+import type { ArenaEvents } from "../emojicoin_dot_fun/arena-events";
+import type { Events } from "../emojicoin_dot_fun/events";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
 import {
   type ArenaEventsModels,

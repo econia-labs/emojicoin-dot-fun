@@ -1,6 +1,6 @@
-import { type SvgProps } from "components/svg/types";
-import { type TextProps } from "components/text/types";
-import { type SpaceProps } from "styled-system";
+import type { SvgProps } from "components/svg/types";
+import type { TextProps } from "components/text/types";
+import type { SpaceProps } from "styled-system";
 
 export const scales = {
   MD: "md",

@@ -1,5 +1,5 @@
 import { DECIMALS } from "@sdk/const";
-import { type AnyNumberString } from "@sdk-types";
+import type { AnyNumberString } from "@sdk-types";
 import Big from "big.js";
 
 // Converts a number to its representation in coin decimals.

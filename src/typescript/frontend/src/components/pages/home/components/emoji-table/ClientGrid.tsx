@@ -2,9 +2,9 @@
 
 import "./module.css";
 
-import { type HomePageProps } from "app/home/HomePage";
+import type { HomePageProps } from "app/home/HomePage";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useMemo, useRef } from "react";
 
 import TableCard from "../table-card/TableCard";

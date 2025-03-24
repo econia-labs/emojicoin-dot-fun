@@ -1,4 +1,4 @@
-import { type Account } from "@aptos-labs/ts-sdk";
+import type { Account } from "@aptos-labs/ts-sdk";
 
 import {
   chunk,

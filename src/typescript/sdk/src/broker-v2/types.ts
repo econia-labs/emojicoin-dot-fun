@@ -9,8 +9,8 @@ import {
   type DatabaseJsonType,
   TableName,
 } from "../indexer-v2/types/json-types";
-import { type ARENA_CANDLESTICK_NAME } from "../types/arena-types";
-import { type AnyNumberString, type CANDLESTICK_NAME } from "../types/types";
+import type { ARENA_CANDLESTICK_NAME } from "../types/arena-types";
+import type { AnyNumberString, CANDLESTICK_NAME } from "../types/types";
 
 export type BrokerEvent = SubscribableBrokerEvents | BrokerArenaEvent;
 

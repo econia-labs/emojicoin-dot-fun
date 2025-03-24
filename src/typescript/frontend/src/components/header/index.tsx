@@ -19,7 +19,7 @@ import LogoIcon from "../svg/icons/LogoIcon";
 import { slideTopVariants } from "./animations";
 import { NAVIGATE_LINKS } from "./constants";
 import { StyledClickItem, StyledCloseIcon, StyledContainer, StyledMobileHeader } from "./styled";
-import { type HeaderProps } from "./types";
+import type { HeaderProps } from "./types";
 import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
 
 const Header = ({ isOpen, setIsOpen }: HeaderProps) => {

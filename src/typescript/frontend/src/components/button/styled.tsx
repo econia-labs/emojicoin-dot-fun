@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { border, layout, opacity, shadow, space, typography, variant } from "styled-system";
 
 import { scaleVariants, variantStyles } from "./theme";
-import { type ButtonProps } from "./types";
+import type { ButtonProps } from "./types";
 
 const StyledButton = styled.button<ButtonProps>`
   background-color: ${({ theme }) => theme.colors.transparent};

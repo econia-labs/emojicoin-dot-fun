@@ -8,7 +8,7 @@ import React from "react";
 import { useScramble, type UseScrambleProps } from "use-scramble";
 
 import StyledButton from "./styled";
-import { type ButtonProps } from "./types";
+import type { ButtonProps } from "./types";
 
 const Button = <E extends React.ElementType = "button">({
   startIcon,

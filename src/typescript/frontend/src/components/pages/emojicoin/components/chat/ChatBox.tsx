@@ -15,7 +15,7 @@ import Loading from "@/components/loading";
 import { LoadMore } from "@/components/ui/table/loadMore";
 
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
-import { type ChatProps } from "../../types";
+import type { ChatProps } from "../../types";
 import { MessageContainer } from "./components";
 import { useChatEventsQuery } from "./useChatEventsQuery";
 

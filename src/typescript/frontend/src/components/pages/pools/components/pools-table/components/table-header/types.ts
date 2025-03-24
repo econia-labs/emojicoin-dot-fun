@@ -1,4 +1,4 @@
-import { type HEADERS } from "../../constants";
+import type { HEADERS } from "../../constants";
 
 export type TableHeaderProps = {
   item: (typeof HEADERS)[number];

@@ -1,11 +1,11 @@
 import { useMatchBreakpoints } from "@hooks/index";
-import {
-  type ArenaInfoModel,
-  type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionModel,
-  type MarketStateModel,
+import type {
+  ArenaInfoModel,
+  ArenaLeaderboardHistoryWithArenaInfoModel,
+  ArenaPositionModel,
+  MarketStateModel,
 } from "@sdk/indexer-v2/types";
-import { type ClassValue } from "clsx";
+import type { ClassValue } from "clsx";
 import React, { useState } from "react";
 import darkTheme from "theme/dark";
 import { GlowingEmoji } from "utils/emoji";

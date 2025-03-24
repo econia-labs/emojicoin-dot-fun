@@ -1,13 +1,13 @@
 // cspell:word DDTHH
 
-import { type SymbolEmoji } from "../../emoji_data";
+import type { SymbolEmoji } from "../../emoji_data";
 import type {
   AccountAddressString,
   Uint64String,
   Uint128String,
   UnsizedDecimalString,
 } from "../../emojicoin_dot_fun/types";
-import { type Flatten, type JsonTypes } from "../../types";
+import type { Flatten, JsonTypes } from "../../types";
 
 export type PeriodTypeFromDatabase =
   | "period_15s"

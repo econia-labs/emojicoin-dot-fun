@@ -15,7 +15,7 @@ import { GeoblockedBanner } from "components/geoblocking";
 import Header from "components/header";
 import { HeaderSpacer } from "components/header-spacer";
 import Loader from "components/loader";
-import { type EmojiMartData } from "components/pages/emoji-picker/types";
+import type { EmojiMartData } from "components/pages/emoji-picker/types";
 import { init } from "emoji-mart";
 import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
 import { enableMapSet } from "immer";

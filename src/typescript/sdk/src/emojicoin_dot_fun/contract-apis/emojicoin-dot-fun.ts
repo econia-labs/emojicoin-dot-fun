@@ -29,13 +29,13 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import {
-  type AccountAddressString,
-  type HexString,
-  type Option,
-  type TypeTagInput,
-  type Uint8,
-  type Uint64,
+import type {
+  AccountAddressString,
+  HexString,
+  Option,
+  TypeTagInput,
+  Uint8,
+  Uint64,
 } from "../types";
 
 export type ChatPayloadMoveArguments = {

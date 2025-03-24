@@ -14,7 +14,7 @@ import {
   REWARDS_MODULE_ADDRESS,
   REWARDS_MODULE_NAME,
 } from "../const";
-import { type TypeTagInput } from "../emojicoin_dot_fun";
+import type { TypeTagInput } from "../emojicoin_dot_fun";
 import { removeLeadingZeros } from "./account-address";
 
 export function toTypeTag(

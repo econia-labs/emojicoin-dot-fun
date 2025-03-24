@@ -1,7 +1,7 @@
 import { type AnyEmojiData, getEmojisInString } from "@sdk/index";
 import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
 import { type DetailedHTMLProps, type HTMLAttributes, useMemo } from "react";
-import { type CSSProperties } from "styled-components";
+import type { CSSProperties } from "styled-components";
 
 /**
  * Displays emoji as a simple span element containing text representing one or more emojis.

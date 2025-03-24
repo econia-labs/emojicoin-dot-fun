@@ -1,4 +1,4 @@
-import { type OrderByStrings } from "@sdk/indexer-v2/const";
+import type { OrderByStrings } from "@sdk/indexer-v2/const";
 import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
 import { cn } from "lib/utils/class-name";
 import _ from "lodash";

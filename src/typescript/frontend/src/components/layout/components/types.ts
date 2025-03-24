@@ -1,15 +1,15 @@
-import { type HTMLAttributes, type PropsWithChildren } from "react";
-import { type DefaultTheme } from "styled-components";
-import { type CSS } from "styled-components/dist/types";
-import {
-  type BorderProps,
-  type FlexboxProps,
-  type LayoutProps,
-  type PositionProps,
-  type ResponsiveValue,
-  type SpaceProps,
+import type { HTMLAttributes, PropsWithChildren } from "react";
+import type { DefaultTheme } from "styled-components";
+import type { CSS } from "styled-components/dist/types";
+import type {
+  BorderProps,
+  FlexboxProps,
+  LayoutProps,
+  PositionProps,
+  ResponsiveValue,
+  SpaceProps,
 } from "styled-system";
-import { type Colors } from "theme/types";
+import type { Colors } from "theme/types";
 
 export interface ColumnProps extends FlexProps {}
 

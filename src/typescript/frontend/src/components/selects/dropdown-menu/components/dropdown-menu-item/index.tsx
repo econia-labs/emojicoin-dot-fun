@@ -1,5 +1,5 @@
 import Checkbox from "components/checkbox";
-import { type DropdownMenuItemProps } from "components/selects/types";
+import type { DropdownMenuItemProps } from "components/selects/types";
 import Arrow from "components/svg/icons/Arrow";
 import { Text } from "components/text";
 import React from "react";

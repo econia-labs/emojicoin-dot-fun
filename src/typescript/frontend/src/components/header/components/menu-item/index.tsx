@@ -4,7 +4,7 @@ import { translationFunction } from "context/language-context";
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { type MenuItemProps } from "./types";
+import type { MenuItemProps } from "./types";
 
 const MenuItem = ({ title, onClick = () => {}, pill }: MenuItemProps) => {
   const { t } = translationFunction();

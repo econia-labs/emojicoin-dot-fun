@@ -29,6 +29,10 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "unused-imports", "import", "simple-import-sort"],
   rules: {
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      { checksVoidReturn: { attributes: false } },
+    ],
     "import/no-cycle": [
       "error",
       {
@@ -89,8 +93,9 @@ module.exports = {
     ],
     "@typescript-eslint/consistent-type-imports": [
       "error",
-      { prefer: "type-imports", fixStyle: "inline-type-imports" },
+      { prefer: "type-imports", fixStyle: "separate-type-imports", disallowTypeAnnotations: true },
     ],
+    "@typescript-eslint/no-import-type-side-effects": "error",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "import/first": "error",

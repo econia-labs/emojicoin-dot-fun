@@ -1,4 +1,4 @@
-import { type PropsWithChildren, type ReactElement } from "react";
+import type { PropsWithChildren, ReactElement } from "react";
 
 import type translations from "../../../public/locales/en-US.json";
 

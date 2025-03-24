@@ -4,8 +4,8 @@ import {
   type SwapNetProceedsArgs,
   SwapNotEnoughBaseError,
 } from "@sdk/emojicoin_dot_fun/calculate-swap-price";
-import { type DatabaseModels } from "@sdk/indexer-v2/types";
-import { type AnyNumberString } from "@sdk/types/types";
+import type { DatabaseModels } from "@sdk/indexer-v2/types";
+import type { AnyNumberString } from "@sdk/types/types";
 
 /**
  * This hook calls the client-side calculation of the swap net proceeds amount.
