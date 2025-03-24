@@ -7,7 +7,7 @@ import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { InputNumeric } from "components/inputs";
 import { Column, Row } from "components/layout/components/FlexContainers";
-import { type SwapComponentProps } from "components/pages/emojicoin/types";
+import type { SwapComponentProps } from "components/pages/emojicoin/types";
 import { getTooltipStyles } from "components/selects/theme";
 import { TradeOptions } from "components/selects/trade-options";
 import { useThemeContext } from "context";

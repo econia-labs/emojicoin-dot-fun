@@ -8,7 +8,7 @@ import {
   StyledDropdownMenuItem,
 } from "../dropdown-menu//components/dropdown-menu-item/styled";
 import { DropdownMenuWrapper } from "../dropdown-menu/styled";
-import { type TradeOptionsProps } from "../types";
+import type { TradeOptionsProps } from "../types";
 
 export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
   const [maxSlippage, setMaxSlippage] = useState<bigint>(DEFAULT_MAX_SLIPPAGE);

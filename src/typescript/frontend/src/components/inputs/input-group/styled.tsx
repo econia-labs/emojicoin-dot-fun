@@ -3,11 +3,11 @@ import { type Scales, scales as inputScales } from "components/inputs/input/type
 import { Text } from "components/text";
 import styled, { css, type DefaultTheme } from "styled-components";
 
-import {
-  type InputGroupProps,
-  type InputIconProps,
-  type InputInnerProps,
-  type StyledInputGroupProps,
+import type {
+  InputGroupProps,
+  InputIconProps,
+  InputInnerProps,
+  StyledInputGroupProps,
 } from "./types";
 
 export interface ThemedProps extends Pick<InputGroupProps, "variant"> {

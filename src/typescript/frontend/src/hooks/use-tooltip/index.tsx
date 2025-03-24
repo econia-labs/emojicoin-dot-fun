@@ -7,7 +7,7 @@ import { appearanceAnimationMap, appearanceAnimationVariants } from "theme";
 import { checkIsEllipsis } from "utils";
 
 import { Arrow, StyledTooltip } from "./styled";
-import { type TooltipOptions } from "./types";
+import type { TooltipOptions } from "./types";
 import { useSubscriptionEventsHandlers } from "./use-subscription-events-handlers";
 /**
  * Is used to display a tooltip when an element is hovered over.

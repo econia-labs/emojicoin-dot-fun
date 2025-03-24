@@ -1,9 +1,9 @@
-import {
-  type ChatEventModel,
-  type LiquidityEventModel,
-  type MarketLatestStateEventModel,
-  type MarketRegistrationEventModel,
-  type SwapEventModel,
+import type {
+  ChatEventModel,
+  LiquidityEventModel,
+  MarketLatestStateEventModel,
+  MarketRegistrationEventModel,
+  SwapEventModel,
 } from "@sdk/indexer-v2/types";
 
 export const MAX_ELEMENTS_PER_LINE = 7;

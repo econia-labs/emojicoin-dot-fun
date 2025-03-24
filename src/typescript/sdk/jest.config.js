@@ -1,5 +1,5 @@
 const { pathsToModuleNameMapper } = require("ts-jest");
-const { compilerOptions } = require("./tsconfig");
+const { compilerOptions } = require("./tsconfig.json");
 
 /** @type {import("jest").Config} */
 module.exports = {
@@ -16,6 +16,11 @@ module.exports = {
   coveragePathIgnorePatterns: [],
   testPathIgnorePatterns: ["dist/*", "tests/utils/*"],
   collectCoverage: false,
+  globals: {
+    "ts-jest": {
+      tsconfig: "<rootDir>/tests/tsconfig.json",
+    }
+  },
   coverageThreshold: {
     global: {
       branches: 50,
@@ -25,6 +30,6 @@ module.exports = {
     },
   },
   maxWorkers: 4,
-  globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/global-setup.ts" : null,
-  globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/global-teardown.ts" : null,
+  globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/global-setup.js" : null,
+  globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/global-teardown.js" : null,
 };

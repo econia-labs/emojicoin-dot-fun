@@ -1,8 +1,8 @@
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { toMarketEmojiData } from "../../../emoji_data";
 import { type AccountAddressString, getEvents, getMarketAddress } from "../../../emojicoin_dot_fun";
-import { type Events } from "../../../emojicoin_dot_fun/events";
+import type { Events } from "../../../emojicoin_dot_fun/events";
 import {
   type DatabaseModels,
   GuidGetters,

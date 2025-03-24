@@ -1,4 +1,4 @@
-import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import type { Account, AccountAddressInput } from "@aptos-labs/ts-sdk";
 
 import { toAccountAddressString } from "../../../utils";
 import { LIMIT, ORDER_BY } from "../../const";

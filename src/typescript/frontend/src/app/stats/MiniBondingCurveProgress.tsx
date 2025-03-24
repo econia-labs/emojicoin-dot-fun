@@ -1,4 +1,4 @@
-import { type StateEventData } from "@sdk/indexer-v2/types";
+import type { StateEventData } from "@sdk/indexer-v2/types";
 import { getBondingCurveProgress } from "@sdk/utils";
 import { Progress } from "components/ui/Progress";
 

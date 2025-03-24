@@ -1,4 +1,4 @@
-import { type TypeTag } from "@aptos-labs/ts-sdk";
+import type { TypeTag } from "@aptos-labs/ts-sdk";
 import { toCoinTypes } from "@sdk/markets";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";

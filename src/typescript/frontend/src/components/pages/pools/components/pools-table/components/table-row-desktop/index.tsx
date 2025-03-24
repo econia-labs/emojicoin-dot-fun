@@ -10,7 +10,7 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 
-import { type TableRowDesktopProps } from "./types";
+import type { TableRowDesktopProps } from "./types";
 import { XprPopup } from "./XprPopup";
 
 const DAYS_IN_WEEK = 7;

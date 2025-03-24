@@ -5,7 +5,7 @@ import { useEventStore } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import React, { useEffect, useState } from "react";
 
-import { type MainInfoProps } from "../../types";
+import type { MainInfoProps } from "../../types";
 
 const statsTextClasses = "uppercase ellipses font-forma";
 

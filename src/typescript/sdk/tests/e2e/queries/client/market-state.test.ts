@@ -1,9 +1,9 @@
-import { type SymbolEmoji } from "../../../../src";
+import type { SymbolEmoji } from "../../../../src";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
 import { fetchMarketState } from "../../../../src/indexer-v2/queries";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
-import { type MarketStateModel } from "../../../../src/indexer-v2/types";
-import { type JsonValue } from "../../../../src/types/json-types";
+import type { MarketStateModel } from "../../../../src/indexer-v2/types";
+import type { JsonValue } from "../../../../src/types/json-types";
 import { getFundedAccount } from "../../../utils/test-accounts";
 
 jest.setTimeout(20000);

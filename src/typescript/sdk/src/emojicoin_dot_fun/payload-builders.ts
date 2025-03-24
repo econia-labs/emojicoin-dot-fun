@@ -26,7 +26,7 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
-import { type StructTagString } from "../utils/type-tags";
+import type { StructTagString } from "../utils/type-tags";
 import { postBCSViewFunction } from "./post-bcs-view-function";
 import serializeEntryArgsToJsonArray from "./serialize-entry-args-to-json";
 

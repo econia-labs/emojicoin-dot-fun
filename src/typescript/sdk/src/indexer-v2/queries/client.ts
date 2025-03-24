@@ -4,7 +4,7 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 
 import { EMOJICOIN_INDEXER_URL, FETCH_DEBUG, FETCH_DEBUG_VERBOSE } from "../../server/env";
 import { parseJSONWithBigInts, stringifyJSONWithBigInts } from "../json-bigint";
-import { type TableName } from "../types/json-types";
+import type { TableName } from "../types/json-types";
 
 /**
  * Fetch with BigInt support. This is necessary because the JSON returned by the indexer

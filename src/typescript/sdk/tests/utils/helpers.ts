@@ -12,10 +12,10 @@ import {
   type Types,
 } from "../../src";
 import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
-import { type Events } from "../../src/emojicoin_dot_fun/events";
+import type { Events } from "../../src/emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { getAptosClient } from "../../src/utils/aptos-client";
-import { type XOR } from "../../src/utils/utility-types";
+import type { XOR } from "../../src/utils/utility-types";
 
 // The exact amount of APT to trigger a transition out of the bonding curve. Note that the
 // fee integrator rate BPs must be set to 0 for this to work.

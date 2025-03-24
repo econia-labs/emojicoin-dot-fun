@@ -1,6 +1,6 @@
-import { type SymbolEmojiData } from "@sdk/emoji_data/types";
+import type { SymbolEmojiData } from "@sdk/emoji_data/types";
 import Link from "next/link";
-import { type PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import React from "react";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";

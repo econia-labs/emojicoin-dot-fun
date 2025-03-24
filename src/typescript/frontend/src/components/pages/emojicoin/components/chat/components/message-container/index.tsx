@@ -15,7 +15,7 @@ import {
   StyledMessageWrapper,
   StyledUserNameWrapper,
 } from "./styled";
-import { type MessageContainerProps } from "./types";
+import type { MessageContainerProps } from "./types";
 
 const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageContainerProps) => {
   const { addressName: connectedWalletName } = useAptos();

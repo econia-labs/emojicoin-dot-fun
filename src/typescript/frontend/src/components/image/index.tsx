@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { getFileNameFromSrc } from "utils";
 
 import { StyledImage } from "./styled";
-import { type ImageProps } from "./types";
+import type { ImageProps } from "./types";
 
 const Image: React.FC<ImageProps> = ({
   src,

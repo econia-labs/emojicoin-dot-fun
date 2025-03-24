@@ -1,9 +1,9 @@
-import { type SvgProps } from "components/svg/types";
-import { type ElementType, type PropsWithChildren, type ReactNode } from "react";
-import { type DefaultTheme } from "styled-components";
-import { type LayoutProps, type SpaceProps } from "styled-system";
-import { type Colors } from "theme/types";
-import { type PolymorphicComponentProps } from "types";
+import type { SvgProps } from "components/svg/types";
+import type { ElementType, PropsWithChildren, ReactNode } from "react";
+import type { DefaultTheme } from "styled-components";
+import type { LayoutProps, SpaceProps } from "styled-system";
+import type { Colors } from "theme/types";
+import type { PolymorphicComponentProps } from "types";
 
 export const variants = {
   OUTLINE: "outline",

@@ -1,7 +1,7 @@
 import { cn } from "lib/utils/class-name";
 import React from "react";
 
-import { type EcTableColumn } from "./ecTable";
+import type { EcTableColumn } from "./ecTable";
 import { TableCell, TableRow } from "./table";
 
 interface Props<T> {

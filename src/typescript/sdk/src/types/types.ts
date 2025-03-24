@@ -1,4 +1,4 @@
-import { type AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
+import type { AccountAddress, TypeTag } from "@aptos-labs/ts-sdk";
 import { hexToBytes } from "@noble/hashes/utils";
 
 import {
@@ -7,14 +7,13 @@ import {
   rawTriggerToEnum,
   type Trigger,
 } from "../const";
-import { type SymbolEmoji } from "../emoji_data";
-import { type AccountAddressString } from "../emojicoin_dot_fun/types";
-import { type STRUCT_STRINGS } from "../utils";
+import type { SymbolEmoji } from "../emoji_data";
+import type { AccountAddressString } from "../emojicoin_dot_fun/types";
+import type { STRUCT_STRINGS } from "../utils";
 import { standardizeAddress } from "../utils/account-address";
-import { type Flatten } from ".";
-import { type ArenaTypes } from "./arena-types";
+import type { Flatten } from ".";
+import type { ArenaTypes } from "./arena-types";
 import { fromAggregatorSnapshot } from "./core";
-import type JsonTypes from "./json-types";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -24,6 +23,7 @@ import {
   isJSONPeriodicStateEvent,
   isJSONStateEvent,
   isJSONSwapEvent,
+  type JsonTypes,
 } from "./json-types";
 
 export type AnyNumberString = number | string | bigint;

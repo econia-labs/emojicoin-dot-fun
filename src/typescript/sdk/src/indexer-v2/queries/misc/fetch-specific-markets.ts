@@ -1,6 +1,6 @@
 import "server-only";
 
-import { type SymbolEmoji } from "../../../emoji_data";
+import type { SymbolEmoji } from "../../../emoji_data";
 import { chunk } from "../../../utils/misc";
 import { TableName, toMarketStateModel } from "../../types";
 import { postgrest } from "../client";

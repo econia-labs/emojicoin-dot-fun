@@ -4,7 +4,7 @@ import { translationFunction } from "context/language-context";
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { type SelectProps } from "../types";
+import type { SelectProps } from "../types";
 import { DropdownSelectWrapper } from "./styled";
 
 export const Select: React.FC<SelectProps> = ({

@@ -1,5 +1,5 @@
 import CultClientPage from "components/pages/cult/CultClientPage";
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 
 export const dynamic = "force-static";
 

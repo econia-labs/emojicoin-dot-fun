@@ -6,7 +6,7 @@ import { translationFunction } from "context/language-context";
 import React, { useEffect, useState } from "react";
 import { useScramble } from "use-scramble";
 
-import { type TableHeaderSwitcherProps } from "./types";
+import type { TableHeaderSwitcherProps } from "./types";
 
 const TableHeaderSwitcher: React.FC<TableHeaderSwitcherProps> = ({ title1, title2, onSelect }) => {
   const [selectedTitle, setSelectedTitle] = useState(title1);

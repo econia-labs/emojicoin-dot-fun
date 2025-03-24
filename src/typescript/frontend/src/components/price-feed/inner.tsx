@@ -1,6 +1,6 @@
 "use client";
 
-import { type DatabaseModels } from "@sdk/indexer-v2/types";
+import type { DatabaseModels } from "@sdk/indexer-v2/types";
 import Carousel from "components/carousel";
 import { FormattedNumber } from "components/FormattedNumber";
 import { PriceColors } from "components/misc/ColoredPriceDisplay";

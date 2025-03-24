@@ -3,7 +3,7 @@
 import { FlexGap } from "@containers";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
 import { DEFAULT_POOLS_SORT_BY } from "@sdk/indexer-v2/queries/query-params";
-import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
+import type { MarketStateModel, UserPoolsRPCModel } from "@sdk/indexer-v2/types";
 import SearchBar from "components/inputs/search-bar";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
 import {

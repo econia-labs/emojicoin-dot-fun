@@ -1,7 +1,7 @@
 // cspell:word timespan
 
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
 
 import { fetchLatestPosition } from "@/queries/arena";

@@ -102,7 +102,7 @@
     "check:ci": "pnpm run check && pnpm run check:tests",
     "check:tests": "tsc -p tests/tsconfig.json",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "e2e:testnet": "pnpm load-test-env -v NO_TEST_SETUP=true -- pnpm jest tests/e2e/queries/testnet",
+    "e2e:testnet": "pnpm dotenv -e ../.env -v NO_TEST_SETUP=true -v APTOS_NETWORK=testnet -- pnpm jest tests/e2e/queries/testnet",
     "format": "pnpm _format --list-different --write",
     "format:check": "pnpm _format --check",
     "lint": "eslint --max-warnings=0 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",

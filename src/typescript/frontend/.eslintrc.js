@@ -27,7 +27,8 @@ module.exports = {
     "playwright.config.js",
     "postcss.config.js",
     "tailwind.config.js",
-    "jest.config.ts",
+    "jest.config.js",
+    "public/static",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -42,6 +43,10 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "import", "simple-import-sort"],
   rules: {
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      { checksVoidReturn: { attributes: false } },
+    ],
     "import/no-cycle": [
       "error",
       {
@@ -90,8 +95,9 @@ module.exports = {
     "react/prop-types": "off",
     "@typescript-eslint/consistent-type-imports": [
       "error",
-      { prefer: "type-imports", fixStyle: "inline-type-imports" },
+      { prefer: "type-imports", fixStyle: "separate-type-imports", disallowTypeAnnotations: true },
     ],
+    "@typescript-eslint/no-import-type-side-effects": "error",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "import/first": "error",

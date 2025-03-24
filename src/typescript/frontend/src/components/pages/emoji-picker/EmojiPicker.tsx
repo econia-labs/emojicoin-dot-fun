@@ -21,7 +21,7 @@ import { notoColorEmoji } from "styles/fonts";
 import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 
-import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
+import type { EmojiMartData, EmojiPickerSearchData, EmojiSelectorData } from "./types";
 
 export type SearchResult = Array<EmojiPickerSearchData>;
 

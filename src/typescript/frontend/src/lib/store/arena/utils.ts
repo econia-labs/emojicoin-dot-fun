@@ -1,10 +1,6 @@
 import { type MarketEmojiData, toMarketEmojiData } from "@sdk/emoji_data";
-import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import {
-  type ArenaCandlestickModel,
-  type ArenaInfoModel,
-  type ArenaModelWithMeleeID,
-} from "@sdk/indexer-v2";
+import type { AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import type { ArenaCandlestickModel, ArenaInfoModel, ArenaModelWithMeleeID } from "@sdk/indexer-v2";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,
@@ -13,11 +9,11 @@ import {
   isArenaSwapModel,
 } from "@sdk/types/arena-types";
 import { toNominal } from "@sdk/utils";
-import { type WritableDraft } from "immer";
+import type { WritableDraft } from "immer";
 
 import { toBar } from "../event/candlestick-bars";
 import { callbackClonedLatestBarIfSubscribed } from "../utils";
-import { type MeleeState } from "./store";
+import type { MeleeState } from "./store";
 
 export type ArenaMarketPair = {
   market0: {

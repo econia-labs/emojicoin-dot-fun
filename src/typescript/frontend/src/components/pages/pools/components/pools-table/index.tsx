@@ -8,7 +8,7 @@ import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import React, { useRef, useState } from "react";
 import { getEmptyListTr } from "utils";
 
-import { type PoolsData } from "../../ClientPoolsPage";
+import type { PoolsData } from "../../ClientPoolsPage";
 import { TableHeader, TableRowDesktop } from "./components";
 import { HEADERS, MOBILE_HEADERS } from "./constants";
 import { StyledPoolsWrapper } from "./styled";

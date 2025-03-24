@@ -1,6 +1,6 @@
-import { type Aptos } from "@aptos-labs/ts-sdk";
-import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
+import type { Aptos } from "@aptos-labs/ts-sdk";
+import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import type { TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 

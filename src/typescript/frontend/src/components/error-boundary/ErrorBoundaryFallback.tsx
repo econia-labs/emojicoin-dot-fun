@@ -4,7 +4,7 @@ import "./styles.css";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 
-import { type ErrorBoundaryFallbackProps } from "./types";
+import type { ErrorBoundaryFallbackProps } from "./types";
 
 export const ErrorContainerButton = styled.button`
   font-family: var(--font-pixelar) !important;

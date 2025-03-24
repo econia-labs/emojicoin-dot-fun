@@ -1,16 +1,13 @@
 // cspell:word immerable
 "use client";
 
-import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
+import type { PeriodTypeFromBroker } from "@sdk/indexer-v2/types/json-types";
 import { immerable } from "immer";
 import { BROKER_URL } from "lib/env";
 
 import { WebSocketClient, type WebSocketClientArgs } from "@/broker/client";
-import { type SubscribableBrokerEvents } from "@/broker/types";
-import {
-  type ImmerGetEventAndClientStore,
-  type ImmerSetEventAndClientStore,
-} from "@/store/event/types";
+import type { SubscribableBrokerEvents } from "@/broker/types";
+import type { ImmerGetEventAndClientStore, ImmerSetEventAndClientStore } from "@/store/event/types";
 
 export type ClientState = {
   client: WebSocketClient;

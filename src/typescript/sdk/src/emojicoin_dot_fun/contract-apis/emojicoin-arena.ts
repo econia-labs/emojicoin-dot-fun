@@ -19,13 +19,13 @@ import {
 } from "@aptos-labs/ts-sdk";
 
 import { ARENA_MODULE_ADDRESS } from "../../const";
-import { type JsonTypes } from "../../types";
+import type { JsonTypes } from "../../types";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import { type TypeTagInput, type Uint64, type Uint64String } from "../types";
+import type { TypeTagInput, Uint64, Uint64String } from "../types";
 
 export type FundVaultPayloadMoveArguments = {
   amount: U64;

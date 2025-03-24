@@ -1,7 +1,7 @@
 "use client";
 
-import { type DatabaseModels } from "@sdk/indexer-v2/types";
-import { type Types } from "@sdk-types";
+import type { DatabaseModels } from "@sdk/indexer-v2/types";
+import type { Types } from "@sdk-types";
 import {
   Select,
   SelectContent,

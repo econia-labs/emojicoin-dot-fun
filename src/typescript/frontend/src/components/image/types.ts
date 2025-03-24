@@ -1,6 +1,6 @@
-import { type BoxProps } from "components/layout/components/types";
-import { type SkeletonProps } from "components/skeleton/types";
-import { type ResponsiveValue } from "styled-system";
+import type { BoxProps } from "components/layout/components/types";
+import type { SkeletonProps } from "components/skeleton/types";
+import type { ResponsiveValue } from "styled-system";
 
 export type ImageDimensions = {
   variant?: SkeletonProps["variant"];

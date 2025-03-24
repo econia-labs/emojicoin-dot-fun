@@ -1,5 +1,5 @@
-import { type WritableDraft } from "immer";
-import { type StoreApi } from "zustand";
+import type { WritableDraft } from "immer";
+import type { StoreApi } from "zustand";
 
 // The type of the `set((state) => ...)` function for the `immer` library.
 export type ImmerSetStore<T> = (

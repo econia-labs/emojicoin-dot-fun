@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 
-import { type TableProps } from "./ecTable";
+import type { TableProps } from "./ecTable";
 import { EcTableRow } from "./ecTableRow";
 import { LoadMore } from "./loadMore";
 import { TableBody, TableCell, TableRow } from "./table";

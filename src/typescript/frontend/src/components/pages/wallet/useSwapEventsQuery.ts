@@ -1,12 +1,12 @@
 import { LIMIT } from "@sdk/indexer-v2/const";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { type GetTradesSchema } from "app/api/trades/schema";
+import type { GetTradesSchema } from "app/api/trades/schema";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 import { addSearchParams } from "utils/url-utils";
-import { type z } from "zod";
+import type { z } from "zod";
 
-import { type fetchSwapEvents } from "@/queries/market";
+import type { fetchSwapEvents } from "@/queries/market";
 
 export type SwapEvent = Awaited<ReturnType<typeof fetchSwapEvents>>[number];
 

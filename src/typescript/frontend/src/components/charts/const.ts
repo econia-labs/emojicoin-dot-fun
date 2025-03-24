@@ -1,12 +1,12 @@
 // cspell:word localstorage
 
-import { type PeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
 import { ArenaPeriod, Period } from "@sdk/const";
-import {
-  type ChartingLibraryWidgetOptions,
-  type LanguageCode,
-  type ResolutionString,
-  type ThemeName,
+import type { PeriodTypeFromBroker } from "@sdk/indexer-v2/types/json-types";
+import type {
+  ChartingLibraryWidgetOptions,
+  LanguageCode,
+  ResolutionString,
+  ThemeName,
 } from "@static/charting_library";
 import { CDN_URL } from "lib/env";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";

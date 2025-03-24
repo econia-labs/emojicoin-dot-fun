@@ -1,11 +1,11 @@
 import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
 
-import { type SymbolEmoji } from "../../../src";
+import type { SymbolEmoji } from "../../../src";
 import { getEventsAsProcessorModelsFromResponse } from "../../../src/indexer-v2/mini-processor";
 import { fetchMarketState } from "../../../src/indexer-v2/queries";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
-import { type MarketStateModel } from "../../../src/indexer-v2/types";
-import { type JsonValue } from "../../../src/types/json-types";
+import type { MarketStateModel } from "../../../src/indexer-v2/types";
+import type { JsonValue } from "../../../src/types/json-types";
 import { getAptosClient } from "../../utils";
 import { registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccount } from "../../utils/test-accounts";

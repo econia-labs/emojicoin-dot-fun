@@ -1,4 +1,4 @@
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import postgres from "postgres";
 

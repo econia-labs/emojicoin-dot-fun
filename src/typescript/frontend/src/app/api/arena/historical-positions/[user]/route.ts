@@ -1,6 +1,6 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { safeParsePageWithDefault } from "lib/routes/home-page-params";
-import { type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
 
 import { fetchArenaLeaderboardHistoryWithArenaInfo } from "@/queries/arena";

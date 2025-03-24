@@ -1,6 +1,6 @@
 import { parseJSONWithBigInts } from "../indexer-v2/json-bigint";
-import { type BrokerEventModels, type PeriodTypeFromBroker } from "../indexer-v2/types";
-import { type BrokerJsonTypes } from "../indexer-v2/types/json-types";
+import type { BrokerEventModels, PeriodTypeFromBroker } from "../indexer-v2/types";
+import type { BrokerJsonTypes } from "../indexer-v2/types/json-types";
 import { ensureArray } from "../utils/misc";
 import {
   type ArenaPeriodRequest,

@@ -1,14 +1,14 @@
 /* eslint-disable import/no-unused-modules */
 import { AccountAddress, type Uint8 } from "@aptos-labs/ts-sdk";
 
-import {
-  type AccountAddressString,
-  type HexString,
-  type Uint64String,
-  type Uint128String,
+import type {
+  AccountAddressString,
+  HexString,
+  Uint64String,
+  Uint128String,
 } from "../emojicoin_dot_fun/types";
-import { type ArenaJsonTypes } from "./arena-json-types";
-import { type AggregatorSnapshot, type EventJSON } from "./core";
+import type { ArenaJsonTypes } from "./arena-json-types";
+import type { AggregatorSnapshot, EventJSON } from "./core";
 
 export type JsonValue =
   | string
@@ -19,7 +19,7 @@ export type JsonValue =
   | { [key: string]: JsonValue }
   | bigint;
 
-type JsonTypes = ArenaJsonTypes & {
+export type JsonTypes = ArenaJsonTypes & {
   ExtendRef: {
     self: AccountAddressString;
   };
@@ -305,8 +305,6 @@ type JsonTypes = ArenaJsonTypes & {
     octas_reward_amount: Uint64String;
   };
 };
-
-export default JsonTypes;
 
 export type AnyEmojicoinJSONEvent =
   | JsonTypes["SwapEvent"]

@@ -30,7 +30,7 @@ import {
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import EmojiMarketPageLink from "./LinkOrAnimationTrigger";
-import { type GridLayoutInformation, type TableCardProps } from "./types";
+import type { GridLayoutInformation, TableCardProps } from "./types";
 
 const TableCard = ({
   index,

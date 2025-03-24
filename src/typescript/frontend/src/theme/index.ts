@@ -1,14 +1,14 @@
-import {
-  type Breakpoints,
-  type Colors,
-  type Fonts,
-  type FontWeight,
-  type Gradients,
-  type MediaQueries,
-  type Radii,
-  type Shadows,
-  type Transitions,
-  type ZIndices,
+import type {
+  Breakpoints,
+  Colors,
+  Fonts,
+  FontWeight,
+  Gradients,
+  MediaQueries,
+  Radii,
+  Shadows,
+  Transitions,
+  ZIndices,
 } from "./types";
 
 export { appearanceAnimationMap, appearanceAnimationVariants, scaleAnimation } from "./animations";

@@ -1,13 +1,9 @@
-import {
-  type Account,
-  type AccountAddress,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import type { Account, AccountAddress, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 
 import { getEvents, maxBigInt, sum, sumByKey } from "../../../src";
-import { type Events } from "../../../src/emojicoin_dot_fun/events";
+import type { Events } from "../../../src/emojicoin_dot_fun/events";
 import { getAptosClient, registerMarketHelper } from "../../utils";
 import { getTxnBatchHighestVersion } from "../../utils/get-txn-batch-highest-version";
 import { getFundedAccounts } from "../../utils/test-accounts";

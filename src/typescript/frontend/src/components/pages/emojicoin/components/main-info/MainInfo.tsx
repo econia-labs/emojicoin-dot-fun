@@ -22,7 +22,7 @@ import { Emoji } from "utils/emoji";
 import { MarketProperties } from "@/contract-apis";
 
 import { Switcher } from "../../../../switcher";
-import { type MainInfoProps } from "../../types";
+import type { MainInfoProps } from "../../types";
 import BondingProgress from "./BondingProgress";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";

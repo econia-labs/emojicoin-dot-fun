@@ -2,7 +2,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { TableCell, TableRow } from "components/ui/table/table";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { useAptPrice } from "context/AptPrice";
-import { type FullCoinData } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
+import type { FullCoinData } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { ROUTES } from "router/routes";

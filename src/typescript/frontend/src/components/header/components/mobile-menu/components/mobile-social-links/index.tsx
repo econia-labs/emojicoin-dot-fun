@@ -1,5 +1,5 @@
 import { FlexGap } from "@containers";
-import { type FlexGapProps } from "components/layout/components/types";
+import type { FlexGapProps } from "components/layout/components/types";
 import React from "react";
 
 import { SOCIAL_ICONS } from "./constants";

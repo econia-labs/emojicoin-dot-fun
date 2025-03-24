@@ -1,9 +1,9 @@
 import "server-only";
 
-import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import type { AccountAddressInput } from "@aptos-labs/ts-sdk";
 
-import { type ArenaPeriod } from "../../..";
-import { type AnyNumberString } from "../../../types";
+import type { ArenaPeriod } from "../../..";
+import type { AnyNumberString } from "../../../types";
 import { toAccountAddressString } from "../../../utils/account-address";
 import { ORDER_BY } from "../../const";
 import {

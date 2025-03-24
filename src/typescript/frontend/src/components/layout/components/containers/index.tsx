@@ -1,12 +1,12 @@
 "use client";
 
-import {
-  type BoxProps,
-  type BoxThemedProps,
-  type ColumnProps,
-  type FlexGapProps,
-  type FlexProps,
-  type RowProps,
+import type {
+  BoxProps,
+  BoxThemedProps,
+  ColumnProps,
+  FlexGapProps,
+  FlexProps,
+  RowProps,
 } from "@containers";
 import React, { type PropsWithChildren } from "react";
 import styled, { css } from "styled-components";

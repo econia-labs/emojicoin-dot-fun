@@ -9,7 +9,7 @@ import {
   QUOTE_REAL_CEILING,
   QUOTE_VIRTUAL_CEILING,
 } from "../const";
-import { type AnyNumberString, type Types } from "../types";
+import type { AnyNumberString, Types } from "../types";
 
 export class CustomCalculatedSwapError extends Error {
   constructor(msg: string) {

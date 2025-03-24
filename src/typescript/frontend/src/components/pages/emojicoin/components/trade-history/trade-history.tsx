@@ -1,4 +1,4 @@
-import { type SwapEventModel } from "@sdk/indexer-v2";
+import type { SwapEventModel } from "@sdk/indexer-v2";
 import { toNominal } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
@@ -17,7 +17,7 @@ import { Emoji } from "utils/emoji";
 
 import { useSwapEventsQuery } from "@/components/pages/wallet/useSwapEventsQuery";
 
-import { type TradeHistoryProps } from "../../types";
+import type { TradeHistoryProps } from "../../types";
 
 const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),

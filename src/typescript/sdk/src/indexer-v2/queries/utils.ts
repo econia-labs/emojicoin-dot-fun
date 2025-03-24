@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 
-import {
-  type PostgrestBuilder,
-  type PostgrestFilterBuilder,
-  type PostgrestSingleResponse,
-  type PostgrestTransformBuilder,
+import type {
+  PostgrestBuilder,
+  PostgrestFilterBuilder,
+  PostgrestSingleResponse,
+  PostgrestTransformBuilder,
 } from "@supabase/postgrest-js";
 
-import { type AnyNumberString } from "../../types/types";
-import { type DatabaseModels } from "../types";
+import type { AnyNumberString } from "../../types/types";
+import type { DatabaseModels } from "../types";
 import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
 import { postgrest } from "./client";
 
@@ -96,7 +96,9 @@ export const waitForEmojicoinIndexer = async (
         } else if (i > maxTries) {
           reject(new Error("Timeout waiting for processed version."));
         } else {
-          setTimeout(check, POLLING_INTERVAL);
+          setTimeout(() => {
+            check();
+          }, POLLING_INTERVAL);
         }
         i += 1;
       } catch (e) {

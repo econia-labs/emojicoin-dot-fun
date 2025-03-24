@@ -3,7 +3,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { layout, space } from "styled-system";
 
-import { type LinkProps } from "./types";
+import type { LinkProps } from "./types";
 
 export const StyledLink = styled(Text)<LinkProps>`
   display: flex;

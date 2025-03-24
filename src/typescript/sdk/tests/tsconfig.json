@@ -1,4 +1,7 @@
 {
+  "compilerOptions": {
+    "verbatimModuleSyntax": false
+  },
   "exclude": [
     "../node_modules"
   ],

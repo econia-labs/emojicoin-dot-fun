@@ -14,8 +14,8 @@ import {
   toSwapEvent,
   type Types,
 } from "../types";
-import { type EventJSON, type GUID } from "../types/core";
-import { type EmojicoinStructName } from "../utils/type-tags";
+import type { EventJSON, GUID } from "../types/core";
+import type { EmojicoinStructName } from "../utils/type-tags";
 
 export type FullEventName = keyof typeof fullEventNames;
 

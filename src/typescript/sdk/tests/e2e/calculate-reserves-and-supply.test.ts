@@ -1,4 +1,4 @@
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import {
   calculateCirculatingSupply,
@@ -12,7 +12,7 @@ import {
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { EMOJICOIN_REMAINDER, EMOJICOIN_SUPPLY, ONE_APT_BIGINT } from "../../src/const";
 import { getMarketAddress } from "../../src/emojicoin_dot_fun";
-import { type SwapEventModel } from "../../src/indexer-v2/types";
+import type { SwapEventModel } from "../../src/indexer-v2/types";
 import { isInBondingCurve } from "../../src/utils/bonding-curve";
 import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../utils/helpers";

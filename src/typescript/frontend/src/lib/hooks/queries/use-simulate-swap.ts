@@ -1,10 +1,6 @@
-import { type Aptos, type TypeTag } from "@aptos-labs/ts-sdk";
-import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import {
-  type AccountAddressString,
-  type AnyNumber,
-  type TypeTagInput,
-} from "@sdk/emojicoin_dot_fun";
+import type { Aptos, TypeTag } from "@aptos-labs/ts-sdk";
+import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import type { AccountAddressString, AnyNumber, TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { useQuery } from "@tanstack/react-query";
 import Big from "big.js";
