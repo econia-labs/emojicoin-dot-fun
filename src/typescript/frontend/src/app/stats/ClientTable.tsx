@@ -7,7 +7,7 @@ import React, { useCallback, useMemo, useState } from "react";
 
 import { Column, TableData } from "./TableData";
 
-export type ClientTableProps = {
+type ClientTableProps = {
   price: DatabaseModels["market_state"][];
   allTimeVolume: DatabaseModels["market_state"][];
   priceDelta: DatabaseModels["price_feed"][];

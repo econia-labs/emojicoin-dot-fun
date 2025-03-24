@@ -17,7 +17,7 @@ const getHeight = ({ scale }: ThemedProps) => {
   }
 };
 
-export const getBorderStyles = ({ error, touched, borderColor, theme }: BorderProps) => {
+const getBorderStyles = ({ error, touched, borderColor, theme }: BorderProps) => {
   if (error && touched) {
     return css`
       border: 1px solid ${theme.colors.lightGray};
@@ -45,7 +45,7 @@ export const getBorderStyles = ({ error, touched, borderColor, theme }: BorderPr
   `;
 };
 
-export const Input = styled.input.attrs<InputProps>(({ scale = "md" }) => ({
+const Input = styled.input.attrs<InputProps>(({ scale = "md" }) => ({
   scale,
 }))`
   background-color: transparent;

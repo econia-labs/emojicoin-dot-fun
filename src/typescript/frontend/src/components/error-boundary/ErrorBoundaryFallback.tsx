@@ -6,7 +6,7 @@ import styled from "styled-components";
 
 import type { ErrorBoundaryFallbackProps } from "./types";
 
-export const ErrorContainerButton = styled.button`
+const ErrorContainerButton = styled.button`
   font-family: var(--font-pixelar) !important;
   border-radius: 8px;
   font-weight: 900;
@@ -54,5 +54,3 @@ const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({ error, re
     </div>
   );
 };
-
-export default ErrorBoundaryFallback;

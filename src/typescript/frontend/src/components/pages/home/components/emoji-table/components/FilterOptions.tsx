@@ -28,7 +28,7 @@ const options: Array<Option> = [
   // TODO: Add price..?
 ];
 
-export type FilterOptionsComponentProps = {
+type FilterOptionsComponentProps = {
   filter: SortMarketsBy;
   onChange: (value: SortMarketsBy) => void;
 };

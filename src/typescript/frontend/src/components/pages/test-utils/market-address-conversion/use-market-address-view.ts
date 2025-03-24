@@ -8,7 +8,7 @@ import { useMemo } from "react";
 
 import { MarketMetadataByMarketAddress } from "@/contract-apis";
 
-export const fetchSymbol = async (args: { aptos: Aptos; marketAddress: string }) =>
+const fetchSymbol = async (args: { aptos: Aptos; marketAddress: string }) =>
   await withResponseError(
     MarketMetadataByMarketAddress.view(args)
       .then(async ({ vec }) => vec.pop())

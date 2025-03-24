@@ -1,7 +1,7 @@
 import React, { type SVGProps } from "react";
 import styled from "styled-components";
 
-export const StyledCloseIcon = styled.div`
+const StyledCloseIcon = styled.div`
   cursor: pointer;
   opacity: 1;
   transition: all 0.15s ease-in-out;
@@ -17,7 +17,7 @@ export const StyledCloseIcon = styled.div`
   }
 `;
 
-export const CloseIconWithHover = (props: SVGProps<SVGSVGElement>) => {
+const CloseIconWithHover = (props: SVGProps<SVGSVGElement>) => {
   return (
     <StyledCloseIcon>
       <svg
@@ -33,5 +33,3 @@ export const CloseIconWithHover = (props: SVGProps<SVGSVGElement>) => {
     </StyledCloseIcon>
   );
 };
-
-export default CloseIconWithHover;

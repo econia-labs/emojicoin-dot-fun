@@ -12,12 +12,12 @@ export const scales = {
   LG: "lg",
 } as const;
 
-export const variants = {
+const variants = {
   PRIMARY: "primary",
 } as const;
 
 export type Scales = (typeof scales)[keyof typeof scales];
-export type Variants = (typeof variants)[keyof typeof variants];
+type Variants = (typeof variants)[keyof typeof variants];
 
 export interface BaseInputProps extends SpaceProps, TypographyProps {
   scale?: Scales;
@@ -28,15 +28,12 @@ export interface BaseInputProps extends SpaceProps, TypographyProps {
   borderColor?: keyof Colors;
 }
 
-export interface ThemedProps extends BaseInputProps {
+interface ThemedProps extends BaseInputProps {
   theme: DefaultTheme;
 }
 
-export interface BorderProps extends ThemedProps {
+interface BorderProps extends ThemedProps {
   borderColor?: keyof Colors;
 }
 
-export type InputProps<P extends ElementType = "input"> = PolymorphicComponentProps<
-  P,
-  BaseInputProps
->;
+type InputProps<P extends ElementType = "input"> = PolymorphicComponentProps<P, BaseInputProps>;

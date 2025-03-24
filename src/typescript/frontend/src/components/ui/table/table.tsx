@@ -160,4 +160,4 @@ const TableRow = React.forwardRef<
 );
 TableRow.displayName = "TableRow";
 
-export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
+export { Table, TableBody, TableCell, TableHead, TableHeader, TableRow };

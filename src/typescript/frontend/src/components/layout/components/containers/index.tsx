@@ -13,7 +13,7 @@ import styled, { css } from "styled-components";
 import { border, flexbox, layout, position, space, system } from "styled-system";
 import { siteWidth } from "theme/base";
 
-export const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
+const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
   if (ellipsis) {
     return css`
       white-space: nowrap;
@@ -39,7 +39,7 @@ export const Box = styled.div<BoxProps>`
 /**
  * Defining Flex here to avoid circular dependencies.
  */
-export const gap = system({ gap: true, rowGap: true, columnGap: true });
+const gap = system({ gap: true, rowGap: true, columnGap: true });
 
 export const Flex = styled(Box)<FlexProps>`
   display: flex;
@@ -61,12 +61,12 @@ export const FlexGap = styled(Flex)<FlexGapProps>`
 /**
  * Defining Row here to avoid circular dependencies.
  */
-export const Row = styled(Flex)<RowProps>`
+const Row = styled(Flex)<RowProps>`
   width: 100%;
   flex-wrap: wrap;
 `;
 
-export const RowBetween = styled(Row)<RowProps>`
+const RowBetween = styled(Row)<RowProps>`
   justify-content: space-between;
 `;
 

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-throw-literal */
-export enum ResponseErrorType {
+enum ResponseErrorType {
   NOT_FOUND = "Not found",
   UNHANDLED = "Unhandled",
   TOO_MANY_REQUESTS = "To Many Requests",
 }
 
-export type ResponseError =
+type ResponseError =
   | { type: ResponseErrorType.NOT_FOUND; message?: string }
   | { type: ResponseErrorType.UNHANDLED; message: string }
   | { type: ResponseErrorType.TOO_MANY_REQUESTS; message?: string };

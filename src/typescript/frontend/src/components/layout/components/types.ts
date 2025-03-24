@@ -40,7 +40,7 @@ export interface PageProps extends PropsWithChildren<BoxProps> {
 
 export interface FlexGapProps extends FlexProps, GapProps {}
 
-export type GapProps = {
+type GapProps = {
   gap?: ResponsiveValue<CSS.Property.Gap>;
   rowGap?: ResponsiveValue<CSS.Property.RowGap>;
   columnGap?: ResponsiveValue<CSS.Property.ColumnGap>;

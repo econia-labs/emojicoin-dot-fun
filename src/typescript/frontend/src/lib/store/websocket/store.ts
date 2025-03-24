@@ -33,7 +33,7 @@ export type WebSocketClientStore = ClientState & ClientActions;
 
 const PERMANENTLY_SUBSCRIBE_REGISTRATIONS = true;
 
-export class ImmerableWebSocketClient extends WebSocketClient {
+class ImmerableWebSocketClient extends WebSocketClient {
   [immerable] = true;
 
   constructor(args: WebSocketClientArgs) {
@@ -43,7 +43,7 @@ export class ImmerableWebSocketClient extends WebSocketClient {
 
 let singletonClient: ImmerableWebSocketClient;
 
-export const getSingletonClient = (args: WebSocketClientArgs) => {
+const getSingletonClient = (args: WebSocketClientArgs) => {
   if (!singletonClient) {
     singletonClient = new ImmerableWebSocketClient(args);
   }

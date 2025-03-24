@@ -15,7 +15,7 @@ import { toBar } from "../event/candlestick-bars";
 import { callbackClonedLatestBarIfSubscribed } from "../utils";
 import type { MeleeState } from "./store";
 
-export type ArenaMarketPair = {
+type ArenaMarketPair = {
   market0: {
     marketID: bigint;
     marketAddress: AccountAddressString;
@@ -28,7 +28,7 @@ export type ArenaMarketPair = {
   } & MarketEmojiData;
 };
 
-export const toArenaMarketPair = (info: ArenaInfoModel): ArenaMarketPair => {
+const toArenaMarketPair = (info: ArenaInfoModel): ArenaMarketPair => {
   const symbol0 = info.emojicoin0Symbols.join("");
   const symbol1 = info.emojicoin1Symbols.join("");
   return {

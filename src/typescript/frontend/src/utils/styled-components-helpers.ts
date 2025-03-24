@@ -9,7 +9,7 @@ type ObjectForStyles = {
   [key: string]: object;
 };
 
-export const getStylesFromResponsiveValue = <T extends string>(
+const getStylesFromResponsiveValue = <T extends string>(
   rawStyles: ResponsiveValue<T>,
   objForStyles: ObjectForStyles
 ) => {

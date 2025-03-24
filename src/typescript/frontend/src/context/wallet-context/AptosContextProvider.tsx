@@ -43,22 +43,22 @@ import {
 } from "./utils";
 
 type WalletContextState = ReturnType<typeof useWallet>;
-export type SubmissionResponse = Promise<{
+type SubmissionResponse = Promise<{
   response: PendingTransactionResponse | UserTransactionResponse | null;
   error: unknown;
 } | null>;
 
-export type TrackedCoinType = "apt" | "emojicoin" | "emojicoinLP";
-export type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
-export type ResponseType = Awaited<SubmissionResponse>;
-export type EntryFunctionNames =
+type TrackedCoinType = "apt" | "emojicoin" | "emojicoinLP";
+type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
+type ResponseType = Awaited<SubmissionResponse>;
+type EntryFunctionNames =
   | "chat"
   | "swap"
   | "register_market"
   | "provide_liquidity"
   | "remove_liquidity";
 
-export type AptosContextState = {
+type AptosContextState = {
   aptos: Aptos;
   submit: (input: WalletInputTransactionData | null) => SubmissionResponse;
   signThenSubmit: (
@@ -80,7 +80,7 @@ export type AptosContextState = {
   setBalance(coinType: TrackedCoinType, n: bigint): void;
 };
 
-export const AptosContext = createContext<AptosContextState | undefined>(undefined);
+const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
 export function AptosContextProvider({ children }: PropsWithChildren) {
   const {

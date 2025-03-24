@@ -11,7 +11,7 @@ export const variant = {
 } as const;
 
 export type Animation = (typeof animation)[keyof typeof animation];
-export type Variant = (typeof variant)[keyof typeof variant];
+type Variant = (typeof variant)[keyof typeof variant];
 
 export interface SkeletonProps extends BoxProps {
   animation?: Animation;

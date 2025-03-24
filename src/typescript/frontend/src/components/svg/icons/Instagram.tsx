@@ -22,5 +22,3 @@ const Icon: React.FC<SvgProps> = ({ color = "white", ...props }) => {
     </Svg>
   );
 };
-
-export default Icon;

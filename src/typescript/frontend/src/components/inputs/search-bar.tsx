@@ -13,7 +13,7 @@ import { InputGroup } from ".";
 
 const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
 
-export const Container = styled(Flex)`
+const Container = styled(Flex)`
   width: ${EMOJI_GRID_ITEM_WIDTH - 20}px;
   margin: 0;
   padding: 0;
@@ -24,7 +24,7 @@ export const Container = styled(Flex)`
   }
 `;
 
-export const Border = styled(Flex)`
+const Border = styled(Flex)`
   align-items: center;
   height: 33px;
   margin: 6px 0;

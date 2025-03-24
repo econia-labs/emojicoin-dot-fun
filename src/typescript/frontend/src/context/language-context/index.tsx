@@ -1,7 +1,7 @@
 import translations from "../../../public/locales/en-US.json";
 import type { TranslationKey } from "./types";
 
-export const simpleTranslation = (s: TranslationKey) => translations[s];
+const simpleTranslation = (s: TranslationKey) => translations[s];
 
 /**
  * There is no reason to pollute the entire codebase with useContext(LanguageContext) when we only have

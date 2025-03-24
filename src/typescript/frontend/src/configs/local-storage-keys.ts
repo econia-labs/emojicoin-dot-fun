@@ -29,7 +29,7 @@ export const LOCAL_STORAGE_CACHE_TIME: {
   settings: Infinity,
 };
 
-export type LocalStorageCache<T> = {
+type LocalStorageCache<T> = {
   expiry: number;
   data: T | null;
   version: string | undefined;

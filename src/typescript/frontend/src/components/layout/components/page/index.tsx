@@ -32,7 +32,7 @@ type Languages = {
  * // export async function generateMetadata = getGenerateMetadataFunction(); // <-- No.
  *
  */
-export async function getGenerateMetadataFunction(
+async function getGenerateMetadataFunction(
   { params, searchParams }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {

@@ -5,7 +5,7 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 
 import type { SlideState } from "./WalletModal";
 
-export const Slide = () => {};
+const Slide = () => {};
 
 type SlideshowProps = {
   slide: number;
@@ -26,7 +26,7 @@ const DESCRIPTIONS = [
   "Aptos Connect lets you use one account across any application built on Aptos. Explore the ecosystem.",
 ];
 
-export const AnimatedSVG = ({ animateKey, slide }: { animateKey: number; slide: number }) => {
+const AnimatedSVG = ({ animateKey, slide }: { animateKey: number; slide: number }) => {
   return (
     <div className="flex w-full min-h-[148px]">
       <div className="m-auto">

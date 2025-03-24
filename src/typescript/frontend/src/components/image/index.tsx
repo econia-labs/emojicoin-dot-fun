@@ -37,5 +37,3 @@ const Image: React.FC<ImageProps> = ({
     </ResponsiveBox>
   );
 };
-
-export default Image;

@@ -14,5 +14,3 @@ const Icon: React.FC<SvgProps> = ({ color = "blue", ...props }) => {
     </Svg>
   );
 };
-
-export default Icon;

@@ -10,7 +10,7 @@ import { q64ToBig } from "@sdk/utils/nominal-price";
 import type { Types } from "@sdk-types";
 import Big from "big.js";
 
-export type Bar = {
+type Bar = {
   time: number;
   open: number;
   high: number;

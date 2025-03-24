@@ -13,7 +13,7 @@ import { Emoji } from "utils/emoji";
 
 import { getIsOnCustomAllowlist } from "./get-verification-status";
 
-export const checkmarkOrX = (checkmark: boolean, className?: string) => (
+const checkmarkOrX = (checkmark: boolean, className?: string) => (
   <Emoji
     className={cn("text-lg", className)}
     emojis={checkmark ? emoji("check mark button") : emoji("cross mark")}
