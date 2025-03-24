@@ -10,9 +10,10 @@ import {
   type StyledInputGroupProps,
 } from "./types";
 
-export interface ThemedProps extends Pick<InputGroupProps, "variant"> {
+interface ThemedProps extends Pick<InputGroupProps, "variant"> {
   theme: DefaultTheme;
 }
+
 const getPadding = (scale: Scales, hasIcon: boolean) => {
   if (!hasIcon) {
     return "16px";

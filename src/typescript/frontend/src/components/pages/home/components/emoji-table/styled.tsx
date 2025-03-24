@@ -3,6 +3,7 @@
 import styled from "styled-components";
 import base, { breakpointsArray } from "theme/base";
 import { darkColors } from "theme/colors";
+
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
 
 export const StyledTHFilters = styled.div`

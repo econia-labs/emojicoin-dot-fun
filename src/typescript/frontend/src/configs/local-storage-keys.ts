@@ -1,7 +1,8 @@
-import { parseJSON, stringifyJSON } from "utils";
-import packages from "../../package.json";
 import { MS_IN_ONE_DAY } from "components/charts/const";
-import { satisfies, type SemVer, parse } from "semver";
+import { parse, satisfies, type SemVer } from "semver";
+import { parseJSON, stringifyJSON } from "utils";
+
+import packages from "../../package.json";
 
 const LOCAL_STORAGE_KEYS = {
   theme: `${packages.name}_theme`,
