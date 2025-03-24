@@ -33,7 +33,7 @@ import {
   StyledGrid,
 } from "./styled";
 
-export interface EmojiTableProps
+interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {

@@ -13,7 +13,7 @@ import { TableHeader, TableRowDesktop } from "./components";
 import { HEADERS, MOBILE_HEADERS } from "./constants";
 import { StyledPoolsWrapper } from "./styled";
 
-export interface PoolsTableProps {
+interface PoolsTableProps {
   data: PoolsData[];
   index: number | undefined;
   sortBy: (sortBy: SortByPageQueryParams) => void;

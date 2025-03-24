@@ -1,3 +1,2 @@
 export { DropdownMenu } from "./dropdown-menu";
-export { default as SingleSelect } from "./single-select";
-export type { DropdownMenuProps, SingleSelectProps } from "./types";
+export { default as SingleSelect } from "./single-select";;

@@ -1,13 +1,13 @@
 import { type ChatEventModel, type SwapEventModel } from "@sdk/indexer-v2/types";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 
-export enum RankIcon {
+enum RankIcon {
   based = "🐳",
   n00b = "🐡",
   lfg = "🐬",
 }
 
-export enum RankName {
+enum RankName {
   based = "based",
   n00b = "n00b",
   lfg = "lfg",

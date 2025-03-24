@@ -1,12 +1,12 @@
 import { readLocalStorageCache, writeLocalStorageCache } from "configs/local-storage-keys";
 import { createStore } from "zustand";
 
-export type UserSettingsState = {
+type UserSettingsState = {
   animate: boolean;
   showEmptyBars: boolean;
 };
 
-export type UserSettingsActions = {
+type UserSettingsActions = {
   setAnimate: (value: boolean) => void;
   setShowEmptyBars: (fn: (prev: boolean) => boolean) => void;
   userAgent: string;

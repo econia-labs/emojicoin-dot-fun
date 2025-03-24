@@ -17,7 +17,7 @@ import { Emoji } from "utils/emoji";
 
 import styles from "./ProfileTab.module.css";
 
-export type ProfileTabProps = {
+type ProfileTabProps = {
   position?: ArenaPositionModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;

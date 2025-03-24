@@ -5,7 +5,7 @@ import React from "react";
 
 import { StyledBtn } from "./styled";
 
-export type ButtonsBlockProps = {
+type ButtonsBlockProps = {
   value: number;
   numPages: number;
   onChange: (page: number) => void;

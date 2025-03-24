@@ -45,7 +45,7 @@ export type SortByPageQueryParams =
   | "price"
   | "apr"
   | "tvl";
-export type SortByPostgrestQueryParams =
+type SortByPostgrestQueryParams =
   | "market_cap"
   | "bump_time"
   | "daily_volume"

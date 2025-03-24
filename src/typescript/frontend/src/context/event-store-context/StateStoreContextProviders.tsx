@@ -22,7 +22,7 @@ export const EventStoreContext = createContext<{
   names: StoreApi<NameStore>;
 } | null>(null);
 
-export interface EventStoreProviderProps {
+interface EventStoreProviderProps {
   children: ReactNode;
 }
 
@@ -51,7 +51,7 @@ export const EventStoreProvider = ({ children }: EventStoreProviderProps) => {
  */
 export const UserSettingsContext = createContext<StoreApi<UserSettingsStore> | null>(null);
 
-export interface UserSettingsProviderProps {
+interface UserSettingsProviderProps {
   userAgent: string;
   children: ReactNode;
 }

@@ -25,11 +25,11 @@ export type Fonts = typeof fonts;
 
 export type ZIndices = typeof zIndices;
 
-export type BaseColors = {
+type BaseColors = {
   [property in keyof typeof baseColors]: string;
 };
 
-export type CustomColors = {
+type CustomColors = {
   [property in keyof typeof darkColors]: string;
 };
 

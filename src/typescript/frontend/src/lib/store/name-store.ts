@@ -3,13 +3,13 @@ import { APTOS_NETWORK } from "lib/env";
 import { immer } from "zustand/middleware/immer";
 import { createStore } from "zustand/vanilla";
 
-export type ANSValue = { name: string | null; expiry: number };
-export type ANSMap = Map<string, ANSValue>;
-export type ANSPromiseMap = Map<string, Promise<void>>;
-export type NameState = {
+type ANSValue = { name: string | null; expiry: number };
+type ANSMap = Map<string, ANSValue>;
+type ANSPromiseMap = Map<string, Promise<void>>;
+type NameState = {
   names: ANSMap;
 };
-export type NameActions = {
+type NameActions = {
   /**
    * Resolves an ANS name for an address. If it's not in local storage, it will be fetched.
    *

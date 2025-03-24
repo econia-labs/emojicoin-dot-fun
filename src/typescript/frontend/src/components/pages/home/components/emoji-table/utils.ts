@@ -7,10 +7,10 @@ import { type EventStore } from "@/store/event/types";
 
 import { type TableCardProps } from "../table-card/types";
 
-export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
+type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
 };
-export type PropsWithTimeAndIndex = TableCardProps & {
+type PropsWithTimeAndIndex = TableCardProps & {
   time: number;
   searchEmojisKey: string;
 };

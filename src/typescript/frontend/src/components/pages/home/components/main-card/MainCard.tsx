@@ -22,7 +22,7 @@ import { emojiNamesToPath } from "utils/pathname-helpers";
 
 import planetHome from "../../../../../../public/images/planet-home.png";
 
-export interface MainCardProps {
+interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
   page: HomePageProps["page"];
   sortBy: HomePageProps["sortBy"];
