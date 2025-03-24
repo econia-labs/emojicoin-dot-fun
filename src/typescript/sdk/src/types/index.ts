@@ -1,5 +1,5 @@
 export * from "./core";
-export { type default as JsonTypes } from "./json-types";
+export type { JsonTypes } from "./json-types";
 export * from "./postgrest-types";
 export * from "./types";
 

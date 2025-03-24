@@ -14,7 +14,6 @@ import { standardizeAddress } from "../utils/account-address";
 import type { Flatten } from ".";
 import type { ArenaTypes } from "./arena-types";
 import { fromAggregatorSnapshot } from "./core";
-import type JsonTypes from "./json-types";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -24,6 +23,7 @@ import {
   isJSONPeriodicStateEvent,
   isJSONStateEvent,
   isJSONSwapEvent,
+  type JsonTypes,
 } from "./json-types";
 
 export type AnyNumberString = number | string | bigint;

@@ -39,7 +39,7 @@ import {
   REGISTRY_ADDRESS,
 } from "../emojicoin_dot_fun";
 import type { Flatten } from "../types";
-import type JsonTypes from "../types/json-types";
+import type { JsonTypes } from "../types/json-types";
 import {
   type AnyNumberString,
   toMarketResource,

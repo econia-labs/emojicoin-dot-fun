@@ -15,7 +15,7 @@ import type {
 } from "../indexer-v2/types";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
 import { dateFromMicroseconds, toAccountAddressString } from "../utils";
-import type JsonTypes from "./json-types";
+import type { JsonTypes } from "./json-types";
 import type { AnyNumberString, Types } from "./types";
 
 export const ARENA_CANDLESTICK_NAME = "ArenaCandlestick";

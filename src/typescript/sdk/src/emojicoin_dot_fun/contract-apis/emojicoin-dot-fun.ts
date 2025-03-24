@@ -22,7 +22,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 
 import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../../const";
-import type JsonTypes from "../../types/json-types";
+import type { JsonTypes } from "../../types/json-types";
 import { getAptosClient } from "../../utils/aptos-client";
 import {
   EntryFunctionPayloadBuilder,

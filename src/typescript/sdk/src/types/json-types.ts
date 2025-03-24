@@ -19,7 +19,7 @@ export type JsonValue =
   | { [key: string]: JsonValue }
   | bigint;
 
-type JsonTypes = ArenaJsonTypes & {
+export type JsonTypes = ArenaJsonTypes & {
   ExtendRef: {
     self: AccountAddressString;
   };
@@ -305,8 +305,6 @@ type JsonTypes = ArenaJsonTypes & {
     octas_reward_amount: Uint64String;
   };
 };
-
-export default JsonTypes;
 
 export type AnyEmojicoinJSONEvent =
   | JsonTypes["SwapEvent"]
