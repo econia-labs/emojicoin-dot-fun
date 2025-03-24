@@ -23,6 +23,8 @@
     "build:no-ssg": "pnpm run --prefix frontend build:no-ssg",
     "build:test": "pnpm i && pnpm load-env:test -- turbo run build:no-checks",
     "check": "turbo run check",
+    "check:ci": "turbo run check:ci",
+    "check:tests": "turbo run check:tests",
     "clean": "turbo run clean --no-cache --force && rm -rf .turbo",
     "clean:full": "pnpm run clean && rm -rf node_modules && rm -rf sdk/node_modules && rm -rf frontend/node_modules",
     "dev": "pnpm load-env -- turbo run dev --force --parallel --continue",

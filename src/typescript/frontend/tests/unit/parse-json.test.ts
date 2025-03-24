@@ -1,5 +1,5 @@
 import { parseJSON, stringifyJSON } from "utils";
-import { ArenaCandlestickModel, toArenaCandlestickModel } from "../../../sdk/src";
+import { type ArenaCandlestickModel, toArenaCandlestickModel } from "../../../sdk/src";
 import { type DatabaseJsonType } from "../../../sdk/src";
 
 // NOTE: These currently don't properly serialize/deserialize Uint8Arrays.

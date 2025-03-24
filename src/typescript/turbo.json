@@ -37,6 +37,15 @@
       ]
     },
     "check": {
+      "cache": false,
+      "outputs": []
+    },
+    "check:ci": {
+      "cache": false,
+      "outputs": []
+    },
+    "check:tests": {
+      "cache": false,
       "outputs": []
     },
     "clean": {
