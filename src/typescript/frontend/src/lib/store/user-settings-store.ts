@@ -61,8 +61,8 @@ export const createUserSettingsStore = (userAgent: string) =>
         const newState = { ...state, devMode: !state.devMode };
         saveSettings(newState);
         return newState;
-      })
-    }
+      });
+    },
   }));
 
 export default createUserSettingsStore;

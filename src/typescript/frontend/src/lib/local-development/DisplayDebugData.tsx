@@ -1,10 +1,10 @@
 "use client";
 
-import { useDevMode } from "context/DevMode";
+import { useUserSettings } from "context/event-store-context";
 import InnerDisplayDebugData from "./inner";
 
 export const DisplayDebugData = () => {
-  const devMode = useDevMode();
+  const devMode = useUserSettings((s) => s.devMode);
   return <>{devMode && <InnerDisplayDebugData />}</>;
 };
 
