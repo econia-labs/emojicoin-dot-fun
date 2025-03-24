@@ -76,17 +76,19 @@ export const fetchCandlesticksForChart = async ({
  * @param event
  * @returns
  */
-const curriedBarsReducer = (to: number) => (acc: Bar[], bar: Bar) => {
-  const inTimeRange = bar.time <= to * 1000;
-  if (inTimeRange && hasTradingActivity(bar)) {
-    const prev = acc.at(-1);
-    if (prev) {
-      bar.open = prev.close;
+function curriedBarsReducer(to: number): (acc: Bar[], bar: Bar) => Bar[] {
+  return (acc, bar) => {
+    const inTimeRange = bar.time <= to * 1000;
+    if (inTimeRange && hasTradingActivity(bar)) {
+      const prev = acc.at(-1);
+      if (prev) {
+        bar.open = prev.close;
+      }
+      acc.push(bar);
     }
-    acc.push(bar);
-  }
-  return acc;
-};
+    return acc;
+  };
+}
 
 /**
  * Push the latest bar (the on-chain bar) to the bars array if it exists and update its `open` value
@@ -144,19 +146,21 @@ export const fetchLatestBarsFromMarketResource = async ({
   };
 };
 
-const getLatestBarFromTracker = (marketResource: Types["Market"], period: Period) => {
+function getLatestBarFromTracker(marketResource: Types["Market"], period: Period) {
   const periodDuration = periodEnumToRawDuration(period);
   const { periodicStateTrackers, sequenceInfo } = marketResource;
   const tracker = periodicStateTrackers.find((p) => Number(p.period) === periodDuration);
   if (!tracker) return undefined;
   return periodicStateTrackerToLatestBar(tracker, sequenceInfo.nonce);
-};
+}
 
-const marketResourceToMarketMetadataModel = (market: Types["Market"]): MarketMetadataModel => ({
-  marketID: market.metadata.marketID,
-  time: 0n,
-  marketNonce: market.sequenceInfo.nonce,
-  trigger: Trigger.PackagePublication, // Make up a bunk trigger, since this field won't be used.
-  marketAddress: market.metadata.marketAddress,
-  ...toMarketEmojiData(market.metadata.emojiBytes),
-});
+function marketResourceToMarketMetadataModel(market: Types["Market"]): MarketMetadataModel {
+  return {
+    marketID: market.metadata.marketID,
+    time: 0n,
+    marketNonce: market.sequenceInfo.nonce,
+    trigger: Trigger.PackagePublication, // Make up a bunk trigger, since this field won't be used.
+    marketAddress: market.metadata.marketAddress,
+    ...toMarketEmojiData(market.metadata.emojiBytes),
+  };
+}

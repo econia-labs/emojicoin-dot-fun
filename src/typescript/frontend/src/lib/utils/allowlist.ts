@@ -20,7 +20,7 @@ export async function isAllowListed(addressIn: string): Promise<boolean> {
   return await isOnCustomAllowlist(address);
 }
 
-export const isOnCustomAllowlist = async (address: `0x${string}`): Promise<boolean> => {
+export async function isOnCustomAllowlist(address: `0x${string}`): Promise<boolean> {
   if (ALLOWLISTER3K_URL !== undefined) {
     const condition = await fetch(`${ALLOWLISTER3K_URL}/${address}`)
       .then((r) => r.text())
@@ -31,4 +31,4 @@ export const isOnCustomAllowlist = async (address: `0x${string}`): Promise<boole
   }
 
   return false;
-};
+}

@@ -143,6 +143,10 @@ export const WalletModal = ({
   // as a draggable carousel slider with AnimatePresence.
   const [slide, setSlide] = useState<SlideState>({ idx: 0, direction: "left" });
 
+  const reset = () => {
+    setSlide({ idx: 0, direction: "left" });
+  };
+
   const handleClose = () => {
     setOpen(false);
     setTimeout(() => reset(), 100);
@@ -167,10 +171,6 @@ export const WalletModal = ({
     setSlide(({ idx: curr }) => {
       return { idx: SLIDE_INDICES.at(curr - 1)!, direction: "left" };
     });
-  };
-
-  const reset = () => {
-    setSlide({ idx: 0, direction: "left" });
   };
 
   const dragProps: MotionProps = {
