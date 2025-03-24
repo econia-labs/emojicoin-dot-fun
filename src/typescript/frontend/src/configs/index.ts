@@ -1,2 +1,2 @@
-export { EN, languageList,  } from "./languages";
+export { EN, languageList } from "./languages";
 export { default as REGEX } from "./regex";

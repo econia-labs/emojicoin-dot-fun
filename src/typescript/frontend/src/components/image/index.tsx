@@ -37,4 +37,3 @@ const Image: React.FC<ImageProps> = ({
     </ResponsiveBox>
   );
 };
-

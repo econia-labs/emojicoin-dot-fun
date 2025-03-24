@@ -54,4 +54,3 @@ const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({ error, re
     </div>
   );
 };
-

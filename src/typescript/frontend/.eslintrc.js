@@ -28,7 +28,7 @@ module.exports = {
     "postcss.config.js",
     "tailwind.config.js",
     "jest.config.ts",
-    "public/static"
+    "public/static",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {

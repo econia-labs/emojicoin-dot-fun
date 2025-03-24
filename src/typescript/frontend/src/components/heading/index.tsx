@@ -14,4 +14,3 @@ const Heading = styled(Text).attrs<HeadingProps>(
 )<HeadingProps>`
   ${({ scale }) => scale && getStylesFromResponsiveValue<Scales>(scale, styles)}
 `;
-

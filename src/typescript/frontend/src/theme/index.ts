@@ -12,10 +12,7 @@ import {
 } from "./types";
 
 export { appearanceAnimationMap, appearanceAnimationVariants, scaleAnimation } from "./animations";
-export { darkColors,  } from "./colors";
-;
-;
-
+export { darkColors } from "./colors";
 export interface CustomTheme {
   siteWidth: number;
   breakpoints: Breakpoints;
