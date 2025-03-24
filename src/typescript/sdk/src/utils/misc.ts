@@ -95,6 +95,8 @@ export function getPeriodStartTime(
  * @param microseconds the time in microseconds.
  * @param period the period to calculate the start of.
  * @returns the start of the period in microseconds.
+ *
+ * Used in {@link getPeriodStartTime}
  */
 export function getPeriodStartTimeFromTime(
   microseconds: AnyNumberString,

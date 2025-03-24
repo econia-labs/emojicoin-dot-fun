@@ -1,3 +1,4 @@
+// cspell:word nofunc
 // cspell:word tsup
 
 module.exports = {
@@ -63,7 +64,12 @@ module.exports = {
     "object-curly-newline": "off",
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": "off",
-    "@typescript-eslint/no-use-before-define": ["error", { functions: false, classes: false }],
+    /**
+     * Function hoisting is safe; because of this, "nofunc" is shorthand for allowing it.
+     * @see {@link https://eslint.org/docs/latest/rules/no-use-before-define#options}
+     */
+    "@typescript-eslint/no-use-before-define": ["error", "nofunc"],
+    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
