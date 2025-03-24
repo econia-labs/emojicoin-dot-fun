@@ -16,7 +16,7 @@ export type EscrowState = {
 export type EscrowActions = {
   ensureUserInMap: (user: `0x${string}`) => void;
   push: (user: `0x${string}`, ...escrows: UserEscrow[]) => void;
-  pushTransactions: (...txns: UserTransactionResponse[]) => void;
+  processTransactions: (...txns: UserTransactionResponse[]) => void;
 };
 
 export type EscrowStore = EscrowActions & EscrowState;
@@ -51,7 +51,7 @@ export const createEscrowStore = () =>
           });
         }
       },
-      pushTransactions(...txns) {
+      processTransactions(...txns) {
         txns
           .filter(({ version }) => !get().processedTransactions.has(BigInt(version)))
           .flatMap(findEscrowsInTxn)

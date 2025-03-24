@@ -31,7 +31,7 @@ export const EscrowStoreProvider = ({ children }: React.PropsWithChildren) => {
           Option(escrowStore.current)
             .zip(txns)
             .map(([escrowStore, txns]) => {
-              escrowStore.getState().pushTransactions(...txns);
+              escrowStore.getState().processTransactions(...txns);
             });
         }
       ),
