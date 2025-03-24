@@ -9,11 +9,6 @@ import {
 
 import { type ContainerName, printLogs } from "./logs";
 
-interface ContainerStatus {
-  isRunning: boolean;
-  isHealthy: boolean;
-}
-
 type ContainerStateJSON = {
   Status: string;
   Running: boolean;
