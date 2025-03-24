@@ -16,7 +16,7 @@ import { SYMBOL_EMOJIS } from "../../src/emoji_data/symbol-emojis";
 import { CHAT_EMOJIS } from "../../src/emoji_data/chat-emojis";
 import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
 import { getFundedAccount } from "../utils/test-accounts";
-import TestHelpers from "../utils/helpers";
+import { registerMarketHelper } from "../utils/helpers";
 import { waitForEmojicoinIndexer } from "../../src/indexer-v2/queries";
 import { fetchMarketRegistrationEvents } from "./queries";
 import { ORDER_BY } from "../../src/indexer-v2/const";
@@ -100,7 +100,7 @@ describe("verification of typescript emoji JSON data", () => {
     // Since the table items aren't added until the first market is registered, we must get the
     // writeset changes for the first registered market, not the publish package transaction.
     // We must also register a market to ensure that there is at least one registered market.
-    const { registerResponse } = await TestHelpers.registerMarketFromEmojis({
+    const { registerResponse } = await registerMarketHelper({
       registrant: getFundedAccount("999"),
       emojis: ["🚽", "🚽"],
     });

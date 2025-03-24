@@ -2,7 +2,7 @@
 
 import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { maxBigInt, type SymbolEmoji } from "../../../src";
-import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
+import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
@@ -26,10 +26,10 @@ describe("queries for liquidity pools", () => {
       Array.from([e])
     );
 
-    const markets: Awaited<ReturnType<typeof TestHelpers.registerMarketFromEmojis>>[] = [];
+    const markets: Awaited<ReturnType<typeof registerMarketHelper>>[] = [];
     for (const emojis of symbols) {
       markets.push(
-        await TestHelpers.registerMarketFromEmojis({
+        await registerMarketHelper({
           registrant,
           emojis,
         })
@@ -78,7 +78,7 @@ describe("queries for liquidity pools", () => {
     const registrant = registrants[1];
     const swapper = registrant;
     const emojis: SymbolEmoji[] = ["🌊"];
-    const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromEmojis({
+    const { marketAddress, emojicoin, emojicoinLP } = await registerMarketHelper({
       registrant,
       emojis,
     });

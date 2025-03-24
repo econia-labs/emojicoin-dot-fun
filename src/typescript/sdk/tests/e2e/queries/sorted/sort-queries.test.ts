@@ -8,7 +8,7 @@ import {
   SYMBOL_EMOJI_DATA,
   type SymbolEmojiName,
 } from "../../../../src";
-import TestHelpers from "../../../utils/helpers";
+import { registerMarketHelper } from "../../../utils";
 import { getFundedAccounts } from "../../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { Swap } from "@/contract-apis/emojicoin-dot-fun";
@@ -54,7 +54,7 @@ describe("sorting queries for the sort filters on the home page", () => {
     for (let i = 0; i < marketEmojiNames.length; i += 1) {
       const emojiNames = marketEmojiNames[i];
       registerAndSwap.push(
-        TestHelpers.registerMarketFromNames({
+        registerMarketHelper({
           registrant: registrants[i],
           emojiNames,
         }).then(async ({ registerResponse }) => {

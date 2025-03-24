@@ -125,6 +125,7 @@ export function queryHelper<
   convert: (rows: Row) => OutputType
 ): (args: WithConfig<QueryArgs>) => Promise<OutputType[]> {
   // Return the curried version of queryHelperWithCount that extracts just the rows.
+  /* eslint-disable-next-line @typescript-eslint/no-use-before-define */
   return async (args) => (await queryHelperWithCount(queryFn, convert)(args)).rows;
 }
 
