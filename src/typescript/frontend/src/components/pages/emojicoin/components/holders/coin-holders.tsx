@@ -1,5 +1,5 @@
 import { calculateCirculatingSupply } from "@sdk/markets";
-import { toNominal,toNominalPrice  } from "@sdk/utils";
+import { toNominal, toNominalPrice } from "@sdk/utils";
 import { type Types } from "@sdk-types";
 import { FormattedNumber } from "components/FormattedNumber";
 import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
@@ -8,7 +8,7 @@ import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell
 import { useAptPrice } from "context/AptPrice";
 import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
 import { useRouter } from "next/navigation";
-import { type FC,useMemo } from "react";
+import { type FC, useMemo } from "react";
 import { ROUTES } from "router/routes";
 
 interface Props {

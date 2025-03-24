@@ -13,7 +13,7 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { motion, useDragControls } from "framer-motion";
 import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
 import { cn } from "lib/utils/class-name";
-import React, { useCallback,useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { isDisallowedEventKey } from "utils";
 

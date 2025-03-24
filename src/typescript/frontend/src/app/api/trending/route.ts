@@ -1,5 +1,5 @@
 // Disable to allow for doc-comment links and sorted imports.
-/* eslint-disable @typescript-eslint/no-unused-vars */ 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type AccountAddress } from "@aptos-labs/ts-sdk";
 import { type DECIMALS } from "@sdk/const";
 import {

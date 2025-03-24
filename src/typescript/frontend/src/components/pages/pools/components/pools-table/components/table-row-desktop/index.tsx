@@ -1,5 +1,5 @@
 import { Flex } from "@containers";
-import { Td,Text, Tr } from "components";
+import { Td, Text, Tr } from "components";
 import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";
 import { useMatchBreakpoints } from "hooks";

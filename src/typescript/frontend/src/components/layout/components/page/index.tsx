@@ -1,11 +1,11 @@
 "use client";
 
 import { Container } from "@containers";
-import { EN,languageList } from "configs";
+import { EN, languageList } from "configs";
 import { DEFAULT_TITLE, getDefaultMetadata } from "configs/meta";
 import { getLanguageCodeFromLocalStorage } from "context/language-context/helpers";
 import translateWithDefault from "lib/translate-with-default";
-import { type Metadata,type ResolvingMetadata } from "next";
+import { type Metadata, type ResolvingMetadata } from "next";
 import { type AlternateLinkDescriptor } from "next/dist/lib/metadata/types/alternative-urls-types";
 import React from "react";
 

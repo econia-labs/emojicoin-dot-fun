@@ -1,6 +1,6 @@
-import { motion,type SVGMotionProps } from "framer-motion";
+import { motion, type SVGMotionProps } from "framer-motion";
 import * as React from "react";
-import { forwardRef, memo,type Ref } from "react";
+import { forwardRef, memo, type Ref } from "react";
 
 import { AnimateDottedSVG } from "./AnimateDottedSVG";
 

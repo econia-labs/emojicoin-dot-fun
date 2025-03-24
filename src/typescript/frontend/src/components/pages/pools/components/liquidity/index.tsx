@@ -4,7 +4,7 @@ import { TypeTag } from "@aptos-labs/ts-sdk";
 import { Column, Flex, FlexGap } from "@containers";
 import { useMatchBreakpoints } from "@hooks/index";
 import { toCoinTypes } from "@sdk/markets/utils";
-import { Button, InputNumeric,Text } from "components";
+import { Button, InputNumeric, Text } from "components";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";

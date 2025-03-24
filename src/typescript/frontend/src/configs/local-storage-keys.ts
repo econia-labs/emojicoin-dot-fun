@@ -1,5 +1,5 @@
 import { MS_IN_ONE_DAY } from "components/charts/const";
-import { parse,satisfies, type SemVer } from "semver";
+import { parse, satisfies, type SemVer } from "semver";
 import { parseJSON, stringifyJSON } from "utils";
 
 import packages from "../../package.json";

@@ -5,12 +5,12 @@ import {
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { getEmojisInString , symbolBytesToEmojis } from "@sdk/emoji_data";
+import { getEmojisInString, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useRouter,useSearchParams  } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import path from "path";
 import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { ROUTES } from "router/routes";

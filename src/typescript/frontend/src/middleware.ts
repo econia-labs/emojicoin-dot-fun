@@ -12,7 +12,7 @@ import {
 import { authenticate } from "components/pages/verify/verify";
 import { IS_ALLOWLIST_ENABLED } from "lib/env";
 import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITER } from "lib/server-env";
-import { type NextRequest,NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 

@@ -1,6 +1,6 @@
 import { type SymbolEmoji } from "@sdk/emoji_data/types";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { type DatabaseModels,type MarketMetadataModel } from "@sdk/indexer-v2/types";
+import { type DatabaseModels, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { type Types } from "@sdk/types";
 import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
 

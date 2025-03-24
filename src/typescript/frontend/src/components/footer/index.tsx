@@ -1,6 +1,6 @@
 "use client";
 
-import { Container, Flex,FlexGap } from "@containers";
+import { Container, Flex, FlexGap } from "@containers";
 import LogoIcon from "components/svg/icons/LogoIcon";
 import { Text } from "components/text";
 import { LINKS } from "lib/env";

@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { flexbox,layout, opacity, space, typography } from "styled-system";
+import { flexbox, layout, opacity, space, typography } from "styled-system";
 
 import { fontWeights, textStyles } from "./theme";
 import { type scales, type TextProps, type ThemedProps } from "./types";

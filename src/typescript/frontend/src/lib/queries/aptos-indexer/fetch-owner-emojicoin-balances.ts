@@ -1,5 +1,5 @@
 import { parseTypeTag } from "@aptos-labs/ts-sdk";
-import { encodeEmojis,getSymbolEmojisInString } from "@sdk/emoji_data";
+import { encodeEmojis, getSymbolEmojisInString } from "@sdk/emoji_data";
 import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
 
 import {

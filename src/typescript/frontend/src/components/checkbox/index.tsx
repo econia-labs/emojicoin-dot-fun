@@ -4,7 +4,7 @@ import CheckIcon from "components/svg/icons/Check";
 import { Text } from "components/text";
 import React from "react";
 
-import { CustomCheckbox,StyledCheckbox, StyledInput } from "./styled";
+import { CustomCheckbox, StyledCheckbox, StyledInput } from "./styled";
 import { type CheckboxProps } from "./types";
 
 const Checkbox: React.FC<CheckboxProps> = ({

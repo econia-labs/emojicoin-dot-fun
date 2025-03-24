@@ -1,4 +1,4 @@
-import { type Config,system } from "styled-system";
+import { type Config, system } from "styled-system";
 import { fontWeight } from "theme/base";
 import { type FontWeight } from "theme/types";
 

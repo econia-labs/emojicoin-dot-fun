@@ -2,7 +2,7 @@
 import styled, { css } from "styled-components";
 import { space, typography } from "styled-system";
 
-import { type BorderProps,type InputProps, scales, type ThemedProps } from "./types";
+import { type BorderProps, type InputProps, scales, type ThemedProps } from "./types";
 
 const getHeight = ({ scale }: ThemedProps) => {
   switch (scale) {

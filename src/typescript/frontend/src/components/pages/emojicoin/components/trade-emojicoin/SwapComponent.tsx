@@ -19,7 +19,7 @@ import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/u
 import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
-import { type PropsWithChildren, useEffect, useMemo,useState } from "react";
+import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { getMaxSlippageSettings } from "utils/slippage";

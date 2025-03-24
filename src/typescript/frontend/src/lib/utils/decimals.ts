@@ -62,4 +62,4 @@ function toDisplayCoinDecimals({
   return res.toString();
 }
 
-export { toActualCoinDecimals,toDisplayCoinDecimals };
+export { toActualCoinDecimals, toDisplayCoinDecimals };

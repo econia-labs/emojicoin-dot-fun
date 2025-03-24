@@ -10,7 +10,7 @@ import {
 } from "@containers";
 import React, { type PropsWithChildren } from "react";
 import styled, { css } from "styled-components";
-import { border, flexbox,layout, position, space , system } from "styled-system";
+import { border, flexbox, layout, position, space, system } from "styled-system";
 import { siteWidth } from "theme/base";
 
 export const getEllipsis = ({ ellipsis }: BoxThemedProps) => {

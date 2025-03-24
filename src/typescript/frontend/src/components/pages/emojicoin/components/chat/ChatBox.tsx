@@ -1,7 +1,7 @@
 "use client";
 
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { Column,Flex } from "@containers";
+import { Column, Flex } from "@containers";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";

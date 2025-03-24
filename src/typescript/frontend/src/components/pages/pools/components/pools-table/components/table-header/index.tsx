@@ -1,4 +1,4 @@
-import { Flex,FlexGap } from "@containers";
+import { Flex, FlexGap } from "@containers";
 import Info from "components/info";
 import { Arrows } from "components/svg";
 import { Text } from "components/text";

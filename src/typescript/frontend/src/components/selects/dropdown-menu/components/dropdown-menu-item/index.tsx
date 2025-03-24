@@ -5,7 +5,7 @@ import { Text } from "components/text";
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { DropdownMenuInner,StyledDropdownMenuItem } from "./styled";
+import { DropdownMenuInner, StyledDropdownMenuItem } from "./styled";
 
 export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
   onClick,

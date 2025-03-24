@@ -9,7 +9,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useAnimationControls } from "framer-motion";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import { useSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-swap-builder";
-import { type Dispatch, type SetStateAction, useCallback,useEffect } from "react";
+import { type Dispatch, type SetStateAction, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 
 import { CongratulationsToast } from "./CongratulationsToast";

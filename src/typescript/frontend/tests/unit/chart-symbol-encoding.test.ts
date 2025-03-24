@@ -4,7 +4,8 @@ import {
   ARENA_CHART_SYMBOL_DELIMITER,
   decodeSymbolsForChart,
   encodeSymbolsForChart,
- isArenaChartSymbol } from "../../src/lib/chart-utils";
+  isArenaChartSymbol,
+} from "../../src/lib/chart-utils";
 
 describe("checks the encoding and decoding of market symbols used in the chart component", () => {
   it("encodes and decodes a market symbol properly", () => {
