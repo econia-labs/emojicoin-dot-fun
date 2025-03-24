@@ -23,7 +23,7 @@ cd tmp
 # Check out submodule.
 git clone \
 	https://$GITHUB_ACCESS_TOKEN@github.com/$TRADING_VIEW_REPO_OWNER/charting_library.git \
-	--branch master \
+	--branch ECO-3115 \
 	--depth 1
 
 # Move files to submodule directory, clean up.
