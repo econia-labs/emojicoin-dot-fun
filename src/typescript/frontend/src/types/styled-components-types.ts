@@ -1,9 +1,4 @@
 import type { ComponentProps, ElementType } from "react";
-import type { DefaultTheme } from "styled-components";
-
-interface ThemedProps {
-  theme: DefaultTheme;
-}
 
 type AsProps<E extends ElementType = ElementType> = {
   as?: E;

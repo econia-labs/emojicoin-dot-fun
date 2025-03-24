@@ -1,36 +1,5 @@
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data/emoji-data";
-import { languageList } from "configs";
 import { ROUTES } from "router/routes";
-
-const removeLangParamFromPathname = (pathname: string, language?: string) => {
-  return pathname
-    .split("/")
-    .filter((item) => item !== language)
-    .join("/");
-};
-
-const cutLocaleFromRoute = (pathname: string) => {
-  const currentLang = getLocaleFromRoute(pathname);
-  if (currentLang) {
-    return removeLangParamFromPathname(pathname, currentLang);
-  }
-  return pathname;
-};
-
-function getLocaleFromRoute(pathname: string) {
-  const maybeLanguageParam = pathname.split("/").filter((item) => !!item)[0];
-  if (languageList.some((item) => item.locale === maybeLanguageParam)) {
-    return maybeLanguageParam;
-  }
-  return "";
-}
-
-const removeTrailingSlashIfExists = (path: string) => {
-  if (path.endsWith("/")) {
-    return path.slice(0, -1);
-  }
-  return path;
-};
 
 /**
  * The delimiter for multiple emoji names; i.e.,

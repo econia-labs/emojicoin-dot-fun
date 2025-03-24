@@ -1,13 +1,6 @@
 "use client";
 
-import type {
-  BoxProps,
-  BoxThemedProps,
-  ColumnProps,
-  FlexGapProps,
-  FlexProps,
-  RowProps,
-} from "@containers";
+import type { BoxProps, BoxThemedProps, ColumnProps, FlexGapProps, FlexProps } from "@containers";
 import React, { type PropsWithChildren } from "react";
 import styled, { css } from "styled-components";
 import { border, flexbox, layout, position, space, system } from "styled-system";
@@ -56,18 +49,6 @@ export const Container: React.FC<PropsWithChildren<BoxProps>> = ({ children, ...
 
 export const FlexGap = styled(Flex)<FlexGapProps>`
   ${gap}
-`;
-
-/**
- * Defining Row here to avoid circular dependencies.
- */
-const Row = styled(Flex)<RowProps>`
-  width: 100%;
-  flex-wrap: wrap;
-`;
-
-const RowBetween = styled(Row)<RowProps>`
-  justify-content: space-between;
 `;
 
 /**

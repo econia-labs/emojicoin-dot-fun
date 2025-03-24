@@ -2,7 +2,7 @@
 enum ResponseErrorType {
   NOT_FOUND = "Not found",
   UNHANDLED = "Unhandled",
-  TOO_MANY_REQUESTS = "To Many Requests",
+  TOO_MANY_REQUESTS = "Too Many Requests",
 }
 
 type ResponseError =
@@ -17,18 +17,18 @@ export async function withResponseError<T>(promise: Promise<T>): Promise<T> {
       // This is a request!
       error = error as Response;
       if (error.status === 404) {
-        throw { type: ResponseErrorType.NOT_FOUND };
+        throw { type: ResponseErrorType.NOT_FOUND } as ResponseError;
       }
     }
     if (error.message.toLowerCase().includes(ResponseErrorType.TOO_MANY_REQUESTS.toLowerCase())) {
       throw {
         type: ResponseErrorType.TOO_MANY_REQUESTS,
-      };
+      } as ResponseError;
     }
 
     throw {
       type: ResponseErrorType.UNHANDLED,
       message: error.toString(),
-    };
+    } as ResponseError;
   });
 }

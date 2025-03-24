@@ -5,8 +5,6 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 
 import type { SlideState } from "./WalletModal";
 
-const Slide = () => {};
-
 type SlideshowProps = {
   slide: number;
   increment: () => void;

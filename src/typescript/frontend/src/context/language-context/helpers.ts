@@ -1,4 +1,4 @@
-import { EN, REGEX } from "configs";
+import { EN } from "configs";
 import { readLocalStorageCache } from "configs/local-storage-keys";
 
 export const getLanguageCodeFromLocalStorage = () => {
@@ -6,8 +6,4 @@ export const getLanguageCodeFromLocalStorage = () => {
     return EN.locale;
   }
   return readLocalStorageCache<string>("language") ?? EN.locale;
-};
-
-const translatedTextIncludesVariable = (translatedText: string) => {
-  return !!translatedText?.match(REGEX.includesVariableRegex);
 };

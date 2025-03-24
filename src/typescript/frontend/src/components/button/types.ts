@@ -1,6 +1,5 @@
 import type { SvgProps } from "components/svg/types";
 import type { ElementType, PropsWithChildren, ReactNode } from "react";
-import type { DefaultTheme } from "styled-components";
 import type { LayoutProps, SpaceProps } from "styled-system";
 import type { Colors } from "theme/types";
 import type { PolymorphicComponentProps } from "types";
@@ -38,7 +37,3 @@ export type ButtonProps<P extends ElementType = "button"> = PolymorphicComponent
   P,
   BaseButtonProps
 >;
-
-interface ThemedProps extends ButtonProps {
-  theme: DefaultTheme;
-}

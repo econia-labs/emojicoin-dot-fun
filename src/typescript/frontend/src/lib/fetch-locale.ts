@@ -13,8 +13,4 @@ const fetchLocale = cache(async (locale: string) => {
   }
 });
 
-const preload = (id: string) => {
-  void fetchLocale(`language-dictionary-${id}`);
-};
-
 export default fetchLocale;

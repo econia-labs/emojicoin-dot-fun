@@ -39,17 +39,6 @@ export const ResolutionStringToPeriod: { [key: string]: Period | ArenaPeriod } =
   "1D": Period.Period1D,
 };
 
-const ResolutionStringToBrokerPeriod: { [key: string]: PeriodTypeFromBroker } = {
-  "15S": "FifteenSeconds",
-  "1": "OneMinute",
-  "5": "FiveMinutes",
-  "15": "FifteenMinutes",
-  "30": "ThirtyMinutes",
-  "60": "OneHour",
-  "240": "FourHours",
-  "1D": "OneDay",
-};
-
 export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 
 export const EXCHANGE_NAME = "emojicoin.fun";

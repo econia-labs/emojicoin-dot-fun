@@ -6,7 +6,6 @@ import type {
   SwapEventModel,
 } from "@sdk/indexer-v2/types";
 
-const MAX_ELEMENTS_PER_LINE = 7;
 export const ANIMATION_DEBOUNCE_TIME = 1111;
 
 const ANIMATION_DURATION = 0.3;
@@ -14,12 +13,7 @@ export const LAYOUT_DURATION = 0.4;
 const PORTAL_BACKWARDS_ANIMATION_DURATION = LAYOUT_DURATION * 1.5;
 const PER_ROW_DELAY = 0.01;
 
-const PORTAL_DURATION = LAYOUT_DURATION * 3;
 const INSERTION_DELAY = LAYOUT_DURATION * 0.5;
-
-// This isn't the longest animation ("initial" is), but for the purpose of updating the grid
-// with a debounced animation effect, it is. Revisit this if we change the animation times.
-const TOTAL_ANIMATION_TIME = ANIMATION_DURATION;
 
 export type EmojicoinAnimationEvents =
   | SwapEventModel

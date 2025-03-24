@@ -1,9 +1,6 @@
 // cspell:word istouched
-import type { ElementType } from "react";
-import type { DefaultTheme } from "styled-components";
 import type { SpaceProps, TypographyProps } from "styled-system";
 import type { Colors } from "theme/types";
-import type { PolymorphicComponentProps } from "types";
 
 export const scales = {
   SM: "sm",
@@ -27,13 +24,3 @@ export interface BaseInputProps extends SpaceProps, TypographyProps {
   variant?: Variants;
   borderColor?: keyof Colors;
 }
-
-interface ThemedProps extends BaseInputProps {
-  theme: DefaultTheme;
-}
-
-interface BorderProps extends ThemedProps {
-  borderColor?: keyof Colors;
-}
-
-type InputProps<P extends ElementType = "input"> = PolymorphicComponentProps<P, BaseInputProps>;

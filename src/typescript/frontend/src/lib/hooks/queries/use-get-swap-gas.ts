@@ -9,9 +9,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { useMemo } from "react";
 
-import { SimulateSwap, Swap } from "@/contract-apis/emojicoin-dot-fun";
-
-import { withResponseError } from "./client";
+import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 
 type Args = {
   aptos: Aptos;
@@ -61,110 +59,6 @@ const useGetGas = (args: Args) => {
     staleTime: 20 * 1000,
   });
   return data;
-};
-
-const simulateSwap = async (args: {
-  aptos: Aptos;
-  account: AccountInfo | null;
-  swapper: AccountAddressString;
-  marketAddress: AccountAddressString;
-  inputAmount: AnyNumber;
-  isSell: boolean;
-  minOutputAmount: AnyNumber;
-  typeTags: [TypeTagInput, TypeTagInput];
-}) => {
-  const res = await withResponseError(
-    SimulateSwap.view({
-      ...args,
-      integrator: INTEGRATOR_ADDRESS,
-      integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
-    })
-  );
-  return {
-    base_volume: res.base_volume,
-    quote_volume: res.quote_volume,
-  };
-};
-
-/**
- * Simulate a swap with the view function.
- * The only three params that the user can change are the marketAddress, inputAmount, and isSell.
- * `numSwaps` is for invalidating the cache and refetching the query when the # of swaps changes.
- *
- * @deprecated in favor of calculating the swap price client-side instead of from the fullnode.
- * @see {@link useCalculateSwapPrice}
- */
-const useSimulateSwap = (args: {
-  marketAddress: AccountAddressString;
-  inputAmount: bigint | number | string;
-  isSell: boolean;
-  numSwaps: number;
-}) => {
-  const { marketAddress, isSell, numSwaps } = args;
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-  const { aptos, account } = useAptos();
-  const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
-  const { inputAmount, invalid, swapper, minOutputAmount } = useMemo(() => {
-    const bigInput = Big(args.inputAmount.toString());
-    const inputAmount = BigInt(bigInput.toString());
-    return {
-      invalid: inputAmount === 0n,
-      inputAmount,
-      minOutputAmount: 1n,
-      swapper: account?.address ? (account.address as `0x${string}`) : undefined,
-    };
-  }, [args.inputAmount, account?.address]);
-
-  const { data } = useQuery({
-    queryKey: [
-      SimulateSwap.prototype.functionName,
-      aptos.config.network,
-      marketAddress,
-      inputAmount.toString(),
-      isSell,
-      Math.round(numSwaps / 10) * 10,
-      emojicoin.toString(),
-      emojicoinLP.toString(),
-      swapper ?? "",
-      minOutputAmount.toString(),
-    ],
-    queryFn: () =>
-      invalid || typeof swapper === "undefined"
-        ? {
-            quote_volume: "0",
-            base_volume: "0",
-          }
-        : simulateSwap({
-            aptos,
-            account,
-            ...args,
-            swapper,
-            inputAmount,
-            minOutputAmount,
-            typeTags,
-          }),
-    staleTime: 10 * 1000,
-  });
-
-  const gas = useGetGas({
-    aptos,
-    account,
-    ...args,
-    swapper,
-    inputAmount,
-    minOutputAmount,
-    typeTags,
-  });
-
-  return typeof data === "undefined"
-    ? data
-    : {
-        gasCost:
-          gas && typeof gas.gas_used === "string" && typeof gas.gas_unit_price === "string"
-            ? BigInt(gas.gas_used) * BigInt(gas.gas_unit_price)
-            : DEFAULT_SWAP_GAS_COST,
-        swapResult: isSell ? BigInt(data.quote_volume) : BigInt(data.base_volume),
-      };
 };
 
 export const useGetGasWithDefault = (args: {
