@@ -3,7 +3,7 @@
 import { TitleBar } from "@react95/core";
 import { translationFunction } from "context/language-context";
 import { shuffle } from "lodash";
-import { useMemo,useState } from "react";
+import { useMemo, useState } from "react";
 import { useWindowSize } from "react-use";
 
 import communityProjects from "../../../../public/community-projects.json";

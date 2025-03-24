@@ -2,7 +2,7 @@
 import Text from "components/text";
 import React from "react";
 
-import { Checkbox, Slider, StyledCheckbox,StyledSwitcher } from "./styled";
+import { Checkbox, Slider, StyledCheckbox, StyledSwitcher } from "./styled";
 // Types
 import { type SwitcherProps } from "./types";
 

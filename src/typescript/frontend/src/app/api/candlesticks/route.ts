@@ -1,4 +1,4 @@
-import { type NextRequest,NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { CandlesticksSearchParamsSchema } from "./search-params-schema";
 import { getCandlesticksRoute } from "./utils";

@@ -1,4 +1,4 @@
-import { motion,type SVGMotionProps } from "framer-motion";
+import { motion, type SVGMotionProps } from "framer-motion";
 import { ECONIA_BLUE } from "theme/colors";
 
 const getAnimateConfig = (delay: number) => ({

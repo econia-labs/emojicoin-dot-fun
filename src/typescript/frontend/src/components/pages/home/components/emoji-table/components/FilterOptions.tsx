@@ -1,6 +1,6 @@
 import { FlexGap } from "@containers";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import { DropdownMenu,SingleSelect } from "components/selects";
+import { DropdownMenu, SingleSelect } from "components/selects";
 import { type Option } from "components/selects/types";
 import { Switcher } from "components/switcher";
 import { Text } from "components/text";

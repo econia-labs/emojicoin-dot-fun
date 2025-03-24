@@ -1,6 +1,6 @@
 import { AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { getSymbolEmojisInString, toMarketEmojiData } from "@sdk/emoji_data/utils";
-import { sum, toAccountAddressString , toNominal } from "@sdk/utils";
+import { sum, toAccountAddressString, toNominal } from "@sdk/utils";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSpecificMarketsAction } from "components/pages/wallet/fetch-specific-markets-action";
 import { type AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";

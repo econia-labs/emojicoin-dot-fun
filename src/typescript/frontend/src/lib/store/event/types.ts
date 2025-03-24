@@ -11,7 +11,7 @@ import { type WritableDraft } from "immer";
 import { type ArenaChartSymbol } from "lib/chart-utils";
 
 import { type ArenaActions, type ArenaState } from "../arena/store";
-import { type ClientActions,type ClientState } from "../websocket/store";
+import { type ClientActions, type ClientState } from "../websocket/store";
 import { type LatestBar } from "./candlestick-bars";
 
 // Aliased to avoid repeating the type names over and over.

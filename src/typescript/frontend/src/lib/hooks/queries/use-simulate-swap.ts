@@ -1,4 +1,4 @@
-import { type Aptos,type TypeTag } from "@aptos-labs/ts-sdk";
+import { type Aptos, type TypeTag } from "@aptos-labs/ts-sdk";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import {
   type AccountAddressString,

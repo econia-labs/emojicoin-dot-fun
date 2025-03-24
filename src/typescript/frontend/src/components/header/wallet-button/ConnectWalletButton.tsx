@@ -7,7 +7,7 @@ import Popup from "components/popup";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
-import { type PropsWithChildren,useMemo, useState } from "react";
+import { type PropsWithChildren, useMemo, useState } from "react";
 import { useScramble } from "use-scramble";
 
 import OuterConnectText from "./OuterConnectText";

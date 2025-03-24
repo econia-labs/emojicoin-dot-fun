@@ -1,6 +1,6 @@
 "use client";
 
-import { Container,Flex, FlexGap } from "@containers";
+import { Container, Flex, FlexGap } from "@containers";
 import { Badge } from "components/Badge";
 import Button from "components/button";
 import MenuItem from "components/header/components/menu-item";
@@ -18,7 +18,7 @@ import CloseIcon from "../svg/icons/Close";
 import LogoIcon from "../svg/icons/LogoIcon";
 import { slideTopVariants } from "./animations";
 import { NAVIGATE_LINKS } from "./constants";
-import { StyledClickItem, StyledCloseIcon,StyledContainer, StyledMobileHeader } from "./styled";
+import { StyledClickItem, StyledCloseIcon, StyledContainer, StyledMobileHeader } from "./styled";
 import { type HeaderProps } from "./types";
 import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
 

@@ -5,7 +5,7 @@ import {
   type PeriodicStateEventModel,
   type SwapEventModel,
 } from "@sdk/indexer-v2/types";
-import { getPeriodStartTimeFromTime , toNominal } from "@sdk/utils";
+import { getPeriodStartTimeFromTime, toNominal } from "@sdk/utils";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 import { type Types } from "@sdk-types";
 import Big from "big.js";

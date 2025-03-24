@@ -1,4 +1,4 @@
-import { Dialog, DialogPanel, DialogTitle,Transition, TransitionChild } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import ClosePixelated from "@icons/ClosePixelated";
 import { Arrow } from "components/svg";
 import React, { Fragment, type PropsWithChildren } from "react";
