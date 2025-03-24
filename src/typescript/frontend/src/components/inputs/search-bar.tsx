@@ -1,14 +1,15 @@
-import { InputGroup } from ".";
-import EmojiPickerWithInput from "../emoji-picker/EmojiPickerWithInput";
-import { Flex } from "../layout";
-import { useEffect } from "react";
-import icon from "../../../public/images/search-icon.svg";
-import Image from "next/image";
-import styled from "styled-components";
 import { EMOJI_GRID_ITEM_WIDTH } from "components/pages/home/components/const";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import Image from "next/image";
+import { useEffect } from "react";
+import styled from "styled-components";
 import { breakpointsArray } from "theme/base";
 import { DARK_GRAY } from "theme/colors";
-import { useEmojiPicker } from "context/emoji-picker-context";
+
+import icon from "../../../public/images/search-icon.svg";
+import EmojiPickerWithInput from "../emoji-picker/EmojiPickerWithInput";
+import { Flex } from "../layout";
+import { InputGroup } from ".";
 
 const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
 

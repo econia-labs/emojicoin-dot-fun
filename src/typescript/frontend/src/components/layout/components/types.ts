@@ -1,7 +1,6 @@
 import { type HTMLAttributes, type PropsWithChildren } from "react";
 import { type DefaultTheme } from "styled-components";
 import { type CSS } from "styled-components/dist/types";
-
 import {
   type BorderProps,
   type FlexboxProps,

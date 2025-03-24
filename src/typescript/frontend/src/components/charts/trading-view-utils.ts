@@ -2,16 +2,18 @@
 // cspell:word minmov
 // cspell:word pricescale
 
-import { type EventStore } from "@/store/event/types";
 import {
-  type LibrarySymbolInfo,
-  type Timezone,
-  type SearchSymbolResultItem,
   type DatafeedConfiguration,
+  type LibrarySymbolInfo,
+  type SearchSymbolResultItem,
+  type Timezone,
 } from "@static/charting_library";
-import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { EXCHANGE_NAME, TV_CHARTING_LIBRARY_RESOLUTIONS } from "./const";
 import { getClientTimezone } from "lib/chart-utils";
+import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+
+import { type EventStore } from "@/store/event/types";
+
+import { EXCHANGE_NAME, TV_CHARTING_LIBRARY_RESOLUTIONS } from "./const";
 
 export const CONFIGURATION_DATA: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,

@@ -1,5 +1,5 @@
-import { type AnchorHTMLAttributes } from "react";
 import { type TextProps } from "components/text/types";
+import { type AnchorHTMLAttributes } from "react";
 import { type Colors } from "theme/types";
 
 export interface LinkProps

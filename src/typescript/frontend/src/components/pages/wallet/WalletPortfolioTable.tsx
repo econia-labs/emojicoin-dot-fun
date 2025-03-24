@@ -3,6 +3,7 @@ import {
   type FullCoinData,
   useUserEmojicoinBalances,
 } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
+
 import { PortfolioRow } from "./PortfolioRow";
 
 const COLUMNS: EcTableColumn<FullCoinData>[] = [

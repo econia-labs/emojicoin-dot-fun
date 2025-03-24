@@ -1,7 +1,8 @@
-import React from "react";
 import Svg from "components/svg/Svg";
-import { type SvgProps } from "../types";
 import { useThemeContext } from "context/theme-context";
+import React from "react";
+
+import { type SvgProps } from "../types";
 
 const Icon: React.FC<SvgProps> = ({ color = "black", ...props }) => {
   const { theme } = useThemeContext();

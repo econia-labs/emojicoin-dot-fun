@@ -1,6 +1,7 @@
-import React from "react";
-import * as RadixTooltip from "@radix-ui/react-tooltip";
 import "./styles.css";
+
+import * as RadixTooltip from "@radix-ui/react-tooltip";
+import React from "react";
 
 const Popup: React.FC<
   React.PropsWithChildren<{ content: React.ReactNode; className?: string; uppercase?: boolean }>

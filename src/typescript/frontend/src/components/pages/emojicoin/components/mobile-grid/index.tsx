@@ -1,24 +1,23 @@
-import React, { Suspense, useState } from "react";
-
 import { Flex } from "@containers";
 import { Text } from "components";
+import ChartContainer from "components/charts/ChartContainer";
+import Loading from "components/loading";
 import { translationFunction } from "context/language-context";
+import React, { Suspense, useState } from "react";
 
+import { type GridProps } from "../../types";
+import ChatBox from "../chat/ChatBox";
+import { CoinHolders } from "../holders/coin-holders";
+import { PersonalTradeHistory } from "../personal-trade-history/personal-trade-history";
+import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
+import SwapComponent from "../trade-emojicoin/SwapComponent";
+import { TradeHistory } from "../trade-history/trade-history";
 import {
-  StyledMobileContentWrapper,
   StyledMobileContentBlock,
   StyledMobileContentHeader,
   StyledMobileContentInner,
+  StyledMobileContentWrapper,
 } from "./styled";
-import ChatBox from "../chat/ChatBox";
-import { type GridProps } from "../../types";
-import SwapComponent from "../trade-emojicoin/SwapComponent";
-import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
-import ChartContainer from "components/charts/ChartContainer";
-import Loading from "components/loading";
-import { CoinHolders } from "../holders/coin-holders";
-import { TradeHistory } from "../trade-history/trade-history";
-import { PersonalTradeHistory } from "../personal-trade-history/personal-trade-history";
 
 const DISPLAY_HEADER_ABOVE_CHART = false;
 const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";

@@ -1,20 +1,26 @@
 "use client";
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { translationFunction } from "context/language-context";
+import "./module.css";
+
 import { Column, Flex } from "@containers";
-import { Text } from "components/text";
-import { type GridLayoutInformation, type TableCardProps } from "./types";
-import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useUserSettings } from "context/event-store-context";
-import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
+import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
+import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { FormattedNumber } from "components/FormattedNumber";
 import { Arrow } from "components/svg";
+import { Text } from "components/text";
+import { useEventStore, useUserSettings } from "context/event-store-context";
+import { translationFunction } from "context/language-context";
+import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
+import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { Emoji } from "utils/emoji";
+
 import {
   borderVariants,
+  eventToVariant as toVariant,
+  glowVariants,
   onlyHoverVariant,
   textVariants,
-  glowVariants,
-  eventToVariant as toVariant,
 } from "./animation-variants/event-variants";
 import {
   calculateGridData,
@@ -24,11 +30,7 @@ import {
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import EmojiMarketPageLink from "./LinkOrAnimationTrigger";
-import { Emoji } from "utils/emoji";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import "./module.css";
-import { FormattedNumber } from "components/FormattedNumber";
-import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
+import { type GridLayoutInformation, type TableCardProps } from "./types";
 
 const TableCard = ({
   index,

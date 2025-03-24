@@ -1,15 +1,16 @@
-import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { useMemo } from "react";
-import { type TradeHistoryProps } from "../../types";
-import { FormattedNumber } from "components/FormattedNumber";
-import { toExplorerLink } from "lib/utils/explorer-link";
-import { AptCell } from "components/ui/table-cells/apt-cell";
-import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
-import { TimeCell } from "components/ui/table-cells/time-cell";
-import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useSwapEventsQuery";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { toNominal } from "@sdk/utils";
+import { FormattedNumber } from "components/FormattedNumber";
+import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
+import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useSwapEventsQuery";
+import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
+import { AptCell } from "components/ui/table-cells/apt-cell";
+import { TimeCell } from "components/ui/table-cells/time-cell";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
+
+import { type TradeHistoryProps } from "../../types";
 
 export const PersonalTradeHistory = (props: TradeHistoryProps) => {
   const { account, connected } = useWallet();

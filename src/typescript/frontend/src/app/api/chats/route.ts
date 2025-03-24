@@ -1,6 +1,8 @@
-import { fetchChatEvents } from "@/queries/market";
-import { GetChatsSchema } from "./schema";
 import { stringifyJSON } from "utils";
+
+import { fetchChatEvents } from "@/queries/market";
+
+import { GetChatsSchema } from "./schema";
 
 export const revalidate = 0;
 

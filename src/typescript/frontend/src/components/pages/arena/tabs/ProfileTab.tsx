@@ -1,3 +1,4 @@
+import { useMatchBreakpoints } from "@hooks/index";
 import {
   type ArenaInfoModel,
   type ArenaLeaderboardHistoryWithArenaInfoModel,
@@ -8,13 +9,13 @@ import { q64ToBig } from "@sdk/utils";
 import Big from "big.js";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
-import styles from "./ProfileTab.module.css";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { useMemo, useState } from "react";
 import { Emoji } from "utils/emoji";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useMatchBreakpoints } from "@hooks/index";
+
+import styles from "./ProfileTab.module.css";
 
 export type ProfileTabProps = {
   position?: ArenaPositionModel | null;

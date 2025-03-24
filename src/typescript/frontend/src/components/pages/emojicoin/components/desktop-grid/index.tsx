@@ -1,24 +1,23 @@
-import React, { Suspense, useState } from "react";
-
-import {
-  StyledContentWrapper,
-  StyledContentColumn,
-  StyledBlockWrapper,
-  StyledContentInner,
-  StyledBlock,
-} from "./styled";
-
-import ChatBox from "../chat/ChatBox";
-import { type GridProps } from "../../types";
-import ChartContainer from "components/charts/ChartContainer";
-import SwapComponent from "../trade-emojicoin/SwapComponent";
-import Loading from "components/loading";
 import { Flex, FlexGap } from "@containers";
+import ChartContainer from "components/charts/ChartContainer";
+import Loading from "components/loading";
 import Text from "components/text";
 import { translationFunction } from "context/language-context";
+import React, { Suspense, useState } from "react";
+
+import { type GridProps } from "../../types";
+import ChatBox from "../chat/ChatBox";
 import { CoinHolders } from "../holders/coin-holders";
-import { TradeHistory } from "../trade-history/trade-history";
 import { PersonalTradeHistory } from "../personal-trade-history/personal-trade-history";
+import SwapComponent from "../trade-emojicoin/SwapComponent";
+import { TradeHistory } from "../trade-history/trade-history";
+import {
+  StyledBlock,
+  StyledBlockWrapper,
+  StyledContentColumn,
+  StyledContentInner,
+  StyledContentWrapper,
+} from "./styled";
 
 const tabs = ["Trade History", "My Trade History", "Top Holders"] as const;
 

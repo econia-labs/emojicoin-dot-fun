@@ -1,13 +1,12 @@
 import { type DefaultTheme } from "styled-components";
 import {
+  type FlexboxProps,
   type LayoutProps,
+  type OpacityProps,
+  type ResponsiveValue,
   type SpaceProps,
   type TypographyProps,
-  type OpacityProps,
-  type FlexboxProps,
-  type ResponsiveValue,
 } from "styled-system";
-
 import { type Colors, type FontWeight } from "theme/types";
 
 export interface ThemedProps extends TextProps {

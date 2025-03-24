@@ -3,6 +3,7 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { toCoinTypes } from "@sdk/markets";
 import { unstable_cache } from "next/cache";
+
 import { fetchEmojicoinBalances } from "./fetch-emojicoin-balances";
 
 async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {

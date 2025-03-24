@@ -1,8 +1,9 @@
-import React from "react";
 import { FlexGap } from "@containers";
-import { Arrow } from "components/svg";
-import { StyledBtn } from "./styled";
 import { useMatchBreakpoints } from "@hooks/index";
+import { Arrow } from "components/svg";
+import React from "react";
+
+import { StyledBtn } from "./styled";
 
 export type ButtonsBlockProps = {
   value: number;

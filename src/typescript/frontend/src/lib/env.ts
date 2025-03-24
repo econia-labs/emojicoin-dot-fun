@@ -1,7 +1,8 @@
-import packageInfo from "../../package.json";
-import { parse } from "semver";
-import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { type Network } from "@aptos-labs/ts-sdk";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { parse } from "semver";
+
+import packageInfo from "../../package.json";
 
 export type Links = {
   x: string;
@@ -65,11 +66,11 @@ const VERSION = parse(packageInfo.version);
 
 export {
   APTOS_NETWORK,
+  BROKER_URL,
   CDN_URL,
   DISCORD_METADATA_REQUEST_CHANNEL,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
   IS_ALLOWLIST_ENABLED,
-  BROKER_URL,
   VERSION,
 };

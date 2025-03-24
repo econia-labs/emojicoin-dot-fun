@@ -1,7 +1,8 @@
+import fs from "fs";
 import path from "path";
+
 import { getGitRoot } from "../../../sdk/tests/utils/helpers";
 import { ROUTES } from "../../src/router/routes";
-import fs from "fs";
 
 /**
  * There are four basic structures employed by the nextjs file-based routing system.

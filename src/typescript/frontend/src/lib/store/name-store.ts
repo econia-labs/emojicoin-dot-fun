@@ -1,7 +1,7 @@
-import { createStore } from "zustand/vanilla";
-import { immer } from "zustand/middleware/immer";
-import { APTOS_NETWORK } from "lib/env";
 import { MS_IN_ONE_DAY } from "components/charts/const";
+import { APTOS_NETWORK } from "lib/env";
+import { immer } from "zustand/middleware/immer";
+import { createStore } from "zustand/vanilla";
 
 export type ANSValue = { name: string | null; expiry: number };
 export type ANSMap = Map<string, ANSValue>;

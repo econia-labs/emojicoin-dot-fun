@@ -1,16 +1,14 @@
+import { InputNumeric } from "components/inputs";
+import { DEFAULT_MAX_SLIPPAGE } from "const";
 import React, { useEffect, useState } from "react";
 
-import { DropdownMenuWrapper } from "../dropdown-menu/styled";
-
-import { type TradeOptionsProps } from "../types";
+import * as SlippageSettings from "../../../utils/slippage";
 import {
   DropdownMenuInner,
   StyledDropdownMenuItem,
 } from "../dropdown-menu//components/dropdown-menu-item/styled";
-import { InputNumeric } from "components/inputs";
-import { DEFAULT_MAX_SLIPPAGE } from "const";
-
-import * as SlippageSettings from "../../../utils/slippage";
+import { DropdownMenuWrapper } from "../dropdown-menu/styled";
+import { type TradeOptionsProps } from "../types";
 
 export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
   const [maxSlippage, setMaxSlippage] = useState<bigint>(DEFAULT_MAX_SLIPPAGE);

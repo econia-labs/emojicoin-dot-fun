@@ -1,10 +1,11 @@
 // cspell:word datafeeds
-import Script from "next/script";
-import { type ChartContainerProps } from "./types";
-import React, { Suspense, useMemo } from "react";
-import Loading from "components/loading";
-import PrivateChart from "./PrivateChart";
 import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
+import Loading from "components/loading";
+import Script from "next/script";
+import React, { Suspense, useMemo } from "react";
+
+import PrivateChart from "./PrivateChart";
+import { type ChartContainerProps } from "./types";
 
 const MemoizedChart = React.memo(PrivateChart);
 

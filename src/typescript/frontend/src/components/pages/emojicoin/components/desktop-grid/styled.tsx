@@ -1,5 +1,5 @@
-import styled from "styled-components";
 import { Flex } from "@containers";
+import styled from "styled-components";
 
 export const StyledContentWrapper = styled.div`
   display: flex;

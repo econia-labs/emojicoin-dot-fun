@@ -1,8 +1,10 @@
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
-import { useTransactionBuilder } from "./use-transaction-builder";
+
 import { SetMarketProperties } from "@/contract-apis";
-import { AccountAddress } from "@aptos-labs/ts-sdk";
+
+import { useTransactionBuilder } from "./use-transaction-builder";
 
 /**
  * The individual args here must be passed to avoid re-renders due to a new object of args being

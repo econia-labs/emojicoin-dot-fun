@@ -1,15 +1,16 @@
 import { Flex } from "@containers";
-import { type GridProps } from "components/pages/emojicoin/types";
-import { StyledContentHeader } from "../desktop-grid/styled";
-import Button from "components/button";
-import { translationFunction } from "context/language-context";
+import { useMatchBreakpoints } from "@hooks/index";
 import { isInBondingCurve } from "@sdk/utils/bonding-curve";
-import { AnimatedProgressBar } from "./AnimatedProgressBar";
+import Button from "components/button";
+import { type GridProps } from "components/pages/emojicoin/types";
+import { Text } from "components/text";
+import { translationFunction } from "context/language-context";
+import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
-import { Text } from "components/text";
-import { useMatchBreakpoints } from "@hooks/index";
+
+import { StyledContentHeader } from "../desktop-grid/styled";
+import { AnimatedProgressBar } from "./AnimatedProgressBar";
 
 export const LiquidityButton = (props: GridProps) => {
   const { isDesktop } = useMatchBreakpoints();

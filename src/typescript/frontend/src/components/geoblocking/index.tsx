@@ -1,8 +1,7 @@
-import React from "react";
-
-import Text from "components/text";
-import Carousel from "components/carousel";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import Carousel from "components/carousel";
+import Text from "components/text";
+import React from "react";
 
 export const GeoblockedBanner = () => {
   // Don't show the banner unless `geoblocked` is explicitly true, not just true or undefined.

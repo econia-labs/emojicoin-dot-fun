@@ -1,4 +1,5 @@
 import { css } from "styled-components";
+
 import { scales } from "./types";
 
 export const styles = {

@@ -1,16 +1,17 @@
 "use client";
 
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { standardizeAddress, truncateAddress } from "@sdk/utils";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { standardizeAddress, truncateAddress } from "@sdk/utils";
-import { getIsOnCustomAllowlist } from "./get-verification-status";
+import { cn } from "lib/utils/class-name";
+import { useEffect, useState } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
-import { cn } from "lib/utils/class-name";
+
+import { getIsOnCustomAllowlist } from "./get-verification-status";
 
 export const checkmarkOrX = (checkmark: boolean, className?: string) => (
   <Emoji

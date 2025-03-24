@@ -1,6 +1,5 @@
-import styled from "styled-components";
-
 import { Box } from "@containers";
+import styled from "styled-components";
 
 export const DropdownMenuWrapper = styled(Box)`
   max-height: 300px;

@@ -1,14 +1,12 @@
+import Arrow from "components/svg/icons/Arrow";
+import { Text } from "components/text";
+import { translationFunction } from "context/language-context";
+import { cn } from "lib/utils/class-name";
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { translationFunction } from "context/language-context";
-
-import { Text } from "components/text";
-import Arrow from "components/svg/icons/Arrow";
-
-import { type MobileMenuItemProps } from "./types";
 import { StyledItemWrapper } from "./styled";
-import { cn } from "lib/utils/class-name";
+import { type MobileMenuItemProps } from "./types";
 
 const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
   withIcon,

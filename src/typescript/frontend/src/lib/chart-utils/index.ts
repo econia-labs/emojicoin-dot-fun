@@ -2,7 +2,6 @@
 // cspell:word Fakaofo
 
 import { isValidMarketSymbol } from "@sdk/emoji_data";
-
 /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
 // @ts-ignore Expect an error when the library isn't installed. Since it's a type, it's fine.
 import { type Bar } from "@static/charting_library/datafeed-api";

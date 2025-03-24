@@ -1,11 +1,11 @@
-import { useEmojiPicker } from "context/emoji-picker-context";
 import Button from "components/button";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import Link from "next/link";
 import path from "path";
-import { ROUTES } from "router/routes";
 import { useMemo } from "react";
+import { ROUTES } from "router/routes";
 
 export const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,

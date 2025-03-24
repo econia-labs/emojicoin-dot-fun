@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef } from "react";
-import clippy, { type Agent } from "clippyts";
 import "./clippy.css";
+
+import clippy, { type Agent } from "clippyts";
+import { useCallback, useEffect, useRef } from "react";
 
 const ANIMATIONS_LOOP = ["Greeting", "Processing", "IdleAtom", "Congratulate"];
 const ANIMATION_INTERVAL = 11000;

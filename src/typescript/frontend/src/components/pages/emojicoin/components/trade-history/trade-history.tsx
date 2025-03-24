@@ -1,21 +1,23 @@
-import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
-import { useMemo } from "react";
-import { type TradeHistoryProps } from "../../types";
-import { useEventStore } from "context/event-store-context";
+import { type SwapEventModel } from "@sdk/indexer-v2";
+import { toNominal } from "@sdk/utils";
+import { FormattedNumber } from "components/FormattedNumber";
+import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import Popup from "components/popup";
+import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
+import { AptCell } from "components/ui/table-cells/apt-cell";
+import { TimeCell } from "components/ui/table-cells/time-cell";
+import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
+import { useEventStore } from "context/event-store-context";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
+import _ from "lodash";
+import { useMemo } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
-import { FormattedNumber } from "components/FormattedNumber";
-import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
-import { toExplorerLink } from "lib/utils/explorer-link";
-import { AptCell } from "components/ui/table-cells/apt-cell";
-import { toNominal } from "@sdk/utils";
-import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
-import { TimeCell } from "components/ui/table-cells/time-cell";
+
 import { useSwapEventsQuery } from "@/components/pages/wallet/useSwapEventsQuery";
-import _ from "lodash";
-import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { type SwapEventModel } from "@sdk/indexer-v2";
+
+import { type TradeHistoryProps } from "../../types";
 
 const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),

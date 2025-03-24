@@ -1,8 +1,8 @@
-import React from "react";
+import Popup from "components/popup";
 import Image from "next/image";
+import React from "react";
 
 import info from "../../../public/images/infoicon.svg";
-import Popup from "components/popup";
 
 const Info: React.FC<
   React.PropsWithChildren<{ popupClassName?: string; imageClassName?: string }>

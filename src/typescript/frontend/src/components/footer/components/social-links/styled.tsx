@@ -1,6 +1,5 @@
-import styled from "styled-components";
-
 import Svg from "components/svg/Svg";
+import styled from "styled-components";
 
 export const StyledIcon = styled.div`
   cursor: pointer;

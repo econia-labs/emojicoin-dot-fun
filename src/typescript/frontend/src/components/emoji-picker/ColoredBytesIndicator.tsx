@@ -1,7 +1,7 @@
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
-import { useEmojiPicker } from "context/emoji-picker-context";
 import { MAX_NUM_CHAT_EMOJIS, MAX_SYMBOL_LENGTH } from "components/pages/emoji-picker/const";
 import { AnimatedLoadingBoxes } from "components/pages/launch-emojicoin/animated-loading-boxes";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 

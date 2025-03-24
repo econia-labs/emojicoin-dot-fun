@@ -1,13 +1,15 @@
 "use client";
 
-import TableCard from "../table-card/TableCard";
+import "./module.css";
+
+import { type HomePageProps } from "app/home/HomePage";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { marketDataToProps } from "./utils";
-import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useMemo, useRef } from "react";
-import { type HomePageProps } from "app/home/HomePage";
-import "./module.css";
+
+import TableCard from "../table-card/TableCard";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import { marketDataToProps } from "./utils";
 
 export const ClientGrid = ({
   markets,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import Maintenance from "./maintenance/component";
 
 export default function GlobalError({

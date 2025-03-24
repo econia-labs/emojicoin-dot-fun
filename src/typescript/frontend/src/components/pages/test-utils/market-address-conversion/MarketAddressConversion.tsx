@@ -1,17 +1,19 @@
 "use client";
 
-import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
-import { Input } from "@/components/ui/Input";
 import { type SymbolEmoji } from "@sdk/emoji_data";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { useEmojiPicker } from "context/emoji-picker-context";
+import { cn } from "lib/utils/class-name";
 import { useCallback, useMemo, useState } from "react";
 import { useEffectOnce } from "react-use";
-import { cn } from "lib/utils/class-name";
-import { useFetchSymbol } from "./use-market-address-view";
-import { Label } from "@/components/ui/Label";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
+
+import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+
+import { useFetchSymbol } from "./use-market-address-view";
 
 const addressTextClass = cn(
   "font-forma w-[66ch] text-center border border-solid border-light-gray",

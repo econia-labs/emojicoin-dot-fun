@@ -1,11 +1,12 @@
-import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { EcTableHead } from "./ecTableHead";
-import { Table, TableHeader, TableRow } from "./table";
-import _ from "lodash";
-import { EcTableBody } from "./ecTableBody";
-import { cn } from "lib/utils/class-name";
 import { type OrderByStrings } from "@sdk/indexer-v2/const";
 import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
+import { cn } from "lib/utils/class-name";
+import _ from "lodash";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
+
+import { EcTableBody } from "./ecTableBody";
+import { EcTableHead } from "./ecTableHead";
+import { Table, TableHeader, TableRow } from "./table";
 
 /**
  * Configuration for a table column.

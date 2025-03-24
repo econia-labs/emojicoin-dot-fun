@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useWindowSize } from "react-use";
+
 import { EMOJI_GRID_ITEM_WIDTH } from "../../const";
 import { GRID_PADDING } from "../styled";
 

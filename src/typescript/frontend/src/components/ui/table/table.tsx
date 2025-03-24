@@ -1,5 +1,5 @@
-import { cn } from "lib/utils/class-name";
 import { type HTMLMotionProps, motion } from "framer-motion";
+import { cn } from "lib/utils/class-name";
 import * as React from "react";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(

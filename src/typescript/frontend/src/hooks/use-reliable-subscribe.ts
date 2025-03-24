@@ -1,6 +1,7 @@
-import { type SubscribableBrokerEvents } from "@/broker/types";
 import { useEventStore } from "context/event-store-context/hooks";
 import { useEffect } from "react";
+
+import { type SubscribableBrokerEvents } from "@/broker/types";
 
 // Note that we let the charting library handle the subscription to arena periods.
 export type ReliableSubscribeArgs = {

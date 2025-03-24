@@ -1,13 +1,14 @@
-import { Emoji } from "utils/emoji";
-import { type ArenaPropsWithPositionHistoryAndEmojiData } from "../utils";
-import { EnterTab } from "./EnterTab";
-import { ProfileTab } from "./ProfileTab";
-import { emoji } from "utils";
-import { InfoTab } from "./InfoTab";
-import { ChatTab } from "./ChatTab";
+import { CloseIcon } from "components/svg";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { CloseIcon } from "components/svg";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+
+import { type ArenaPropsWithPositionHistoryAndEmojiData } from "../utils";
+import { ChatTab } from "./ChatTab";
+import { EnterTab } from "./EnterTab";
+import { InfoTab } from "./InfoTab";
+import { ProfileTab } from "./ProfileTab";
 
 const getTabs = (
   {

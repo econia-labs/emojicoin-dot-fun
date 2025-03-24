@@ -1,13 +1,15 @@
-import { type Metadata, type Viewport } from "next";
-import { getDefaultMetadata } from "configs/meta";
-import Providers from "context/providers";
-import StyledComponentsRegistry from "lib/registry";
 import "react-toastify/dist/ReactToastify.css";
 import "../app/global.css";
-import DisplayDebugData from "lib/local-development/DisplayDebugData";
-import { fontsStyle, notoColorEmoji } from "styles/fonts";
-import { headers } from "next/headers";
 import "@react95/core/themes/win95.css";
+
+import { getDefaultMetadata } from "configs/meta";
+import Providers from "context/providers";
+import DisplayDebugData from "lib/local-development/DisplayDebugData";
+import StyledComponentsRegistry from "lib/registry";
+import { type Metadata, type Viewport } from "next";
+import { headers } from "next/headers";
+import { fontsStyle, notoColorEmoji } from "styles/fonts";
+
 import { BackgroundEmojis } from "@/components/misc/background-emojis/BackgroundEmojis";
 
 export const metadata: Metadata = getDefaultMetadata();

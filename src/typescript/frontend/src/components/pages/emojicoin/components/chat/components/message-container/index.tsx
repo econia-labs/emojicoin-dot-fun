@@ -1,6 +1,13 @@
-import React, { useMemo } from "react";
-
 import { FlexGap } from "@containers";
+import { useNameResolver } from "@hooks/use-name-resolver";
+import { formatDisplayName } from "@sdk/utils";
+import { EXTERNAL_LINK_PROPS } from "components/link";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { motion } from "framer-motion";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import React, { useMemo } from "react";
+import { Emoji } from "utils/emoji";
+
 import {
   Arrow,
   StyledMessageContainer,
@@ -9,13 +16,6 @@ import {
   StyledUserNameWrapper,
 } from "./styled";
 import { type MessageContainerProps } from "./types";
-import { EXTERNAL_LINK_PROPS } from "components/link";
-import { toExplorerLink } from "lib/utils/explorer-link";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { formatDisplayName } from "@sdk/utils";
-import { motion } from "framer-motion";
-import { Emoji } from "utils/emoji";
-import { useNameResolver } from "@hooks/use-name-resolver";
 
 const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageContainerProps) => {
   const { addressName: connectedWalletName } = useAptos();

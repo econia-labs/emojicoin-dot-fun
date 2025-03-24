@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import { translationFunction } from "context/language-context";
-
 import { Text } from "components";
-import styled from "styled-components";
-import { Page } from "components/layout/components/page";
 import Button from "components/button";
+import { Page } from "components/layout/components/page";
+import { translationFunction } from "context/language-context";
+import { useRouter } from "next/navigation";
+import React from "react";
+import styled from "styled-components";
 
 export const StyledNotFoundPage = styled(Page)`
   min-height: 100dvh;

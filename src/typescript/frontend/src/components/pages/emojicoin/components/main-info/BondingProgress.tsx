@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-
-import { translationFunction } from "context/language-context";
-import { type MainInfoProps } from "../../types";
-import { useEventStore } from "context/event-store-context";
 import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
 import { FormattedNumber } from "components/FormattedNumber";
 import ProgressBar from "components/ProgressBar";
+import { useEventStore } from "context/event-store-context";
+import { translationFunction } from "context/language-context";
+import React, { useEffect, useState } from "react";
+
+import { type MainInfoProps } from "../../types";
 
 const statsTextClasses = "uppercase ellipses font-forma";
 

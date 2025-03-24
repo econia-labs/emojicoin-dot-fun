@@ -1,10 +1,10 @@
 "use client";
-import { useRouter } from "next/navigation";
-
 import "./styles.css";
 
-import { type ErrorBoundaryFallbackProps } from "./types";
+import { useRouter } from "next/navigation";
 import styled from "styled-components";
+
+import { type ErrorBoundaryFallbackProps } from "./types";
 
 export const ErrorContainerButton = styled.button`
   font-family: var(--font-pixelar) !important;

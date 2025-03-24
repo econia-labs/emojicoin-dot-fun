@@ -1,7 +1,8 @@
-import { fetchPriceFeedWithMarketState } from "@/queries/home";
 import { SortMarketsBy } from "@econia-labs/emojicoin-sdk";
 import { ORDER_BY } from "@sdk/indexer-v2/const";
 import { unstable_cache } from "next/cache";
+
+import { fetchPriceFeedWithMarketState } from "@/queries/home";
 
 export const NUM_MARKETS_ON_PRICE_FEED = 25;
 

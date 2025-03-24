@@ -1,10 +1,12 @@
 import { type Aptos } from "@aptos-labs/ts-sdk";
-import { useQuery } from "@tanstack/react-query";
-import { withResponseError } from "./client";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import { Balance } from "@/contract-apis";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo, useRef, useState } from "react";
+
+import { Balance } from "@/contract-apis";
+
+import { withResponseError } from "./client";
 
 /**
  * __NOTE: If you're using this for a connected user's APT balance, you should use__

@@ -1,8 +1,9 @@
 import React from "react";
-import { DropdownMenuWrapper } from "./styled";
-import { DropdownMenuItem } from "./components";
+
 import { type DropdownMenuProps } from "../types";
+import { DropdownMenuItem } from "./components";
 import { DropdownMenuInner, StyledDropdownMenuClose } from "./components/dropdown-menu-item/styled";
+import { DropdownMenuWrapper } from "./styled";
 
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onClick,

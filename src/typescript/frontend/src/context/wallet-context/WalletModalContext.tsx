@@ -1,5 +1,5 @@
-import { createContext, type PropsWithChildren, useContext, useState } from "react";
 import { WalletModal } from "components/wallet/WalletModal";
+import { createContext, type PropsWithChildren, useContext, useState } from "react";
 
 export type WalletModalContextState = {
   openWalletModal: () => void;

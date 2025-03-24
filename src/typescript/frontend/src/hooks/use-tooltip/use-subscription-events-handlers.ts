@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
 import debounce from "lodash/debounce";
+import { useCallback, useEffect, useState } from "react";
+
 import { type useSubscriptionEventsHandlersProps } from "./types";
 
 export const useSubscriptionEventsHandlers = ({

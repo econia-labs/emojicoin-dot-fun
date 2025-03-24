@@ -1,6 +1,7 @@
 import { EN } from "configs";
 import { getLanguageCodeFromLocalStorage } from "context/language-context/helpers";
 import { type TranslationKey } from "context/language-context/types";
+
 import fetchLocale from "./fetch-locale";
 
 // For server-side translation. It doesn't have all of the functionality

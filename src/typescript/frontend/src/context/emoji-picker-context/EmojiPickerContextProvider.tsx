@@ -1,7 +1,8 @@
 "use client";
 
-import { type ReactNode, createContext, useRef } from "react";
+import { createContext, type ReactNode, useRef } from "react";
 import { type StoreApi } from "zustand";
+
 import { type EmojiPickerStore } from "@/store/emoji-picker-store";
 import createEmojiPickerStore from "@/store/emoji-picker-store";
 

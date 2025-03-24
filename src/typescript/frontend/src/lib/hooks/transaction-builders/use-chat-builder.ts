@@ -4,8 +4,10 @@ import { toCoinTypesForEntry } from "@sdk/markets";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
-import { useTransactionBuilder } from "./use-transaction-builder";
+
 import { Chat } from "@/contract-apis/emojicoin-dot-fun";
+
+import { useTransactionBuilder } from "./use-transaction-builder";
 
 /**
  * The individual args here must be passed to avoid re-renders due to a new object of args being

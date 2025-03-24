@@ -1,18 +1,19 @@
 "use client";
 
 import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useCallback, useEffect, useState } from "react";
-import { createSession } from "./session";
-import { useScramble } from "use-scramble";
-import { motion } from "framer-motion";
 import { Flex } from "@containers";
-import Link from "next/link";
-import { Text } from "components/text";
-import { LINKS } from "lib/env";
-import { ROUTES } from "router/routes";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { Text } from "components/text";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { motion } from "framer-motion";
+import { LINKS } from "lib/env";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { ROUTES } from "router/routes";
+import { useScramble } from "use-scramble";
+
+import { createSession } from "./session";
 
 export const ClientVerifyPage = () => {
   const { account } = useAptos();

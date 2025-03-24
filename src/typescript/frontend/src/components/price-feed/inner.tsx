@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import Carousel from "components/carousel";
-import { Emoji } from "utils/emoji";
-import { useMemo } from "react";
-import { cn } from "lib/utils/class-name";
-import useEffectOnce from "react-use/lib/useEffectOnce";
-import { useEventStore } from "context/event-store-context/hooks";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
+import Carousel from "components/carousel";
 import { FormattedNumber } from "components/FormattedNumber";
 import { PriceColors } from "components/misc/ColoredPriceDisplay";
+import { useEventStore } from "context/event-store-context/hooks";
+import { cn } from "lib/utils/class-name";
+import Link from "next/link";
+import { useMemo } from "react";
+import useEffectOnce from "react-use/lib/useEffectOnce";
+import { Emoji } from "utils/emoji";
 
 export const PriceDelta = ({ delta, className = "" }: { delta: number; className?: string }) => {
   const { prefix, suffix } = useMemo(

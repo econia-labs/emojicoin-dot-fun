@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
-import type { SvgProps } from "../types";
-import Svg from "../Svg";
 import { useThemeContext } from "context";
+import React from "react";
+
+import Svg from "../Svg";
+import type { SvgProps } from "../types";
 
 const Planet: React.FC<SvgProps> = ({ color = "econiaBlue", ...props }) => {
   const { theme } = useThemeContext();
