@@ -1,4 +1,4 @@
-import { NON_ARENA_PERIODS, PeriodDuration, getPeriodStartTime } from "../../src";
+import { getPeriodStartTime, NON_ARENA_PERIODS, PeriodDuration } from "../../src";
 import { calculatePeriodBoundariesCrossed } from "../utils";
 import { SAMPLE_STATE_EVENT, SAMPLE_SWAP_EVENT } from "../utils/sample-data";
 

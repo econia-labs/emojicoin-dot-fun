@@ -1,12 +1,10 @@
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
+import "server-only";
 
-import { LIMIT, ORDER_BY } from "../../const";
+import { type AccountAddress } from "@aptos-labs/ts-sdk";
+
+import { type SymbolEmoji } from "../../../emoji_data/types";
 import { type AnyNumberString } from "../../../types";
-import { TableName } from "../../types/json-types";
-import { postgrest, toQueryArray } from "../client";
-import { queryHelper, queryHelperSingle } from "../utils";
+import { LIMIT, ORDER_BY } from "../../const";
 import {
   toChatEventModel,
   toMarketRegistrationEventModel,
@@ -14,9 +12,10 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
-import { type SymbolEmoji } from "../../../emoji_data/types";
-import { type AccountAddress } from "@aptos-labs/ts-sdk";
+import { type MarketStateQueryArgs, type PeriodicStateEventQueryArgs } from "../../types/common";
+import { TableName } from "../../types/json-types";
+import { postgrest, toQueryArray } from "../client";
+import { queryHelper, queryHelperSingle } from "../utils";
 
 const selectSwaps = ({
   sender,

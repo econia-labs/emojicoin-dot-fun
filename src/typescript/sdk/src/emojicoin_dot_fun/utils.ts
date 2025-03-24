@@ -2,32 +2,33 @@ import {
   AccountAddress,
   type AccountAddressInput,
   type Aptos,
-  type UserTransactionResponse,
-  MoveString,
   isUserTransactionResponse,
+  MoveString,
   type PendingTransactionResponse,
+  type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
+
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
-import {
-  type Events,
-  converter,
-  createEmptyEvents,
-  toCamelCaseEventName,
-  isAnEmojicoinStructName,
-  type EventsWithIndices,
-} from "./events";
-import { typeTagInputToStructName } from "../utils/type-tags";
-import { createNamedObjectAddress } from "../utils/aptos-utils";
-import type JsonTypes from "../types/json-types";
 import { encodeEmojis, type SymbolEmoji } from "../emoji_data";
+import type JsonTypes from "../types/json-types";
+import { createNamedObjectAddress } from "../utils/aptos-utils";
+import { typeTagInputToStructName } from "../utils/type-tags";
 import {
   arenaConverter,
+  type ArenaEvents,
+  type ArenaEventsWithIndices,
   createEmptyArenaEvents,
   isAnArenaStructName,
   toCamelCaseArenaEventName,
-  type ArenaEvents,
-  type ArenaEventsWithIndices,
 } from "./arena-events";
+import {
+  converter,
+  createEmptyEvents,
+  type Events,
+  type EventsWithIndices,
+  isAnEmojicoinStructName,
+  toCamelCaseEventName,
+} from "./events";
 
 // Note that the conversion to string bytes below doesn't work if the length of the string is > 255.
 const registryNameBytes = new MoveString("Registry").bcsToBytes().slice(1);

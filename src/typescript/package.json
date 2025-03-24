@@ -38,7 +38,7 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "load-env": "dotenv -e .env",
-    "load-env:test": "dotenv -e ci.env",
+    "load-env:test": "dotenv -e ci.env -v NODE_OPTIONS='--conditions=react-server'",
     "playwright:install": "turbo run playwright:install",
     "start": "pnpm load-env -- turbo run start",
     "submodule": "turbo run submodule",

@@ -12,10 +12,10 @@ import {
 import { getFundedAccount } from "../../utils/test-accounts";
 import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../broker/utils";
 import {
+  depositToVault,
+  ONE_SECOND_MICROSECONDS,
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
-  ONE_SECOND_MICROSECONDS,
-  depositToVault,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
 

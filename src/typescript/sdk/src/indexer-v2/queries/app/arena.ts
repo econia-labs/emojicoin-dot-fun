@@ -1,10 +1,11 @@
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
+import "server-only";
 
-import { TableName } from "../../types/json-types";
-import { postgrest } from "../client";
-import { queryHelper, queryHelperSingle } from "../utils";
+import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
+
+import { type ArenaPeriod } from "../../..";
+import { type AnyNumberString } from "../../../types";
+import { toAccountAddressString } from "../../../utils/account-address";
+import { ORDER_BY } from "../../const";
 import {
   toArenaCandlestickModel,
   toArenaInfoModel,
@@ -13,11 +14,9 @@ import {
   toArenaPositionModel,
   toMarketStateModel,
 } from "../../types";
-import { ORDER_BY } from "../../const";
-import { toAccountAddressString } from "../../../utils/account-address";
-import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import { type AnyNumberString } from "../../../types";
-import { type ArenaPeriod } from "../../..";
+import { TableName } from "../../types/json-types";
+import { postgrest } from "../client";
+import { queryHelper, queryHelperSingle } from "../utils";
 
 const selectMelee = () =>
   postgrest

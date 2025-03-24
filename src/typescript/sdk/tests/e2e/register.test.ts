@@ -1,16 +1,17 @@
 import { Ed25519Account, Hex } from "@aptos-labs/ts-sdk";
+
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
-  ONE_APT,
-  SYMBOL_EMOJI_DATA,
   getMarketAddress,
   getMarketResource,
   getRegistryAddress,
+  ONE_APT,
+  SYMBOL_EMOJI_DATA,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getPublishHelpers } from "../utils";
 import { standardizeAddress } from "../../src/utils/account-address";
+import { getPublishHelpers } from "../utils";
 import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(20000);

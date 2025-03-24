@@ -13,13 +13,7 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import {
-  EmojicoinDotFun,
-  MarketView,
-  REGISTRY_ADDRESS,
-  getMarketAddress,
-} from "../emojicoin_dot_fun";
-import { toConfig } from "../utils/aptos-utils";
+
 import {
   BASE_VIRTUAL_CEILING,
   BASE_VIRTUAL_FLOOR,
@@ -33,23 +27,30 @@ import {
   rawPeriodToEnum,
 } from "../const";
 import {
+  encodeEmojis,
+  symbolBytesToEmojis,
+  type SymbolEmoji,
+  type SymbolEmojiData,
+} from "../emoji_data";
+import {
+  EmojicoinDotFun,
+  getMarketAddress,
+  MarketView,
+  REGISTRY_ADDRESS,
+} from "../emojicoin_dot_fun";
+import { type Flatten } from "../types";
+import type JsonTypes from "../types/json-types";
+import {
   type AnyNumberString,
-  type Types,
   toMarketResource,
   toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
+  type Types,
 } from "../types/types";
-import type JsonTypes from "../types/json-types";
-import {
-  encodeEmojis,
-  symbolBytesToEmojis,
-  type SymbolEmojiData,
-  type SymbolEmoji,
-} from "../emoji_data";
 import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
-import { type Flatten } from "../types";
+import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import { type AtLeastOne } from "../utils/utility-types";
 

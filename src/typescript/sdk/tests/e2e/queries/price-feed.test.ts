@@ -1,9 +1,5 @@
-import {
-  fetchPriceFeedWithMarketState,
-  waitForEmojicoinIndexer,
-} from "../../../src/indexer-v2/queries";
-import { getFundedAccount } from "../../utils/test-accounts";
-import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+import Big from "big.js";
+
 import {
   type AnyNumberString,
   compareBigInt,
@@ -11,10 +7,15 @@ import {
   type SymbolEmoji,
   toSequenceNumberOptions,
 } from "../../../src";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+import { ORDER_BY } from "../../../src/indexer-v2/const";
+import {
+  fetchPriceFeedWithMarketState,
+  waitForEmojicoinIndexer,
+} from "../../../src/indexer-v2/queries";
 import { calculateDeltaPercentageForQ64s, toPriceFeed } from "../../../src/indexer-v2/types";
 import { SortMarketsBy } from "../../../src/indexer-v2/types/common";
-import { ORDER_BY } from "../../../src/indexer-v2/const";
-import Big from "big.js";
+import { getFundedAccount } from "../../utils/test-accounts";
 
 jest.setTimeout(30000);
 
