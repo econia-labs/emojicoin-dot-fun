@@ -21,7 +21,7 @@ import {
   type PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
-  type Option,
+  type MoveJsonOption as Option,
   type TypeTagInput,
   type Uint8,
   type Uint64,

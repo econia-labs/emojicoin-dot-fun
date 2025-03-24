@@ -5,6 +5,7 @@ import {
   type SingleKeyAccount,
   type AccountAddressInput,
 } from "@aptos-labs/ts-sdk";
+import { type StandardizedAddress } from "../types";
 
 export const standardizeAddress = (address: AccountAddressInput) =>
   AccountAddress.from(address).toString();
@@ -16,8 +17,11 @@ export const toAccountAddress = (input: AnyAccount | AccountAddressInput) =>
     typeof input === "object" && "accountAddress" in input ? input.accountAddress : input
   );
 
-export const toAccountAddressString = (input: AnyAccount | AccountAddressInput) =>
-  toAccountAddress(input).toString();
+export const toAccountAddressString = (
+  input: AnyAccount | AccountAddressInput
+): StandardizedAddress => toAccountAddress(input).toString() as StandardizedAddress;
+
+export const toStandardizedAddress = toAccountAddressString;
 
 /**
  * Remove the leading zeros from a hex string that starts with `0x`.

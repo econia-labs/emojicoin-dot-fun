@@ -20,7 +20,7 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import { type Option, type AccountAddressString } from "../types";
+import { type MoveJsonOption as Option, type AccountAddressString } from "../types";
 
 export type AddAdminPayloadMoveArguments = {
   newAdmin: AccountAddress;
