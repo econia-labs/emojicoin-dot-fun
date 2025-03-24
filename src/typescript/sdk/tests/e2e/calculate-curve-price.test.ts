@@ -1,3 +1,6 @@
+import { type Account } from "@aptos-labs/ts-sdk";
+import Big from "big.js";
+
 import {
   APTOS_COIN_TYPE_TAG,
   calculateCurvePrice,
@@ -11,12 +14,10 @@ import {
   toCoinTypes,
   zip,
 } from "../../src";
-import { getFundedAccounts } from "../utils/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { waitForEmojicoinIndexer } from "../../src/indexer-v2";
-import { type Account } from "@aptos-labs/ts-sdk";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../utils";
-import Big from "big.js";
+import { getFundedAccounts } from "../utils/test-accounts";
 
 jest.setTimeout(30000);
 

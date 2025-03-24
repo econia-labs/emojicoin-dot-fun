@@ -1,9 +1,9 @@
 import {
   type Account,
   AccountAddress,
+  type AccountAddressInput,
   type Ed25519Account,
   type SingleKeyAccount,
-  type AccountAddressInput,
 } from "@aptos-labs/ts-sdk";
 
 export const standardizeAddress = (address: AccountAddressInput) =>

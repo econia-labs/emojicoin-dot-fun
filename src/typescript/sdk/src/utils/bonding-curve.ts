@@ -1,6 +1,7 @@
-import { type AtLeastOne } from "./utility-types";
-import { QUOTE_REAL_CEILING, QUOTE_VIRTUAL_FLOOR } from "../const";
 import Big from "big.js";
+
+import { QUOTE_REAL_CEILING, QUOTE_VIRTUAL_FLOOR } from "../const";
+import { type AtLeastOne } from "./utility-types";
 
 /**
  * We can check if the market is in the bonding curve by checking if the LP coin supply is 0

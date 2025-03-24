@@ -1,14 +1,14 @@
-import { queryHelper } from "../utils";
+import { type SymbolEmoji } from "../../../emoji_data";
+import { LIMIT } from "../../const";
 import {
   toLiquidityEventModel,
   toMarketRegistrationEventModel,
   toSwapEventModel,
 } from "../../types";
-import { LIMIT } from "../../const";
 import type { MarketStateQueryArgs } from "../../types/common";
-import { postgrest, toQueryArray } from "../client";
 import { TableName } from "../../types/json-types";
-import { type SymbolEmoji } from "../../../emoji_data";
+import { postgrest, toQueryArray } from "../client";
+import { queryHelper } from "../utils";
 
 const selectMarketRegistrationEventBySymbolEmojis = ({
   searchEmojis,

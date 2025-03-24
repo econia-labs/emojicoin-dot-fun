@@ -2,7 +2,26 @@ import {
   type EntryFunctionPayloadResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
+
 import {
+  type AnyEmojicoinEvent,
+  calculateTvlGrowth,
+  getEvents,
+  getEventsWithIndices,
+  getMarketResourceFromWriteSet,
+  Period,
+  rawPeriodToEnum,
+  standardizeAddress,
+  type Types,
+} from "../../../src";
+import {
+  type ChatEventModel,
+  type GlobalStateEventModel,
+  type LiquidityEventModel,
+  type MarketLatestStateEventModel,
+  type MarketRegistrationEventModel,
+  type PeriodicStateEventModel,
+  type SwapEventModel,
   type withChatEventData,
   type withGlobalStateEventData,
   type withLastSwap,
@@ -15,25 +34,7 @@ import {
   type withStateEventData,
   type withSwapEventData,
   type withTransactionMetadata,
-  type SwapEventModel,
-  type GlobalStateEventModel,
-  type MarketRegistrationEventModel,
-  type ChatEventModel,
-  type LiquidityEventModel,
-  type PeriodicStateEventModel,
-  type MarketLatestStateEventModel,
 } from "../../../src/indexer-v2/types";
-import {
-  type AnyEmojicoinEvent,
-  calculateTvlGrowth,
-  getEvents,
-  getEventsWithIndices,
-  getMarketResourceFromWriteSet,
-  Period,
-  rawPeriodToEnum,
-  standardizeAddress,
-  type Types,
-} from "../../../src";
 import { type JsonValue } from "../../../src/types/json-types";
 
 type Indexer = {

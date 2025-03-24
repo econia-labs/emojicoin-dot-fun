@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import WebSocket from "ws";
+
 import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 
 // If you'd like to see the processor, broker, and postgres logs while the tests are running,

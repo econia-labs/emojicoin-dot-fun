@@ -1,13 +1,14 @@
 /* eslint-disable import/no-unused-modules */
 import { AccountAddress, type Uint8 } from "@aptos-labs/ts-sdk";
+
 import {
-  type Uint64String,
   type AccountAddressString,
-  type Uint128String,
   type HexString,
+  type Uint64String,
+  type Uint128String,
 } from "../emojicoin_dot_fun/types";
-import { type EventJSON, type AggregatorSnapshot } from "./core";
 import { type ArenaJsonTypes } from "./arena-json-types";
+import { type AggregatorSnapshot, type EventJSON } from "./core";
 
 export type JsonValue =
   | string

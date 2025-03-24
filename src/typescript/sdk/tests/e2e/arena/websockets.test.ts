@@ -1,6 +1,6 @@
 // cspell:word funder
 
-import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
+import { getEvents,ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { type MeleeEmojiData } from "../../../src/markets/arena-utils";
 import {
@@ -12,10 +12,10 @@ import {
 import { getFundedAccount } from "../../utils/test-accounts";
 import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../broker/utils";
 import {
+  depositToVault,
+  ONE_SECOND_MICROSECONDS,
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
-  ONE_SECOND_MICROSECONDS,
-  depositToVault,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
 

@@ -5,14 +5,15 @@ import {
   MoveOption,
   MoveString,
   MoveVector,
-  U128,
+  U8,
   U16,
-  U256,
   U32,
   U64,
-  U8,
+  U128,
+  U256,
 } from "@aptos-labs/ts-sdk";
-import { serializeEntryArgsToJsonArray, toAccountAddress, type AnyPrimitive } from "../../src";
+
+import { type AnyPrimitive, serializeEntryArgsToJsonArray, toAccountAddress } from "../../src";
 
 const MAX_U8 = 2 ** 8 - 1;
 const MAX_U16 = 2 ** 16 - 1;

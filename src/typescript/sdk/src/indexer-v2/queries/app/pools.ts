@@ -1,11 +1,12 @@
-import { type AccountAddressInput, type Account } from "@aptos-labs/ts-sdk";
-import { LIMIT, ORDER_BY } from "../../const";
+import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
+
 import { toAccountAddressString } from "../../../utils";
+import { LIMIT, ORDER_BY } from "../../const";
 import { toUserPoolsRPCResponse } from "../../types";
-import { postgrest } from "../client";
-import { queryHelper } from "../utils";
-import { sortByWithFallback } from "../query-params";
 import { type MarketStateQueryArgs, SortMarketsBy } from "../../types/common";
+import { postgrest } from "../client";
+import { sortByWithFallback } from "../query-params";
+import { queryHelper } from "../utils";
 
 const callUserPools = ({
   provider,

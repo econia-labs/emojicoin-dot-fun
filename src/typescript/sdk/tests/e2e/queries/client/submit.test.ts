@@ -1,4 +1,12 @@
 import {
+  Aptos,
+  AptosConfig,
+  Ed25519Account,
+  type EntryFunctionPayloadResponse,
+  Network,
+} from "@aptos-labs/ts-sdk";
+
+import {
   APTOS_NETWORK,
   getEmojicoinMarketAddressAndTypeTags,
   INTEGRATOR_ADDRESS,
@@ -7,21 +15,14 @@ import {
   ONE_APT,
   REWARDS_MODULE_ADDRESS,
   REWARDS_MODULE_NAME,
+  type SymbolEmoji,
   Trigger,
   zip,
-  type SymbolEmoji,
 } from "../../../../src";
-import { getFundedAccount } from "../../../utils/test-accounts";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
-import {
-  Aptos,
-  AptosConfig,
-  Ed25519Account,
-  type EntryFunctionPayloadResponse,
-  Network,
-} from "@aptos-labs/ts-sdk";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
 import { calculatePeriodBoundariesCrossed } from "../../../utils";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
+import { getFundedAccount } from "../../../utils/test-accounts";
 
 jest.setTimeout(15000);
 

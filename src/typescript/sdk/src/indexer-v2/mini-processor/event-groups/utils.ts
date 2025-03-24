@@ -1,14 +1,7 @@
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+
 import { rawPeriodToEnum } from "../../../const";
-import {
-  GuidGetters,
-  type MarketMetadataModel,
-  type StateEventData,
-  type DatabaseModels,
-  toTransactionMetadataForUserLiquidityPools,
-  type TransactionMetadata,
-} from "../../types";
-import { type BumpEvent } from "./builder";
+import { type AccountAddressString } from "../../../emojicoin_dot_fun";
 import {
   isChatEvent,
   isLiquidityEvent,
@@ -16,9 +9,17 @@ import {
   isSwapEvent,
   type Types,
 } from "../../../types";
-import { type EventsModels, type UserLiquidityPoolsMap } from ".";
-import { type AccountAddressString } from "../../../emojicoin_dot_fun";
+import {
+  type DatabaseModels,
+  GuidGetters,
+  type MarketMetadataModel,
+  type StateEventData,
+  toTransactionMetadataForUserLiquidityPools,
+  type TransactionMetadata,
+} from "../../types";
 import { getLPCoinBalanceFromWriteSet } from "../parse-write-set";
+import { type EventsModels, type UserLiquidityPoolsMap } from ".";
+import { type BumpEvent } from "./builder";
 
 const toChatEventData = (event: Types["ChatEvent"]): DatabaseModels["chat_events"]["chat"] => ({
   user: event.user,

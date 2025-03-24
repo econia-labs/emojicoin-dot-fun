@@ -1,41 +1,42 @@
 /* eslint-disable max-classes-per-file */
 import {
-  AccountAddress,
-  MoveVector,
-  type TypeTag,
-  U64,
-  U8,
-  Bool,
   type Account,
+  AccountAddress,
+  type AccountAddressInput,
   type Aptos,
   type AptosConfig,
-  type AccountAddressInput,
-  type HexInput,
-  parseTypeTag,
+  Bool,
   buildTransaction,
+  type HexInput,
   type InputGenerateTransactionOptions,
-  type WaitForTransactionOptions,
-  type UserTransactionResponse,
   type LedgerVersionArg,
-  SimpleTransaction,
+  MoveVector,
+  parseTypeTag,
   type PublicKey,
+  SimpleTransaction,
+  type TypeTag,
+  U8,
+  U64,
+  type UserTransactionResponse,
+  type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
+
+import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../../const";
+import type JsonTypes from "../../types/json-types";
+import { getAptosClient } from "../../utils/aptos-client";
 import {
+  EntryFunctionPayloadBuilder,
+  EntryFunctionTransactionBuilder,
+  ViewFunctionPayloadBuilder,
+} from "../payload-builders";
+import {
+  type AccountAddressString,
+  type HexString,
   type Option,
   type TypeTagInput,
   type Uint8,
   type Uint64,
-  type AccountAddressString,
-  type HexString,
 } from "../types";
-import {
-  ViewFunctionPayloadBuilder,
-  EntryFunctionPayloadBuilder,
-  EntryFunctionTransactionBuilder,
-} from "../payload-builders";
-import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../../const";
-import type JsonTypes from "../../types/json-types";
-import { getAptosClient } from "../../utils/aptos-client";
 
 export type ChatPayloadMoveArguments = {
   marketAddress: AccountAddress;

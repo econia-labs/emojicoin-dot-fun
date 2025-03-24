@@ -1,6 +1,7 @@
 // cspell:word
-import path from "path";
 import fs from "fs";
+import path from "path";
+
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
 import { toMarketStateModel } from "../../../src/indexer-v2/types";
 import { type DatabaseJsonType } from "../../../src/indexer-v2/types/json-types";

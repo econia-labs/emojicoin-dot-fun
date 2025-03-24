@@ -1,17 +1,18 @@
 // cspell:word abcdeg
 
 import { AccountAddress, type TypeTagStruct } from "@aptos-labs/ts-sdk";
+
 import {
-  removeLeadingZerosFromStructString,
+  APTOS_COIN_TYPE_TAG,
+  chunk,
+  deserializeToHexString,
+  generateRandomSymbol,
+  getMarketAddress,
   normalizeHex,
   removeLeadingZeros,
+  removeLeadingZerosFromStructString,
   type StructTagString,
-  APTOS_COIN_TYPE_TAG,
-  generateRandomSymbol,
   toCoinTypes,
-  getMarketAddress,
-  deserializeToHexString,
-  chunk,
   zip,
 } from "../../src";
 

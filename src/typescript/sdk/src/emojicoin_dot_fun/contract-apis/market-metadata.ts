@@ -1,26 +1,27 @@
 /* eslint-disable max-len */
 import {
-  AccountAddress,
-  MoveString,
-  MoveVector,
   type Account,
+  AccountAddress,
+  type AccountAddressInput,
   Aptos,
   type AptosConfig,
-  type AccountAddressInput,
   buildTransaction,
   type InputGenerateTransactionOptions,
-  type WaitForTransactionOptions,
-  type UserTransactionResponse,
-  type MoveValue,
   type LedgerVersionArg,
+  MoveString,
+  type MoveValue,
+  MoveVector,
+  type UserTransactionResponse,
+  type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
+
 import { MODULE_ADDRESS } from "../../const";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import { type Option, type AccountAddressString } from "../types";
+import { type AccountAddressString, type Option } from "../types";
 
 export type AddAdminPayloadMoveArguments = {
   newAdmin: AccountAddress;

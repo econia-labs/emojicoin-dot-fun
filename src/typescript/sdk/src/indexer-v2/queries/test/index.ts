@@ -1,6 +1,8 @@
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import { LIMIT, ORDER_BY, type OrderBy } from "../../const";
+
 import { type AnyNumberString } from "../../../types";
+import { toAccountAddressString } from "../../../utils";
+import { LIMIT, ORDER_BY, type OrderBy } from "../../const";
 import {
   toChatEventModel,
   toLiquidityEventModel,
@@ -13,7 +15,6 @@ import { type MarketStateQueryArgs } from "../../types/common";
 import { TableName } from "../../types/json-types";
 import { postgrest } from "../client";
 import { queryHelper } from "../utils";
-import { toAccountAddressString } from "../../../utils";
 
 // These queries should not be used directly; they are used only for testing purposes.
 

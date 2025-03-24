@@ -1,42 +1,44 @@
 import {
-  AccountAddress,
-  Aptos,
   type Account,
-  type UserTransactionResponse,
+  AccountAddress,
   type AccountAddressInput,
-  type TypeTag,
-  type InputGenerateTransactionOptions,
-  type WaitForTransactionOptions,
+  Aptos,
   AptosConfig,
+  type InputGenerateTransactionOptions,
   type LedgerVersionArg,
+  type TypeTag,
+  type UserTransactionResponse,
+  type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
-import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
-import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
+
 import {
   Chat,
   ProvideLiquidity,
-  RemoveLiquidity,
   RegisterMarket,
+  RemoveLiquidity,
   Swap,
   SwapWithRewards,
 } from "@/contract-apis/emojicoin-dot-fun";
-import { type Events } from "../emojicoin_dot_fun/events";
-import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
-import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
-import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
-import { toChatMessageEntryFunctionArgs } from "../emoji_data";
-import customExpect from "./expect";
+
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
-import { waitFor } from "../utils";
-import { postgrest } from "../indexer-v2/queries";
-import { TableName } from "../indexer-v2/types/json-types";
-import { toMarketView, toRegistryView, toSwapEvent, type AnyNumberString } from "../types";
-import { toArenaCoinTypes } from "../markets/arena-utils";
+import { toChatMessageEntryFunctionArgs } from "../emoji_data";
+import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
+import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
 import { type ArenaEvents } from "../emojicoin_dot_fun/arena-events";
+import { type Events } from "../emojicoin_dot_fun/events";
+import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
 import {
   type ArenaEventsModels,
   getArenaEventsAsProcessorModels,
 } from "../indexer-v2/mini-processor/arena-events-to-models";
+import { postgrest } from "../indexer-v2/queries";
+import { TableName } from "../indexer-v2/types/json-types";
+import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
+import { toArenaCoinTypes } from "../markets/arena-utils";
+import { type AnyNumberString, toMarketView, toRegistryView, toSwapEvent } from "../types";
+import { waitFor } from "../utils";
+import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
+import customExpect from "./expect";
 
 const { expect, Expect } = customExpect;
 

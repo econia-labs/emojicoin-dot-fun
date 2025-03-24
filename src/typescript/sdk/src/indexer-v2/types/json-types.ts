@@ -2,12 +2,12 @@
 
 import { type SymbolEmoji } from "../../emoji_data";
 import type {
-  UnsizedDecimalString,
   AccountAddressString,
-  Uint128String,
   Uint64String,
+  Uint128String,
+  UnsizedDecimalString,
 } from "../../emojicoin_dot_fun/types";
-import { type JsonTypes, type Flatten } from "../../types";
+import { type Flatten, type JsonTypes } from "../../types";
 
 export type PeriodTypeFromDatabase =
   | "period_15s"

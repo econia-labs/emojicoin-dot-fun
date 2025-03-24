@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { Account, AccountAddress, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
+
 import { VERCEL } from "../../src/const";
 
 export const getTestPublisherPrivateKey = () => {

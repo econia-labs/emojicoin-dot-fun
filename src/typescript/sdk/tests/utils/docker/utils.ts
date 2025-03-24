@@ -1,10 +1,12 @@
+import { promisify } from "node:util";
+
 import {
   type ChildProcessWithoutNullStreams,
   exec,
   type ExecException,
   spawn,
 } from "child_process";
-import { promisify } from "node:util";
+
 import { type ContainerName, printLogs } from "./logs";
 
 export interface ContainerStatus {

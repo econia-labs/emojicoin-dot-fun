@@ -1,4 +1,4 @@
-import { type Uint64String, type AccountAddressString } from "../emojicoin_dot_fun";
+import { type AccountAddressString, type Uint64String } from "../emojicoin_dot_fun";
 import { type DatabaseStructType } from "../indexer-v2";
 import type JsonTypes from "./json-types";
 

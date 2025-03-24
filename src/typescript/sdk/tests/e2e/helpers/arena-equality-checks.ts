@@ -1,14 +1,15 @@
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+
+import { getEvents } from "../../../src";
 import {
-  type ArenaExitModel,
   type ArenaEnterModel,
+  type ArenaExitModel,
   type ArenaMeleeModel,
   type ArenaSwapModel,
   type ArenaVaultBalanceUpdateModel,
 } from "../../../src/indexer-v2";
-import { getEvents } from "../../../src";
-import { checkTuples, compareTransactionMetadata } from "./equality-checks";
 import { type JsonValue } from "../../../src/types/json-types";
+import { checkTuples, compareTransactionMetadata } from "./equality-checks";
 
 // Map keys and values to a readable string so that any test failures in jest
 // are clear in what value is actually failing the equality checks.

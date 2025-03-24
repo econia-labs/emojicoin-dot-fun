@@ -1,12 +1,12 @@
 /* eslint-disable import/no-unused-modules */
 import {
+  AccountAddress,
+  type AccountAddressInput,
   Aptos,
   type AptosConfig,
-  type AccountAddressInput,
-  type HexInput,
-  AccountAddress,
-  Hex,
   DeriveScheme,
+  Hex,
+  type HexInput,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
 

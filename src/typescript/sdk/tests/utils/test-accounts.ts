@@ -1,4 +1,5 @@
 import { Account, type Ed25519Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
+
 import testAccountData from "./test-accounts.json";
 
 export type FundedAddress = keyof typeof testAccountData;
