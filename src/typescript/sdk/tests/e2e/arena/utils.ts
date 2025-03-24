@@ -70,7 +70,7 @@ export const waitUntilCurrentMeleeEnds = async () => {
   return res;
 };
 
-export const ONE_MINUTE_MICROSECONDS = 60n * 1000n * 1000n;
+const ONE_MINUTE_MICROSECONDS = 60n * 1000n * 1000n;
 export const ONE_SECOND_MICROSECONDS = 1000n * 1000n;
 
 /**
