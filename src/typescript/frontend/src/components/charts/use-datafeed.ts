@@ -1,11 +1,12 @@
-import { isNonArenaPeriod, periodEnumToRawDuration } from "@sdk/const";
-import type { Bar, IBasicDataFeed } from "@static/charting_library";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { decodeSymbolsForChart, isArenaChartSymbol, parseSymbolWithParams } from "lib/chart-utils";
 import { useRouter } from "next/navigation";
 import path from "path";
 import { useMemo } from "react";
 import { ROUTES } from "router/routes";
+
+import { isNonArenaPeriod, periodEnumToRawDuration } from "@/sdk/const";
+import type { Bar, IBasicDataFeed } from "@/static/charting_library";
 
 import { ResolutionStringToPeriod } from "./const";
 import {

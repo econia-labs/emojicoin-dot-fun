@@ -1,7 +1,8 @@
-import { getRandomSymbolEmoji } from "@sdk/emoji_data";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
 import { Emoji } from "utils/emoji";
+
+import { getRandomSymbolEmoji } from "@/sdk/emoji_data";
 
 export const AnimatedEmojiCircle = ({
   numEmojis = 14,

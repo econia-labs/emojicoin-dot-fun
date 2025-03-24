@@ -1,12 +1,13 @@
-import { NON_ARENA_PERIODS, Period, periodEnumToRawDuration } from "@sdk/const";
+import type { WritableDraft } from "immer";
+
+import { NON_ARENA_PERIODS, Period, periodEnumToRawDuration } from "@/sdk/const";
 import type {
   EventModelWithMarket,
   PeriodicStateEventModel,
   SwapEventModel,
-} from "@sdk/indexer-v2/types";
-import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
-import type { WritableDraft } from "immer";
+} from "@/sdk/indexer-v2/types";
+import { getPeriodStartTimeFromTime } from "@/sdk/utils";
+import { q64ToBig, toNominal } from "@/sdk/utils/nominal-price";
 
 import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } from "../utils";
 import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";

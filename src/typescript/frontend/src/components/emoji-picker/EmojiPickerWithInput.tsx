@@ -1,9 +1,6 @@
 import "./triangle.css";
 
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { Flex } from "@containers";
-import ClosePixelated from "@icons/ClosePixelated";
-import { getEmojisInString } from "@sdk/emoji_data";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { InputGroup, Textarea } from "components/inputs";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
@@ -16,6 +13,10 @@ import { cn } from "lib/utils/class-name";
 import React, { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { isDisallowedEventKey } from "utils";
+
+import { Flex } from "@/containers";
+import ClosePixelated from "@/icons/ClosePixelated";
+import { getEmojisInString } from "@/sdk/emoji_data";
 
 import { variants } from "./animation-variants";
 import { MarketValidityIndicator } from "./ColoredBytesIndicator";

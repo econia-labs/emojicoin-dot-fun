@@ -1,11 +1,12 @@
 import { AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { cache } from "react";
+
 import {
   getAptosClient,
   isValidAptosName,
   removeLeadingZeros,
   type ValidAptosName,
-} from "@sdk/utils";
-import { cache } from "react";
+} from "@/sdk/utils";
 
 const INVALID_INPUT_RESULT = {
   address: undefined,

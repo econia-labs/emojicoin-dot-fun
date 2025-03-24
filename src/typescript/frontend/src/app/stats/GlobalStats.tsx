@@ -1,12 +1,13 @@
-import AptosIconBlack from "@icons/AptosBlack";
-import { ONE_APT_BIGINT } from "@sdk/const";
-import { compareBigInt, compareNumber, sum } from "@sdk/utils";
-import type { AnyNumberString, Types } from "@sdk-types";
 import Big from "big.js";
 import { MS_IN_ONE_DAY } from "components/charts/const";
 import { cn } from "lib/utils/class-name";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { useMemo } from "react";
+
+import AptosIconBlack from "@/icons/AptosBlack";
+import { ONE_APT_BIGINT } from "@/sdk/const";
+import { compareBigInt, compareNumber, sum } from "@/sdk/utils";
+import type { AnyNumberString, Types } from "@/sdk-types";
 
 import type { StatsPageProps } from "./StatsPage";
 

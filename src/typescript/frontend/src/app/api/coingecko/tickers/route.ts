@@ -1,10 +1,11 @@
-import { APTOS_COIN_TYPE_TAG } from "@sdk/const";
-import { postgrest } from "@sdk/indexer-v2/queries/client";
-import { TableName } from "@sdk/indexer-v2/types";
-import { toNominal, toNominalPrice } from "@sdk/utils";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
+
+import { APTOS_COIN_TYPE_TAG } from "@/sdk/const";
+import { postgrest } from "@/sdk/indexer-v2/queries/client";
+import { TableName } from "@/sdk/indexer-v2/types";
+import { toNominal, toNominalPrice } from "@/sdk/utils";
 
 import { estimateLiquidityInUSD } from "./utils";
 

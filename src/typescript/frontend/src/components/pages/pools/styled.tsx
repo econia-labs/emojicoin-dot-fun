@@ -1,5 +1,6 @@
-import { Flex } from "@containers";
 import styled from "styled-components";
+
+import { Flex } from "@/containers";
 
 export const StyledPoolsPage = styled.div`
   display: flex;

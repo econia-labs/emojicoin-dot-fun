@@ -1,13 +1,5 @@
 // cspell:word timespan
 
-import type { ArenaPeriod } from "@sdk/const";
-import {
-  type ArenaCandlestickModel,
-  fetchArenaCandlesticksSince,
-  fetchArenaInfoByMeleeID,
-} from "@sdk/indexer-v2";
-import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
-import type { AnyNumberString } from "@sdk-types";
 import {
   getCachedLatestProcessedEmojicoinTimestamp,
   getPeriodDurationSeconds,
@@ -21,6 +13,15 @@ import {
 } from "app/api/candlesticks/utils";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
+
+import type { ArenaPeriod } from "@/sdk/const";
+import {
+  type ArenaCandlestickModel,
+  fetchArenaCandlesticksSince,
+  fetchArenaInfoByMeleeID,
+} from "@/sdk/indexer-v2";
+import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
+import type { AnyNumberString } from "@/sdk-types";
 
 import type { ArenaCandlesticksSearchParams } from "./search-params-schema";
 

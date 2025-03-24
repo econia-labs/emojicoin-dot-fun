@@ -1,7 +1,8 @@
-import type { AnyEmojiName } from "@sdk/emoji_data/types";
 import type { MouseEventHandler } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+
+import type { AnyEmojiName } from "@/sdk/emoji_data/types";
 
 import Popup from "./popup";
 

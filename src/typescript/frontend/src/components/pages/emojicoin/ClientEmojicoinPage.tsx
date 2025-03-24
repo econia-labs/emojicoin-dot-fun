@@ -1,7 +1,5 @@
 "use client";
 
-import { Box } from "@containers";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { Text } from "components";
 import Carousel from "components/carousel";
 import { useEventStore } from "context/event-store-context";
@@ -14,6 +12,8 @@ import { ROUTES } from "router/routes";
 import { darkColors } from "theme";
 
 import type { SubscribableBrokerEvents } from "@/broker/types";
+import { Box } from "@/containers";
+import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
 import { marketToLatestBars } from "@/store/event/candlestick-bars";
 
 import DesktopGrid from "./components/desktop-grid";

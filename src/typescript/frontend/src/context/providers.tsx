@@ -8,7 +8,6 @@ import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
-import { getAptosApiKey } from "@sdk/const";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Footer from "components/footer";
 import { GeoblockedBanner } from "components/geoblocking";
@@ -26,6 +25,8 @@ import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
 import StyledToaster from "styles/StyledToaster";
 import { completePickerData } from "utils/picker-data/complete-picker-data";
+
+import { getAptosApiKey } from "@/sdk/const";
 
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import ContentWrapper from "./ContentWrapper";

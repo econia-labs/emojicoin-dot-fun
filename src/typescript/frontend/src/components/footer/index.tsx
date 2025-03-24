@@ -1,12 +1,13 @@
 "use client";
 
-import { Container, Flex, FlexGap } from "@containers";
 import LogoIcon from "components/svg/icons/LogoIcon";
 import Text from "components/text";
 import { LINKS } from "lib/env";
 import Link from "next/link";
 import React from "react";
 import { ROUTES } from "router/routes";
+
+import { Container, Flex, FlexGap } from "@/containers";
 
 import { SocialLinks } from "./components/social-links";
 import { StyledClickItem, StyledContainer, StyledSocialWrapper } from "./styled";

@@ -4,7 +4,6 @@ import {
   partitionWallets,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import EmojicoinLogo from "@icons/EmojicoinLogo";
 import { BaseModal } from "components/modal/BaseModal";
 import { Arrow } from "components/svg";
 import { DEFAULT_TOAST_CONFIG } from "const";
@@ -12,6 +11,8 @@ import { isSupportedWallet, WalletItem, walletSort } from "context/wallet-contex
 import { motion, type MotionProps, type PanInfo } from "framer-motion";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { toast } from "react-toastify";
+
+import EmojicoinLogo from "@/icons/EmojicoinLogo";
 
 import { AptosConnectWalletRow } from "./AptosConnectWalletRow";
 import LearnMoreSlideshow, { SLIDE_INDICES } from "./LearnMoreSlideshow";

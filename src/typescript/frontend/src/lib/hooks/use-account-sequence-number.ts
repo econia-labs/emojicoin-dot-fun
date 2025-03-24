@@ -1,8 +1,9 @@
 import type { AccountAddressInput, Aptos } from "@aptos-labs/ts-sdk";
 import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import { getAptosClient } from "@sdk/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
+
+import { getAptosClient } from "@/sdk/utils";
 
 import { withResponseError } from "./queries/client";
 

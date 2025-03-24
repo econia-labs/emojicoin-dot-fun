@@ -1,12 +1,13 @@
-import type { DatabaseModels } from "@sdk/indexer-v2/types";
-import { calculateCirculatingSupply, calculateCurvePrice } from "@sdk/markets";
-import { toNominal, toNominalPrice } from "@sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { EXTERNAL_LINK_PROPS } from "components/link/const";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { PriceDelta } from "components/price-feed/inner";
 import { useCallback, useMemo } from "react";
 import { ROUTES } from "router/routes";
+
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
+import { calculateCirculatingSupply, calculateCurvePrice } from "@/sdk/markets";
+import { toNominal, toNominalPrice } from "@/sdk/utils";
 
 import { MiniBondingCurveProgress } from "./MiniBondingCurveProgress";
 

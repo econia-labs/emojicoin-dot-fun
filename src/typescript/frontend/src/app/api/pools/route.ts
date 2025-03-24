@@ -1,7 +1,8 @@
-import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
-import { getValidSortByForPoolsPage } from "@sdk/indexer-v2/queries/query-params";
 import { handleEmptySearchBytes, safeParsePageWithDefault } from "lib/routes/home-page-params";
 import { unstable_cache } from "next/cache";
+
+import { symbolBytesToEmojis } from "@/sdk/emoji_data/utils";
+import { getValidSortByForPoolsPage } from "@/sdk/indexer-v2/queries/query-params";
 
 import { getPoolData } from "./getPoolDataQuery";
 

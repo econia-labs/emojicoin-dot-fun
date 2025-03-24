@@ -1,7 +1,8 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
-import ClosePixelated from "@icons/ClosePixelated";
 import { Arrow } from "components/svg";
 import React, { Fragment, type PropsWithChildren } from "react";
+
+import ClosePixelated from "@/icons/ClosePixelated";
 
 export const BaseModal: React.FC<
   PropsWithChildren<{

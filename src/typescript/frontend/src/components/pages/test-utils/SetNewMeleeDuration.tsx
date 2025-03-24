@@ -1,7 +1,6 @@
 "use client";
 
 import { Network } from "@aptos-labs/ts-sdk";
-import { isNumberInConstruction } from "@sdk/utils";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { cn } from "lib/utils/class-name";
 import { useState } from "react";
@@ -12,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { successfulTransactionToast } from "@/components/wallet/toasts";
 import { EmojicoinArena } from "@/contract-apis";
+import { isNumberInConstruction } from "@/sdk/utils";
 
 import { getLocalPublisher } from "./local-publisher";
 

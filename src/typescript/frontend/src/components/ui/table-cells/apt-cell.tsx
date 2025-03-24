@@ -1,6 +1,7 @@
-import AptosIconBlack from "@icons/AptosBlack";
 import { FormattedNumber } from "components/FormattedNumber";
 import type { FormatNumberStringProps } from "lib/utils/format-number-string";
+
+import AptosIconBlack from "@/icons/AptosBlack";
 
 export const AptCell = (props: FormatNumberStringProps & { scramble?: boolean }) => {
   return (

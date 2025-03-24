@@ -1,7 +1,5 @@
 "use client";
 
-import type { DatabaseModels } from "@sdk/indexer-v2/types";
-import type { Types } from "@sdk-types";
 import {
   Select,
   SelectContent,
@@ -12,6 +10,9 @@ import {
 import { useInView } from "framer-motion";
 import React, { useRef, useState } from "react";
 import { useDebounce } from "react-use";
+
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
+import type { Types } from "@/sdk-types";
 
 import { ClientTable } from "./ClientTable";
 import { GlobalStats } from "./GlobalStats";

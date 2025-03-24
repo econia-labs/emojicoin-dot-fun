@@ -1,7 +1,5 @@
 "use client";
 
-import type { SymbolEmoji } from "@sdk/emoji_data";
-import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { cn } from "lib/utils/class-name";
 import { useCallback, useMemo, useState } from "react";
@@ -12,6 +10,8 @@ import { Emoji } from "utils/emoji";
 import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import type { SymbolEmoji } from "@/sdk/emoji_data";
+import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 
 import { useFetchSymbol } from "./use-market-address-view";
 

@@ -2,10 +2,6 @@
 // cspell:word couldn
 
 import { default as Picker } from "@emoji-mart/react";
-import RoundButton from "@icons/Minimize";
-import { MAX_SYMBOL_LENGTH } from "@sdk/const";
-import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
-import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import {
   type HTMLAttributes,
@@ -19,6 +15,11 @@ import { isIOS, isMacOs } from "react-device-detect";
 import { notoColorEmoji } from "styles/fonts";
 import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
+
+import RoundButton from "@/icons/Minimize";
+import { MAX_SYMBOL_LENGTH } from "@/sdk/const";
+import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@/sdk/emoji_data";
+import { sumBytes } from "@/sdk/utils/sum-emoji-bytes";
 
 import type { EmojiMartData, EmojiSelectorData } from "./types";
 

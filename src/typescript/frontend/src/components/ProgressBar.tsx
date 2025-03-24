@@ -1,7 +1,8 @@
-import BondingCurveArrow from "@icons/BondingCurveArrow";
 import React from "react";
 import { emoji } from "utils";
 import { EmojiAsImage } from "utils/emoji";
+
+import BondingCurveArrow from "@/icons/BondingCurveArrow";
 
 const ProgressBar = ({ length, position }: { length: number; position: number }) => {
   const aspectRatio = (115 / 30) * length;

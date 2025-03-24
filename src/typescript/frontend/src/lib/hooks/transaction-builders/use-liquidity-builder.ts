@@ -1,8 +1,8 @@
-import { toCoinTypesForEntry } from "@sdk/markets";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { ProvideLiquidity, RemoveLiquidity } from "@/contract-apis";
+import { toCoinTypesForEntry } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 

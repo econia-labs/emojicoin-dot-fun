@@ -16,9 +16,10 @@
  // }
  **/
 
-import { getProcessorStatus } from "@sdk/indexer-v2/queries";
-import { getAptosClient } from "@sdk/utils/aptos-client";
 import { type NextRequest, NextResponse } from "next/server";
+
+import { getProcessorStatus } from "@/sdk/indexer-v2/queries";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
 
 /**
  * - `blockTimestamp` should be a UNIX timestamp, **not** including milliseconds

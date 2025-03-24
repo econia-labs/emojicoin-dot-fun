@@ -1,6 +1,5 @@
 "use client";
 
-import type { DatabaseModels } from "@sdk/indexer-v2/types";
 import Carousel from "components/carousel";
 import { FormattedNumber } from "components/FormattedNumber";
 import { PriceColors } from "components/misc/ColoredPriceDisplay";
@@ -10,6 +9,8 @@ import Link from "next/link";
 import { useMemo } from "react";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import { Emoji } from "utils/emoji";
+
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
 
 export const PriceDelta = ({ delta, className = "" }: { delta: number; className?: string }) => {
   const { prefix, suffix } = useMemo(

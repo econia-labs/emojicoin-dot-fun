@@ -1,5 +1,4 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { toNominal } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useSwapEventsQuery";
@@ -9,6 +8,8 @@ import { TimeCell } from "components/ui/table-cells/time-cell";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
+
+import { toNominal } from "@/sdk/utils";
 
 import type { TradeHistoryProps } from "../../types";
 

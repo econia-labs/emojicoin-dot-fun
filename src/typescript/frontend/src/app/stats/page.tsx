@@ -1,11 +1,10 @@
-import { ORDER_BY } from "@sdk/indexer-v2/const";
-import { toPriceFeed } from "@sdk/indexer-v2/types";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import { compareNumber, getAptosClient } from "@sdk/utils";
-import { toRegistryView } from "@sdk-types";
-
 import { RegistryView } from "@/contract-apis";
 import { fetchMarkets, fetchPriceFeedWithMarketState } from "@/queries/home";
+import { ORDER_BY } from "@/sdk/indexer-v2/const";
+import { toPriceFeed } from "@/sdk/indexer-v2/types";
+import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
+import { compareNumber, getAptosClient } from "@/sdk/utils";
+import { toRegistryView } from "@/sdk-types";
 
 import StatsPageComponent from "./StatsPage";
 

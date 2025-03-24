@@ -1,7 +1,4 @@
 import { isUserTransactionResponse, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { ARENA_MODULE_ADDRESS } from "@sdk/const";
-import type { ArenaPositionModel, MarketStateModel } from "@sdk/indexer-v2/types";
-import { q64ToBig } from "@sdk/utils";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
@@ -18,6 +15,10 @@ import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-ex
 import React, { type PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { emoji } from "utils";
 import { GlowingEmoji } from "utils/emoji";
+
+import { ARENA_MODULE_ADDRESS } from "@/sdk/const";
+import type { ArenaPositionModel, MarketStateModel } from "@/sdk/indexer-v2/types";
+import { q64ToBig } from "@/sdk/utils";
 
 import { EmojiTitle, lockedTernary, marketTernary } from "../utils";
 

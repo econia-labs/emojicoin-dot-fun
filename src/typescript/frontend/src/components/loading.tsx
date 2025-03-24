@@ -1,11 +1,12 @@
 "use client";
 // cspell:word unpathify
 
-import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@sdk/emoji_data";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import { Emoji } from "utils/emoji";
 import { EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE } from "utils/pathname-helpers";
+
+import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@/sdk/emoji_data";
 
 import AnimatedEmojiCircle from "./pages/launch-emojicoin/animated-emoji-circle";
 

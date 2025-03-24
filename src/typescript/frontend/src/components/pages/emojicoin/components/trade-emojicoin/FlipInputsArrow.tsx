@@ -1,5 +1,6 @@
-import BidirectionalArrowIcon from "@icons/BidirectionalArrow";
 import { useState } from "react";
+
+import BidirectionalArrowIcon from "@/icons/BidirectionalArrow";
 
 const arrowWrapper = `
   flex border border-solid border-dark-gray radii-circle p-[12px] justify-center items-center

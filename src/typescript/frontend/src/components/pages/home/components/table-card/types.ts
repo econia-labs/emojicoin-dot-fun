@@ -1,5 +1,6 @@
-import type { SymbolEmojiData } from "@sdk/emoji_data";
 import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
+
+import type { SymbolEmojiData } from "@/sdk/emoji_data";
 
 export type TableCardProps = {
   index: number;

@@ -1,8 +1,5 @@
 "use client";
 
-import useEvent from "@hooks/use-event";
-import { encodeEmojis, symbolBytesToEmojis } from "@sdk/emoji_data";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import type { HomePageProps } from "app/home/HomePage";
 import SearchBar from "components/inputs/search-bar";
 import Text from "components/text";
@@ -16,6 +13,10 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
+
+import useEvent from "@/hooks/use-event";
+import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import { EMOJI_GRID_ITEM_WIDTH } from "../const";
 import { LiveClientGrid } from "./AnimatedClientGrid";

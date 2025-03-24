@@ -73,22 +73,23 @@
  // }
  **/
 
-import { DECIMALS } from "@sdk/const";
+import { toCoinDecimalString } from "lib/utils/decimals";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { DECIMALS } from "@/sdk/const";
 import {
   fetchLiquidityEventsByBlock,
   fetchSwapEventsByBlock,
-} from "@sdk/indexer-v2/queries/app/dexscreener";
+} from "@/sdk/indexer-v2/queries/app/dexscreener";
 import {
   isLiquidityEventModel,
   type toLiquidityEventModel,
   type toSwapEventModel,
-} from "@sdk/indexer-v2/types";
-import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
-import { compareBigInt } from "@sdk/utils/compare-bigint";
-import type { XOR } from "@sdk/utils/utility-types";
-import type { Flatten } from "@sdk-types";
-import { toCoinDecimalString } from "lib/utils/decimals";
-import { type NextRequest, NextResponse } from "next/server";
+} from "@/sdk/indexer-v2/types";
+import { calculateCurvePrice, calculateRealReserves } from "@/sdk/markets";
+import { compareBigInt } from "@/sdk/utils/compare-bigint";
+import type { XOR } from "@/sdk/utils/utility-types";
+import type { Flatten } from "@/sdk-types";
 
 import type { Block } from "../latest-block/route";
 import { symbolEmojisToPairId } from "../util";
