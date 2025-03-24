@@ -248,7 +248,7 @@ const MeleeBreakdownInner = ({
   );
 };
 
-const CurrentMeleeBreakdown = ({
+function CurrentMeleeBreakdown({
   melee,
   market0,
   market1,
@@ -260,7 +260,7 @@ const CurrentMeleeBreakdown = ({
   market1: MarketStateModel;
   historyHidden: boolean;
   close: () => void;
-}) => {
+}) {
   const emojicoin0BalanceInApt = q64ToBig(market0.lastSwap.avgExecutionPriceQ64).mul(
     melee.emojicoin0Balance.toString()
   );
@@ -287,9 +287,9 @@ const CurrentMeleeBreakdown = ({
       {...{ historyHidden, pnl, lastHeld, close }}
     />
   );
-};
+}
 
-const HistoricMeleeBreakdown = ({
+function HistoricMeleeBreakdown({
   melee,
   historyHidden,
   close,
@@ -297,7 +297,7 @@ const HistoricMeleeBreakdown = ({
   melee: ArenaLeaderboardHistoryWithArenaInfoModel;
   historyHidden: boolean;
   close: () => void;
-}) => {
+}) {
   const lastHeld =
     melee.lastExit0 || melee.emojicoin0Balance > 0
       ? melee.emojicoin0Symbols.join("")
@@ -315,7 +315,7 @@ const HistoricMeleeBreakdown = ({
       {...{ historyHidden, pnl, lastHeld, close }}
     />
   );
-};
+}
 
 const MeleeBreakdown = ({
   selectedRow,
@@ -526,7 +526,7 @@ const Inner: React.FC<
       >
         {historyHidden ? (
           <div
-            className="text-ec-blue cursor-pointer h-[100%] bg-dark-gray/25 text-light-gray grid place-items-center"
+            className="text-light-gray cursor-pointer h-[100%] bg-dark-gray/25 grid place-items-center"
             style={{
               gridRow: "2",
               gridColumn: "1",
