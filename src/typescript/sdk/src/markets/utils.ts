@@ -128,11 +128,6 @@ export const getEmojicoinData = (
   };
 };
 
-export function isRegistrationGracePeriodOver(flag: Types["RegistrantGracePeriodFlag"]): boolean {
-  const now = BigInt(new Date().getTime()) * 1000n;
-  return now - GRACE_PERIOD_TIME > flag.marketRegistrationTime;
-}
-
 /**
  * Fetches the market grace period from the registry resource based on the market `symbol` input.
  *
@@ -224,6 +219,12 @@ export async function getRegistrationGracePeriodFlag(args: {
     };
   }
 }
+
+export function isRegistrationGracePeriodOver(flag: Types["RegistrantGracePeriodFlag"]): boolean {
+  const now = BigInt(new Date().getTime()) * 1000n;
+  return now - GRACE_PERIOD_TIME > flag.marketRegistrationTime;
+}
+
 
 export const registerMarketAndGetEmojicoinInfo = async (args: {
   aptos: Aptos | AptosConfig;
