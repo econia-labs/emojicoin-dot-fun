@@ -23,6 +23,7 @@ const expanded = expandRoutes({
     trending: _,
   },
   arena: _,
+  bridge: _,
   cult: _,
   dev: {
     metadata: _,
