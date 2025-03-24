@@ -173,9 +173,9 @@ export class DockerTestHarness {
   }
 
   static async waitForMigrationsToComplete(): Promise<boolean> {
-    // Because `global-setup.ts` imports this file, and we have `server-only` for queries, we must
+    // Because `global-setup.js` imports this file, and we have `server-only` for queries, we must
     // write the query here to avoid getting an error. `--react-conditions=server-only` does not
-    // fix the issue, because it seems that `global-setup.ts` does not run with those conditions.
+    // fix the issue, because it seems that `global-setup.js` does not run with those conditions.
     const getLatestVersion = async () => {
       const url = new URL(TableName.ProcessorStatus, EMOJICOIN_INDEXER_URL);
       url.searchParams.set("select", "last_success_version");
