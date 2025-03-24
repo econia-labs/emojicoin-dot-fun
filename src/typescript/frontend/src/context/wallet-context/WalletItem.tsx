@@ -25,7 +25,7 @@ const IconProps = {
   className: "m-auto",
 };
 
-export const WALLET_ICON: { [key: string]: ReactElement } = {
+const WALLET_ICON: { [key: string]: ReactElement } = {
   "okx wallet": <OKXIcon {...IconProps} />,
   petra: <PetraIcon {...IconProps} />,
   "bitget wallet": <BitgetIcon {...IconProps} />,

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import styled from "styled-components";
 
-export const StyledNotFoundPage = styled(Page)`
+const StyledNotFoundPage = styled(Page)`
   min-height: 100dvh;
   display: flex;
   flex-direction: column;

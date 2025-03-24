@@ -38,4 +38,3 @@ const Image: React.FC<ImageProps> = ({
   );
 };
 
-export default Image;

@@ -2,7 +2,7 @@
 
 import { createContext, type PropsWithChildren, useContext } from "react";
 
-export const AptPriceContext = createContext<number | undefined>(undefined);
+const AptPriceContext = createContext<number | undefined>(undefined);
 
 export function AptPriceContextProvider({
   aptPrice,

@@ -6,7 +6,7 @@ import { getSelectorsByUserAgent } from "react-device-detect";
  *
  * @see {@link ReactDeviceDetect}
  */
-export const booleanUserAgentSelectors = {
+const booleanUserAgentSelectors = {
   isBrowser: null,
   isDesktop: null,
   isMobile: null,

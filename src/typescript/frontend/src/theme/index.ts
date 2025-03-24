@@ -12,9 +12,9 @@ import {
 } from "./types";
 
 export { appearanceAnimationMap, appearanceAnimationVariants, scaleAnimation } from "./animations";
-export { darkColors, lightColors } from "./colors";
-export { default as dark } from "./dark";
-export { default as light } from "./light";
+export { darkColors,  } from "./colors";
+;
+;
 
 export interface CustomTheme {
   siteWidth: number;

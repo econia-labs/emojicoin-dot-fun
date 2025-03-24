@@ -26,7 +26,7 @@ import { parseJSON } from "utils";
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
-export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
+const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>(DEFAULT_POOLS_SORT_BY);

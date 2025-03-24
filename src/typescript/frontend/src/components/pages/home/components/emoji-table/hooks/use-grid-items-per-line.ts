@@ -4,7 +4,7 @@ import { useWindowSize } from "react-use";
 import { EMOJI_GRID_ITEM_WIDTH } from "../../const";
 import { GRID_PADDING } from "../styled";
 
-export const MAX_ELEMENTS_PER_LINE = 7;
+const MAX_ELEMENTS_PER_LINE = 7;
 
 export const useGridRowLength = () => {
   const { width } = useWindowSize();

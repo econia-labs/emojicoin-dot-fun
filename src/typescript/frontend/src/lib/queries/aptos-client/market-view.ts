@@ -7,7 +7,7 @@ import { parseJSON, stringifyJSON } from "utils";
 
 import { MarketView } from "@/contract-apis/emojicoin-dot-fun";
 
-export const fetchContractMarketView = async (marketAddress: `0x${string}`) => {
+const fetchContractMarketView = async (marketAddress: `0x${string}`) => {
   const aptos = getAptosClient();
   const res = await MarketView.view({
     aptos,

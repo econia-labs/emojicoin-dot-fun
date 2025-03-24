@@ -25,20 +25,20 @@ import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData 
 
 export type SearchResult = Array<EmojiPickerSearchData>;
 
-export const search = async (value: string): Promise<SearchResult> => {
+const search = async (value: string): Promise<SearchResult> => {
   return await SearchIndex.search(value);
 };
 
 /**
  * Checks if an emoji-mart input is a valid symbol emoji.
  */
-export const isEmojiMartSymbolEmoji = (e?: EmojiMartData["emojis"][string]) =>
+const isEmojiMartSymbolEmoji = (e?: EmojiMartData["emojis"][string]) =>
   isSymbolEmoji(e?.skins[0].native ?? "");
 
 /**
  * * Checks if an emoji-mart input is a valid chat emoji.
  */
-export const isEmojiMartChatEmoji = (e?: EmojiMartData["emojis"][string]) =>
+const isEmojiMartChatEmoji = (e?: EmojiMartData["emojis"][string]) =>
   isValidChatMessageEmoji(e?.skins[0].native ?? "");
 
 export default function EmojiPicker(

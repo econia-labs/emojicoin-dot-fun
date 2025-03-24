@@ -5,7 +5,7 @@ import { type LayoutProps, type SpaceProps } from "styled-system";
 import { type Colors } from "theme/types";
 import { type PolymorphicComponentProps } from "types";
 
-export const variants = {
+const variants = {
   OUTLINE: "outline",
 } as const;
 

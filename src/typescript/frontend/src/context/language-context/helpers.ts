@@ -8,6 +8,6 @@ export const getLanguageCodeFromLocalStorage = () => {
   return readLocalStorageCache<string>("language") ?? EN.locale;
 };
 
-export const translatedTextIncludesVariable = (translatedText: string) => {
+const translatedTextIncludesVariable = (translatedText: string) => {
   return !!translatedText?.match(REGEX.includesVariableRegex);
 };

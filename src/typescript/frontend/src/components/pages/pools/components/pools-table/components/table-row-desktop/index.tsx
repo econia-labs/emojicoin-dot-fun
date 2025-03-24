@@ -17,10 +17,10 @@ const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
 
 // prettier-ignore
-export const getXPR = (x: number, tvlPerLpCoinGrowth: number) =>
+const getXPR = (x: number, tvlPerLpCoinGrowth: number) =>
   ((tvlPerLpCoinGrowth ** x) - 1) * 100;
 
-export const formatXPR = (time: number, bigDailyTvl: number) => {
+const formatXPR = (time: number, bigDailyTvl: number) => {
   if (bigDailyTvl === 0) {
     return <Emoji emojis={emoji("hourglass not done")} />;
   }

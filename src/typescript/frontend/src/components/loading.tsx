@@ -12,7 +12,7 @@ import AnimatedEmojiCircle from "./pages/launch-emojicoin/animated-emoji-circle"
 const unpathify = (pathEmojiName: string) =>
   SYMBOL_EMOJI_DATA.byName(pathEmojiName.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE));
 
-export const Loading = ({
+const Loading = ({
   emojis,
   numEmojis,
 }: {

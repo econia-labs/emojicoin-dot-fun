@@ -12,7 +12,7 @@ export const scales = {
   LG: "lg",
 } as const;
 
-export const variants = {
+const variants = {
   PRIMARY: "primary",
 } as const;
 

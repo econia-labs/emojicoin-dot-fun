@@ -41,10 +41,10 @@ DropdownSeparator.displayName = PrimitiveSeparator.displayName;
 export {
   DropdownArrow,
   DropdownContent,
-  DropdownGroup,
+  
   DropdownItem,
   DropdownMenu,
-  DropdownPortal,
-  DropdownSeparator,
+  
+  
   DropdownTrigger,
 };

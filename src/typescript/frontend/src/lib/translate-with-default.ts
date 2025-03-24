@@ -7,7 +7,7 @@ import fetchLocale from "./fetch-locale";
 // For server-side translation. It doesn't have all of the functionality
 // of the language context provider, but it will translate using the fetched
 // locale dictionary + English dictionary.
-export const translateWithDefault = async (text: string): Promise<string> => {
+const translateWithDefault = async (text: string): Promise<string> => {
   const languageCode = getLanguageCodeFromLocalStorage();
 
   const localeDictionary = await fetchLocale(languageCode);

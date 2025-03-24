@@ -5,7 +5,7 @@ import React from "react";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 
-export const EmojiMarketPageLink = ({
+const EmojiMarketPageLink = ({
   emojis,
   ...props
 }: { emojis: SymbolEmojiData[] } & PropsWithChildren) => (

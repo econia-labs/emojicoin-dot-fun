@@ -21,7 +21,7 @@ const WalletItemClassName =
   "transition-all hover:text-ec-blue hover:bg-[#0000000E] " +
   "text-black group";
 
-export const FirstSlide = ({
+const FirstSlide = ({
   slide,
   setOpen,
   increment,
