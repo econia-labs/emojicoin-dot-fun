@@ -99,15 +99,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
     [explorerLink]
   );
 
-  useHotkey(
-    "x",
-    "goto",
-    () => {
-      router.push(explorerLink);
-    },
-    {},
-    [explorerLink]
-  );
+  useHotkey("x", "goto", () => router.push(explorerLink), {}, [explorerLink]);
 
   return (
     <Box>

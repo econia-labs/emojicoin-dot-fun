@@ -197,6 +197,19 @@ export const generateRandomSymbol = () => {
 export const namesToEmojis = (...names: SymbolEmojiName[]) =>
   names.map((name) => SYMBOL_EMOJI_DATA.byStrictName(name).emoji);
 
+/**
+ * Convert {@link AnyEmoji} to SCN (standardized codepoint notation).
+ *
+ * `_` is used as a separator between codepoints.
+ *
+ * `+` is used as a separator between emojis.
+ *
+ *  The black cat emoji is composed from the three following codepoints: `U+1F408 U+200D U+2B1B`. It's SCN is `1f408_200d_2b1b`.
+ *
+ *  The moose emoji is composed from one codepoint: 1face.
+ *
+ *  The black cat moose symbol's SCN is `1f408_200d_2b1b+1face`.
+ */
 export function toCodePoint(emoji: AnyEmoji): string;
 export function toCodePoint(emoji: AnyEmoji[]): string;
 export function toCodePoint(emoji: AnyEmoji[] | AnyEmoji) {

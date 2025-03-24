@@ -1,12 +1,22 @@
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
-import { createContext, type DependencyList, type PropsWithChildren, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  type DependencyList,
+  type PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useUserSettings } from "./event-store-context";
 import { toast } from "react-toastify";
 
 type HotkeyMode = "*" | "cmd" | "goto" | null;
 
-export const HotkeysContext = createContext<{mode: HotkeyMode, setMode: (mode: HotkeyMode) => void} | null>(null);
+export const HotkeysContext = createContext<{
+  mode: HotkeyMode;
+  setMode: (mode: HotkeyMode) => void;
+} | null>(null);
 
 export const useHotkey = (
   key: string,
@@ -14,11 +24,11 @@ export const useHotkey = (
   action: () => void,
   ops: {
     modifiers?: {
-      ctrl?: boolean,
-      shift?: boolean,
-      alt?: boolean,
-    },
-    exitMode?: HotkeyMode
+      ctrl?: boolean;
+      shift?: boolean;
+      alt?: boolean;
+    };
+    exitMode?: HotkeyMode;
   },
   ...deps: DependencyList
 ) => {
@@ -43,13 +53,14 @@ export const useHotkey = (
     };
     document.addEventListener("keydown", fn);
     return () => document.removeEventListener("keydown", fn);
-  }, deps);
-}
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [devMode, key, ops, mode, action, context, ...deps]);
+};
 
 const DefaultHotkeys = ({ children }: PropsWithChildren) => {
   const router = useRouter();
-  useHotkey("p", null, () => {}, { modifiers: {ctrl: true}, exitMode: "cmd" }, [router]);
-  useHotkey("g", null, () => {}, { modifiers: {ctrl: true}, exitMode: "goto" }, [router]);
+  useHotkey("p", null, () => {}, { modifiers: { ctrl: true }, exitMode: "cmd" }, [router]);
+  useHotkey("g", null, () => {}, { modifiers: { ctrl: true }, exitMode: "goto" }, [router]);
   useHotkey("Escape", "*", () => {}, { exitMode: null }, [router]);
   useHotkey("h", "goto", () => router.push(ROUTES.home), {}, [router]);
   useHotkey("p", "goto", () => router.push(ROUTES.pools), {}, [router]);
@@ -57,7 +68,7 @@ const DefaultHotkeys = ({ children }: PropsWithChildren) => {
   useHotkey("c", "goto", () => router.push(ROUTES.cult), {}, [router]);
 
   return children;
-}
+};
 
 export function HotkeysContextProvider({ children }: PropsWithChildren) {
   const [mode, setMode] = useState<HotkeyMode>(null);
@@ -65,23 +76,24 @@ export function HotkeysContextProvider({ children }: PropsWithChildren) {
   const toggleDevMode = useUserSettings((s) => s.toggleDevMode);
   const devMode = useUserSettings((s) => s.devMode);
   useEffect(() => {
+    let timeouts: NodeJS.Timeout[] = [];
     const fn = (e: KeyboardEvent) => {
-      console.log(e.key)
       if (e.key === "d" && e.ctrlKey) {
         e.preventDefault();
         setDevModeCount((v) => v + 1);
-        setTimeout(() => {
-          setDevModeCount((v) => {
-            if (v > 0) {
-              return v - 1;
-            }
-            return 0;
-          });
+        const timeout = setTimeout(() => {
+          setDevModeCount((v) => Math.min(0, v - 1));
+          timeouts = timeouts.slice(1);
         }, 1300);
+        timeouts.push(timeout);
       }
     };
     document.addEventListener("keydown", fn);
-    return () => document.removeEventListener("keydown", fn);
+    return () => {
+      document.removeEventListener("keydown", fn);
+      timeouts.forEach(clearTimeout);
+      timeouts = [];
+    };
   }, []);
   useEffect(() => {
     if (devModeCount > 10) {
@@ -93,13 +105,13 @@ export function HotkeysContextProvider({ children }: PropsWithChildren) {
         toast("Dev mode enabled");
       }
     }
-  }, [devModeCount, setDevModeCount]);
+  }, [devModeCount, setDevModeCount, devMode, toggleDevMode]);
 
-  return <HotkeysContext.Provider value={{mode, setMode}}>
-    <DefaultHotkeys>
-      {children}
-    </DefaultHotkeys>
-  </HotkeysContext.Provider>;
+  return (
+    <HotkeysContext.Provider value={{ mode, setMode }}>
+      <DefaultHotkeys>{children}</DefaultHotkeys>
+    </HotkeysContext.Provider>
+  );
 }
 
 export default HotkeysContextProvider;
