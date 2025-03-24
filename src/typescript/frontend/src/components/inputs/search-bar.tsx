@@ -36,7 +36,7 @@ const Border = styled(Flex)`
   }
 `;
 
-export const SearchBar = () => {
+const SearchBar = () => {
   const setMode = useEmojiPicker((state) => state.setMode);
   useEffect(() => {
     setMode("search");

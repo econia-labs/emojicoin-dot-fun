@@ -42,7 +42,7 @@ const AnimatedSVG = ({ animateKey, slide }: { animateKey: number; slide: number 
   );
 };
 
-export const LearnMoreSlideshow = ({
+const LearnMoreSlideshow = ({
   slide,
   increment,
   decrement,

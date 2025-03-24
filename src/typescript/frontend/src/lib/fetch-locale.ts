@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-export const fetchLocale = cache(async (locale: string) => {
+const fetchLocale = cache(async (locale: string) => {
   try {
     const response = await fetch(`/locales/${locale}.json`);
 

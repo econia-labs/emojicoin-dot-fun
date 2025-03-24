@@ -2,7 +2,7 @@ import MobileMenuItem from "components/header/components/mobile-menu-item";
 import { type AnimationControls, motion } from "framer-motion";
 import type { ReactElement } from "react";
 
-export const AnimatedDropdownItem = ({
+const AnimatedDropdownItem = ({
   title,
   icon,
   onClick,

@@ -1,4 +1,4 @@
-export const FEATURE_FLAGS = {
+const FEATURE_FLAGS = {
   Arena: process.env.NEXT_PUBLIC_ARENA_ENABLED === "true",
 } as const;
 

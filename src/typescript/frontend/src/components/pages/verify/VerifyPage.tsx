@@ -15,7 +15,7 @@ import { useScramble } from "use-scramble";
 
 import { createSession } from "./session";
 
-export const ClientVerifyPage = () => {
+const ClientVerifyPage = () => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [verified, setVerified] = useState<boolean | null>(null);

@@ -96,7 +96,7 @@ const setInputHelper = ({
   };
 };
 
-export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
+const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
   createStore<EmojiPickerStore>()((set, get) => ({
     ...defaultValues,
     ...initial,

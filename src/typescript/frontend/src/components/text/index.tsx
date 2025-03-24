@@ -22,7 +22,7 @@ const wordBreak = ({ wordBreak }: ThemedProps) => {
   }
 };
 
-export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
+const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
   textScale,
 }))`
   color: ${({ theme, color }) => (color ? theme.colors[color] : theme.colors.white)};

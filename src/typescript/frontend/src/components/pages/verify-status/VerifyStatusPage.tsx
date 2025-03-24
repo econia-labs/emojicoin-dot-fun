@@ -20,7 +20,7 @@ const checkmarkOrX = (checkmark: boolean, className?: string) => (
   />
 );
 
-export const ClientVerifyPage = ({
+const ClientVerifyPage = ({
   country,
   region,
 }: {
