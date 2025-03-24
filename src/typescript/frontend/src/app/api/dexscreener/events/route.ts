@@ -84,6 +84,7 @@ import {
   type toSwapEventModel,
 } from "@sdk/indexer-v2/types";
 import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
+import { compareBigInt } from "@sdk/utils/compare-bigint";
 import type { XOR } from "@sdk/utils/utility-types";
 import type { Flatten } from "@sdk-types";
 import { toCoinDecimalString } from "lib/utils/decimals";
