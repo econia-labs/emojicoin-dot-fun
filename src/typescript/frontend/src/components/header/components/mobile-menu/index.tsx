@@ -47,6 +47,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     };
   }, [isOpen]);
 
+  const handleCloseSubMenu = useCallback(async () => {
+    setSubMenuOpen(false);
+    await borderControls.start({ opacity: 0 });
+    await subMenuControls.start({ height: 0 });
+  }, [subMenuControls, borderControls]);
+
   useEffect(() => {
     if (!isOpen) {
       handleCloseSubMenu();
@@ -65,12 +71,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     await handleCloseSubMenu();
     setIsOpen(false);
   };
-
-  const handleCloseSubMenu = useCallback(async () => {
-    setSubMenuOpen(false);
-    await borderControls.start({ opacity: 0 });
-    await subMenuControls.start({ height: 0 });
-  }, [subMenuControls, borderControls]);
 
   const subMenuOnClick = async () => {
     if (!account) {

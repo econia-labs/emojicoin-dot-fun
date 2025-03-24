@@ -13,6 +13,12 @@ export const safeParsePageWithDefault = (pageInput: unknown): number => {
   return result.success ? result.data : 1;
 };
 
+// Converts a bare `0x` and a `null` input to undefined. If it's already undefined, it remains so.
+// Otherwise, return the value.
+export const handleEmptySearchBytes = (searchBytes?: string | null) => {
+  return searchBytes === "0x" ? undefined : (searchBytes ?? undefined);
+};
+
 export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams | undefined) => {
   const {
     page: pageInput,
@@ -35,10 +41,4 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
     inBondingCurve,
     q,
   };
-};
-
-// Converts a bare `0x` and a `null` input to undefined. If it's already undefined, it remains so.
-// Otherwise, return the value.
-export const handleEmptySearchBytes = (searchBytes?: string | null) => {
-  return searchBytes === "0x" ? undefined : (searchBytes ?? undefined);
 };

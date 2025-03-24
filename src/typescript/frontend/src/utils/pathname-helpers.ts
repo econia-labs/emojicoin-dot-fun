@@ -17,13 +17,13 @@ export const cutLocaleFromRoute = (pathname: string) => {
   return pathname;
 };
 
-export const getLocaleFromRoute = (pathname: string) => {
+export function getLocaleFromRoute(pathname: string) {
   const maybeLanguageParam = pathname.split("/").filter((item) => !!item)[0];
   if (languageList.some((item) => item.locale === maybeLanguageParam)) {
     return maybeLanguageParam;
   }
   return "";
-};
+}
 
 export const removeTrailingSlashIfExists = (path: string) => {
   if (path.endsWith("/")) {
@@ -46,13 +46,6 @@ export const EMOJI_PATH_INTRA_SEGMENT_DELIMITER = "_";
 
 export const ONE_SPACE = " ";
 
-export const emojisToPath = (emojis: string[]) => {
-  const names = emojis
-    .map((x) => SYMBOL_EMOJI_DATA.byEmoji(x)?.name)
-    .filter((x) => typeof x !== "undefined") as string[];
-  return emojiNamesToPath(names);
-};
-
 export const emojiNamesToPath = (emojiNames: string[]) =>
   emojiNames
     .map((x) => encodeURIComponent(x.replaceAll(ONE_SPACE, EMOJI_PATH_INTRA_SEGMENT_DELIMITER)))
@@ -62,6 +55,13 @@ export const pathToEmojiNames = (path: string) =>
   decodeURIComponent(path)
     .split(EMOJI_PATH_DELIMITER)
     .map((n) => n.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE));
+
+export const emojisToPath = (emojis: string[]) => {
+  const names = emojis
+    .map((x) => SYMBOL_EMOJI_DATA.byEmoji(x)?.name)
+    .filter((x) => typeof x !== "undefined") as string[];
+  return emojiNamesToPath(names);
+};
 
 /**
  * Used to normalize a potential emojicoin market path by replacing emojis with their properly
