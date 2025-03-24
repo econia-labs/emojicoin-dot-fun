@@ -1,4 +1,4 @@
-import { periodToPeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
+import { periodToPeriodTypeFromBroker } from "@sdk/broker-v2/types";
 import {
   type BrokerEventModels,
   isChatEventModel,

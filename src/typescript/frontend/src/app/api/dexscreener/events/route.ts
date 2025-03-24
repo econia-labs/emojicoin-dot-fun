@@ -73,7 +73,6 @@
  // }
  **/
 
-import { compareBigInt, type Flatten } from "@econia-labs/emojicoin-sdk";
 import { DECIMALS } from "@sdk/const";
 import {
   fetchLiquidityEventsByBlock,
@@ -85,7 +84,9 @@ import {
   type toSwapEventModel,
 } from "@sdk/indexer-v2/types";
 import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
+import { compareBigInt } from "@sdk/utils";
 import { type XOR } from "@sdk/utils/utility-types";
+import { type Flatten } from "@sdk-types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { type NextRequest, NextResponse } from "next/server";
 

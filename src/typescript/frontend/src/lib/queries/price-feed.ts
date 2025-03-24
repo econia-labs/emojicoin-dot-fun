@@ -1,5 +1,5 @@
-import { SortMarketsBy } from "@econia-labs/emojicoin-sdk";
 import { ORDER_BY } from "@sdk/indexer-v2/const";
+import { SortMarketsBy } from "@sdk/indexer-v2/types";
 import { unstable_cache } from "next/cache";
 
 import { fetchPriceFeedWithMarketState } from "@/queries/home";

@@ -1,5 +1,5 @@
 // cspell:word datafeeds
-import { symbolToEmojis } from "@econia-labs/emojicoin-sdk";
+import { symbolToEmojis } from "@sdk/emoji_data/utils";
 import Loading from "components/loading";
 import Script from "next/script";
 import React, { Suspense, useMemo } from "react";
