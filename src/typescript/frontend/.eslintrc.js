@@ -27,7 +27,7 @@ module.exports = {
     "playwright.config.js",
     "postcss.config.js",
     "tailwind.config.js",
-    "jest.config.ts",
+    "jest.config.js",
     "public/static",
   ],
   parser: "@typescript-eslint/parser",
