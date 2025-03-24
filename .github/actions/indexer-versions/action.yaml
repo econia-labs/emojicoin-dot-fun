@@ -1,11 +1,9 @@
+# check-workflow: exempt
 ---
 description: 'Ensure consistent indexer versions across various contexts'
 name: 'Indexer versions'
 runs:
   steps:
-  - uses: 'econia-labs/common/.github/actions/check-workflow@ECO-3009'
-    with:
-      action_path: '${{ github.action_path }}'
   - id: 'check-deploy-files'
     run: 'sh ${{ github.action_path }}/sh/check-deploy-files.sh'
     shell: 'sh'

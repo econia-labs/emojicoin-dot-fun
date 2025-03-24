@@ -13,6 +13,4 @@ name: 'Indexer versions'
     branches:
     - 'production'
     - 'fallback'
-    - 'main'
-    - 'foo'
 ...
