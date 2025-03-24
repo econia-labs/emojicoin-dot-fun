@@ -1,7 +1,7 @@
 import type { EventModelWithMarket } from "@sdk/indexer-v2";
 import { parseJSON, stringifyJSON } from "utils";
 
-export const LOCAL_STORAGE_EXPIRATION_TIME = 1000 * 60; // 10 minutes.
+const LOCAL_STORAGE_EXPIRATION_TIME = 1000 * 60; // 10 minutes.
 
 export const LOCAL_STORAGE_EVENT_TYPES = [
   "swap",

@@ -1,7 +1,6 @@
 // cspell:word localstorage
 
 import { ArenaPeriod, Period } from "@sdk/const";
-import type { PeriodTypeFromBroker } from "@sdk/indexer-v2/types/json-types";
 import type {
   ChartingLibraryWidgetOptions,
   LanguageCode,
@@ -23,10 +22,10 @@ export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
   "1D",
 ] as ResolutionString[];
 
-export const PINK = hexToRgba(PINK_HEX);
-export const GREEN = hexToRgba(GREEN_HEX);
-export const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
-export const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
+const PINK = hexToRgba(PINK_HEX);
+const GREEN = hexToRgba(GREEN_HEX);
+const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
+const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
 export const ResolutionStringToPeriod: { [key: string]: Period | ArenaPeriod } = {
   "15S": ArenaPeriod.Period15S,
@@ -39,22 +38,11 @@ export const ResolutionStringToPeriod: { [key: string]: Period | ArenaPeriod } =
   "1D": Period.Period1D,
 };
 
-export const ResolutionStringToBrokerPeriod: { [key: string]: PeriodTypeFromBroker } = {
-  "15S": "FifteenSeconds",
-  "1": "OneMinute",
-  "5": "FiveMinutes",
-  "15": "FifteenMinutes",
-  "30": "ThirtyMinutes",
-  "60": "OneHour",
-  "240": "FourHours",
-  "1D": "OneDay",
-};
-
 export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 
 export const EXCHANGE_NAME = "emojicoin.fun";
 
-export const DEFAULT_RESOLUTION_STRING = "60" as ResolutionString;
+const DEFAULT_RESOLUTION_STRING = "60" as ResolutionString;
 
 export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = {
   library_path: `${CDN_URL}/charting_library/`,

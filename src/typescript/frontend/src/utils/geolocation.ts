@@ -3,7 +3,7 @@
 import { GEOBLOCKED, GEOBLOCKING_ENABLED } from "lib/server-env";
 import { headers } from "next/headers";
 
-export type Location = {
+type Location = {
   countryCode: string | null;
   regionCode: string | null;
 };

@@ -1,9 +1,7 @@
 import styled from "styled-components";
 import { space, typography } from "styled-system";
 
-import type { TextareaProps } from "./types";
-
-export const Textarea = styled.textarea<TextareaProps>`
+export const Textarea = styled.textarea`
   height: 45px;
   background-color: transparent;
   color: ${({ theme }) => theme.colors.white};

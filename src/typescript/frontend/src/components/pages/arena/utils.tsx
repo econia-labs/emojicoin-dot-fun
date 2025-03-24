@@ -36,7 +36,7 @@ export const Box = ({
   </div>
 );
 
-export const getFontMultiplier = (emojis: number) => {
+const getFontMultiplier = (emojis: number) => {
   return 1 - (emojis * 5) / 6 / 10;
 };
 

@@ -3,13 +3,13 @@ import { APTOS_NETWORK } from "lib/env";
 import { immer } from "zustand/middleware/immer";
 import { createStore } from "zustand/vanilla";
 
-export type ANSValue = { name: string | null; expiry: number };
-export type ANSMap = Map<string, ANSValue>;
-export type ANSPromiseMap = Map<string, Promise<void>>;
-export type NameState = {
+type ANSValue = { name: string | null; expiry: number };
+type ANSMap = Map<string, ANSValue>;
+type ANSPromiseMap = Map<string, Promise<void>>;
+type NameState = {
   names: ANSMap;
 };
-export type NameActions = {
+type NameActions = {
   /**
    * Resolves an ANS name for an address. If it's not in local storage, it will be fetched.
    *
@@ -20,13 +20,13 @@ export type NameActions = {
 };
 export type NameStore = NameState & NameActions;
 
-export const LOCALSTORAGE_ANS_KEY = `${APTOS_NETWORK}-ans-names`;
+const LOCALSTORAGE_ANS_KEY = `${APTOS_NETWORK}-ans-names`;
 // Cache resolved names for one week.
-export const ANS_CACHE_TIME = MS_IN_ONE_DAY * 7;
+const ANS_CACHE_TIME = MS_IN_ONE_DAY * 7;
 // Cache unresolved names for one day. Otherwise people who register new names wouldn't see them
 // get updated for a week.
-export const ANS_NULL_CACHE_TIME = MS_IN_ONE_DAY;
-export const MAX_ITEMS_IN_CACHE = 3000;
+const ANS_NULL_CACHE_TIME = MS_IN_ONE_DAY;
+const MAX_ITEMS_IN_CACHE = 3000;
 
 /**
  * Stores promises to requests.
@@ -46,7 +46,7 @@ function getRequestURL(address: string, isPrimary: boolean) {
  *
  * Removes outdated values by the way.
  */
-export function saveANSMap(map: ANSMap) {
+function saveANSMap(map: ANSMap) {
   const now = new Date().getTime();
   const notExpired = (entry: [string, ANSValue]) => entry[1].expiry > now;
 
@@ -61,7 +61,7 @@ export function saveANSMap(map: ANSMap) {
 }
 
 /** Loads the ANSMap from localStorage. */
-export function loadANSMap(): ANSMap {
+function loadANSMap(): ANSMap {
   const map = localStorage.getItem(LOCALSTORAGE_ANS_KEY);
   if (map) {
     return new Map(JSON.parse(map));
@@ -103,7 +103,7 @@ async function fetchANSName(address: string): Promise<string | null> {
   }
 }
 
-export const initializeEventStore = (): NameState => {
+const initializeEventStore = (): NameState => {
   if (typeof localStorage !== "undefined") {
     return { names: loadANSMap() };
   } else {
@@ -111,7 +111,7 @@ export const initializeEventStore = (): NameState => {
   }
 };
 
-export const defaultState: NameState = initializeEventStore();
+const defaultState: NameState = initializeEventStore();
 
 export const createNameStore = (initialState: NameState = defaultState) => {
   return createStore<NameStore>()(

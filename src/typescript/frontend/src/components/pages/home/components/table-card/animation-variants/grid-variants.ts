@@ -6,20 +6,14 @@ import type {
   SwapEventModel,
 } from "@sdk/indexer-v2/types";
 
-export const MAX_ELEMENTS_PER_LINE = 7;
 export const ANIMATION_DEBOUNCE_TIME = 1111;
 
-export const ANIMATION_DURATION = 0.3;
+const ANIMATION_DURATION = 0.3;
 export const LAYOUT_DURATION = 0.4;
-export const PORTAL_BACKWARDS_ANIMATION_DURATION = LAYOUT_DURATION * 1.5;
-export const PER_ROW_DELAY = 0.01;
+const PORTAL_BACKWARDS_ANIMATION_DURATION = LAYOUT_DURATION * 1.5;
+const PER_ROW_DELAY = 0.01;
 
-export const PORTAL_DURATION = LAYOUT_DURATION * 3;
 const INSERTION_DELAY = LAYOUT_DURATION * 0.5;
-
-// This isn't the longest animation ("initial" is), but for the purpose of updating the grid
-// with a debounced animation effect, it is. Revisit this if we change the animation times.
-export const TOTAL_ANIMATION_TIME = ANIMATION_DURATION;
 
 export type EmojicoinAnimationEvents =
   | SwapEventModel
@@ -86,7 +80,7 @@ export const tableCardVariants = {
   }),
 };
 
-export type TableCardVariants = keyof typeof tableCardVariants;
+type TableCardVariants = keyof typeof tableCardVariants;
 
 // Set the `symbol` <span> value to `variant` to view these variants in action and how they work.
 export const determineGridAnimationVariant = ({
@@ -146,19 +140,19 @@ export const determineGridAnimationVariant = ({
   };
 };
 
-export type GridCoordinateHistory = {
+type GridCoordinateHistory = {
   prev?: GridCoordinate;
   curr: GridCoordinate;
 };
 
-export type GridCoordinate = {
+type GridCoordinate = {
   row: number;
   col: number;
   index: number;
 };
 
-export const getRow = (index: number, rowLength: number) => Math.floor(index / rowLength);
-export const getColumn = (index: number, rowLength: number) => index % rowLength;
+const getRow = (index: number, rowLength: number) => Math.floor(index / rowLength);
+const getColumn = (index: number, rowLength: number) => index % rowLength;
 
 export const calculateGridData = ({
   index,
@@ -188,5 +182,3 @@ export const calculateGridData = ({
     prev,
   };
 };
-
-export default tableCardVariants;

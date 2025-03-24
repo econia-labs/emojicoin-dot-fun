@@ -7,10 +7,10 @@ import type { EventStore } from "@/store/event/types";
 
 import type { TableCardProps } from "../table-card/types";
 
-export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
+type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
 };
-export type PropsWithTimeAndIndex = TableCardProps & {
+type PropsWithTimeAndIndex = TableCardProps & {
   time: number;
   searchEmojisKey: string;
 };
@@ -30,7 +30,7 @@ export const marketDataToProps = (markets: HomePageProps["markets"]): PropsWithT
     staticVolume24H: m.dailyVolume,
   }));
 
-export const stateEventsToProps = (
+const stateEventsToProps = (
   firehose: EventStore["stateFirehose"],
   getMarket: EventStore["getMarket"],
   searchEmojis: string[]
@@ -57,7 +57,7 @@ export const stateEventsToProps = (
   });
 };
 
-export const deduplicateEventsByMarketID = (
+const deduplicateEventsByMarketID = (
   aggregate: PropsWithTime[]
 ): (PropsWithTime & { index: number })[] => {
   const marketIDs = new Set<number>();
@@ -77,7 +77,7 @@ export const deduplicateEventsByMarketID = (
 };
 
 // Sorts by time. This is specifically for the bump order sorting and deduplication.
-export const deduplicateAndSortEvents = (
+const deduplicateAndSortEvents = (
   initial: PropsWithTime[],
   appended: PropsWithTime[]
 ): (PropsWithTime & { index: number })[] => {

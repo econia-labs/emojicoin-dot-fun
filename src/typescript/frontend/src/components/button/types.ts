@@ -1,11 +1,10 @@
 import type { SvgProps } from "components/svg/types";
 import type { ElementType, PropsWithChildren, ReactNode } from "react";
-import type { DefaultTheme } from "styled-components";
 import type { LayoutProps, SpaceProps } from "styled-system";
 import type { Colors } from "theme/types";
 import type { PolymorphicComponentProps } from "types";
 
-export const variants = {
+const variants = {
   OUTLINE: "outline",
 } as const;
 
@@ -15,10 +14,10 @@ export const scales = {
   XLARGE: "xl",
 } as const;
 
-export type Scale = (typeof scales)[keyof typeof scales];
-export type Variant = (typeof variants)[keyof typeof variants];
+type Scale = (typeof scales)[keyof typeof scales];
+type Variant = (typeof variants)[keyof typeof variants];
 
-export interface BaseButtonProps
+interface BaseButtonProps
   extends LayoutProps,
     SpaceProps,
     PropsWithChildren<{
@@ -38,7 +37,3 @@ export type ButtonProps<P extends ElementType = "button"> = PolymorphicComponent
   P,
   BaseButtonProps
 >;
-
-export interface ThemedProps extends ButtonProps {
-  theme: DefaultTheme;
-}

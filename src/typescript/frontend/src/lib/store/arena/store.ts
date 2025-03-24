@@ -37,7 +37,7 @@ export type ArenaActions = {
   loadArenaInfoFromServer: (info: ArenaInfoModel) => void;
 };
 
-export const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
+const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
   swaps: [],
   enters: [],
   exits: [],

@@ -5,7 +5,7 @@ import { encodeEmojis, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import type { HomePageProps } from "app/home/HomePage";
 import SearchBar from "components/inputs/search-bar";
-import { Text } from "components/text";
+import Text from "components/text";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
@@ -33,7 +33,7 @@ import {
   StyledGrid,
 } from "./styled";
 
-export interface EmojiTableProps
+interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {

@@ -1,7 +1,7 @@
 import { Flex, FlexGap } from "@containers";
 import Info from "components/info";
 import { Arrows } from "components/svg";
-import { Text } from "components/text";
+import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import { useMatchBreakpoints } from "hooks";
 import React from "react";

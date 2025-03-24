@@ -138,12 +138,6 @@ Discord channel name for adding social links.
 
 - **Example**: \`"A link to a discord channel here."
 
-#### `REVALIDATION_TIME`
-
-A Next.js setting to determine some queries' revalidation length (in seconds).
-
-- **Example**: `"1"`
-
 #### `HASH_SEED`
 
 A private environment variable used to hash the user address and store it in a

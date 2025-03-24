@@ -3,7 +3,7 @@ import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { DropdownMenu, SingleSelect } from "components/selects";
 import type { Option } from "components/selects/types";
 import { Switcher } from "components/switcher";
-import { Text } from "components/text";
+import Text from "components/text";
 import { useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useMatchBreakpoints } from "hooks";
@@ -28,12 +28,12 @@ const options: Array<Option> = [
   // TODO: Add price..?
 ];
 
-export type FilterOptionsComponentProps = {
+type FilterOptionsComponentProps = {
   filter: SortMarketsBy;
   onChange: (value: SortMarketsBy) => void;
 };
 
-export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
+const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
   const selectedOption = options.find((x) => x.value === filter)!;
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();

@@ -1,6 +1,6 @@
 import { Box } from "@containers";
 import { type Scales, scales as inputScales } from "components/inputs/input/types";
-import { Text } from "components/text";
+import Text from "components/text";
 import styled, { css, type DefaultTheme } from "styled-components";
 
 import type {
@@ -10,7 +10,7 @@ import type {
   StyledInputGroupProps,
 } from "./types";
 
-export interface ThemedProps extends Pick<InputGroupProps, "variant"> {
+interface ThemedProps extends Pick<InputGroupProps, "variant"> {
   theme: DefaultTheme;
 }
 const getPadding = (scale: Scales, hasIcon: boolean) => {
@@ -28,7 +28,7 @@ const getPadding = (scale: Scales, hasIcon: boolean) => {
   }
 };
 
-export const variantStyles = ({ theme, variant }: ThemedProps) => {
+const variantStyles = ({ theme, variant }: ThemedProps) => {
   return {
     fantom: css`
       display: flex;

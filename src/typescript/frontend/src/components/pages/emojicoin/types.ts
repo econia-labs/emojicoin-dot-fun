@@ -6,9 +6,6 @@ import type { AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-bal
 
 import type { SymbolString } from "@/store/event/types";
 
-export interface WithVersion {
-  version: number;
-}
 type DataProps = MarketMetadataModel & {
   symbol: SymbolString;
   swaps: Array<DatabaseModels["swap_events"]>;

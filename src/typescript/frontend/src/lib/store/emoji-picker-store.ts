@@ -3,7 +3,7 @@ import { createStore } from "zustand";
 
 import { insertEmojiTextInputHelper, removeEmojiTextInputHelper } from "./emoji-picker-utils";
 
-export type EmojiPickerState = {
+type EmojiPickerState = {
   mode: "chat" | "register" | "search";
   emojis: AnyEmoji[];
   nativePicker: boolean;
@@ -24,7 +24,7 @@ export type EmojiPickerState = {
   registeredSymbolData: Array<SymbolEmojiData>;
 };
 
-export type EmojiPickerActions = {
+type EmojiPickerActions = {
   clear: () => void;
   setEmojis: (emojis: AnyEmoji[]) => void;
   setNativePicker: (value: boolean) => void;
@@ -54,7 +54,7 @@ const defaultValues: EmojiPickerState = {
   onClickOutside: (_e) => {},
 };
 
-export const setInputHelper = ({
+const setInputHelper = ({
   textAreaRef,
   emojis,
   selectionStart,
@@ -96,7 +96,7 @@ export const setInputHelper = ({
   };
 };
 
-export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
+const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
   createStore<EmojiPickerStore>()((set, get) => ({
     ...defaultValues,
     ...initial,

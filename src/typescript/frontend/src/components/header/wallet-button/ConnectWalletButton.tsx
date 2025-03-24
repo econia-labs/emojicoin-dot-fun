@@ -12,7 +12,7 @@ import { useScramble } from "use-scramble";
 
 import OuterConnectText from "./OuterConnectText";
 
-export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
+interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
   onClick?: () => void;
   arrow?: boolean;
@@ -23,7 +23,7 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
 
 const CONNECT_WALLET = "Connect Wallet";
 
-export const ButtonWithConnectWalletFallback = ({
+const ButtonWithConnectWalletFallback = ({
   mobile,
   children,
   className,

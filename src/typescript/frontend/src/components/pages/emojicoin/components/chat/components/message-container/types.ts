@@ -4,7 +4,7 @@ export type MessageContainerProps = {
   shouldAnimateAsInsertion?: boolean;
 };
 
-export type MessageType = {
+type MessageType = {
   sender: string;
   text: string;
   senderRank: string;

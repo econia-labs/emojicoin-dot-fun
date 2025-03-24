@@ -7,7 +7,6 @@ import { MAX_SYMBOL_LENGTH } from "@sdk/const";
 import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { SearchIndex } from "emoji-mart";
 import {
   type HTMLAttributes,
   type PointerEventHandler,
@@ -21,24 +20,18 @@ import { notoColorEmoji } from "styles/fonts";
 import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 
-import type { EmojiMartData, EmojiPickerSearchData, EmojiSelectorData } from "./types";
-
-export type SearchResult = Array<EmojiPickerSearchData>;
-
-export const search = async (value: string): Promise<SearchResult> => {
-  return await SearchIndex.search(value);
-};
+import type { EmojiMartData, EmojiSelectorData } from "./types";
 
 /**
  * Checks if an emoji-mart input is a valid symbol emoji.
  */
-export const isEmojiMartSymbolEmoji = (e?: EmojiMartData["emojis"][string]) =>
+const isEmojiMartSymbolEmoji = (e?: EmojiMartData["emojis"][string]) =>
   isSymbolEmoji(e?.skins[0].native ?? "");
 
 /**
  * * Checks if an emoji-mart input is a valid chat emoji.
  */
-export const isEmojiMartChatEmoji = (e?: EmojiMartData["emojis"][string]) =>
+const isEmojiMartChatEmoji = (e?: EmojiMartData["emojis"][string]) =>
   isValidChatMessageEmoji(e?.skins[0].native ?? "");
 
 export default function EmojiPicker(

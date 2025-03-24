@@ -12,7 +12,7 @@ import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } fro
 import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";
 import type { EventState, MarketEventStore, MarketStoreMetadata } from "./types";
 
-export const createInitialMarketState = (
+const createInitialMarketState = (
   marketMetadata: MarketStoreMetadata
 ): WritableDraft<MarketEventStore> => ({
   marketMetadata,

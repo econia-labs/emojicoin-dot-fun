@@ -4,7 +4,7 @@ import { flexbox, layout, opacity, space, typography } from "styled-system";
 import { fontWeights, textStyles } from "./theme";
 import type { scales, TextProps, ThemedProps } from "./types";
 
-export const getEllipsis = ({ ellipsis }: ThemedProps) => {
+const getEllipsis = ({ ellipsis }: ThemedProps) => {
   if (ellipsis) {
     return css`
       white-space: nowrap;
@@ -14,7 +14,7 @@ export const getEllipsis = ({ ellipsis }: ThemedProps) => {
   }
 };
 
-export const wordBreak = ({ wordBreak }: ThemedProps) => {
+const wordBreak = ({ wordBreak }: ThemedProps) => {
   if (wordBreak) {
     return css`
       word-break: ${wordBreak};
@@ -22,7 +22,7 @@ export const wordBreak = ({ wordBreak }: ThemedProps) => {
   }
 };
 
-export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
+const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
   textScale,
 }))`
   color: ${({ theme, color }) => (color ? theme.colors[color] : theme.colors.white)};
