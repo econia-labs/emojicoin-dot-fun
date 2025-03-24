@@ -12,6 +12,8 @@ export const useSubscriptionEventsHandlers = ({
 }: useSubscriptionEventsHandlersProps) => {
   const [visible, setVisible] = useState(isInitiallyOpened);
 
+  // TODO: Fix this mess.
+  /* eslint-disable @typescript-eslint/no-use-before-define */
   const debouncedHide = debounce((e) => {
     hideTooltip(e);
   }, hideTimeout);
@@ -39,6 +41,7 @@ export const useSubscriptionEventsHandlers = ({
     },
     [debouncedHide]
   );
+  /* eslint-enable @typescript-eslint/no-use-before-define */
 
   const toggleTooltip = useCallback(
     (e: Event) => {

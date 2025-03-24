@@ -144,7 +144,7 @@ export function useTransactionBuilderWithOptions<
   return builder;
 }
 
-const useIncrementingNonce = (intervalTime: number) => {
+function useIncrementingNonce(intervalTime: number) {
   const [nonce, setNonce] = useState<number>(0);
   useEffect(() => {
     const interval = setInterval(() => setNonce((n) => n + 1), intervalTime);
@@ -152,4 +152,4 @@ const useIncrementingNonce = (intervalTime: number) => {
   });
 
   return nonce;
-};
+}

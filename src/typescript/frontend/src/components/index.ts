@@ -13,5 +13,5 @@ export { default as Footer } from "./footer";
 export { default as Link } from "./link/component";
 export { StyledLink } from "./link/styled";
 export { default as Checkbox } from "./checkbox";
-export { SingleSelect, MultipleSelect } from "./selects";
+export { SingleSelect } from "./selects";
 export { Table, Th, Tr, EmptyTr, Td, ThInner, HeaderTr, TBody, TrWrapper } from "./table";

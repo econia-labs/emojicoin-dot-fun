@@ -54,9 +54,9 @@ export const useCalculateSwapPrice = ({
   return res;
 };
 
-const getReservesAndBondingCurveStateWithDefault = (
+function getReservesAndBondingCurveStateWithDefault(
   latestMarketState?: DatabaseModels["market_latest_state_event"]
-) => {
+) {
   if (latestMarketState) {
     return {
       clammVirtualReserves: latestMarketState.state.clammVirtualReserves,
@@ -69,4 +69,4 @@ const getReservesAndBondingCurveStateWithDefault = (
     cpammRealReserves: INITIAL_REAL_RESERVES,
     startsInBondingCurve: true,
   };
-};
+}

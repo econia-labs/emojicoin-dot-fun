@@ -50,19 +50,6 @@ export const toArenaMarketPair = (info: ArenaInfoModel): ArenaMarketPair => {
   };
 };
 
-export const toMappedMelees = <T extends ArenaModelWithMeleeID>(models: T[]) => {
-  const map = new Map<bigint, T[]>();
-
-  models.forEach((model) => {
-    const id = getMeleeIDFromArenaModel(model);
-    if (!map.has(id)) {
-      map.set(id, []);
-    }
-    map.get(id)!.push(model);
-  });
-  return map;
-};
-
 export const getMeleeIDFromArenaModel = (model: ArenaModelWithMeleeID): bigint => {
   if (isArenaMeleeModel(model)) {
     return model.melee.meleeID;
@@ -76,6 +63,19 @@ export const getMeleeIDFromArenaModel = (model: ArenaModelWithMeleeID): bigint =
     return model.meleeID;
   }
   throw new Error("Invalid arena model for `getMeleeID`: ", model);
+};
+
+export const toMappedMelees = <T extends ArenaModelWithMeleeID>(models: T[]) => {
+  const map = new Map<bigint, T[]>();
+
+  models.forEach((model) => {
+    const id = getMeleeIDFromArenaModel(model);
+    if (!map.has(id)) {
+      map.set(id, []);
+    }
+    map.get(id)!.push(model);
+  });
+  return map;
 };
 
 /**

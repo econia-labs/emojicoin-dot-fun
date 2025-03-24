@@ -64,6 +64,7 @@ module.exports = {
     ],
     "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
@@ -72,7 +73,11 @@ module.exports = {
         varsIgnorePattern: "^_",
       },
     ],
-    "@typescript-eslint/no-use-before-define": 0,
+    /**
+     * Function hoisting is safe; because of this, "nofunc" is shorthand for allowing it.
+     * @see {@link https://eslint.org/docs/latest/rules/no-use-before-define#options}
+     */
+    "@typescript-eslint/no-use-before-define": ["error", "nofunc"],
     "no-console": [
       "warn",
       {

@@ -215,5 +215,6 @@ export function decodeSymbolsForChart(symbol: ArenaChartSymbol | string) {
  * @param symbol
  * @returns symbol is ArenaChartSymbol
  */
-export const isArenaChartSymbol = (symbol: string): symbol is ArenaChartSymbol =>
-  symbol.includes("/") && symbol.split("/").every(isValidMarketSymbol);
+export function isArenaChartSymbol(symbol: string): symbol is ArenaChartSymbol {
+  return symbol.includes("/") && symbol.split("/").every(isValidMarketSymbol);
+}
