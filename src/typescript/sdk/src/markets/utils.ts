@@ -11,7 +11,6 @@ import {
   parseTypeTag,
   type TypeTag,
   type UserTransactionResponse,
-  type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import {
@@ -48,7 +47,7 @@ import {
   type SymbolEmojiData,
   type SymbolEmoji,
 } from "../emoji_data";
-import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
+import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
 import { type Flatten } from "../types";
 import { isInBondingCurve } from "../utils/bonding-curve";
@@ -128,6 +127,11 @@ export const getEmojicoinData = (
     symbolBytes,
   };
 };
+
+export function isRegistrationGracePeriodOver(flag: Types["RegistrantGracePeriodFlag"]): boolean {
+  const now = BigInt(new Date().getTime()) * 1000n;
+  return now - GRACE_PERIOD_TIME > flag.marketRegistrationTime;
+}
 
 /**
  * Fetches the market grace period from the registry resource based on the market `symbol` input.
@@ -221,11 +225,6 @@ export async function getRegistrationGracePeriodFlag(args: {
   }
 }
 
-export function isRegistrationGracePeriodOver(flag: Types["RegistrantGracePeriodFlag"]): boolean {
-  const now = BigInt(new Date().getTime()) * 1000n;
-  return now - GRACE_PERIOD_TIME > flag.marketRegistrationTime;
-}
-
 export const registerMarketAndGetEmojicoinInfo = async (args: {
   aptos: Aptos | AptosConfig;
   registryAddress: AccountAddressInput;
@@ -276,57 +275,24 @@ export async function getMarketResource(args: {
   return toMarketResource(marketResource);
 }
 
-export function getMarketResourceFromWriteSet(
+export const getMarketResourceFromWriteSet = (
   response: UserTransactionResponse,
   marketAddress: AccountAddressInput
-) {
-  return getResourceFromWriteSet({
+) =>
+  getResourceFromWriteSet({
     response,
     resourceTypeTag: TYPE_TAGS.Market,
     writeResourceAddress: marketAddress,
     convert: toMarketResource,
   });
-}
 
-export function getRegistryResourceFromWriteSet(response: UserTransactionResponse) {
-  return getResourceFromWriteSet({
+export const getRegistryResourceFromWriteSet = (response: UserTransactionResponse) =>
+  getResourceFromWriteSet({
     response,
     resourceTypeTag: TYPE_TAGS.Registry,
     writeResourceAddress: REGISTRY_ADDRESS,
     convert: toRegistryResource,
   });
-}
-
-export function getResourceFromWriteSet<T, U>(args: {
-  response: UserTransactionResponse;
-  resourceTypeTag: TypeTag;
-  writeResourceAddress: AccountAddressInput;
-  convert: (data: T) => U;
-}): U | undefined {
-  const { writeResourceAddress, resourceTypeTag, response, convert } = args;
-  const { changes } = response;
-  const changedAddress = AccountAddress.from(writeResourceAddress);
-  let resource: T | undefined;
-  changes.find((someChange) => {
-    if (someChange.type !== "write_resource") return false;
-    const change = someChange as WriteSetChangeWriteResource;
-
-    const { address } = change as WriteSetChangeWriteResource;
-    if (!changedAddress.equals(AccountAddress.from(address))) return false;
-
-    const resourceType = (change as WriteSetChangeWriteResource).data.type;
-    const typeTag = parseTypeTag(resourceType).toString();
-    if (typeTag !== resourceTypeTag.toString()) return false;
-
-    resource = change.data.data as T;
-    return true;
-  });
-
-  if (typeof resource !== "undefined") {
-    return convert(resource);
-  }
-  return undefined;
-}
 
 export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateTracker"]) {
   if (rawPeriodToEnum(periodicStateTracker1D.period) !== Period.Period1D) {

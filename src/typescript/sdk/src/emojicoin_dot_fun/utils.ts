@@ -75,13 +75,6 @@ export async function getRegistryAddress(args: {
   return AccountAddress.from(registryAddressResource.registry_address);
 }
 
-export const getEvents = (response?: UserTransactionResponse | PendingTransactionResponse | null) =>
-  getEventsMaybeWithIndices(response, false);
-
-export const getEventsWithIndices = (
-  response?: UserTransactionResponse | PendingTransactionResponse | null
-) => getEventsMaybeWithIndices(response, true);
-
 function getEventsMaybeWithIndices(
   response: UserTransactionResponse | PendingTransactionResponse | null | undefined,
   withIndices?: false | undefined
@@ -126,3 +119,10 @@ function getEventsMaybeWithIndices(
   });
   return events;
 }
+
+export const getEvents = (response?: UserTransactionResponse | PendingTransactionResponse | null) =>
+  getEventsMaybeWithIndices(response, false);
+
+export const getEventsWithIndices = (
+  response?: UserTransactionResponse | PendingTransactionResponse | null
+) => getEventsMaybeWithIndices(response, true);
