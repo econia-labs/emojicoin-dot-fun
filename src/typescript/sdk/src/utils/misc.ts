@@ -28,28 +28,6 @@ export async function sleep(amount: number): Promise<null> {
 }
 
 /**
- * Calculate the start of a period based on a given input time and period.
- * @param microseconds the time in microseconds.
- * @param period the period to calculate the start of.
- * @returns the start of the period in microseconds.
- * 
- * Used in {@link getPeriodStartTime}
- */
-export function getPeriodStartTimeFromTime(
-  microseconds: AnyNumberString,
-  period: PeriodDuration | AnyPeriod
-) {
-  const periodDuration = typeof period !== "number" ? periodEnumToRawDuration(period) : period;
-  const time = BigInt(microseconds);
-  // prettier-ignore
-  const res = Big(time.toString())
-    .div(periodDuration)
-    .round(0, Big.roundDown)
-    .mul(periodDuration);
-  return BigInt(res.toString());
-}
-
-/**
  * This function calculates the period boundary for a swap or state event.
  * @param event
  * @param period The enum period boundary of which to calculate.
@@ -110,6 +88,28 @@ export function getPeriodStartTime(
 
   const boundary = getPeriodStartTimeFromTime(time, period);
   return boundary;
+}
+
+/**
+ * Calculate the start of a period based on a given input time and period.
+ * @param microseconds the time in microseconds.
+ * @param period the period to calculate the start of.
+ * @returns the start of the period in microseconds.
+ *
+ * Used in {@link getPeriodStartTime}
+ */
+export function getPeriodStartTimeFromTime(
+  microseconds: AnyNumberString,
+  period: PeriodDuration | AnyPeriod
+) {
+  const periodDuration = typeof period !== "number" ? periodEnumToRawDuration(period) : period;
+  const time = BigInt(microseconds);
+  // prettier-ignore
+  const res = Big(time.toString())
+    .div(periodDuration)
+    .round(0, Big.roundDown)
+    .mul(periodDuration);
+  return BigInt(res.toString());
 }
 
 export function getPeriodBoundary(microseconds: AnyNumberString, period: Period): bigint {
