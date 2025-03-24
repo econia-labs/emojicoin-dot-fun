@@ -17,7 +17,7 @@ const LOCAL_STORAGE_VERSIONS: {
   theme: parse("1.0.0")!,
   language: parse("1.0.0")!,
   geoblocking: parse("2.0.0")!,
-  settings: parse("1.0.0")!,
+  settings: parse("1.1.0")!,
 };
 
 export const LOCAL_STORAGE_CACHE_TIME: {
