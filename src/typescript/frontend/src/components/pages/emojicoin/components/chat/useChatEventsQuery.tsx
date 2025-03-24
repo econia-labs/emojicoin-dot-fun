@@ -7,7 +7,7 @@ import { parseJSON } from "utils";
 import { addSearchParams } from "utils/url-utils";
 import type { z } from "zod";
 
-export type ChatEvent = Awaited<ReturnType<typeof fetchChatEvents>>[number];
+type ChatEvent = Awaited<ReturnType<typeof fetchChatEvents>>[number];
 
 export const useChatEventsQuery = (args: z.input<typeof GetChatsSchema>) => {
   const query = useInfiniteQuery({

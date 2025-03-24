@@ -5,7 +5,7 @@ import React from "react";
 
 import { StyledBtn } from "./styled";
 
-export type ButtonsBlockProps = {
+type ButtonsBlockProps = {
   value: number;
   numPages: number;
   onChange: (page: number) => void;
@@ -71,5 +71,3 @@ export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBl
     </FlexGap>
   );
 };
-
-export default ButtonsBlock;

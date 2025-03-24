@@ -51,7 +51,7 @@ export const jsonStrAppend = (a: string, b: string): string => {
   return `${a.substring(0, a.length - 1)},${b.substring(1)}`;
 };
 
-export type GetCandlesticksParams = {
+type GetCandlesticksParams = {
   marketID: AnyNumberString;
   index: number;
   period: Period;

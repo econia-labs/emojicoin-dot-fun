@@ -1,6 +1,6 @@
 import { type SymbolEmoji, toMarketEmojiData } from "@sdk/emoji_data";
 
-export function pairIdToSymbolEmojiString(pairId: string): string {
+function pairIdToSymbolEmojiString(pairId: string): string {
   return pairId.split("-")[0];
 }
 

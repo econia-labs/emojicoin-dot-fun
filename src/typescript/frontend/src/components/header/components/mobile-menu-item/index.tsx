@@ -1,5 +1,5 @@
 import Arrow from "components/svg/icons/Arrow";
-import { Text } from "components/text";
+import Text from "components/text";
 import { translationFunction } from "context/language-context";
 import { cn } from "lib/utils/class-name";
 import React from "react";

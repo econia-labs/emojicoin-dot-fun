@@ -7,7 +7,7 @@ import type { AnyNumberString, Flatten } from "@sdk-types";
  *
  * Fixed will always show `decimals` digits.
  */
-export type FormattedNumberStyle = "sliding-precision" | "fixed";
+type FormattedNumberStyle = "sliding-precision" | "fixed";
 
 // Must be an independent type for `Flatten<...>` to work properly.
 type MaybeNominalizeProps =

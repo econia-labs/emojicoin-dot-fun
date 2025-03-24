@@ -4,7 +4,7 @@ import { parse } from "semver";
 
 import packageInfo from "../../package.json";
 
-export type Links = {
+type Links = {
   x: string;
   github: string;
   discord: string;

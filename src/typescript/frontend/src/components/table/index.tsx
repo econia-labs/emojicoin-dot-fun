@@ -110,22 +110,6 @@ export const EmptyTr = styled.tr<TrProps>`
   ${layout}
 `;
 
-export const TrWrapper = styled(Flex)`
-  width: 100%;
-
-  &:last-child {
-    ${Tr} {
-      border-bottom: none;
-    }
-  }
-
-  &:first-child {
-    ${Tr} {
-      border-top: none;
-    }
-  }
-`;
-
 export const Td = styled.td<TdProps>`
   display: inline-block;
   color: ${({ theme }) => theme.colors.lightGray};

@@ -1,14 +1,9 @@
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import postgres from "postgres";
 
 import { type AnyNumberString, BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
-
-export const getDbConnection = () => {
-  return postgres(process.env.DB_URL!);
-};
 
 /**
  * NOTE: This function *WILL NOT* work if the INTEGRATOR_FEE_RATE_BPS results in a fee output that
@@ -50,7 +45,7 @@ export const getExactTransitionInputAmount = (
   return BigInt(rounded.toString());
 };
 
-export const PROCESSING_WAIT_TIME = 2 * 1000;
+const PROCESSING_WAIT_TIME = 2 * 1000;
 
 export const waitForProcessor = <
   T extends { version: AnyNumberString } | { response: UserTransactionResponse },

@@ -3,7 +3,7 @@ import { css, type DefaultTheme } from "styled-components";
 
 import { type ButtonProps, scales } from "./types";
 
-export interface ThemedProps extends ButtonProps {
+interface ThemedProps extends ButtonProps {
   theme: DefaultTheme;
 }
 

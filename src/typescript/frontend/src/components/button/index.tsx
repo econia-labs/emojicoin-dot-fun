@@ -3,7 +3,7 @@
 import { FlexGap } from "@containers";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import SpinnerIcon from "components/svg/icons/Spinner";
-import { Text } from "components/text";
+import Text from "components/text";
 import React from "react";
 import { useScramble, type UseScrambleProps } from "use-scramble";
 

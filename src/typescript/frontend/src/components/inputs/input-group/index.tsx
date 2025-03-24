@@ -1,6 +1,6 @@
 // cspell:word istouched
 import { scales as inputScales } from "components/inputs/input/types";
-import { Text } from "components/text";
+import Text from "components/text";
 import React, { cloneElement } from "react";
 
 import { InputError, InputIcon, InputInner, InputWrapper, StyledInputGroup } from "./styled";

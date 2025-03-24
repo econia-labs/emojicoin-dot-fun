@@ -6,7 +6,7 @@ import { cn } from "lib/utils/class-name";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { emoji } from "utils";
 
-export type StaggerSpeed = 1 | 2 | 3 | 4 | 5;
+type StaggerSpeed = 1 | 2 | 3 | 4 | 5;
 
 /**
  * @param speed The speed of the animation. Higher is faster. 1 is the default.

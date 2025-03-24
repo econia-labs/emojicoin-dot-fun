@@ -13,19 +13,19 @@ import {
 } from "@sdk/indexer-v2/types";
 import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
 
-export const transitionIn = {
+const transitionIn = {
   duration: 0,
 };
 
-export const transitionOut = {
+const transitionOut = {
   duration: 1.5,
 };
 
-export type AnyNonGridTableCardVariant =
+type AnyNonGridTableCardVariant =
   | TableCardGlowVariants
   | TableCardTextVariants
   | TableCardBorderVariants;
-export type TableCardGlowVariants = keyof typeof glowVariants;
+type TableCardGlowVariants = keyof typeof glowVariants;
 
 export const glowVariants = {
   initial: {
@@ -55,7 +55,7 @@ export const glowVariants = {
   },
 };
 
-export type TableCardTextVariants = keyof typeof textVariants;
+type TableCardTextVariants = keyof typeof textVariants;
 
 export const textVariants = {
   initial: {
@@ -75,7 +75,7 @@ export const textVariants = {
   },
 };
 
-export type TableCardBorderVariants = keyof typeof borderVariants;
+type TableCardBorderVariants = keyof typeof borderVariants;
 
 export const borderVariants = {
   initial: {
@@ -132,9 +132,7 @@ export const eventToVariant = (
   throw new Error("Unknown event type");
 };
 
-export function stateEventToVariant(
-  event: MarketLatestStateEventModel
-): AnyNonGridTableCardVariant {
+function stateEventToVariant(event: MarketLatestStateEventModel): AnyNonGridTableCardVariant {
   if (event.market.trigger === Trigger.MarketRegistration) return "register";
   if (event.market.trigger === Trigger.RemoveLiquidity) return "sell";
   if (event.market.trigger === Trigger.ProvideLiquidity) return "buy";

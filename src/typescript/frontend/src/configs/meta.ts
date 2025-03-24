@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { emoji } from "utils";
 
-export const DEFAULT_TITLE = "emojicoin.fun";
-export const DEFAULT_DESCRIPTION = `Give your wallet the personality it deserves ${emoji("zany face")}${emoji("sparkles")}`;
-export const OG_IMAGES = "/social-preview.png";
-export const OG_TYPE = "website";
-export const TWITTER_CARD = "summary";
-export const TWITTER_IMAGES = "/social-preview.png";
+const DEFAULT_TITLE = "emojicoin.fun";
+const DEFAULT_DESCRIPTION = `Give your wallet the personality it deserves ${emoji("zany face")}${emoji("sparkles")}`;
+const OG_IMAGES = "/social-preview.png";
+const OG_TYPE = "website";
+const TWITTER_CARD = "summary";
+const TWITTER_IMAGES = "/social-preview.png";
 
 export const getDefaultMetadata = (): Metadata => {
   /**

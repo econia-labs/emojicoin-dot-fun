@@ -2,7 +2,7 @@
 
 import { Container, Flex, FlexGap } from "@containers";
 import LogoIcon from "components/svg/icons/LogoIcon";
-import { Text } from "components/text";
+import Text from "components/text";
 import { LINKS } from "lib/env";
 import Link from "next/link";
 import React from "react";

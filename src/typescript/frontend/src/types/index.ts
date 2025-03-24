@@ -1,6 +1,1 @@
-export type {
-  AsProps,
-  MergeProps,
-  PolymorphicComponentProps,
-  ThemedProps,
-} from "./styled-components-types";
+export type { PolymorphicComponentProps } from "./styled-components-types";

@@ -4,15 +4,6 @@ import { sleep } from "@sdk/utils";
 export { isDisallowedEventKey } from "./check-is-disallowed-event-key";
 export { checkIsEllipsis } from "./check-is-ellipsis";
 export { getEmptyListTr } from "./get-empty-list-tr";
-export { getFileNameFromSrc } from "./get-file-name-from-src";
-export {
-  cutLocaleFromRoute,
-  getLocaleFromRoute,
-  removeLangParamFromPathname,
-  removeTrailingSlashIfExists,
-} from "./pathname-helpers";
-export { getStylesFromResponsiveValue } from "./styled-components-helpers";
-
 export const BigIntTrailingNRegex = /^-?(([1-9]\d*)|0)n$/;
 
 // This matches the below pattern: 1234-12-31T23:59:59.666Z

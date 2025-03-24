@@ -54,7 +54,7 @@ export type EventState = {
   globalStateEvents: Readonly<GlobalState[]>;
 };
 
-export type PeriodSubscription = {
+type PeriodSubscription = {
   symbol: string | ArenaChartSymbol;
   period: AnyPeriod;
   cb: SubscribeBarsCallback;
@@ -65,7 +65,7 @@ export type SetLatestBarsArgs = {
   latestBars: readonly LatestBar[];
 };
 
-export type EventActions = {
+type EventActions = {
   getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
   getMeleeMap: () => Readonly<ArenaState["meleeMap"]>;
@@ -79,11 +79,7 @@ export type EventActions = {
 
 export type EventStore = EventState & EventActions & ArenaState & ArenaActions;
 
-export type EventAndClientStore = EventState &
-  EventActions &
-  ClientState &
-  ClientActions &
-  ArenaState;
+type EventAndClientStore = EventState & EventActions & ClientState & ClientActions & ArenaState;
 
 export type ImmerSetEventAndClientStore = (
   nextStateOrUpdater:
