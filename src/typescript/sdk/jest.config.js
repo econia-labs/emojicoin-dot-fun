@@ -1,16 +1,5 @@
 const { pathsToModuleNameMapper } = require("ts-jest");
-const { compilerOptions } = require("./tests/tsconfig.json");
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
-console.warn(compilerOptions);
+const { compilerOptions } = require("./tsconfig.json");
 
 /** @type {import("jest").Config} */
 module.exports = {
@@ -27,6 +16,11 @@ module.exports = {
   coveragePathIgnorePatterns: [],
   testPathIgnorePatterns: ["dist/*", "tests/utils/*"],
   collectCoverage: false,
+  globals: {
+    "ts-jest": {
+      tsconfig: "<rootDir>/tests/tsconfig.json",
+    }
+  },
   coverageThreshold: {
     global: {
       branches: 50,
