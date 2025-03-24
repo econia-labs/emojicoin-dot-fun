@@ -1,3 +1,5 @@
+// cspell:word nofunc
+
 module.exports = {
   env: {
     browser: true,
