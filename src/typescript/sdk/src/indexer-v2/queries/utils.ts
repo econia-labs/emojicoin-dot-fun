@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import "server-only";
+
 import {
   type PostgrestBuilder,
   type PostgrestFilterBuilder,
@@ -8,12 +10,8 @@ import {
 
 import { type AnyNumberString } from "../../types/types";
 import { type DatabaseModels } from "../types";
-import { type DatabaseJsonType, postgresTimestampToDate,TableName } from "../types/json-types";
+import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
 import { postgrest } from "./client";
-
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
 
 type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
 

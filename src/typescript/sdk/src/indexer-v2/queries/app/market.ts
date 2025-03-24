@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type AccountAddress } from "@aptos-labs/ts-sdk";
 
 import { type SymbolEmoji } from "../../../emoji_data/types";
@@ -14,10 +16,6 @@ import { type MarketStateQueryArgs, type PeriodicStateEventQueryArgs } from "../
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
-
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
 
 const selectSwaps = ({
   sender,

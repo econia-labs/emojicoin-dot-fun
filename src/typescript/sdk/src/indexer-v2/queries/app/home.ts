@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
@@ -11,10 +13,6 @@ import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { sortByWithFallback } from "../query-params";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
-
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
 
 // A helper function to abstract the logic for fetching rows that contain market state.
 const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({

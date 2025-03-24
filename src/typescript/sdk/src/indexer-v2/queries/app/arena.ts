@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
 
 import { type ArenaPeriod } from "../../..";
@@ -15,10 +17,6 @@ import {
 import { TableName } from "../../types/json-types";
 import { postgrest } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
-
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
 
 const selectMelee = () =>
   postgrest
