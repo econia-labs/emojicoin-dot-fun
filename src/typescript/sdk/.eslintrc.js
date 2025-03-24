@@ -64,7 +64,6 @@ module.exports = {
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error", { functions: false, classes: false }],
-    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {

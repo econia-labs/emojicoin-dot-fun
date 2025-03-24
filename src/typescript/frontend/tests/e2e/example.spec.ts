@@ -1,4 +1,4 @@
-import { test, expect, Response } from "@playwright/test";
+import { test, expect, type Response } from "@playwright/test";
 import { REVALIDATE_TEST } from "../../src/const";
 
 const sleep = (ms: number) => {
@@ -28,9 +28,8 @@ test("api test route", async ({ page }) => {
   do {
     await sleep(100);
     res1 = (await page.goto("/test"))!;
-    res1headers = res1?.headers()!;
     expect(res1).toBeDefined();
-    expect(res1headers).toBeDefined();
+    res1headers = res1.headers();
   } while (res1headers[NEXTJS_CACHE_HEADER] === "STALE");
   const res1text = await res1.text();
   expect(res1text).toMatch(numericRegex);
