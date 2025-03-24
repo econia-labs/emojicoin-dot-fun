@@ -28,26 +28,23 @@
       "@/components/*": [
         "components/*"
       ],
+      "@/containers": [
+        "components/layout/components/index.ts"
+      ],
       "@/contract-apis": [
         "../../sdk/src/emojicoin_dot_fun/contract-apis"
       ],
       "@/contract-apis/*": [
         "../../sdk/src/emojicoin_dot_fun/contract-apis/*"
       ],
-      "@/queries/*": [
-        "../../sdk/src/indexer-v2/queries/app/*"
-      ],
-      "@/store/*": [
-        "lib/store/*"
-      ],
-      "@/containers": [
-        "components/layout/components/index.ts"
-      ],
       "@/hooks/*": [
         "hooks/*"
       ],
       "@/icons/*": [
         "components/svg/icons/*"
+      ],
+      "@/queries/*": [
+        "../../sdk/src/indexer-v2/queries/app/*"
       ],
       "@/sdk-types": [
         "../../sdk/src/types/index.ts"
@@ -57,6 +54,9 @@
       ],
       "@/static/*": [
         "../public/static/*"
+      ],
+      "@/store/*": [
+        "lib/store/*"
       ]
     },
     "plugins": [
