@@ -251,7 +251,7 @@ export const createEventStore = () => {
     }))
   );
 
-  // Return early to avoid localStorage operations.
+  // Return early to avoid state mutations based on localStorage.
   if (typeof window === "undefined") {
     return store;
   }
