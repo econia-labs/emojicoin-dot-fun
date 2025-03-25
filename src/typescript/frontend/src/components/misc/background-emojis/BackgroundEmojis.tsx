@@ -5,7 +5,7 @@ import { Emoji } from "utils/emoji";
 
 import { getRandomSymbolEmoji } from "@/sdk/emoji_data";
 
-import { useRoughWindowSize } from "./use-window-size-with-step";
+import { useWindowSizeWithStep } from "./use-window-size-with-step";
 
 const MemoizedRandomEmoji = React.memo(OneRandomEmoji);
 
@@ -47,8 +47,7 @@ export function BackgroundEmojis() {
     return () => doc?.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Window dimensions with less granularity to avoid excessive re-renders on resize.
-  const { width, height } = useRoughWindowSize(300);
+  const { width, height } = useWindowSizeWithStep();
 
   const { rows, cols, emojis } = useMemo(() => {
     // 1x the width, 3x the height, based on the element dimensions. (h-300% w-100%)
