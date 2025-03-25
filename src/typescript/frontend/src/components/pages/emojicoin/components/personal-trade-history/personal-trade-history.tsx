@@ -21,7 +21,7 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
       sender: account?.address,
       marketID: props.data.marketID.toString(),
     },
-    !connected
+    { disabled: !connected, queryKey: "PersonalTradeHistory" }
   );
 
   const columns: EcTableColumn<SwapEvent>[] = useMemo(
