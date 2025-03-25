@@ -70,47 +70,45 @@ const Providers: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
   }, []);
 
   return (
-    <>
-      {isMounted && (
-        <ThemeProvider theme={darkTheme}>
-          <QueryClientProvider client={queryClient}>
-            <UserSettingsProvider userAgent={userAgent}>
-              <AptosWalletAdapterProvider
-                plugins={wallets}
-                autoConnect={true}
-                dappConfig={{
-                  aptosApiKey: getAptosApiKey(),
-                  network: APTOS_NETWORK,
-                }}
-              >
-                <WalletModalContextProvider>
-                  <AptosContextProvider>
-                    <EmojiPickerProvider
-                      initialState={{
-                        nativePicker: isMobile || isTablet,
-                      }}
-                    >
-                      <GlobalStyle />
-                      <ConnectToWebSockets />
-                      <Suspense fallback={<Loader />}>
-                        <StyledToaster />
-                        <ContentWrapper>
-                          <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                          <HeaderSpacer />
-                          <GeoblockedBanner />
-                          {children}
-                          <Footer />
-                        </ContentWrapper>
-                      </Suspense>
-                    </EmojiPickerProvider>
-                  </AptosContextProvider>
-                </WalletModalContextProvider>
-              </AptosWalletAdapterProvider>
-            </UserSettingsProvider>
-          </QueryClientProvider>
-        </ThemeProvider>
-      )}
-    </>
+    isMounted && (
+      <ThemeProvider theme={darkTheme}>
+        <QueryClientProvider client={queryClient}>
+          <UserSettingsProvider userAgent={userAgent}>
+            <AptosWalletAdapterProvider
+              plugins={wallets}
+              autoConnect={true}
+              dappConfig={{
+                aptosApiKey: getAptosApiKey(),
+                network: APTOS_NETWORK,
+              }}
+            >
+              <WalletModalContextProvider>
+                <AptosContextProvider>
+                  <EmojiPickerProvider
+                    initialState={{
+                      nativePicker: isMobile || isTablet,
+                    }}
+                  >
+                    <GlobalStyle />
+                    <ConnectToWebSockets />
+                    <Suspense fallback={<Loader />}>
+                      <StyledToaster />
+                      <ContentWrapper>
+                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                        <HeaderSpacer />
+                        <GeoblockedBanner />
+                        {children}
+                        <Footer />
+                      </ContentWrapper>
+                    </Suspense>
+                  </EmojiPickerProvider>
+                </AptosContextProvider>
+              </WalletModalContextProvider>
+            </AptosWalletAdapterProvider>
+          </UserSettingsProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    )
   );
 };
 
