@@ -1,0 +1,33 @@
+# yamllint disable rule:key-ordering
+---
+name: 'pnpm install'
+description: 'Installs node.js, pnpm, then runs pnpm install.'
+inputs:
+  project-path:
+    description: 'Base path for typescript project'
+    required: false
+    default: 'src/typescript'
+runs:
+  steps:
+  - name: 'Set relative path'
+    id: 'set-path'
+    run: |
+      path="${{ inputs.project-path }}"
+      echo "path=$path" >> $GITHUB_OUTPUT
+    shell: 'bash'
+  - name: 'Install pnpm'
+    uses: 'pnpm/action-setup@v4'
+    with:
+      package_json_file: '${{ steps.set-path.outputs.path }}/package.json'
+  - name: 'Install node.js'
+    uses: 'actions/setup-node@v4'
+    with:
+      cache: 'pnpm'
+      cache-dependency-path: '${{ steps.set-path.outputs.path }}/pnpm-lock.yaml'
+      node-version-file: '${{ steps.set-path.outputs.path }}/.node-version'
+  - name: 'Install dependencies'
+    run: 'pnpm install'
+    shell: 'bash'
+    working-directory: '${{ steps.set-path.outputs.path }}'
+  using: 'composite'
+...

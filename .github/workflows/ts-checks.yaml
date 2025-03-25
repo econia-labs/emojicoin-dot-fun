@@ -1,27 +1,56 @@
+# yamllint disable rule:empty-lines
+# yamllint disable rule:key-ordering
 ---
+name: 'typescript'
+
+'on':
+  merge_group: null
+  pull_request: null
+  workflow_dispatch: null
+
+defaults:
+  run:
+    working-directory: 'src/typescript'
+
 jobs:
-  typescript-tests:
-    defaults:
-      run:
-        working-directory: 'src/typescript'
-    name: 'typescript / (${{ matrix.pretty-suffix }})'
+  lint:
+    name: 'TS lint'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
       with:
         submodules: 'false'
-    - name: 'Install pnpm'
-      uses: 'pnpm/action-setup@v4'
+    - uses: './.github/actions/pnpm-install'
+    - run: 'pnpm run lint'
+
+  format:
+    name: 'TS format'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v4'
       with:
-        package_json_file: 'src/typescript/package.json'
-    - name: 'Install node.js'
-      uses: 'actions/setup-node@v4'
+        submodules: 'false'
+    - uses: './.github/actions/pnpm-install'
+    - run: 'pnpm run format:check'
+
+  tsc-check:
+    name: 'TS compile check'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v4'
       with:
-        cache: 'pnpm'
-        cache-dependency-path: 'src/typescript/pnpm-lock.yaml'
-        node-version-file: 'src/typescript/.node-version'
-    - name: 'Install dependencies'
-      run: 'pnpm install'
+        submodules: 'false'
+    - uses: './.github/actions/pnpm-install'
+    - run: 'pnpm run check'
+
+  tests:
+    name: 'test suite / (${{ matrix.pretty-suffix }})'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v4'
+      with:
+        submodules: 'false'
+    - uses: './.github/actions/pnpm-install'
     - env:
         EMOJICOIN_ARENA_MODULE_ADDRESS: >-
           0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d
@@ -49,13 +78,4 @@ jobs:
         - pretty-suffix: 'sdk, e2e, arena-candlesticks'
         - pretty-suffix: 'sdk, e2e, candlesticks'
     timeout-minutes: 15
-name: 'Run test suite'
-'on':
-  merge_group: null
-  pull_request: null
-  push:
-    branches:
-    - 'main'
-    - 'production'
-  workflow_dispatch: null
 ...
