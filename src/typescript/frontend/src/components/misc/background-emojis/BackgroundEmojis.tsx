@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useWindowSize } from "react-use";
 import { Emoji } from "utils/emoji";
 
 import { getRandomSymbolEmoji } from "@/sdk/emoji_data";
+
+import { useRoughWindowSize } from "./use-window-size-with-step";
 
 const MemoizedRandomEmoji = React.memo(OneRandomEmoji);
 
@@ -34,7 +35,6 @@ const maybeRandomEmoji = () => (Math.random() < CHANCE ? getRandomSymbolEmoji().
 const PARALLAX_STRENGTH = 0.15;
 
 export function BackgroundEmojis() {
-  const { width, height } = useWindowSize();
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -46,6 +46,9 @@ export function BackgroundEmojis() {
     doc?.addEventListener("scroll", handleScroll);
     return () => doc?.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Window dimensions with less granularity to avoid excessive re-renders on resize.
+  const { width, height } = useRoughWindowSize(300);
 
   const { rows, cols, emojis } = useMemo(() => {
     // 1x the width, 3x the height, based on the element dimensions. (h-300% w-100%)
