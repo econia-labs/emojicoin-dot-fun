@@ -37,6 +37,7 @@ econia
 econialabs
 emojicoin
 emojicoins
+emojicolor
 eswatini
 faso
 fleur
@@ -81,6 +82,7 @@ mybuilder
 nazar
 nextjs
 nohup
+noto
 octa
 octas
 oden

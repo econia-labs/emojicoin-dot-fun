@@ -1,37 +1,52 @@
 // cspell:word noto
 // cspell:word NOTO
 
-import { type AnyEmoji } from "@econia-labs/emojicoin-sdk";
+import { type SymbolEmoji } from "@econia-labs/emojicoin-sdk";
 import { getBooleanUserAgentSelectors } from "../user-agent-selectors";
-import { EMOJI_COLORS_APPLE } from "./emoji-colors-apple";
-import { EMOJI_COLORS_NOTO } from "./emoji-colors-noto";
-import { formatRgb } from "./emoji-color-helpers";
 
-const getSingleEmojiColor = (
-  emoji: AnyEmoji,
-  dataSource: Record<string, { r: number; g: number; b: number }>
-) => {
-  if (!(emoji in dataSource)) {
-    console.error(`Emoji ${emoji} not found in color data. Returning default color`);
-    return formatRgb({ r: 0, g: 0, b: 0 });
+// Cache for loaded color modules
+let appleColorsPromise: Promise<Record<string, string>> | null = null;
+let notoColorsPromise: Promise<Record<string, string>> | null = null;
+
+/**
+ * Loads the emoji color module dynamically based on platform.
+ *
+ * Uses lazy loading via dynamic imports to only fetch the required color set
+ * (either Apple or Noto, not both) based on the user's device.
+ * @param isApple - True for Apple emoji colors, false for Noto emoji colors
+ * @returns Promise resolving to the emoji color mapping
+ */
+const getColorModule = async (isApple: boolean) => {
+  if (isApple) {
+    if (!appleColorsPromise) {
+      appleColorsPromise = import("./symbol-emojis/apple-symbol-emoji-colors").then(
+        (module) => module.default
+      );
+    }
+    return appleColorsPromise;
+  } else {
+    if (!notoColorsPromise) {
+      notoColorsPromise = import("./symbol-emojis/noto-symbol-emoji-colors").then(
+        (module) => module.default
+      );
+    }
+    return notoColorsPromise;
   }
-
-  return formatRgb(dataSource[emoji]);
 };
 
-export const getEmojiColor = (emoji: AnyEmoji[], userAgent?: string) => {
-  if (!userAgent && typeof window === "undefined")
-    throw new Error("If using on the server, you must provide a user agent");
+const getSingleEmojiColor = async (emoji: SymbolEmoji, dataSource: Record<string, string>) => {
+  if (!(emoji in dataSource)) {
+    console.error(`Emoji ${emoji} not found in color data. Returning default color`);
+    return "#000000";
+  }
+
+  return dataSource[emoji];
+};
+
+export const getEmojiColor = async (emoji: SymbolEmoji[], userAgent?: string) => {
   if (!userAgent) userAgent = window.navigator.userAgent;
   const { isIOS, isMacOs } = getBooleanUserAgentSelectors(userAgent);
-  const dataSource = isIOS || isMacOs ? EMOJI_COLORS_APPLE : EMOJI_COLORS_NOTO;
-  const colors = emoji.map((e) => getSingleEmojiColor(e, dataSource));
-  if (colors.length === 1) return colors[0].hexString;
-  else if (colors.length === 2) {
-    // Create a linear gradient from emoji1 to emoji2.
-    return `linear-gradient(to top, ${colors[0].hexString}, ${colors[1].hexString})`;
-  } else {
-    console.warn(`Expected 1 or 2 emojis, but got ${colors.length}. Using first emoji color.`);
-    return colors[0].hexString;
-  }
+  const dataSource = await getColorModule(isIOS || isMacOs || false);
+  const colors = await Promise.all(emoji.map((e) => getSingleEmojiColor(e, dataSource)));
+  return colors;
 };

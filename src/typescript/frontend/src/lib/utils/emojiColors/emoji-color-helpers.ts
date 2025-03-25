@@ -4,10 +4,10 @@ const CANVAS_SIZE = 50;
 const SAME_COLOR_THRESHOLD = 30;
 
 // Set up the canvas
-const canvas: OffscreenCanvas = new OffscreenCanvas(CANVAS_SIZE, CANVAS_SIZE);
-const ctx: OffscreenCanvasRenderingContext2D | null = canvas.getContext("2d", {
-  willReadFrequently: true,
-});
+const offscreenCanvas: OffscreenCanvas | HTMLCanvasElement = new OffscreenCanvas(
+  CANVAS_SIZE,
+  CANVAS_SIZE
+);
 
 // Function to get color distance (for grouping similar colors)
 function getColorDistance(color1: string, color2: string): number {
@@ -36,39 +36,27 @@ function averageColors(colors: string[]): string {
 // Draw emoji on canvas and return true if successfully rendered
 function drawEmojiOnCanvas(
   emoji: string,
-  ctx: OffscreenCanvasRenderingContext2D,
-  canvas: OffscreenCanvas
+  ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  canvas: OffscreenCanvas | HTMLCanvasElement,
+  fontFamily?: string
 ): boolean {
   // Clear canvas to transparent
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Try different font families for better emoji support
-  const fonts = [
-    `${CANVAS_SIZE}px system-ui`,
-    `${CANVAS_SIZE}px Noto Color Emoji`,
-    `${CANVAS_SIZE}px EmojiOne Color`,
-    `${CANVAS_SIZE}px Apple Color Emoji`,
-  ];
+  // Noto font has some weird y offset compared to apple emojis, so we make sure the emoji size is smaller than the canvas.
+  ctx.font = `${CANVAS_SIZE / 2}px ${fontFamily || "sans-serif"}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
 
-  // Try each font until we get a valid color
-  for (const font of fonts) {
-    ctx.font = font;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
-
-    // Check if we got any visible pixels
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      if (data[i + 3] > 0) {
-        // Only check alpha channel
-        return true;
-      }
+  // Check if we got any visible pixels
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] > 0) {
+      // Only check alpha channel
+      return true;
     }
-
-    // Clear canvas for next attempt
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   return false;
@@ -141,15 +129,46 @@ function rgbToHex(r: number, g: number, b: number) {
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-// Main function to get dominant color of a single emoji
-export function getEmojiDominantColor(emoji: string) {
-  drawEmojiOnCanvas(emoji, ctx!, canvas);
+/**
+ * Returns the dominant color of an emoji as a string in the format 'rgb(r,g,b)'.
+ *
+ * This function works by rendering the emoji on a canvas, analyzing the image data,
+ * grouping similar colors, and finding the most dominant color group.
+ *
+ * @param emoji - The emoji character to analyze
+ * @param fontFamily - Optional font family to use when rendering the emoji
+ * @param _canvas - Optional canvas element to use for rendering (will use a global canvas if not provided)
+ * @returns A string representing the dominant RGB color in the format 'rgb(r,g,b)'
+ *
+ * @example
+ * ```typescript
+ * const dominantColor = getEmojiDominantColor('😀', 'Apple Color Emoji');
+ * ```
+ */
+export function getEmojiDominantColor(
+  emoji: string,
+  fontFamily?: string,
+  canvasOverride?: HTMLCanvasElement
+) {
+  const canvas = canvasOverride || offscreenCanvas;
+  canvas.height = CANVAS_SIZE;
+  canvas.width = CANVAS_SIZE;
+  const ctx = canvas.getContext("2d", {
+    willReadFrequently: true,
+  }) as OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
+
+  drawEmojiOnCanvas(emoji, ctx, canvas, fontFamily);
 
   // Get final image data
-  const imageData = ctx!.getImageData(0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const colorGroups = groupSimilarColors(imageData);
-  const rgb = findDominantColor(colorGroups);
-  return formatRgb(rgb);
+  try {
+    const rgb = findDominantColor(colorGroups);
+    return formatRgb(rgb);
+  } catch (e) {
+    console.error(`Error getting dominant color for emoji: ${emoji}`, e);
+    return formatRgb({ r: 0, g: 0, b: 0 });
+  }
 }
 
 export function formatRgb({ r, g, b }: { r: number; g: number; b: number }) {
