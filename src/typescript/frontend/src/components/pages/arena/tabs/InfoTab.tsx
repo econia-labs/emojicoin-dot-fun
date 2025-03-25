@@ -8,7 +8,7 @@ const INFO: Info[] = [
   {
     title: "What is an emojicoin.fun melee?",
     paragraph:
-      "An emojicoin.fun melee is a 24-hour trading event featuring two randomly " +
+      "An emojicoin.fun melee is a 20-hour trading event featuring two randomly " +
       "selected emojicoins. During a melee, participants can trade exclusively " +
       "between these two emojicoins for reduced fees. Users can also choose to " +
       '"lock in" for the full duration, receiving matched APT amounts based on ' +
@@ -18,8 +18,8 @@ const INFO: Info[] = [
   {
     title: "How long does a melee last?",
     paragraph:
-      "A melee lasts for 24 hours. When a melee ends, the next one starts " +
-      "with two new random emojicoins.",
+      "Currently, a melee lasts for 20 hours. This number can be changed in the " +
+      "future. When a melee ends, the next one starts with two new random emojicoins.",
   },
   {
     title: "Can I request an emojicoin to be part of a melee?",
