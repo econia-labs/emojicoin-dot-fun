@@ -13,7 +13,7 @@ export type SwapEvent = Awaited<ReturnType<typeof fetchSwapEvents>>[number];
 export const useSwapEventsQuery = (
   args: z.input<typeof GetTradesSchema>,
   options?: {
-    enabled?: boolean;
+    disabled?: boolean;
     /**
      * Additional query key to differentiate between multiple instances of this query with the same arguments.
      * This prevents cached data from being shared between queries when they have different enabled states.
@@ -36,8 +36,8 @@ export const useSwapEventsQuery = (
     initialPageParam: 1,
     getNextPageParam: (lastPageResponse, allPageResponses) =>
       lastPageResponse?.length === LIMIT ? allPageResponses.length + 1 : undefined,
-    // Disable the query when neither sender nor marketID is provided
-    enabled: options?.enabled !== false && (!!args.sender || !!args.marketID),
+    // Disable the query when explicitly disabled or when neither sender nor marketID is provided
+    enabled: options?.disabled !== true && (!!args.sender || !!args.marketID),
   });
 
   return query;
