@@ -23,7 +23,7 @@ const INFO: Info[] = [
     {
     title: "How do I 'win' in the arena?",
     paragraph:
-        "Success in emojicon arena comes from strategic trading between the two emojicoins featured in a melee. By entering early, locking in for matched rewards, and skillfully timing your swaps between the two emojicoins, you can maximize your returns. Your goal is to simply end with more value than you started with, either by holding the emojicoins you believe will increase in value or by actively trading between them to capture price movements."
+        "Success in emojicoin arena comes from strategic trading between the two emojicoins featured in a melee. By entering early, locking in for matched rewards, and skillfully timing your swaps between the two emojicoins, you can maximize your returns. Your goal is to simply end with more value than you started with, either by holding the emojicoins you believe will increase in value or by actively trading between them to capture price movements."
     },
     {
     title: "What is 'locking in' and why should I do it?",
