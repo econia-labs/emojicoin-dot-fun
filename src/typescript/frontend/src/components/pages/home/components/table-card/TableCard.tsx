@@ -137,18 +137,6 @@ const TableCard = ({
     };
   }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
 
-  // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border
-  // though, which we handle in the layout animation begin/complete callbacks and in the outermost div's style prop.
-  // Always show the left border when there's something in the search bar.
-  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : 0);
-
-  useEffect(() => {
-    if (curr.col === 0) {
-      borderLeftWidth.set(1);
-    }
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [curr]);
-
   return (
     <motion.div
       layout
@@ -165,7 +153,7 @@ const TableCard = ({
               }
             : undefined
       }
-      className="grid-emoji-card group cursor-pointer border-solid border border-dark-gray hover:z-10 hover:border-ec-blue"
+      className="grid-emoji-card group cursor-pointer border-solid bg-black border border-dark-gray hover:z-10 hover:border-ec-blue"
       variants={tableCardVariants}
       animate={variant}
       custom={{ curr, prev, layoutDelay }}
@@ -191,21 +179,6 @@ const TableCard = ({
           },
         }
       }
-      onLayoutAnimationStart={() => {
-        // Show a temporary left border for all elements while they are changing their layout position.
-        // Note that this is probably a fairly bad way to do this. It works for now but we could easily improve it.
-        // The issue is that transition has a different time than the variant, and there's no way to coalesce the two
-        // easily without refactoring the entire animation orchestration. For now, we can use the setTimeout.
-        setTimeout(() => {
-          borderLeftWidth.set(1);
-        }, layoutDelay * 1000);
-      }}
-      onLayoutAnimationComplete={() => {
-        // Get rid of the temporary border after the layout animation completes.
-        if (curr.col !== 0) {
-          borderLeftWidth.set(0);
-        }
-      }}
       {...props}
     >
       <EmojiMarketPageLink emojis={emojis}>
