@@ -16,11 +16,15 @@ module.exports = {
   coveragePathIgnorePatterns: [],
   testPathIgnorePatterns: ["dist/*", "tests/utils/*"],
   collectCoverage: false,
-  globals: {
-    "ts-jest": {
-      tsconfig: "<rootDir>/tests/tsconfig.json",
-    }
+  transform: {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        tsconfig: "tests/tsconfig.json",
+      },
+    ],
   },
+  transformIgnorePatterns: ["node_modules"],
   coverageThreshold: {
     global: {
       branches: 50,
