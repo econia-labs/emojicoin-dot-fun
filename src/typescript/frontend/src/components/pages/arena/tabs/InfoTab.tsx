@@ -18,8 +18,8 @@ const INFO: Info[] = [
   {
     title: "How long does a melee last?",
     paragraph:
-      "Currently, a melee lasts for 20 hours. This number can be changed in the " +
-      "future. When a melee ends, the next one starts with two new random emojicoins.",
+      "By default a melee lasts for 20 hours; however this number is configurable. " +
+      "When a melee ends, the next one starts with two new random emojicoins.",
   },
   {
     title: "Can I request an emojicoin to be part of a melee?",
