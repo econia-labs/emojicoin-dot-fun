@@ -3,7 +3,6 @@ import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";
 import { Planet, TwitterOutlineIcon } from "components/svg";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
-import { useThemeContext } from "context";
 import { useEventStore } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -12,6 +11,7 @@ import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import darkTheme from "theme/dark";
 import type { Colors } from "theme/types";
 import { Emoji } from "utils/emoji";
 
@@ -74,7 +74,6 @@ const LinkButton = ({
 
 const MainInfo = ({ data }: MainInfoProps) => {
   const { t } = translationFunction();
-  const { theme } = useThemeContext();
 
   const marketEmojis = data.symbolEmojis;
   const stateEvents = useEventStore((s) => s.getMarket(marketEmojis)?.stateEvents ?? []);
@@ -193,7 +192,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
     <div
       className="flex justify-center mt-[10px]"
       style={{
-        borderTop: `1px solid ${theme.colors.darkGray}`,
+        borderTop: `1px solid ${darkTheme.colors.darkGray}`,
       }}
     >
       <div

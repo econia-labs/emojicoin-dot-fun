@@ -18,6 +18,13 @@ export const setMaxSlippageMode = (mode: MaxSlippageMode) => {
 };
 
 export const getMaxSlippageSettings = () => {
+  if (typeof window === "undefined") {
+    return {
+      mode: "auto" as MaxSlippageMode,
+      maxSlippage: DEFAULT_MAX_SLIPPAGE,
+    };
+  }
+
   let maxSlippageModeFromLocalStorage = localStorage.getItem(
     LOCALSTORAGE_MAX_SLIPPAGE_MODE_KEY
   ) as MaxSlippageMode;

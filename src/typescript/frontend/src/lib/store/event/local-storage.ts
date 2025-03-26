@@ -25,6 +25,8 @@ export const maybeUpdateLocalStorage = (
   key: EventLocalStorageKey,
   event: EventModelWithMarket
 ) => {
+  if (typeof window === "undefined") return;
+
   if (!update) return;
   const str = localStorage.getItem(key) ?? "[]";
   const data: EventModelWithMarket[] = parseJSON(str);
@@ -33,6 +35,8 @@ export const maybeUpdateLocalStorage = (
 };
 
 export const cleanReadLocalStorage = (key: EventLocalStorageKey) => {
+  if (typeof window === "undefined") return [];
+
   const str = localStorage.getItem(key) ?? "[]";
   const data: EventModelWithMarket[] = parseJSON(str);
   const relevantItems = data.filter(shouldKeep);
@@ -41,5 +45,7 @@ export const cleanReadLocalStorage = (key: EventLocalStorageKey) => {
 };
 
 export const clearLocalStorage = (key: EventLocalStorageKey) => {
+  if (typeof window === "undefined") return;
+
   localStorage.setItem(key, "[]");
 };

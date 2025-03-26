@@ -7,7 +7,6 @@ import { Column, Row } from "components/layout/components/FlexContainers";
 import type { SwapComponentProps } from "components/pages/emojicoin/types";
 import { getTooltipStyles } from "components/selects/theme";
 import { TradeOptions } from "components/selects/trade-options";
-import { useThemeContext } from "context";
 import { useEventStore } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -17,6 +16,7 @@ import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
 import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
+import darkTheme from "theme/dark";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { getMaxSlippageSettings } from "utils/slippage";
@@ -153,15 +153,13 @@ export default function SwapComponent({
     );
   }, [t, account, isSell, aptBalance, emojicoinBalance, sufficientBalance]);
 
-  const { theme } = useThemeContext();
-
   const { targetRef, tooltip: gearTooltip } = useTooltip(
     <TradeOptions
       onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
     />,
     {
       placement: "bottom",
-      customStyles: getTooltipStyles(theme),
+      customStyles: getTooltipStyles(darkTheme),
       trigger: "click",
       tooltipOffset: [100, 10],
     }
