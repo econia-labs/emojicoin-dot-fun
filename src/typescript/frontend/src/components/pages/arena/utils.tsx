@@ -15,6 +15,7 @@ export type ArenaProps = {
   arenaInfo: ArenaInfoModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
+  vaultBalance: bigint;
 };
 
 export type ArenaPropsWithPositionHistoryAndEmojiData = ArenaProps & {

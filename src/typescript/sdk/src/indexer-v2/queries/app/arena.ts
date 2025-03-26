@@ -12,6 +12,7 @@ import {
   toArenaLeaderboardHistoryWithArenaInfo,
   toArenaMeleeModel,
   toArenaPositionModel,
+  toArenaVaultBalanceUpdateModel,
   toMarketStateModel,
 } from "../../types";
 import { TableName } from "../../types/json-types";
@@ -41,6 +42,15 @@ const selectArenaInfo = () =>
     .order("melee_id", ORDER_BY.DESC)
     .limit(1)
     .single();
+
+const selectVaultBalance = () =>
+  postgrest
+    .from(TableName.ArenaVaultBalanceUpdateEvents)
+    .select("*")
+    .order("transaction_version", ORDER_BY.DESC)
+    .order("event_index", ORDER_BY.DESC)
+    .limit(1)
+    .maybeSingle();
 
 const selectPosition = ({ user, meleeID }: { user: AccountAddressInput; meleeID: bigint }) =>
   postgrest
@@ -111,6 +121,10 @@ export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoMode
 export const fetchArenaInfoByMeleeID = queryHelperSingle(
   selectArenaInfoByMeleeID,
   toArenaInfoModel
+);
+export const fetchVaultBalance = queryHelperSingle(
+  selectVaultBalance,
+  toArenaVaultBalanceUpdateModel
 );
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
 export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionModel);

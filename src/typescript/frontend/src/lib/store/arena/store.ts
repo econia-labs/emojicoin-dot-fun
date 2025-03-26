@@ -32,13 +32,15 @@ export type ArenaState = {
   meleeEvents: readonly ArenaMeleeModel[];
   melees: Readonly<Map<bigint, MeleeState>>;
   meleeMap: Readonly<Map<ArenaChartSymbol, bigint>>;
+  vaultBalance: bigint | undefined;
 };
 
 export type ArenaActions = {
   loadArenaInfoFromServer: (info: ArenaInfoModel) => void;
+  loadVaultBalance: (vaultBalance: bigint) => void;
 };
 
-const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
+export const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
   swaps: [],
   enters: [],
   exits: [],
@@ -63,4 +65,5 @@ export const initializeArenaStore = (): ArenaState => ({
   meleeEvents: [],
   melees: new Map(),
   meleeMap: new Map(),
+  vaultBalance: undefined,
 });
