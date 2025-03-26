@@ -13,7 +13,12 @@ import {
   U256,
 } from "@aptos-labs/ts-sdk";
 
-import { type AnyPrimitive, serializeEntryArgsToJsonArray, toAccountAddress } from "../../src";
+import {
+  type AnyPrimitive,
+  padAddressInput,
+  serializeEntryArgsToJsonArray,
+  toAccountAddress,
+} from "../../src";
 
 const MAX_U8 = 2 ** 8 - 1;
 const MAX_U16 = 2 ** 16 - 1;
@@ -44,8 +49,8 @@ describe("ensures all BCS-serializable values can be serialized to JSON-serializ
     u256_b: new U256(MAX_U256),
     string_a: new MoveString("string_a"),
     string_b: new MoveString("string_b"),
-    address_a: AccountAddress.from("0x0123456789abcdef"),
-    address_b: AccountAddress.from("0xfedcba9876543210"),
+    address_a: AccountAddress.from(padAddressInput("0x0123456789abcdef")),
+    address_b: AccountAddress.from(padAddressInput("0xfedcba9876543210")),
   };
 
   const bcsArrayArgs = {
