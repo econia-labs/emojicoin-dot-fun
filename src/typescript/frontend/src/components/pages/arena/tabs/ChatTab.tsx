@@ -12,7 +12,7 @@ import { MessageContainer } from "../../emojicoin/components/chat/components";
 import { type ArenaPositionModel, type MarketStateModel } from "@econia-labs/emojicoin-sdk";
 import { marketTernary } from "../utils";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
-import { getEmojiColor } from "lib/utils/emojiColors/emoji-color-data";
+import { useEmojiColors } from "lib/utils/emojiColors/use-emoji-colors";
 
 interface Props {
   market0: MarketStateModel;
@@ -70,16 +70,28 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const [colorEmoji0, colorEmoji1] = useMemo(() => {
-    return [getEmojiColor(market0.market.symbolEmojis), getEmojiColor(market1.market.symbolEmojis)];
-  }, [market0.market.symbolEmojis, market1.market.symbolEmojis]);
+  const { data: emoji0Color } = useEmojiColors(market0.market.symbolEmojis);
+  const { data: emoji1Color } = useEmojiColors(market1.market.symbolEmojis);
+
+  const bgColors = useMemo(() => {
+    if (!emoji0Color || !emoji1Color) return;
+    const color0 =
+      emoji0Color.length > 1
+        ? `linear-gradient(0deg, ${emoji0Color[0]} 0%, ${emoji0Color[1]} 100%)`
+        : emoji0Color[0];
+    const color1 =
+      emoji1Color.length > 1
+        ? `linear-gradient(0deg, ${emoji1Color[0]} 0%, ${emoji1Color[1]} 100%)`
+        : emoji1Color[0];
+    return { color0, color1 };
+  }, [emoji0Color, emoji1Color]);
 
   return (
     <Column className="relative" width="100%" height="100%" flexGrow={1}>
       <Flex flexGrow="1" width="100%" overflowY="auto" flexDirection="column-reverse">
         <motion.div
           layoutScroll
-          className="flex flex-col-reverse w-full justify-center px-[21px] py-0 border-r border-solid border-r-dark-gray"
+          className="flex flex-col-reverse w-full justify-center px-[21px] py-0"
         >
           {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
             <MessageContainer
@@ -89,7 +101,7 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
               shouldAnimateAsInsertion={shouldAnimateAsInsertion}
               alignLeft={message.marketID === market0.market.marketID}
               backgroundColor={
-                message.marketID === market0.market.marketID ? colorEmoji0 : colorEmoji1
+                message.marketID === market0.market.marketID ? bgColors?.color0 : bgColors?.color1
               }
             />
           ))}

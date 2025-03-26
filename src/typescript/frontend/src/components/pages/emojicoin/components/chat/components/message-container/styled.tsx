@@ -6,7 +6,8 @@ export const Arrow = styled.div`
   height: 10px;
   position: absolute;
   top: 50%;
-  transform: translateY(-50%) rotate(45deg);
+  transform: translateY(-40%) rotate(45deg);
+  background: white !important;
   z-index: -1;
 `;
 
@@ -16,6 +17,8 @@ export const StyledMessageInner = styled.div`
   padding: 6px;
   border-radius: ${({ theme }) => theme.radii.xSmall};
   margin: 0 7px 11px 7px;
+  border: 2px solid white;
+  box-shadow: inset 0px 0px 8px 4px rgba(0, 0, 0, 0.6);
 `;
 
 export const StyledMessageWrapper = styled(motion.div)<{ alignLeft: boolean }>`

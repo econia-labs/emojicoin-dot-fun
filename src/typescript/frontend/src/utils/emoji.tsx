@@ -1,4 +1,5 @@
 import { useEmojiFontConfig } from "lib/hooks/use-emoji-font-family";
+import { cn } from "lib/utils/class-name";
 import { type DetailedHTMLProps, type HTMLAttributes, useMemo } from "react";
 import type { CSSProperties } from "styled-components";
 
@@ -87,16 +88,32 @@ export const EmojiAsImage = ({
 export const GlowingEmoji = ({
   emojis,
   className,
+  onClick,
   style,
 }: {
   emojis: string;
   className?: string;
   style?: CSSProperties;
-}) => (
-  <div className="relative z-[0]">
-    <div className="absolute z-[-1]" style={{ filter: "blur(15px)" }}>
+  onClick?: () => void;
+}) => {
+  const isSingleEmoji = useMemo(() => getEmojisInString(emojis).length === 1, [emojis]);
+  return (
+    <div className={cn("group relative z-[0]", onClick && "cursor-pointer")} onClick={onClick}>
+      <div className={"absolute z-[-1] blur-lg"}>
+        <Emoji className={className} emojis={emojis} style={style} />
+      </div>
+      {/* For the hover effect */}
+      {onClick && (
+        <div
+          className={cn(
+            "absolute z-[-1] blur-lg group-hover:saturate-[5] group-hover:scale-[2.2] transition-[transform,opacity] duration-75 pointer-events-none opacity-0 group-hover:opacity-100",
+            !isSingleEmoji && "tracking-[-25px]"
+          )}
+        >
+          <Emoji className={className} emojis={emojis} style={style} />
+        </div>
+      )}
       <Emoji className={className} emojis={emojis} style={style} />
     </div>
-    <Emoji className={className} emojis={emojis} style={style} />
-  </div>
-);
+  );
+};
