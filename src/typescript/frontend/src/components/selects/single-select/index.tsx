@@ -1,8 +1,8 @@
 import { Arrow } from "components/svg";
-import { useThemeContext } from "context";
 import { useTooltip } from "hooks";
 import type { TooltipOptions } from "hooks/use-tooltip/types";
 import React from "react";
+import darkTheme from "theme/dark";
 
 import { Select } from "../select";
 import { getTooltipStyles } from "../theme";
@@ -24,13 +24,11 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
   setValue,
   onHover,
 }) => {
-  const { theme } = useThemeContext();
-
   const DropdownComponent = dropdownComponent;
 
   const defaultTooltipOptions: TooltipOptions = {
     placement: "bottom",
-    customStyles: getTooltipStyles(theme),
+    customStyles: getTooltipStyles(darkTheme),
     trigger: "click",
   };
 

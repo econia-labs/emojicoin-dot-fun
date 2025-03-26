@@ -36,6 +36,8 @@ type LocalStorageCache<T> = {
 };
 
 export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): T | null {
+  if (typeof window === "undefined") return null;
+
   const str = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
   if (str === null) {
     return null;

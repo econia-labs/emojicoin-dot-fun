@@ -64,5 +64,11 @@
   "workspaces": [
     "sdk",
     "frontend"
-  ]
+  ],
+  "pnpm": {
+    "overrides": {
+      "axios": ">=1.8.2",
+      "cross-spawn": ">=7.0.5"
+    }
+  }
 }
