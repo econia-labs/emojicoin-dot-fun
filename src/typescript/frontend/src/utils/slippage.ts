@@ -20,7 +20,7 @@ export const setMaxSlippageMode = (mode: MaxSlippageMode) => {
 export const getMaxSlippageSettings = () => {
   if (typeof window === "undefined") {
     return {
-      mode: "auto",
+      mode: "auto" as MaxSlippageMode,
       maxSlippage: DEFAULT_MAX_SLIPPAGE,
     };
   }
