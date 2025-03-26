@@ -11,7 +11,7 @@ import { CHAT_EMOJIS, SYMBOL_EMOJIS } from "@econia-labs/emojicoin-sdk";
 import AnimatedLoadingBoxes from "@/components/pages/launch-emojicoin/animated-loading-boxes";
 import { toast } from "react-toastify";
 
-export const EmojiColorTest = () => {
+export const EmojiColorGenerator = () => {
   const emojis = useEmojiPicker((s) => s.emojis);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -20,8 +20,8 @@ export const EmojiColorTest = () => {
     []
   );
 
-  const [fontFamily, setFontFamily] = useState<"apple" | "noto">(
-    isIOS || isMacOs ? "apple" : "noto"
+  const [fontFamily, setFontFamily] = useState<"native" | "noto">(
+    isIOS || isMacOs ? "native" : "noto"
   );
   const [emojiType, setEmojiType] = useState<"symbol" | "chat">("symbol");
   const [generatedColors, setGeneratedColors] = useState<Map<string, string>>();
@@ -60,16 +60,16 @@ export const EmojiColorTest = () => {
     <div className="flex flex-col items-center gap-y-3">
       {!isIOS && !isMacOs && (
         <h1 className="text-red pixel-heading-3">
-          Must be on MacOs/IOS to test and generate colors font apple emojis
+          Must be on MacOs/IOS to test and generate colors for apple emojis
         </h1>
       )}
       <label className="pixel-heading-3">Select Font</label>
       <select
         value={fontFamily}
-        onChange={(e) => setFontFamily(e.target.value as "apple" | "noto")}
+        onChange={(e) => setFontFamily(e.target.value as "native" | "noto")}
         className="w-[200px] bg-black border border-white rounded h-[30px]"
       >
-        <option value="apple">Apple</option>
+        <option value="native">Native</option>
         <option value={"noto"}>Noto</option>
       </select>
       <div className="flex flex-row justify-center gap-8">

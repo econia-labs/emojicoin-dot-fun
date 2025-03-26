@@ -48,7 +48,7 @@ This separation allows for:
 ### Testing and Generation
 
 You can test and generate emoji color data by
-visiting the page at `/test/emojicolor`
+visiting the page at `/dev/color-generator`
 
 The interface provides:
 
