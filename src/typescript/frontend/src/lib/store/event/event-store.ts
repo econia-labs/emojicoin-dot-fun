@@ -251,6 +251,11 @@ export const createEventStore = () => {
     }))
   );
 
+  // Return early to avoid state mutations based on localStorage.
+  if (typeof window === "undefined") {
+    return store;
+  }
+
   const state = store.getState();
   for (const eventType of LOCAL_STORAGE_EVENT_TYPES) {
     try {
