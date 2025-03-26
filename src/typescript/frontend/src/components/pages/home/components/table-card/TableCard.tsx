@@ -5,7 +5,7 @@ import { Arrow } from "components/svg";
 import Text from "components/text";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
-import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
+import { motion, type MotionProps, useAnimationControls } from "framer-motion";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Emoji } from "utils/emoji";
