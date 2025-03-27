@@ -1,15 +1,13 @@
 "use client";
 
-import "./module.css";
-
 import { FormattedNumber } from "components/FormattedNumber";
 import { Arrow } from "components/svg";
 import Text from "components/text";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
-import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
+import { motion, type MotionProps, useAnimationControls } from "framer-motion";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Emoji } from "utils/emoji";
 
 import { Column, Flex } from "@/containers";
@@ -139,18 +137,6 @@ const TableCard = ({
     };
   }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
 
-  // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border
-  // though, which we handle in the layout animation begin/complete callbacks and in the outermost div's style prop.
-  // Always show the left border when there's something in the search bar.
-  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : 0);
-
-  useEffect(() => {
-    if (curr.col === 0) {
-      borderLeftWidth.set(1);
-    }
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [curr]);
-
   return (
     <motion.div
       layout
@@ -167,7 +153,7 @@ const TableCard = ({
               }
             : undefined
       }
-      className="grid-emoji-card group card-wrapper border-[1px] border-solid border-dark-gray !bg-black"
+      className="grid-emoji-card group cursor-pointer border-solid bg-black border border-dark-gray hover:z-10 hover:border-ec-blue"
       variants={tableCardVariants}
       animate={variant}
       custom={{ curr, prev, layoutDelay }}
@@ -183,47 +169,21 @@ const TableCard = ({
               ? LAYOUT_DURATION * 0.25
               : LAYOUT_DURATION,
       }}
-      style={{
-        borderLeftWidth,
-        borderLeftColor: "var(--dark-gray)",
-        borderLeftStyle: "solid",
-        borderTop: "0px solid #00000000",
-        cursor: "pointer",
-      }}
-      onLayoutAnimationStart={() => {
-        // Show a temporary left border for all elements while they are changing their layout position.
-        // Note that this is probably a fairly bad way to do this. It works for now but we could easily improve it.
-        // The issue is that transition has a different time than the variant, and there's no way to coalesce the two
-        // easily without refactoring the entire animation orchestration. For now, we can use the setTimeout.
-        setTimeout(() => {
-          borderLeftWidth.set(1);
-        }, layoutDelay * 1000);
-      }}
-      onLayoutAnimationComplete={() => {
-        // Get rid of the temporary border after the layout animation completes.
-        if (curr.col !== 0) {
-          borderLeftWidth.set(0);
-        }
+      whileHover={{
+        filter: "brightness(1.05) saturate(1.1)",
+        boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
+        transition: {
+          filter: { duration: 0.05 },
+          boxShadow: { duration: 0.05 },
+        },
       }}
       {...props}
     >
       <EmojiMarketPageLink emojis={emojis}>
-        <motion.div
-          animate={controls}
-          variants={animationsOn ? glowVariants : {}}
-          style={{
-            boxShadow: "0 0 0px 0px #00000000",
-            filter: "drop-shadow(0 0 0px #00000000)",
-          }}
-        >
+        <motion.div animate={controls} variants={animationsOn ? glowVariants : {}}>
           <motion.div
             className="flex flex-col relative grid-emoji-card w-full h-full py-[10px] px-[19px] overflow-hidden"
             whileHover="hover"
-            style={{
-              borderWidth: 1,
-              borderStyle: "solid",
-              borderColor: "#00000000",
-            }}
             animate={controls}
             variants={animationsOn ? borderVariants : onlyHoverVariant}
           >
