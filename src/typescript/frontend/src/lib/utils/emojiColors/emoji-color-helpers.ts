@@ -45,6 +45,8 @@ function drawEmojiOnCanvas(
 
   // Noto font has some weird y offset compared to apple emojis, so we make sure the emoji size is smaller than the canvas.
   ctx.font = `${CANVAS_SIZE / 2}px ${fontFamily || "sans-serif"}`;
+  // Some emojis such as ⚕️ on apple require a fillStyle, otherwise they are black
+  ctx.fillStyle = "#086CD9";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
@@ -73,8 +75,11 @@ function groupSimilarColors(imageData: ImageData): Map<string, string[]> {
     const b = data[i + 2];
     const a = data[i + 3];
 
-    // Skip fully transparent pixels
+    // Skip fully transparent pixels.
     if (a === 0) continue;
+
+    // Skip fully black pixels
+    if (r + g + b === 0) continue;
 
     const color = `${r},${g},${b}`;
     let foundGroup = false;
@@ -97,15 +102,26 @@ function groupSimilarColors(imageData: ImageData): Map<string, string[]> {
   return colorGroups;
 }
 
-// Find dominant color group and return average RGB
+// Find dominant color group and return average RGB with saturation weighting
 function findDominantColor(colorGroups: Map<string, string[]>) {
-  // Find the largest color group
-  let maxCount = 0;
+  // Find the largest color group with saturation weighting
+  let maxWeightedCount = 0;
   let dominantGroup: string[] | null = null;
 
   for (const [_, colors] of colorGroups) {
-    if (colors.length > maxCount) {
-      maxCount = colors.length;
+    // Calculate saturation-weighted count for this group
+    const weightedCount = colors.reduce((acc, color) => {
+      const [r, g, b] = color.split(",").map(Number);
+      // Calculate saturation: difference between max and min RGB components
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const saturation = max === 0 ? 0 : (max - min) / max;
+      // Add 1 + saturation weight to count (ensures even grayscale colors get some weight)
+      return acc + (1 + saturation);
+    }, 0);
+
+    if (weightedCount > maxWeightedCount) {
+      maxWeightedCount = weightedCount;
       dominantGroup = colors;
     }
   }
