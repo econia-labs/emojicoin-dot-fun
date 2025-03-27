@@ -594,11 +594,11 @@ export class EmojicoinClient {
     lockIn: boolean,
     symbol0: SymbolEmoji[],
     symbol1: SymbolEmoji[],
-    escrowCoin: "symbol1" | "symbol2",
+    escrowCoin: "symbol0" | "symbol1",
     options?: Options
   ) {
     const typeTags = toArenaCoinTypes({ symbol0, symbol1 });
-    const escrowType = escrowCoin === "symbol1" ? typeTags[0] : typeTags[2];
+    const escrowType = escrowCoin === "symbol0" ? typeTags[0] : typeTags[2];
     const response = await EmojicoinArena.Enter.submit({
       aptosConfig: this.aptos.config,
       entrant,

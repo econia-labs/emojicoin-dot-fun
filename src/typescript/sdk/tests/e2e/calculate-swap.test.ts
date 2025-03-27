@@ -7,7 +7,7 @@ import {
   getMarketResource,
   maxBigInt,
   type SymbolEmoji,
-  toCoinTypes,
+  toEmojicoinTypes,
   zip,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
@@ -185,7 +185,7 @@ describe("tests the swap functionality", () => {
     expect(model.market.marketNonce).toEqual(market.sequenceInfo.nonce);
 
     // Transfer the emojicoins from the first swapper to the second.
-    const { emojicoin: emojicoinType } = toCoinTypes(marketAddress);
+    const { emojicoin: emojicoinType } = toEmojicoinTypes(marketAddress);
     const transferRes = await TransferCoins.submit({
       aptosConfig: aptos.config,
       from: firstSwapper,
@@ -236,7 +236,7 @@ describe("tests the swap functionality", () => {
     expect(model.market.marketNonce).toEqual(market.sequenceInfo.nonce);
 
     // Transfer the emojicoins from the first swapper to the second.
-    const { emojicoin: emojicoinType } = toCoinTypes(marketAddress);
+    const { emojicoin: emojicoinType } = toEmojicoinTypes(marketAddress);
     const transferRes = await TransferCoins.submit({
       aptosConfig: aptos.config,
       from: firstSwapper,
