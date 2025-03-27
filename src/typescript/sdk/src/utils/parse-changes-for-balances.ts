@@ -27,7 +27,7 @@ export const toCoinTypeString = (type: TypeTagInput) =>
   parseTypeTag(type.toString()).toString() as CoinTypeString;
 
 export const toCoinStoreString = (type: TypeTagInput) =>
-  `0x0::coin::CoinStore<${toCoinTypeString(type)}>` as CoinStoreString;
+  `0x1::coin::CoinStore<${toCoinTypeString(type)}>` as CoinStoreString;
 
 export const getCoinBalanceFromChanges = ({
   response,
