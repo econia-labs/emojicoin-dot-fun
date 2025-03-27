@@ -59,7 +59,7 @@ import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import type { AtLeastOne } from "../utils/utility-types";
 
-export function toCoinTypes(inputAddress: AccountAddressInput): {
+export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: CoinTypeString;
   emojicoinLP: CoinTypeString;
 } {
@@ -79,10 +79,10 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
  * @param marketAddress the market address
  * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
  */
-export function toCoinTypesForEntry(
+export function toEmojicoinTypesForEntry(
   marketAddress: AccountAddressInput
 ): [CoinTypeString, CoinTypeString] {
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+  const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
   return [emojicoin, emojicoinLP] as [CoinTypeString, CoinTypeString];
 }
 
@@ -102,7 +102,7 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
   const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array()).emojis.map((e) => e.emoji);
   const marketAddress = getMarketAddress(emojis, registryAddress);
 
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+  const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
 
   return {
     marketAddress,

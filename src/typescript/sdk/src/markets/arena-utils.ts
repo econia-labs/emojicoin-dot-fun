@@ -6,7 +6,7 @@ import { toMarketView } from "../types";
 import { toArenaMeleeEvent, toArenaRegistry } from "../types/arena-types";
 import { type CoinTypeString, getAptosClient } from "../utils";
 import type { StrictXOR } from "../utils/utility-types";
-import { toCoinTypesForEntry } from "./utils";
+import { toEmojicoinTypesForEntry } from "./utils";
 
 type ArenaSymbols = { symbol0: SymbolEmoji[]; symbol1: SymbolEmoji[] };
 type ArenaMarketAddresses = {
@@ -27,7 +27,7 @@ export const toArenaCoinTypes = (args: StrictXOR<ArenaSymbols, ArenaMarketAddres
       ? [args.market0Address, args.market1Address]
       : [getMarketAddress(args.symbol0), getMarketAddress(args.symbol1)];
 
-  return [...toCoinTypesForEntry(address0), ...toCoinTypesForEntry(address1)] as [
+  return [...toEmojicoinTypesForEntry(address0), ...toEmojicoinTypesForEntry(address1)] as [
     CoinTypeString,
     CoinTypeString,
     CoinTypeString,
