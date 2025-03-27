@@ -6,7 +6,6 @@ import {
   AptosConfig,
   type InputGenerateTransactionOptions,
   type LedgerVersionArg,
-  type TypeTag,
   type UserTransactionResponse,
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
@@ -36,7 +35,7 @@ import { TableName } from "../indexer-v2/types/json-types";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { toArenaCoinTypes } from "../markets/arena-utils";
 import { type AnyNumberString, toMarketView, toRegistryView, toSwapEvent } from "../types";
-import { waitFor } from "../utils";
+import { type CoinTypeString, waitFor } from "../utils";
 import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
 import customExpect from "./expect";
 
@@ -564,11 +563,11 @@ export class EmojicoinClient {
 
   private async arenaSwap(
     swapper: Account,
+    symbol0: SymbolEmoji[],
     symbol1: SymbolEmoji[],
-    symbol2: SymbolEmoji[],
     options?: Options
   ) {
-    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const typeTags = toArenaCoinTypes({ symbol0, symbol1 });
     const response = await EmojicoinArena.Swap.submit({
       aptosConfig: this.aptos.config,
       swapper,
@@ -593,12 +592,12 @@ export class EmojicoinClient {
     entrant: Account,
     inputAmount: bigint,
     lockIn: boolean,
+    symbol0: SymbolEmoji[],
     symbol1: SymbolEmoji[],
-    symbol2: SymbolEmoji[],
     escrowCoin: "symbol1" | "symbol2",
     options?: Options
   ) {
-    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const typeTags = toArenaCoinTypes({ symbol0, symbol1 });
     const escrowType = escrowCoin === "symbol1" ? typeTags[0] : typeTags[2];
     const response = await EmojicoinArena.Enter.submit({
       aptosConfig: this.aptos.config,
@@ -644,11 +643,11 @@ export class EmojicoinClient {
 
   private async arenaExit(
     participant: Account,
+    symbol0: SymbolEmoji[],
     symbol1: SymbolEmoji[],
-    symbol2: SymbolEmoji[],
     options?: Options
   ) {
-    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const typeTags = toArenaCoinTypes({ symbol0, symbol1 });
     const response = await EmojicoinArena.Exit.submit({
       aptosConfig: this.aptos.config,
       participant,
@@ -688,7 +687,7 @@ export class EmojicoinClient {
 
   private getEmojicoinInfo(symbolEmojis: SymbolEmoji[]): {
     marketAddress: AccountAddress;
-    typeTags: [TypeTag, TypeTag];
+    typeTags: [CoinTypeString, CoinTypeString];
   } {
     const { marketAddress, emojicoin, emojicoinLP } = getEmojicoinMarketAddressAndTypeTags({
       symbolBytes: this.emojisToHexSymbol(symbolEmojis),

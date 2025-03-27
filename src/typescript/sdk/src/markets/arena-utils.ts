@@ -1,35 +1,37 @@
-import type { LedgerVersionArg, TypeTag } from "@aptos-labs/ts-sdk";
+import type { AccountAddressInput, LedgerVersionArg } from "@aptos-labs/ts-sdk";
 
 import { type SymbolEmoji, toMarketEmojiData } from "../emoji_data";
 import { EmojicoinArena, getMarketAddress, MarketView } from "../emojicoin_dot_fun";
 import { toMarketView } from "../types";
 import { toArenaMeleeEvent, toArenaRegistry } from "../types/arena-types";
-import { getAptosClient } from "../utils";
+import { type CoinTypeString, getAptosClient } from "../utils";
+import type { StrictXOR } from "../utils/utility-types";
 import { toCoinTypesForEntry } from "./utils";
 
-/**
- * Converts two input symbols to the four coin TypeTags necessary for arena entry functions.
- *
- * @param symbols.a the first symbol as an array of symbol emojis
- * @param symbols.b the second symbol as an array of symbol emojis
- *
- * @returns [Coin0, LP0, Coin1, LP1] as [TypeTag, TypeTag, TypeTag, TypeTag]
- */
-export const toArenaCoinTypes = ({
-  symbol1,
-  symbol2,
-}: {
-  symbol1: SymbolEmoji[];
-  symbol2: SymbolEmoji[];
-}) => {
-  const addressA = getMarketAddress(symbol1);
-  const addressB = getMarketAddress(symbol2);
+type ArenaSymbols = { symbol0: SymbolEmoji[]; symbol1: SymbolEmoji[] };
+type ArenaMarketAddresses = {
+  market0Address: AccountAddressInput;
+  market1Address: AccountAddressInput;
+};
 
-  return [...toCoinTypesForEntry(addressA), ...toCoinTypesForEntry(addressB)] as [
-    TypeTag,
-    TypeTag,
-    TypeTag,
-    TypeTag,
+/**
+ * Converts two input symbols or addresses to the four coin type strings necessary for arena entry
+ * functions.
+ *
+ * @returns
+ * [Coin0, LP0, Coin1, LP1] as [CoinTypeString, CoinTypeString, CoinTypeString, CoinTypeString]
+ */
+export const toArenaCoinTypes = (args: StrictXOR<ArenaSymbols, ArenaMarketAddresses>) => {
+  const [address0, address1] =
+    "market0Address" in args
+      ? [args.market0Address, args.market1Address]
+      : [getMarketAddress(args.symbol0), getMarketAddress(args.symbol1)];
+
+  return [...toCoinTypesForEntry(address0), ...toCoinTypesForEntry(address1)] as [
+    CoinTypeString,
+    CoinTypeString,
+    CoinTypeString,
+    CoinTypeString,
   ];
 };
 
@@ -71,7 +73,7 @@ export const fetchArenaRegistryView = async (options?: LedgerVersionArg) =>
 export const fetchMeleeEmojiData = async (
   view: Awaited<ReturnType<typeof fetchArenaMeleeView>>
 ) => {
-  const [symbol1, symbol2] = await Promise.all(
+  const [symbol0, symbol1] = await Promise.all(
     [view.emojicoin0MarketAddress, view.emojicoin1MarketAddress].map((marketAddress) =>
       MarketView.view({
         aptos: getAptosClient(),
@@ -86,19 +88,19 @@ export const fetchMeleeEmojiData = async (
     )
   );
   const [coin0, lp0, coin1, lp1] = toArenaCoinTypes({
+    symbol0: symbol0.emojis.map(({ emoji }) => emoji),
     symbol1: symbol1.emojis.map(({ emoji }) => emoji),
-    symbol2: symbol2.emojis.map(({ emoji }) => emoji),
   });
 
   return {
     view,
+    market0: {
+      ...symbol0,
+      typeTags: [coin0, lp0] as const,
+    },
     market1: {
       ...symbol1,
-      typeTags: [coin0, lp0] as [TypeTag, TypeTag],
-    },
-    market2: {
-      ...symbol2,
-      typeTags: [coin1, lp1] as [TypeTag, TypeTag],
+      typeTags: [coin1, lp1] as const,
     },
   };
 };
@@ -111,11 +113,11 @@ export type MeleeEmojiData = Awaited<ReturnType<typeof fetchMeleeEmojiData>>;
 export const fetchAllCurrentMeleeData = async () => {
   const registry = await fetchArenaRegistryView();
   const melee = await fetchArenaMeleeView(registry.currentMeleeID);
-  const { market1, market2 } = await fetchMeleeEmojiData(melee);
+  const { market0, market1 } = await fetchMeleeEmojiData(melee);
   return {
     registry,
     melee,
+    market0,
     market1,
-    market2,
   };
 };

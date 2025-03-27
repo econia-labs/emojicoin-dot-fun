@@ -1,9 +1,8 @@
-import type { TypeTag } from "@aptos-labs/ts-sdk";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { Exit } from "@/move-modules/emojicoin-arena";
-import { toCoinTypes } from "@/sdk/markets";
+import { toArenaCoinTypes } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 
@@ -21,16 +20,9 @@ export const useExitTransactionBuilder = (
     if (!accountAddress) {
       return null;
     }
-    const { emojicoin: emojicoin0, emojicoinLP: emojicoinLP0 } = toCoinTypes(market0Address);
-    const { emojicoin: emojicoin1, emojicoinLP: emojicoinLP1 } = toCoinTypes(market1Address);
     return {
       participant: accountAddress,
-      typeTags: [emojicoin0, emojicoinLP0, emojicoin1, emojicoinLP1] as [
-        TypeTag,
-        TypeTag,
-        TypeTag,
-        TypeTag,
-      ],
+      typeTags: toArenaCoinTypes({ market0Address, market1Address }),
     };
   }, [accountAddress, market0Address, market1Address]);
 

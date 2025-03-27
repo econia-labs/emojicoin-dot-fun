@@ -9,7 +9,6 @@ import {
   type HexInput,
   type InputGenerateTransactionOptions,
   parseTypeTag,
-  type TypeTag,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
@@ -48,23 +47,28 @@ import {
   toRegistryResource,
   type Types,
 } from "../types/types";
-import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
+import {
+  type CoinTypeString,
+  getResourceFromWriteSet,
+  STRUCT_STRINGS,
+  toCoinTypeString,
+  TYPE_TAGS,
+} from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
 import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import type { AtLeastOne } from "../utils/utility-types";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
-  emojicoin: TypeTag;
-  emojicoinLP: TypeTag;
+  emojicoin: CoinTypeString;
+  emojicoinLP: CoinTypeString;
 } {
   const marketAddress = AccountAddress.from(inputAddress);
+  const prefix = `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}`;
 
   return {
-    emojicoin: parseTypeTag(`${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::Emojicoin`),
-    emojicoinLP: parseTypeTag(
-      `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::EmojicoinLP`
-    ),
+    emojicoin: toCoinTypeString(`${prefix}::Emojicoin`),
+    emojicoinLP: toCoinTypeString(`${prefix}::EmojicoinLP`),
   };
 }
 
@@ -75,9 +79,11 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
  * @param marketAddress the market address
  * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
  */
-export function toCoinTypesForEntry(marketAddress: AccountAddressInput): [TypeTag, TypeTag] {
+export function toCoinTypesForEntry(
+  marketAddress: AccountAddressInput
+): [CoinTypeString, CoinTypeString] {
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-  return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
+  return [emojicoin, emojicoinLP] as [CoinTypeString, CoinTypeString];
 }
 
 /**

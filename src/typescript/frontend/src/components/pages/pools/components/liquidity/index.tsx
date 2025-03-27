@@ -1,6 +1,5 @@
 "use client";
 
-import { TypeTag } from "@aptos-labs/ts-sdk";
 import { Button, InputNumeric, Text } from "components";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
@@ -130,7 +129,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
       : true;
 
   useEffect(() => {
-    if (emojicoin instanceof TypeTag) {
+    if (emojicoin) {
       setEmojicoinType(emojicoin);
     }
   }, [emojicoin, setEmojicoinType]);

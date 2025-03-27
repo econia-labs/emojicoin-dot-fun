@@ -9,12 +9,7 @@ import { fetchEmojicoinBalances } from "./fetch-emojicoin-balances";
 
 async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
   const { emojicoin } = toCoinTypes(marketAddress);
-  if (!emojicoin.isStruct()) {
-    console.error(`Invalid market address passed to \`fetchHoldersInternal\`: ${marketAddress}`);
-    return [];
-  }
-  const assetType = emojicoin.toString();
-  const holders = await fetchEmojicoinBalances({ assetType });
+  const holders = await fetchEmojicoinBalances({ assetType: emojicoin });
 
   // Exclude the emojicoin market address from the holders list.
   const market = AccountAddress.from(marketAddress);

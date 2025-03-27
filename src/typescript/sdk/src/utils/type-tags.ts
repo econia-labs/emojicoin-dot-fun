@@ -16,6 +16,7 @@ import {
 } from "../const";
 import type { TypeTagInput } from "../emojicoin_dot_fun";
 import { removeLeadingZeros } from "./account-address";
+import type { Nominal } from "./utility-types";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
@@ -79,6 +80,11 @@ export type ArenaStructName =
   | "ArenaVaultBalanceUpdateEvent";
 
 export type StructTagString = `0x${string}::${string}::${string}`;
+export type CoinStoreString = Nominal<
+  `0x1::coin::CoinStore<${StructTagString}>`,
+  "CoinStoreString"
+>;
+export type CoinTypeString = Nominal<StructTagString, "CoinTypeString">;
 
 type AnyEmojicoinDotFunStructName = EmojicoinStructName | ArenaStructName;
 

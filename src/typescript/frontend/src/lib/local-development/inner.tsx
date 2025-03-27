@@ -40,9 +40,9 @@ const InnerDisplayDebugData = () => {
   const handleCrank = async (definedAccount: AccountInfo) =>
     // Use fire and water if on the local network, otherwise get the actual melee data.
     fetchAllCurrentMeleeData()
-      .then(({ market1, market2 }) => [market1.symbolEmojis, market2.symbolEmojis])
-      .then(([symbol1, symbol2]) => {
-        const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol1, symbol2 });
+      .then(({ market0, market1 }) => [market0.symbolEmojis, market1.symbolEmojis])
+      .then(([symbol0, symbol1]) => {
+        const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol0, symbol1 });
         EmojicoinArena.Enter.builder({
           aptosConfig: aptos.config,
           entrant: definedAccount.address,
