@@ -1,4 +1,3 @@
-import type { ArenaPositionModel, MarketStateModel } from "@econia-labs/emojicoin-sdk";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { motion } from "framer-motion";
@@ -10,6 +9,7 @@ import { useEffect, useMemo, useRef } from "react";
 import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
 import { Column, Flex } from "@/components/layout";
 import { LoadMore } from "@/components/ui/table/loadMore";
+import type { ArenaPositionModel, MarketStateModel } from "@/sdk/index";
 
 import { MessageContainer } from "../../emojicoin/components/chat/components";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
