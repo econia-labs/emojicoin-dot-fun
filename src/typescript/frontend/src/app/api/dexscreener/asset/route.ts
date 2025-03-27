@@ -31,7 +31,7 @@ import { toNominal } from "@/sdk/utils";
 import { symbolEmojiStringToArray } from "../util";
 
 /**
- * - In most cases, asset ids will correspond to contract addresses. Ids are case-sensitive.
+ * - In most cases, asset ids will correspond to module addresses. Ids are case-sensitive.
  * - All `Asset` props aside from `id` may be mutable. The Indexer will periodically query assets for their most
  * up-to-date info
  * - `totalSupply` is optional but DEX Screener cannot calculate FDV/Market Cap if not available

@@ -2,8 +2,7 @@ import "server-only";
 
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
-import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
-
+import { RegistryView } from "../../../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
 import { toRegistryView } from "../../../types";
 import { getAptosClient } from "../../../utils/aptos-client";
 import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
@@ -99,7 +98,7 @@ export const fetchLargestMarketID = async () => {
 };
 
 /**
- * Retrieves the number of markets by querying the view function in the registry contract on-chain.
+ * Retrieves the number of markets by querying the view function in the registry module on-chain.
  * The ledger (transaction) version is specified in order to reflect the exact total number of
  * unique markets the `emojicoin-dot-fun` processor will have processed up to that version.
  *

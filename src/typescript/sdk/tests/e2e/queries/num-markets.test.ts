@@ -1,4 +1,4 @@
-import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
+import { RegistryView } from "@/move-modules/emojicoin-dot-fun";
 
 import { getRegistryResourceFromWriteSet, toRegistryView } from "../../../src";
 import type { SymbolEmojiName } from "../../../src/emoji_data/types";

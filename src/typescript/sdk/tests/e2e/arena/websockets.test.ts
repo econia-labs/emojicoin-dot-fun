@@ -29,7 +29,7 @@ describe("tests to ensure that arena websocket events work as expected", () => {
   let symbol2: SymbolEmoji[];
 
   beforeAll(async () => {
-    // Prepare the on-chain state for the arena contract to immediately exit the initial arena.
+    // Prepare the on-chain state for the arena module to immediately exit the initial arena.
     await registerAndUnlockInitialMarketsForArenaTest();
     await waitUntilCurrentMeleeEnds();
     await setNextMeleeDurationAndEnsureCrank(ONE_SECOND_MICROSECONDS * 15n).then((res) => {

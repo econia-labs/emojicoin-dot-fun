@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 
-import { MarketMetadataByMarketAddress, MarketProperties } from "@/contract-apis";
+import { MarketMetadataByMarketAddress, MarketProperties } from "@/move-modules";
 
 const PLACEHOLDERS = new Map([
   ["Discord", "https://discord.gg/..."],

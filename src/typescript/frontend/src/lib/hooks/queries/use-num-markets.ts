@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEventStore } from "context/event-store-context";
 
-import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
+import { RegistryView } from "@/sdk/emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 
 async function getNumMarkets(): Promise<number> {

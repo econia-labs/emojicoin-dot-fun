@@ -124,7 +124,7 @@ export const BASIS_POINTS_PER_UNIT = 10_000n;
 // Arena constants.
 export const ARENA_CONSTANTS = {
   /**
-   * Note that the duration here reflects the contract when deployed on public networks.
+   * Note that the duration here reflects the Move module when deployed on public networks.
    * In test/CI environments, the `deployer` service may alter this to be much smaller to
    * facilitate reasonable test durations. See `src/docker/deployer/sh`.
    */
@@ -260,7 +260,7 @@ export const toTrigger = (s: DatabaseStructType["GlobalStateEventData"]["trigger
     throw new Error(`Unknown trigger: ${s}`);
   })();
 
-/// As defined in the contract, not in the database; i.e., numbers, not enum strings.
+/// As defined in the Move module, not in the database; i.e., numbers, not enum strings.
 export enum TriggerFromContract {
   PackagePublication = 0,
   MarketRegistration = 1,

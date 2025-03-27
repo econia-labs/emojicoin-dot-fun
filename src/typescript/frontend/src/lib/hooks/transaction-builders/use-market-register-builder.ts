@@ -3,8 +3,8 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS } from "lib/env";
 import { useMemo } from "react";
 
-import { RegisterMarket } from "@/contract-apis/emojicoin-dot-fun";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data/emoji-data";
+import { RegisterMarket } from "@/sdk/emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
 
 import { useTransactionBuilderWithOptions } from "./use-transaction-builder";
 

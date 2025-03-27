@@ -28,7 +28,7 @@ export const revalidate = 10;
  *
  * #### NOTE: `market_cap_usd` and `usd_price` may be absent if APT/USD isn't fetched successfully.
  *
- * All q64 values in the contract are normalized to decimalized values with {@link q64ToBig}
+ * All q64 values in the module are normalized to decimalized values with {@link q64ToBig}
  *
  * All APT and emojicoin values are converted to their decimalized formats; that is, they are
  * divided by 10 ^ {@link DECIMALS}.

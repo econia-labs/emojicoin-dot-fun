@@ -2,7 +2,7 @@
 
 import type { TypeTag, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
-import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
+import { ProvideLiquidity, Swap } from "@/move-modules/emojicoin-dot-fun";
 
 import { maxBigInt, type SymbolEmoji } from "../../../src";
 import { LIMIT } from "../../../src/indexer-v2/const";

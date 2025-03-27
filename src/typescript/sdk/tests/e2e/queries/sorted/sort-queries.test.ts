@@ -1,6 +1,6 @@
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
-import { Swap } from "@/contract-apis/emojicoin-dot-fun";
+import { Swap } from "@/move-modules/emojicoin-dot-fun";
 
 import {
   compareBigInt,

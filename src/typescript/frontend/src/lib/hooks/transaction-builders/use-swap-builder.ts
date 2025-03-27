@@ -2,7 +2,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { useMemo } from "react";
 
-import { Swap } from "@/contract-apis";
+import { Swap } from "@/move-modules";
 import { toCoinTypesForEntry } from "@/sdk/markets";
 import type { AnyNumberString } from "@/sdk-types";
 

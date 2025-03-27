@@ -31,17 +31,17 @@
       "@/containers": [
         "components/layout/components/index.ts"
       ],
-      "@/contract-apis": [
-        "../../sdk/src/emojicoin_dot_fun/contract-apis"
-      ],
-      "@/contract-apis/*": [
-        "../../sdk/src/emojicoin_dot_fun/contract-apis/*"
-      ],
       "@/hooks/*": [
         "hooks/*"
       ],
       "@/icons/*": [
         "components/svg/icons/*"
+      ],
+      "@/move-modules": [
+        "../../sdk/src/emojicoin_dot_fun/move-modules"
+      ],
+      "@/move-modules/*": [
+        "../../sdk/src/emojicoin_dot_fun/move-modules/*"
       ],
       "@/queries/*": [
         "../../sdk/src/indexer-v2/queries/app/*"

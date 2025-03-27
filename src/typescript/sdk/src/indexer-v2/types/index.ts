@@ -648,7 +648,7 @@ export const GuidGetters = {
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
   }),
   candlestick: ({ market_id, start_time, period }: DatabaseJsonType["candlesticks"]) => ({
-    // Not a real contract event, but used to classify the type of data.
+    // Not a real module-emitted event, but used to classify the type of data.
     eventName: CANDLESTICK_NAME,
     guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
   }),
@@ -701,7 +701,7 @@ export const GuidGetters = {
     period,
     last_transaction_version: version,
   }: DatabaseJsonType["arena_candlesticks"]) => ({
-    // Not a real contract event, but used to classify the type of data.
+    // Not a real module-emitted event, but used to classify the type of data.
     eventName: ARENA_CANDLESTICK_NAME,
     guid: `${ARENA_CANDLESTICK_NAME}::${melee_id}::${period}::${start_time}::${version}`,
   }),

@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "lib/hooks/queries/client";
 
+import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
 import {
   SimulateProvideLiquidity,
   SimulateRemoveLiquidity,
-} from "@/contract-apis/emojicoin-dot-fun";
-import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
+} from "@/sdk/emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
 
 const simulateProvideLiquidity = async (args: {
   aptos: Aptos;

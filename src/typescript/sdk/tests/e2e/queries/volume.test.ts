@@ -1,6 +1,6 @@
 import type { Account, AccountAddress, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
-import { Swap } from "@/contract-apis/emojicoin-dot-fun";
+import { Swap } from "@/move-modules/emojicoin-dot-fun";
 
 import { getEvents, maxBigInt, sum, sumByKey } from "../../../src";
 import type { Events } from "../../../src/emojicoin_dot_fun/events";

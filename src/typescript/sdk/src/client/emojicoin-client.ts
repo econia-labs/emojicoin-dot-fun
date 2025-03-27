@@ -11,6 +11,12 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
+import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
+import { toChatMessageEntryFunctionArgs } from "../emoji_data";
+import type { ChatEmoji, SymbolEmoji } from "../emoji_data/types";
+import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
+import type { ArenaEvents } from "../emojicoin_dot_fun/arena-events";
+import type { Events } from "../emojicoin_dot_fun/events";
 import {
   Chat,
   ProvideLiquidity,
@@ -18,14 +24,7 @@ import {
   RemoveLiquidity,
   Swap,
   SwapWithRewards,
-} from "@/contract-apis/emojicoin-dot-fun";
-
-import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
-import { toChatMessageEntryFunctionArgs } from "../emoji_data";
-import type { ChatEmoji, SymbolEmoji } from "../emoji_data/types";
-import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
-import type { ArenaEvents } from "../emojicoin_dot_fun/arena-events";
-import type { Events } from "../emojicoin_dot_fun/events";
+} from "../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
 import {
   type ArenaEventsModels,
@@ -121,7 +120,7 @@ async function waitForArenaEventProcessed(
  *
  * The `swap` function is separated into `buy` and `sell` to reduce the amount of input arguments.
  *
- * The `provide_liquidity` and `remove_liquidity` functions in the contract are both under
+ * The `provide_liquidity` and `remove_liquidity` functions in the Move module are both under
  * `liquidity` as `provide` and `remove`, respectively.
  *
  * The `utils` functions provides several commonly used utility functions.

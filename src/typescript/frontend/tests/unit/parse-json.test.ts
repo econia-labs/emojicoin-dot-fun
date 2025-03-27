@@ -107,7 +107,7 @@ describe("json parse and stringify tests", () => {
     expect(parsedAgain).toEqual(obj.map((v) => v.getTime()));
   });
 
-  it("parses and stringifies example contract data correctly", () => {
+  it("parses and stringifies example Move module data correctly", () => {
     const candlestick: DatabaseJsonType["arena_candlesticks"] = {
       melee_id: "63",
       last_transaction_version: "6648021205",

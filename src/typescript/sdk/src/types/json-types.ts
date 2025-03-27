@@ -94,7 +94,7 @@ export type JsonTypes = ArenaJsonTypes & {
     cumulative_chat_messages: AggregatorSnapshot<Uint64String>;
   };
 
-  // The result of the contract's `market_view` view function. NOT the database view.
+  // The result of the module's `market_view` view function. NOT the database view.
   MarketView: {
     metadata: JsonTypes["MarketMetadata"];
     sequence_info: JsonTypes["SequenceInfo"];
