@@ -8,10 +8,10 @@ description: Liquidity pools and yield farming
 ![LP](./LP.png "LP")
 
 Constant-product automated market makers (CPAMMs), like those used on
-emojicoin.fun, automatically set the trading price of two token, in this case an
-emojicoin denominated in APT. The initial ratio of these tokens sets price at
-the start of the CPAMM, while the liquidity curve dictates price changes for
-each swap transaction.
+emojicoin.fun, automatically set the trading price of two tokens — in
+this case, an emojicoin denominated in APT. The initial ratio of these
+tokens sets the price at the start of the CPAMM, while the liquidity curve
+dictates price changes for each swap transaction.
 
 ## How it works
 
