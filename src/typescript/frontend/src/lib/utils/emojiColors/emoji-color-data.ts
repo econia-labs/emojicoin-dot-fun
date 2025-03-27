@@ -1,7 +1,8 @@
 // cspell:word noto
 // cspell:word NOTO
 
-import { SymbolEmoji } from "@/sdk/index";
+import type { SymbolEmoji } from "@/sdk/index";
+
 import { getBooleanUserAgentSelectors } from "../user-agent-selectors";
 
 // Cache for loaded color modules

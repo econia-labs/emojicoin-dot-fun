@@ -1,6 +1,7 @@
 // cspell:ignore noto
 
 import { SYMBOL_EMOJIS } from "@/sdk/index";
+
 import appleEmojiColorData from "../../src/lib/utils/emojiColors/symbol-emojis/apple-symbol-emoji-colors";
 import notoEmojiColorData from "../../src/lib/utils/emojiColors/symbol-emojis/noto-symbol-emoji-colors";
 
