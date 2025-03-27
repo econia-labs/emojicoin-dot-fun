@@ -3,7 +3,7 @@ import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import {
   type AnyNumber,
   type AccountAddressString,
-  type TypeTagInput,
+  type TypeTagInput, SimulateSwap_v2,
 } from "@sdk/emojicoin_dot_fun";
 import { type TypeTag, type Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
@@ -80,7 +80,11 @@ export const simulateSwap = async (args: {
       ...args,
       integrator: INTEGRATOR_ADDRESS,
       integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
-    })
+    }).catch(async ()=> await SimulateSwap_v2.view({
+      ...args,
+      integrator: INTEGRATOR_ADDRESS,
+      integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
+    }))
   );
   return {
     base_volume: res.base_volume,

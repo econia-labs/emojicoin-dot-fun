@@ -58,7 +58,7 @@ export type EntryFunctionNames =
   | "remove_liquidity";
 
 export type AptosContextState = {
-  aptos: Aptos;
+  aptos: Aptos ;
   submit: (input: WalletInputTransactionData | null) => SubmissionResponse;
   signThenSubmit: (
     transactionBuilder: EntryFunctionTransactionBuilder | null

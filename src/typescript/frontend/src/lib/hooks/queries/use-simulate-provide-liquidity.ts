@@ -1,5 +1,5 @@
 import type { AnyNumber, AccountAddressString, TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import  {SimulateProvideLiquidity_v2 } from "@/contract-apis/emojicoin-dot-fun_v2";
+import  {SimulateProvideLiquidity_v2 ,SimulateRemoveLiquidity_v2} from "@/contract-apis/emojicoin-dot-fun_v2";
 import {type Aptos, type AptosConfig} from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -16,14 +16,16 @@ export const simulateProvideLiquidity = async (args: {
 }) => {
   return withResponseError(
       SimulateProvideLiquidity.view({
-        aptos:args.aptos,
+        aptos:args.aptos ,
         provider: "0x0",
           marketAddress:args.marketAddress,
           quoteAmount:args.quoteAmount
       }).catch(() =>
           SimulateProvideLiquidity_v2.view({
-            ...args,
-            provider: "0x0",
+              aptos:args.aptos  ,
+              provider: "0x0",
+              marketAddress:args.marketAddress,
+              quoteAmount:args.quoteAmount
           })
       )
   );
@@ -50,14 +52,33 @@ export const useSimulateProvideLiquidity = (args: {
       marketAddress,
       quoteAmount.toString(),
     ],
-    queryFn: () =>
-      invalid
-        ? {
-            base_amount: "0",
-            lp_coin_amount: "0",
-          }
-        : simulateProvideLiquidity({ aptos, ...args, marketAddress, quoteAmount }),
-    staleTime: Infinity,
+    queryFn: async () =>{
+        if (invalid) {
+            // 如果输入无效，返回默认值
+            return {
+                base_amount: "0",
+                lp_coin_amount: "0",
+            };
+        }
+        try {
+            // 第一次尝试使用第一代合约
+            return await SimulateProvideLiquidity.view({
+                aptos,
+                provider: "0x0",
+                marketAddress: marketAddress,
+                quoteAmount,
+            });
+        } catch (error) {
+            // 如果第一代合约调用失败，则尝试使用第二代合约
+            return await SimulateProvideLiquidity_v2.view({
+                aptos,
+                provider: "0x0",
+                marketAddress: marketAddress,
+                quoteAmount,
+            });
+        }
+         },
+      staleTime: Infinity,
   });
 
   return data;
@@ -73,7 +94,10 @@ export const simulateRemoveLiquidity = async (args: {
     SimulateRemoveLiquidity.view({
       ...args,
       provider: "0x0",
-    })
+    }).catch(()=> SimulateRemoveLiquidity_v2.view({
+        ...args,
+        provider: "0x0",
+    }))
   );
 };
 
