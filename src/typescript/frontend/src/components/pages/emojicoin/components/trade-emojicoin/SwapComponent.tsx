@@ -23,7 +23,7 @@ import { getMaxSlippageSettings } from "utils/slippage";
 
 import { Flex, FlexGap } from "@/containers";
 import { useTooltip } from "@/hooks/index";
-import { toCoinTypes } from "@/sdk/markets/utils";
+import { toEmojicoinTypes } from "@/sdk/markets/utils";
 
 import FlipInputsArrow from "./FlipInputsArrow";
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
@@ -104,7 +104,7 @@ export default function SwapComponent({
   });
 
   useEffect(() => {
-    const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
+    const emojicoinType = toEmojicoinTypes(marketAddress).emojicoin.toString();
     setEmojicoinType(emojicoinType);
   }, [marketAddress, setEmojicoinType]);
 

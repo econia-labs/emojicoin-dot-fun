@@ -25,7 +25,7 @@ import {
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@/sdk/const";
 import { encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
 import { getEvents, getMarketAddress } from "@/sdk/emojicoin_dot_fun";
-import { fetchAllCurrentMeleeData, toArenaCoinTypes, toCoinTypesForEntry } from "@/sdk/markets";
+import { fetchAllCurrentMeleeData, toArenaCoinTypes, toEmojicoinTypesForEntry } from "@/sdk/markets";
 import { getAptosClient } from "@/sdk/utils";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
@@ -103,7 +103,7 @@ const InnerDisplayDebugData = () => {
               integrator: INTEGRATOR_ADDRESS,
               integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
               minOutputAmount: 0n,
-              typeTags: toCoinTypesForEntry(
+              typeTags: toEmojicoinTypesForEntry(
                 models.marketRegistrationEvents[0].marketMetadata.marketAddress
               ),
             })

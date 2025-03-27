@@ -9,7 +9,7 @@ import { useMemo } from "react";
 import { tryEd25519PublicKey } from "@/components/pages/launch-emojicoin/hooks/use-register-market";
 import { Swap } from "@/move-modules/emojicoin-dot-fun";
 import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
-import { toCoinTypesForEntry } from "@/sdk/markets/utils";
+import { toEmojicoinTypesForEntry } from "@/sdk/markets/utils";
 
 type Args = {
   aptos: Aptos;
@@ -86,7 +86,7 @@ export const useGetGasWithDefault = (args: {
     swapper,
     inputAmount,
     minOutputAmount,
-    typeTags: toCoinTypesForEntry(args.marketAddress),
+    typeTags: toEmojicoinTypesForEntry(args.marketAddress),
   });
 
   // Neither of these values will ever be zero if a meaningful value is returned,

@@ -3,12 +3,12 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { unstable_cache } from "next/cache";
 
-import { toCoinTypes } from "@/sdk/markets";
+import { toEmojicoinTypes } from "@/sdk/markets";
 
 import { fetchEmojicoinBalances } from "./fetch-emojicoin-balances";
 
 async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
-  const { emojicoin } = toCoinTypes(marketAddress);
+  const { emojicoin } = toEmojicoinTypes(marketAddress);
   const holders = await fetchEmojicoinBalances({ assetType: emojicoin });
 
   // Exclude the emojicoin market address from the holders list.

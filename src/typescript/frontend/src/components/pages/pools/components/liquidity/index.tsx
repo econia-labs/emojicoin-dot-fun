@@ -24,7 +24,7 @@ import React, { type PropsWithChildren, useEffect, useMemo, useState } from "rea
 
 import { Column, Flex, FlexGap } from "@/containers";
 import { useMatchBreakpoints } from "@/hooks/index";
-import { toCoinTypes } from "@/sdk/markets/utils";
+import { toEmojicoinTypes } from "@/sdk/markets/utils";
 
 import type { PoolsData } from "../../ClientPoolsPage";
 import { StyledAddLiquidityWrapper } from "./styled";
@@ -108,7 +108,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
     quoteAmount: liquidity ?? 0n,
   });
 
-  const { emojicoin } = marketAddress ? toCoinTypes(marketAddress) : { emojicoin: "" };
+  const { emojicoin } = marketAddress ? toEmojicoinTypes(marketAddress) : { emojicoin: "" };
 
   const removeLiquidityResult = useSimulateRemoveLiquidity({
     marketAddress,
