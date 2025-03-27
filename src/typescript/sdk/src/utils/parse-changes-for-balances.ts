@@ -2,14 +2,14 @@ import {
   AccountAddress,
   type AccountAddressInput,
   parseTypeTag,
-  type TypeTag,
   type UserTransactionResponse,
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 
-import { APTOS_COIN_TYPE_TAG } from "../const";
+import { APTOS_COIN_TYPE_STRING } from "../const";
 import type { TypeTagInput } from "../emojicoin_dot_fun/types";
 import { type JSONFeeStatement, toFeeStatement } from "../types/core";
+import type { CoinTypeString } from "./type-tags";
 
 /* eslint-disable-next-line import/no-unused-modules */
 export const getFeeStatement = (response: UserTransactionResponse) => {
@@ -30,7 +30,7 @@ export const getCoinBalanceFromChanges = ({
 }: {
   response: UserTransactionResponse;
   userAddress: AccountAddressInput;
-  coinType: TypeTag;
+  coinType: CoinTypeString;
 }) => {
   const { changes } = response;
   const coinBalanceChange = changes.find((change) => {
@@ -65,5 +65,5 @@ export const getAptBalanceFromChanges = (
   getCoinBalanceFromChanges({
     response,
     userAddress,
-    coinType: APTOS_COIN_TYPE_TAG,
+    coinType: APTOS_COIN_TYPE_STRING,
   });
