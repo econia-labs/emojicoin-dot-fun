@@ -9,6 +9,7 @@ import {
   type HexInput,
   type InputGenerateTransactionOptions,
   parseTypeTag,
+  type TypeTag,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
@@ -39,36 +40,29 @@ import {
 } from "../emojicoin_dot_fun";
 import type { Flatten } from "../types";
 import type { JsonTypes } from "../types/json-types";
+import type { AnyNumberString, Types } from "../types/types";
 import {
-  type AnyNumberString,
   toMarketResource,
   toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
-  type Types,
 } from "../types/types";
-import {
-  type CoinTypeString,
-  getResourceFromWriteSet,
-  STRUCT_STRINGS,
-  toCoinTypeString,
-  TYPE_TAGS,
-} from "../utils";
+import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
 import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import type { AtLeastOne } from "../utils/utility-types";
 
 export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
-  emojicoin: CoinTypeString;
-  emojicoinLP: CoinTypeString;
+  emojicoin: TypeTag;
+  emojicoinLP: TypeTag;
 } {
   const marketAddress = AccountAddress.from(inputAddress);
   const prefix = `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}`;
 
   return {
-    emojicoin: toCoinTypeString(`${prefix}::Emojicoin`),
-    emojicoinLP: toCoinTypeString(`${prefix}::EmojicoinLP`),
+    emojicoin: parseTypeTag(`${prefix}::Emojicoin`),
+    emojicoinLP: parseTypeTag(`${prefix}::EmojicoinLP`),
   };
 }
 
@@ -79,11 +73,9 @@ export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
  * @param marketAddress the market address
  * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
  */
-export function toEmojicoinTypesForEntry(
-  marketAddress: AccountAddressInput
-): [CoinTypeString, CoinTypeString] {
+export function toEmojicoinTypesForEntry(marketAddress: AccountAddressInput) {
   const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
-  return [emojicoin, emojicoinLP] as [CoinTypeString, CoinTypeString];
+  return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
 }
 
 /**

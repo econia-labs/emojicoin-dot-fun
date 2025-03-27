@@ -1,4 +1,4 @@
-import type { AccountAddress } from "@aptos-labs/ts-sdk";
+import type { AccountAddress, TypeTag } from "@aptos-labs/ts-sdk";
 import { hexToBytes } from "@noble/hashes/utils";
 
 import {
@@ -9,7 +9,7 @@ import {
 } from "../const";
 import type { SymbolEmoji } from "../emoji_data";
 import type { AccountAddressString } from "../emojicoin_dot_fun/types";
-import type { CoinTypeString, STRUCT_STRINGS } from "../utils";
+import type { STRUCT_STRINGS } from "../utils";
 import { standardizeAddress } from "../utils/account-address";
 import type { Flatten } from ".";
 import type { ArenaTypes } from "./arena-types";
@@ -60,8 +60,8 @@ export type WithMarketID = {
 export type Types = ArenaTypes & {
   EmojicoinInfo: {
     marketAddress: AccountAddress;
-    emojicoin: CoinTypeString;
-    emojicoinLP: CoinTypeString;
+    emojicoin: TypeTag;
+    emojicoinLP: TypeTag;
   };
 
   TableHandle: {

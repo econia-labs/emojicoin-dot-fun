@@ -1,14 +1,13 @@
-import {
-  type Account,
-  AccountAddress,
-  type AccountAddressInput,
-  Aptos,
-  AptosConfig,
-  type InputGenerateTransactionOptions,
-  type LedgerVersionArg,
-  type UserTransactionResponse,
-  type WaitForTransactionOptions,
+import type {
+  Account,
+  AccountAddressInput,
+  InputGenerateTransactionOptions,
+  LedgerVersionArg,
+  TypeTag,
+  UserTransactionResponse,
+  WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
+import { AccountAddress, Aptos, AptosConfig } from "@aptos-labs/ts-sdk";
 
 import {
   Chat,
@@ -35,7 +34,7 @@ import { TableName } from "../indexer-v2/types/json-types";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { toArenaCoinTypes } from "../markets/arena-utils";
 import { type AnyNumberString, toMarketView, toRegistryView, toSwapEvent } from "../types";
-import { type CoinTypeString, waitFor } from "../utils";
+import { waitFor } from "../utils";
 import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
 import customExpect from "./expect";
 
@@ -687,7 +686,7 @@ export class EmojicoinClient {
 
   private getEmojicoinInfo(symbolEmojis: SymbolEmoji[]): {
     marketAddress: AccountAddress;
-    typeTags: [CoinTypeString, CoinTypeString];
+    typeTags: [TypeTag, TypeTag];
   } {
     const { marketAddress, emojicoin, emojicoinLP } = getEmojicoinMarketAddressAndTypeTags({
       symbolBytes: this.emojisToHexSymbol(symbolEmojis),

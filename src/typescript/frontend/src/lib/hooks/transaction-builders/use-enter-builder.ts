@@ -1,9 +1,9 @@
+import type { TypeTag } from "@aptos-labs/ts-sdk";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { Enter } from "@/move-modules/emojicoin-arena";
 import { toArenaCoinTypes } from "@/sdk/markets";
-import type { CoinTypeString } from "@/sdk/utils";
 import type { AnyNumberString } from "@/sdk-types";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
@@ -39,7 +39,7 @@ export const useEnterTransactionBuilder = (
         emojicoin1,
         emojicoinLP1,
         targetMarketAddress === market0Address ? emojicoin0 : emojicoin1,
-      ] as [CoinTypeString, CoinTypeString, CoinTypeString, CoinTypeString, CoinTypeString],
+      ] as [TypeTag, TypeTag, TypeTag, TypeTag, TypeTag],
     };
   }, [accountAddress, inputAmount, lockIn, market0Address, market1Address, targetMarketAddress]);
 

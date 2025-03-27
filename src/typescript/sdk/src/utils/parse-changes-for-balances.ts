@@ -1,18 +1,15 @@
-import {
-  AccountAddress,
-  type AccountAddressInput,
-  parseTypeTag,
-  type UserTransactionResponse,
-  type WriteSetChangeWriteResource,
+import type {
+  AccountAddressInput,
+  TypeTag,
+  UserTransactionResponse,
+  WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
+import { AccountAddress, parseTypeTag } from "@aptos-labs/ts-sdk";
 
 import { APTOS_COIN_TYPE_STRING } from "../const";
 import type { TypeTagInput } from "../emojicoin_dot_fun/types";
-import {
-  isWriteSetChangeWriteResource,
-  type JSONFeeStatement,
-  toFeeStatement,
-} from "../types/core";
+import type { JSONFeeStatement } from "../types/core";
+import { isWriteSetChangeWriteResource, toFeeStatement } from "../types/core";
 import type { CoinStoreString, CoinTypeString } from "./type-tags";
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -36,7 +33,7 @@ export const getCoinBalanceFromChanges = ({
 }: {
   response: UserTransactionResponse;
   userAddress: AccountAddressInput;
-  coinType: CoinTypeString;
+  coinType: CoinTypeString | TypeTag;
 }) => {
   const { changes } = response;
   const coinBalanceChange = changes.find((change) => {

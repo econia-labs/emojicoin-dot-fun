@@ -1,8 +1,9 @@
+import type { TypeTag } from "@aptos-labs/ts-sdk";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 
 import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/move-modules";
 
-import type { CoinTypeString, MarketEmojiData, SymbolEmoji, Types } from "../../../src";
+import type { MarketEmojiData, SymbolEmoji, Types } from "../../../src";
 import {
   compareBigInt,
   encodeEmojis,
@@ -200,7 +201,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     const moreSharedArgs = {
       marketAddress,
-      typeTags: [emojicoin, emojicoinLP] as [CoinTypeString, CoinTypeString],
+      typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
     };
 
     const swapResponse = await Swap.submit({
@@ -253,7 +254,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     const moreSharedArgs = {
       marketAddress,
-      typeTags: [emojicoin, emojicoinLP] as [CoinTypeString, CoinTypeString],
+      typeTags: [emojicoin, emojicoinLP] as [TypeTag, TypeTag],
     };
 
     const swapResponse = await SwapWithRewards.submit({
@@ -333,18 +334,12 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     const moreSharedArgsForMarket_1 = {
       marketAddress: marketMetadata_1.marketAddress,
-      typeTags: [marketMetadata_1.emojicoin, marketMetadata_1.emojicoinLP] as [
-        CoinTypeString,
-        CoinTypeString,
-      ],
+      typeTags: [marketMetadata_1.emojicoin, marketMetadata_1.emojicoinLP] as [TypeTag, TypeTag],
     };
 
     const moreSharedArgsForMarket_2 = {
       marketAddress: marketMetadata_2.marketAddress,
-      typeTags: [marketMetadata_2.emojicoin, marketMetadata_2.emojicoinLP] as [
-        CoinTypeString,
-        CoinTypeString,
-      ],
+      typeTags: [marketMetadata_2.emojicoin, marketMetadata_2.emojicoinLP] as [TypeTag, TypeTag],
     };
 
     const swap_1 = await SwapWithRewards.submit({
@@ -429,18 +424,12 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     const moreSharedArgsForMarket_1 = {
       marketAddress: marketMetadata_1.marketAddress,
-      typeTags: [marketMetadata_1.emojicoin, marketMetadata_1.emojicoinLP] as [
-        CoinTypeString,
-        CoinTypeString,
-      ],
+      typeTags: [marketMetadata_1.emojicoin, marketMetadata_1.emojicoinLP] as [TypeTag, TypeTag],
     };
 
     const moreSharedArgsForMarket_2 = {
       marketAddress: marketMetadata_2.marketAddress,
-      typeTags: [marketMetadata_2.emojicoin, marketMetadata_2.emojicoinLP] as [
-        CoinTypeString,
-        CoinTypeString,
-      ],
+      typeTags: [marketMetadata_2.emojicoin, marketMetadata_2.emojicoinLP] as [TypeTag, TypeTag],
     };
 
     const swaps = new Array<Types["SwapEvent"]>();

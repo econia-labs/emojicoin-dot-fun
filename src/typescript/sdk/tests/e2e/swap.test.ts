@@ -1,10 +1,6 @@
-import {
-  AccountAddress,
-  isFeePayerSignature,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import type { TypeTag, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { AccountAddress, isFeePayerSignature } from "@aptos-labs/ts-sdk";
 
-import type { CoinTypeString} from "../../src";
 import { SYMBOL_EMOJI_DATA } from "../../src";
 import { ONE_APT } from "../../src/const";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
@@ -45,7 +41,7 @@ describe("tests the swap functionality", () => {
     integrator: randomIntegrator.accountAddress,
     integratorFeeRateBPs: 0,
     minOutputAmount: 1n,
-    typeTags: [pooEmojicoin, pooLPCoin] as [CoinTypeString, CoinTypeString],
+    typeTags: [pooEmojicoin, pooLPCoin] as [TypeTag, TypeTag],
   };
 
   beforeAll(async () => {

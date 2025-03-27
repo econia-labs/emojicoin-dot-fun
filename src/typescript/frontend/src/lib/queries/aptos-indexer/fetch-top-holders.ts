@@ -4,12 +4,14 @@ import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { unstable_cache } from "next/cache";
 
 import { toEmojicoinTypes } from "@/sdk/markets";
+import type { CoinTypeString } from "@/sdk/utils";
 
 import { fetchEmojicoinBalances } from "./fetch-emojicoin-balances";
 
 async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
   const { emojicoin } = toEmojicoinTypes(marketAddress);
-  const holders = await fetchEmojicoinBalances({ assetType: emojicoin });
+  const assetType = emojicoin.toString() as CoinTypeString;
+  const holders = await fetchEmojicoinBalances({ assetType });
 
   // Exclude the emojicoin market address from the holders list.
   const market = AccountAddress.from(marketAddress);

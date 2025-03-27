@@ -1,10 +1,10 @@
-import type { AccountAddressInput, LedgerVersionArg } from "@aptos-labs/ts-sdk";
+import type { AccountAddressInput, LedgerVersionArg, TypeTag } from "@aptos-labs/ts-sdk";
 
 import { type SymbolEmoji, toMarketEmojiData } from "../emoji_data";
 import { EmojicoinArena, getMarketAddress, MarketView } from "../emojicoin_dot_fun";
 import { toMarketView } from "../types";
 import { toArenaMeleeEvent, toArenaRegistry } from "../types/arena-types";
-import { type CoinTypeString, getAptosClient } from "../utils";
+import { getAptosClient } from "../utils";
 import type { StrictXOR } from "../utils/utility-types";
 import { toEmojicoinTypesForEntry } from "./utils";
 
@@ -28,10 +28,10 @@ export const toArenaCoinTypes = (args: StrictXOR<ArenaSymbols, ArenaMarketAddres
       : [getMarketAddress(args.symbol0), getMarketAddress(args.symbol1)];
 
   return [...toEmojicoinTypesForEntry(address0), ...toEmojicoinTypesForEntry(address1)] as [
-    CoinTypeString,
-    CoinTypeString,
-    CoinTypeString,
-    CoinTypeString,
+    TypeTag,
+    TypeTag,
+    TypeTag,
+    TypeTag,
   ];
 };
 

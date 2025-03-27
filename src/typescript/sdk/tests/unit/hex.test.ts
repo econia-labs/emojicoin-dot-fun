@@ -1,8 +1,9 @@
 // cspell:word abcdeg
 
+import type { TypeTagStruct } from "@aptos-labs/ts-sdk";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 
-import type { CoinTypeString, StructTagString } from "../../src";
+import type { StructTagString } from "../../src";
 import {
   APTOS_COIN_TYPE_STRING,
   chunk,
@@ -184,30 +185,36 @@ describe("hex utility functions", () => {
   it("should remove leading zeroes from an emojicoin type tag with leading zeros", () => {
     // Since the factory address can change, just find an address with leading zeros randomly.
     // There's a 1/16 chance it will start with a leading zero.
-    let base: CoinTypeString;
-    let lp: CoinTypeString;
+    let base: TypeTagStruct;
+    let lp: TypeTagStruct;
     do {
       const { emojis } = generateRandomSymbol();
       const marketAddress = getMarketAddress(emojis.map((v) => v.emoji));
       const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
-      if (emojicoin.toString().startsWith("0x0")) {
+      if (
+        emojicoin.toString().startsWith("0x0") &&
+        emojicoin.isStruct() &&
+        emojicoinLP.isStruct()
+      ) {
         base = emojicoin;
         lp = emojicoinLP;
         break;
       }
     } while (true);
 
-    const baseNoLeadingZeros = removeLeadingZerosFromStructString(base);
-    const lpNoLeadingZeros = removeLeadingZerosFromStructString(lp);
+    const baseTypeString = base.toString();
+    const baseNoLeadingZeros = removeLeadingZerosFromStructString(baseTypeString);
+    const lpTypeString = lp.toString();
+    const lpNoLeadingZeros = removeLeadingZerosFromStructString(lpTypeString);
 
-    expect(base.startsWith("0x0")).toBe(true);
+    expect(baseTypeString.startsWith("0x0")).toBe(true);
     expect(baseNoLeadingZeros.startsWith("0x0")).toBe(false);
-    expect(base.endsWith("::coin_factory::Emojicoin")).toBe(true);
+    expect(baseTypeString.endsWith("::coin_factory::Emojicoin")).toBe(true);
     expect(baseNoLeadingZeros.endsWith("::coin_factory::Emojicoin")).toBe(true);
 
-    expect(lp.startsWith("0x0")).toBe(true);
+    expect(lpTypeString.startsWith("0x0")).toBe(true);
     expect(lpNoLeadingZeros.startsWith("0x0")).toBe(false);
-    expect(lp.endsWith("::coin_factory::EmojicoinLP")).toBe(true);
+    expect(lpTypeString.endsWith("::coin_factory::EmojicoinLP")).toBe(true);
     expect(lpNoLeadingZeros.endsWith("::coin_factory::EmojicoinLP")).toBe(true);
   }, 2000);
 
