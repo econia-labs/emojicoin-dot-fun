@@ -34,7 +34,8 @@ cspell:word presales
 - **Social Interaction**: Emojis are inherently social, and are often used to
   express emotions and ideas in digital communication. The emojicoin.fun
   platform encourages a community-driven atmosphere where users can bond over
-  their emojicoins through a per-market chat feature based entirely on emojis.
+  their emojicoins through a chat feature for each market, based entirely on
+  emojis.
 - **Inclusive Environment**: By leveraging the universal appeal of emojis,
   emojicoin.fun creates an inclusive trading environment that welcomes users
   from all walks of life.

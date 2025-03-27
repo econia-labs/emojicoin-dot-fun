@@ -26,12 +26,12 @@ transition, anyone can provide liquidity into the CPAMM!
 For a more in-depth overview of the emojicoin dot fun mechanism design, see
 the [emojicoin dot fun blackpaper]!
 
-## Emojicoin or else
+## emojicoin or else
 
 The only coins that can be launched are emojicoins from the
 [Unicode emoji library].
 
-## Emojicoin CPAMM Pool
+## emojicoin CPAMM Pool
 
 The emojicoin CPAMM follows the constant-product equation popularized by Uniswap
 v2:
@@ -40,7 +40,7 @@ $$
 X \cdot Y = K
 $$
 
-## Emojicoin lifecycle: launch to pool
+## emojicoin lifecycle: launch to pool
 
 **Introduction**: Congratulations! You've decided to launch an emojicoin! Head
 on over to emojicoin.fun for a seamless experience, powered by the Aptos

@@ -39,7 +39,7 @@ Before we begin, you will need the following:
    ![eth6](./images/eth6.png "eth6")
 1. Enter the amount of funds you would like to turn into APT
 
-Congrats! You are now ready to start trading at Emojicoin.fun with the APT you
+Congrats! You are now ready to start trading at emojicoin.fun with the APT you
 now have in your wallet!
 
 [the aptos bridge]: https://theaptosbridge.com/
