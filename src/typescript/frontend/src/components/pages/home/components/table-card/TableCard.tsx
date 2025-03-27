@@ -169,23 +169,18 @@ const TableCard = ({
               ? LAYOUT_DURATION * 0.25
               : LAYOUT_DURATION,
       }}
-      whileHover={
-        {
-          filter: "brightness(1.05) saturate(1.1)",
-          boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-          transition: {
-            filter: { duration: 0.05 },
-            boxShadow: { duration: 0.05 },
-          },
-        }
-      }
+      whileHover={{
+        filter: "brightness(1.05) saturate(1.1)",
+        boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
+        transition: {
+          filter: { duration: 0.05 },
+          boxShadow: { duration: 0.05 },
+        },
+      }}
       {...props}
     >
       <EmojiMarketPageLink emojis={emojis}>
-        <motion.div
-          animate={controls}
-          variants={animationsOn ? glowVariants : {}}
-        >
+        <motion.div animate={controls} variants={animationsOn ? glowVariants : {}}>
           <motion.div
             className="flex flex-col relative grid-emoji-card w-full h-full py-[10px] px-[19px] overflow-hidden"
             whileHover="hover"
