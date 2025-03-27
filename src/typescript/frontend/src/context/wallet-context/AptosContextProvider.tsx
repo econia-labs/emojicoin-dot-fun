@@ -1,6 +1,5 @@
 import {
   type Aptos,
-  APTOS_COIN,
   AptosApiError,
   isUserTransactionResponse,
   type PendingTransactionResponse,
@@ -32,6 +31,7 @@ import type {
   EntryFunctionTransactionBuilder,
   WalletInputTransactionData,
 } from "@/sdk/emojicoin_dot_fun/payload-builders";
+import { APTOS_COIN_TYPE_STRING } from "@/sdk/index";
 import { sleep } from "@/sdk/utils";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { useLatestBalance } from "@/store/latest-balance/store";
@@ -112,7 +112,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
 
-  const aptHelper = useLatestBalance(account?.address, APTOS_COIN);
+  const aptHelper = useLatestBalance(account?.address, APTOS_COIN_TYPE_STRING);
   const emojicoinHelper = useLatestBalance(account?.address, emojicoin);
   const emojicoinLPHelper = useLatestBalance(account?.address, emojicoinLP);
 

@@ -20,7 +20,7 @@ export async function postBCSViewFunction<
   const serializer = new Serializer();
   payload.serialize(serializer);
   const bytes = serializer.toUint8Array();
-  const { data, headers } = await postAptosFullNode<Uint8Array, T>({
+  const res = await postAptosFullNode<Uint8Array, T>({
     aptosConfig,
     path: "view",
     originMethod: "view",
@@ -28,8 +28,9 @@ export async function postBCSViewFunction<
     params: { ledger_version: options?.ledgerVersion },
     body: bytes,
   });
+
   return {
-    data: data as T,
-    headers: headers as Headers,
+    data: res.data as T,
+    headers: res.headers as Headers,
   };
 }
