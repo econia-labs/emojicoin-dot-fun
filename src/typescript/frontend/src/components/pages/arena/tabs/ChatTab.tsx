@@ -1,18 +1,20 @@
-import { useChatEventsQuery } from "../../emojicoin/components/chat/useChatEventsQuery";
-import { Column, Flex } from "@/components/layout";
-import { motion } from "framer-motion";
-import { LoadMore } from "@/components/ui/table/loadMore";
-import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
-import { useEffect, useMemo, useRef } from "react";
-import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { useEventStore } from "context/event-store-context";
-import _ from "lodash";
+import type { ArenaPositionModel, MarketStateModel } from "@econia-labs/emojicoin-sdk";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { MessageContainer } from "../../emojicoin/components/chat/components";
-import { type ArenaPositionModel, type MarketStateModel } from "@econia-labs/emojicoin-sdk";
-import { marketTernary } from "../utils";
-import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
+import { useEventStore } from "context/event-store-context";
+import { motion } from "framer-motion";
 import { useEmojiColors } from "lib/utils/emojiColors/use-emoji-colors";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
+import _ from "lodash";
+import { useEffect, useMemo, useRef } from "react";
+
+import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
+import { Column, Flex } from "@/components/layout";
+import { LoadMore } from "@/components/ui/table/loadMore";
+
+import { MessageContainer } from "../../emojicoin/components/chat/components";
+import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
+import { useChatEventsQuery } from "../../emojicoin/components/chat/useChatEventsQuery";
+import { marketTernary } from "../utils";
 
 interface Props {
   market0: MarketStateModel;
