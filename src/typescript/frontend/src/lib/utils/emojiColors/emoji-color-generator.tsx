@@ -1,7 +1,7 @@
 "use client";
 
 import { useEmojiPicker } from "context/emoji-picker-context";
-import React, { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { getEmojiDominantColor } from "./emoji-color-helpers";
 import SearchBar from "@/components/inputs/search-bar";
 import { notoColorEmoji } from "styles/fonts";
@@ -109,6 +109,10 @@ export const EmojiColorGenerator = () => {
                 isLoading={isLoading}
                 onClick={() => {
                   const colorsObject = Object.fromEntries(generatedColors.entries());
+                  // Remove the # from the hex string to reduce size.
+                  for (const [key, value] of Object.entries(colorsObject)) {
+                    colorsObject[key] = value.replace("#", "");
+                  }
                   navigator.clipboard.writeText(JSON.stringify(colorsObject));
                   toast.success("Copied to clipboard");
                 }}

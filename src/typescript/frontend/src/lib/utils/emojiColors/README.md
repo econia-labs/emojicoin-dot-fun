@@ -1,3 +1,7 @@
+<!---
+cspell:word noto
+-->
+
 # Emoji Color Generator
 
 This utility generates dominant color data for emoji characters.

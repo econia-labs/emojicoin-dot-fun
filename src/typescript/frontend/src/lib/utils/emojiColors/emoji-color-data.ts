@@ -40,7 +40,7 @@ const getSingleEmojiColor = async (emoji: SymbolEmoji, dataSource: Record<string
     return "#000000";
   }
 
-  return dataSource[emoji];
+  return `#${dataSource[emoji]}`;
 };
 
 export const getEmojiColor = async (emoji: SymbolEmoji[], userAgent?: string) => {
