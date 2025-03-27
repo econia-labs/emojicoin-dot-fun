@@ -2,14 +2,16 @@
 
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useMemo, useRef, useState } from "react";
-import { getEmojiDominantColor } from "./emoji-color-helpers";
-import SearchBar from "@/components/inputs/search-bar";
-import { notoColorEmoji } from "styles/fonts";
-import Button from "@/components/button";
-import { getBooleanUserAgentSelectors } from "../user-agent-selectors";
-import { CHAT_EMOJIS, SYMBOL_EMOJIS } from "@econia-labs/emojicoin-sdk";
-import AnimatedLoadingBoxes from "@/components/pages/launch-emojicoin/animated-loading-boxes";
 import { toast } from "react-toastify";
+import { notoColorEmoji } from "styles/fonts";
+
+import Button from "@/components/button";
+import SearchBar from "@/components/inputs/search-bar";
+import AnimatedLoadingBoxes from "@/components/pages/launch-emojicoin/animated-loading-boxes";
+import { CHAT_EMOJIS, SYMBOL_EMOJIS } from "@/sdk/index";
+
+import { getBooleanUserAgentSelectors } from "../user-agent-selectors";
+import { getEmojiDominantColor } from "./emoji-color-helpers";
 
 export const EmojiColorGenerator = () => {
   const emojis = useEmojiPicker((s) => s.emojis);

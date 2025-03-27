@@ -1,6 +1,7 @@
-import { type SymbolEmoji } from "@econia-labs/emojicoin-sdk";
 import { useQuery } from "@tanstack/react-query";
+
 import { getEmojiColor } from "./emoji-color-data";
+import { SymbolEmoji } from "@/sdk/index";
 
 /**
  * A hook to fetch color information for emojis.
