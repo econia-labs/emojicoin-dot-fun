@@ -10,7 +10,7 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 

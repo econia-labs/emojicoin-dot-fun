@@ -23,7 +23,7 @@ export const WalletAddressCell = ({
 
   return (
     <a
-      href={`${ROUTES.wallet}/${address}`}
+      href={`${ROUTES.wallet}/${resolvedName}`}
       className={cn("flex h-full", className)}
       onClick={(e) => e.stopPropagation()}
     >
