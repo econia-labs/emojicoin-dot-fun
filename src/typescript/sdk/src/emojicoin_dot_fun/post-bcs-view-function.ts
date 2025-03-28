@@ -11,16 +11,17 @@ import {
 
 import { toConfig } from "../utils/aptos-utils";
 
-export async function postBCSViewFunction<
-  T extends MoveValue[],
-  Headers extends Record<string, unknown> = Record<string, never>,
->(args: { aptosConfig: Aptos | AptosConfig; payload: EntryFunction; options?: LedgerVersionArg }) {
+export async function postBCSViewFunction<T extends Array<MoveValue>>(args: {
+  aptosConfig: Aptos | AptosConfig;
+  payload: EntryFunction;
+  options?: LedgerVersionArg;
+}): Promise<T> {
   const { payload, options } = args;
   const aptosConfig = toConfig(args.aptosConfig);
   const serializer = new Serializer();
   payload.serialize(serializer);
   const bytes = serializer.toUint8Array();
-  const res = await postAptosFullNode<Uint8Array, T>({
+  const { data } = await postAptosFullNode<Uint8Array, MoveValue[]>({
     aptosConfig,
     path: "view",
     originMethod: "view",
@@ -28,9 +29,5 @@ export async function postBCSViewFunction<
     params: { ledger_version: options?.ledgerVersion },
     body: bytes,
   });
-
-  return {
-    data: res.data as T,
-    headers: res.headers as Headers,
-  };
+  return data as T;
 }
