@@ -69,10 +69,7 @@ const MessageContainer = ({
                   {displayName}
                 </span>
               </a>
-              <Emoji
-                className="pixel-heading-4 text-light-gray uppercase"
-                emojis={message.senderRank}
-              />
+              <Emoji className="pixel-heading-4 text-light-gray uppercase" emojis={message.label} />
             </FlexGap>
           </StyledUserNameWrapper>
         </StyledMessageWrapper>

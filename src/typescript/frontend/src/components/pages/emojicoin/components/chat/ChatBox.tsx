@@ -42,7 +42,7 @@ const ChatBox = (props: ChatProps) => {
       message: {
         sender: s.chat.user,
         text: s.chat.message,
-        senderRank: getRankFromEvent(s.chat).rankIcon,
+        label: getRankFromEvent(s.chat).rankIcon,
         version: s.transaction.version,
       },
       shouldAnimateAsInsertion: i === 0 && !initialLoad.current,

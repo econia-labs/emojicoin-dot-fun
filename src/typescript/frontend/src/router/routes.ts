@@ -25,6 +25,7 @@ const expanded = expandRoutes({
   arena: _,
   cult: _,
   dev: {
+    "color-generator": _,
     metadata: _,
     "verify-status": _,
     "verify-api-keys": _,

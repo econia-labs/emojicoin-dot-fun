@@ -34,7 +34,7 @@ import { getAptosClient } from "@/sdk/utils";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
-  "flex p-3 !text-white h-auto m-auto border border-sky-100 border-solid uppercase min-w-[15ch] hover:bg-dark-gray";
+  "flex p-3 !text-white h-auto m-auto border border-sky-100 border-solid uppercase min-w-[18ch] hover:bg-dark-gray justify-center";
 
 const InnerDisplayDebugData = () => {
   const { account, connect, connected, wallet } = useWallet();
@@ -156,7 +156,7 @@ const InnerDisplayDebugData = () => {
                 {"Fund me"} {emoji("money bag")}
               </span>
             </button>
-            <a className={cn(debugButtonClassName, "justify-start")} href={ROUTES["test-utils"]}>
+            <a className={cn(debugButtonClassName, "justify-center")} href={ROUTES["test-utils"]}>
               <span className="rotate-[-22.5deg]">{"/"}</span>
               <span className="lowercase">{"test-utils"}</span>
             </a>
@@ -175,6 +175,13 @@ const InnerDisplayDebugData = () => {
             >
               {"init arena"}
             </button>
+            <a
+              className={cn(debugButtonClassName, "justify-center")}
+              href={ROUTES["dev"]["color-generator"]}
+            >
+              <span className="rotate-[-22.5deg]">{"/"}</span>
+              <span className="lowercase">{"color-generator"}</span>
+            </a>
           </>
         )}
       </div>

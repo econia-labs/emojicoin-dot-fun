@@ -9,6 +9,6 @@ export type MessageContainerProps = {
 type MessageType = {
   sender: string;
   text: string;
-  senderRank: string;
+  label: string;
   version: bigint;
 };

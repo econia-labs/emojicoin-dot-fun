@@ -194,3 +194,10 @@ export function formatRgb({ r, g, b }: { r: number; g: number; b: number }) {
     hexString: rgbToHex(r, g, b),
   };
 }
+
+export function getGradientFromColors(colors: string[]) {
+  if (colors.length === 1) return colors[0];
+  const step = 100 / (colors.length - 1);
+  const gradientStops = colors.map((color, i) => `${color} ${i * step}%`).join(", ");
+  return `linear-gradient(0deg, ${gradientStops})`;
+}

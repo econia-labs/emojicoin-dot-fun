@@ -1,8 +1,6 @@
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { motion } from "framer-motion";
-import { useEmojiColors } from "lib/utils/emojiColors/use-emoji-colors";
-import { getRankFromEvent } from "lib/utils/get-user-rank";
 import _ from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -60,7 +58,7 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
         marketID: s.market.marketID,
         sender: s.chat.user,
         text: s.chat.message,
-        senderRank: getRankFromEvent(s.chat).rankIcon,
+        label: s.market.symbolData.symbol,
         version: s.transaction.version,
       },
       shouldAnimateAsInsertion: i === 0 && !initialLoad.current,
@@ -71,22 +69,6 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
     setMode("chat");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-
-  const { data: emoji0Color } = useEmojiColors(market0.market.symbolEmojis);
-  const { data: emoji1Color } = useEmojiColors(market1.market.symbolEmojis);
-
-  const bgColors = useMemo(() => {
-    if (!emoji0Color || !emoji1Color) return;
-    const color0 =
-      emoji0Color.length > 1
-        ? `linear-gradient(0deg, ${emoji0Color[0]} 0%, ${emoji0Color[1]} 100%)`
-        : emoji0Color[0];
-    const color1 =
-      emoji1Color.length > 1
-        ? `linear-gradient(0deg, ${emoji1Color[0]} 0%, ${emoji1Color[1]} 100%)`
-        : emoji1Color[0];
-    return { color0, color1 };
-  }, [emoji0Color, emoji1Color]);
 
   return (
     <Column className="relative" width="100%" height="100%" flexGrow={1}>
@@ -102,9 +84,6 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
               index={sortedChats.length - index}
               shouldAnimateAsInsertion={shouldAnimateAsInsertion}
               alignLeft={message.marketID === market0.market.marketID}
-              backgroundColor={
-                message.marketID === market0.market.marketID ? bgColors?.color0 : bgColors?.color1
-              }
             />
           ))}
           <LoadMore
