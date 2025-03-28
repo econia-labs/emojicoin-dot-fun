@@ -1,9 +1,11 @@
 // cspell:word abcdeg
 
-import { AccountAddress, type TypeTagStruct } from "@aptos-labs/ts-sdk";
+import type { TypeTagStruct } from "@aptos-labs/ts-sdk";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 
+import type { StructTagString } from "../../src";
 import {
-  APTOS_COIN_TYPE_TAG,
+  APTOS_COIN_TYPE_STRING,
   chunk,
   deserializeToHexString,
   generateRandomSymbol,
@@ -13,10 +15,9 @@ import {
   removeLeadingZeros,
   removeLeadingZerosFromStructString,
   standardizeAddress,
-  type StructTagString,
   toAccountAddress,
   toAccountAddressString,
-  toCoinTypes,
+  toEmojicoinTypes,
   zip,
 } from "../../src";
 
@@ -178,7 +179,7 @@ describe("hex utility functions", () => {
       "0x225708cc6557dcea948575ad85e8849322f7c13ad176f80c51514f36a34a9a0::module::Struct"
     );
     expect(removeLeadingZerosFromStructString(assetType3)).toEqual("0x1::module::Struct");
-    expect(removeLeadingZerosFromStructString(assetType4)).toEqual(APTOS_COIN_TYPE_TAG.toString());
+    expect(removeLeadingZerosFromStructString(assetType4)).toEqual(APTOS_COIN_TYPE_STRING);
   });
 
   it("should remove leading zeroes from an emojicoin type tag with leading zeros", () => {
@@ -189,7 +190,7 @@ describe("hex utility functions", () => {
     do {
       const { emojis } = generateRandomSymbol();
       const marketAddress = getMarketAddress(emojis.map((v) => v.emoji));
-      const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+      const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
       if (
         emojicoin.toString().startsWith("0x0") &&
         emojicoin.isStruct() &&

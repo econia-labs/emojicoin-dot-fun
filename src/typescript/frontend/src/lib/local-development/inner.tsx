@@ -25,7 +25,11 @@ import {
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@/sdk/const";
 import { encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
 import { getEvents, getMarketAddress } from "@/sdk/emojicoin_dot_fun";
-import { fetchAllCurrentMeleeData, toArenaCoinTypes, toCoinTypesForEntry } from "@/sdk/markets";
+import {
+  fetchAllCurrentMeleeData,
+  toArenaCoinTypes,
+  toEmojicoinTypesForEntry,
+} from "@/sdk/markets";
 import { getAptosClient } from "@/sdk/utils";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
@@ -40,9 +44,9 @@ const InnerDisplayDebugData = () => {
   const handleCrank = async (definedAccount: AccountInfo) =>
     // Use fire and water if on the local network, otherwise get the actual melee data.
     fetchAllCurrentMeleeData()
-      .then(({ market1, market2 }) => [market1.symbolEmojis, market2.symbolEmojis])
-      .then(([symbol1, symbol2]) => {
-        const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol1, symbol2 });
+      .then(({ market0, market1 }) => [market0.symbolEmojis, market1.symbolEmojis])
+      .then(([symbol0, symbol1]) => {
+        const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol0, symbol1 });
         EmojicoinArena.Enter.builder({
           aptosConfig: aptos.config,
           entrant: definedAccount.address,
@@ -103,7 +107,7 @@ const InnerDisplayDebugData = () => {
               integrator: INTEGRATOR_ADDRESS,
               integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
               minOutputAmount: 0n,
-              typeTags: toCoinTypesForEntry(
+              typeTags: toEmojicoinTypesForEntry(
                 models.marketRegistrationEvents[0].marketMetadata.marketAddress
               ),
             })

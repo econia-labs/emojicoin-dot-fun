@@ -1,15 +1,16 @@
-import {
-  AccountAddress,
-  type AccountAddressInput,
-  parseTypeTag,
-  type TypeTag,
-  type UserTransactionResponse,
-  type WriteSetChangeWriteResource,
+import type {
+  AccountAddressInput,
+  TypeTag,
+  UserTransactionResponse,
+  WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
+import { AccountAddress, parseTypeTag } from "@aptos-labs/ts-sdk";
 
-import { APTOS_COIN_TYPE_TAG } from "../const";
+import { APTOS_COIN_TYPE_STRING } from "../const";
 import type { TypeTagInput } from "../emojicoin_dot_fun/types";
-import { type JSONFeeStatement, toFeeStatement } from "../types/core";
+import type { JSONFeeStatement } from "../types/core";
+import { isWriteSetChangeWriteResource, toFeeStatement } from "../types/core";
+import type { CoinStoreString, CoinTypeString } from "./type-tags";
 
 /* eslint-disable-next-line import/no-unused-modules */
 export const getFeeStatement = (response: UserTransactionResponse) => {
@@ -19,9 +20,11 @@ export const getFeeStatement = (response: UserTransactionResponse) => {
   return toFeeStatement(jsonFeeStatement);
 };
 
-/* eslint-disable-next-line import/no-unused-modules */
-export const toCoinStore = (type: TypeTagInput) =>
-  parseTypeTag(`0x1::coin::CoinStore<${type.toString()}>`);
+export const toCoinTypeString = (type: TypeTagInput) =>
+  parseTypeTag(type.toString()).toString() as CoinTypeString;
+
+export const toCoinStoreString = (type: TypeTagInput) =>
+  `0x1::coin::CoinStore<${toCoinTypeString(type)}>` as CoinStoreString;
 
 export const getCoinBalanceFromChanges = ({
   response,
@@ -30,23 +33,22 @@ export const getCoinBalanceFromChanges = ({
 }: {
   response: UserTransactionResponse;
   userAddress: AccountAddressInput;
-  coinType: TypeTag;
+  coinType: CoinTypeString | TypeTag;
 }) => {
   const { changes } = response;
   const coinBalanceChange = changes.find((change) => {
-    const changeType = change.type;
-    if (changeType !== "write_resource") return false;
+    if (!isWriteSetChangeWriteResource(change)) return false;
 
-    const { address } = change as WriteSetChangeWriteResource;
+    const { address } = change;
     if (!AccountAddress.from(userAddress).equals(AccountAddress.from(address))) return false;
 
-    const resourceType = (change as WriteSetChangeWriteResource).data.type;
+    const resourceType = change.data.type;
     // Normalize the coin type, otherwise leading zeros can cause the comparison to fail.
     const changeCoinType = parseTypeTag(resourceType).toString();
-    if (changeCoinType !== toCoinStore(coinType).toString()) return false;
+    if (changeCoinType !== toCoinStoreString(coinType)) return false;
 
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    const changeData = (change as WriteSetChangeWriteResource).data.data as any;
+    const changeData = change.data.data as any;
     return typeof changeData.coin.value === "string";
   }) as WriteSetChangeWriteResource | undefined;
 
@@ -65,5 +67,5 @@ export const getAptBalanceFromChanges = (
   getCoinBalanceFromChanges({
     response,
     userAddress,
-    coinType: APTOS_COIN_TYPE_TAG,
+    coinType: APTOS_COIN_TYPE_STRING,
   });

@@ -12,7 +12,7 @@ import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
 import { encodeEmojis, type SymbolEmoji } from "../emoji_data";
 import type { JsonTypes } from "../types/json-types";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
-import { typeTagInputToStructName } from "../utils/type-tags";
+import { type StructTagString, typeTagInputToStructName } from "../utils/type-tags";
 import {
   arenaConverter,
   type ArenaEvents,
@@ -105,7 +105,7 @@ function getEventsMaybeWithIndices(
   }
 
   response.events.forEach((event, eventIndex): void => {
-    const structName = typeTagInputToStructName(event.type);
+    const structName = typeTagInputToStructName(event.type as StructTagString);
     if (!structName || (!isAnEmojicoinStructName(structName) && !isAnArenaStructName(structName))) {
       return;
     }

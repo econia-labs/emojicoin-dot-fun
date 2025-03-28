@@ -1,4 +1,4 @@
-import type { Aptos, TypeTag } from "@aptos-labs/ts-sdk";
+import type { Aptos } from "@aptos-labs/ts-sdk";
 import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useQuery } from "@tanstack/react-query";
 import Big from "big.js";
@@ -9,7 +9,7 @@ import { useMemo } from "react";
 import { tryEd25519PublicKey } from "@/components/pages/launch-emojicoin/hooks/use-register-market";
 import { Swap } from "@/move-modules/emojicoin-dot-fun";
 import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
-import { toCoinTypes } from "@/sdk/markets/utils";
+import { toEmojicoinTypesForEntry } from "@/sdk/markets/utils";
 
 type Args = {
   aptos: Aptos;
@@ -67,10 +67,7 @@ export const useGetGasWithDefault = (args: {
   isSell: boolean;
   numSwaps: number;
 }) => {
-  const { marketAddress } = args;
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
   const { aptos, account } = useAptos();
-  const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
   const { inputAmount, swapper, minOutputAmount } = useMemo(() => {
     const bigInput = Big(args.inputAmount.toString());
     const inputAmount = BigInt(bigInput.toString());
@@ -89,7 +86,7 @@ export const useGetGasWithDefault = (args: {
     swapper,
     inputAmount,
     minOutputAmount,
-    typeTags,
+    typeTags: toEmojicoinTypesForEntry(args.marketAddress),
   });
 
   // Neither of these values will ever be zero if a meaningful value is returned,

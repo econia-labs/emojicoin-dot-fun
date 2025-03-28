@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Chat } from "@/move-modules/emojicoin-dot-fun";
 import { MAX_NUM_CHAT_EMOJIS } from "@/sdk/const";
 import { toChatMessageEntryFunctionArgs } from "@/sdk/emoji_data/chat-message";
-import { toCoinTypesForEntry } from "@/sdk/markets";
+import { toEmojicoinTypesForEntry } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 
@@ -23,7 +23,7 @@ export const useChatTransactionBuilder = (marketAddress: `0x${string}`) => {
     }
     const emojiText = emojis.join("");
     const { emojiBytes, emojiIndicesSequence } = toChatMessageEntryFunctionArgs(emojiText);
-    const typeTags = toCoinTypesForEntry(marketAddress);
+    const typeTags = toEmojicoinTypesForEntry(marketAddress);
     return {
       user: account.address,
       marketAddress,

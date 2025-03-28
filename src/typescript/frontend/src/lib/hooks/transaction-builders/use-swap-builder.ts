@@ -3,7 +3,7 @@ import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { useMemo } from "react";
 
 import { Swap } from "@/move-modules";
-import { toCoinTypesForEntry } from "@/sdk/markets";
+import { toEmojicoinTypesForEntry } from "@/sdk/markets";
 import type { AnyNumberString } from "@/sdk-types";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
@@ -31,7 +31,7 @@ export const useSwapTransactionBuilder = (
       isSell,
       integrator: INTEGRATOR_ADDRESS,
       integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
-      typeTags: toCoinTypesForEntry(marketAddress),
+      typeTags: toEmojicoinTypesForEntry(marketAddress),
       minOutputAmount: BigInt(minOutputAmount),
     };
   }, [accountAddress, marketAddress, inputAmount, isSell, minOutputAmount]);

@@ -99,10 +99,10 @@ console.log(registerEvents.marketRegistrationEvents[0]);
 
 ```typescript
 // Using variables from above...
-import { getMarketAddress, toCoinTypesForEntry } from "@econia-labs/emojicoin-sdk";
+import { getMarketAddress, toEmojicoinTypesForEntry } from "@econia-labs/emojicoin-sdk";
 
 const marketAddress = getMarketAddress(emojis);
-const typeTags = toCoinTypesForEntry(marketAddress);
+const typeTags = toEmojicoinTypesForEntry(marketAddress);
 
 await SwapWithRewards.submit({
   aptosConfig: aptos.config,

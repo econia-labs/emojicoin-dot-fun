@@ -1,21 +1,20 @@
-import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
+import type { TypeTag } from "@aptos-labs/ts-sdk";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 
 import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/move-modules";
 
+import type { MarketEmojiData, SymbolEmoji, Types } from "../../../src";
 import {
   compareBigInt,
   encodeEmojis,
   enumerate,
   getEmojicoinMarketAddressAndTypeTags,
   getEvents,
-  type MarketEmojiData,
   maxBigInt,
   ONE_APT,
   sleep,
   SYMBOL_EMOJI_DATA,
-  type SymbolEmoji,
   toMarketEmojiData,
-  type Types,
   zip,
 } from "../../../src";
 import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";

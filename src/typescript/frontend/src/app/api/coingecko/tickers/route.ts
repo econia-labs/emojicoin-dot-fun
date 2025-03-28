@@ -2,7 +2,7 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
 
-import { APTOS_COIN_TYPE_TAG } from "@/sdk/const";
+import { APTOS_COIN_TYPE_STRING } from "@/sdk/const";
 import { postgrest } from "@/sdk/indexer-v2/queries/client";
 import { TableName } from "@/sdk/indexer-v2/types";
 import { toNominal, toNominalPrice } from "@/sdk/utils";
@@ -52,14 +52,12 @@ export async function GET(request: NextRequest) {
     .order("market_id")
     .range(skip, skip + limit - 1);
 
-  const APTOS_COIN = APTOS_COIN_TYPE_TAG.toString();
-
   const aptPrice = await getAptPrice();
 
   const data = markets.data?.map((e) => ({
-    ticker_id: `${e.market_address}::coin_factory::Emojicoin_${APTOS_COIN}`,
+    ticker_id: `${e.market_address}::coin_factory::Emojicoin_${APTOS_COIN_TYPE_STRING}`,
     base_currency: `${e.market_address}::coin_factory::Emojicoin`,
-    target_currency: APTOS_COIN,
+    target_currency: APTOS_COIN_TYPE_STRING,
     pool_id: e.symbol_emojis.join(""),
     last_price: toNominalPrice(e.last_swap_avg_execution_price_q64).toString(),
     base_volume: toNominal(BigInt(e.daily_base_volume)).toString(),

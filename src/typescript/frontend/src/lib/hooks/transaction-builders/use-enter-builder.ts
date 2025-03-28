@@ -3,7 +3,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { Enter } from "@/move-modules/emojicoin-arena";
-import { toCoinTypes } from "@/sdk/markets";
+import { toArenaCoinTypes } from "@/sdk/markets";
 import type { AnyNumberString } from "@/sdk-types";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
@@ -25,8 +25,10 @@ export const useEnterTransactionBuilder = (
     if (!accountAddress) {
       return null;
     }
-    const { emojicoin: emojicoin0, emojicoinLP: emojicoinLP0 } = toCoinTypes(market0Address);
-    const { emojicoin: emojicoin1, emojicoinLP: emojicoinLP1 } = toCoinTypes(market1Address);
+    const [emojicoin0, emojicoinLP0, emojicoin1, emojicoinLP1] = toArenaCoinTypes({
+      market0Address,
+      market1Address,
+    });
     return {
       entrant: accountAddress,
       inputAmount: BigInt(inputAmount),

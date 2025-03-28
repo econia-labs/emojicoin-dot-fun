@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 
-import type { TypeTag, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { ProvideLiquidity, Swap } from "@/move-modules/emojicoin-dot-fun";
 
@@ -20,7 +20,7 @@ describe("queries for liquidity pools", () => {
   const inputAmount = EXACT_TRANSITION_INPUT_AMOUNT;
   const integrator = registrants[0].accountAddress;
 
-  it("queries a user's liquidity pools with the rpc function call", async () => {
+  it("queries a user's liquidity pools", async () => {
     const registrant = registrants[0];
     const [swapper, provider] = [registrant, registrant];
 
@@ -40,7 +40,6 @@ describe("queries for liquidity pools", () => {
 
     const responses: UserTransactionResponse[] = [];
     for (const { marketAddress, emojicoin, emojicoinLP } of markets) {
-      const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
       await Swap.submit({
         aptosConfig,
         swapper,
@@ -50,7 +49,7 @@ describe("queries for liquidity pools", () => {
         minOutputAmount: 1n,
         integrator,
         integratorFeeRateBPs: 0,
-        typeTags,
+        typeTags: [emojicoin, emojicoinLP],
       });
       const res = await ProvideLiquidity.submit({
         aptosConfig,
@@ -58,7 +57,7 @@ describe("queries for liquidity pools", () => {
         marketAddress,
         quoteAmount: 1000n,
         minLpCoinsOut: 1n,
-        typeTags,
+        typeTags: [emojicoin, emojicoinLP],
       });
       responses.push(res);
     }
