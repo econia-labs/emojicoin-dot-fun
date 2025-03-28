@@ -1,4 +1,10 @@
-import { Account, Ed25519PrivateKey, Hex, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  Ed25519PrivateKey,
+  PrivateKey,
+  PrivateKeyVariants,
+  type UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import findGitRoot from "find-git-root";
 import path from "path";
 
@@ -25,8 +31,11 @@ export const getPublisherPrivateKey = () => {
   if (!process.env.PUBLISHER_PRIVATE_KEY) {
     throw new Error("process.env.PUBLISHER_PRIVATE_KEY must be set.");
   }
-  const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
-  const privateKey = new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array());
+  const privateKeyString = PrivateKey.formatPrivateKey(
+    process.env.PUBLISHER_PRIVATE_KEY,
+    PrivateKeyVariants.Ed25519
+  );
+  const privateKey = new Ed25519PrivateKey(privateKeyString);
   return privateKey;
 };
 
