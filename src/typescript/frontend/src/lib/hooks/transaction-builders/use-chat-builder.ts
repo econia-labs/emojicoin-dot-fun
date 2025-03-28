@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { MAX_NUM_CHAT_EMOJIS } from "@/sdk/const";
 import { toChatMessageEntryFunctionArgs } from "@/sdk/emoji_data/chat-message";
-import { Chat } from "@/sdk/emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
+import { Chat } from "@/move-modules/emojicoin-dot-fun";
 import { toCoinTypesForEntry } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";

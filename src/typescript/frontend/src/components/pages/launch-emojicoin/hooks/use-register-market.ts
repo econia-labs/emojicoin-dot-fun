@@ -18,7 +18,7 @@ import {
   MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST,
 } from "@/sdk/const";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
-import { RegisterMarket } from "@/sdk/emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
+import { RegisterMarket } from "@/move-modules/emojicoin-dot-fun";
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {

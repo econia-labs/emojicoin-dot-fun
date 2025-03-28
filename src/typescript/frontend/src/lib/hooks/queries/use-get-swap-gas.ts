@@ -8,7 +8,7 @@ import { useMemo } from "react";
 
 import { tryEd25519PublicKey } from "@/components/pages/launch-emojicoin/hooks/use-register-market";
 import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
-import { Swap } from "@/sdk/emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
+import { Swap } from "@/move-modules/emojicoin-dot-fun";
 import { toCoinTypes } from "@/sdk/markets/utils";
 
 type Args = {

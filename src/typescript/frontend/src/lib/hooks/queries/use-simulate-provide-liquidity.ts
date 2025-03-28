@@ -7,7 +7,7 @@ import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojic
 import {
   SimulateProvideLiquidity,
   SimulateRemoveLiquidity,
-} from "@/sdk/emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
+} from "@/move-modules/emojicoin-dot-fun";
 
 const simulateProvideLiquidity = async (args: {
   aptos: Aptos;
