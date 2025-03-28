@@ -26,7 +26,6 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
-import type { Flatten } from "..";
 import type { StructTagString } from "../utils/type-tags";
 import { postBCSViewFunction } from "./post-bcs-view-function";
 import serializeEntryArgsToJsonArray from "./serialize-entry-args-to-json";
@@ -192,18 +191,7 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
   }
 }
 
-type ReturnHeadersArg = { returnHeaders?: boolean };
-type AptosResponseHeaders = Record<string, unknown> & { "x-aptos-ledger-version": number };
-/**
- * Defaults to headers that includes the ledger version on-chain at the time of the view function
- * response. If a type is specified, the object resolves to those extra `key: values` as well.
- */
-type WithHeaders<T, H extends AptosResponseHeaders> = Flatten<{
-  data: T;
-  headers: Flatten<H>;
-}>;
-
-export abstract class ViewFunctionPayloadBuilder<T extends MoveValue[]> {
+export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
   public abstract readonly moduleAddress: AccountAddress;
 
   public abstract readonly moduleName: string;
@@ -222,26 +210,7 @@ export abstract class ViewFunctionPayloadBuilder<T extends MoveValue[]> {
     };
   }
 
-  /**
-   * Executes a view function with the provided arguments.
-   * @param args Object containing aptos client/config and options
-   * @returns When `options.returnHeaders` is true, returns `{ data: T, headers: H }`
-   * @returns When `options.returnHeaders` is not true, returns `T`
-   */
-  async view<H extends AptosResponseHeaders>(args: {
-    aptos: Aptos | AptosConfig;
-    options: LedgerVersionArg & ReturnHeadersArg & { returnHeaders: true };
-  }): Promise<WithHeaders<T, H>>;
-  async view(args: {
-    aptos: Aptos | AptosConfig;
-    options?: Omit<LedgerVersionArg & ReturnHeadersArg, "returnHeaders"> & {
-      returnHeaders?: false | undefined;
-    };
-  }): Promise<T>;
-  async view<H extends AptosResponseHeaders>(args: {
-    aptos: Aptos | AptosConfig;
-    options?: LedgerVersionArg & ReturnHeadersArg;
-  }): Promise<T | WithHeaders<T, H>> {
+  async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }): Promise<T> {
     const entryFunction = EntryFunction.build(
       `${this.moduleAddress.toString()}::${this.moduleName}`,
       this.functionName,
@@ -249,15 +218,12 @@ export abstract class ViewFunctionPayloadBuilder<T extends MoveValue[]> {
       this.argsToArray()
     );
     const { aptos, options } = args;
-    const viewRequest = await postBCSViewFunction<T, H>({
+    const viewRequest = await postBCSViewFunction<T>({
       aptosConfig: aptos,
       payload: entryFunction,
       options,
     });
-    if (options?.returnHeaders) {
-      return viewRequest;
-    }
-    return viewRequest.data;
+    return viewRequest as T;
   }
 
   argsToArray(): Array<EntryFunctionArgumentTypes> {
