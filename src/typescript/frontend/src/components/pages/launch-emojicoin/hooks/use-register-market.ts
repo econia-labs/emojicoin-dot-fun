@@ -12,13 +12,13 @@ import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useMarketRegisterTransactionBuilder } from "lib/hooks/transaction-builders/use-market-register-builder";
 import { useCallback, useMemo } from "react";
 
+import { RegisterMarket } from "@/move-modules/emojicoin-dot-fun";
 import {
   MARKET_REGISTRATION_FEE,
   MARKET_REGISTRATION_GAS_ESTIMATION_FIRST,
   MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST,
 } from "@/sdk/const";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
-import { RegisterMarket } from "@/move-modules/emojicoin-dot-fun";
 
 export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {

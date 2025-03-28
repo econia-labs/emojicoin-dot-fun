@@ -2,9 +2,9 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
+import { Chat } from "@/move-modules/emojicoin-dot-fun";
 import { MAX_NUM_CHAT_EMOJIS } from "@/sdk/const";
 import { toChatMessageEntryFunctionArgs } from "@/sdk/emoji_data/chat-message";
-import { Chat } from "@/move-modules/emojicoin-dot-fun";
 import { toCoinTypesForEntry } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
