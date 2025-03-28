@@ -60,7 +60,8 @@ const selectChatsByMarketID = ({
   const query = postgrest
     .from(TableName.ChatEvents)
     .select("*")
-    .order("transaction_timestamp", ORDER_BY.DESC)
+    .order("transaction_version", ORDER_BY.DESC)
+    .order("event_index", ORDER_BY.DESC)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (Array.isArray(marketID)) {
