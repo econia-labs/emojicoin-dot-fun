@@ -13,12 +13,12 @@ import { useTransactionBuilder } from "./use-transaction-builder";
  * The individual args here must be passed to avoid re-renders due to a new object of args being
  * passed on re-renders.
  */
-export const useChatTransactionBuilder = (marketAddress: `0x${string}`) => {
+export const useChatTransactionBuilder = (marketAddress?: `0x${string}`) => {
   const { account } = useAptos();
   const emojis = useEmojiPicker((s) => s.emojis);
 
   const memoizedArgs = useMemo(() => {
-    if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS) {
+    if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS || !marketAddress) {
       return null;
     }
     const emojiText = emojis.join("");

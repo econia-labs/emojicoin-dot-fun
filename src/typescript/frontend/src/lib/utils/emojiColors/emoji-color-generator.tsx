@@ -8,10 +8,10 @@ import { notoColorEmoji } from "styles/fonts";
 import Button from "@/components/button";
 import SearchBar from "@/components/inputs/search-bar";
 import AnimatedLoadingBoxes from "@/components/pages/launch-emojicoin/animated-loading-boxes";
-import { CHAT_EMOJIS, SYMBOL_EMOJIS } from "@/sdk/index";
+import { CHAT_EMOJIS, SYMBOL_EMOJI_DATA, SYMBOL_EMOJIS } from "@/sdk/index";
 
 import { getBooleanUserAgentSelectors } from "../user-agent-selectors";
-import { getEmojiDominantColor } from "./emoji-color-helpers";
+import { getEmojiDominantColor, getGradientFromColors } from "./emoji-color-helpers";
 
 export const EmojiColorGenerator = () => {
   const emojis = useEmojiPicker((s) => s.emojis);
@@ -57,6 +57,17 @@ export const EmojiColorGenerator = () => {
     setGeneratedColors(colorsMap);
     setIsLoading(false);
   };
+
+  const gradients = useMemo(
+    () =>
+      getGradientFromColors(
+        emojis
+          .filter(SYMBOL_EMOJI_DATA.hasEmoji)
+          .map((v) => getEmojiDominantColor(v))
+          .map((v) => v.hexString)
+      ),
+    [emojis]
+  );
 
   return (
     <div className="flex flex-col items-center gap-y-3">
@@ -137,6 +148,20 @@ export const EmojiColorGenerator = () => {
                   </div>
                 );
               })}
+          </div>
+        </div>
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          <div className="flex flex-col items-center gap-y-4">
+            <h1 className="pixel-heading-3">Emoji gradients</h1>
+            <div className="flex flex-row items-center gap-2 min-h-[270px]">
+              <div
+                className="flex min-h-[270px] w-[200px]"
+                style={{
+                  backgroundImage: emojis.length > 1 ? gradients : undefined,
+                  backgroundColor: emojis.length === 1 ? gradients : undefined,
+                }}
+              ></div>
+            </div>
           </div>
         </div>
       </div>
