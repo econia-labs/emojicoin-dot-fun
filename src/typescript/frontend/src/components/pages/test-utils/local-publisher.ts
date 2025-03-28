@@ -1,4 +1,10 @@
-import { Account, Ed25519PrivateKey, Hex, Network } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  Ed25519PrivateKey,
+  Network,
+  PrivateKey,
+  PrivateKeyVariants,
+} from "@aptos-labs/ts-sdk";
 
 import { APTOS_NETWORK } from "@/sdk/const";
 
@@ -11,6 +17,7 @@ export const getLocalPublisher = () => {
   }
   const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
   if (!privateKeyString) throw new Error("Publisher private key not set.");
-  const privateKey = new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array());
+  const formatted = PrivateKey.formatPrivateKey(privateKeyString, PrivateKeyVariants.Ed25519);
+  const privateKey = new Ed25519PrivateKey(formatted);
   return Account.fromPrivateKey({ privateKey });
 };
