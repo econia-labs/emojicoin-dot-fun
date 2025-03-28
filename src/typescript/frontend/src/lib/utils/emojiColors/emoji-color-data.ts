@@ -44,8 +44,9 @@ const getSingleEmojiColor = async (emoji: SymbolEmoji, dataSource: Record<string
   return `#${dataSource[emoji]}`;
 };
 
-export const getEmojiColor = async (emoji: SymbolEmoji[], userAgent?: string) => {
-  if (!userAgent) userAgent = window.navigator.userAgent;
+export const getEmojiColor = async (emoji: SymbolEmoji[], userAgentArg?: string) => {
+  const userAgent = userAgentArg || window?.navigator.userAgent || "";
+  if (!userAgent) console.warn("No user agent string in `getEmojiColor`");
   const { isIOS, isMacOs } = getBooleanUserAgentSelectors(userAgent);
   const dataSource = await getColorModule(isIOS || isMacOs || false);
   const colors = await Promise.all(emoji.map((e) => getSingleEmojiColor(e, dataSource)));
