@@ -1,9 +1,4 @@
-import {
-  AccountAddress,
-  parseTypeTag,
-  TypeTag,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import { AccountAddress, TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import type { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
@@ -11,7 +6,7 @@ import { emoji } from "utils";
 
 import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun";
 import { getEventsAsProcessorModelsFromResponse } from "@/sdk/indexer-v2/mini-processor";
-import { getAptBalanceFromChanges, getCoinBalanceFromChanges } from "@/sdk/utils";
+import { getAptBalanceFromChanges, getCoinBalanceFromChanges, toCoinTypeString } from "@/sdk/utils";
 
 export const setBalancesFromWriteset = ({
   response,
@@ -36,10 +31,10 @@ export const setBalancesFromWriteset = ({
 
   const newAptBalance = getAptBalanceFromChanges(response, userAddress);
   const newEmojicoinBalance = emojicoin
-    ? getCoinBalanceFromChanges({ response, userAddress, coinType: parseTypeTag(emojicoin) })
+    ? getCoinBalanceFromChanges({ response, userAddress, coinType: toCoinTypeString(emojicoin) })
     : undefined;
   const newEmojicoinLPBalance = emojicoinLP
-    ? getCoinBalanceFromChanges({ response, userAddress, coinType: parseTypeTag(emojicoinLP) })
+    ? getCoinBalanceFromChanges({ response, userAddress, coinType: toCoinTypeString(emojicoinLP) })
     : undefined;
   // Update the user's balance if the coins are present in the write set changes.
   if (typeof newAptBalance !== "undefined") setAptBalance(newAptBalance);

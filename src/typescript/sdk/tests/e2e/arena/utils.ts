@@ -44,9 +44,9 @@ export const registerAndUnlockInitialMarketsForArenaTest = async () => {
   const { res3, res4 } = await fetchArenaRegistryView().then((res) =>
     fetchArenaMeleeView(res.currentMeleeID)
       .then(fetchMeleeEmojiData)
-      .then(async ({ market1, market2 }) => ({
-        res3: await emojicoin.buy(publisher, market1.symbolEmojis, 1n),
-        res4: await emojicoin.buy(publisher, market2.symbolEmojis, 1n),
+      .then(async ({ market0, market1 }) => ({
+        res3: await emojicoin.buy(publisher, market0.symbolEmojis, 1n),
+        res4: await emojicoin.buy(publisher, market1.symbolEmojis, 1n),
       }))
   );
 
@@ -85,22 +85,22 @@ export const setNextMeleeDurationAndEnsureCrank = async (
 ) => {
   const { currentMeleeID } = await fetchArenaRegistryView();
   const melee = await fetchArenaMeleeView(currentMeleeID).then(fetchMeleeEmojiData);
-  const [symbol1, symbol2] = [melee.market1.symbolEmojis, melee.market2.symbolEmojis];
+  const [symbol0, symbol1] = [melee.market0.symbolEmojis, melee.market1.symbolEmojis];
   const emojicoin = new EmojicoinClient();
   const publisher = getPublisher();
   // End the first melee by cranking with `enter` and set the next melee's duration.
   await emojicoin.arena.setNextMeleeDuration(publisher, nextDuration);
-  const crank = await emojicoin.arena.enter(publisher, 1n, false, symbol1, symbol2, "symbol1");
+  const crank = await emojicoin.arena.enter(publisher, 1n, false, symbol0, symbol1, "symbol0");
   const { currentMeleeID: newMeleeID } = await fetchArenaRegistryView();
   const newMelee = await fetchArenaMeleeView(newMeleeID).then(fetchMeleeEmojiData);
-  const [newSymbol1, newSymbol2] = [newMelee.market1.symbolEmojis, newMelee.market2.symbolEmojis];
+  const [newSymbol0, newSymbol1] = [newMelee.market0.symbolEmojis, newMelee.market1.symbolEmojis];
   expect(newMeleeID).toEqual(currentMeleeID + 1n);
   expect(newMelee.view.duration).toEqual(nextDuration);
   return {
     melee: newMelee,
     meleeID: newMeleeID,
+    symbol0: newSymbol0,
     symbol1: newSymbol1,
-    symbol2: newSymbol2,
     version: crank.response.version,
   };
 };

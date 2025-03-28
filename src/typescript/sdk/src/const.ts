@@ -9,6 +9,7 @@ import Big from "big.js";
 
 import type { DatabaseStructType } from "./indexer-v2/types/json-types";
 import type { Types } from "./types";
+import type { CoinTypeString } from "./utils";
 import type { ValueOf } from "./utils/utility-types";
 
 export const VERCEL = process.env.VERCEL === "1";
@@ -92,7 +93,7 @@ export const INTEGRATOR_ADDRESS = (() =>
 export const INTEGRATOR_FEE_RATE_BPS = Number(process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS);
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
-export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);
+export const APTOS_COIN_TYPE_STRING = parseTypeTag(APTOS_COIN).toString() as CoinTypeString;
 export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
 export const EMOJICOIN_DOT_FUN_MODULE_NAME = "emojicoin_dot_fun";

@@ -40,13 +40,12 @@ import {
 } from "../emojicoin_dot_fun";
 import type { Flatten } from "../types";
 import type { JsonTypes } from "../types/json-types";
+import type { AnyNumberString, Types } from "../types/types";
 import {
-  type AnyNumberString,
   toMarketResource,
   toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
-  type Types,
 } from "../types/types";
 import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
@@ -54,17 +53,16 @@ import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import type { AtLeastOne } from "../utils/utility-types";
 
-export function toCoinTypes(inputAddress: AccountAddressInput): {
+export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
   emojicoinLP: TypeTag;
 } {
   const marketAddress = AccountAddress.from(inputAddress);
+  const prefix = `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}`;
 
   return {
-    emojicoin: parseTypeTag(`${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::Emojicoin`),
-    emojicoinLP: parseTypeTag(
-      `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::EmojicoinLP`
-    ),
+    emojicoin: parseTypeTag(`${prefix}::Emojicoin`),
+    emojicoinLP: parseTypeTag(`${prefix}::EmojicoinLP`),
   };
 }
 
@@ -75,8 +73,8 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
  * @param marketAddress the market address
  * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
  */
-export function toCoinTypesForEntry(marketAddress: AccountAddressInput): [TypeTag, TypeTag] {
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+export function toEmojicoinTypesForEntry(marketAddress: AccountAddressInput) {
+  const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
   return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
 }
 
@@ -96,7 +94,7 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
   const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array()).emojis.map((e) => e.emoji);
   const marketAddress = getMarketAddress(emojis, registryAddress);
 
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+  const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
 
   return {
     marketAddress,

@@ -1,9 +1,5 @@
-import {
-  AccountAddress,
-  isFeePayerSignature,
-  type TypeTag,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import type { TypeTag, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { AccountAddress, isFeePayerSignature } from "@aptos-labs/ts-sdk";
 
 import { SYMBOL_EMOJI_DATA } from "../../src";
 import { ONE_APT } from "../../src/const";

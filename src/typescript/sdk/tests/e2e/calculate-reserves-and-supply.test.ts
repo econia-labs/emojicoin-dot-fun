@@ -1,12 +1,12 @@
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
+import type { SymbolEmoji } from "../../src";
 import {
   calculateCirculatingSupply,
   calculateRealReserves,
   fetchCirculatingSupply,
   fetchRealReserves,
-  type SymbolEmoji,
-  toCoinTypes,
+  toEmojicoinTypes,
   zip,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
@@ -40,7 +40,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     const [swapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
     const buyAmount = ONE_APT_BIGINT;
     const coinAddress = getMarketAddress(symbolEmojis);
-    const coinType = toCoinTypes(coinAddress).emojicoin;
+    const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
     const userAddress = swapper.accountAddress;
 
     const { supplyAfterBuy, userBalance } = await emojicoin
@@ -110,7 +110,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     const sellAmountEmojicoin = ONE_APT_BIGINT * 2n;
     const userAddress = swapper.accountAddress;
     const coinAddress = getMarketAddress(symbolEmojis);
-    const coinType = toCoinTypes(coinAddress).emojicoin;
+    const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
 
     await emojicoin
       .buy(swapper, symbolEmojis, buyAmountQuote)
@@ -155,7 +155,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     const buyAmount = ONE_APT_BIGINT;
     const userAddress = swapper.accountAddress;
     const coinAddress = getMarketAddress(symbolEmojis);
-    const coinType = toCoinTypes(coinAddress).emojicoin;
+    const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
 
     const { userBalance, baseAfterBuy } = await emojicoin
       .buy(swapper, symbolEmojis, buyAmount)
@@ -211,7 +211,7 @@ describe("tests the calculation functions for circulating supply and real reserv
 
     const userAddress = swapper.accountAddress;
     const coinAddress = getMarketAddress(symbolEmojis);
-    const coinType = toCoinTypes(coinAddress).emojicoin;
+    const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
 
     // Verify the real reserves equals the total supply - circulating supply.
     const verifyCSAndReserves = (response: UserTransactionResponse, swap: SwapEventModel) => {

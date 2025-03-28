@@ -2,7 +2,7 @@ import type { Account } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 
 import {
-  APTOS_COIN_TYPE_TAG,
+  APTOS_COIN_TYPE_STRING,
   calculateCurvePrice,
   getCoinBalanceFromChanges,
   getMarketAddress,
@@ -11,7 +11,7 @@ import {
   ONE_APT_BIGINT,
   PreciseBig,
   type SymbolEmoji,
-  toCoinTypes,
+  toEmojicoinTypes,
   zip,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
@@ -97,7 +97,7 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
     emoji: bigint;
   }> => {
     const marketAddress = getMarketAddress(symbolEmojis);
-    const coinTypes = toCoinTypes(marketAddress);
+    const coinTypes = toEmojicoinTypes(marketAddress);
     return await getMarketResource({ aptos, marketAddress })
       .then((market) => calculateCurvePrice(market))
       .then((beforePrice) =>
@@ -130,7 +130,7 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
         const apt = getCoinBalanceFromChanges({
           response,
           userAddress: registrant.accountAddress,
-          coinType: APTOS_COIN_TYPE_TAG,
+          coinType: APTOS_COIN_TYPE_STRING,
         })!;
         const emoji = getCoinBalanceFromChanges({
           response,
