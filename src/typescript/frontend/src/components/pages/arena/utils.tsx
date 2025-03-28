@@ -1,6 +1,5 @@
 import type { ClassValue } from "clsx";
-import React, { useState } from "react";
-import darkTheme from "theme/dark";
+import React from "react";
 import { GlowingEmoji } from "utils/emoji";
 
 import { useMatchBreakpoints } from "@/hooks/index";
@@ -64,12 +63,6 @@ export const EmojiTitle = ({
     (isLaptop ? 0.69 : 1) *
     getFontMultiplier(emojiCount);
 
-  const [hover0, setHover0] = useState<boolean>(false);
-  const [hover1, setHover1] = useState<boolean>(false);
-
-  const baseCircleStyle =
-    "absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] rounded-full z-[-1]";
-
   return (
     <div
       className="grid place-items-center uppercase w-[100%]"
@@ -78,63 +71,11 @@ export const EmojiTitle = ({
         gridTemplateColumns: "1fr auto 1fr",
       }}
     >
-      <span
-        className={`relative z-[2] ${onClicks !== undefined ? "cursor-pointer" : ""}`}
-        onClick={onClicks?.emoji0}
-        onMouseEnter={() => setHover0(true)}
-        onMouseLeave={() => setHover0(false)}
-      >
-        <GlowingEmoji emojis={market0Symbols.join("")} />{" "}
-        {onClicks !== undefined && hover0 ? (
-          <>
-            <div
-              style={{
-                boxShadow: `0 0 16px 4px ${darkTheme.colors.econiaBlue}50`,
-              }}
-              className={`${baseCircleStyle} h-[1.5em] w-[1.5em] bg-ec-blue/75`}
-            ></div>
-            <div
-              style={{
-                boxShadow: `0 0 16px 8px ${darkTheme.colors.econiaBlue}50`,
-              }}
-              className={`${baseCircleStyle} h-[2.5em] w-[2.5em] bg-ec-blue/50`}
-            ></div>
-            <div className={`${baseCircleStyle} h-[3.5em] w-[3.5em] bg-ec-blue/25`}></div>
-          </>
-        ) : (
-          <></>
-        )}
-      </span>
+      <GlowingEmoji onClick={onClicks?.emoji0} emojis={market0Symbols.join("")} />
       <span style={{ fontSize: baseFontSize * 1.2 + "px" }} className="text-light-gray">
         vs
       </span>{" "}
-      <span
-        className={`relative z-[2] ${onClicks !== undefined ? "cursor-pointer" : ""}`}
-        onClick={onClicks?.emoji1}
-        onMouseEnter={() => setHover1(true)}
-        onMouseLeave={() => setHover1(false)}
-      >
-        <GlowingEmoji emojis={market1Symbols.join("")} />
-        {onClicks !== undefined && hover1 ? (
-          <>
-            <div
-              style={{
-                boxShadow: `0 0 16px 4px ${darkTheme.colors.pink}50`,
-              }}
-              className={`${baseCircleStyle} h-[1.5em] w-[1.5em] bg-pink/75`}
-            ></div>
-            <div
-              style={{
-                boxShadow: `0 0 16px 8px ${darkTheme.colors.pink}50`,
-              }}
-              className={`${baseCircleStyle} h-[2.5em] w-[2.5em] bg-pink/50`}
-            ></div>
-            <div className={`${baseCircleStyle} h-[3.5em] w-[3.5em] bg-pink/25`}></div>
-          </>
-        ) : (
-          <></>
-        )}
-      </span>
+      <GlowingEmoji onClick={onClicks?.emoji1} emojis={market1Symbols.join("")} />
     </div>
   );
 };

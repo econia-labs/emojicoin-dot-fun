@@ -47,7 +47,7 @@ const getTabs = (
   {
     name: "Chat",
     emoji: emoji("left speech bubble"),
-    element: <ChatTab />,
+    element: <ChatTab position={position} market0={market0} market1={market1} />,
   },
   {
     name: "Info",

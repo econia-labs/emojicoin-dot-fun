@@ -1,5 +1,4 @@
 import { EXTERNAL_LINK_PROPS } from "components/link";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import React, { useMemo } from "react";
@@ -18,16 +17,15 @@ import {
 } from "./styled";
 import type { MessageContainerProps } from "./types";
 
-const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageContainerProps) => {
-  const { addressName: connectedWalletName } = useAptos();
+const MessageContainer = ({
+  index,
+  message,
+  shouldAnimateAsInsertion,
+  alignLeft,
+  backgroundColor,
+}: MessageContainerProps) => {
   const senderAddressName = useNameResolver(message.sender);
-  const { fromAnotherUser, displayName } = useMemo(
-    () => ({
-      fromAnotherUser: senderAddressName === connectedWalletName,
-      displayName: formatDisplayName(senderAddressName),
-    }),
-    [connectedWalletName, senderAddressName]
-  );
+  const displayName = useMemo(() => formatDisplayName(senderAddressName), [senderAddressName]);
 
   const delay = React.useMemo(() => {
     // Start with minimal delay and increase logarithmically
@@ -50,8 +48,8 @@ const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageC
         },
       }}
     >
-      <StyledMessageContainer layout fromAnotherUser={fromAnotherUser}>
-        <StyledMessageWrapper layout fromAnotherUser={fromAnotherUser}>
+      <StyledMessageContainer layout alignLeft={alignLeft} backgroundColor={backgroundColor}>
+        <StyledMessageWrapper layout alignLeft={alignLeft}>
           <StyledMessageInner>
             <Emoji
               className="pt-[1ch] p-[0.25ch] text-xl tracking-widest"
@@ -71,10 +69,7 @@ const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageC
                   {displayName}
                 </span>
               </a>
-              <Emoji
-                className="pixel-heading-4 text-light-gray uppercase"
-                emojis={message.senderRank}
-              />
+              <Emoji className="pixel-heading-4 text-light-gray uppercase" emojis={message.label} />
             </FlexGap>
           </StyledUserNameWrapper>
         </StyledMessageWrapper>
