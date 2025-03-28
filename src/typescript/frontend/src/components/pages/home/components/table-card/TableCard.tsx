@@ -5,13 +5,17 @@ import { Arrow } from "components/svg";
 import Text from "components/text";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion, type MotionProps, useAnimationControls } from "framer-motion";
+import { useFavoriteTransactionBuilder } from "lib/hooks/transaction-builders/use-favorite-builder";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import { Heart } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Emoji } from "utils/emoji";
 
 import { Column, Flex } from "@/containers";
 import { useUsdMarketCap } from "@/hooks/use-usd-market-cap";
+import { getMarketAddress } from "@/sdk/index";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import {
@@ -46,8 +50,17 @@ const TableCard = ({
 }: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
   const isMounted = useRef(true);
+  const { submit } = useAptos();
   const controls = useAnimationControls();
   const animationsOn = useUserSettings((s) => s.animate);
+
+  const marketAddress = getMarketAddress(emojis.map((e) => e.emoji)).toString();
+  const addFavorite = useFavoriteTransactionBuilder(marketAddress, true);
+  const removeFavorite = useFavoriteTransactionBuilder(marketAddress, false);
+
+  const toggleFavorite = () => {
+    submit(addFavorite);
+  };
 
   const stateEvents = useEventStore(
     (s) => s.getMarket(emojis.map((e) => e.emoji))?.stateEvents ?? []
@@ -250,6 +263,16 @@ const TableCard = ({
                 >
                   <FormattedNumber value={secondaryMetric} scramble nominalize suffix=" APT" />
                 </motion.div>
+              </Column>
+              <Column>
+                <Heart
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavorite();
+                  }}
+                  fill={"white"}
+                />
               </Column>
             </Flex>
           </motion.div>
