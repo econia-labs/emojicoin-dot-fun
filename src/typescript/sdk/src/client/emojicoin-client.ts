@@ -11,12 +11,6 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
-import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
-import { toChatMessageEntryFunctionArgs } from "../emoji_data";
-import type { ChatEmoji, SymbolEmoji } from "../emoji_data/types";
-import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
-import type { ArenaEvents } from "../emojicoin_dot_fun/arena-events";
-import type { Events } from "../emojicoin_dot_fun/events";
 import {
   Chat,
   ProvideLiquidity,
@@ -24,7 +18,14 @@ import {
   RemoveLiquidity,
   Swap,
   SwapWithRewards,
-} from "../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
+} from "@/move-modules/emojicoin-dot-fun";
+
+import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
+import { toChatMessageEntryFunctionArgs } from "../emoji_data";
+import type { ChatEmoji, SymbolEmoji } from "../emoji_data/types";
+import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
+import type { ArenaEvents } from "../emojicoin_dot_fun/arena-events";
+import type { Events } from "../emojicoin_dot_fun/events";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
 import {
   type ArenaEventsModels,
