@@ -1,4 +1,4 @@
-import { Chat } from "@/contract-apis/emojicoin-dot-fun";
+import { Chat } from "@/move-modules/emojicoin-dot-fun";
 
 import { getEvents, toCoinTypesForEntry } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";

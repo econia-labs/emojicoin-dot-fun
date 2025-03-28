@@ -4,7 +4,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "lib/hooks/queries/client";
 import { useMemo } from "react";
 
-import { MarketMetadataByMarketAddress } from "@/contract-apis";
+import { MarketMetadataByMarketAddress } from "@/move-modules";
 import { symbolBytesToEmojis } from "@/sdk/emoji_data";
 import { REGISTRY_ADDRESS } from "@/sdk/emojicoin_dot_fun";
 

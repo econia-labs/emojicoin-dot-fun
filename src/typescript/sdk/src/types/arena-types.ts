@@ -207,7 +207,7 @@ const withVersionAndEventIndex = (data: {
 const isValidBigIntString = (str: string) => /^\d+$/.test(str);
 
 /**
- * Since we've coalesced the types for the database and emitted contract event data, it's helpful
+ * Since we've coalesced the types for the database and emitted module event data, it's helpful
  * to have a function that can handle either an incoming bigint string or a postgres timestamp.
  *
  * NOTE: This function returns `new Date(0)` if all attempts at parsing fail. Explanation below.

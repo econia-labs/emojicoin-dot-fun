@@ -135,7 +135,7 @@ export type Types = ArenaTypes & {
     cumulativeChatMessages: bigint;
   };
 
-  // The result of the contract's `market_view` view function. NOT the database view.
+  // The result of the Move module's `market_view` view function. NOT the database view.
   MarketView: {
     metadata: Types["MarketMetadata"];
     sequenceInfo: Types["SequenceInfo"];

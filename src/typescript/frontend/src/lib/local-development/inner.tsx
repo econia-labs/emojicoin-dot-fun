@@ -21,7 +21,7 @@ import {
   MarketMetadataByMarketAddress,
   RegisterMarket,
   Swap,
-} from "@/contract-apis";
+} from "@/move-modules";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@/sdk/const";
 import { encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
 import { getEvents, getMarketAddress } from "@/sdk/emojicoin_dot_fun";

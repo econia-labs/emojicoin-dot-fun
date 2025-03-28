@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { successfulTransactionToast } from "@/components/wallet/toasts";
-import { EmojicoinArena } from "@/contract-apis";
+import { EmojicoinArena } from "@/move-modules";
 import { isNumberInConstruction } from "@/sdk/utils";
 
 import { getLocalPublisher } from "./local-publisher";

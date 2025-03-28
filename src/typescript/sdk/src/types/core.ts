@@ -19,9 +19,9 @@ import type { Flatten } from ".";
 // The fields have essentially been deprecated since event v2 because
 // they've been zeroed out in the Aptos VM in order to parallelize event
 // emission.
-// Note that the `guid` here is NOT the same as the `guid` in the contract event types in
-// `Types["ts"]`. The `guid` here is a deprecated Move resource emitted in the v1 event data,
-// where as the `guid` in our contract event types is a unique identifier for the event type
+// Note that the `guid` here is NOT the same as the `guid` in the module event types in
+// `types.ts`. The `guid` here is a deprecated Move resource emitted in the v1 event data,
+// where as the `guid` in our module event types is a unique identifier for the event type
 // we use to avoid storing duplicate events in state.
 export type EventJSON = {
   guid?: EventGuid;

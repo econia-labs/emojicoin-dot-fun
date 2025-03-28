@@ -2,7 +2,7 @@ import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
-import { SetMarketProperties } from "@/contract-apis";
+import { SetMarketProperties } from "@/move-modules";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 

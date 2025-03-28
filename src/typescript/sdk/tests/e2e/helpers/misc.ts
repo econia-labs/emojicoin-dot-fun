@@ -14,7 +14,7 @@ import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
  *
  * The calculation solves for the total input amount (i) given:
  * - Known exact transition amount (E) without fees
- * - Integrator fee percentage (FEE_PERCENTAGE) @see get_bps_fee in the Move contract.
+ * - Integrator fee percentage (FEE_PERCENTAGE) @see get_bps_fee in the Move module.
  *
  * Mathematical derivation:
  * 1. E = i - (i * FEE_PERCENTAGE)    // Base equation

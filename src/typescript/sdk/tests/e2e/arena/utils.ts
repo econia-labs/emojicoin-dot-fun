@@ -2,7 +2,7 @@
 
 import type { Account } from "@aptos-labs/ts-sdk";
 
-import { EmojicoinArena } from "@/contract-apis";
+import { EmojicoinArena } from "@/move-modules";
 
 import {
   fetchArenaMeleeView,

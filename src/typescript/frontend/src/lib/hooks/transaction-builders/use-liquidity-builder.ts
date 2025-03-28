@@ -1,7 +1,7 @@
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
-import { ProvideLiquidity, RemoveLiquidity } from "@/contract-apis";
+import { ProvideLiquidity, RemoveLiquidity } from "@/move-modules";
 import { toCoinTypesForEntry } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";

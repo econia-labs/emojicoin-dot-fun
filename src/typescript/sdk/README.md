@@ -33,22 +33,22 @@ You can view the files here:
 NOTE: The environment variables must be defined prior to runtime, so you
 **cannot** use `dotenv.config({ path: "..." })` at runtime to load them.
 
-## Using the auto-generated Move contract APIs
+## Using the auto-generated Move module APIs
 
 The `emojicoin_dot_fun` move functions have corresponding auto-generated
-transaction builder classes that you can use to interact with the contract.
+transaction builder classes that you can use to interact with the module.
 
-They are not particularly ergonomic- they are mostly just wrappers for contract
+They are not particularly ergonomic- they are mostly just wrappers for module
 entry and view functions; however, you can hover over each class for
 documentation based on the corresponding `*.move` function args
 and generic types.
 
-For a more ergonomic way to interact with the contract please see the
+For a more ergonomic way to interact with the module please see the
 [emojicoin client helper class](#the-emojicoinclient-helper-class).
 
-See the [contract APIs] for all of the possible smart contract functions.
+See the [move module APIs] for all of the possible move module functions.
 
-Here are the basic interactions with the `emojicoin_dot_fun.move` contract:
+Here are the basic interactions with the `emojicoin_dot_fun.move` module:
 
 ### Setup an account on testnet
 
@@ -86,7 +86,7 @@ const register = await RegisterMarket.submit({
   aptosConfig: aptos.config,
   registrant: account,
   emojis: bytes,
-  integrator: INTEGRATOR_ADDRESS,
+  integrator: INTEGRATOR_ADDRESS
 });
 
 const registerEvents = getEvents(register);
@@ -146,13 +146,13 @@ await Chat.submit({
 
 The EmojicoinClient class is a helper class primarily for local and test
 development. It facilitates terse, imperative code to interact with the
-contract's multiple entry and view functions.
+module's multiple entry and view functions.
 
 ### Not intended for web applications
 
 The EmojicoinClient was primarily made as a utility class for local development.
 The default configuration options are not as explicit as the auto-generated
-contract classes above.
+Move module classes above.
 
 Please be mindful of the default configuration options in the client.
 See the [EmojicoinClient] and the default values passed to the constructor
@@ -352,10 +352,10 @@ Please [file an issue] if you need access to an import that's not available!
 <!-- markdownlint-enable MD013 -->
 
 [an import error]: #error-this-module-cannot-be-imported-from-a-client-component-module
-[contract apis]: src/emojicoin_dot_fun/contract-apis/
 [emojicoinclient]: src/client/emojicoin-client.ts
 [file an issue]: https://github.com/econia-labs/emojicoin-dot-fun/issues
 [keeping server-only code out of the client environment]: https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 [local network]: ../example.local.env
 [mainnet network]: ../example.mainnet.env
+[move module apis]: src/emojicoin_dot_fun/move-modules/
 [testnet network]: ../example.testnet.env

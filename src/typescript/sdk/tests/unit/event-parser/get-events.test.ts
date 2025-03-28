@@ -40,7 +40,7 @@ const eventData: EventData = Data as any;
 const response: UserTransactionResponse = {
   ...Transaction,
   events: Transaction["events"].map((e) => {
-    // Because the module address is interpolated at runtime for things like creating the contract's
+    // Because the module address is interpolated at runtime for things like creating the module's
     // struct tag strings and type tag strings and other various pattern matching functions, we must
     // interpolate the value into the json data at runtime lest the json data not accurately reflect
     // how an event would appear given the current `process.env.NEXT_PUBLIC_MODULE_ADDRESS`.

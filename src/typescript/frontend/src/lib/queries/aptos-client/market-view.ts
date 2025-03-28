@@ -3,7 +3,7 @@
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
-import { MarketView } from "@/contract-apis/emojicoin-dot-fun";
+import { MarketView } from "@/move-modules/emojicoin-dot-fun";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { toMarketView } from "@/sdk-types";
 
