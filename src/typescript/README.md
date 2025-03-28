@@ -20,7 +20,7 @@ The Aptos network. Options: `mainnet`, `testnet`, `devnet`, `local`, or `custom`
 
 #### `NEXT_PUBLIC_MODULE_ADDRESS`
 
-The contract address of the main `emojicoin-dot-fun` module.
+The address of the main `emojicoin-dot-fun` module.
 
 <!-- markdownlint-disable MD013 -->
 
@@ -28,19 +28,19 @@ The contract address of the main `emojicoin-dot-fun` module.
 
 #### `NEXT_PUBLIC_REWARDS_MODULE_ADDRESS`
 
-The contract address of the rewards module with an overloaded swap function.
+The address of the rewards module with an overloaded swap function.
 
 - **Example**: `"0x2e51979739db25dc987bd24e1a968e45cca0e0daea7cae9121f68af93e8884c9"`
 
 #### `NEXT_PUBLIC_INTEGRATOR_ADDRESS`
 
-The integrator address for the contract, aka the address that receives fees.
+The integrator address for the module, aka the address that receives fees.
 
 - **Example**: `"0x33332c9ea4c220e0572b7f83f397164f8171e1c9f681136bb8ab78efa6c43333"`
 
 #### `NEXT_PUBLIC_ARENA_MODULE_ADDRESS`
 
-The contract address of the arena module.
+The address of the arena module.
 
 #### `NEXT_PUBLIC_ARENA_ENABLED`
 
@@ -89,7 +89,7 @@ Used for inserting directly into the database.
 
 #### `PUBLISHER_PRIVATE_KEY`
 
-Used for publishing the contract.
+Used for publishing the Move module.
 
 <!-- markdownlint-disable MD013 -->
 

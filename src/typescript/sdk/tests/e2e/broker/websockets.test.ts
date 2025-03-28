@@ -1,6 +1,6 @@
 import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 
-import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/contract-apis";
+import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/move-modules";
 
 import {
   compareBigInt,

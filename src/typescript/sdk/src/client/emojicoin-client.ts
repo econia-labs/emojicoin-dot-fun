@@ -18,7 +18,7 @@ import {
   RemoveLiquidity,
   Swap,
   SwapWithRewards,
-} from "@/contract-apis/emojicoin-dot-fun";
+} from "@/move-modules/emojicoin-dot-fun";
 
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
@@ -121,7 +121,7 @@ async function waitForArenaEventProcessed(
  *
  * The `swap` function is separated into `buy` and `sell` to reduce the amount of input arguments.
  *
- * The `provide_liquidity` and `remove_liquidity` functions in the contract are both under
+ * The `provide_liquidity` and `remove_liquidity` functions in the Move module are both under
  * `liquidity` as `provide` and `remove`, respectively.
  *
  * The `utils` functions provides several commonly used utility functions.

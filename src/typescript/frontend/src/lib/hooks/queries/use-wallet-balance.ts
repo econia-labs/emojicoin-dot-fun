@@ -3,7 +3,7 @@ import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 
-import { Balance } from "@/contract-apis";
+import { Balance } from "@/move-modules";
 import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun";
 
 import { withResponseError } from "./client";

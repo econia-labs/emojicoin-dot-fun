@@ -1,6 +1,6 @@
 import type { AccountAddressInput } from "@aptos-labs/ts-sdk";
 
-import { TransferCoins } from "@/contract-apis";
+import { TransferCoins } from "@/move-modules";
 
 import {
   type AnyNumberString,

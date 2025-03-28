@@ -312,7 +312,7 @@ describe("all submission types for the emojicoin client", () => {
     });
   });
 
-  it("swap buys with the rewards contract", async () => {
+  it("swap buys with the rewards module", async () => {
     const [sender, emojis] = senderAndSymbols[6];
     const inputAmount = 1234567n;
     await emojicoin.register(sender, emojis, gasOptions).then(({ registration }) => {
@@ -343,7 +343,7 @@ describe("all submission types for the emojicoin client", () => {
       });
     });
   });
-  it("swap sells with the rewards contract", async () => {
+  it("swap sells with the rewards module", async () => {
     const [sender, emojis] = senderAndSymbols[7];
     const inputAmount = 1234567n;
     await emojicoin.register(sender, emojis, gasOptions);

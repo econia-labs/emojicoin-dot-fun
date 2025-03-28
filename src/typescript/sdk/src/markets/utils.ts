@@ -83,7 +83,7 @@ export function toCoinTypesForEntry(marketAddress: AccountAddressInput): [TypeTa
 /**
  * Get the derived market address and TypeTags for the given registry address and symbol bytes.
  *
- * @param registryAddress The contract's registry address.
+ * @param registryAddress The module's registry address.
  * @param symbolBytes The emojicoin's full symbol bytes.
  * @returns The derived market address and TypeTags.
  */
@@ -328,7 +328,7 @@ export type ReservesAndBondingCurveState = Flatten<
 /**
  * Calculates the circulating supply based on the given market state.
  *
- * The logic for calculation is taken directly from the Move smart contract.
+ * The logic for calculation is taken directly from the Move module.
  * @see assign_supply_minuend_reserves_ref_mut in `emojicoin_dot_fun.move`
  */
 export const calculateCirculatingSupply = ({
@@ -372,7 +372,7 @@ export const fetchCirculatingSupply = async (
  * Calculates the real reserves of a market based on the given market state.
  *
  * The logic for calculating the real reserves of a market in the bonding curve is taken directly
- * from the Move smart contract.
+ * from the Move module.
  *
  * Note that while the market is in the bonding curve, the current market price (the current
  * position on the bonding curve) is represented by the clamm's virtual reserves, *not* the clamm's

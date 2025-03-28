@@ -2,7 +2,7 @@ import type { TypeTag } from "@aptos-labs/ts-sdk";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
-import { Exit } from "@/contract-apis/emojicoin-arena";
+import { Exit } from "@/move-modules/emojicoin-arena";
 import { toCoinTypes } from "@/sdk/markets";
 
 import { useTransactionBuilder } from "./use-transaction-builder";

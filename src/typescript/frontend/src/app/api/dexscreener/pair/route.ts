@@ -32,7 +32,7 @@ import { pairIdToSymbolEmojis, symbolEmojisToString } from "../util";
 
 /**
  * - All `Pair` props are immutable - Indexer will not query a given pair more than once
- * - In most cases, pair ids will correspond to contract addresses. Ids are case-sensitive.
+ * - In most cases, pair ids will correspond to module addresses. Ids are case-sensitive.
  * - `dexKey` is an identifier for the DEX that hosts this pair. For most adapters this will be a static value such as
  * `uniswap`, but if multiple DEXes are tracked an id such as a factory address may be used.
  * - `asset0` and `asset1` order should **never** change. `amount0/reserve0` will always refer to the same `asset0`,

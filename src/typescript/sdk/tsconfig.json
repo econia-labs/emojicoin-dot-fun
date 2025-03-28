@@ -21,11 +21,11 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "paths": {
-      "@/contract-apis": [
-        "./src/emojicoin_dot_fun/contract-apis"
+      "@/move-modules": [
+        "./src/emojicoin_dot_fun/move-modules"
       ],
-      "@/contract-apis/*": [
-        "./src/emojicoin_dot_fun/contract-apis/*"
+      "@/move-modules/*": [
+        "./src/emojicoin_dot_fun/move-modules/*"
       ]
     },
     "preserveWatchOutput": true,

@@ -1,4 +1,4 @@
-import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
+import { SwapWithRewards } from "@/move-modules/emojicoin-dot-fun";
 
 import type { SymbolEmoji } from "../../../src";
 import { getEventsAsProcessorModelsFromResponse } from "../../../src/indexer-v2/mini-processor";

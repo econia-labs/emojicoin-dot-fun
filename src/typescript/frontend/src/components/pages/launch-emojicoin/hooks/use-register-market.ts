@@ -12,7 +12,7 @@ import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useMarketRegisterTransactionBuilder } from "lib/hooks/transaction-builders/use-market-register-builder";
 import { useCallback, useMemo } from "react";
 
-import { RegisterMarket } from "@/contract-apis/emojicoin-dot-fun";
+import { RegisterMarket } from "@/move-modules/emojicoin-dot-fun";
 import {
   MARKET_REGISTRATION_FEE,
   MARKET_REGISTRATION_GAS_ESTIMATION_FIRST,

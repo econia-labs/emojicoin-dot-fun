@@ -6,7 +6,7 @@ import { withResponseError } from "lib/hooks/queries/client";
 import {
   SimulateProvideLiquidity,
   SimulateRemoveLiquidity,
-} from "@/contract-apis/emojicoin-dot-fun";
+} from "@/move-modules/emojicoin-dot-fun";
 import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
 
 const simulateProvideLiquidity = async (args: {

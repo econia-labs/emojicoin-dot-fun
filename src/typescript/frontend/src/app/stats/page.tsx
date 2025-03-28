@@ -1,4 +1,4 @@
-import { RegistryView } from "@/contract-apis";
+import { RegistryView } from "@/move-modules";
 import { fetchMarkets, fetchPriceFeedWithMarketState } from "@/queries/home";
 import { ORDER_BY } from "@/sdk/indexer-v2/const";
 import { toPriceFeed } from "@/sdk/indexer-v2/types";
