@@ -60,8 +60,7 @@ export const StyledMessageContainer = styled(motion.div)<{
 
   ${StyledMessageInner} {
     width: fit-content;
-    background: ${({ backgroundColor }) => backgroundColor};
-    background-color: ${({ theme, alignLeft, backgroundColor }) =>
+    background: ${({ theme, alignLeft, backgroundColor }) =>
       backgroundColor ? backgroundColor : alignLeft ? theme.colors.econiaBlue : theme.colors.blue};
   }
 `;
