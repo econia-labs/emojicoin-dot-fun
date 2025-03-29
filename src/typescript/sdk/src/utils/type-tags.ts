@@ -77,7 +77,10 @@ export type ArenaStructName =
   | "ArenaEnterEvent"
   | "ArenaExitEvent"
   | "ArenaSwapEvent"
-  | "ArenaVaultBalanceUpdateEvent";
+  | "ArenaVaultBalanceUpdateEvent"
+  | "Escrow";
+
+export type ArenaEventName = Extract<ArenaStructName, `${string}Event`>;
 
 export type StructTagString = `0x${string}::${string}::${string}`;
 export type CoinStoreString = Nominal<
@@ -105,6 +108,7 @@ export const TYPE_TAGS: { [K in AnyEmojicoinDotFunStructName]: TypeTag } = {
   ArenaExitEvent: toArenaStructTag("Exit"),
   ArenaSwapEvent: toArenaStructTag("Swap"),
   ArenaVaultBalanceUpdateEvent: toArenaStructTag("VaultBalanceUpdate"),
+  Escrow: toArenaStructTag("Escrow"),
 };
 
 export const STRUCT_STRINGS: { [K in AnyEmojicoinDotFunStructName]: StructTagString } = {
@@ -125,6 +129,7 @@ export const STRUCT_STRINGS: { [K in AnyEmojicoinDotFunStructName]: StructTagStr
   ArenaSwapEvent: TYPE_TAGS.ArenaSwapEvent.toString() as StructTagString,
   ArenaVaultBalanceUpdateEvent:
     TYPE_TAGS.ArenaVaultBalanceUpdateEvent.toString() as StructTagString,
+  Escrow: TYPE_TAGS.Escrow.toString() as `0x${string}::${string}::Escrow`,
 };
 
 const structStringToName = new Map(
