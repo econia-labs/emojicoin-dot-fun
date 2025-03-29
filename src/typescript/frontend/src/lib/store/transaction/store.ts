@@ -34,14 +34,14 @@ export const globalTransactionStore = createStore<TransactionStore>()(
         });
       },
       pushTransactions: (...transactions) => {
-        const uniques = new Set(transactions.map(({ sender }) => toAccountAddressString(sender)));
-        get().ensureInStore(uniques);
-        console.log(uniques);
-        console.log(uniques.size);
-        if (!uniques.size) return;
+        const addresses = transactions.map(({ sender }) => toAccountAddressString(sender));
+        const uniqueAddresses = new Set(addresses);
+        if (!uniqueAddresses.size) return;
+
+        get().ensureInStore(uniqueAddresses);
 
         set((state) => {
-          uniques.forEach((addr) => {
+          uniqueAddresses.forEach((addr) => {
             state.addresses.get(addr)!.push(...transactions);
           });
         });
