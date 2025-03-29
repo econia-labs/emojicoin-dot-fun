@@ -23,7 +23,7 @@ export const useIsMarketRegistered = () => {
       MarketMetadataByEmojiBytes.prototype.functionName,
       aptos.config.network,
       emojiBytes,
-      // Invalidate the cache when the number of markets change, since `staleTime === Infinity`.
+      // Invalidate the cache when the number of markets changes.
       numMarkets,
     ],
     queryFn: async () => {
@@ -58,8 +58,7 @@ export const useIsMarketRegistered = () => {
         registered,
       };
     },
-    // Once fetched, this data will never change until the # of markets changes, which is tracked in
-    // the queryKey.
+    // Once fetched, this data will never change as long as `numMarkets` hasn't changed.
     staleTime: Infinity,
   });
 
