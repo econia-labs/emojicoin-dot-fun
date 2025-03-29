@@ -5,7 +5,7 @@ import { EmojicoinArena, getMarketAddress, MarketView } from "../../emojicoin_do
 import { toEmojicoinTypesForEntry } from "../../markets/utils";
 import { toMarketView } from "../../types";
 import { toArenaMeleeEvent, toArenaRegistry } from "../../types/arena-types";
-import { getAptosClient } from "..";
+import { getAptosClient } from "../aptos-client";
 import type { StrictXOR } from "../utility-types";
 
 type ArenaSymbols = { symbol0: SymbolEmoji[]; symbol1: SymbolEmoji[] };

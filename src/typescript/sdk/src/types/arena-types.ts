@@ -14,7 +14,8 @@ import type {
   // Note that if you import anything more than a type here, you'll get lots of import issues.
 } from "../indexer-v2/types";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
-import { dateFromMicroseconds, toAccountAddressString } from "../utils";
+import { toAccountAddressString } from "../utils/account-address";
+import { dateFromMicroseconds } from "../utils/misc";
 import type { JsonTypes } from "./json-types";
 import type { AnyNumberString, Types } from "./types";
 

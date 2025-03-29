@@ -47,10 +47,11 @@ import {
   toRegistrantGracePeriodFlag,
   toRegistryResource,
 } from "../types/types";
-import { getResourceFromWriteSet, STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
 import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
+import { getResourceFromWriteSet } from "../utils/get-resource-from-writeset";
+import { STRUCT_STRINGS, TYPE_TAGS } from "../utils/type-tags";
 import type { AtLeastOne } from "../utils/utility-types";
 
 export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
