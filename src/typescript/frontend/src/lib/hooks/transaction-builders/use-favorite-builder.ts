@@ -1,7 +1,7 @@
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
-import { AddFavorite, RemoveFavorite } from "@/contract-apis";
+import { AddFavorite, RemoveFavorite } from "@/move-modules";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 
