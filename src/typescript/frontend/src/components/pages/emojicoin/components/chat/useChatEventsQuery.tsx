@@ -10,6 +10,8 @@ import { LIMIT } from "@/sdk/indexer-v2/const";
 
 type ChatEvent = Awaited<ReturnType<typeof fetchChatEvents>>[number];
 
+const TEN_SECONDS = 10000;
+
 export const useChatEventsQuery = (args: z.input<typeof GetChatsSchema>) => {
   const query = useInfiniteQuery({
     queryKey: ["fetchChatEvents", args],
@@ -26,6 +28,7 @@ export const useChatEventsQuery = (args: z.input<typeof GetChatsSchema>) => {
       lastPage?.length === LIMIT ? allPages.length + 1 : undefined,
     // Disable the query when a marketID isn't provided
     enabled: !!args.marketID,
+    staleTime: TEN_SECONDS,
   });
 
   return query;

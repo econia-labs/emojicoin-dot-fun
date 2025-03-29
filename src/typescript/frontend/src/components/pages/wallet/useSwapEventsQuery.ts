@@ -10,6 +10,8 @@ import { LIMIT } from "@/sdk/indexer-v2/const";
 
 export type SwapEvent = Awaited<ReturnType<typeof fetchSwapEvents>>[number];
 
+const TEN_SECONDS = 10000;
+
 export const useSwapEventsQuery = (
   args: z.input<typeof GetTradesSchema>,
   options?: {
@@ -38,6 +40,7 @@ export const useSwapEventsQuery = (
       lastPageResponse?.length === LIMIT ? allPageResponses.length + 1 : undefined,
     // Disable the query when explicitly disabled or when neither sender nor marketID is provided
     enabled: options?.disabled !== true && (!!args.sender || !!args.marketID),
+    staleTime: TEN_SECONDS,
   });
 
   return query;

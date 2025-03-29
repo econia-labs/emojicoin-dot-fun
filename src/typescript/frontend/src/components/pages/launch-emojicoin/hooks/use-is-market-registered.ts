@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 
 import { MarketMetadataByEmojiBytes } from "@/move-modules/emojicoin-dot-fun";
 import { SYMBOL_EMOJI_DATA, type SymbolEmoji } from "@/sdk/emoji_data";
@@ -15,9 +16,16 @@ export const useIsMarketRegistered = () => {
   const getMarket = useEventStore((state) => state.getMarket);
   const { aptos } = useAptos();
   const emojiBytes = normalizeHex(encoder.encode(emojis.join("")));
+  const { data: numMarkets } = useNumMarkets();
 
   const { data } = useQuery({
-    queryKey: [MarketMetadataByEmojiBytes.prototype.functionName, aptos.config.network, emojiBytes],
+    queryKey: [
+      MarketMetadataByEmojiBytes.prototype.functionName,
+      aptos.config.network,
+      emojiBytes,
+      // Invalidate the cache when the number of markets changes.
+      numMarkets,
+    ],
     queryFn: async () => {
       const length = sumBytes(emojis);
       const invalidLength = length === 0 || length > 10;
@@ -50,7 +58,8 @@ export const useIsMarketRegistered = () => {
         registered,
       };
     },
-    staleTime: 1,
+    // Once fetched, this data will never change as long as `numMarkets` hasn't changed.
+    staleTime: Infinity,
   });
 
   return (
