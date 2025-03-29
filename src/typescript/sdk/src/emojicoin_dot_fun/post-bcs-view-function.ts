@@ -9,7 +9,7 @@ import {
   Serializer,
 } from "@aptos-labs/ts-sdk";
 
-import { toConfig } from "../utils";
+import { toConfig } from "../utils/aptos-utils";
 
 export async function postBCSViewFunction<T extends Array<MoveValue>>(args: {
   aptosConfig: Aptos | AptosConfig;
