@@ -25,7 +25,6 @@ import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
 import ChartContainer from "@/components/charts/ChartContainer";
 import { type ClassValue } from "clsx";
 import { useEventStore } from "context/event-store-context/hooks";
-import { useArenaEscrows } from "@hooks/use-arena-escrows";
 import { useUserEscrows } from "@/store/escrow/context-provider";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
@@ -120,7 +119,9 @@ export const ArenaClient = (props: ArenaProps) => {
   const { account } = useAptos();
   const router = useRouter();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
-  const escrows = useArenaEscrows();
+  const escrows = useUserEscrows();
+
+  useEffect(() => console.log(escrows));
 
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);

@@ -1,14 +1,14 @@
-import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 import { fetchUserArenaEscrows } from "@sdk/utils/arena/escrow";
+import { toStandardizedAddress } from "@sdk/utils";
 
 export const useArenaEscrows = () => {
   const { aptos, account } = useAptos();
 
   const accountAddress = useMemo(
-    () => (account ? AccountAddress.from(account.address) : null),
+    () => (account ? toStandardizedAddress(account.address) : null),
     [account]
   );
 
