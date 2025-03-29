@@ -4,13 +4,13 @@ import type { Account } from "@aptos-labs/ts-sdk";
 
 import { EmojicoinArena } from "@/move-modules";
 
+import type { SymbolEmoji } from "../../../src";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {
   fetchArenaMeleeView,
   fetchArenaRegistryView,
   fetchMeleeEmojiData,
-  type SymbolEmoji,
-} from "../../../src";
-import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+} from "../../../src/utils/arena";
 import { getAptosClient, getPublisher } from "../../utils";
 
 /**
