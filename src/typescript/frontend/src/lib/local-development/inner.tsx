@@ -26,8 +26,7 @@ import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@/sdk/cons
 import { encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
 import { getEvents, getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 import { toEmojicoinTypesForEntry } from "@/sdk/markets";
-import { getAptosClient } from "@/sdk/utils";
-import { fetchAllCurrentMeleeData, toArenaCoinTypes } from "@/sdk/utils/arena/misc";
+import { fetchAllCurrentMeleeData, getAptosClient, toArenaCoinTypes } from "@/sdk/utils";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
