@@ -2,13 +2,13 @@
 
 import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import type { MeleeEmojiData } from "../../../src/markets/arena-utils";
 import {
   isArenaEnterModel,
   isArenaExitModel,
   isArenaSwapModel,
   isArenaVaultBalanceUpdateModel,
 } from "../../../src/types/arena-types";
+import type { MeleeEmojiData } from "../../../src/utils/arena/helpers";
 import { getFundedAccount } from "../../utils/test-accounts";
 import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../broker/utils";
 import {
