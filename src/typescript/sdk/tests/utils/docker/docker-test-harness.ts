@@ -104,9 +104,17 @@ export class DockerTestHarness {
 
     const command = "docker";
 
-    const args = ["compose", "-f", LOCAL_COMPOSE_PATH, "--env-file", LOCAL_ENV_PATH, "up"].filter(
-      (arg) => arg !== ""
-    );
+    const args = [
+      "compose",
+      "-f",
+      LOCAL_COMPOSE_PATH,
+      "--env-file",
+      LOCAL_ENV_PATH,
+      "up",
+      "--no-build",
+      "--pull",
+      "always",
+    ].filter((arg) => arg !== "");
 
     const process = spawnWrapper(command, args, false, filterLogsFrom);
     writeFileSync(TMP_PID_FILE_PATH, process.pid?.toString() ?? "");
