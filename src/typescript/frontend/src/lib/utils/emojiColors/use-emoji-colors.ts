@@ -18,5 +18,6 @@ export const useEmojiColors = (emoji: SymbolEmoji[]) => {
   return useQuery({
     queryKey: ["useEmojiColors", emoji],
     queryFn: async () => await getEmojiColor(emoji),
+    staleTime: Infinity,
   });
 };
