@@ -31,7 +31,7 @@ import {
   fetchArenaRegistryView,
   fetchMeleeEmojiData,
   type MeleeEmojiData,
-} from "../../../src/markets/arena-utils";
+} from "../../../src/utils/arena/helpers";
 import { getPublisher } from "../../utils/helpers";
 import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
 import { waitForProcessor } from "../helpers";

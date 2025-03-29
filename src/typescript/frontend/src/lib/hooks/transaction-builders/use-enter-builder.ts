@@ -3,7 +3,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { Enter } from "@/move-modules/emojicoin-arena";
-import { toArenaCoinTypes } from "@/sdk/markets";
+import { toArenaCoinTypes } from "@/sdk/utils/arena/helpers";
 import type { AnyNumberString } from "@/sdk-types";
 
 import { useTransactionBuilder } from "./use-transaction-builder";

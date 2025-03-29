@@ -32,10 +32,10 @@ import {
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
-import { toArenaCoinTypes } from "../markets/arena-utils";
 import { type AnyNumberString, toMarketView, toRegistryView, toSwapEvent } from "../types";
 import { waitFor } from "../utils";
 import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
+import { toArenaCoinTypes } from "../utils/arena/helpers";
 import customExpect from "./expect";
 
 const { expect, Expect } = customExpect;

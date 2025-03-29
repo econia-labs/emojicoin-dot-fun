@@ -2,7 +2,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { Swap } from "@/move-modules/emojicoin-arena";
-import { toArenaCoinTypes } from "@/sdk/markets";
+import { toArenaCoinTypes } from "@/sdk/utils/arena/helpers";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 
