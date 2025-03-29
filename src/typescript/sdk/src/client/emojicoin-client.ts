@@ -35,7 +35,7 @@ import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { type AnyNumberString, toMarketView, toRegistryView, toSwapEvent } from "../types";
 import { waitFor } from "../utils";
 import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
-import { toArenaCoinTypes } from "../utils/arena/misc";
+import { toArenaCoinTypes } from "../utils/arena/helpers";
 import customExpect from "./expect";
 
 const { expect, Expect } = customExpect;
