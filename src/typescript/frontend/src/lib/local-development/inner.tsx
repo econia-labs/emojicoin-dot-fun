@@ -34,7 +34,7 @@ const debugButtonClassName =
 
 const InnerDisplayDebugData = () => {
   const { account, connect, connected, wallet } = useWallet();
-  const { aptos, forceRefetch, submit } = useAptos();
+  const { aptos, refetchIfStale, submit } = useAptos();
   const [showDebugger, setShowDebugger] = useState(false);
   const registeredMarkets = useEventStore((s) => s.markets);
   const handleCrank = async (definedAccount: AccountInfo) =>
@@ -145,7 +145,7 @@ const InnerDisplayDebugData = () => {
                     accountAddress: definedAccount.address,
                     amount: ONE_APT * 10000000,
                   })
-                  .then(() => forceRefetch("apt"))
+                  .then(() => refetchIfStale("apt"))
               )}
             >
               <span className="justify-start">
