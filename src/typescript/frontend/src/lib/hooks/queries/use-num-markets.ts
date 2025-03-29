@@ -13,9 +13,7 @@ export const useNumMarkets = () => {
   const numMarkets = useEventStore((s) => s.markets.size);
   const res = useQuery({
     queryKey: ["num-markets", numMarkets],
-    queryFn: () => {
-      return getNumMarkets();
-    },
+    queryFn: () => getNumMarkets(),
     staleTime: 15000,
   });
 
