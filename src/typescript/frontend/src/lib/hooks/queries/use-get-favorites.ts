@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useCallback } from "react";
 
-import { ViewFavorites } from "@/contract-apis";
+import { ViewFavorites } from "@/move-modules";
 import { getAptosClient } from "@/sdk/utils";
 
 async function getFavorites(address: string) {
@@ -12,9 +13,25 @@ async function getFavorites(address: string) {
 export function useGetFavorites() {
   const { account } = useAptos();
 
-  return useQuery({
+  const favoritesQuery = useQuery({
     queryKey: ["useGetFavorites", account?.address],
     queryFn: () => (!account?.address ? [] : getFavorites(account.address)),
+    select: (data) => new Set(data),
     enabled: !!account,
   });
+
+  //Helper function to check if a market is a favorite
+  const checkIsFavorite = useCallback(
+    (marketAddress: `0x${string}`) => {
+      if (!favoritesQuery.data) {
+        return false;
+      }
+      if (favoritesQuery.data.has(marketAddress)) {
+        return true;
+      }
+    },
+    [favoritesQuery.data]
+  );
+
+  return { favoritesQuery, checkIsFavorite };
 }

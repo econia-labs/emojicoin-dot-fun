@@ -15,7 +15,7 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
-import { MODULE_ADDRESS } from "../../const";
+import { FAVORITES_MODULE_ADDRESS } from "../..";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
@@ -36,8 +36,7 @@ export type AddFavoritePayloadMoveArguments = {
  **/
 
 export class AddFavorite extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = MODULE_ADDRESS;
-
+  public readonly moduleAddress = FAVORITES_MODULE_ADDRESS;
   public readonly moduleName = "emojicoin_dot_fun_favorites";
 
   public readonly functionName = "add_favorite";
@@ -125,8 +124,7 @@ export type RemoveFavoritePayloadMoveArguments = {
  **/
 
 export class RemoveFavorite extends EntryFunctionPayloadBuilder {
-  public readonly moduleAddress = MODULE_ADDRESS;
-
+  public readonly moduleAddress = FAVORITES_MODULE_ADDRESS;
   public readonly moduleName = "emojicoin_dot_fun_favorites";
 
   public readonly functionName = "remove_favorite";
@@ -214,7 +212,7 @@ export type ViewFavoritesPayloadMoveArguments = {
  **/
 
 export class ViewFavorites extends ViewFunctionPayloadBuilder<[Array<string>]> {
-  public readonly moduleAddress = MODULE_ADDRESS;
+  public readonly moduleAddress = FAVORITES_MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun_favorites";
 

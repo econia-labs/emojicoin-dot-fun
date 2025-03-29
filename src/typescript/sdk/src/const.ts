@@ -32,7 +32,8 @@ if (
   !process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS ||
-  !process.env.NEXT_PUBLIC_APTOS_NETWORK
+  !process.env.NEXT_PUBLIC_APTOS_NETWORK ||
+  !process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS
 ) {
   const missing = [
     ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
@@ -41,6 +42,7 @@ if (
     ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
     ["NEXT_PUBLIC_APTOS_NETWORK", process.env.NEXT_PUBLIC_APTOS_NETWORK],
+    ["NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS", process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS],
   ].filter(([_, value]) => !value);
   missing.forEach(([key, _]) => {
     console.error(`Missing environment variables ${key}`);
@@ -97,6 +99,8 @@ export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const ARENA_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS))();
+export const FAVORITES_MODULE_ADDRESS = (() =>
+  AccountAddress.from(process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 export const INTEGRATOR_ADDRESS = (() =>
