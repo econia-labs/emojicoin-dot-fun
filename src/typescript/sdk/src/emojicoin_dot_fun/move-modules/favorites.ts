@@ -15,7 +15,7 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
-import { FAVORITES_MODULE_ADDRESS } from "../..";
+import { FAVORITES_MODULE_ADDRESS } from "../../const";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
