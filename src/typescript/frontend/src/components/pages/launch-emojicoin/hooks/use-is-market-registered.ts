@@ -3,7 +3,6 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
-import { useEffect, useMemo } from "react";
 
 import { MarketMetadataByEmojiBytes } from "@/move-modules/emojicoin-dot-fun";
 import { SYMBOL_EMOJI_DATA, type SymbolEmoji } from "@/sdk/emoji_data";
