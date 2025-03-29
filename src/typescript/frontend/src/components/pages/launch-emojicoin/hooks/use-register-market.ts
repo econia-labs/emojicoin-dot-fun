@@ -75,7 +75,7 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
         return undefined;
       }
     },
-    staleTime: 1000,
+    staleTime: 2000,
     enabled:
       numMarkets !== undefined && account !== null && (numMarkets === 0 || emojis.length > 0),
   });
