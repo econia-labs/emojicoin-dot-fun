@@ -10,7 +10,7 @@ import type {
 } from "@aptos-labs/ts-sdk";
 import { AccountAddress, Aptos, buildTransaction } from "@aptos-labs/ts-sdk";
 
-import { FAVORITES_MODULE_ADDRESS } from "../..";
+import { FAVORITES_MODULE_ADDRESS } from "../../const";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
