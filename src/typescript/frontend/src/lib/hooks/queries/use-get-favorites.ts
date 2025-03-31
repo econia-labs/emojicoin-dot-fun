@@ -22,14 +22,8 @@ export function useGetFavorites() {
 
   //Helper function to check if a market is a favorite
   const checkIsFavorite = useCallback(
-    (marketAddress: `0x${string}`) => {
-      if (!favoritesQuery.data) {
-        return false;
-      }
-      if (favoritesQuery.data.has(marketAddress)) {
-        return true;
-      }
-    },
+    (marketAddress: `0x${string}`) =>
+      !!favoritesQuery.data && favoritesQuery.data.has(marketAddress),
     [favoritesQuery.data]
   );
 
