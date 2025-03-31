@@ -1,28 +1,55 @@
-import { fetchMarketStateByAddress, fetchMelee } from "@/queries/arena";
+import { fetchArenaInfo } from "@/queries/arena";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
 import { redirect } from "next/navigation";
+import { ROUTES } from "router/routes";
+import { fetchSpecificMarkets } from "@sdk/indexer-v2";
+import { type Metadata } from "next/types";
 
 export const revalidate = 2;
 
+export const metadata: Metadata = {
+  title: "arena",
+  description: "⚔️ Step into the Emojicoin Arena! Trade, battle and rise to glory.",
+};
+
+const logAndReturnValue = <T extends [] | undefined | null | Record<string, unknown>>(
+  dataType: string,
+  onFailure: T
+) => {
+  console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
+  return onFailure;
+};
+
 export default async function Arena() {
-  let melee: Awaited<ReturnType<typeof fetchMelee>> = null;
+  let arenaInfo: Awaited<ReturnType<typeof fetchArenaInfo>> = null;
+
   try {
-    melee = await fetchMelee({});
+    arenaInfo = await fetchArenaInfo({});
   } catch (e) {
-    console.warn(
-      "Could not get melee data. This probably means that the backend is running an outdated version of the processor, without the arena processing. Please update."
+    console.warn("Could not get melee data.");
+    redirect(ROUTES.home);
+  }
+
+  if (!arenaInfo) {
+    redirect(ROUTES.home);
+  }
+
+  const { market0, market1 } = await fetchSpecificMarkets([
+    arenaInfo.emojicoin0Symbols,
+    arenaInfo.emojicoin1Symbols,
+  ])
+    .then((res) => ({
+      market0: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin0MarketAddress),
+      market1: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin1MarketAddress),
+    }))
+    .catch(() =>
+      logAndReturnValue("arena market0 and market1", { market0: undefined, market1: undefined })
     );
-    redirect("/home");
+
+  if (!market0 || !market1) {
+    console.warn("Couldn't fetch market state for one of the arena markets.");
+    redirect(ROUTES.home);
   }
 
-  if (!melee) {
-    redirect("/home");
-  }
-
-  const [market0, market1] = await Promise.all([
-    fetchMarketStateByAddress({ address: melee.arenaMelee.emojicoin0MarketAddress }),
-    fetchMarketStateByAddress({ address: melee.arenaMelee.emojicoin1MarketAddress }),
-  ]);
-
-  return <ArenaClient melee={melee} market0={market0!} market1={market1!} />;
+  return <ArenaClient arenaInfo={arenaInfo} market0={market0} market1={market1} />;
 }

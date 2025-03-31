@@ -28,6 +28,12 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {
+    "import/no-cycle": [
+      "error",
+      {
+        ignoreExternal: true,
+      },
+    ],
     "@typescript-eslint/no-explicit-any": "warn",
     "no-console": [
       "warn",

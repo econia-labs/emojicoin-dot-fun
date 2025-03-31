@@ -53,7 +53,16 @@ export const PortfolioRow = ({ coinData, index, totalValue }: Props) => {
       </TableCell>
       <TableCell className="text-right">
         <span className="flex items-center justify-end gap-1">
-          <AptCell value={coinData.marketCap} />
+          {aptPrice ? (
+            <FormattedNumber
+              value={coinData.marketCap * aptPrice}
+              prefix={"$"}
+              style={"fixed"}
+              decimals={2}
+            />
+          ) : (
+            <AptCell value={coinData.marketCap} />
+          )}
         </span>
       </TableCell>
       <TableCell className="text-right">

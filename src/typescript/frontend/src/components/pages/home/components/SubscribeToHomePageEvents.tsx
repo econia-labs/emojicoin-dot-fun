@@ -1,0 +1,37 @@
+"use client";
+
+import { useLatestMeleeID } from "@hooks/use-latest-melee-id";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import { type ArenaInfoModel } from "@sdk/indexer-v2";
+import { useEventStore } from "context/event-store-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export const SubscribeToHomePageEvents = ({ info }: { info?: ArenaInfoModel }) => {
+  const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (info) {
+      loadArenaInfoFromServer(info);
+    }
+  }, [loadArenaInfoFromServer, info]);
+
+  useReliableSubscribe({
+    arena: true,
+    eventTypes: ["MarketLatestState"],
+  });
+
+  const latestMeleeID = useLatestMeleeID();
+  const currentMelee = useEventStore((s) => s.arenaInfoFromServer);
+
+  useEffect(() => {
+    if (currentMelee) {
+      if (latestMeleeID > currentMelee.meleeID) {
+        router.refresh();
+      }
+    }
+  }, [latestMeleeID, currentMelee, router]);
+
+  return <></>;
+};

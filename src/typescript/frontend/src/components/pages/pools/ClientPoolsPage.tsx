@@ -22,6 +22,7 @@ import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_da
 import SearchBar from "components/inputs/search-bar";
 import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
 import { DEFAULT_POOLS_SORT_BY } from "@sdk/indexer-v2/queries/query-params";
+import { ROUTES } from "router/routes";
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
@@ -52,7 +53,6 @@ export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) =
   }, [emojis]);
 
   useEffect(() => {
-    const poolsAPI = "/pools/api";
     const params = new URLSearchParams({
       sortby: sortBy,
       orderby: orderBy,
@@ -64,7 +64,7 @@ export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) =
     if (realEmojis.length) {
       params.set("searchBytes", encodeEmojis(realEmojis));
     }
-    const url = `${poolsAPI}?${params.toString()}`;
+    const url = `${ROUTES.api.pools}?${params.toString()}`;
     fetch(url)
       .then((res) => res.text())
       .then((txt) => parseJSON(txt) as PoolsData[])

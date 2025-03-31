@@ -6,6 +6,7 @@ export const SAMPLE_SWAP_EVENT: Types["SwapEvent"] = {
   time: 0n,
   marketNonce: 0n,
   swapper: "0x0",
+  sender: "0x0",
   inputAmount: 0n,
   isSell: false,
   integrator: "0x0",

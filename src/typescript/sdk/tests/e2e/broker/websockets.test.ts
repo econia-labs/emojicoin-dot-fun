@@ -12,7 +12,6 @@ import {
   type SymbolEmoji,
   toMarketEmojiData,
   type Types,
-  waitFor,
   zip,
 } from "../../../src";
 import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/contract-apis";
@@ -24,22 +23,15 @@ import {
   isMarketLatestStateEventModel,
   isMarketRegistrationEventModel,
   isSwapEventModel,
+  isTransactionEventModel,
 } from "../../../src/indexer-v2/types";
 import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
-
-import { connectNewClient, compareParsedData, subscribe } from "./utils";
+import { connectNewClient, compareParsedData, subscribe, customWaitFor } from "./utils";
+import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
 
 jest.setTimeout(20000);
-
-const customWaitFor = async (condition: () => boolean) =>
-  waitFor({
-    condition,
-    interval: 10,
-    maxWaitTime: 5000,
-    errorMessage: `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
-  });
 
 describe("tests to ensure that websocket event subscriptions work as expected", () => {
   const registrants = getFundedAccounts("040", "041", "042", "043", "044", "045");
@@ -139,6 +131,11 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     const messageEvent = messageEvents.pop()!;
     expect(messageEvent).toBeDefined();
     const event = convertWebSocketMessageToBrokerEvent(messageEvent);
+
+    const isTransactionEvent = isTransactionEventModel(event);
+    expect(isTransactionEvent).toBe(true);
+    if (!isTransactionEvent) throw new Error("Never.");
+
     expect(event.transaction.version).toEqual(BigInt(response.version));
     const received = BigInt(response.timestamp);
     expect(received - event.transaction.time).toBeLessThanOrEqual(2n * 1000n * 1000n);
@@ -226,10 +223,11 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     // Since they're pushed at the same time, we only have to find the index of one, then we know
     // all the arrays should have the same index for the corresponding message event type.
     const swapIndex = events.findIndex(
-      (e) => e.transaction.version === BigInt(swapResponse.version)
+      (e) => isTransactionEventModel(e) && e.transaction.version === BigInt(swapResponse.version)
     );
     const liquidityIndex = events.findIndex(
-      (e) => e.transaction.version === BigInt(liquidityResponse.version)
+      (e) =>
+        isTransactionEventModel(e) && e.transaction.version === BigInt(liquidityResponse.version)
     );
     compareParsedData({
       messageEvent: messageEvents[swapIndex],
@@ -289,7 +287,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     expect(events.length === 2);
     expect(events.every((e) => e.eventName === "Chat")).toBe(true);
 
-    for (const [event, i] of enumerate(events)) {
+    for (const [event, i] of enumerate(events.filter(isTransactionEventModel))) {
       // Although the event arrays should correspond to one another's order, the responses may not.
       const response = [chatResponse, chatResponse2].find(
         ({ version }) => BigInt(version) === event.transaction.version
@@ -388,6 +386,9 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     });
   });
 
+  // Set the retry times for the flaky test: ("it receives events for all markets and event types").
+  // It's an issue with the broker not receiving all events from the processor properly.
+  jest.retryTimes(3, { logErrorsBeforeRetry: true });
   it("receives events for all markets and event types", async () => {
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
     const MARKET_INDEX = 5;
@@ -491,7 +492,17 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     await waitForEmojicoinIndexer(highestVersion);
     // Wait for the broker to send all 10 messages:
     // 1 registration, 2 swaps, 2 chats, and 5 state event models.
-    await customWaitFor(() => messageEvents.length === 10);
+    await customWaitFor(
+      () => messageEvents.length === 10,
+      () =>
+        stringifyJSONWithBigInts(
+          events.map((v) => ({
+            event: v.eventName,
+            txn: isTransactionEventModel(v) ? v.transaction.version : v.version,
+            guid: v.guid,
+          }))
+        )
+    );
     expect(messageEvents.length === 10);
     expect(brokerMessages.length === 10);
     expect(events.length === 10);

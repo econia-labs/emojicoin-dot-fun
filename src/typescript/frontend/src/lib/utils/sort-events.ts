@@ -1,7 +1,7 @@
-import { type AnyEmojicoinEvent } from "@sdk-types";
+import { type EventWithMarket } from "@sdk/indexer-v2/mini-processor/event-groups/builder";
 import {
-  type AnyEventModel,
   type ChatEventModel,
+  type EventModelWithMarket,
   type GlobalStateEventModel,
   isGlobalStateEventModel,
   isMarketRegistrationEventModel,
@@ -30,7 +30,10 @@ export const sortByValue = <T extends bigint | number>(
  * events across different markets or with global and non-global state events.
  * NOTE: It assumes that the array is homogenous.
  */
-export const sortEvents = <T extends AnyEventModel>(arr: T[], order: "asc" | "desc" = "desc") => {
+export const sortEvents = <T extends EventModelWithMarket | GlobalStateEventModel>(
+  arr: T[],
+  order: "asc" | "desc" = "desc"
+) => {
   if (arr.length <= 1) {
     return;
   } else {
@@ -45,13 +48,15 @@ export const sortEvents = <T extends AnyEventModel>(arr: T[], order: "asc" | "de
       );
     } else {
       (
-        arr as Array<Exclude<AnyEventModel, GlobalStateEventModel | MarketRegistrationEventModel>>
+        arr as Array<
+          Exclude<EventModelWithMarket, GlobalStateEventModel | MarketRegistrationEventModel>
+        >
       ).sort(({ market: a }, { market: b }) => sortByValue(a.marketNonce, b.marketNonce, order));
     }
   }
 };
 
-export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
+export const mergeSortedEvents = <T extends EventWithMarket>(
   existing: readonly T[],
   incoming: T[]
 ): T[] => {
@@ -79,7 +84,7 @@ export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
   return merged;
 };
 
-export const toSortedDedupedEvents = <T extends readonly AnyEventModel[]>(
+export const toSortedDedupedEvents = <T extends readonly EventModelWithMarket[]>(
   a: T,
   b: T,
   order: "asc" | "desc" = "desc"

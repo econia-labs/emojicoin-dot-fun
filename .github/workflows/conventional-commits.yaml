@@ -1,0 +1,34 @@
+# cspell:word amannn
+---
+env:
+  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+jobs:
+  conventional-commit:
+    env:
+      # If run from a merge group, the action should not run. However there is
+      # no way to exit early in GitHub actions per
+      # https://github.com/actions/runner/issues/662, so using a conditional
+      # check for each step serves as a workaround.
+      IS_MERGE_GROUP: '${{ github.event_name == ''merge_group'' }}'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - env:
+        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      if: '${{ env.IS_MERGE_GROUP != ''true'' }}'
+      uses: 'amannn/action-semantic-pull-request@v5'
+      with:
+        requireScope: true
+        scopes: '^ECO-[0-9]+$'
+        subjectPattern: '^[A-Z].*$'
+        validateSingleCommit: true
+        validateSingleCommitMatchesPrTitle: true
+name: 'Verify conventional commit PR title'
+'on':
+  merge_group: null
+  pull_request:
+    types:
+    - 'edited'
+    - 'opened'
+    - 'reopened'
+    - 'synchronize'
+...
