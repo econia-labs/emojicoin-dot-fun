@@ -3,7 +3,7 @@ import { expandRoutes } from "./utils";
 const _ = "";
 
 // cspell:word dexscreener
-export const ROUTES = expandRoutes({
+const expanded = expandRoutes({
   api: {
     arena: {
       position: _,
@@ -11,6 +11,7 @@ export const ROUTES = expandRoutes({
       candlesticks: _,
     },
     candlesticks: _,
+    chats: _,
     dexscreener: {
       asset: _,
       pair: _,
@@ -40,3 +41,13 @@ export const ROUTES = expandRoutes({
   verify: _,
   wallet: _,
 } as const);
+
+// Manually add the root API route to the `ROUTES`- it's difficult to get the types to work with
+// `expandRoutes` properly.
+export const ROUTES = {
+  ...expanded,
+  api: {
+    ...expanded.api,
+    ".": "/api",
+  },
+} as const;

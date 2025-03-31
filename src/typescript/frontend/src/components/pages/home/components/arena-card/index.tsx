@@ -10,27 +10,45 @@ import "./module.css";
 import { useMatchBreakpoints } from "@hooks/index";
 import { getEmojisInString } from "@sdk/emoji_data";
 import { Countdown } from "components/Countdown";
+import { type HomePageProps } from "app/home/HomePage";
+import { useMemo } from "react";
+import { toTotalAptLocked } from "@sdk/indexer-v2/types";
 
 type ArenaCardProps = {
-  market0Symbol: string;
-  market1Symbol: string;
-  rewardsRemaining: bigint;
-  meleeVolume: bigint;
-  aptLocked: bigint;
-  startTime: Date;
-  duration: bigint;
+  meleeData: NonNullable<HomePageProps["meleeData"]>;
 };
 
-export const ArenaCard = ({
-  market0Symbol,
-  market1Symbol,
-  rewardsRemaining,
-  meleeVolume,
-  aptLocked,
-  startTime,
-  duration,
-}: ArenaCardProps) => {
+const meleeDataToArenaCardProps = (meleeData: ArenaCardProps["meleeData"]) => ({
+  market0Symbol: meleeData.market0.market.symbolEmojis.join(""),
+  market1Symbol: meleeData.market1.market.symbolEmojis.join(""),
+  rewardsRemaining: meleeData.arenaInfo.rewardsRemaining,
+  meleeVolume: meleeData.arenaInfo.volume,
+  aptLocked: toTotalAptLocked({
+    market0: {
+      state: meleeData.market0.state,
+      locked: meleeData.arenaInfo.emojicoin0Locked,
+    },
+    market1: {
+      state: meleeData.market1.state,
+      locked: meleeData.arenaInfo.emojicoin1Locked,
+    },
+  }),
+  startTime: meleeData.arenaInfo.startTime,
+  duration: meleeData.arenaInfo.duration / 1000n / 1000n,
+});
+
+export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
   const { isMobile } = useMatchBreakpoints();
+
+  const {
+    market0Symbol,
+    market1Symbol,
+    rewardsRemaining,
+    meleeVolume,
+    aptLocked,
+    startTime,
+    duration,
+  } = useMemo(() => meleeDataToArenaCardProps(meleeData), [meleeData]);
 
   const headerText = (
     <span

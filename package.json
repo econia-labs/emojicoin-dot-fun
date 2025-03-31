@@ -3,6 +3,7 @@
   "scripts": {
     "build": "pnpm --prefix src/typescript run build",
     "build:debug": "pnpm --prefix src/typescript run build:debug",
+    "build:no-ssg": "pnpm --prefix src/typescript run build:no-ssg",
     "check": "pnpm --prefix src/typescript run check",
     "clean": "pnpm --prefix src/typescript run clean",
     "clean:full": "pnpm --prefix src/typescript run clean:full",

@@ -38,6 +38,16 @@ The integrator address for the contract, aka the address that receives fees.
 
 - **Example**: `"0x33332c9ea4c220e0572b7f83f397164f8171e1c9f681136bb8ab78efa6c43333"`
 
+#### `NEXT_PUBLIC_ARENA_MODULE_ADDRESS`
+
+The contract address of the arena module.
+
+#### `NEXT_PUBLIC_ARENA_ENABLED`
+
+A feature flag for arena functionality in the frontend application.
+
+Only considered true if the value is set to the string value `true`.
+
 <!-- markdownlint-enable MD013 -->
 
 ______________________________________________________________________

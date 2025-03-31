@@ -1,72 +1,77 @@
 "use client";
 
-import useNodeDimensions from "@hooks/use-node-dimensions";
 import { getRandomSymbolEmoji } from "@sdk/emoji_data";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useWindowSize } from "react-use";
 import { Emoji } from "utils/emoji";
 
+const MemoizedRandomEmoji = React.memo(OneRandomEmoji);
+
 function OneRandomEmoji({ emoji }: { emoji: string }) {
-  const mt = useMemo(() => Math.random() * 100, []);
-  const ml = useMemo(() => Math.random() * 100, []);
-  const rotate = useMemo(() => Math.round(Math.random() * 50 - 25), []);
+  const style = useMemo(
+    () => ({
+      marginTop: Math.random() * 100,
+      marginLeft: Math.random() * 100,
+      transform: `rotate(${Math.round(Math.random() * 50 - 25)}deg)`,
+      filter: "blur(9px)",
+      opacity: 0.2,
+    }),
+    []
+  );
   return (
     <div
       className="flex flex-col w-min h-min text-8xl place-items-center select-none transition-all"
-      style={{
-        marginTop: `${mt}%`,
-        marginLeft: `${ml}%`,
-        transform: `rotate(${rotate}deg)`,
-        filter: "blur(15px)",
-        opacity: "0.6",
-      }}
+      style={style}
     >
       <Emoji emojis={emoji} />
     </div>
   );
 }
 
-export function BackgroundEmojis() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { height, width } = useNodeDimensions(ref);
-  const nRows = useMemo(() => Math.ceil(height / 150), [height]);
-  const nCols = useMemo(() => Math.ceil(width / 150), [width]);
-  const rows = useMemo(
-    () =>
-      Array.from({ length: nCols * nRows }).map(() =>
-        Math.random() < 1 / 8 ? getRandomSymbolEmoji() : undefined
-      ),
-    [nRows, nCols]
-  );
+const CHANCE = 1 / 8;
+const maybeRandomEmoji = () => (Math.random() < CHANCE ? getRandomSymbolEmoji().emoji : undefined);
+const PARALLAX_STRENGTH = 0.15;
 
-  // The margin top value for the parallax effect- used on the overall background.
-  const [mt, setMt] = useState<number>(0);
+export function BackgroundEmojis() {
+  const { width, height } = useWindowSize();
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
-    // The function that creates the parallax effect.
-    const fn = (e: Event) => {
-      setMt(((e.target as HTMLElement | null)?.scrollTop ?? 0) * -0.4);
-    };
+    const handleScroll = (e: Event) => setScrollY((e.target as HTMLElement).scrollTop);
 
-    document.addEventListener("scroll", fn, { passive: true, capture: true });
+    // The page doesn't actually scroll on the `window`, it scrolls inside the content-wrapper.
+    const doc = document.getElementById("content-wrapper");
 
-    return () => document.removeEventListener("scroll", fn);
+    doc?.addEventListener("scroll", handleScroll);
+    return () => doc?.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const { rows, cols, emojis } = useMemo(() => {
+    // 1x the width, 3x the height, based on the element dimensions. (h-300% w-100%)
+    const rows = Math.ceil((height * 3) / 150);
+    const cols = Math.ceil(width / 150);
+    const emojis = Array.from({ length: rows * cols }).map(maybeRandomEmoji);
+    return {
+      rows,
+      cols,
+      emojis,
+    };
+  }, [width, height]);
 
   return (
     <div className="z-[-1] absolute top-0 left-0 h-[100%] w-[100vw] overflow-hidden">
       <div
-        ref={ref}
-        className="absolute top-0 left-0 h-[300%] w-[100%] grid"
+        className="absolute top-0 left-0 h-[300%] w-[100%] grid will-change-transform"
         style={{
-          gridTemplateRows: `repeat(${nRows}, 1fr)`,
-          gridTemplateColumns: `repeat(${nCols}, 1fr)`,
-          perspective: "20px",
-          top: mt,
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          perspective: "1000px",
+          translate: `0 ${scrollY * -PARALLAX_STRENGTH}px`,
         }}
       >
-        {rows.map((row, i) =>
-          row ? (
-            <OneRandomEmoji key={`random-emoji-bg-${i}`} emoji={row.emoji} />
+        {emojis.map((emoji, i) =>
+          emoji ? (
+            <MemoizedRandomEmoji key={`random-emoji-bg-${i}`} emoji={emoji} />
           ) : (
             <div key={`random-emoji-bg-${i}`} />
           )
