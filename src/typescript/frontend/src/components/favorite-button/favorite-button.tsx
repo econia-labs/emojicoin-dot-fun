@@ -49,9 +49,6 @@ export const FavoriteButton = ({ marketAddress, emojis, className }: Props) => {
     return "0x0";
   }, [marketAddress, emojis]);
 
-  const addFavorite = useFavoriteTransactionBuilder(mktAddress, true);
-  const removeFavorite = useFavoriteTransactionBuilder(mktAddress, false);
-
   const isFavorite = useMemo(() => {
     if (mktAddress) {
       return checkIsFavorite(mktAddress);
@@ -59,9 +56,11 @@ export const FavoriteButton = ({ marketAddress, emojis, className }: Props) => {
     return false;
   }, [checkIsFavorite, mktAddress]);
 
+  const toggleFavorite = useFavoriteTransactionBuilder(mktAddress, !isFavorite);
+
   const handleClick = () => {
     setIsLoading(true);
-    submit(isFavorite ? removeFavorite : addFavorite)
+    submit(toggleFavorite)
       .then(() => refetch())
       .finally(() => setIsLoading(false));
   };
