@@ -233,7 +233,7 @@ module favorites::emojicoin_dot_fun_favorites {
             let emoji_bytes = *vector::borrow(&emojis, i);
             add_favorite(&account_1_signer, emoji_bytes);
         };
-        
+
         let num_favorites = view_favorites(ACCOUNT_1).length();
         assert!(num_favorites == MAX_NUM_FAVORITES);
     }
