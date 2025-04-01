@@ -31,12 +31,13 @@ aptos move publish \
 ## Add favorite
 
 ```sh
-MARKET_ADDRESS=0xccc...
+# The market's flattened symbol emoji bytes. For example: 0xf09f8e83
+SYMBOL_BYTES=0xf09f...
 FAVORITES=0xaaa...
 PROFILE=my-profile
 
 aptos move run \
-  --args address:$MARKET_ADDRESS \
+  --args hex:$SYMBOL_BYTES \
   --function-id $FAVORITES::emojicoin_dot_fun_favorites::add_favorite \
   --profile $PROFILE
 ```
@@ -44,12 +45,13 @@ aptos move run \
 ## Remove favorite
 
 ```sh
-MARKET_ADDRESS=0xccc...
+# The market's flattened symbol emoji bytes. For example: 0xf09f8e83
+SYMBOL_BYTES=0xf09f...
 FAVORITES=0xaaa...
 PROFILE=my-profile
 
 aptos move run \
-  --args address:$MARKET_ADDRESS \
+  --args hex:$SYMBOL_BYTES \
   --function-id $FAVORITES::emojicoin_dot_fun_favorites::remove_favorite \
   --profile $PROFILE
 ```
