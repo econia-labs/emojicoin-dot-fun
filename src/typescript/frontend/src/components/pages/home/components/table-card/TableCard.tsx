@@ -6,6 +6,7 @@ import Text from "components/text";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { motion, type MotionProps, useAnimationControls } from "framer-motion";
+import FEATURE_FLAGS from "lib/feature-flags";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Emoji } from "utils/emoji";
@@ -253,14 +254,16 @@ const TableCard = ({
                   <FormattedNumber value={secondaryMetric} scramble nominalize suffix=" APT" />
                 </motion.div>
               </Column>
-              <Column>
-                <div className="flex justify-end items-end grow relative w-[25px] h-[25px]">
-                  <FavoriteButton
-                    emojis={emojis.map((e) => e.emoji)}
-                    className="absolute bottom-0 right-0"
-                  />
-                </div>
-              </Column>
+              {FEATURE_FLAGS.Favorites && (
+                <Column>
+                  <div className="flex justify-end items-end grow relative w-[25px] h-[25px]">
+                    <FavoriteButton
+                      emojis={emojis.map((e) => e.emoji)}
+                      className="absolute bottom-0 right-0"
+                    />
+                  </div>
+                </Column>
+              )}
             </Flex>
           </motion.div>
         </motion.div>
