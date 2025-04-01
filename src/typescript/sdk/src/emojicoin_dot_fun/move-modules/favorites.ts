@@ -1,14 +1,19 @@
-/* eslint-disable import/no-unused-modules */
-import type {
-  Account,
-  AccountAddressInput,
-  AptosConfig,
-  InputGenerateTransactionOptions,
-  LedgerVersionArg,
-  UserTransactionResponse,
-  WaitForTransactionOptions,
+/* eslint-disable max-len */
+import {
+  type Account,
+  AccountAddress,
+  type AccountAddressInput,
+  Aptos,
+  type AptosConfig,
+  buildTransaction,
+  type HexInput,
+  type InputGenerateTransactionOptions,
+  type LedgerVersionArg,
+  MoveVector,
+  type U8,
+  type UserTransactionResponse,
+  type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
-import { AccountAddress, Aptos, buildTransaction } from "@aptos-labs/ts-sdk";
 
 import { MODULE_ADDRESS } from "../../const";
 import {
@@ -16,42 +21,48 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import type { AccountAddressString } from "../types";
 
 export type AddFavoritePayloadMoveArguments = {
-  market: AccountAddress;
+  symbolBytes: MoveVector<U8>;
 };
 
 /**
  *```
  *  public entry fun add_favorite(
  *     user: &signer,
- *     market: address,
+ *     symbol_bytes: vector<u8>,
  *  )
  *```
  **/
 
 export class AddFavorite extends EntryFunctionPayloadBuilder {
   public readonly moduleAddress = MODULE_ADDRESS;
+
   public readonly moduleName = "emojicoin_dot_fun_favorites";
+
   public readonly functionName = "add_favorite";
+
   public readonly args: AddFavoritePayloadMoveArguments;
+
   public readonly typeTags: [] = [];
+
   public readonly primarySender: AccountAddress;
+
   public readonly secondarySenders: [] = [];
+
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
     user: AccountAddressInput; // &signer
-    market: AccountAddressInput; // address
+    symbolBytes: HexInput; // vector<u8>
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
     super();
-    const { user, market, feePayer } = args;
+    const { user, symbolBytes, feePayer } = args;
     this.primarySender = AccountAddress.from(user);
 
     this.args = {
-      market: AccountAddress.from(market),
+      symbolBytes: MoveVector.U8(symbolBytes),
     };
     this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
   }
@@ -59,7 +70,7 @@ export class AddFavorite extends EntryFunctionPayloadBuilder {
   static async builder(args: {
     aptosConfig: AptosConfig;
     user: AccountAddressInput; // &signer
-    market: AccountAddressInput; // address
+    symbolBytes: HexInput; // vector<u8>
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
   }): Promise<EntryFunctionTransactionBuilder> {
@@ -79,7 +90,7 @@ export class AddFavorite extends EntryFunctionPayloadBuilder {
   static async submit(args: {
     aptosConfig: AptosConfig;
     user: Account; // &signer
-    market: AccountAddressInput; // address
+    symbolBytes: HexInput; // vector<u8>
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
@@ -101,39 +112,46 @@ export class AddFavorite extends EntryFunctionPayloadBuilder {
 }
 
 export type RemoveFavoritePayloadMoveArguments = {
-  market: AccountAddress;
+  symbolBytes: MoveVector<U8>;
 };
 
 /**
  *```
  *  public entry fun remove_favorite(
  *     user: &signer,
- *     market: address,
+ *     symbol_bytes: vector<u8>,
  *  )
  *```
  **/
 
 export class RemoveFavorite extends EntryFunctionPayloadBuilder {
   public readonly moduleAddress = MODULE_ADDRESS;
+
   public readonly moduleName = "emojicoin_dot_fun_favorites";
+
   public readonly functionName = "remove_favorite";
+
   public readonly args: RemoveFavoritePayloadMoveArguments;
+
   public readonly typeTags: [] = [];
+
   public readonly primarySender: AccountAddress;
+
   public readonly secondarySenders: [] = [];
+
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
     user: AccountAddressInput; // &signer
-    market: AccountAddressInput; // address
+    symbolBytes: HexInput; // vector<u8>
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
     super();
-    const { user, market, feePayer } = args;
+    const { user, symbolBytes, feePayer } = args;
     this.primarySender = AccountAddress.from(user);
 
     this.args = {
-      market: AccountAddress.from(market),
+      symbolBytes: MoveVector.U8(symbolBytes),
     };
     this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
   }
@@ -141,7 +159,7 @@ export class RemoveFavorite extends EntryFunctionPayloadBuilder {
   static async builder(args: {
     aptosConfig: AptosConfig;
     user: AccountAddressInput; // &signer
-    market: AccountAddressInput; // address
+    symbolBytes: HexInput; // vector<u8>
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
   }): Promise<EntryFunctionTransactionBuilder> {
@@ -161,7 +179,7 @@ export class RemoveFavorite extends EntryFunctionPayloadBuilder {
   static async submit(args: {
     aptosConfig: AptosConfig;
     user: Account; // &signer
-    market: AccountAddressInput; // address
+    symbolBytes: HexInput; // vector<u8>
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
@@ -191,15 +209,19 @@ export type ViewFavoritesPayloadMoveArguments = {
  *  #[view]
  *  public fun view_favorites(
  *     user: address,
- *  ): vector<address>
+ *  ): vector<vector<u8>>
  *```
  **/
 
-export class ViewFavorites extends ViewFunctionPayloadBuilder<[Array<AccountAddressString>]> {
+export class ViewFavorites extends ViewFunctionPayloadBuilder<[Array<string>]> {
   public readonly moduleAddress = MODULE_ADDRESS;
+
   public readonly moduleName = "emojicoin_dot_fun_favorites";
+
   public readonly functionName = "view_favorites";
+
   public readonly args: ViewFavoritesPayloadMoveArguments;
+
   public readonly typeTags: [] = [];
 
   constructor(args: {
@@ -217,7 +239,7 @@ export class ViewFavorites extends ViewFunctionPayloadBuilder<[Array<AccountAddr
     aptos: Aptos | AptosConfig;
     user: AccountAddressInput; // address
     options?: LedgerVersionArg;
-  }): Promise<Array<AccountAddressString>> {
+  }): Promise<Array<string>> {
     const [res] = await new ViewFavorites(args).view(args);
     return res;
   }
