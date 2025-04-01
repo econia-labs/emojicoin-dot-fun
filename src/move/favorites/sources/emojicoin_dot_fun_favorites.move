@@ -232,7 +232,10 @@ module favorites::emojicoin_dot_fun_favorites {
         for (i in 0..MAX_NUM_FAVORITES) {
             let emoji_bytes = *vector::borrow(&emojis, i);
             add_favorite(&account_1_signer, emoji_bytes);
-        }
+        };
+        
+        let num_favorites = view_favorites(ACCOUNT_1).length();
+        assert!(num_favorites == MAX_NUM_FAVORITES);
     }
 
     #[test, expected_failure(abort_code = E_USER_HAS_MAX_NUMBER_OF_FAVORITES)]
