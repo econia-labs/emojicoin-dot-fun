@@ -3,6 +3,8 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCallback } from "react";
 
 import { ViewFavorites } from "@/move-modules";
+import type { SymbolEmoji } from "@/sdk/index";
+import { encodeEmojis } from "@/sdk/index";
 import { getAptosClient } from "@/sdk/utils";
 
 async function getFavorites(address: string) {
@@ -22,8 +24,8 @@ export function useGetFavorites() {
 
   //Helper function to check if a market is a favorite
   const checkIsFavorite = useCallback(
-    (marketAddress: `0x${string}`) =>
-      !!favoritesQuery.data && favoritesQuery.data.has(marketAddress),
+    (emojis: SymbolEmoji[]) =>
+      !!favoritesQuery.data && favoritesQuery.data.has(encodeEmojis(emojis)),
     [favoritesQuery.data]
   );
 

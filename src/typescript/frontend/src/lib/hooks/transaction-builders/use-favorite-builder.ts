@@ -2,10 +2,12 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
 import { AddFavorite, RemoveFavorite } from "@/move-modules";
+import type { SymbolEmoji } from "@/sdk/index";
+import { encodeEmojis } from "@/sdk/index";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
 
-export const useFavoriteTransactionBuilder = (marketAddress: `0x${string}`, isAdd: boolean) => {
+export const useFavoriteTransactionBuilder = (emojis: SymbolEmoji[], isAdd: boolean) => {
   const { account } = useAptos();
 
   const memoizedArgs = useMemo(() => {
@@ -14,9 +16,9 @@ export const useFavoriteTransactionBuilder = (marketAddress: `0x${string}`, isAd
     }
     return {
       user: account.address,
-      market: marketAddress,
+      symbolBytes: encodeEmojis(emojis),
     };
-  }, [account, marketAddress]);
+  }, [account, emojis]);
 
   return useTransactionBuilder(memoizedArgs, isAdd ? AddFavorite : RemoveFavorite);
 };
