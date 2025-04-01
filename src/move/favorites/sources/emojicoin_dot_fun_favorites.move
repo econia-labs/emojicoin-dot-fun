@@ -22,7 +22,7 @@ module favorites::emojicoin_dot_fun_favorites {
     /// User already has the maximum number of favorites.
     const E_USER_HAS_MAX_NUMBER_OF_FAVORITES: u64 = 4;
 
-    const MAX_NUM_FAVORITES: u64 = 100;
+    const MAX_NUM_FAVORITES: u64 = 25;
 
     struct Nil {}
     has copy, drop, store;
