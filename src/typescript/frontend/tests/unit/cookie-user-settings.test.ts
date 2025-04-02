@@ -1,6 +1,7 @@
 import {
   COOKIE_USER_SETTINGS_DEFAULT_STATE,
   COOKIE_USER_SETTINGS_MAX_AGE,
+  COOKIE_USER_SETTINGS_NAME,
 } from "lib/cookie-user-settings/types";
 import { cookies } from "next/headers";
 
@@ -102,7 +103,7 @@ describe("Cookie Storage with Server Actions", () => {
       await saveSettings({ accountAddress: ACCOUNT_ADDRESS_1 });
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
-        "user_settings",
+        COOKIE_USER_SETTINGS_NAME,
         JSON.stringify({
           version: 1,
           accountAddress: ACCOUNT_ADDRESS_1,
@@ -117,10 +118,10 @@ describe("Cookie Storage with Server Actions", () => {
 
     it("should throw error for invalid settings", async () => {
       const invalidSettings = {
-        accountAddress: 123, // Should be string
+        accountAddress: "wrong address", // Should be a valid address
       };
 
-      await expect(saveSettings(invalidSettings as any)).rejects.toThrow();
+      await expect(saveSettings(invalidSettings)).rejects.toThrow();
     });
   });
 
@@ -137,7 +138,7 @@ describe("Cookie Storage with Server Actions", () => {
       await saveSetting("accountAddress", ACCOUNT_ADDRESS_2);
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
-        "user_settings",
+        COOKIE_USER_SETTINGS_NAME,
         JSON.stringify({
           version: 1,
           accountAddress: ACCOUNT_ADDRESS_2,
@@ -151,7 +152,7 @@ describe("Cookie Storage with Server Actions", () => {
     it("should delete the settings cookie", async () => {
       await clearSettings();
 
-      expect(mockCookieStore.delete).toHaveBeenCalledWith("user_settings");
+      expect(mockCookieStore.delete).toHaveBeenCalledWith(COOKIE_USER_SETTINGS_NAME);
     });
   });
 });
