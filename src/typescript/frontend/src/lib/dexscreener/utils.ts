@@ -1,10 +1,10 @@
-import { DECIMALS } from "@sdk/const";
-import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
-import { type SymbolEmoji, toMarketEmojiData } from "@sdk/emoji_data";
-import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2";
-import { toCoinDecimalString } from "../utils/decimals";
+import { DECIMALS } from "@/sdk/const";
+import { type SymbolEmoji, toMarketEmojiData } from "@/sdk/emoji_data";
+import type { toLiquidityEventModel, toSwapEventModel } from "@/sdk/indexer-v2";
+import { calculateCurvePrice, calculateRealReserves } from "@/sdk/markets";
 
-import type { SwapEvent, BlockInfo, JoinExitEvent } from "./types";
+import { toCoinDecimalString } from "../utils/decimals";
+import type { BlockInfo, JoinExitEvent, SwapEvent } from "./types";
 
 export function pairIdToSymbolEmojiString(pairId: string): string {
   return pairId.split("-")[0];

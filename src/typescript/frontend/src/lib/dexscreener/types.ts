@@ -1,5 +1,5 @@
-import type { XOR } from "@sdk/utils/utility-types";
-import type { Flatten } from "@sdk-types";
+import type { XOR } from "@/sdk/utils/utility-types";
+import type { Flatten } from "@/sdk-types";
 
 export interface Asset {
   id: string;
