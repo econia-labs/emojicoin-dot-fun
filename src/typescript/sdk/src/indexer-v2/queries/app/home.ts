@@ -12,6 +12,7 @@ import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { sortByWithFallback } from "../query-params";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
+import { joinEqClauses } from "../misc";
 
 // A helper function to abstract the logic for fetching rows that contain market state.
 const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({
@@ -20,6 +21,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
   searchEmojis,
+  selectEmojis,
   sortBy = DEFAULT_SORT_BY,
   inBondingCurve,
   count,
@@ -44,8 +46,12 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     .order(sortByWithFallback(sortBy), orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  if (searchEmojis && searchEmojis.length) {
+  if (searchEmojis?.length) {
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
+  }
+
+  if (selectEmojis?.length) {
+    query = query.or(joinEqClauses(selectEmojis));
   }
 
   if (typeof inBondingCurve === "boolean") {

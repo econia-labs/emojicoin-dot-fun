@@ -156,7 +156,12 @@ const EmojiTable = (props: EmojiTableProps) => {
                   >
                     <StyledGrid>
                       {shouldAnimateGrid ? (
-                        <LiveClientGrid markets={markets} sortBy={sort} />
+                        <LiveClientGrid
+                          isFavoriteFilterEnabled={props.isFavoriteFilterEnabled}
+                          markets={markets}
+                          sortBy={sort}
+                          page={page}
+                        />
                       ) : (
                         <ClientGrid markets={markets} page={page} sortBy={sort} />
                       )}

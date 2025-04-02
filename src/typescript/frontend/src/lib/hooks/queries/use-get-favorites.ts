@@ -1,22 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { getFavorites } from "lib/queries/get-favorite-markets";
 import { useCallback } from "react";
 
-import { ViewFavorites } from "@/move-modules";
 import type { SymbolEmoji } from "@/sdk/index";
 import { encodeEmojis } from "@/sdk/index";
-import { getAptosClient } from "@/sdk/utils";
 
-async function getFavorites(address: string) {
-  const aptos = getAptosClient();
-  return ViewFavorites.view({ aptos, user: address }).then((res) => res);
-}
-
-export function useGetFavorites() {
+export function useGetFavoriteMarkets() {
   const { account } = useAptos();
 
   const favoritesQuery = useQuery({
-    queryKey: ["useGetFavorites", account?.address],
+    queryKey: ["useGetFavoriteMarkets", account?.address],
     queryFn: () => (!account?.address ? [] : getFavorites(account.address)),
     select: (data) => new Set(data),
     enabled: !!account,
