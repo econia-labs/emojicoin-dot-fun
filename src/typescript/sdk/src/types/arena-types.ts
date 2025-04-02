@@ -118,7 +118,6 @@ export type ArenaTypes = {
 
   ArenaLeaderboardHistoryWithArenaInfo: {
     user: AccountAddressString;
-    leaderboardLastTransactionVersion: bigint;
     meleeID: bigint;
     profits: bigint;
     losses: bigint;
@@ -128,7 +127,6 @@ export type ArenaTypes = {
     lastExit0: boolean | null;
     exited: boolean;
 
-    arenaInfoLastTransactionVersion: bigint;
     emojicoin0MarketAddress: AccountAddressString;
     emojicoin0Symbols: SymbolEmoji[];
     emojicoin0MarketID: bigint;
@@ -137,6 +135,9 @@ export type ArenaTypes = {
     emojicoin1MarketID: bigint;
     startTime: Date;
     duration: bigint;
+
+    arenaInfoLastTransactionVersion: bigint;
+    leaderboardHistoryLastTransactionVersion: bigint;
   };
 
   ArenaLeaderboard: {
