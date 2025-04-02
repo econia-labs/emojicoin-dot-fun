@@ -34,7 +34,7 @@ import type {
 import { APTOS_COIN_TYPE_STRING } from "@/sdk/index";
 import { sleep } from "@/sdk/utils";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
-import { useLatestBalance } from "@/store/latest-balance/store";
+import { useLatestBalance } from "@/store/latest-balance";
 import { globalTransactionStore } from "@/store/transaction/store";
 
 import { copyAddressHelper, getFlattenedEventModelsFromResponse, setCoinTypeHelper } from "./utils";

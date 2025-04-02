@@ -5,7 +5,7 @@ import type { StructTagString } from "@/sdk/index";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 import type { CoinTypeString } from "@/sdk/utils/type-tags";
 /* eslint-disable-next-line */ // So we can link the import in the doc comment.
-import { type useLatestBalance } from "@/store/latest-balance/store";
+import { type useLatestBalance } from "@/store/latest-balance";
 
 import { withResponseError } from "./client";
 

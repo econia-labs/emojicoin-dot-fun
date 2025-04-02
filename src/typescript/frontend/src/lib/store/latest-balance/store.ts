@@ -1,17 +1,9 @@
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { useFetchWalletBalanceQuery } from "lib/hooks/queries/use-wallet-balance";
-import { useEffect, useMemo, useRef } from "react";
-import { createStore, useStore } from "zustand";
+import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun/types";
-import {
-  getCoinBalanceFromChanges,
-  toCoinTypeString,
-} from "@/sdk/utils/parse-changes-for-balances";
+import { getCoinBalanceFromChanges } from "@/sdk/utils/parse-changes-for-balances";
 import type { CoinTypeString } from "@/sdk/utils/type-tags";
-
-import { globalTransactionStore } from "../transaction/store";
 
 type LatestBalance = {
   balance: bigint;
@@ -21,7 +13,7 @@ type LatestBalance = {
 type CoinBalanceMap = Map<CoinTypeString, LatestBalance>;
 type AddressToCoinMap = Map<`0x${string}`, CoinBalanceMap>;
 
-type LatestBalanceStore = {
+export type LatestBalanceStore = {
   ensureInStore: (addr: `0x${string}`, coinType: CoinTypeString) => void;
   maybeUpdate: (addr: `0x${string}`, coinType: CoinTypeString, incoming: LatestBalance) => void;
   processChanges: (
@@ -33,7 +25,7 @@ type LatestBalanceStore = {
 };
 
 // The global store for all latest balances. This is the actual zustand/immer store.
-const globalLatestBalanceStore = createStore<LatestBalanceStore>()(
+export const globalLatestBalanceStore = createStore<LatestBalanceStore>()(
   immer((set, get) => ({
     addressMap: new Map(),
     ensureInStore(addr, coinType) {
@@ -91,73 +83,3 @@ const globalLatestBalanceStore = createStore<LatestBalanceStore>()(
     },
   }))
 );
-
-/**
- * In order to process all incoming transactions, we need to subscribe to all incoming transactions
- * from the global txn store and process the balances accordingly.
- * The `useRef` + `.subscribe` pattern here is the recommended way of subscribing to a store with a
- * selector in a reactive way.
- *
- * @param coinType the coin type to track. A parsed and standardized, fully-qualified type string
- * @param address the account address to store changes for
- *
- * @see {@link https://github.com/pmndrs/zustand/tree/main?tab=readme-ov-file#transient-updates-for-often-occurring-state-changes}
- */
-const useSyncBalanceFromTransactionStore = (
-  address: `0x${string}` | undefined,
-  coinType: CoinTypeString | undefined
-) => {
-  const transactionsRef = useRef(
-    address && globalTransactionStore.getState().addresses.get(address)
-  );
-
-  useEffect(
-    () =>
-      globalTransactionStore.subscribe(
-        (state) => (transactionsRef.current = address && state.addresses.get(address)),
-        (newTransactions, _prevTransactions) => {
-          if (address && coinType && newTransactions) {
-            globalLatestBalanceStore
-              .getState()
-              .processChanges(address, coinType, ...newTransactions);
-          }
-        }
-      ),
-    [address, coinType]
-  );
-};
-
-export const useLatestBalanceStore = <T>(selector: (store: LatestBalanceStore) => T): T =>
-  useStore(globalLatestBalanceStore, selector);
-
-export const useLatestBalance = (
-  accountAddress: `0x${string}` | undefined,
-  coinTypeIn: TypeTagInput | undefined
-) => {
-  const coinType = useMemo(
-    () => (coinTypeIn && toCoinTypeString(coinTypeIn)) || undefined,
-    [coinTypeIn]
-  );
-
-  useSyncBalanceFromTransactionStore(accountAddress, coinType);
-  const queryRes = useFetchWalletBalanceQuery(accountAddress, coinType);
-
-  const balance = useLatestBalanceStore(
-    (s) => accountAddress && coinType && s.addressMap.get(accountAddress)?.get(coinType)?.balance
-  );
-
-  useEffect(() => {
-    if (accountAddress && coinType) {
-      globalLatestBalanceStore.getState().maybeUpdate(accountAddress, coinType, {
-        balance: queryRes.balance,
-        version: queryRes.version,
-      });
-    }
-  }, [accountAddress, coinType, queryRes.balance, queryRes.version]);
-
-  return {
-    balance: balance ?? 0n,
-    isFetching: queryRes.isFetching,
-    refetchIfStale: queryRes.refetchIfStale,
-  };
-};
