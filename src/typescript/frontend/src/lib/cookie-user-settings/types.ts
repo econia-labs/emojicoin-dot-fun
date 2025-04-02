@@ -7,7 +7,7 @@ export const CookieUserSettingsSchema = z.object({
   version: z.number().int().positive(),
   accountAddress: z
     .string()
-    .refine((arg) => AccountAddress.isValid({ input: arg }), {
+    .refine((arg) => AccountAddress.isValid({ input: arg }).valid, {
       message: "Invalid account address format",
     })
     .optional()
