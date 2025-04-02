@@ -1,7 +1,7 @@
 import { INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { calculateCirculatingSupply, EMOJICOIN_SUPPLY,toMarketEmojiData } from "@/sdk/index";
+import { calculateCirculatingSupply, EMOJICOIN_SUPPLY, toMarketEmojiData } from "@/sdk/index";
 import {
   fetchLiquidityEventsByBlock,
   fetchMarketRegistrationEventBySymbolEmojis,
