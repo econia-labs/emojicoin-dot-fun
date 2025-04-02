@@ -1,7 +1,9 @@
 import { AptPriceContextProvider } from "context/AptPrice";
+import { getSettings } from "lib/cookie-user-settings/cookie-user-settings";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import { getFavorites } from "lib/queries/get-favorite-markets";
 import { fetchCachedPriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
@@ -18,6 +20,12 @@ export const revalidate = 2;
 export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
+
+  const { accountAddress, homePageFilterFavorites } = await getSettings();
+
+  // Don't filter favorites if there is a search query.
+  const favorites =
+    !q && accountAddress && homePageFilterFavorites ? await getFavorites(accountAddress) : [];
 
   const priceFeedPromise = fetchCachedPriceFeed()
     .then((res) => res.map(toPriceFeed))
@@ -37,6 +45,9 @@ export default async function Home({ searchParams }: HomePageParams) {
       orderBy,
       searchEmojis,
       pageSize: MARKETS_PER_PAGE,
+      selectEmojis: favorites.map((emojiBytes) =>
+        symbolBytesToEmojis(emojiBytes).emojis.map((e) => e.emoji)
+      ),
       count: true,
     });
     marketsPromise = promise.then((r) => r.rows);
@@ -47,6 +58,9 @@ export default async function Home({ searchParams }: HomePageParams) {
       sortBy,
       orderBy,
       searchEmojis,
+      selectEmojis: favorites.map((emojiBytes) =>
+        symbolBytesToEmojis(emojiBytes).emojis.map((e) => e.emoji)
+      ),
       pageSize: MARKETS_PER_PAGE,
     });
     numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
@@ -78,6 +92,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         searchBytes={q}
         priceFeed={priceFeedData}
         meleeData={meleeData}
+        isFavoriteFilterEnabled={!!favorites}
       />
     </AptPriceContextProvider>
   );

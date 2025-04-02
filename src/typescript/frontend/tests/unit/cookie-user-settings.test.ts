@@ -1,15 +1,15 @@
-import { revalidatePath } from "next/cache";
+import {
+  COOKIE_USER_SETTINGS_DEFAULT_STATE,
+  COOKIE_USER_SETTINGS_MAX_AGE,
+} from "lib/cookie-user-settings/types";
 import { cookies } from "next/headers";
 
 import {
   clearSettings,
-  COOKIE_MAX_AGE,
-  DEFAULT_SETTINGS,
   getSetting,
   getSettings,
   saveSetting,
   saveSettings,
-  UserSettingsSchema,
 } from "../../src/lib/cookie-user-settings/cookie-user-settings";
 
 const ACCOUNT_ADDRESS_1 = "0x000000000000000000000000000000000000000000000000000000000000000A";
@@ -22,10 +22,6 @@ jest.mock("next/headers", () => ({
     set: jest.fn(),
     delete: jest.fn(),
   })),
-}));
-
-jest.mock("next/cache", () => ({
-  revalidatePath: jest.fn(),
 }));
 
 describe("Cookie Storage with Server Actions", () => {
@@ -53,14 +49,14 @@ describe("Cookie Storage with Server Actions", () => {
       mockCookieStore.get.mockReturnValue(null);
 
       const settings = await getSettings();
-      expect(settings).toEqual(DEFAULT_SETTINGS);
+      expect(settings).toEqual(COOKIE_USER_SETTINGS_DEFAULT_STATE);
     });
 
     it("should return default settings when cookie is invalid JSON", async () => {
       mockCookieStore.get.mockReturnValue({ value: "invalid json" });
 
       const settings = await getSettings();
-      expect(settings).toEqual(DEFAULT_SETTINGS);
+      expect(settings).toEqual(COOKIE_USER_SETTINGS_DEFAULT_STATE);
     });
 
     it("should return default settings when version is outdated", async () => {
@@ -69,7 +65,7 @@ describe("Cookie Storage with Server Actions", () => {
       });
 
       const settings = await getSettings();
-      expect(settings).toEqual(DEFAULT_SETTINGS);
+      expect(settings).toEqual(COOKIE_USER_SETTINGS_DEFAULT_STATE);
     });
 
     it("should return valid settings from cookie", async () => {
@@ -112,12 +108,11 @@ describe("Cookie Storage with Server Actions", () => {
           accountAddress: ACCOUNT_ADDRESS_1,
         }),
         expect.objectContaining({
-          maxAge: COOKIE_MAX_AGE,
+          maxAge: COOKIE_USER_SETTINGS_MAX_AGE,
           path: "/",
           sameSite: "strict",
         })
       );
-      expect(revalidatePath).toHaveBeenCalledWith("/");
     });
 
     it("should throw error for invalid settings", async () => {
@@ -149,7 +144,6 @@ describe("Cookie Storage with Server Actions", () => {
         }),
         expect.any(Object)
       );
-      expect(revalidatePath).toHaveBeenCalledWith("/");
     });
   });
 
@@ -158,39 +152,6 @@ describe("Cookie Storage with Server Actions", () => {
       await clearSettings();
 
       expect(mockCookieStore.delete).toHaveBeenCalledWith("user_settings");
-      expect(revalidatePath).toHaveBeenCalledWith("/");
-    });
-  });
-
-  describe("Schema Validation", () => {
-    it("should validate correct settings", () => {
-      const validSettings = {
-        version: 1,
-        accountAddress: ACCOUNT_ADDRESS_1,
-      };
-
-      const result = UserSettingsSchema.safeParse(validSettings);
-      expect(result.success).toBe(true);
-    });
-
-    it("should reject invalid version", () => {
-      const invalidSettings = {
-        version: -1,
-        accountAddress: ACCOUNT_ADDRESS_1,
-      };
-
-      const result = UserSettingsSchema.safeParse(invalidSettings);
-      expect(result.success).toBe(false);
-    });
-
-    it("should allow null accountAddress", () => {
-      const settings = {
-        version: 1,
-        accountAddress: null,
-      };
-
-      const result = UserSettingsSchema.safeParse(settings);
-      expect(result.success).toBe(true);
     });
   });
 });

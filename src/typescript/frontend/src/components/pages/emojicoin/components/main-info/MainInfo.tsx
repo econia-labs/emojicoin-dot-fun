@@ -216,7 +216,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           </Link>
           {FEATURE_FLAGS.Favorites && (
             <div className="absolute bottom-4 right-4">
-              <FavoriteButton marketAddress={data.marketAddress} />
+              <FavoriteButton emojis={marketEmojis} marketAddress={data.marketAddress} />
             </div>
           )}
         </div>

@@ -5,6 +5,7 @@ import "./module.css";
 import type { HomePageProps } from "app/home/HomePage";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
@@ -13,14 +14,19 @@ import useEvent from "@/hooks/use-event";
 import { ANIMATION_DEBOUNCE_TIME } from "../table-card/animation-variants/grid-variants";
 import TableCard from "../table-card/TableCard";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "./utils";
+import type { PropsWithTimeAndIndex } from "./utils";
+import { constructOrdered, toSerializedGridOrder } from "./utils";
 
 export const LiveClientGrid = ({
   markets,
   sortBy,
+  isFavoriteFilterEnabled,
+  page,
 }: {
   markets: HomePageProps["markets"];
   sortBy: MarketDataSortByHomePage;
+  isFavoriteFilterEnabled: boolean;
+  page: number;
 }) => {
   const rowLength = useGridRowLength();
   const getMarket = useEventStore((s) => s.getMarket);
@@ -33,6 +39,7 @@ export const LiveClientGrid = ({
       stateFirehose,
       getMarket,
       getSearchEmojis,
+      isFavoriteFilterEnabled,
     })
   );
   // Note we merely use this as a trigger, we can use the latestOrdered ref to get the true latest ordered list,
@@ -40,13 +47,14 @@ export const LiveClientGrid = ({
   // is right when we should update the ordered list.
   const [gridOrder, setGridOrder] = useState(toSerializedGridOrder(latestOrdered.current));
   const [ordered, setOrdered] = useState<
-    Array<WithTimeIndexAndPrev & { runInitialAnimation?: boolean }>
+    Array<PropsWithTimeAndIndex & { runInitialAnimation?: boolean }>
   >(
     constructOrdered({
       markets,
       stateFirehose,
       getMarket,
       getSearchEmojis,
+      isFavoriteFilterEnabled,
     }).map((v) => ({
       ...v,
       runInitialAnimation: true,
@@ -73,6 +81,7 @@ export const LiveClientGrid = ({
       stateFirehose,
       getMarket,
       getSearchEmojis,
+      isFavoriteFilterEnabled,
     });
 
     updateGridIfOrderChanged();
@@ -146,11 +155,11 @@ export const LiveClientGrid = ({
 
   return (
     <>
-      {ordered.map((v) => {
+      {ordered.map((v, i) => {
         return (
           <TableCard
             key={`live-${v.marketID}-${v.searchEmojisKey}`}
-            index={v.index}
+            index={(page - 1) * MARKETS_PER_PAGE + i}
             pageOffset={0} // We don't paginate the live grid.
             marketID={v.marketID}
             symbol={v.symbol}
