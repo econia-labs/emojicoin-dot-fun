@@ -27,30 +27,35 @@ if (
 
 export const VERCEL_TARGET_ENV = process.env.VERCEL_TARGET_ENV as typeof vercelTargetEnv;
 
-const requiredEnv = {
-  NEXT_PUBLIC_MODULE_ADDRESS: true,
-  NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: true,
-  NEXT_PUBLIC_INTEGRATOR_ADDRESS: true,
-  NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: true,
-  NEXT_PUBLIC_APTOS_NETWORK: true,
-  // Only required if feature flag is enabled.
-  NEXT_PUBLIC_ARENA_MODULE_ADDRESS: process.env.NEXT_PUBLIC_ARENA_ENABLED === "true",
-  NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS: process.env.NEXT_PUBLIC_FAVORITES_ENABLED === "true",
+// Create an explicit mapping of environment variables
+const envMapping = {
+  NEXT_PUBLIC_MODULE_ADDRESS: process.env.NEXT_PUBLIC_MODULE_ADDRESS,
+  NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS,
+  NEXT_PUBLIC_INTEGRATOR_ADDRESS: process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS,
+  NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS,
+  NEXT_PUBLIC_APTOS_NETWORK: process.env.NEXT_PUBLIC_APTOS_NETWORK,
+  NEXT_PUBLIC_ARENA_MODULE_ADDRESS: process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS,
+  NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS: process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS,
+} as const;
+type envKeys = keyof typeof envMapping;
+
+// Make some env vars optional based on feature flags.
+const optionalEnv: Partial<Record<envKeys, boolean>> = {
+  NEXT_PUBLIC_ARENA_MODULE_ADDRESS: process.env.NEXT_PUBLIC_ARENA_ENABLED === "false",
+  NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS: process.env.NEXT_PUBLIC_FAVORITES_ENABLED === "false",
 } as const;
 
-const { envVariables, missing } = {
-  ...Object.entries(requiredEnv).reduce<{
-    envVariables: Record<keyof typeof requiredEnv, string>;
-    missing: string[];
-  }>(
-    ({ envVariables, missing }, [key, isRequired]) => {
-      const value = process.env[key];
-      if (!value && isRequired) return { envVariables, missing: [...missing, key] };
-      return { envVariables: { ...envVariables, [key]: value }, missing };
-    },
-    { envVariables: {} as Record<keyof typeof requiredEnv, string>, missing: [] }
-  ),
-};
+const { envVariables, missing } = Object.entries(envMapping).reduce<{
+  envVariables: Record<envKeys, string>;
+  missing: string[];
+}>(
+  ({ envVariables, missing }, [key, value]) => {
+    if (!value && (!(key in optionalEnv) || optionalEnv[key as envKeys] === false))
+      return { envVariables, missing: [...missing, key] };
+    return { envVariables: { ...envVariables, [key]: value }, missing };
+  },
+  { envVariables: {} as Record<envKeys, string>, missing: [] }
+);
 
 if (missing.length > 0) {
   console.error(`Missing environment variables: ${missing.join(", ")}.`);
