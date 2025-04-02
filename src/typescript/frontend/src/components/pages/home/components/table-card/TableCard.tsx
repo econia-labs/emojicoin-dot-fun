@@ -140,6 +140,8 @@ const TableCard = ({
     };
   }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
 
+  const symbolEmojis = useMemo(() => emojis.map((e) => e.emoji), [emojis]);
+
   return (
     <motion.div
       layout
@@ -257,10 +259,7 @@ const TableCard = ({
               {FEATURE_FLAGS.Favorites && (
                 <Column>
                   <div className="flex justify-end items-end grow relative w-[25px] h-[25px]">
-                    <FavoriteButton
-                      emojis={emojis.map((e) => e.emoji)}
-                      className="absolute bottom-0 right-0"
-                    />
+                    <FavoriteButton emojis={symbolEmojis} className="absolute bottom-0 right-0" />
                   </div>
                 </Column>
               )}

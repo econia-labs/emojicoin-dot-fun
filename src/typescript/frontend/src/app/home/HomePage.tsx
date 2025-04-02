@@ -19,6 +19,7 @@ export interface HomePageProps {
   children?: React.ReactNode;
   priceFeed: DatabaseModels["price_feed"][];
   meleeData: ArenaProps | null;
+  isFavoriteFilterEnabled: boolean;
 }
 
 export default async function HomePageComponent({
@@ -30,6 +31,7 @@ export default async function HomePageComponent({
   children,
   priceFeed,
   meleeData,
+  isFavoriteFilterEnabled,
 }: HomePageProps) {
   return (
     <div className="relative">
@@ -47,6 +49,7 @@ export default async function HomePageComponent({
       </div>
 
       <EmojiTable
+        isFavoriteFilterEnabled={isFavoriteFilterEnabled}
         markets={markets}
         numMarkets={numMarkets}
         page={page}
