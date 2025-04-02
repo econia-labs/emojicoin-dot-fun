@@ -869,6 +869,7 @@ export const toArenaLeaderboardHistoryWithArenaInfo = (
   data: DatabaseJsonType["arena_leaderboard_history_with_arena_info"]
 ): Types["ArenaLeaderboardHistoryWithArenaInfo"] => ({
   user: data.user,
+  leaderboardLastTransactionVersion: BigInt(data.leaderboard_last_transaction_version),
   meleeID: BigInt(data.melee_id),
   profits: BigInt(data.profits),
   losses: BigInt(data.losses),
@@ -878,6 +879,7 @@ export const toArenaLeaderboardHistoryWithArenaInfo = (
   lastExit0: data.last_exit_0,
   exited: data.exited,
 
+  arenaInfoLastTransactionVersion: BigInt(data.arena_info_last_transaction_version),
   emojicoin0Symbols: data.emojicoin_0_symbols,
   emojicoin1Symbols: data.emojicoin_1_symbols,
   emojicoin0MarketAddress: data.emojicoin_0_market_address,

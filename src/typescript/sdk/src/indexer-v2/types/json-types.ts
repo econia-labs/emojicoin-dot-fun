@@ -370,7 +370,10 @@ type ArenaLeaderboardHistoryWithArenaInfoData = Flatten<
       | "emojicoin_1_market_id"
       | "start_time"
       | "duration"
-    >
+    > & {
+      leaderboard_last_transaction_version: Uint64String;
+      arena_info_last_transaction_version: Uint64String;
+    }
 >;
 
 type ArenaLeaderboardData = {
