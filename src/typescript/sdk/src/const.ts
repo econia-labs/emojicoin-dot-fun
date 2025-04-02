@@ -25,39 +25,51 @@ if (
   const val = process.env.VERCEL_TARGET_ENV;
   throw new Error(`Unexpected VERCEL_TARGET_ENV value "${val}". Please add it to sdk/src/const.ts`);
 }
+
 export const VERCEL_TARGET_ENV = process.env.VERCEL_TARGET_ENV as typeof vercelTargetEnv;
-if (
-  !process.env.NEXT_PUBLIC_MODULE_ADDRESS ||
-  !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS ||
-  !process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS ||
-  !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
-  !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS ||
-  !process.env.NEXT_PUBLIC_APTOS_NETWORK ||
-  !process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS
-) {
-  const missing = [
-    ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
-    ["NEXT_PUBLIC_REWARDS_MODULE_ADDRESS", process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS],
-    ["NEXT_PUBLIC_ARENA_MODULE_ADDRESS", process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS],
-    ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
-    ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
-    ["NEXT_PUBLIC_APTOS_NETWORK", process.env.NEXT_PUBLIC_APTOS_NETWORK],
-    ["NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS", process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS],
-  ].filter(([_, value]) => !value);
-  missing.forEach(([key, _]) => {
-    console.error(`Missing environment variables ${key}`);
-  });
+
+// Create an explicit mapping of environment variables.
+const envMapping = {
+  NEXT_PUBLIC_MODULE_ADDRESS: process.env.NEXT_PUBLIC_MODULE_ADDRESS,
+  NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS,
+  NEXT_PUBLIC_INTEGRATOR_ADDRESS: process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS,
+  NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS,
+  NEXT_PUBLIC_APTOS_NETWORK: process.env.NEXT_PUBLIC_APTOS_NETWORK,
+  NEXT_PUBLIC_ARENA_MODULE_ADDRESS: process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS,
+  NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS: process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS,
+} as const;
+type envKeys = keyof typeof envMapping;
+
+// Make some env vars optional based on feature flags.
+const optionalEnv: Partial<Record<envKeys, boolean>> = {
+  NEXT_PUBLIC_ARENA_MODULE_ADDRESS: process.env.NEXT_PUBLIC_ARENA_ENABLED === "false",
+  NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS: process.env.NEXT_PUBLIC_FAVORITES_ENABLED === "false",
+} as const;
+
+const { envVariables, missing } = Object.entries(envMapping).reduce<{
+  envVariables: Record<envKeys, string>;
+  missing: string[];
+}>(
+  ({ envVariables, missing }, [key, value]) => {
+    if (!value && (!(key in optionalEnv) || optionalEnv[key as envKeys] === false))
+      return { envVariables, missing: [...missing, key] };
+    return { envVariables: { ...envVariables, [key]: value }, missing };
+  },
+  { envVariables: {} as Record<envKeys, string>, missing: [] }
+);
+
+if (missing.length > 0) {
+  console.error(`Missing environment variables: ${missing.join(", ")}.`);
   throw new Error(
     VERCEL
-      ? `Please set the missing environment variables. ${missing.map(([key, _]) => key).join(", ")}`
+      ? `Please set the missing environment variables. ${missing.join(", ")}`
       : "Please run this project from the top-level, parent directory.\n"
   );
 }
 
-const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
-export const APTOS_NETWORK = NetworkToNetworkName[network];
+export const APTOS_NETWORK = NetworkToNetworkName[envVariables.NEXT_PUBLIC_APTOS_NETWORK];
 if (!APTOS_NETWORK) {
-  throw new Error(`Invalid network: ${network}`);
+  throw new Error(`Invalid network: ${envVariables.NEXT_PUBLIC_APTOS_NETWORK}`);
 }
 
 /**
@@ -96,17 +108,18 @@ const serverApiKey = serverKeys[APTOS_NETWORK];
 // is in a client-side context, and it should use the API key for client-side queries.
 export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
 
-export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
+export const MODULE_ADDRESS = (() =>
+  AccountAddress.from(envVariables.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const ARENA_MODULE_ADDRESS = (() =>
-  AccountAddress.from(process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS))();
+  AccountAddress.from(envVariables.NEXT_PUBLIC_ARENA_MODULE_ADDRESS))();
 export const FAVORITES_MODULE_ADDRESS = (() =>
-  AccountAddress.from(process.env.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS))();
+  AccountAddress.from(envVariables.NEXT_PUBLIC_FAVORITES_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
-  AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
+  AccountAddress.from(envVariables.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 export const INTEGRATOR_ADDRESS = (() =>
-  AccountAddress.from(process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS))();
+  AccountAddress.from(envVariables.NEXT_PUBLIC_INTEGRATOR_ADDRESS))();
 export const INTEGRATOR_FEE_RATE_BPS = PositiveIntegerSchema.parse(
-  process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
+  envVariables.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
 );
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
