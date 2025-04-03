@@ -19,6 +19,7 @@ import type {
   ArenaLeaderboardHistoryWithArenaInfoModel,
   ArenaPositionModel,
 } from "@/sdk/indexer-v2/types";
+import { useArenaEscrows } from "@/store/escrow/use-arena-escrows";
 
 import { BottomNavigation, TabContainer } from "./tabs";
 import {
@@ -27,7 +28,6 @@ import {
   Box,
   EmojiTitle,
 } from "./utils";
-import { useArenaEscrows } from "@/store/escrow/use-arena-escrows";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();

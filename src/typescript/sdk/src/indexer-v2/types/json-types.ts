@@ -89,7 +89,7 @@ export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): b
   const microseconds = spl.length === 1 ? 0n : BigInt(spl[1].padEnd(6, "0"));
 
   // Get the date to the nearest second. Ensure JavaScript parses it as a UTC date.
-  const dateToNearestSecond = new Date(`${spl[0]}Z`);
+  const dateToNearestSecond = new Date(spl[0].endsWith("Z") ? spl[0] : `${spl[0]}Z`);
   // Convert it to milliseconds.
   const inMilliseconds = dateToNearestSecond.getTime();
   // Convert it to microseconds; add the microseconds portion from the original timestamp.
@@ -629,6 +629,5 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistoryWithArenaInfo] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.AggregateMarketState];
-
 
 export type AnyColumnName = keyof Columns;

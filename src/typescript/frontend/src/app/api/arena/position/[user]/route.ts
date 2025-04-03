@@ -1,15 +1,25 @@
 // cspell:word timespan
 
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import type { NextRequest } from "next/server";
-import { stringifyJSON } from "utils";
+import { waitForVersionCached } from "lib/queries/latest-emojicoin-version";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchLatestPosition } from "@/queries/arena";
+import { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 
 export const fetchCache = "force-no-store";
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ user: string }> }) {
-  const user = (await params).user;
+export async function GET(
+  _: NextRequest,
+  { params }: { params: Promise<{ user: string; minimumVersion?: string }> }
+) {
+  const { user, minimumVersion } = await params;
+  const parsedMinimumVersion = PositiveBigIntSchema.safeParse(minimumVersion);
+
+  // If a minimum version is specified- wait for it.
+  if (parsedMinimumVersion.success) {
+    await waitForVersionCached(parsedMinimumVersion.data);
+  }
 
   if (!!user && !AccountAddress.isValid({ input: user, strict: true }).valid) {
     return new Response("Invalid address.", { status: 400 });
@@ -17,5 +27,5 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ user: 
 
   const position = await fetchLatestPosition({ user });
 
-  return new Response(stringifyJSON(position ?? null));
+  return NextResponse.json(position);
 }
