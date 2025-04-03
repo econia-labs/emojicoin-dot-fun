@@ -886,6 +886,11 @@ export const toArenaLeaderboardHistoryWithArenaInfo = (
   emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
   startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
+
+  leaderboardHistoryLastTransactionVersion: BigInt(
+    data.leaderboard_history_last_transaction_version
+  ),
+  arenaInfoLastTransactionVersion: BigInt(data.arena_info_last_transaction_version),
 });
 
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({
