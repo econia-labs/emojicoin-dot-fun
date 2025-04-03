@@ -105,6 +105,10 @@
       "cache": false,
       "outputs": []
     },
+    "test:e2e:unit": {
+      "cache": false,
+      "outputs": []
+    },
     "test:unit": {
       "cache": false,
       "outputs": []
