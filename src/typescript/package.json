@@ -45,6 +45,7 @@
     "test": "pnpm run test:frontend && pnpm run test:sdk",
     "test:frontend": "pnpm run test:frontend:unit && test:frontend:e2e",
     "test:frontend:e2e": "pnpm run load-env:test -- turbo run test:e2e --filter @econia-labs/emojicoin-frontend --log-prefix none",
+    "test:frontend:e2e:unit": "pnpm run load-env:test -- turbo run test:e2e:unit --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "test:frontend:unit": "NO_TEST_SETUP=true pnpm run load-env:test -- turbo run test:unit --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "test:sdk": "pnpm run test:sdk:unit && pnpm run test:sdk:e2e",
     "test:sdk:e2e": "pnpm run test:sdk:e2e:base && pnpm run test:sdk:e2e:arena",
