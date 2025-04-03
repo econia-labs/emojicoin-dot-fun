@@ -27,6 +27,7 @@ import {
   Box,
   EmojiTitle,
 } from "./utils";
+import { useArenaEscrows } from "@/store/escrow/use-arena-escrows";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -150,6 +151,14 @@ export const ArenaClient = (props: ArenaProps) => {
       ),
     [isMobile, props, position, setPosition, history, setHistory]
   );
+
+  const escrows = useArenaEscrows();
+
+  useEffect(() => {
+    if (escrows) {
+      console.log(Array.from(escrows.entries()));
+    }
+  }, [escrows]);
 
   useEffect(() => {
     // This is done because account refreshes often and we don't want to refetch

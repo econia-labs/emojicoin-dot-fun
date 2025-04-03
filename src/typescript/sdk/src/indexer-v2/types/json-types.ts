@@ -630,4 +630,5 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.AggregateMarketState];
 
+
 export type AnyColumnName = keyof Columns;
