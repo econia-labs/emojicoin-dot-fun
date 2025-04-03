@@ -43,6 +43,10 @@ const nextConfig = {
    * @see {@link https://nextjs.org/docs/app/api-reference/config/next-config-js/staleTimes#version-history}
    */
   experimental: {
+    turbo: {},
+    turbotrace: {
+      logAll: true,
+    },
     staleTimes: {
       dynamic: 0, // Default is normally 30s.
       static: 60, // Default is normally 180s.

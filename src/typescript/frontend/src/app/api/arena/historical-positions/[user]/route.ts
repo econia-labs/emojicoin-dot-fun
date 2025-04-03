@@ -5,7 +5,7 @@ import { stringifyJSON } from "utils";
 
 import { fetchArenaLeaderboardHistoryWithArenaInfo } from "@/queries/arena";
 
-const ROWS_RETURNED = 25;
+const ROWS_RETURNED = 100;
 
 export const fetchCache = "force-no-store";
 
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const user = (await params).user;
   const page = safeParsePageWithDefault(request.nextUrl.searchParams.get("page"));
 
-  if (!AccountAddress.isValid({ input: user, strict: true }).valid) {
+  if (!!user && !AccountAddress.isValid({ input: user, strict: true }).valid) {
     return new Response("Invalid address.", { status: 400 });
   }
 
