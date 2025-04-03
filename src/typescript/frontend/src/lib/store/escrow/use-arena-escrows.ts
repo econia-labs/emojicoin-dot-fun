@@ -5,10 +5,10 @@ import { useStore } from "zustand";
 import { toAccountAddressString, toUserEscrowJson } from "@/sdk/utils";
 import { serverLog } from "@/sdk/utils/server-log";
 
-import { globalTransactionStore } from "../transaction/store";
+import { useFetchArenaEscrows } from "../../hooks/queries/arena/use-fetch-arena-escrows";
+import { globalUserTransactionStore } from "../transaction/store";
 import type { EscrowStore } from "./store";
 import { globalEscrowStore } from "./store";
-import { useFetchArenaEscrows } from "./use-fetch-arena-escrows";
 
 export const useArenaEscrows = () => {
   const { account } = useAptos();
@@ -46,12 +46,12 @@ export const useArenaEscrows = () => {
  */
 function useSyncEscrowsFromTransactionStore(address: `0x${string}` | undefined) {
   const transactionsRef = useRef(
-    address && globalTransactionStore.getState().addresses.get(address)
+    address && globalUserTransactionStore.getState().addresses.get(address)
   );
 
   useEffect(
     () =>
-      globalTransactionStore.subscribe(
+      globalUserTransactionStore.subscribe(
         (state) => (transactionsRef.current = address && state.addresses.get(address)),
         (newTransactions, _prevTransactions) => {
           if (address && newTransactions) {

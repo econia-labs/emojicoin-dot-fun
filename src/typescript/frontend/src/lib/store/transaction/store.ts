@@ -1,9 +1,9 @@
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { createStore } from "zustand";
+import { createStore, useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-import { toAccountAddressString } from "@/sdk/utils";
+import { compareBigInt, toAccountAddressString } from "@/sdk/utils";
 
 type Actions = {
   ensureInStore: (uniqueAddresses: Set<`0x${string}`>) => void;
@@ -12,11 +12,12 @@ type Actions = {
 
 type State = {
   addresses: Readonly<Map<`0x${string}`, Readonly<UserTransactionResponse[]>>>;
+  latestResponse?: UserTransactionResponse;
 };
 
-export type TransactionStore = Actions & State;
+export type UserTransactionStore = Actions & State;
 
-export const globalTransactionStore = createStore<TransactionStore>()(
+export const globalUserTransactionStore = createStore<UserTransactionStore>()(
   subscribeWithSelector(
     immer((set, get) => ({
       ensureInStore: (uniqueAddresses) => {
@@ -41,12 +42,23 @@ export const globalTransactionStore = createStore<TransactionStore>()(
         get().ensureInStore(uniqueAddresses);
 
         set((state) => {
+          state.latestResponse = transactions
+            .toSorted(({ version: a }, { version: b }) => compareBigInt(a, b))
+            .at(-1)!;
+
           uniqueAddresses.forEach((addr) => {
-            state.addresses.get(addr)!.push(...transactions);
+            state.addresses
+              .get(addr)!
+              .push(...transactions.filter(({ sender }) => sender === addr));
           });
         });
       },
       addresses: new Map(),
+      latestResponse: undefined,
     }))
   )
 );
+
+export function useUserTransactionStore<T>(selector: (store: UserTransactionStore) => T): T {
+  return useStore(globalUserTransactionStore, selector);
+}

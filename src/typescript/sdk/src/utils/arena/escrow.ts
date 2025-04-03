@@ -6,20 +6,20 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 
-import {
-  type ArenaInfoModel,
-  type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionModel,
-  maxBigInt,
-  toArenaCoinTypes,
-  toCoinTypeString,
+import type {
+  ArenaInfoModel,
+  ArenaLeaderboardHistoryWithArenaInfoModel,
+  ArenaPositionModel,
 } from "../..";
 import type { AccountAddressString } from "../../emojicoin_dot_fun/types";
 import { type AnyNumberString, isWriteSetChangeWriteResource } from "../../types";
 import type { ArenaJsonTypes } from "../../types/arena-json-types";
 import { toEscrowResource } from "../../types/arena-types";
 import { toAccountAddressString } from "../account-address";
+import { maxBigInt } from "../compare-bigint";
+import { toCoinTypeString } from "../parse-changes-for-balances";
 import { type CoinTypeString, STRUCT_STRINGS } from "../type-tags";
+import { toArenaCoinTypes } from "./helpers";
 
 const isEscrowStruct = ({ value }: TypeTagStruct) => {
   const { address, moduleName, name } = value;
