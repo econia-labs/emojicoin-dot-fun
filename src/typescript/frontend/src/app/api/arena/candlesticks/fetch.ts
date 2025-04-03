@@ -1,16 +1,5 @@
 // cspell:word timespan
 
-import {
-  getCachedLatestProcessedEmojicoinTimestamp,
-  getPeriodDurationSeconds,
-  HISTORICAL_CACHE_DURATION,
-  indexToParcelEndDate,
-  indexToParcelStartDate,
-  jsonStrAppend,
-  NORMAL_CACHE_DURATION,
-  PARCEL_SIZE,
-  toIndex,
-} from "app/api/candlesticks/utils";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
@@ -24,6 +13,17 @@ import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { AnyNumberString } from "@/sdk-types";
 
 import type { ArenaCandlesticksSearchParams } from "./search-params-schema";
+import {
+  getCachedLatestProcessedEmojicoinTimestamp,
+  getPeriodDurationSeconds,
+  HISTORICAL_CACHE_DURATION,
+  indexToParcelEndDate,
+  indexToParcelStartDate,
+  jsonStrAppend,
+  NORMAL_CACHE_DURATION,
+  PARCEL_SIZE,
+  toIndex,
+} from "./utils";
 
 const getCandlesticks = async (
   params: Pick<ArenaCandlesticksSearchParams, "meleeID" | "period"> & { index: number }

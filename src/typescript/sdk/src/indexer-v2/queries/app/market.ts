@@ -12,7 +12,11 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import type { MarketStateQueryArgs, PeriodicStateEventQueryArgs } from "../../types/common";
+import type {
+  MarketStateQueryArgs,
+  PeriodicStateEventQueryArgs,
+  PeriodicStateEventToQueryArgs,
+} from "../../types/common";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
@@ -73,6 +77,23 @@ const selectChatsByMarketID = ({
   return query;
 };
 
+const selectPeriodicEventsTo = ({
+  marketID,
+  period,
+  end,
+  amount,
+}: PeriodicStateEventToQueryArgs) => {
+  const query = postgrest
+    .from(TableName.PeriodicStateEvents)
+    .select("*")
+    .eq("market_id", marketID)
+    .eq("period", period)
+    .lt("start_time", end.toISOString())
+    .limit(amount)
+    .order("start_time", ORDER_BY.DESC);
+  return query;
+};
+
 // This query uses `offset` instead of `page` because the periodic state events query requires
 // more granular pagination due to the requirements of the private TradingView charting library.
 const selectPeriodicEventsSince = ({
@@ -124,3 +145,13 @@ export const fetchMarketRegistration = queryHelperSingle(
   selectMarketRegistration,
   toMarketRegistrationEventModel
 );
+
+export const tryFetchMarketRegistration = async (marketID: AnyNumberString) =>
+  fetchMarketRegistration({ marketID }).then((res) => {
+    if (res) {
+      return Number(res.market.time / 1000n / 1000n);
+    }
+    throw new Error("Market is not yet registered.");
+  });
+
+export const fetchPeriodicEventsTo = queryHelper(selectPeriodicEventsTo, toPeriodicStateEventModel);
