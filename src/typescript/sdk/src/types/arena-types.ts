@@ -135,6 +135,9 @@ export type ArenaTypes = {
     emojicoin1MarketID: bigint;
     startTime: Date;
     duration: bigint;
+
+    arenaInfoLastTransactionVersion: bigint;
+    leaderboardHistoryLastTransactionVersion: bigint;
   };
 
   ArenaLeaderboard: {

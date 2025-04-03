@@ -141,6 +141,8 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
   "last_success_version",
   "last_transaction_version",
   "transaction_version",
+  "arena_info_last_transaction_version",
+  "leaderboard_history_last_transaction_version",
 ]);
 
 /**
