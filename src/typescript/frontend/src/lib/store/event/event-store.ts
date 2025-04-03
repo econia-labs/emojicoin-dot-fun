@@ -24,12 +24,12 @@ import {
 } from "@/sdk/types/arena-types";
 import { DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
 
-import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
+import { ensureMeleeInStore, initializeArenaStore } from "../arena/event/store";
 import {
   getMeleeIDFromArenaModel,
   handleLatestBarForArenaCandlestick,
   toMappedMelees,
-} from "../arena/utils";
+} from "../arena/event/utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import {
   cleanReadLocalStorage,

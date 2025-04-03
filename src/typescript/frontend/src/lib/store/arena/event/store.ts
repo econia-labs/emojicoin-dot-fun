@@ -10,8 +10,8 @@ import type {
   ArenaSwapModel,
 } from "@/sdk/indexer-v2";
 
-import type { CandlestickData } from "../event/types";
-import { createInitialCandlestickData } from "../utils";
+import type { CandlestickData } from "../../event/types";
+import { createInitialCandlestickData } from "../../utils";
 
 export type MeleeState = {
   swaps: readonly ArenaSwapModel[];

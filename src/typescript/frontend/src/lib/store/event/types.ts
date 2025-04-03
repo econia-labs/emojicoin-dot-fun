@@ -11,7 +11,7 @@ import type {
 import type { Flatten } from "@/sdk-types";
 import type { SubscribeBarsCallback } from "@/static/charting_library/datafeed-api";
 
-import type { ArenaActions, ArenaState } from "../arena/store";
+import type { ArenaActions, ArenaState } from "../arena/event/store";
 import type { ClientActions, ClientState } from "../websocket/store";
 import type { LatestBar } from "./candlestick-bars";
 

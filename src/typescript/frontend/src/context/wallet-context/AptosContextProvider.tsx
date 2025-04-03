@@ -35,7 +35,7 @@ import { APTOS_COIN_TYPE_STRING } from "@/sdk/index";
 import { sleep } from "@/sdk/utils";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { useLatestBalance } from "@/store/latest-balance";
-import { globalTransactionStore } from "@/store/transaction/store";
+import { globalUserTransactionStore } from "@/store/transaction/store";
 
 import { copyAddressHelper, getFlattenedEventModelsFromResponse, setCoinTypeHelper } from "./utils";
 
@@ -172,7 +172,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       // Store any relevant events in the state event store for all components to see.
       if (response && isUserTransactionResponse(response)) {
-        globalTransactionStore.getState().pushTransactions(response);
+        globalUserTransactionStore.getState().pushTransactions(response);
         const flattenedEvents = getFlattenedEventModelsFromResponse(response);
         pushEventsFromClient(flattenedEvents, true);
       }

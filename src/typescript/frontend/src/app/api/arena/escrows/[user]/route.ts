@@ -1,15 +1,17 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { safeParsePageWithDefault } from "lib/routes/home-page-params";
 import { type NextRequest, NextResponse } from "next/server";
-import { stringifyJSON } from "utils";
 
 import {
   fetchArenaInfo,
   fetchArenaLeaderboardHistoryWithArenaInfo,
   fetchPosition,
 } from "@/queries/arena";
-import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
-import { positionToUserEscrow, toUserEscrowJson } from "@/sdk/index";
+import type { DatabaseJsonType } from "@/sdk/index";
+import {
+  positionToUserEscrow,
+  toArenaLeaderboardHistoryWithArenaInfo,
+  toUserEscrowJson,
+} from "@/sdk/index";
 
 const ROWS_RETURNED = 100;
 
@@ -31,11 +33,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   })
     .catch((e) => {
       console.error(e);
-      return [] as ArenaLeaderboardHistoryWithArenaInfoModel[];
+      return [] as DatabaseJsonType["arena_leaderboard_history_with_arena_info"][];
     })
-    .then((res) => res.map(positionToUserEscrow));
+    .then((res) => res.map(toArenaLeaderboardHistoryWithArenaInfo).map(positionToUserEscrow));
 
-  const currentPosition = fetchArenaInfo({})
+  const currentPosition = fetchArenaInfo()
     .then(async (info) => {
       if (!info) return null;
       return await fetchPosition({ user, meleeID: info.meleeID }).then((position) => {
