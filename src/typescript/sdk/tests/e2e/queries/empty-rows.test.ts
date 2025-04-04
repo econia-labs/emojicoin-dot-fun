@@ -1,4 +1,4 @@
-import { type SymbolEmoji } from "../../../src";
+import type { SymbolEmoji } from "../../../src";
 import {
   fetchChatEvents,
   fetchMarkets,

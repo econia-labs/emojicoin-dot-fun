@@ -28,38 +28,35 @@
       "@/components/*": [
         "components/*"
       ],
-      "@/contract-apis": [
-        "../../sdk/src/emojicoin_dot_fun/contract-apis"
+      "@/containers": [
+        "components/layout/components/index.ts"
       ],
-      "@/contract-apis/*": [
-        "../../sdk/src/emojicoin_dot_fun/contract-apis/*"
+      "@/hooks/*": [
+        "hooks/*"
+      ],
+      "@/icons/*": [
+        "components/svg/icons/*"
+      ],
+      "@/move-modules": [
+        "../../sdk/src/emojicoin_dot_fun/move-modules"
+      ],
+      "@/move-modules/*": [
+        "../../sdk/src/emojicoin_dot_fun/move-modules/*"
       ],
       "@/queries/*": [
         "../../sdk/src/indexer-v2/queries/app/*"
       ],
-      "@/store/*": [
-        "lib/store/*"
-      ],
-      "@containers": [
-        "components/layout/components/index.ts"
-      ],
-      "@econia-labs/emojicoin-sdk": [
-        "../../sdk/src/index.ts"
-      ],
-      "@hooks/*": [
-        "hooks/*"
-      ],
-      "@icons/*": [
-        "components/svg/icons/*"
-      ],
-      "@sdk-types": [
+      "@/sdk-types": [
         "../../sdk/src/types/index.ts"
       ],
-      "@sdk/*": [
+      "@/sdk/*": [
         "../../sdk/src/*"
       ],
-      "@static/*": [
+      "@/static/*": [
         "../public/static/*"
+      ],
+      "@/store/*": [
+        "lib/store/*"
       ]
     },
     "plugins": [
@@ -74,7 +71,8 @@
     "target": "esnext"
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "tests"
   ],
   "include": [
     "next-env.d.ts",

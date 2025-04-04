@@ -1,17 +1,16 @@
 "use client";
 
-import React from "react";
+import LogoIcon from "components/svg/icons/LogoIcon";
+import Text from "components/text";
+import { LINKS } from "lib/env";
 import Link from "next/link";
+import React from "react";
+import { ROUTES } from "router/routes";
 
-import { Container, FlexGap, Flex } from "@containers";
-import { Text } from "components/text";
+import { Container, Flex, FlexGap } from "@/containers";
 
 import { SocialLinks } from "./components/social-links";
-import LogoIcon from "components/svg/icons/LogoIcon";
-
 import { StyledClickItem, StyledContainer, StyledSocialWrapper } from "./styled";
-import { LINKS } from "lib/env";
-import { ROUTES } from "router/routes";
 
 const Footer: React.FC = () => {
   return (

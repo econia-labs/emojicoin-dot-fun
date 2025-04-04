@@ -1,17 +1,16 @@
 "use server";
 
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { toCoinTypes } from "@sdk/markets";
 import { unstable_cache } from "next/cache";
+
+import { toEmojicoinTypes } from "@/sdk/markets";
+import type { CoinTypeString } from "@/sdk/utils";
+
 import { fetchEmojicoinBalances } from "./fetch-emojicoin-balances";
 
 async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
-  const { emojicoin } = toCoinTypes(marketAddress);
-  if (!emojicoin.isStruct()) {
-    console.error(`Invalid market address passed to \`fetchHoldersInternal\`: ${marketAddress}`);
-    return [];
-  }
-  const assetType = emojicoin.toString();
+  const { emojicoin } = toEmojicoinTypes(marketAddress);
+  const assetType = emojicoin.toString() as CoinTypeString;
   const holders = await fetchEmojicoinBalances({ assetType });
 
   // Exclude the emojicoin market address from the holders list.

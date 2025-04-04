@@ -1,11 +1,10 @@
+import type { FlexGapProps } from "components/layout/components/types";
 import React from "react";
 
-import { FlexGap } from "@containers";
-import { StyledIcon } from "./styled";
+import { FlexGap } from "@/containers";
 
 import { SOCIAL_ICONS } from "./constants";
-
-import { type FlexGapProps } from "components/layout/components/types";
+import { StyledIcon } from "./styled";
 
 export const MobileSocialLinks: React.FC<FlexGapProps> = (props) => {
   return (

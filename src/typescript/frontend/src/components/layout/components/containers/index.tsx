@@ -1,20 +1,13 @@
 "use client";
 
-import styled, { css } from "styled-components";
-import { border, layout, position, space, flexbox } from "styled-system";
 import React, { type PropsWithChildren } from "react";
-import {
-  type ColumnProps,
-  type RowProps,
-  type BoxProps,
-  type FlexGapProps,
-  type FlexProps,
-  type BoxThemedProps,
-} from "@containers";
-import { system } from "styled-system";
+import styled, { css } from "styled-components";
+import { border, flexbox, layout, position, space, system } from "styled-system";
 import { siteWidth } from "theme/base";
 
-export const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
+import type { BoxProps, BoxThemedProps, ColumnProps, FlexGapProps, FlexProps } from "@/containers";
+
+const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
   if (ellipsis) {
     return css`
       white-space: nowrap;
@@ -40,7 +33,7 @@ export const Box = styled.div<BoxProps>`
 /**
  * Defining Flex here to avoid circular dependencies.
  */
-export const gap = system({ gap: true, rowGap: true, columnGap: true });
+const gap = system({ gap: true, rowGap: true, columnGap: true });
 
 export const Flex = styled(Box)<FlexProps>`
   display: flex;
@@ -57,18 +50,6 @@ export const Container: React.FC<PropsWithChildren<BoxProps>> = ({ children, ...
 
 export const FlexGap = styled(Flex)<FlexGapProps>`
   ${gap}
-`;
-
-/**
- * Defining Row here to avoid circular dependencies.
- */
-export const Row = styled(Flex)<RowProps>`
-  width: 100%;
-  flex-wrap: wrap;
-`;
-
-export const RowBetween = styled(Row)<RowProps>`
-  justify-content: space-between;
 `;
 
 /**

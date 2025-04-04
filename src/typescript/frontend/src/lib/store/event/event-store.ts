@@ -1,3 +1,8 @@
+import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
+import { immer } from "zustand/middleware/immer";
+import { createStore } from "zustand/vanilla";
+
+import { periodToPeriodTypeFromBroker } from "@/broker/index";
 import {
   type BrokerEventModels,
   isChatEventModel,
@@ -8,41 +13,38 @@ import {
   isMarketRegistrationEventModel,
   isPeriodicStateEventModel,
   isSwapEventModel,
-} from "@sdk/indexer-v2/types";
-import { createStore } from "zustand/vanilla";
-import { immer } from "zustand/middleware/immer";
-import { type SetLatestBarsArgs, type EventStore } from "./types";
-import {
-  ensureMarketInStore,
-  handleLatestBarForPeriodicStateEvent,
-  handleLatestBarForSwapEvent,
-  toMappedMarketEvents,
-  initialState,
-} from "./utils";
-import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
-import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
-import {
-  maybeUpdateLocalStorage,
-  cleanReadLocalStorage,
-  clearLocalStorage,
-  LOCAL_STORAGE_EVENT_TYPES,
-} from "./local-storage";
-import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
+} from "@/sdk/indexer-v2/types";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,
-  isArenaModelWithMeleeID,
   isArenaExitModel,
   isArenaMeleeModel,
+  isArenaModelWithMeleeID,
   isArenaSwapModel,
-} from "@sdk/types/arena-types";
+} from "@/sdk/types/arena-types";
+import { DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
+
+import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
 import {
   getMeleeIDFromArenaModel,
   handleLatestBarForArenaCandlestick,
   toMappedMelees,
 } from "../arena/utils";
-import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
-import { periodToPeriodTypeFromBroker } from "@econia-labs/emojicoin-sdk";
+import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
+import {
+  cleanReadLocalStorage,
+  clearLocalStorage,
+  LOCAL_STORAGE_EVENT_TYPES,
+  maybeUpdateLocalStorage,
+} from "./local-storage";
+import type { EventStore, SetLatestBarsArgs } from "./types";
+import {
+  ensureMarketInStore,
+  handleLatestBarForPeriodicStateEvent,
+  handleLatestBarForSwapEvent,
+  initialState,
+  toMappedMarketEvents,
+} from "./utils";
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
@@ -248,6 +250,11 @@ export const createEventStore = () => {
       ...createWebSocketClientStore(set, get),
     }))
   );
+
+  // Return early to avoid state mutations based on localStorage.
+  if (typeof window === "undefined") {
+    return store;
+  }
 
   const state = store.getState();
   for (const eventType of LOCAL_STORAGE_EVENT_TYPES) {

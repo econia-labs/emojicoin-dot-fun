@@ -1,9 +1,11 @@
-import { type Aptos, type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
-import { getAptosClient } from "@sdk/utils";
+import type { AccountAddressInput, Aptos } from "@aptos-labs/ts-sdk";
+import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { withResponseError } from "./queries/client";
 import { useMemo } from "react";
+
+import { getAptosClient } from "@/sdk/utils";
+
+import { withResponseError } from "./queries/client";
 
 const fetchAccountSequenceNumber = async (accountAddress: AccountAddressInput) =>
   withResponseError(getAptosClient().account.getAccountInfo({ accountAddress })).then((res) =>

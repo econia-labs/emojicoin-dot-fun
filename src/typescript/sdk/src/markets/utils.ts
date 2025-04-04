@@ -11,16 +11,9 @@ import {
   parseTypeTag,
   type TypeTag,
   type UserTransactionResponse,
-  type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import {
-  EmojicoinDotFun,
-  MarketView,
-  REGISTRY_ADDRESS,
-  getMarketAddress,
-} from "../emojicoin_dot_fun";
-import { toConfig } from "../utils/aptos-utils";
+
 import {
   BASE_VIRTUAL_CEILING,
   BASE_VIRTUAL_FLOOR,
@@ -34,37 +27,43 @@ import {
   rawPeriodToEnum,
 } from "../const";
 import {
-  type AnyNumberString,
-  type Types,
+  encodeEmojis,
+  symbolBytesToEmojis,
+  type SymbolEmoji,
+  type SymbolEmojiData,
+} from "../emoji_data";
+import {
+  EmojicoinDotFun,
+  getMarketAddress,
+  MarketView,
+  REGISTRY_ADDRESS,
+} from "../emojicoin_dot_fun";
+import type { Flatten } from "../types";
+import type { JsonTypes } from "../types/json-types";
+import type { AnyNumberString, Types } from "../types/types";
+import {
   toMarketResource,
   toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
 } from "../types/types";
-import type JsonTypes from "../types/json-types";
-import {
-  encodeEmojis,
-  symbolBytesToEmojis,
-  type SymbolEmojiData,
-  type SymbolEmoji,
-} from "../emoji_data";
-import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
-import { type Flatten } from "../types";
+import { toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
-import { type AtLeastOne } from "../utils/utility-types";
+import { getResourceFromWriteSet } from "../utils/get-resource-from-writeset";
+import { STRUCT_STRINGS, TYPE_TAGS } from "../utils/type-tags";
+import type { AtLeastOne } from "../utils/utility-types";
 
-export function toCoinTypes(inputAddress: AccountAddressInput): {
+export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
   emojicoinLP: TypeTag;
 } {
   const marketAddress = AccountAddress.from(inputAddress);
+  const prefix = `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}`;
 
   return {
-    emojicoin: parseTypeTag(`${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::Emojicoin`),
-    emojicoinLP: parseTypeTag(
-      `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::EmojicoinLP`
-    ),
+    emojicoin: parseTypeTag(`${prefix}::Emojicoin`),
+    emojicoinLP: parseTypeTag(`${prefix}::EmojicoinLP`),
   };
 }
 
@@ -75,15 +74,15 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
  * @param marketAddress the market address
  * @returns [emojicoin, emojicoinLP] as [TypeTag, TypeTag]
  */
-export function toCoinTypesForEntry(marketAddress: AccountAddressInput): [TypeTag, TypeTag] {
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+export function toEmojicoinTypesForEntry(marketAddress: AccountAddressInput) {
+  const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
   return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
 }
 
 /**
  * Get the derived market address and TypeTags for the given registry address and symbol bytes.
  *
- * @param registryAddress The contract's registry address.
+ * @param registryAddress The module's registry address.
  * @param symbolBytes The emojicoin's full symbol bytes.
  * @returns The derived market address and TypeTags.
  */
@@ -96,7 +95,7 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
   const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array()).emojis.map((e) => e.emoji);
   const marketAddress = getMarketAddress(emojis, registryAddress);
 
-  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+  const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
 
   return {
     marketAddress,
@@ -276,57 +275,24 @@ export async function getMarketResource(args: {
   return toMarketResource(marketResource);
 }
 
-export function getMarketResourceFromWriteSet(
+export const getMarketResourceFromWriteSet = (
   response: UserTransactionResponse,
   marketAddress: AccountAddressInput
-) {
-  return getResourceFromWriteSet({
+) =>
+  getResourceFromWriteSet({
     response,
     resourceTypeTag: TYPE_TAGS.Market,
     writeResourceAddress: marketAddress,
     convert: toMarketResource,
   });
-}
 
-export function getRegistryResourceFromWriteSet(response: UserTransactionResponse) {
-  return getResourceFromWriteSet({
+export const getRegistryResourceFromWriteSet = (response: UserTransactionResponse) =>
+  getResourceFromWriteSet({
     response,
     resourceTypeTag: TYPE_TAGS.Registry,
     writeResourceAddress: REGISTRY_ADDRESS,
     convert: toRegistryResource,
   });
-}
-
-export function getResourceFromWriteSet<T, U>(args: {
-  response: UserTransactionResponse;
-  resourceTypeTag: TypeTag;
-  writeResourceAddress: AccountAddressInput;
-  convert: (data: T) => U;
-}): U | undefined {
-  const { writeResourceAddress, resourceTypeTag, response, convert } = args;
-  const { changes } = response;
-  const changedAddress = AccountAddress.from(writeResourceAddress);
-  let resource: T | undefined;
-  changes.find((someChange) => {
-    if (someChange.type !== "write_resource") return false;
-    const change = someChange as WriteSetChangeWriteResource;
-
-    const { address } = change as WriteSetChangeWriteResource;
-    if (!changedAddress.equals(AccountAddress.from(address))) return false;
-
-    const resourceType = (change as WriteSetChangeWriteResource).data.type;
-    const typeTag = parseTypeTag(resourceType).toString();
-    if (typeTag !== resourceTypeTag.toString()) return false;
-
-    resource = change.data.data as T;
-    return true;
-  });
-
-  if (typeof resource !== "undefined") {
-    return convert(resource);
-  }
-  return undefined;
-}
 
 export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateTracker"]) {
   if (rawPeriodToEnum(periodicStateTracker1D.period) !== Period.Period1D) {
@@ -361,7 +327,7 @@ export type ReservesAndBondingCurveState = Flatten<
 /**
  * Calculates the circulating supply based on the given market state.
  *
- * The logic for calculation is taken directly from the Move smart contract.
+ * The logic for calculation is taken directly from the Move module.
  * @see assign_supply_minuend_reserves_ref_mut in `emojicoin_dot_fun.move`
  */
 export const calculateCirculatingSupply = ({
@@ -405,7 +371,7 @@ export const fetchCirculatingSupply = async (
  * Calculates the real reserves of a market based on the given market state.
  *
  * The logic for calculating the real reserves of a market in the bonding curve is taken directly
- * from the Move smart contract.
+ * from the Move module.
  *
  * Note that while the market is in the bonding curve, the current market price (the current
  * position on the bonding curve) is represented by the clamm's virtual reserves, *not* the clamm's

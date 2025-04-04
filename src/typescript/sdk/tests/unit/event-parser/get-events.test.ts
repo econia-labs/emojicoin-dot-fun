@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word goldens
+import type {
+  EntryFunctionPayloadResponse,
+  TransactionEd25519Signature,
+  TransactionResponseType,
+  UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
+
 import {
   type EventName,
   getEvents,
@@ -19,16 +26,10 @@ import {
   isAnEmojicoinStructName,
   toCamelCaseEventName,
 } from "../../../src/emojicoin_dot_fun/events";
+import goldens from "./goldens";
 import Data from "./json/event-data.json";
 // Note that this isn't an actual valid transaction, it's just structured like one for parsing.
 import Transaction from "./json/transaction.json";
-import goldens from "./goldens";
-import {
-  type EntryFunctionPayloadResponse,
-  type TransactionEd25519Signature,
-  type TransactionResponseType,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
 
 type EventData = {
   [K in EventName]: JsonTypes[`${K}Event`];
@@ -39,7 +40,7 @@ const eventData: EventData = Data as any;
 const response: UserTransactionResponse = {
   ...Transaction,
   events: Transaction["events"].map((e) => {
-    // Because the module address is interpolated at runtime for things like creating the contract's
+    // Because the module address is interpolated at runtime for things like creating the module's
     // struct tag strings and type tag strings and other various pattern matching functions, we must
     // interpolate the value into the json data at runtime lest the json data not accurately reflect
     // how an event would appear given the current `process.env.NEXT_PUBLIC_MODULE_ADDRESS`.

@@ -1,10 +1,12 @@
-import React from "react";
-import { FlexGap } from "@containers";
 import { Arrow } from "components/svg";
-import { StyledBtn } from "./styled";
-import { useMatchBreakpoints } from "@hooks/index";
+import React from "react";
 
-export type ButtonsBlockProps = {
+import { FlexGap } from "@/containers";
+import { useMatchBreakpoints } from "@/hooks/index";
+
+import { StyledBtn } from "./styled";
+
+type ButtonsBlockProps = {
   value: number;
   numPages: number;
   onChange: (page: number) => void;
@@ -70,5 +72,3 @@ export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBl
     </FlexGap>
   );
 };
-
-export default ButtonsBlock;

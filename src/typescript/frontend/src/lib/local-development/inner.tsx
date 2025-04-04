@@ -1,37 +1,38 @@
 // cspell:word mkts
 "use client";
 
+import { Network } from "@aptos-labs/ts-sdk";
+import { type AccountInfo, useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
+import { useEventStore } from "context/event-store-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { APTOS_NETWORK } from "lib/env";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { cn } from "lib/utils/class-name";
+import { Minus, X } from "lucide-react";
+import { useCallback, useState } from "react";
+import { toast } from "react-toastify";
+import { ROUTES } from "router/routes";
+import { emoji } from "utils";
+
+import { getLocalPublisher } from "@/components/pages/test-utils/local-publisher";
+import { successfulTransactionToast } from "@/components/wallet/toasts";
 import {
   EmojicoinArena,
   MarketMetadataByMarketAddress,
   RegisterMarket,
   Swap,
-} from "@/contract-apis";
-import { type AccountInfo, useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
-import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@sdk/const";
-import { fetchAllCurrentMeleeData, toArenaCoinTypes, toCoinTypesForEntry } from "@sdk/markets";
-import { useEventStore } from "context/event-store-context";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { APTOS_NETWORK } from "lib/env";
-import { cn } from "lib/utils/class-name";
-import { Minus, X } from "lucide-react";
-import { useCallback, useState } from "react";
-import { ROUTES } from "router/routes";
-import { emoji } from "utils";
-import { Network } from "@aptos-labs/ts-sdk";
-import { successfulTransactionToast } from "@/components/wallet/toasts";
-import { toast } from "react-toastify";
-import { getAptosClient } from "@sdk/utils";
-import { getEvents, getMarketAddress } from "@sdk/emojicoin_dot_fun";
-import { encodeEmojis, type SymbolEmoji } from "@sdk/emoji_data";
-import { getLocalPublisher } from "@/components/pages/test-utils/local-publisher";
-import FEATURE_FLAGS from "lib/feature-flags";
+} from "@/move-modules";
+import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@/sdk/const";
+import { encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
+import { getEvents, getMarketAddress } from "@/sdk/emojicoin_dot_fun";
+import { toEmojicoinTypesForEntry } from "@/sdk/markets";
+import { fetchAllCurrentMeleeData, getAptosClient, toArenaCoinTypes } from "@/sdk/utils";
 
 const iconClassName = "p-2 !text-white cursor-pointer !h-[40px] !w-[40px]";
 const debugButtonClassName =
-  "flex p-3 !text-white h-auto m-auto border border-sky-100 border-solid uppercase min-w-[15ch] hover:bg-dark-gray";
+  "flex p-3 !text-white h-auto m-auto border border-sky-100 border-solid uppercase min-w-[18ch] hover:bg-dark-gray justify-center";
 
-export const InnerDisplayDebugData = () => {
+const InnerDisplayDebugData = () => {
   const { account, connect, connected, wallet } = useWallet();
   const { aptos, forceRefetch, submit } = useAptos();
   const [showDebugger, setShowDebugger] = useState(false);
@@ -39,9 +40,9 @@ export const InnerDisplayDebugData = () => {
   const handleCrank = async (definedAccount: AccountInfo) =>
     // Use fire and water if on the local network, otherwise get the actual melee data.
     fetchAllCurrentMeleeData()
-      .then(({ market1, market2 }) => [market1.symbolEmojis, market2.symbolEmojis])
-      .then(([symbol1, symbol2]) => {
-        const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol1, symbol2 });
+      .then(({ market0, market1 }) => [market0.symbolEmojis, market1.symbolEmojis])
+      .then(([symbol0, symbol1]) => {
+        const [c0, lp0, c1, lp1] = toArenaCoinTypes({ symbol0, symbol1 });
         EmojicoinArena.Enter.builder({
           aptosConfig: aptos.config,
           entrant: definedAccount.address,
@@ -102,7 +103,7 @@ export const InnerDisplayDebugData = () => {
               integrator: INTEGRATOR_ADDRESS,
               integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
               minOutputAmount: 0n,
-              typeTags: toCoinTypesForEntry(
+              typeTags: toEmojicoinTypesForEntry(
                 models.marketRegistrationEvents[0].marketMetadata.marketAddress
               ),
             })
@@ -116,7 +117,7 @@ export const InnerDisplayDebugData = () => {
 
   // Curry a function to force a connection if the wallet isn't connected or call the original function otherwise.
   const forceConnectOrRunFunction = useCallback(
-    (functionToCallIfConnected: (definedAccount: AccountInfo) => void) => () =>
+    (functionToCallIfConnected: (definedAccount: AccountInfo) => Promise<void>) => () =>
       account && connected
         ? functionToCallIfConnected(account)
         : connect(wallet?.name ?? ("Petra" as WalletName)),
@@ -138,20 +139,20 @@ export const InnerDisplayDebugData = () => {
           <>
             <button
               className={debugButtonClassName}
-              onClick={forceConnectOrRunFunction((definedAccount) => {
+              onClick={forceConnectOrRunFunction((definedAccount) =>
                 aptos
                   .fundAccount({
                     accountAddress: definedAccount.address,
                     amount: ONE_APT * 10000000,
                   })
-                  .then(() => forceRefetch("apt"));
-              })}
+                  .then(() => forceRefetch("apt"))
+              )}
             >
               <span className="justify-start">
                 {"Fund me"} {emoji("money bag")}
               </span>
             </button>
-            <a className={cn(debugButtonClassName, "justify-start")} href={ROUTES["test-utils"]}>
+            <a className={cn(debugButtonClassName, "justify-center")} href={ROUTES["test-utils"]}>
               <span className="rotate-[-22.5deg]">{"/"}</span>
               <span className="lowercase">{"test-utils"}</span>
             </a>
@@ -170,6 +171,13 @@ export const InnerDisplayDebugData = () => {
             >
               {"init arena"}
             </button>
+            <a
+              className={cn(debugButtonClassName, "justify-center")}
+              href={ROUTES["dev"]["color-generator"]}
+            >
+              <span className="rotate-[-22.5deg]">{"/"}</span>
+              <span className="lowercase">{"color-generator"}</span>
+            </a>
           </>
         )}
       </div>

@@ -1,7 +1,8 @@
-import { toOrderBy } from "@sdk/indexer-v2/const";
-import { Schemas } from "@sdk/utils";
-import { type HomePageSearchParams } from "lib/queries/sorting/query-params";
+import type { HomePageSearchParams } from "lib/queries/sorting/query-params";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
+
+import { toOrderBy } from "@/sdk/indexer-v2/const";
+import { Schemas } from "@/sdk/utils";
 
 export interface HomePageParams {
   params?: {};
@@ -11,6 +12,12 @@ export interface HomePageParams {
 export const safeParsePageWithDefault = (pageInput: unknown): number => {
   const result = Schemas["PositiveInteger"].safeParse(pageInput);
   return result.success ? result.data : 1;
+};
+
+// Converts a bare `0x` and a `null` input to undefined. If it's already undefined, it remains so.
+// Otherwise, return the value.
+export const handleEmptySearchBytes = (searchBytes?: string | null) => {
+  return searchBytes === "0x" ? undefined : (searchBytes ?? undefined);
 };
 
 export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams | undefined) => {
@@ -35,10 +42,4 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
     inBondingCurve,
     q,
   };
-};
-
-// Converts a bare `0x` and a `null` input to undefined. If it's already undefined, it remains so.
-// Otherwise, return the value.
-export const handleEmptySearchBytes = (searchBytes?: string | null) => {
-  return searchBytes === "0x" ? undefined : (searchBytes ?? undefined);
 };

@@ -1,4 +1,7 @@
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
+
+import { Swap } from "@/move-modules/emojicoin-dot-fun";
+
 import {
   compareBigInt,
   getEmojicoinMarketAddressAndTypeTags,
@@ -8,13 +11,11 @@ import {
   SYMBOL_EMOJI_DATA,
   type SymbolEmojiName,
 } from "../../../../src";
-import TestHelpers from "../../../utils/helpers";
-import { getFundedAccounts } from "../../../utils/test-accounts";
-import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
-import { Swap } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../../utils";
 import { fetchMarkets } from "../../../../src/indexer-v2/queries/app/home";
+import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { SortMarketsBy } from "../../../../src/indexer-v2/types/common";
+import { getAptosClient, registerMarketHelper } from "../../../utils";
+import { getFundedAccounts } from "../../../utils/test-accounts";
 import {
   checkOrder,
   checkSubsetsEqual,
@@ -54,7 +55,7 @@ describe("sorting queries for the sort filters on the home page", () => {
     for (let i = 0; i < marketEmojiNames.length; i += 1) {
       const emojiNames = marketEmojiNames[i];
       registerAndSwap.push(
-        TestHelpers.registerMarketFromNames({
+        registerMarketHelper({
           registrant: registrants[i],
           emojiNames,
         }).then(async ({ registerResponse }) => {

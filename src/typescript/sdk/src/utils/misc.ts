@@ -1,18 +1,19 @@
 import { AccountAddress, type InputGenerateTransactionOptions } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
+
 import {
-  type PeriodDuration,
+  type AnyPeriod,
   type Period,
+  type PeriodDuration,
   periodEnumToRawDuration,
   toPeriodDuration,
-  type AnyPeriod,
 } from "../const";
 import {
   type AnyNumberString,
-  type Types,
   isPeriodicStateEvent,
   isStateEvent,
   isSwapEvent,
+  type Types,
 } from "../types";
 
 /**
@@ -95,6 +96,8 @@ export function getPeriodStartTime(
  * @param microseconds the time in microseconds.
  * @param period the period to calculate the start of.
  * @returns the start of the period in microseconds.
+ *
+ * Used in {@link getPeriodStartTime}
  */
 export function getPeriodStartTimeFromTime(
   microseconds: AnyNumberString,

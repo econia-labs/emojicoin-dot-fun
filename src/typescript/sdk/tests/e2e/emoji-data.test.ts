@@ -1,25 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word writeset
 import { AccountAddress, type WriteSetChangeWriteTableItem } from "@aptos-labs/ts-sdk";
-import { getPublishHelpers } from "../utils/helpers";
+
 import {
-  CHAT_EMOJI_DATA,
-  SYMBOL_EMOJI_DATA,
   allChatEmojis,
   allSymbolEmojis,
+  CHAT_EMOJI_DATA,
   getRegistryResourceFromWriteSet,
   isEntryFunctionUserTransactionResponse,
   isWriteSetChangeWriteTableItem,
   normalizeHex,
+  SYMBOL_EMOJI_DATA,
 } from "../../src";
-import { SYMBOL_EMOJIS } from "../../src/emoji_data/symbol-emojis";
 import { CHAT_EMOJIS } from "../../src/emoji_data/chat-emojis";
-import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
-import { getFundedAccount } from "../utils/test-accounts";
-import TestHelpers from "../utils/helpers";
-import { waitForEmojicoinIndexer } from "../../src/indexer-v2/queries";
-import { fetchMarketRegistrationEvents } from "./queries";
+import { SYMBOL_EMOJIS } from "../../src/emoji_data/symbol-emojis";
 import { ORDER_BY } from "../../src/indexer-v2/const";
+import { waitForEmojicoinIndexer } from "../../src/indexer-v2/queries";
+import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
+import { getPublishHelpers, registerMarketHelper } from "../utils/helpers";
+import { getFundedAccount } from "../utils/test-accounts";
+import { fetchMarketRegistrationEvents } from "./queries";
 
 jest.setTimeout(10000);
 
@@ -100,7 +100,7 @@ describe("verification of typescript emoji JSON data", () => {
     // Since the table items aren't added until the first market is registered, we must get the
     // writeset changes for the first registered market, not the publish package transaction.
     // We must also register a market to ensure that there is at least one registered market.
-    const { registerResponse } = await TestHelpers.registerMarketFromEmojis({
+    const { registerResponse } = await registerMarketHelper({
       registrant: getFundedAccount("999"),
       emojis: ["🚽", "🚽"],
     });

@@ -1,5 +1,5 @@
-import { type Period, periodEnumToRawDuration, NON_ARENA_PERIODS } from "../../src/const";
-import { type AnyNumberString } from "../../src/types";
+import { NON_ARENA_PERIODS, type Period, periodEnumToRawDuration } from "../../src/const";
+import type { AnyNumberString } from "../../src/types";
 import { getPeriodBoundary } from "../../src/utils/misc";
 
 /**

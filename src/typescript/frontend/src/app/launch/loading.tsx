@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import LoadingComponent from "components/loading";
+import React from "react";
 
 export default function Loading() {
   return <LoadingComponent />;

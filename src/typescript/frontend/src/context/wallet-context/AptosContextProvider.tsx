@@ -1,12 +1,21 @@
 import {
+  type Aptos,
   APTOS_COIN,
   AptosApiError,
   isUserTransactionResponse,
-  type Aptos,
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import {
+  checkNetworkAndToast,
+  parseAPIErrorAndToast,
+  successfulTransactionToast,
+} from "components/wallet/toasts";
+import { DEFAULT_TOAST_CONFIG } from "const";
+import { useEventStore } from "context/event-store-context";
+import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
+import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import {
   createContext,
   type PropsWithChildren,
@@ -16,55 +25,48 @@ import {
   useState,
 } from "react";
 import { toast } from "react-toastify";
-import {
-  type WalletInputTransactionData,
-  type EntryFunctionTransactionBuilder,
-} from "@sdk/emojicoin_dot_fun/payload-builders";
-import {
-  checkNetworkAndToast,
-  parseAPIErrorAndToast,
-  successfulTransactionToast,
-} from "components/wallet/toasts";
-import { useEventStore } from "context/event-store-context";
-import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import { DEFAULT_TOAST_CONFIG } from "const";
-import { sleep } from "@sdk/utils";
-import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
-import { getAptosClient } from "@sdk/utils/aptos-client";
-import { useNameResolver } from "@hooks/use-name-resolver";
+
+import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
+import { useNameResolver } from "@/hooks/use-name-resolver";
+import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun";
+import type {
+  EntryFunctionTransactionBuilder,
+  WalletInputTransactionData,
+} from "@/sdk/emojicoin_dot_fun/payload-builders";
+import { sleep } from "@/sdk/utils";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
+
 import {
   copyAddressHelper,
   getFlattenedEventModelsFromResponse,
   setBalancesFromWriteset,
   setCoinTypeHelper,
 } from "./utils";
-import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 
 type WalletContextState = ReturnType<typeof useWallet>;
-export type SubmissionResponse = Promise<{
+type SubmissionResponse = Promise<{
   response: PendingTransactionResponse | UserTransactionResponse | null;
   error: unknown;
 } | null>;
 
-export type TrackedCoinType = "apt" | "emojicoin" | "emojicoinLP";
-export type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
-export type ResponseType = Awaited<SubmissionResponse>;
-export type EntryFunctionNames =
+type TrackedCoinType = "apt" | "emojicoin" | "emojicoinLP";
+type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
+type ResponseType = Awaited<SubmissionResponse>;
+type EntryFunctionNames =
   | "chat"
   | "swap"
   | "register_market"
   | "provide_liquidity"
   | "remove_liquidity";
 
-export type AptosContextState = {
+type AptosContextState = {
   aptos: Aptos;
   submit: (input: WalletInputTransactionData | null) => SubmissionResponse;
   signThenSubmit: (
     transactionBuilder: EntryFunctionTransactionBuilder | null
   ) => SubmissionResponse;
   account: WalletContextState["account"];
-  copyAddress: () => void;
+  copyAddress: () => Promise<void>;
   status: TransactionStatus;
   lastResponse: ResponseType;
   lastResponseStoredAt: number;
@@ -79,7 +81,7 @@ export type AptosContextState = {
   setBalance(coinType: TrackedCoinType, n: bigint): void;
 };
 
-export const AptosContext = createContext<AptosContextState | undefined>(undefined);
+const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
 export function AptosContextProvider({ children }: PropsWithChildren) {
   const {

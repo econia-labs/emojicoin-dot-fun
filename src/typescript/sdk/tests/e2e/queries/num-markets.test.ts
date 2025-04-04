@@ -1,15 +1,16 @@
+import { RegistryView } from "@/move-modules/emojicoin-dot-fun";
+
 import { getRegistryResourceFromWriteSet, toRegistryView } from "../../../src";
-import { type SymbolEmojiName } from "../../../src/emoji_data/types";
-import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../../src/utils/aptos-client";
-import TestHelpers from "../../utils/helpers";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import type { SymbolEmojiName } from "../../../src/emoji_data/types";
 import {
   fetchLargestMarketID,
   postgrest,
   TableName,
   toMarketRegistrationEventModel,
 } from "../../../src/indexer-v2";
+import { getAptosClient } from "../../../src/utils/aptos-client";
+import { registerMarketHelper } from "../../utils/helpers";
+import { getFundedAccounts } from "../../utils/test-accounts";
 
 jest.setTimeout(20000);
 
@@ -30,7 +31,7 @@ describe("fetches the number of registered markets based on the latest processed
 
   beforeAll(async () => {
     const registerAll = marketEmojiNames.map((emojiNames, i) =>
-      TestHelpers.registerMarketFromNames({
+      registerMarketHelper({
         registrant: registrants[i],
         emojiNames,
       }).then(({ registerResponse }) => {

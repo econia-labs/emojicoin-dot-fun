@@ -1,7 +1,9 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
+
+import type { EmojiPickerStore } from "@/store/emoji-picker-store";
+
 import { EmojiPickerContext } from "./EmojiPickerContextProvider";
-import { type EmojiPickerStore } from "@/store/emoji-picker-store";
 
 export const useEmojiPicker = <T,>(selector: (store: EmojiPickerStore) => T): T => {
   const emojiPickerContext = useContext(EmojiPickerContext);

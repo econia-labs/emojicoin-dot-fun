@@ -1,7 +1,9 @@
-import { type SubscribeBarsCallback } from "@static/charting_library";
-import { type WritableDraft } from "immer";
-import { type LatestBar } from "./event/candlestick-bars";
-import { type CandlestickData } from "./event/types";
+import type { WritableDraft } from "immer";
+
+import type { SubscribeBarsCallback } from "@/static/charting_library";
+
+import type { LatestBar } from "./event/candlestick-bars";
+import type { CandlestickData } from "./event/types";
 
 export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
   callback: undefined,

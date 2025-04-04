@@ -37,7 +37,32 @@ export type DeepWritable<T> = {
   -readonly [P in keyof T]: DeepWritable<T[P]>;
 };
 
+/**
+ * This doesn't work on objects with multiple keys. For that, use {@link StrictXOR}.
+ */
 // prettier-ignore
 export type XOR<T, U> =
   | (T & { [K in keyof U]?: never })
-  | (U & { [K in keyof T]?: never });
+  | (U & { [K in keyof T]?: never }) ;
+
+/**
+ * A less ergonomic, but functional exclusive OR utility type. This function requires a specific
+ * invocation to properly infer types. See the example below.
+ *
+ * @example
+ * type ABorCD = StrictXOR<{ a: number, b: number }, { c: number, d: number }>;
+ * function foo(value: ABorCD) {
+ *   // `value.` won't autocomplete- it will show as having no fields. However, you can do this:
+ *   if ("a" in value) {
+ *     // TypeScript can properly infer from here
+ *   } else {
+ *     // And here
+ *   }
+ * }
+ *
+ */
+export type StrictXOR<T, U> = Exclude<T, U> | Exclude<U, T>;
+
+declare const __brand: unique symbol;
+type Brand<B> = { [__brand]: B };
+export type Nominal<T, B> = T & Brand<B>;

@@ -3,23 +3,25 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { standardizeAddress, truncateAddress } from "@sdk/utils";
-import { getIsOnCustomAllowlist } from "./get-verification-status";
+import { cn } from "lib/utils/class-name";
+import { useEffect, useState } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
-import { cn } from "lib/utils/class-name";
 
-export const checkmarkOrX = (checkmark: boolean, className?: string) => (
+import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
+import { standardizeAddress, truncateAddress } from "@/sdk/utils";
+
+import { getIsOnCustomAllowlist } from "./get-verification-status";
+
+const checkmarkOrX = (checkmark: boolean, className?: string) => (
   <Emoji
     className={cn("text-lg", className)}
     emojis={checkmark ? emoji("check mark button") : emoji("cross mark")}
   />
 );
 
-export const ClientVerifyPage = ({
+const ClientVerifyPage = ({
   country,
   region,
 }: {

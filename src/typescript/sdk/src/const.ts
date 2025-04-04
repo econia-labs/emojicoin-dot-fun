@@ -6,9 +6,11 @@ import {
   parseTypeTag,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import { type ValueOf } from "./utils/utility-types";
-import { type DatabaseStructType } from "./indexer-v2/types/json-types";
-import { type Types } from "./types";
+
+import type { DatabaseStructType } from "./indexer-v2/types/json-types";
+import type { Types } from "./types";
+import type { CoinTypeString } from "./utils";
+import type { ValueOf } from "./utils/utility-types";
 
 export const VERCEL = process.env.VERCEL === "1";
 let vercelTargetEnv: "production" | "preview" | "development" | "release-preview";
@@ -91,7 +93,7 @@ export const INTEGRATOR_ADDRESS = (() =>
 export const INTEGRATOR_FEE_RATE_BPS = Number(process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS);
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
-export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);
+export const APTOS_COIN_TYPE_STRING = parseTypeTag(APTOS_COIN).toString() as CoinTypeString;
 export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
 export const EMOJICOIN_DOT_FUN_MODULE_NAME = "emojicoin_dot_fun";
@@ -123,7 +125,7 @@ export const BASIS_POINTS_PER_UNIT = 10_000n;
 // Arena constants.
 export const ARENA_CONSTANTS = {
   /**
-   * Note that the duration here reflects the contract when deployed on public networks.
+   * Note that the duration here reflects the Move module when deployed on public networks.
    * In test/CI environments, the `deployer` service may alter this to be much smaller to
    * facilitate reasonable test durations. See `src/docker/deployer/sh`.
    */
@@ -259,7 +261,7 @@ export const toTrigger = (s: DatabaseStructType["GlobalStateEventData"]["trigger
     throw new Error(`Unknown trigger: ${s}`);
   })();
 
-/// As defined in the contract, not in the database; i.e., numbers, not enum strings.
+/// As defined in the Move module, not in the database; i.e., numbers, not enum strings.
 export enum TriggerFromContract {
   PackagePublication = 0,
   MarketRegistration = 1,

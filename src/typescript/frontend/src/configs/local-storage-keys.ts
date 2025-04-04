@@ -1,7 +1,8 @@
-import { parseJSON, stringifyJSON } from "utils";
-import packages from "../../package.json";
 import { MS_IN_ONE_DAY } from "components/charts/const";
-import { satisfies, type SemVer, parse } from "semver";
+import { parse, satisfies, type SemVer } from "semver";
+import { parseJSON, stringifyJSON } from "utils";
+
+import packages from "../../package.json";
 
 const LOCAL_STORAGE_KEYS = {
   theme: `${packages.name}_theme`,
@@ -28,13 +29,15 @@ export const LOCAL_STORAGE_CACHE_TIME: {
   settings: Infinity,
 };
 
-export type LocalStorageCache<T> = {
+type LocalStorageCache<T> = {
   expiry: number;
   data: T | null;
   version: string | undefined;
 };
 
 export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): T | null {
+  if (typeof window === "undefined") return null;
+
   const str = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
   if (str === null) {
     return null;

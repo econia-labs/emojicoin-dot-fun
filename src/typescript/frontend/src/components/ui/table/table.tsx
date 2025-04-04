@@ -1,5 +1,5 @@
-import { cn } from "lib/utils/class-name";
 import { type HTMLMotionProps, motion } from "framer-motion";
+import { cn } from "lib/utils/class-name";
 import * as React from "react";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
@@ -160,4 +160,4 @@ const TableRow = React.forwardRef<
 );
 TableRow.displayName = "TableRow";
 
-export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
+export { Table, TableBody, TableCell, TableHead, TableHeader, TableRow };

@@ -1,11 +1,12 @@
-import { type AccountAddressInput, type AptosConfig } from "@aptos-labs/ts-sdk";
-import { type InputGenerateTransactionOptions } from "@aptos-labs/wallet-adapter-core";
-import {
-  type WalletInputTransactionData,
-  type EntryFunctionTransactionBuilder,
-} from "@sdk/emojicoin_dot_fun/payload-builders";
-import { useEffect, useState } from "react";
+import type { AccountAddressInput, AptosConfig } from "@aptos-labs/ts-sdk";
+import type { InputGenerateTransactionOptions } from "@aptos-labs/wallet-adapter-core";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useEffect, useState } from "react";
+
+import type {
+  EntryFunctionTransactionBuilder,
+  WalletInputTransactionData,
+} from "@/sdk/emojicoin_dot_fun/payload-builders";
 
 type BuilderConfig = {
   aptosConfig: AptosConfig;
@@ -144,7 +145,7 @@ export function useTransactionBuilderWithOptions<
   return builder;
 }
 
-const useIncrementingNonce = (intervalTime: number) => {
+function useIncrementingNonce(intervalTime: number) {
   const [nonce, setNonce] = useState<number>(0);
   useEffect(() => {
     const interval = setInterval(() => setNonce((n) => n + 1), intervalTime);
@@ -152,4 +153,4 @@ const useIncrementingNonce = (intervalTime: number) => {
   });
 
   return nonce;
-};
+}

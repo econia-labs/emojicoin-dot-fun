@@ -1,25 +1,27 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
-import { EXTERNAL_LINK_PROPS, Link } from "components/link";
-import { MobileSocialLinks } from "./components/mobile-social-links";
-import { MobileMenuItem } from "../index";
-import { type MobileMenuProps } from "./types";
-import { slideVariants } from "./animations";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
   APTOS_CONNECT_ACCOUNT_URL,
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { Copy, LogOut, User, UserRound } from "lucide-react";
+import { Badge } from "components/Badge";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { EXTERNAL_LINK_PROPS, Link } from "components/link";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { AnimatePresence, useAnimationControls } from "framer-motion";
-import AnimatedDropdownItem from "./components/animated-dropdown-item";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
-import { ROUTES } from "router/routes";
+import { Copy, LogOut, User, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Badge } from "components/Badge";
+import React, { useCallback, useEffect, useState } from "react";
+import { ROUTES } from "router/routes";
+
+import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
+
+import { MobileMenuItem } from "../index";
+import { slideVariants } from "./animations";
+import AnimatedDropdownItem from "./components/animated-dropdown-item";
+import { MobileSocialLinks } from "./components/mobile-social-links";
+import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
+import type { MobileMenuProps } from "./types";
 
 const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-black";
 
@@ -47,6 +49,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     };
   }, [isOpen]);
 
+  const handleCloseSubMenu = useCallback(async () => {
+    setSubMenuOpen(false);
+    await borderControls.start({ opacity: 0 });
+    await subMenuControls.start({ height: 0 });
+  }, [subMenuControls, borderControls]);
+
   useEffect(() => {
     if (!isOpen) {
       handleCloseSubMenu();
@@ -65,12 +73,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     await handleCloseSubMenu();
     setIsOpen(false);
   };
-
-  const handleCloseSubMenu = useCallback(async () => {
-    setSubMenuOpen(false);
-    await borderControls.start({ opacity: 0 });
-    await subMenuControls.start({ height: 0 });
-  }, [subMenuControls, borderControls]);
 
   const subMenuOnClick = async () => {
     if (!account) {

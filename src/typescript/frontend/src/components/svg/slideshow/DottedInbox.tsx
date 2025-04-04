@@ -1,7 +1,9 @@
+import { motion, type SVGMotionProps } from "framer-motion";
 import * as React from "react";
-import { type Ref, forwardRef, memo } from "react";
+import { forwardRef, memo, type Ref } from "react";
+
 import { AnimateDottedSVG } from "./AnimateDottedSVG";
-import { type SVGMotionProps, motion } from "framer-motion";
+
 const SvgComponent = (
   { width = 128, height = 102, ...props }: SVGMotionProps<SVGSVGElement>,
   ref: Ref<SVGSVGElement>

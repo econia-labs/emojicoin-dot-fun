@@ -1,13 +1,9 @@
-import { type AnyNumberString, BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
-import postgres from "postgres";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
-import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 
-export const getDbConnection = () => {
-  return postgres(process.env.DB_URL!);
-};
+import { type AnyNumberString, BASIS_POINTS_PER_UNIT, INTEGRATOR_FEE_RATE_BPS } from "../../../src";
+import { waitForEmojicoinIndexer } from "../../../src/indexer-v2";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
 
 /**
  * NOTE: This function *WILL NOT* work if the INTEGRATOR_FEE_RATE_BPS results in a fee output that
@@ -18,7 +14,7 @@ export const getDbConnection = () => {
  *
  * The calculation solves for the total input amount (i) given:
  * - Known exact transition amount (E) without fees
- * - Integrator fee percentage (FEE_PERCENTAGE) @see get_bps_fee in the Move contract.
+ * - Integrator fee percentage (FEE_PERCENTAGE) @see get_bps_fee in the Move module.
  *
  * Mathematical derivation:
  * 1. E = i - (i * FEE_PERCENTAGE)    // Base equation
@@ -49,7 +45,7 @@ export const getExactTransitionInputAmount = (
   return BigInt(rounded.toString());
 };
 
-export const PROCESSING_WAIT_TIME = 2 * 1000;
+const PROCESSING_WAIT_TIME = 2 * 1000;
 
 export const waitForProcessor = <
   T extends { version: AnyNumberString } | { response: UserTransactionResponse },

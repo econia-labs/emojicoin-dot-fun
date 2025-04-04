@@ -1,17 +1,19 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@headlessui/react";
-import { formatDisplayName } from "@sdk/utils/misc";
-import { translationFunction } from "context/language-context";
-import { useWalletModal } from "context/wallet-context/WalletModalContext";
-import { useMemo, useState, type PropsWithChildren } from "react";
-import { useScramble } from "use-scramble";
-import OuterConnectText from "./OuterConnectText";
-import Arrow from "@icons/Arrow";
 import Popup from "components/popup";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useWalletModal } from "context/wallet-context/WalletModalContext";
+import { type PropsWithChildren, useMemo, useState } from "react";
+import { useScramble } from "use-scramble";
 
-export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
+import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
+import Arrow from "@/icons/Arrow";
+import { formatDisplayName } from "@/sdk/utils/misc";
+
+import OuterConnectText from "./OuterConnectText";
+
+interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
   onClick?: () => void;
   arrow?: boolean;
@@ -22,7 +24,7 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
 
 const CONNECT_WALLET = "Connect Wallet";
 
-export const ButtonWithConnectWalletFallback = ({
+const ButtonWithConnectWalletFallback = ({
   mobile,
   children,
   className,

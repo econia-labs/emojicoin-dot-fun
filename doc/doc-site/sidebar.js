@@ -1,3 +1,5 @@
+// cspell:word geckoterminal
+
 module.exports = {
   docs: [
     {
@@ -58,6 +60,7 @@ module.exports = {
           items: [
             'resources/integrators/api/coingecko',
             'resources/integrators/api/dexscreener',
+            'resources/integrators/api/geckoterminal',
             'resources/integrators/api/trending',
           ]
         },

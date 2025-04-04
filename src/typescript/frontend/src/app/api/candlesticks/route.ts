@@ -1,6 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { getCandlesticksRoute } from "./utils";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { CandlesticksSearchParamsSchema } from "./search-params-schema";
+import { getCandlesticksRoute } from "./utils";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;

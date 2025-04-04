@@ -1,8 +1,10 @@
-import { ProvideLiquidity, RemoveLiquidity } from "@/contract-apis";
-import { toCoinTypesForEntry } from "@sdk/markets";
-import { useMemo } from "react";
-import { useTransactionBuilder } from "./use-transaction-builder";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useMemo } from "react";
+
+import { ProvideLiquidity, RemoveLiquidity } from "@/move-modules";
+import { toEmojicoinTypesForEntry } from "@/sdk/markets";
+
+import { useTransactionBuilder } from "./use-transaction-builder";
 
 /**
  * The individual args here must be passed to avoid re-renders due to a new object of args being
@@ -30,7 +32,7 @@ export const useLiquidityTransactionBuilder = (
     const sharedArgs = {
       provider: accountAddress,
       marketAddress,
-      typeTags: toCoinTypesForEntry(marketAddress),
+      typeTags: toEmojicoinTypesForEntry(marketAddress),
     };
     const otherArgs =
       direction === "add"
