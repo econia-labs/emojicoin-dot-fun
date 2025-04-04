@@ -61,11 +61,5 @@ export default defineConfig({
       use: { ...devices["Desktop Safari"] },
       dependencies: ["setup"],
     },
-    // Tests without dependencies.
-    {
-      name: "unit",
-      testDir: "./tests/e2e/unit",
-      testMatch: /.*\.test\.ts/,
-    },
   ],
 });
