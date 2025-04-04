@@ -1,4 +1,4 @@
-import type { PoolsData } from "components/pages/pools/ClientPoolsPage";
+import type { PoolsData } from "app/pools/page";
 
 export type TableRowDesktopProps = {
   item: PoolsData;
