@@ -1,3 +1,5 @@
+import type { Account } from "@aptos-labs/ts-sdk";
+
 import {
   ArenaPeriod,
   calculateCurvePrice,
@@ -18,16 +20,15 @@ import {
   fetchArenaMeleeView,
   fetchMeleeEmojiData,
   type MeleeEmojiData,
-} from "../../../src/markets/arena-utils";
+} from "../../../src/utils/arena/helpers";
+import { getPublisher } from "../../utils/helpers";
 import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
+import { waitForProcessor } from "../helpers";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
-import { getPublisher } from "../../utils/helpers";
-import type { Account } from "@aptos-labs/ts-sdk";
-import { waitForProcessor } from "../helpers";
 
 const TWO_SECONDS = 2000;
 
@@ -73,9 +74,9 @@ describe("ensures arena candlesticks work", () => {
       publisher,
       1n,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
+      "symbol0"
     );
     melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
     await waitForProcessor(res);
@@ -93,12 +94,12 @@ describe("ensures arena candlesticks work", () => {
     const registrant0: string = await postgrest
       .from(TableName.MarketRegistrationEvents)
       .select("registrant")
-      .eq("market_id", melee.market1.marketID)
+      .eq("market_id", melee.market0.marketID)
       .then((r) => r.data![0].registrant.substring(2, 5));
     const registrant1: string = await postgrest
       .from(TableName.MarketRegistrationEvents)
       .select("registrant")
-      .eq("market_id", melee.market2.marketID)
+      .eq("market_id", melee.market1.marketID)
       .then((r) => r.data![0].registrant.substring(2, 5));
 
     let account1: Account;
@@ -135,14 +136,14 @@ describe("ensures arena candlesticks work", () => {
       state0 = await postgrest
         .from(TableName.MarketLatestStateEvent)
         .select("*")
-        .eq("market_id", melee.market1.marketID)
+        .eq("market_id", melee.market0.marketID)
         .single()
         .then((r) => r.data)
         .then((r) => toMarketLatestStateEventModel(r));
       state1 = await postgrest
         .from(TableName.MarketLatestStateEvent)
         .select("*")
-        .eq("market_id", melee.market2.marketID)
+        .eq("market_id", melee.market1.marketID)
         .single()
         .then((r) => r.data)
         .then((r) => toMarketLatestStateEventModel(r));
@@ -182,9 +183,9 @@ describe("ensures arena candlesticks work", () => {
         account1,
         ONE_APT_BIGINT,
         false,
+        melee.market0.symbolEmojis,
         melee.market1.symbolEmojis,
-        melee.market2.symbolEmojis,
-        "symbol1"
+        "symbol0"
       )
     );
 
@@ -209,7 +210,7 @@ describe("ensures arena candlesticks work", () => {
 
     // No swap is generated from the exit.
 
-    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
 
     // Here, we make a swap on the other market.
 
@@ -218,9 +219,9 @@ describe("ensures arena candlesticks work", () => {
         account2,
         ONE_APT_BIGINT,
         false,
+        melee.market0.symbolEmojis,
         melee.market1.symbolEmojis,
-        melee.market2.symbolEmojis,
-        "symbol2"
+        "symbol1"
       )
     );
 
@@ -247,7 +248,7 @@ describe("ensures arena candlesticks work", () => {
     // We swap for emojicoin 1 to emojicoin 0.
 
     await waitForProcessor(
-      await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
+      await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis)
     );
 
     await refreshCandlesticksData();
@@ -274,7 +275,7 @@ describe("ensures arena candlesticks work", () => {
     // This swap should happen in the next candlestick boundary, so it should generate a new one.
 
     await waitForProcessor(
-      await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
+      await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis)
     );
 
     const oldSwap1 = state1!;

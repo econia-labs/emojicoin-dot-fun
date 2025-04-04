@@ -1,12 +1,17 @@
-import { Account, type Ed25519Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  type Ed25519Account,
+  Ed25519PrivateKey,
+  PrivateKey,
+  PrivateKeyVariants,
+} from "@aptos-labs/ts-sdk";
+
 import testAccountData from "./test-accounts.json";
 
-export type FundedAddress = keyof typeof testAccountData;
 type D = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
 export type FundedAccountIndex = `${D}${D}${D}`;
-export type FundedAddressIndex = FundedAccountIndex;
 const DIGITS = 3;
-export const fundedAccounts = new Map<FundedAccountIndex, Ed25519Account>(
+const fundedAccounts = new Map<FundedAccountIndex, Ed25519Account>(
   Object.entries(testAccountData).map(([addressWith0x, privateKeyString]) => {
     const address = addressWith0x.replace(/^0x/, "");
     const { length } = address;
@@ -18,7 +23,11 @@ export const fundedAccounts = new Map<FundedAccountIndex, Ed25519Account>(
       throw new Error("Prefix and suffix for the addresses should be the same.");
     }
     const index = prefix as FundedAccountIndex;
-    const privateKey = new Ed25519PrivateKey(privateKeyString);
+    const formattedPrivateKeyString = PrivateKey.formatPrivateKey(
+      privateKeyString,
+      PrivateKeyVariants.Ed25519
+    );
+    const privateKey = new Ed25519PrivateKey(formattedPrivateKeyString);
     const account = Account.fromPrivateKey({ privateKey });
     return [index, account];
   })

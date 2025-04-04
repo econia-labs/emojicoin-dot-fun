@@ -1,20 +1,22 @@
 import {
-  type AccountAddressInput,
   AccountAddress,
+  type AccountAddressInput,
   parseTypeTag,
   type TypeTag,
   type TypeTagStruct,
 } from "@aptos-labs/ts-sdk";
+
 import {
-  MODULE_ADDRESS,
-  EMOJICOIN_DOT_FUN_MODULE_NAME,
-  REWARDS_MODULE_NAME,
-  REWARDS_MODULE_ADDRESS,
   ARENA_MODULE_ADDRESS,
   ARENA_MODULE_NAME,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+  MODULE_ADDRESS,
+  REWARDS_MODULE_ADDRESS,
+  REWARDS_MODULE_NAME,
 } from "../const";
-import { type TypeTagInput } from "../emojicoin_dot_fun";
+import type { TypeTagInput } from "../emojicoin_dot_fun";
 import { removeLeadingZeros } from "./account-address";
+import type { Nominal } from "./utility-types";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
@@ -78,6 +80,11 @@ export type ArenaStructName =
   | "ArenaVaultBalanceUpdateEvent";
 
 export type StructTagString = `0x${string}::${string}::${string}`;
+export type CoinStoreString = Nominal<
+  `0x1::coin::CoinStore<${StructTagString}>`,
+  "CoinStoreString"
+>;
+export type CoinTypeString = Nominal<StructTagString, "CoinTypeString">;
 
 type AnyEmojicoinDotFunStructName = EmojicoinStructName | ArenaStructName;
 

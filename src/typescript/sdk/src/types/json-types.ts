@@ -1,13 +1,14 @@
 /* eslint-disable import/no-unused-modules */
 import { AccountAddress, type Uint8 } from "@aptos-labs/ts-sdk";
-import {
-  type Uint64String,
-  type AccountAddressString,
-  type Uint128String,
-  type HexString,
+
+import type {
+  AccountAddressString,
+  HexString,
+  Uint64String,
+  Uint128String,
 } from "../emojicoin_dot_fun/types";
-import { type EventJSON, type AggregatorSnapshot } from "./core";
-import { type ArenaJsonTypes } from "./arena-json-types";
+import type { ArenaJsonTypes } from "./arena-json-types";
+import type { AggregatorSnapshot, EventJSON } from "./core";
 
 export type JsonValue =
   | string
@@ -18,7 +19,7 @@ export type JsonValue =
   | { [key: string]: JsonValue }
   | bigint;
 
-type JsonTypes = ArenaJsonTypes & {
+export type JsonTypes = ArenaJsonTypes & {
   ExtendRef: {
     self: AccountAddressString;
   };
@@ -93,7 +94,7 @@ type JsonTypes = ArenaJsonTypes & {
     cumulative_chat_messages: AggregatorSnapshot<Uint64String>;
   };
 
-  // The result of the contract's `market_view` view function. NOT the database view.
+  // The result of the module's `market_view` view function. NOT the database view.
   MarketView: {
     metadata: JsonTypes["MarketMetadata"];
     sequence_info: JsonTypes["SequenceInfo"];
@@ -304,8 +305,6 @@ type JsonTypes = ArenaJsonTypes & {
     octas_reward_amount: Uint64String;
   };
 };
-
-export default JsonTypes;
 
 export type AnyEmojicoinJSONEvent =
   | JsonTypes["SwapEvent"]

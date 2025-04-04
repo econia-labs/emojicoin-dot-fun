@@ -33,7 +33,7 @@ other ways to refer to these concepts.
 
 To disambiguate the terms we use here, keep in mind the following:
 
-`emojicoin_dot_fun.move` contract events of the type `PeriodicStateEvent`
+`emojicoin_dot_fun.move` module events of the type `PeriodicStateEvent`
 represent a single [OHLCV candlestick], also referred to as a `bar` or
 as our `periodic state event` type. Each `candlestick` exists for a specific
 `period` or `resolution`. This is the `time frame` or `time range` used for the
@@ -50,7 +50,7 @@ either side of a period boundary, i.e., the start _or_ the end time for a
 candlestick period.
 
 The `PeriodDuration` enum indicates the actual time of the period in
-microseconds, as specified in the Move smart contract.
+microseconds, as specified in the Move module.
 
 ## Datafeed API
 
@@ -75,9 +75,9 @@ sections.
 
 ## Updating and creating new bar data
 
-Since the contract data does not emit events for updates to the current
+Since the module data does not emit events for updates to the current
 candlestick, we must construct this data ourselves through a combination of
-logic and on-chain data fetched from the `emojicoin_dot_fun.move` contract's
+logic and on-chain data fetched from the `emojicoin_dot_fun.move` module's
 view functions.
 
 The general process of how we create and update bar data is detailed below.
@@ -102,7 +102,7 @@ without having to use the callback function to update the latest bar.
 
 We also currently update all candlestick data to use the previous bar's closing
 price as its open price. This is additional logic that supersedes the `open`
-values emitted from the contract. This is so we can display contiguous bar
+values emitted from the module. This is so we can display contiguous bar
 data in the chart, which is typical for most 24/7 markets.
 
 ### On the arrival of a swap or periodic state event from the MQTT/wss client
@@ -116,7 +116,7 @@ data in the chart, which is typical for most 24/7 markets.
 1. When a new swap event comes in and it should be part of a new candlestick
    bar, we create a new bar based off of the swap data.
 
-Once we've deserialized the stream buffer data into proper contract events, we
+Once we've deserialized the stream buffer data into proper module events, we
 store them in state and visually update the latest bar data with the
 [subscribeBars] callback function provided by the datafeed API.
 
@@ -226,7 +226,7 @@ post-transaction submission flow for user transactions (transactions that update
 state on-chain) and parse any events returned from a valid, awaited
 `UserTransactionResponse`.
 
-When it comes across a relevant contract event, like a `SwapEvent` or a
+When it comes across a relevant module event, like a `SwapEvent` or a
 `PeriodicStateEvent`, it stores it in state. It is pushed into state with the
 same function that events received through the `WebSocket` connection are, using
 the same deduplication and chart subscription/visual update logic.

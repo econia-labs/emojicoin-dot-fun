@@ -1,13 +1,14 @@
-import { MarketMetadataByMarketAddress } from "@/contract-apis";
-import { type Aptos } from "@aptos-labs/ts-sdk";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { REGISTRY_ADDRESS } from "@sdk/emojicoin_dot_fun";
+import type { Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "lib/hooks/queries/client";
 import { useMemo } from "react";
 
-export const fetchSymbol = async (args: { aptos: Aptos; marketAddress: string }) =>
+import { MarketMetadataByMarketAddress } from "@/move-modules";
+import { symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { REGISTRY_ADDRESS } from "@/sdk/emojicoin_dot_fun";
+
+const fetchSymbol = async (args: { aptos: Aptos; marketAddress: string }) =>
   await withResponseError(
     MarketMetadataByMarketAddress.view(args)
       .then(async ({ vec }) => vec.pop())

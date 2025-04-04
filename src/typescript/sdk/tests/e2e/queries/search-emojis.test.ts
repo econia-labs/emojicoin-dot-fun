@@ -1,8 +1,8 @@
-import { type SymbolEmojiName, namesToEmojis } from "../../../src";
-import TestHelpers from "../../utils/helpers";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import { namesToEmojis, type SymbolEmojiName } from "../../../src";
 import { fetchMarkets } from "../../../src/indexer-v2/queries/app/home";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
+import { registerMarketHelper } from "../../utils";
+import { getFundedAccounts } from "../../utils/test-accounts";
 
 jest.setTimeout(20000);
 
@@ -25,7 +25,7 @@ describe("queries markets by the various emojis in their symbols", () => {
 
   beforeAll(async () => {
     const registerAll = marketEmojiNames.map((emojiNames, i) =>
-      TestHelpers.registerMarketFromNames({
+      registerMarketHelper({
         registrant: registrants[i],
         emojiNames,
       }).then(({ registerResponse }) => registerResponse)

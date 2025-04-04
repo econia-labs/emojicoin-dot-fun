@@ -1,5 +1,6 @@
 import { useAptPrice } from "context/AptPrice";
-import { toNominal } from "@sdk/utils";
+
+import { toNominal } from "@/sdk/utils";
 
 /**
  * Returns the market cap in USD.

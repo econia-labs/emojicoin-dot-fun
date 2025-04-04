@@ -1,4 +1,9 @@
-import { type Uint64String, type AccountAddressString } from "../../emojicoin_dot_fun";
+import Big from "big.js";
+
+import { type Period, toArenaPeriod, toPeriod, toTrigger, type Trigger } from "../../const";
+import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
+import type { AccountAddressString, Uint64String } from "../../emojicoin_dot_fun";
+import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
 import {
   type AnyNumberString,
   CANDLESTICK_NAME,
@@ -11,27 +16,23 @@ import {
   type Types,
 } from "../../types";
 import {
-  type WithEmitTime,
-  type DatabaseStructType,
-  type DatabaseJsonType,
-  postgresTimestampToMicroseconds,
-  postgresTimestampToDate,
-  TableName,
-  type ProcessedFields,
-  DatabaseRpc,
-  type BlockAndEventIndexMetadata,
-} from "./json-types";
-import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
-import { toArenaPeriod, toPeriod, toTrigger, type Period, type Trigger } from "../../const";
-import { deserializeToHexString, toAccountAddressString } from "../../utils";
-import Big from "big.js";
-import { q64ToBig } from "../../utils/nominal-price";
-import {
+  type AnyArenaEvent,
   ARENA_CANDLESTICK_NAME,
   safeParseBigIntOrPostgresTimestamp,
-  type AnyArenaEvent,
 } from "../../types/arena-types";
-import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
+import { deserializeToHexString, toAccountAddressString } from "../../utils";
+import { q64ToBig } from "../../utils/nominal-price";
+import {
+  type BlockAndEventIndexMetadata,
+  type DatabaseJsonType,
+  DatabaseRpc,
+  type DatabaseStructType,
+  postgresTimestampToDate,
+  postgresTimestampToMicroseconds,
+  type ProcessedFields,
+  TableName,
+  type WithEmitTime,
+} from "./json-types";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -647,7 +648,7 @@ export const GuidGetters = {
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
   }),
   candlestick: ({ market_id, start_time, period }: DatabaseJsonType["candlesticks"]) => ({
-    // Not a real contract event, but used to classify the type of data.
+    // Not a real module-emitted event, but used to classify the type of data.
     eventName: CANDLESTICK_NAME,
     guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
   }),
@@ -700,7 +701,7 @@ export const GuidGetters = {
     period,
     last_transaction_version: version,
   }: DatabaseJsonType["arena_candlesticks"]) => ({
-    // Not a real contract event, but used to classify the type of data.
+    // Not a real module-emitted event, but used to classify the type of data.
     eventName: ARENA_CANDLESTICK_NAME,
     guid: `${ARENA_CANDLESTICK_NAME}::${melee_id}::${period}::${start_time}::${version}`,
   }),
@@ -885,6 +886,11 @@ export const toArenaLeaderboardHistoryWithArenaInfo = (
   emojicoin1MarketID: BigInt(data.emojicoin_1_market_id),
   startTime: postgresTimestampToDate(data.start_time),
   duration: BigInt(data.duration),
+
+  leaderboardHistoryLastTransactionVersion: BigInt(
+    data.leaderboard_history_last_transaction_version
+  ),
+  arenaInfoLastTransactionVersion: BigInt(data.arena_info_last_transaction_version),
 });
 
 export const toArenaMeleeModel = (data: DatabaseJsonType["arena_melee_events"]) => ({

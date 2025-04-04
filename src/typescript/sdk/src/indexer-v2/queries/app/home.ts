@@ -1,18 +1,17 @@
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
+import "server-only";
 
+import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+
+import { RegistryView } from "../../../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
+import { toRegistryView } from "../../../types";
+import { getAptosClient } from "../../../utils/aptos-client";
 import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
+import { DatabaseTypeConverter } from "../../types";
 import { DEFAULT_SORT_BY, type MarketStateQueryArgs } from "../../types/common";
 import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
-import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
-import { DatabaseTypeConverter } from "../../types";
-import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../../utils/aptos-client";
-import { toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
-import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
 
 // A helper function to abstract the logic for fetching rows that contain market state.
 const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({
@@ -99,7 +98,7 @@ export const fetchLargestMarketID = async () => {
 };
 
 /**
- * Retrieves the number of markets by querying the view function in the registry contract on-chain.
+ * Retrieves the number of markets by querying the view function in the registry module on-chain.
  * The ledger (transaction) version is specified in order to reflect the exact total number of
  * unique markets the `emojicoin-dot-fun` processor will have processed up to that version.
  *

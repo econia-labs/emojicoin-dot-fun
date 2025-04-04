@@ -1,22 +1,24 @@
-import {
-  type ArenaInfoModel,
-  type ArenaLeaderboardHistoryWithArenaInfoModel,
-  type ArenaPositionModel,
-  type MarketStateModel,
-} from "@sdk/indexer-v2/types";
-import { q64ToBig } from "@sdk/utils";
 import Big from "big.js";
 import Button from "components/button";
 import { FormattedNumber } from "components/FormattedNumber";
-import styles from "./ProfileTab.module.css";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { useMemo, useState } from "react";
 import { Emoji } from "utils/emoji";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useMatchBreakpoints } from "@hooks/index";
 
-export type ProfileTabProps = {
+import { useMatchBreakpoints } from "@/hooks/index";
+import type {
+  ArenaInfoModel,
+  ArenaLeaderboardHistoryWithArenaInfoModel,
+  ArenaPositionModel,
+  MarketStateModel,
+} from "@/sdk/indexer-v2/types";
+import { q64ToBig } from "@/sdk/utils";
+
+import styles from "./ProfileTab.module.css";
+
+type ProfileTabProps = {
   position?: ArenaPositionModel | null;
   market0: MarketStateModel;
   market1: MarketStateModel;
@@ -248,7 +250,7 @@ const MeleeBreakdownInner = ({
   );
 };
 
-const CurrentMeleeBreakdown = ({
+function CurrentMeleeBreakdown({
   melee,
   market0,
   market1,
@@ -260,7 +262,7 @@ const CurrentMeleeBreakdown = ({
   market1: MarketStateModel;
   historyHidden: boolean;
   close: () => void;
-}) => {
+}) {
   const emojicoin0BalanceInApt = q64ToBig(market0.lastSwap.avgExecutionPriceQ64).mul(
     melee.emojicoin0Balance.toString()
   );
@@ -287,9 +289,9 @@ const CurrentMeleeBreakdown = ({
       {...{ historyHidden, pnl, lastHeld, close }}
     />
   );
-};
+}
 
-const HistoricMeleeBreakdown = ({
+function HistoricMeleeBreakdown({
   melee,
   historyHidden,
   close,
@@ -297,7 +299,7 @@ const HistoricMeleeBreakdown = ({
   melee: ArenaLeaderboardHistoryWithArenaInfoModel;
   historyHidden: boolean;
   close: () => void;
-}) => {
+}) {
   const lastHeld =
     melee.lastExit0 || melee.emojicoin0Balance > 0
       ? melee.emojicoin0Symbols.join("")
@@ -315,7 +317,7 @@ const HistoricMeleeBreakdown = ({
       {...{ historyHidden, pnl, lastHeld, close }}
     />
   );
-};
+}
 
 const MeleeBreakdown = ({
   selectedRow,
@@ -526,7 +528,7 @@ const Inner: React.FC<
       >
         {historyHidden ? (
           <div
-            className="text-ec-blue cursor-pointer h-[100%] bg-dark-gray/25 text-light-gray grid place-items-center"
+            className="text-light-gray cursor-pointer h-[100%] bg-dark-gray/25 grid place-items-center"
             style={{
               gridRow: "2",
               gridColumn: "1",

@@ -1,17 +1,17 @@
-import { type Types } from "@sdk-types";
-import { type AnyPeriod, type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
-import {
-  type SwapEventModel,
-  type PeriodicStateEventModel,
-  isPeriodicStateEventModel,
-  type ArenaCandlestickModel,
-} from "@sdk/indexer-v2/types";
-import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { q64ToBig } from "@sdk/utils/nominal-price";
 import Big from "big.js";
-import { toNominal } from "@sdk/utils";
 
-export type Bar = {
+import { type AnyPeriod, type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@/sdk/const";
+import {
+  type ArenaCandlestickModel,
+  isPeriodicStateEventModel,
+  type PeriodicStateEventModel,
+  type SwapEventModel,
+} from "@/sdk/indexer-v2/types";
+import { getPeriodStartTimeFromTime, toNominal } from "@/sdk/utils";
+import { q64ToBig } from "@/sdk/utils/nominal-price";
+import type { Types } from "@/sdk-types";
+
+type Bar = {
   time: number;
   open: number;
   high: number;

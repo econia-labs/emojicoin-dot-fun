@@ -1,7 +1,7 @@
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
-export const OuterConnectText = ({
+const OuterConnectText = ({
   side,
   connected,
   mobile,

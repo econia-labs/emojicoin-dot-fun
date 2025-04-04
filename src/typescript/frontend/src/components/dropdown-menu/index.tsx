@@ -8,8 +8,6 @@ const PrimitiveSeparator = DropdownMenuPrimitives.Separator;
 
 const DropdownMenu = DropdownMenuPrimitives.Root;
 const DropdownTrigger = DropdownMenuPrimitives.Trigger;
-const DropdownGroup = DropdownMenuPrimitives.Group;
-const DropdownPortal = DropdownMenuPrimitives.Portal;
 const DropdownArrow = DropdownMenuPrimitives.Arrow;
 
 const DropdownItem = forwardRef<
@@ -38,13 +36,4 @@ const DropdownSeparator = forwardRef<
 ));
 DropdownSeparator.displayName = PrimitiveSeparator.displayName;
 
-export {
-  DropdownMenu,
-  DropdownTrigger,
-  DropdownGroup,
-  DropdownPortal,
-  DropdownArrow,
-  DropdownItem,
-  DropdownContent,
-  DropdownSeparator,
-};
+export { DropdownArrow, DropdownContent, DropdownItem, DropdownMenu, DropdownTrigger };

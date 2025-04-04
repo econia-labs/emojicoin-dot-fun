@@ -1,18 +1,15 @@
+import { promisify } from "node:util";
+
 import {
   type ChildProcessWithoutNullStreams,
   exec,
   type ExecException,
   spawn,
 } from "child_process";
-import { promisify } from "node:util";
+
 import { type ContainerName, printLogs } from "./logs";
 
-export interface ContainerStatus {
-  isRunning: boolean;
-  isHealthy: boolean;
-}
-
-export type ContainerStateJSON = {
+type ContainerStateJSON = {
   Status: string;
   Running: boolean;
   Paused: boolean;

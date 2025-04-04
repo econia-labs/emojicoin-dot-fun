@@ -1,25 +1,27 @@
-import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import {
-  INTEGRATOR_FEE_RATE_BPS,
-  ONE_APT,
-  INITIAL_REAL_RESERVES,
-  INITIAL_VIRTUAL_RESERVES,
-} from "../../src/const";
+import type { AccountAddressInput } from "@aptos-labs/ts-sdk";
+
+import { TransferCoins } from "@/move-modules";
+
 import {
   type AnyNumberString,
   getMarketResource,
   maxBigInt,
   type SymbolEmoji,
-  toCoinTypes,
+  toEmojicoinTypes,
   zip,
 } from "../../src";
+import { EmojicoinClient } from "../../src/client/emojicoin-client";
+import {
+  INITIAL_REAL_RESERVES,
+  INITIAL_VIRTUAL_RESERVES,
+  INTEGRATOR_FEE_RATE_BPS,
+  ONE_APT,
+} from "../../src/const";
 import { calculateSwapNetProceeds, getMarketAddress } from "../../src/emojicoin_dot_fun";
+import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
 import { getPublishHelpers } from "../utils/helpers";
 import { getFundedAccounts } from "../utils/test-accounts";
-import { EmojicoinClient } from "../../src/client/emojicoin-client";
-import { TransferCoins } from "@/contract-apis";
 import { getExactTransitionInputAmount } from "./helpers/misc";
-import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
 
 jest.setTimeout(30000);
 
@@ -183,7 +185,7 @@ describe("tests the swap functionality", () => {
     expect(model.market.marketNonce).toEqual(market.sequenceInfo.nonce);
 
     // Transfer the emojicoins from the first swapper to the second.
-    const { emojicoin: emojicoinType } = toCoinTypes(marketAddress);
+    const { emojicoin: emojicoinType } = toEmojicoinTypes(marketAddress);
     const transferRes = await TransferCoins.submit({
       aptosConfig: aptos.config,
       from: firstSwapper,
@@ -234,7 +236,7 @@ describe("tests the swap functionality", () => {
     expect(model.market.marketNonce).toEqual(market.sequenceInfo.nonce);
 
     // Transfer the emojicoins from the first swapper to the second.
-    const { emojicoin: emojicoinType } = toCoinTypes(marketAddress);
+    const { emojicoin: emojicoinType } = toEmojicoinTypes(marketAddress);
     const transferRes = await TransferCoins.submit({
       aptosConfig: aptos.config,
       from: firstSwapper,

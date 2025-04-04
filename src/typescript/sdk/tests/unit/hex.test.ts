@@ -1,17 +1,23 @@
 // cspell:word abcdeg
 
-import { AccountAddress, type TypeTagStruct } from "@aptos-labs/ts-sdk";
+import type { TypeTagStruct } from "@aptos-labs/ts-sdk";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
+
+import type { StructTagString } from "../../src";
 import {
-  removeLeadingZerosFromStructString,
-  normalizeHex,
-  removeLeadingZeros,
-  type StructTagString,
-  APTOS_COIN_TYPE_TAG,
-  generateRandomSymbol,
-  toCoinTypes,
-  getMarketAddress,
-  deserializeToHexString,
+  APTOS_COIN_TYPE_STRING,
   chunk,
+  deserializeToHexString,
+  generateRandomSymbol,
+  getMarketAddress,
+  normalizeHex,
+  padAddressInput,
+  removeLeadingZeros,
+  removeLeadingZerosFromStructString,
+  standardizeAddress,
+  toAccountAddress,
+  toAccountAddressString,
+  toEmojicoinTypes,
   zip,
 } from "../../src";
 
@@ -97,16 +103,50 @@ describe("hex utility functions", () => {
     });
   });
 
+  it("should pad addresses properly", () => {
+    const tsSDKAndOurs = [
+      // No leading 0x in ours.
+      [AccountAddress.from("ff".padStart(64, "0")), "ff", padAddressInput("ff")],
+      [AccountAddress.from("16".padStart(64, "0")), "16", padAddressInput("16")],
+      [AccountAddress.from("0b".padStart(64, "0")), "b", padAddressInput("b")],
+      [AccountAddress.from("0123".padStart(64, "0")), "123", padAddressInput("123")],
+      // With leading 0x in ours.
+      [AccountAddress.from("ff".padStart(64, "0")), "0xff", padAddressInput("0xff")],
+      [AccountAddress.from("16".padStart(64, "0")), "0x16", padAddressInput("0x16")],
+      [AccountAddress.from("0b".padStart(64, "0")), "0xb", padAddressInput("0xb")],
+      [AccountAddress.from("0123".padStart(64, "0")), "0x123", padAddressInput("0x123")],
+      // Pad SDK input with leading 0x. No leading 0x in ours.
+      [AccountAddress.from(`0x${"ff".padStart(64, "0")}`), "ff", padAddressInput("ff")],
+      [AccountAddress.from(`0x${"16".padStart(64, "0")}`), "16", padAddressInput("16")],
+      [AccountAddress.from(`0x${"0b".padStart(64, "0")}`), "b", padAddressInput("b")],
+      [AccountAddress.from(`0x${"0123".padStart(64, "0")}`), "123", padAddressInput("123")],
+      // Pad SDK input with leading 0x. With leading 0x in ours.
+      [AccountAddress.from(`0x${"ff".padStart(64, "0")}`), "0xff", padAddressInput("0xff")],
+      [AccountAddress.from(`0x${"16".padStart(64, "0")}`), "0x16", padAddressInput("0x16")],
+      [AccountAddress.from(`0x${"0b".padStart(64, "0")}`), "0xb", padAddressInput("0xb")],
+      [AccountAddress.from(`0x${"0123".padStart(64, "0")}`), "0x123", padAddressInput("0x123")],
+    ];
+    tsSDKAndOurs.forEach(([addressFromSDK, ours, justPadded]) => {
+      const fromSDK = addressFromSDK.toString();
+      expect(fromSDK).toEqual(toAccountAddressString(ours));
+      expect(fromSDK).toEqual(toAccountAddressString(justPadded));
+      expect(fromSDK).toEqual(toAccountAddress(ours).toString());
+      expect(fromSDK).toEqual(toAccountAddress(justPadded).toString());
+      expect(fromSDK).toEqual(standardizeAddress(ours));
+      expect(fromSDK).toEqual(standardizeAddress(justPadded));
+    });
+  });
+
   it("should remove leading zeroes from AccountAddresses", () => {
     const givenAndExpected = [
       [AccountAddress.from("0x0"), "0x0"],
       [AccountAddress.from("0x1"), "0x1"],
       [AccountAddress.from("0x2"), "0x2"],
       [AccountAddress.from("0x9"), "0x9"],
-      [AccountAddress.from("0xff"), "0xff"],
-      [AccountAddress.from("0x16"), "0x16"],
-      [AccountAddress.from("0x0b"), "0xb"],
-      [AccountAddress.from("0x0123"), "0x123"],
+      [AccountAddress.from("ff".padStart(64, "0")), "0xff"],
+      [AccountAddress.from("16".padStart(64, "0")), "0x16"],
+      [AccountAddress.from("0b".padStart(64, "0")), "0xb"],
+      [AccountAddress.from("0123".padStart(64, "0")), "0x123"],
       [
         AccountAddress.from("0000000000000000000000000000000000000000000000000000000000000001"),
         "0x1",
@@ -139,7 +179,7 @@ describe("hex utility functions", () => {
       "0x225708cc6557dcea948575ad85e8849322f7c13ad176f80c51514f36a34a9a0::module::Struct"
     );
     expect(removeLeadingZerosFromStructString(assetType3)).toEqual("0x1::module::Struct");
-    expect(removeLeadingZerosFromStructString(assetType4)).toEqual(APTOS_COIN_TYPE_TAG.toString());
+    expect(removeLeadingZerosFromStructString(assetType4)).toEqual(APTOS_COIN_TYPE_STRING);
   });
 
   it("should remove leading zeroes from an emojicoin type tag with leading zeros", () => {
@@ -150,7 +190,7 @@ describe("hex utility functions", () => {
     do {
       const { emojis } = generateRandomSymbol();
       const marketAddress = getMarketAddress(emojis.map((v) => v.emoji));
-      const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+      const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
       if (
         emojicoin.toString().startsWith("0x0") &&
         emojicoin.isStruct() &&

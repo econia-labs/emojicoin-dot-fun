@@ -1,11 +1,10 @@
 // cspell:word Kolkata
 // cspell:word Fakaofo
 
-import { isValidMarketSymbol } from "@sdk/emoji_data";
-
+import { isValidMarketSymbol } from "@/sdk/emoji_data";
 /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
 // @ts-ignore Expect an error when the library isn't installed. Since it's a type, it's fine.
-import { type Bar } from "@static/charting_library/datafeed-api";
+import type { Bar } from "@/static/charting_library/datafeed-api";
 
 /**
  * Retrieves the client's timezone based on the current system time offset.
@@ -215,5 +214,6 @@ export function decodeSymbolsForChart(symbol: ArenaChartSymbol | string) {
  * @param symbol
  * @returns symbol is ArenaChartSymbol
  */
-export const isArenaChartSymbol = (symbol: string): symbol is ArenaChartSymbol =>
-  symbol.includes("/") && symbol.split("/").every(isValidMarketSymbol);
+export function isArenaChartSymbol(symbol: string): symbol is ArenaChartSymbol {
+  return symbol.includes("/") && symbol.split("/").every(isValidMarketSymbol);
+}

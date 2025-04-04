@@ -2,14 +2,14 @@
 // cspell:word proname
 // cspell:word pronamespace
 
-import { EMOJICOIN_INDEXER_URL } from "../../src/server/env";
 import { type AnyColumnName, TableName } from "../../src/indexer-v2/types/json-types";
 import {
-  floatColumns,
   bigintColumns,
+  floatColumns,
   integerColumns,
   PostgresNumericTypes,
 } from "../../src/indexer-v2/types/postgres-numeric-types";
+import { EMOJICOIN_INDEXER_URL } from "../../src/server/env";
 
 // This is not the full response type; it's just what we use in this test.
 interface DatabaseSchema {

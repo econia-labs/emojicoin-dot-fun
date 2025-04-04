@@ -1,13 +1,15 @@
-import { FlexGap } from "@containers";
-import { SingleSelect, DropdownMenu } from "components/selects";
+import { DropdownMenu, SingleSelect } from "components/selects";
+import type { Option } from "components/selects/types";
 import { Switcher } from "components/switcher";
-import { translationFunction } from "context/language-context";
-import { StyledTHFilters } from "../styled";
-import { useMatchBreakpoints } from "hooks";
-import { Text } from "components/text";
-import { type Option } from "components/selects/types";
+import Text from "components/text";
 import { useUserSettings } from "context/event-store-context";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { translationFunction } from "context/language-context";
+import { useMatchBreakpoints } from "hooks";
+
+import { FlexGap } from "@/containers";
+import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
+
+import { StyledTHFilters } from "../styled";
 
 const titleFromValue: Record<SortMarketsBy, string> = {
   [SortMarketsBy.MarketCap]: "Market Cap",
@@ -27,12 +29,12 @@ const options: Array<Option> = [
   // TODO: Add price..?
 ];
 
-export type FilterOptionsComponentProps = {
+type FilterOptionsComponentProps = {
   filter: SortMarketsBy;
   onChange: (value: SortMarketsBy) => void;
 };
 
-export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
+const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
   const selectedOption = options.find((x) => x.value === filter)!;
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();

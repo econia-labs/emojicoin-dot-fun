@@ -1,10 +1,12 @@
 import { parseTypeTag } from "@aptos-labs/ts-sdk";
-import { getSymbolEmojisInString, encodeEmojis } from "@sdk/emoji_data";
-import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/markets";
+
+import { encodeEmojis, getSymbolEmojisInString } from "@/sdk/emoji_data";
+import { getEmojicoinMarketAddressAndTypeTags } from "@/sdk/markets";
+
 import {
+  type AssetBalance,
   fetchEmojicoinBalances,
   type FetchFungibleAssetsParams,
-  type AssetBalance,
 } from "./fetch-emojicoin-balances";
 
 /**

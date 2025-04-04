@@ -1,18 +1,9 @@
-import { type AnyEmojiName, CHAT_EMOJI_DATA, SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
-import { sleep } from "@sdk/utils";
+import { type AnyEmojiName, CHAT_EMOJI_DATA, SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
+import { sleep } from "@/sdk/utils";
 
-export { checkIsEllipsis } from "./check-is-ellipsis";
-export { getFileNameFromSrc } from "./get-file-name-from-src";
-export {
-  removeLangParamFromPathname,
-  removeTrailingSlashIfExists,
-  cutLocaleFromRoute,
-  getLocaleFromRoute,
-} from "./pathname-helpers";
-export { getStylesFromResponsiveValue } from "./styled-components-helpers";
 export { isDisallowedEventKey } from "./check-is-disallowed-event-key";
+export { checkIsEllipsis } from "./check-is-ellipsis";
 export { getEmptyListTr } from "./get-empty-list-tr";
-
 export const BigIntTrailingNRegex = /^-?(([1-9]\d*)|0)n$/;
 
 // This matches the below pattern: 1234-12-31T23:59:59.666Z

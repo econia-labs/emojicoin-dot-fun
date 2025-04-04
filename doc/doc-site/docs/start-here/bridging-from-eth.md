@@ -24,7 +24,7 @@ Before we begin, you will need the following:
    ![eth2](./images/eth2.png "eth2")
 1. Connect your EVM and Aptos Wallet
    ![eth3](./images/eth3.png "eth3")
-1. Select the "From" and "To" tokens. In this case,  select " ETH" ( or USDC
+1. Select the "From" and "To" tokens. In this case, select "ETH" (or USDC
    on your given chain) or ETH for the "From" token and "WETH" on APT for the
    "To" token.
    ![eth4](./images/eth4.png "eth4")
@@ -33,13 +33,13 @@ Before we begin, you will need the following:
 1. Review the transaction details and click on the "Confirm" button
 1. The bridge will be executed and your wrapped USDC (LayerZero) coins for
    Aptos will be deposited into your Aptos wallet
-1. Now heading over to Panora to swap WETH_lz to APT
+1. Now head over to Panora to swap WETH_lz to APT
    ![eth5](./images/eth5.png "eth5")
 1. Connect wallet
    ![eth6](./images/eth6.png "eth6")
 1. Enter the amount of funds you would like to turn into APT
 
-Congrats! You are now ready to start trading at Emojicoin.fun with the APT you
+Congrats! You are now ready to start trading at emojicoin.fun with the APT you
 now have in your wallet!
 
 [the aptos bridge]: https://theaptosbridge.com/

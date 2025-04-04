@@ -1,32 +1,33 @@
 "use client";
 
-import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { translationFunction } from "context/language-context";
-import { Flex, Column, FlexGap } from "@containers";
-import { Text, Button, InputNumeric } from "components";
-import { StyledAddLiquidityWrapper } from "./styled";
+import { Button, InputNumeric, Text } from "components";
+import { EmojiPill } from "components/EmojiPill";
+import { FormattedNumber } from "components/FormattedNumber";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import Info from "components/info";
 import {
   AptosInputLabel,
   EmojiInputLabel,
   EmojiInputLabelStyles,
 } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
+import { Arrows } from "components/svg";
+import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { toActualCoinDecimals } from "lib/utils/decimals";
-import { toCoinTypes } from "@sdk/markets/utils";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import {
   useSimulateProvideLiquidity,
   useSimulateRemoveLiquidity,
 } from "lib/hooks/queries/use-simulate-provide-liquidity";
-import { Arrows } from "components/svg";
-import { useSearchParams } from "next/navigation";
-import { TypeTag } from "@aptos-labs/ts-sdk";
-import Info from "components/info";
-import { type PoolsData } from "../../ClientPoolsPage";
-import { EmojiPill } from "components/EmojiPill";
-import { FormattedNumber } from "components/FormattedNumber";
-import { useMatchBreakpoints } from "@hooks/index";
 import { useLiquidityTransactionBuilder } from "lib/hooks/transaction-builders/use-liquidity-builder";
+import { toActualCoinDecimals } from "lib/utils/decimals";
+import { useSearchParams } from "next/navigation";
+import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
+
+import { Column, Flex, FlexGap } from "@/containers";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { toEmojicoinTypes } from "@/sdk/markets/utils";
+
+import type { PoolsData } from "../../ClientPoolsPage";
+import { StyledAddLiquidityWrapper } from "./styled";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -107,7 +108,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
     quoteAmount: liquidity ?? 0n,
   });
 
-  const { emojicoin } = marketAddress ? toCoinTypes(marketAddress) : { emojicoin: "" };
+  const { emojicoin } = marketAddress ? toEmojicoinTypes(marketAddress) : { emojicoin: "" };
 
   const removeLiquidityResult = useSimulateRemoveLiquidity({
     marketAddress,
@@ -128,7 +129,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
       : true;
 
   useEffect(() => {
-    if (emojicoin instanceof TypeTag) {
+    if (emojicoin) {
       setEmojicoinType(emojicoin);
     }
   }, [emojicoin, setEmojicoinType]);

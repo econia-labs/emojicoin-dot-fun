@@ -1,15 +1,15 @@
-import { INITIAL_REAL_RESERVES, INITIAL_VIRTUAL_RESERVES } from "@sdk/const";
+import { INITIAL_REAL_RESERVES, INITIAL_VIRTUAL_RESERVES } from "@/sdk/const";
 import {
   calculateSwapNetProceeds,
   type SwapNetProceedsArgs,
   SwapNotEnoughBaseError,
-} from "@sdk/emojicoin_dot_fun/calculate-swap-price";
-import { type DatabaseModels } from "@sdk/indexer-v2/types";
-import { type AnyNumberString } from "@sdk/types/types";
+} from "@/sdk/emojicoin_dot_fun/calculate-swap-price";
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
+import type { AnyNumberString } from "@/sdk/types/types";
 
 /**
  * This hook calls the client-side calculation of the swap net proceeds amount.
- * If the Move contract logic would result in an error being thrown, it's captured
+ * If the Move module logic would result in an error being thrown, it's captured
  * in the `error` field returned by the calculation function called in this hook.
  *
  * In order to not disrupt the execution flow and see the resulting output swap price
@@ -54,9 +54,9 @@ export const useCalculateSwapPrice = ({
   return res;
 };
 
-const getReservesAndBondingCurveStateWithDefault = (
+function getReservesAndBondingCurveStateWithDefault(
   latestMarketState?: DatabaseModels["market_latest_state_event"]
-) => {
+) {
   if (latestMarketState) {
     return {
       clammVirtualReserves: latestMarketState.state.clammVirtualReserves,
@@ -69,4 +69,4 @@ const getReservesAndBondingCurveStateWithDefault = (
     cpammRealReserves: INITIAL_REAL_RESERVES,
     startsInBondingCurve: true,
   };
-};
+}

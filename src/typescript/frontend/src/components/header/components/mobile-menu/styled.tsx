@@ -1,5 +1,5 @@
-import styled from "styled-components";
 import { motion } from "framer-motion";
+import styled from "styled-components";
 import { ECONIA_BLUE } from "theme/colors";
 
 export const StyledMotion = styled(motion.div)`

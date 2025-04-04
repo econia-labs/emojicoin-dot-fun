@@ -7,8 +7,8 @@ import {
   toTrigger,
   type Types,
 } from "../../../src";
-import { type DatabaseModels } from "../../../src/indexer-v2/types";
-import { type TableName } from "../../../src/indexer-v2/types/json-types";
+import type { DatabaseModels } from "../../../src/indexer-v2/types";
+import type { TableName } from "../../../src/indexer-v2/types/json-types";
 
 const Swap: Types["SwapEvent"] = {
   marketID: 26n,

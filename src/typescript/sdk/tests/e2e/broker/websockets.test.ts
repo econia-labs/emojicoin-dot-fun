@@ -1,23 +1,26 @@
+import type { TypeTag } from "@aptos-labs/ts-sdk";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
+
+import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/move-modules";
+
+import type { MarketEmojiData, SymbolEmoji, Types } from "../../../src";
 import {
   compareBigInt,
   encodeEmojis,
   enumerate,
   getEmojicoinMarketAddressAndTypeTags,
   getEvents,
-  type MarketEmojiData,
   maxBigInt,
   ONE_APT,
   sleep,
   SYMBOL_EMOJI_DATA,
-  type SymbolEmoji,
   toMarketEmojiData,
-  type Types,
   zip,
 } from "../../../src";
-import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/contract-apis";
-import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
-import { getFundedAccounts } from "../../utils/test-accounts";
-import { type BrokerEvent } from "../../../src/broker-v2/types";
+import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
+import type { BrokerEvent } from "../../../src/broker-v2/types";
+import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
+import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import {
   isChatEventModel,
   isMarketLatestStateEventModel,
@@ -25,11 +28,9 @@ import {
   isSwapEventModel,
   isTransactionEventModel,
 } from "../../../src/indexer-v2/types";
-import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
-import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
-import { connectNewClient, compareParsedData, subscribe, customWaitFor } from "./utils";
-import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
+import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
+import { getFundedAccounts } from "../../utils/test-accounts";
+import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "./utils";
 
 jest.setTimeout(20000);
 
@@ -386,9 +387,6 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     });
   });
 
-  // Set the retry times for the flaky test: ("it receives events for all markets and event types").
-  // It's an issue with the broker not receiving all events from the processor properly.
-  jest.retryTimes(3, { logErrorsBeforeRetry: true });
   it("receives events for all markets and event types", async () => {
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
     const MARKET_INDEX = 5;

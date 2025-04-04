@@ -1,9 +1,10 @@
-import React from "react";
 // Components
 import Text from "components/text";
-import { Checkbox, Slider, StyledSwitcher, StyledCheckbox } from "./styled";
+import React from "react";
+
+import { Checkbox, Slider, StyledCheckbox, StyledSwitcher } from "./styled";
 // Types
-import { type SwitcherProps } from "./types";
+import type { SwitcherProps } from "./types";
 
 export const Switcher: React.FC<SwitcherProps> = ({
   label,

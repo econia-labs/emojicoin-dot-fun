@@ -1,4 +1,4 @@
-import { toAggregateMarketState, type DatabaseJsonType } from "../types";
+import { type DatabaseJsonType, toAggregateMarketState } from "../types";
 import { postgrest } from "./client";
 
 export const callAggregateMarketState = () =>

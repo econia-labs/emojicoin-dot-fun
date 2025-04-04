@@ -1,6 +1,6 @@
-import styled from "styled-components";
 import { motion } from "framer-motion";
-import { type Colors } from "theme/types";
+import styled from "styled-components";
+import type { Colors } from "theme/types";
 
 const PADDING = 16;
 

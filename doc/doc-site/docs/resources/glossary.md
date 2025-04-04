@@ -24,7 +24,7 @@ liquidity is selectively confined to one or multiple price ranges.
 - Uniswap v2 style (`xy = k`), where `x` and `y` represent the quantities of two
   assets in a liquidity pool, and `k` is a constant.
 
-**emojicoin**: a coin with an emoji as a symbol. Emojicoins are the only
+**emojicoin**: a coin with an emoji as a symbol. emojicoins are the only
 tradeable assets on emojicoin.fun, and are enabled by a novel hexadecimal
 encoding technique.
 

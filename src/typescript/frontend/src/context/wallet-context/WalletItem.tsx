@@ -1,23 +1,24 @@
 // cspell:word bitget
 // cspell:word pontem
 import {
-  type Wallet,
-  WalletReadyState,
   type AptosStandardSupportedWallet,
   useWallet,
+  type Wallet,
+  WalletReadyState,
 } from "@aptos-labs/wallet-adapter-react";
-import { type MouseEventHandler, type ReactElement, useEffect, useState, useCallback } from "react";
-import MartianIcon from "@icons/MartianIcon";
-import PetraIcon from "@icons/PetraIcon";
-import PontemIcon from "@icons/PontemIcon";
-import RiseIcon from "@icons/RiseIcon";
-import NightlyIcon from "@icons/NightlyIcon";
-import OKXIcon from "@icons/OKXIcon";
 import { Arrow } from "components/svg";
+import { type MouseEventHandler, type ReactElement, useCallback, useEffect, useState } from "react";
 import { useScramble } from "use-scramble";
-import { Emoji } from "utils/emoji";
 import { emoji } from "utils";
-import BitgetIcon from "@icons/BitgetIcon";
+import { Emoji } from "utils/emoji";
+
+import BitgetIcon from "@/icons/BitgetIcon";
+import MartianIcon from "@/icons/MartianIcon";
+import NightlyIcon from "@/icons/NightlyIcon";
+import OKXIcon from "@/icons/OKXIcon";
+import PetraIcon from "@/icons/PetraIcon";
+import PontemIcon from "@/icons/PontemIcon";
+import RiseIcon from "@/icons/RiseIcon";
 
 const IconProps = {
   width: 28,
@@ -25,7 +26,7 @@ const IconProps = {
   className: "m-auto",
 };
 
-export const WALLET_ICON: { [key: string]: ReactElement } = {
+const WALLET_ICON: { [key: string]: ReactElement } = {
   "okx wallet": <OKXIcon {...IconProps} />,
   petra: <PetraIcon {...IconProps} />,
   "bitget wallet": <BitgetIcon {...IconProps} />,

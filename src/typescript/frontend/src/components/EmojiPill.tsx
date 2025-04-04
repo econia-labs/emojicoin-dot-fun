@@ -1,8 +1,10 @@
-import { type MouseEventHandler } from "react";
-import { Emoji } from "utils/emoji";
-import Popup from "./popup";
+import type { MouseEventHandler } from "react";
 import { emoji } from "utils";
-import { type AnyEmojiName } from "@sdk/emoji_data/types";
+import { Emoji } from "utils/emoji";
+
+import type { AnyEmojiName } from "@/sdk/emoji_data/types";
+
+import Popup from "./popup";
 
 export const EmojiPill = ({
   emoji: emojiName,

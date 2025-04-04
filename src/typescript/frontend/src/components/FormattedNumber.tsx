@@ -1,6 +1,7 @@
 import { formatNumberString, type FormatNumberStringProps } from "lib/utils/format-number-string";
-import { useLabelScrambler } from "@hooks/use-label-scrambler";
 import { useEffect, useMemo } from "react";
+
+import { useLabelScrambler } from "@/hooks/use-label-scrambler";
 
 const ScrambledNumberLabel = ({
   value,

@@ -60,7 +60,7 @@ const nextConfig = {
           },
         }
       : undefined,
-  transpilePackages: ["@sdk"],
+  transpilePackages: ["@/sdk"],
   redirects: async () => [
     {
       source: "/",

@@ -1,15 +1,14 @@
 // cspell:word istouched
-import { type ReactElement } from "react";
-import { type SpaceProps, type LayoutProps, type ResponsiveValue } from "styled-system";
-
-import { type Scales } from "components/inputs/input/types";
-import { type Scales as TextScales } from "components/text/types";
+import type { Scales } from "components/inputs/input/types";
+import type { Scales as TextScales } from "components/text/types";
+import type { ReactElement } from "react";
+import type { LayoutProps, ResponsiveValue, SpaceProps } from "styled-system";
 
 export const variants = {
   FANTOM: "fantom",
 } as const;
 
-export type Variant = (typeof variants)[keyof typeof variants];
+type Variant = (typeof variants)[keyof typeof variants];
 
 export interface InputGroupProps extends SpaceProps, LayoutProps {
   scale?: Scales;

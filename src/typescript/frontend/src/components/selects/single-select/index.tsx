@@ -1,15 +1,12 @@
-import React from "react";
-
 import { Arrow } from "components/svg";
-import { Select } from "../select";
-
 import { useTooltip } from "hooks";
+import type { TooltipOptions } from "hooks/use-tooltip/types";
+import React from "react";
+import darkTheme from "theme/dark";
 
-import { useThemeContext } from "context";
+import { Select } from "../select";
 import { getTooltipStyles } from "../theme";
-
-import { type Option, type SingleSelectProps } from "../types";
-import { type TooltipOptions } from "hooks/use-tooltip/types";
+import type { Option, SingleSelectProps } from "../types";
 
 const SingleSelect: React.FC<SingleSelectProps> = ({
   title,
@@ -27,13 +24,11 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
   setValue,
   onHover,
 }) => {
-  const { theme } = useThemeContext();
-
   const DropdownComponent = dropdownComponent;
 
   const defaultTooltipOptions: TooltipOptions = {
     placement: "bottom",
-    customStyles: getTooltipStyles(theme),
+    customStyles: getTooltipStyles(darkTheme),
     trigger: "click",
   };
 

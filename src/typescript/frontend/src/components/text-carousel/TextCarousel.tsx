@@ -1,5 +1,6 @@
-import Planet from "@icons/Planet";
 import Carousel from "components/carousel";
+
+import Planet from "@/icons/Planet";
 
 const Item = ({ children }: { children: React.ReactNode }) => {
   return (

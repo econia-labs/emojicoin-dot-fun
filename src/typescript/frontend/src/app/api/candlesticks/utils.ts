@@ -1,5 +1,9 @@
 // cspell:word timespan
 
+import { unstable_cache } from "next/cache";
+import { parseJSON, stringifyJSON } from "utils";
+
+import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
 import {
   type AnyNumberString,
   type AnyPeriod,
@@ -7,12 +11,10 @@ import {
   type Period,
   PeriodDuration,
   periodEnumToRawDuration,
-} from "@sdk/index";
-import { unstable_cache } from "next/cache";
-import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
-import { parseJSON, stringifyJSON } from "utils";
-import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
-import { type CandlesticksSearchParams } from "./search-params-schema";
+} from "@/sdk/index";
+import { getLatestProcessedEmojicoinTimestamp } from "@/sdk/indexer-v2/queries/utils";
+
+import type { CandlesticksSearchParams } from "./search-params-schema";
 
 /**
  * Parcel size is the amount of candlestick periods that will be in a single parcel.
@@ -49,7 +51,7 @@ export const jsonStrAppend = (a: string, b: string): string => {
   return `${a.substring(0, a.length - 1)},${b.substring(1)}`;
 };
 
-export type GetCandlesticksParams = {
+type GetCandlesticksParams = {
   marketID: AnyNumberString;
   index: number;
   period: Period;

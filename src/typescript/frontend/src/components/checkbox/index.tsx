@@ -1,12 +1,11 @@
 "use client";
 
+import CheckIcon from "components/svg/icons/Check";
+import Text from "components/text";
 import React from "react";
 
-import { StyledCheckbox, StyledInput, CustomCheckbox } from "./styled";
-import CheckIcon from "components/svg/icons/Check";
-import { Text } from "components/text";
-
-import { type CheckboxProps } from "./types";
+import { CustomCheckbox, StyledCheckbox, StyledInput } from "./styled";
+import type { CheckboxProps } from "./types";
 
 const Checkbox: React.FC<CheckboxProps> = ({
   label,

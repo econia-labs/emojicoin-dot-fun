@@ -1,13 +1,13 @@
 "use client";
 
+import Text from "components/text";
+import { translationFunction } from "context/language-context";
 import React, { useEffect, useState } from "react";
 import { useScramble } from "use-scramble";
 
-import { translationFunction } from "context/language-context";
-import { Flex, FlexGap } from "@containers";
-import { Text } from "components/text";
+import { Flex, FlexGap } from "@/containers";
 
-import { type TableHeaderSwitcherProps } from "./types";
+import type { TableHeaderSwitcherProps } from "./types";
 
 const TableHeaderSwitcher: React.FC<TableHeaderSwitcherProps> = ({ title1, title2, onSelect }) => {
   const [selectedTitle, setSelectedTitle] = useState(title1);

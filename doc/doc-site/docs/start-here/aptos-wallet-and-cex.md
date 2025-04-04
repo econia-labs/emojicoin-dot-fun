@@ -22,5 +22,5 @@ Use this guide if you are using an Aptos wallet and using Coinbase to onramp.
    ![cex7](./images/cex7.png "cex7")
 1. Wait a few seconds for the purchased APT to hit your wallet
    ![cex8](./images/cex8.png "cex8")
-   Congrats! You are now ready to start trading at Emojicoin.fun with the
+   Congrats! You are now ready to start trading at emojicoin.fun with the
    APT you now have in your wallet!

@@ -1,14 +1,15 @@
-import type { AnyNumber, AccountAddressString, TypeTagInput } from "@sdk/emojicoin_dot_fun";
-import { type Aptos } from "@aptos-labs/ts-sdk";
+import type { Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "lib/hooks/queries/client";
+
 import {
   SimulateProvideLiquidity,
   SimulateRemoveLiquidity,
-} from "@/contract-apis/emojicoin-dot-fun";
+} from "@/move-modules/emojicoin-dot-fun";
+import type { AccountAddressString, AnyNumber, TypeTagInput } from "@/sdk/emojicoin_dot_fun";
 
-export const simulateProvideLiquidity = async (args: {
+const simulateProvideLiquidity = async (args: {
   aptos: Aptos;
   marketAddress: AccountAddressString;
   quoteAmount: AnyNumber;
@@ -54,7 +55,7 @@ export const useSimulateProvideLiquidity = (args: {
   return data;
 };
 
-export const simulateRemoveLiquidity = async (args: {
+const simulateRemoveLiquidity = async (args: {
   aptos: Aptos;
   marketAddress: AccountAddressString;
   lpCoinAmount: AnyNumber;

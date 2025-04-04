@@ -1,9 +1,10 @@
 // cspell:word
-import path from "path";
 import fs from "fs";
+import path from "path";
+
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
 import { toMarketStateModel } from "../../../src/indexer-v2/types";
-import { type DatabaseJsonType } from "../../../src/indexer-v2/types/json-types";
+import type { DatabaseJsonType } from "../../../src/indexer-v2/types/json-types";
 import goldens from "./goldens";
 
 // Note that we *cannot* import directly from the JSON file like below, because node.js will try to

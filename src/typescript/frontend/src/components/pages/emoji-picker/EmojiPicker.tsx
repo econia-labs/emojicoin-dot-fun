@@ -1,43 +1,38 @@
 "use client";
 // cspell:word couldn
 
+import { default as Picker } from "@emoji-mart/react";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import {
   type HTMLAttributes,
-  Suspense,
-  useEffect,
   type PointerEventHandler,
+  Suspense,
   useCallback,
+  useEffect,
   useMemo,
 } from "react";
-import { useEmojiPicker } from "context/emoji-picker-context";
-import { default as Picker } from "@emoji-mart/react";
-import { SearchIndex } from "emoji-mart";
-import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
-import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
-import RoundButton from "@icons/Minimize";
 import { isIOS, isMacOs } from "react-device-detect";
-import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
-import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
-import { MAX_SYMBOL_LENGTH } from "@sdk/const";
 import { notoColorEmoji } from "styles/fonts";
+import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
+import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 
-export type SearchResult = Array<EmojiPickerSearchData>;
+import RoundButton from "@/icons/Minimize";
+import { MAX_SYMBOL_LENGTH } from "@/sdk/const";
+import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@/sdk/emoji_data";
+import { sumBytes } from "@/sdk/utils/sum-emoji-bytes";
 
-export const search = async (value: string): Promise<SearchResult> => {
-  return await SearchIndex.search(value);
-};
+import type { EmojiMartData, EmojiSelectorData } from "./types";
 
 /**
  * Checks if an emoji-mart input is a valid symbol emoji.
  */
-export const isEmojiMartSymbolEmoji = (e?: EmojiMartData["emojis"][string]) =>
+const isEmojiMartSymbolEmoji = (e?: EmojiMartData["emojis"][string]) =>
   isSymbolEmoji(e?.skins[0].native ?? "");
 
 /**
  * * Checks if an emoji-mart input is a valid chat emoji.
  */
-export const isEmojiMartChatEmoji = (e?: EmojiMartData["emojis"][string]) =>
+const isEmojiMartChatEmoji = (e?: EmojiMartData["emojis"][string]) =>
   isValidChatMessageEmoji(e?.skins[0].native ?? "");
 
 export default function EmojiPicker(

@@ -1,18 +1,19 @@
-import { InputGroup } from ".";
-import EmojiPickerWithInput from "../emoji-picker/EmojiPickerWithInput";
-import { Flex } from "../layout";
-import { useEffect } from "react";
-import icon from "../../../public/images/search-icon.svg";
-import Image from "next/image";
-import styled from "styled-components";
 import { EMOJI_GRID_ITEM_WIDTH } from "components/pages/home/components/const";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import Image from "next/image";
+import { useEffect } from "react";
+import styled from "styled-components";
 import { breakpointsArray } from "theme/base";
 import { DARK_GRAY } from "theme/colors";
-import { useEmojiPicker } from "context/emoji-picker-context";
+
+import icon from "../../../public/images/search-icon.svg";
+import EmojiPickerWithInput from "../emoji-picker/EmojiPickerWithInput";
+import { Flex } from "../layout";
+import { InputGroup } from ".";
 
 const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
 
-export const Container = styled(Flex)`
+const Container = styled(Flex)`
   width: ${EMOJI_GRID_ITEM_WIDTH - 20}px;
   margin: 0;
   padding: 0;
@@ -23,7 +24,7 @@ export const Container = styled(Flex)`
   }
 `;
 
-export const Border = styled(Flex)`
+const Border = styled(Flex)`
   align-items: center;
   height: 33px;
   margin: 6px 0;
@@ -35,7 +36,7 @@ export const Border = styled(Flex)`
   }
 `;
 
-export const SearchBar = () => {
+const SearchBar = () => {
   const setMode = useEmojiPicker((state) => state.setMode);
   useEffect(() => {
     setMode("search");

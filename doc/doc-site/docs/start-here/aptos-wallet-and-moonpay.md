@@ -13,5 +13,5 @@ Use this guide if you are using an Aptos wallet and Moonpay.
 1. Enter amount you want to purchase
    ![apt3](./images/apt3.png "apt3")
 
-Congrats! You are now ready to start trading at Emojicoin.fun with the APT you
+Congrats! You are now ready to start trading at emojicoin.fun with the APT you
 now have in your wallet!

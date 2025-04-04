@@ -1,6 +1,7 @@
 import Big from "big.js";
 import React, { useEffect, useState } from "react";
-import { isNumberInConstruction, countDigitsAfterDecimal, sanitizeNumber } from "@sdk/utils";
+
+import { countDigitsAfterDecimal, isNumberInConstruction, sanitizeNumber } from "@/sdk/utils";
 
 const intToStr = (value: bigint, decimals?: number) =>
   (Number(value) / 10 ** (decimals ?? 0)).toString();

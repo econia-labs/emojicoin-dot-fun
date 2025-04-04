@@ -1,7 +1,8 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { isValidEmojiHex, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { PaginationSchema } from "lib/api/schemas/api-pagination";
 import { z } from "zod";
+
+import { isValidEmojiHex, symbolBytesToEmojis } from "@/sdk/emoji_data";
 
 export const GetTradesSchema = PaginationSchema.extend({
   sender: z

@@ -1,42 +1,42 @@
-import {
-  AccountAddress,
-  Aptos,
-  type Account,
-  type UserTransactionResponse,
-  type AccountAddressInput,
-  type TypeTag,
-  type InputGenerateTransactionOptions,
-  type WaitForTransactionOptions,
-  AptosConfig,
-  type LedgerVersionArg,
+import type {
+  Account,
+  AccountAddressInput,
+  InputGenerateTransactionOptions,
+  LedgerVersionArg,
+  TypeTag,
+  UserTransactionResponse,
+  WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
-import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
-import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
+import { AccountAddress, Aptos, AptosConfig } from "@aptos-labs/ts-sdk";
+
 import {
   Chat,
   ProvideLiquidity,
-  RemoveLiquidity,
   RegisterMarket,
+  RemoveLiquidity,
   Swap,
   SwapWithRewards,
-} from "@/contract-apis/emojicoin-dot-fun";
-import { type Events } from "../emojicoin_dot_fun/events";
-import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
-import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
-import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
-import { toChatMessageEntryFunctionArgs } from "../emoji_data";
-import customExpect from "./expect";
+} from "@/move-modules/emojicoin-dot-fun";
+
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
-import { waitFor } from "../utils";
-import { postgrest } from "../indexer-v2/queries";
-import { TableName } from "../indexer-v2/types/json-types";
-import { toMarketView, toRegistryView, toSwapEvent, type AnyNumberString } from "../types";
-import { toArenaCoinTypes } from "../markets/arena-utils";
-import { type ArenaEvents } from "../emojicoin_dot_fun/arena-events";
+import { toChatMessageEntryFunctionArgs } from "../emoji_data";
+import type { ChatEmoji, SymbolEmoji } from "../emoji_data/types";
+import { EmojicoinArena, EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
+import type { ArenaEvents } from "../emojicoin_dot_fun/arena-events";
+import type { Events } from "../emojicoin_dot_fun/events";
+import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
 import {
   type ArenaEventsModels,
   getArenaEventsAsProcessorModels,
 } from "../indexer-v2/mini-processor/arena-events-to-models";
+import { postgrest } from "../indexer-v2/queries";
+import { TableName } from "../indexer-v2/types/json-types";
+import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
+import { type AnyNumberString, toMarketView, toRegistryView, toSwapEvent } from "../types";
+import { waitFor } from "../utils";
+import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
+import { toArenaCoinTypes } from "../utils/arena/helpers";
+import customExpect from "./expect";
 
 const { expect, Expect } = customExpect;
 
@@ -119,7 +119,7 @@ async function waitForArenaEventProcessed(
  *
  * The `swap` function is separated into `buy` and `sell` to reduce the amount of input arguments.
  *
- * The `provide_liquidity` and `remove_liquidity` functions in the contract are both under
+ * The `provide_liquidity` and `remove_liquidity` functions in the Move module are both under
  * `liquidity` as `provide` and `remove`, respectively.
  *
  * The `utils` functions provides several commonly used utility functions.
@@ -562,11 +562,11 @@ export class EmojicoinClient {
 
   private async arenaSwap(
     swapper: Account,
+    symbol0: SymbolEmoji[],
     symbol1: SymbolEmoji[],
-    symbol2: SymbolEmoji[],
     options?: Options
   ) {
-    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const typeTags = toArenaCoinTypes({ symbol0, symbol1 });
     const response = await EmojicoinArena.Swap.submit({
       aptosConfig: this.aptos.config,
       swapper,
@@ -591,13 +591,13 @@ export class EmojicoinClient {
     entrant: Account,
     inputAmount: bigint,
     lockIn: boolean,
+    symbol0: SymbolEmoji[],
     symbol1: SymbolEmoji[],
-    symbol2: SymbolEmoji[],
-    escrowCoin: "symbol1" | "symbol2",
+    escrowCoin: "symbol0" | "symbol1",
     options?: Options
   ) {
-    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
-    const escrowType = escrowCoin === "symbol1" ? typeTags[0] : typeTags[2];
+    const typeTags = toArenaCoinTypes({ symbol0, symbol1 });
+    const escrowType = escrowCoin === "symbol0" ? typeTags[0] : typeTags[2];
     const response = await EmojicoinArena.Enter.submit({
       aptosConfig: this.aptos.config,
       entrant,
@@ -642,11 +642,11 @@ export class EmojicoinClient {
 
   private async arenaExit(
     participant: Account,
+    symbol0: SymbolEmoji[],
     symbol1: SymbolEmoji[],
-    symbol2: SymbolEmoji[],
     options?: Options
   ) {
-    const typeTags = toArenaCoinTypes({ symbol1, symbol2 });
+    const typeTags = toArenaCoinTypes({ symbol0, symbol1 });
     const response = await EmojicoinArena.Exit.submit({
       aptosConfig: this.aptos.config,
       participant,
