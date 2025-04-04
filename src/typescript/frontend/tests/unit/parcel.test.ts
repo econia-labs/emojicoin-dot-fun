@@ -1,7 +1,6 @@
-import { expect, test } from "@playwright/test";
 import { parseJSON, stringifyJSON } from "utils";
 
-import { Parcel } from "../../../src/lib/parcel";
+import { Parcel } from "../../src/lib/parcel";
 
 test("test normal parcel", async () => {
   // Store reads in this array to check cache hits.
