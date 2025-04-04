@@ -1,3 +1,4 @@
+import type { SymbolEmoji } from "../..";
 import type { Period } from "../../const";
 import type { AnyNumberString } from "../../types";
 import type { OrderBy } from "../const";
@@ -20,6 +21,7 @@ export type MarketStateQueryArgs = {
   pageSize?: number;
   orderBy?: OrderBy;
   searchEmojis?: string[];
+  selectEmojis?: SymbolEmoji[][];
   inBondingCurve?: boolean;
   count?: boolean;
 };

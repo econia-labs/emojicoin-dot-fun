@@ -4,7 +4,11 @@ import { Switcher } from "components/switcher";
 import Text from "components/text";
 import { useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMatchBreakpoints } from "hooks";
+import { getSetting, saveSetting } from "lib/cookie-user-settings/cookie-user-settings";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { useEffect, useState } from "react";
 
 import { FlexGap } from "@/containers";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
@@ -40,6 +44,18 @@ const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProp
   const { isLaptopL } = useMatchBreakpoints();
   const animate = useUserSettings((s) => s.animate);
   const toggleAnimate = useUserSettings((s) => s.toggleAnimate);
+  const { account } = useAptos();
+
+  const [isFilterFavorites, setIsFilterFavorites] = useState(false);
+
+  useEffect(() => {
+    getSetting("homePageFilterFavorites").then((res) => setIsFilterFavorites(res || false));
+  }, []);
+
+  const toggleFavorites = () => {
+    saveSetting("homePageFilterFavorites", !isFilterFavorites);
+    setIsFilterFavorites((prev) => !prev);
+  };
 
   return (
     <StyledTHFilters>
@@ -67,13 +83,29 @@ const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProp
         placeholder="Sort:"
       />
 
-      <FlexGap gap="12px" className={"med-pixel-text"}>
-        <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
-          {t("Animate:")}
-        </Text>
+      <div className="flex flex-row gap-4">
+        {account?.address && FEATURE_FLAGS.Favorites && (
+          <FlexGap gap="12px" className={"med-pixel-text"}>
+            <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
+              {t("Favorites:")}
+            </Text>
 
-        <Switcher checked={animate} onChange={toggleAnimate} scale={isLaptopL ? "md" : "sm"} />
-      </FlexGap>
+            <Switcher
+              checked={isFilterFavorites || false}
+              onChange={toggleFavorites}
+              scale={isLaptopL ? "md" : "sm"}
+            />
+          </FlexGap>
+        )}
+
+        <FlexGap gap="12px" className={"med-pixel-text"}>
+          <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
+            {t("Animate:")}
+          </Text>
+
+          <Switcher checked={animate} onChange={toggleAnimate} scale={isLaptopL ? "md" : "sm"} />
+        </FlexGap>
+      </div>
     </StyledTHFilters>
   );
 };

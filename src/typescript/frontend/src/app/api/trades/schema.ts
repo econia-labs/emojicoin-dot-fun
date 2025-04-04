@@ -7,7 +7,7 @@ import { isValidEmojiHex, symbolBytesToEmojis } from "@/sdk/emoji_data";
 export const GetTradesSchema = PaginationSchema.extend({
   sender: z
     .string()
-    .refine((arg) => AccountAddress.isValid({ input: arg }), {
+    .refine((arg) => AccountAddress.isValid({ input: arg }).valid, {
       message: "Invalid account address format",
     })
     .optional()

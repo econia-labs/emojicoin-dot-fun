@@ -8,6 +8,7 @@ import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
 import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
+import FEATURE_FLAGS from "lib/feature-flags";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import darkTheme from "theme/dark";
 import type { Colors } from "theme/types";
 import { Emoji } from "utils/emoji";
 
+import { FavoriteButton } from "@/components/favorite-button/favorite-button";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useUsdMarketCap, useUSDValue } from "@/hooks/use-usd-market-cap";
 import TelegramOutlineIcon from "@/icons/TelegramOutlineIcon";
@@ -216,10 +218,15 @@ const MainInfo = ({ data }: MainInfoProps) => {
               }
         }
       >
-        <div className={`grid place-items-center text-center ${borderStyle}`}>
+        <div className={`relative grid place-items-center text-center ${borderStyle}`}>
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />
           </Link>
+          {FEATURE_FLAGS.Favorites && (
+            <div className="absolute bottom-4 right-4">
+              <FavoriteButton emojis={marketEmojis} marketAddress={data.marketAddress} />
+            </div>
+          )}
         </div>
 
         <div className={`flex flex-col justify-between ${borderStyle}`}>

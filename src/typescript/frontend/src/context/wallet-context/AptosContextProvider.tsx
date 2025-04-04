@@ -14,6 +14,7 @@ import {
 } from "components/wallet/toasts";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { useEventStore } from "context/event-store-context";
+import { getSetting, saveSetting } from "lib/cookie-user-settings/cookie-user-settings";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import {
@@ -21,6 +22,7 @@ import {
   type PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -87,6 +89,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
     account,
+    isLoading,
     network,
     submitTransaction,
     signTransaction,
@@ -113,6 +116,17 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     checkNetworkAndToast(network);
     return getAptosClient();
   }, [network]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    getSetting("accountAddress").then((savedAddress) => {
+      if (savedAddress !== account?.address) {
+        return saveSetting("accountAddress", account?.address);
+      }
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.address]);
 
   const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
 
