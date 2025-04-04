@@ -92,7 +92,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         searchBytes={q}
         priceFeed={priceFeedData}
         meleeData={meleeData}
-        isFavoriteFilterEnabled={!!favorites}
+        isFavoriteFilterEnabled={favorites.length > 0}
       />
     </AptPriceContextProvider>
   );
