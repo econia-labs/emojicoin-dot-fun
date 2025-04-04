@@ -1,6 +1,7 @@
 // Disable to allow for doc-comment links and sorted imports.
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { AccountAddress } from "@aptos-labs/ts-sdk";
+import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { fetchCachedPriceFeed, type NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
 import { NextResponse } from "next/server";
@@ -90,19 +91,13 @@ export const revalidate = 10;
  * ]
  * ```
  */
-export async function GET(_request: Request) {
-  try {
-    const aptPrice = await getAptPrice();
-    const priceFeed = await fetchCachedPriceFeed();
-    const res = priceFeed.map((mkt) => {
-      (mkt as TrendingMarketArgs)["apt_price"] = aptPrice;
-      return toTrendingMarket(mkt);
-    });
+export const GET = apiRouteErrorHandler(async () => {
+  const aptPrice = await getAptPrice();
+  const priceFeed = await fetchCachedPriceFeed();
+  const res = priceFeed.map((mkt) => {
+    (mkt as TrendingMarketArgs)["apt_price"] = aptPrice;
+    return toTrendingMarket(mkt);
+  });
 
-    return NextResponse.json<TrendingMarket[]>(res);
-  } catch (error) {
-    console.error("Failed to fetch trending markets:", error);
-
-    return NextResponse.json({ error: "Failed to fetch trending markets." }, { status: 500 });
-  }
-}
+  return NextResponse.json<TrendingMarket[]>(res);
+});
