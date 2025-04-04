@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { isValidEmojiHex, isValidMarketSymbol, symbolBytesToEmojis } from "../..";
+
+import { isValidEmojiHex, isValidMarketSymbol, symbolBytesToEmojis } from "../../emoji_data";
 
 export const SymbolEmojisSchema = z
   .string()
