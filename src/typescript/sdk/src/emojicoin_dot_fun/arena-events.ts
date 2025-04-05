@@ -7,7 +7,7 @@ import {
   toArenaSwapEvent,
   toArenaVaultBalanceUpdateEvent,
 } from "../types/arena-types";
-import type { ArenaStructName } from "../utils/type-tags";
+import type { ArenaEventName } from "../utils/type-tags";
 import type { PascalToCamelCase, RemovePlurality } from "./events";
 
 type FullArenaEventName = keyof typeof fullArenaEventNames;
@@ -48,7 +48,7 @@ export const createEmptyArenaEvents = (): ArenaEvents => ({
 });
 
 type ArenaConverter = {
-  [K in ArenaStructName]: (
+  [K in ArenaEventName]: (
     data: ArenaJsonTypes[K],
     version: AnyNumberString,
     eventIndex: AnyNumberString
