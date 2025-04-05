@@ -56,8 +56,9 @@ export const createEventStore = () => {
         const market = get().markets.get(emojis.join(""));
         const latestState = market?.stateEvents.at(-1);
         if (!market || !latestState) return undefined;
-        // TODO: Ensure volumes are properly propagated/set in state.
-        // For now, just return 0 if it's undefined.
+        // Note that volumes are only properly propagated/set in state when `loadMarketStateFromServer` is
+        // called. The volumes are optional because sometimes they're missing when data is loaded
+        // from live events rather than as a result of the indexer view with daily volumes.
         return {
           ...latestState,
           dailyVolume: market.dailyVolume ?? 0n,
