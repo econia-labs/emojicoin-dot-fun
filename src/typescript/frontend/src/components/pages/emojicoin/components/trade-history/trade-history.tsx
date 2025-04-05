@@ -38,10 +38,11 @@ export const TradeHistory = (props: TradeHistoryProps) => {
 
   const sortedSwaps = useMemo(() => {
     return _.orderBy(
-      _.uniqBy([...swapsFromStore, ...(swapsQuery.data?.pages.flat() || [])], (i) =>
-        i.transaction.version.toString()
+      _.uniqBy(
+        [...swapsFromStore, ...(swapsQuery.data?.pages.flat() || [])],
+        (i) => i.market.marketNonce
       ),
-      (i) => i.transaction.version.toString(),
+      (i) => i.market.marketNonce,
       "desc"
     ).map(toTableItem);
   }, [swapsQuery.data?.pages, swapsFromStore]);

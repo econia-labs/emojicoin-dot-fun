@@ -49,9 +49,9 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
     return _.orderBy(
       _.uniqBy(
         [...market1chatsFromStore, ...market0chatsFromStore, ...(chats.data?.pages.flat() || [])],
-        (i) => i.transaction.version
+        (i) => i.market.marketNonce
       ),
-      (i) => i.transaction.version,
+      (i) => i.market.marketNonce,
       "desc"
     ).map((s, i) => ({
       message: {
