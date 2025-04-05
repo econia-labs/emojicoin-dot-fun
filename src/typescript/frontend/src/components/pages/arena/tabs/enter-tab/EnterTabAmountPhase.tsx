@@ -7,13 +7,13 @@ import { AptosInputLabel } from "@/components/pages/emojicoin/components/trade-e
 import type { MarketStateModel } from "@/sdk/index";
 
 const inputAndOutputStyles = `
-  block text-[16px] font-normal h-[32px] outline-none w-full
-  font-forma
-  border-transparent !p-0 text-white
-`;
+    block text-[16px] font-normal h-[32px] outline-none w-full
+    font-forma
+    border-transparent !p-0 text-white
+  `;
 const grayLabel = `
-  pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
-`;
+    pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
+  `;
 
 export const EnterTabAmountPhase: React.FC<{
   market: MarketStateModel;

@@ -3,6 +3,7 @@ import React from "react";
 import { GlowingEmoji } from "utils/emoji";
 
 import { useMatchBreakpoints } from "@/hooks/index";
+import type { UserEscrow } from "@/sdk/index";
 import type { ArenaInfoModel, ArenaPositionModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 
 export type ArenaProps = {
@@ -13,7 +14,6 @@ export type ArenaProps = {
 
 export type ArenaPropsWithPositionHistoryAndEmojiData = ArenaProps & {
   position?: ArenaPositionModel | null;
-  setPosition: (position: ArenaPositionModel | null) => void;
 };
 
 export const Box = ({
@@ -73,12 +73,12 @@ export const EmojiTitle = ({
   );
 };
 
-/** If the position is on market0, return option0, else return option1 */
-export function ifPositionTernary<T>(position: ArenaPositionModel, option0: T, option1: T) {
-  return position.emojicoin0Balance > 0n ? option0 : option1;
+/** If the escrow/position is on market0, return option0, else return option1 */
+export function ifEscrowTernary<T>(escrow: UserEscrow, option0: T, option1: T) {
+  return escrow.emojicoin0 > 0n ? option0 : option1;
 }
 
 /** If the position is locked, return option0, else return option1 */
-export function ifLockedTernary<T>(position: ArenaPositionModel, option0: T, option1: T) {
+export function ifLockedTernary<T>(position: UserEscrow, option0: T, option1: T) {
   return position.matchAmount > 0n ? option0 : option1;
 }

@@ -1,17 +1,20 @@
 import Button from "components/button";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { Emoji } from "utils/emoji";
 
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
+import { useArenaEscrow } from "@/store/escrow/hooks";
 
 import { CurrentMeleeBreakdown, HistoricMeleeBreakdown } from "../melee-breakdown/MeleeBreakdown";
 import type { ProfileTabProps } from "../ProfileTab";
 import styles from "./History.module.css";
 
-const HistoryRow = ({
+const HistoricalRow = ({
   row,
   isSelected,
   select,
@@ -28,27 +31,26 @@ const HistoryRow = ({
     row.emojicoin1MarketAddress as `0x${string}`
   );
   const { submit } = useAptos();
+  const escrow = useArenaEscrow(row.meleeID);
+
   return (
     <>
       <tr className={isSelected ? styles["selected-row"] : ""} onClick={select}>
         <td className={styles["emoji"]}>
           <Emoji emojis={row.emojicoin0Symbols.join("")} />
         </td>
-        <td className={styles["text"]}>vs</td>
+        <td className={styles["text"]}>{"vs"}</td>
         <td className={styles["emoji"]}>
           <Emoji emojis={row.emojicoin1Symbols.join("")} />
         </td>
-        <td className={styles["text"]}>{row.exited ? "Exited" : "Complete"}</td>
+        {/* If the position is open still, it means the arena is complete but the user hasn't exited yet. */}
+        <td className={styles["text"]}>{escrow?.open ? "Complete" : "Exited"}</td>
         <td>
-          {!row.exited ? (
+          {escrow?.open ? (
             <ButtonWithConnectWalletFallback>
               <Button
                 onClick={() => {
-                  submit(exitTransactionBuilder).then((r) => {
-                    if (r && !r.error) {
-                      row.exited = true;
-                    }
-                  });
+                  submit(exitTransactionBuilder);
                 }}
               >
                 Exit
@@ -70,11 +72,12 @@ const HistoryRow = ({
   );
 };
 
+/**
+ * All melee history.
+ */
 export const MeleeHistory = ({
-  position,
   market0,
   market1,
-  history,
   selectedRow,
   setSelectedRow,
   setHistoryHidden,
@@ -85,10 +88,13 @@ export const MeleeHistory = ({
   setHistoryHidden: (historyHidden: boolean) => void;
 }) => {
   const { isMobile } = useMatchBreakpoints();
+  const { position } = useCurrentPositionQuery();
+  const { history } = useHistoricalPositionsQuery();
+
   return (
     <div className="h-[100%] overflow-auto">
       <div className="flex justify-between px-[1em] h-[3em] items-center border-dark-gray border-b-[1px] border-solid">
-        <div className="uppercase text-md font-forma">History</div>
+        <div className="uppercase text-md font-forma">{"History"}</div>
         {!isMobile && (
           <div
             className="uppercase text-xl text-light-gray cursor-pointer"
@@ -109,29 +115,27 @@ export const MeleeHistory = ({
                 <td className={styles["emoji"]}>
                   <Emoji emojis={market0.market.symbolEmojis.join("")} />
                 </td>
-                <td className={styles["text"]}>vs</td>
+                <td className={styles["text"]}>{"vs"}</td>
                 <td className={styles["emoji"]}>
                   <Emoji emojis={market1.market.symbolEmojis.join("")} />
                 </td>
-                <td className={styles["text"]}>Active</td>
+                <td className={styles["text"]}>{"Active"}</td>
                 <td></td>
               </tr>
               {selectedRow === -1 && isMobile && (
                 <tr>
                   <td colSpan={5}>
                     <CurrentMeleeBreakdown
-                      melee={position}
                       historyHidden={false}
                       close={() => setSelectedRow(undefined)}
-                      {...{ market0, market1 }}
                     />
                   </td>
                 </tr>
               )}
             </>
           )}
-          {history.toReversed().map((m, i) => (
-            <HistoryRow
+          {history.map((m, i) => (
+            <HistoricalRow
               key={`history-table-row-${i}`}
               row={m}
               isSelected={selectedRow === i}
