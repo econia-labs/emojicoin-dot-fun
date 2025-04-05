@@ -1,8 +1,9 @@
 import FEATURE_FLAGS from "lib/feature-flags";
+import { fetchCachedArenaInfo } from "lib/queries/arena-info";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
-import { fetchArenaInfo, fetchSpecificMarkets } from "@/sdk/indexer-v2";
+import { fetchSpecificMarkets, toArenaInfoModel } from "@/sdk/indexer-v2";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
@@ -16,7 +17,9 @@ const logAndDefault = (e: unknown) => {
 type MeleeData = Awaited<ReturnType<typeof fetchMeleeData>>;
 const fetchMeleeData = async () => {
   try {
-    const arenaInfo = await fetchArenaInfo({}).catch(() => null);
+    const arenaInfo = await fetchCachedArenaInfo()
+      .then((res) => (res ? toArenaInfoModel(res) : null))
+      .catch(() => null);
 
     if (!arenaInfo) {
       throw new Error("Couldn't fetch arena info");
