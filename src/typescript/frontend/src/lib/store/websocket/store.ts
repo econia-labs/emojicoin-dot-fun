@@ -19,11 +19,11 @@ export type ClientActions = {
   close: () => void;
   subscribeEvents: (
     events: SubscribableBrokerEvents[],
-    arena?: { baseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
+    arena?: { arenaBaseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
   ) => void;
   unsubscribeEvents: (
     events: SubscribableBrokerEvents[],
-    arena?: { baseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
+    arena?: { arenaBaseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
   ) => void;
   subscribeToArenaPeriod: (period: PeriodTypeFromBroker) => void;
   unsubscribeFromArenaPeriod: (period: PeriodTypeFromBroker) => void;

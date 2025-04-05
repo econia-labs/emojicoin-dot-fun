@@ -58,14 +58,17 @@ export const useFetchWalletBalanceQuery = (
     enabled: !!accountAddress && !!coinType,
   });
 
-  const refetchIfStale = useCallback(() => {
-    if (isStale) refetch();
-  }, [refetch, isStale]);
+  const refetchBalance = useCallback(
+    (forceRefetch: boolean = false) => {
+      if (forceRefetch || isStale) refetch();
+    },
+    [refetch, isStale]
+  );
 
   return {
     balance: BigInt(data?.balance ?? 0),
     version: BigInt(data?.version ?? -1n),
     isFetching,
-    refetchIfStale,
+    refetchBalance,
   };
 };

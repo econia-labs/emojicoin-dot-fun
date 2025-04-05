@@ -37,7 +37,7 @@ export const useSimulateProvideLiquidity = (args: {
 
   const { data } = useQuery({
     queryKey: [
-      SimulateProvideLiquidity.prototype.functionName,
+      "simulate_provide_liquidity",
       aptos.config.network,
       marketAddress,
       quoteAmount.toString(),
@@ -85,7 +85,7 @@ export const useSimulateRemoveLiquidity = (args: {
 
   const { data } = useQuery({
     queryKey: [
-      SimulateRemoveLiquidity.prototype.functionName,
+      "simulate_remove_liquidity",
       aptos.config.network,
       marketAddress,
       lpCoinAmount.toString(),

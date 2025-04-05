@@ -50,12 +50,6 @@ type SubmissionResponse = Promise<{
 type TrackedCoinType = "apt" | "emojicoin" | "emojicoinLP";
 type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
 type ResponseType = Awaited<SubmissionResponse>;
-type EntryFunctionNames =
-  | "chat"
-  | "swap"
-  | "register_market"
-  | "provide_liquidity"
-  | "remove_liquidity";
 
 type AptosContextState = {
   aptos: Aptos;
@@ -73,7 +67,7 @@ type AptosContextState = {
   aptBalance: bigint;
   emojicoinBalance: bigint;
   emojicoinLPBalance: bigint;
-  refetchIfStale(coinType: TrackedCoinType): void;
+  refetchBalance(coinType: TrackedCoinType, forceRefetch?: boolean): void;
 };
 
 const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -123,7 +117,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       functionName,
       res,
     }: {
-      functionName: EntryFunctionNames;
+      functionName: `${string}::${string}::${string}`;
       res: PendingTransactionResponse;
     }) => {
       let response: PendingTransactionResponse | UserTransactionResponse | null = null;
@@ -145,7 +139,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           })) as UserTransactionResponse;
           setStatus("success");
           // We handle the `register_market` indicators manually with the animation orchestration.
-          if (functionName !== "register_market") {
+          if (!functionName.endsWith("register_market")) {
             successfulTransactionToast(awaitedResponse, network);
           }
           response = awaitedResponse;
@@ -188,7 +182,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       if (checkNetworkAndToast(network, true)) {
         setStatus("prompt");
         const { functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
-          functionName: input.data.function.split("::").at(-1) as EntryFunctionNames,
+          functionName: input.data.function,
           res,
         }));
         return await handleTransactionSubmission({ functionName, res });
@@ -211,7 +205,11 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           transaction: transactionBuilder.rawTransactionInput,
           senderAuthenticator,
         }).then((res) => ({
-          functionName: transactionBuilder.payloadBuilder.functionName as EntryFunctionNames,
+          functionName: [
+            transactionBuilder.payloadBuilder.moduleAddress,
+            transactionBuilder.payloadBuilder.moduleName,
+            transactionBuilder.payloadBuilder.functionName,
+          ].join("::") as `${string}::${string}::${string}`,
           res,
         }));
 
@@ -236,10 +234,10 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     emojicoinLPBalance: emojicoinLPHelper.balance,
     addressName,
     setEmojicoinType: (type?: TypeTagInput) => setCoinTypeHelper(setEmojicoinType, type),
-    refetchIfStale: (coinType: TrackedCoinType) => {
-      if (coinType === "apt") aptHelper.refetchIfStale();
-      else if (coinType === "emojicoin") emojicoinHelper.refetchIfStale();
-      else if (coinType === "emojicoinLP") emojicoinLPHelper.refetchIfStale();
+    refetchBalance: (coinType: TrackedCoinType, forceRefetch?: boolean) => {
+      if (coinType === "apt") aptHelper.refetchBalance(forceRefetch);
+      else if (coinType === "emojicoin") emojicoinHelper.refetchBalance(forceRefetch);
+      else if (coinType === "emojicoinLP") emojicoinLPHelper.refetchBalance(forceRefetch);
       else throw new Error(`Invalid coin type: ${coinType}`);
     },
   };

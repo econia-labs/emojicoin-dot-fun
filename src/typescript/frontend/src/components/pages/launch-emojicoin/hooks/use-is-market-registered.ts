@@ -20,7 +20,7 @@ export const useIsMarketRegistered = () => {
 
   const { data } = useQuery({
     queryKey: [
-      MarketMetadataByEmojiBytes.prototype.functionName,
+      "market_metadata_by_emoji_bytes",
       aptos.config.network,
       emojiBytes,
       // Invalidate the cache when the number of markets changes.
