@@ -8,6 +8,7 @@ import {
 import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   checkNetworkAndToast,
+  crankedArenaMeleeToast,
   parseAPIErrorAndToast,
   successfulTransactionToast,
 } from "components/wallet/toasts";
@@ -31,7 +32,7 @@ import type {
   EntryFunctionTransactionBuilder,
   WalletInputTransactionData,
 } from "@/sdk/emojicoin_dot_fun/payload-builders";
-import { APTOS_COIN_TYPE_STRING } from "@/sdk/index";
+import { APTOS_COIN_TYPE_STRING, STRUCT_STRINGS } from "@/sdk/index";
 import { sleep } from "@/sdk/utils";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 import { useLatestBalance } from "@/store/latest-balance";
@@ -140,7 +141,13 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           setStatus("success");
           // We handle the `register_market` indicators manually with the animation orchestration.
           if (!functionName.endsWith("register_market")) {
-            successfulTransactionToast(awaitedResponse, network);
+            // Toast for the crank if it's there.
+            if (awaitedResponse.events.find((e) => e.type === STRUCT_STRINGS.ArenaMeleeEvent)) {
+              crankedArenaMeleeToast(functionName);
+            } else {
+              // Otherwise, a normal successful txn toast.
+              successfulTransactionToast(awaitedResponse, network);
+            }
           }
           response = awaitedResponse;
         } catch (e) {
