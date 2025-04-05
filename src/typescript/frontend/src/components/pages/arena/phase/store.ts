@@ -26,7 +26,7 @@ const initialArenaPhaseState = (): ArenaPhaseState => ({
   error: false,
 });
 
-export const globalArenaPhaseStore = createStore<ArenaPhaseStore>()(
+const globalArenaPhaseStore = createStore<ArenaPhaseStore>()(
   immer((set) => ({
     ...initialArenaPhaseState(),
     setPhase(phase) {

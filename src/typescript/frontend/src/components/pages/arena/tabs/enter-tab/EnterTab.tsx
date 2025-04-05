@@ -11,7 +11,7 @@ import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
 import type { UserEscrow } from "@/sdk/index";
 import { useArenaEscrow } from "@/store/escrow/hooks";
 
-import { globalArenaPhaseStore, useArenaPhaseStore } from "../../phase/store";
+import { useArenaPhaseStore } from "../../phase/store";
 import { EnterTabAmountPhase } from "./EnterTabAmountPhase";
 import { EnterTabLockPhase } from "./EnterTabLockPhase";
 import { EnterTabPickPhase } from "./EnterTabPickPhase";
