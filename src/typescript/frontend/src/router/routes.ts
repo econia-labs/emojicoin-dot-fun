@@ -7,7 +7,6 @@ const expanded = expandRoutes({
   api: {
     arena: {
       candlesticks: _,
-      escrows: _,
       "historical-positions": _,
       position: _,
     },
