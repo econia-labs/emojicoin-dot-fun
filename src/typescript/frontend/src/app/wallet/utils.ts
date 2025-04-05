@@ -1,4 +1,5 @@
 import { AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { APTOS_NETWORK } from "lib/env";
 import { cache } from "react";
 
 import {
@@ -54,6 +55,13 @@ const resolveOwnerName = async (input?: AccountAddressInput | null): Promise<Pos
     }
   } catch (e) {
     if (isValidAptosName(input) || AccountAddress.isValid({ input })) {
+      // There's no ANS service on the local network. Just silently return.
+      if (APTOS_NETWORK === "local") {
+        return {
+          address: AccountAddress.from(input).toString(),
+          name: undefined,
+        };
+      }
       console.warn(`${input} is a valid ANS name or account address but still threw an error ${e}`);
     }
   }
