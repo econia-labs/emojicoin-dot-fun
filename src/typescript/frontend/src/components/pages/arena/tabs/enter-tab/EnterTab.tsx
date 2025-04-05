@@ -1,13 +1,19 @@
 import Loading from "components/loading";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
 import type { PropsWithChildren } from "react";
 import React, { useEffect, useState } from "react";
 
 import Button from "@/components/button";
 import ProgressBar from "@/components/ProgressBar";
-import type { ArenaPositionModel } from "@/sdk/index";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
+import type { UserEscrow } from "@/sdk/index";
 import type { MarketStateModel } from "@/sdk/indexer-v2/types";
+import { useArenaEscrow } from "@/store/escrow/hooks";
 
-import { marketTernary } from "../../utils";
+import AnimatedLoadingBoxes from "../../../launch-emojicoin/animated-loading-boxes";
+import { ifEscrowTernary } from "../../utils";
 import { EnterTabAmountPhase } from "./EnterTabAmountPhase";
 import { EnterTabLockPhase } from "./EnterTabLockPhase";
 import { EnterTabPickPhase } from "./EnterTabPickPhase";
@@ -15,58 +21,58 @@ import { EnterTabSummary } from "./EnterTabSummary";
 
 type Phase = "pick" | "amount" | "lock" | "summary";
 
-export const EnterTab: React.FC<{
-  market0: MarketStateModel;
-  market1: MarketStateModel;
-  position?: ArenaPositionModel | null;
-  setPosition: (position: ArenaPositionModel | null) => void;
-}> = ({ market0, market1, position, setPosition }) => {
+export const EnterTab = () => {
   const [phase, setPhase] = useState<Phase>();
   const [market, setMarket] = useState<MarketStateModel>();
   const [amount, setAmount] = useState<bigint>();
   const [error, setError] = useState<boolean>(false);
-  const [cranked, setCranked] = useState<boolean>(false);
+
+  const latestMeleeID = useLatestMeleeID();
+  const { meleeInfo, market0, market1 } = useCurrentMeleeInfo();
+  const { position } = useCurrentPositionQuery();
+  const escrow = useArenaEscrow(meleeInfo?.meleeID);
+
+  const { account } = useAptos();
 
   useEffect(() => {
-    if (position !== undefined && position !== null && position.open) {
+    if (account && position && position.meleeID >= latestMeleeID) {
       setPhase("summary");
-    } else if (position === null || position?.open === false) {
+    } else {
       setPhase("pick");
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [position]);
+  }, [account, position, latestMeleeID]);
 
   if (phase === "summary") {
-    if (!position) return <Loading />;
+    if (!escrow || !market0 || !market1) return <Loading />;
     return (
       <EnterTabSummary
-        market={marketTernary(position, market0, market1)}
+        escrow={escrow}
+        market={ifEscrowTernary(escrow, market0, market1)}
         topOff={() => {
           setPhase("amount");
-          setMarket(marketTernary(position, market0, market1));
+          setMarket(ifEscrowTernary(escrow, market0, market1));
         }}
         tapOut={() => setPhase("pick")}
-        swap={() => setMarket(marketTernary(position, market1, market0))}
-        {...{ market0, market1, setPosition, position }}
+        swap={() => setMarket(ifEscrowTernary(escrow, market1, market0))}
       />
     );
   }
 
   if (phase === "pick") {
     return (
-      <Container progress={1} {...{ phase, position, setPhase }}>
-        <EnterTabPickPhase
-          {...{
-            market0,
-            market1,
-            setMarket,
-            error,
-            closeError: () => setError(false),
-            cranked,
-            closeCranked: () => setCranked(false),
-            nextPhase: () => setPhase("amount"),
-          }}
-        />
+      <Container progress={1} phase={phase} escrow={escrow} setPhase={setPhase}>
+        {!market0 || !market1 ? (
+          <AnimatedLoadingBoxes numSquares={4} />
+        ) : (
+          <EnterTabPickPhase
+            market0={market0}
+            market1={market1}
+            setMarket={setMarket}
+            error={error}
+            closeError={() => setError(false)}
+            nextPhase={() => setPhase("amount")}
+          />
+        )}
       </Container>
     );
   }
@@ -74,8 +80,12 @@ export const EnterTab: React.FC<{
   if (phase === "amount") {
     if (!market) throw new Error("Market is undefined in amount phase");
     return (
-      <Container progress={2} {...{ phase, position, setPhase }}>
-        <EnterTabAmountPhase {...{ market, setAmount, nextPhase: () => setPhase("lock") }} />
+      <Container progress={2} phase={phase} escrow={escrow} setPhase={setPhase}>
+        <EnterTabAmountPhase
+          market={market}
+          setAmount={setAmount}
+          nextPhase={() => () => setPhase("lock")}
+        />
       </Container>
     );
   }
@@ -84,25 +94,19 @@ export const EnterTab: React.FC<{
     if (!market || amount === undefined)
       throw new Error("Market or amount is undefined in lock phase");
     return (
-      <Container progress={3} {...{ phase, position, setPhase }}>
-        <EnterTabLockPhase
-          {...{
-            market,
-            market0,
-            market1,
-            amount,
-            errorOut: () => {
+      <Container progress={3} phase={phase} escrow={escrow} setPhase={setPhase}>
+        {!market0 || !market1 ? (
+          <AnimatedLoadingBoxes numSquares={4} />
+        ) : (
+          <EnterTabLockPhase
+            market={market}
+            amount={amount}
+            errorOut={() => {
               setPhase("pick");
               setError(true);
-            },
-            setCranked: () => {
-              setPhase("pick");
-              setCranked(true);
-            },
-            position,
-            setPosition,
-          }}
-        />
+            }}
+          />
+        )}
       </Container>
     );
   }
@@ -114,12 +118,12 @@ function Container({
   progress,
   phase,
   setPhase,
-  position,
+  escrow,
 }: PropsWithChildren & {
   progress: number;
   phase: Phase;
   setPhase: (phase: Phase) => void;
-  position?: ArenaPositionModel | null;
+  escrow?: UserEscrow | null;
 }) {
   return (
     <div className="relative flex flex-col h-[100%] gap-[3em]">
@@ -133,7 +137,7 @@ function Container({
               scale="lg"
               onClick={() => {
                 if (phase === "amount") {
-                  if (position?.open) setPhase("summary");
+                  if (escrow?.open) setPhase("summary");
                   else setPhase("pick");
                 } else if (phase === "lock") setPhase("amount");
               }}

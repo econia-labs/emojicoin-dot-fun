@@ -83,6 +83,6 @@ export function useArenaEscrow(meleeID: bigint | undefined) {
   });
 }
 
-function useArenaEscrowStore<T>(selector: (store: EscrowStore) => T): T {
+export function useArenaEscrowStore<T>(selector: (store: EscrowStore) => T): T {
   return useStore(globalEscrowStore, selector);
 }

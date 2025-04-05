@@ -1,6 +1,5 @@
 import Button from "components/button";
 import React from "react";
-import { emoji } from "utils";
 
 import type { MarketStateModel } from "@/sdk/indexer-v2/types";
 
@@ -13,10 +12,8 @@ export const EnterTabPickPhase: React.FC<{
   setMarket: (market: MarketStateModel) => void;
   error: boolean;
   closeError: () => void;
-  cranked: boolean;
-  closeCranked: () => void;
   nextPhase: () => void;
-}> = ({ market0, market1, setMarket, error, closeError, cranked, closeCranked, nextPhase }) => {
+}> = ({ market0, market1, setMarket, error, closeError, nextPhase }) => {
   return (
     <div className="relative grid gap-[3em] place-items-center h-[100%] w-[100%]">
       {error && (
@@ -29,29 +26,6 @@ export const EnterTabPickPhase: React.FC<{
             </div>
           </div>
           <Button scale="lg" onClick={closeError}>
-            Close
-          </Button>
-        </BlurModal>
-      )}
-      {cranked && (
-        <BlurModal close={closeCranked}>
-          <div className="flex flex-col gap-[3em] max-w-[58ch]">
-            <div className="text-4xl uppercase text-white text-center">
-              You just cranked the melee!
-            </div>
-            <div className="font-forma text-light-gray leading-6 uppercase">
-              In order for the next melee to start, a user has to crank the package. You happen to
-              be the one that cranked, and thus started the next melee!
-            </div>
-            <div className="font-forma text-light-gray leading-6 uppercase text-center text-2xl">
-              {emoji("party popper")} Congratulations {emoji("party popper")}
-            </div>
-            <div className="font-forma text-light-gray leading-6 uppercase">
-              As a result, no funds have been moved, and the enter to the previous melee was
-              cancelled.
-            </div>
-          </div>
-          <Button scale="lg" onClick={closeCranked}>
             Close
           </Button>
         </BlurModal>

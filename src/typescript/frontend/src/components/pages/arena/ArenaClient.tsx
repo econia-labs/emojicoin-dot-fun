@@ -4,22 +4,15 @@ import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useEventStore } from "context/event-store-context/hooks";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { useEffectOnce } from "react-use";
 
 import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
-import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
-import type {
-  ArenaLeaderboardHistoryWithArenaInfoModel,
-  ArenaPositionModel,
-} from "@/sdk/indexer-v2/types";
-import { useArenaEscrows } from "@/store/escrow/use-arena-escrows";
+import { useSyncArenaEscrows } from "@/store/escrow/hooks";
 
 import { BottomNavigation, TabContainer } from "./tabs";
 import {
@@ -49,7 +42,7 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
 
 const chartBoxClassName: ClassValue = "relative w-full h-full col-start-1 col-end-3";
 
-const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+const Desktop = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <div
@@ -81,9 +74,11 @@ const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
       </Box>
     </div>
   );
-};
+});
+// Necessary to add a display name because of the React.memo wrapper.
+Desktop.displayName = "Desktop";
 
-const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+const Mobile = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <>
@@ -114,66 +109,52 @@ const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
       {createPortal(<BottomNavigation {...props} />, document.body)}
     </>
   );
-};
+});
+// Necessary to add a display name because of the React.memo wrapper.
+Mobile.displayName = "Mobile";
+
+/**
+ * When a melee ends, all clients will refresh at once. To avoid hammering the indexer in case of huge traffic, stagger
+ * the requests by randomly delaying them for 1-5 seconds. Getting the new melee data is a once a day thing, so it's
+ * fine if this is delayed by a few seconds for a client.
+ *
+ * In a development environment, this is just a flat, shorter amount of time.
+ */
+const randomlyStaggeredRefreshDelay = () =>
+  process.env.NODE_ENV === "development" ? 300 : 1000 + Math.random() * 4000;
 
 export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
-  const { account } = useAptos();
   const router = useRouter();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
-
-  // Undefined while loading. Null means no position
-  const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
-  const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
-
-  useReliableSubscribe({ eventTypes: ["Chat"], arena: true });
-
-  useEffect(() => {
-    if (props.arenaInfo) {
-      loadArenaInfoFromServer(props.arenaInfo);
-    }
-  }, [loadArenaInfoFromServer, props.arenaInfo]);
-
+  const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
+  const subscribeEvents = useEventStore((s) => s.subscribeEvents);
   const latestMeleeID = useLatestMeleeID();
 
+  useSyncArenaEscrows();
+
+  useEffectOnce(() => {
+    subscribeEvents(["Chat", "MarketLatestState"], { arenaBaseEvents: true });
+  });
+
   useEffect(() => {
-    if (latestMeleeID > props.arenaInfo.meleeID) {
-      router.refresh();
-    }
+    loadArenaInfoFromServer(props.arenaInfo);
+    loadMarketStateFromServer([props.market0]);
+    loadMarketStateFromServer([props.market1]);
+  }, [loadArenaInfoFromServer, loadMarketStateFromServer, props]);
+
+  useEffect(() => {
+    const shouldRefresh = latestMeleeID > props.arenaInfo.meleeID;
+
+    // Need to wait for the processor to catch up- then refresh.
+    const timeout = shouldRefresh
+      ? setTimeout(() => {
+          router.refresh();
+        }, randomlyStaggeredRefreshDelay())
+      : undefined;
+
+    return () => clearTimeout(timeout);
   }, [latestMeleeID, props.arenaInfo.meleeID, router]);
 
-  const r = useMemo(
-    () =>
-      isMobile ? (
-        <Mobile {...props} {...{ position, setPosition, history, setHistory }} />
-      ) : (
-        <Desktop {...props} {...{ position, setPosition, history, setHistory }} />
-      ),
-    [isMobile, props, position, setPosition, history, setHistory]
-  );
-
-  const escrows = useArenaEscrows();
-
-  useEffect(() => {
-    if (escrows) {
-      console.log(Array.from(escrows.entries()));
-    }
-  }, [escrows]);
-
-  useEffect(() => {
-    // This is done because account refreshes often and we don't want to refetch
-    if (account) {
-      setPosition(undefined);
-      fetch(`${ROUTES.api.arena.position}/${account.address}`)
-        .then((r) => r.text())
-        .then(parseJSON<ArenaPositionModel | null>)
-        .then((r) => setPosition(r));
-      fetch(`${ROUTES.api.arena["historical-positions"]}/${account.address}`)
-        .then((r) => r.text())
-        .then(parseJSON<ArenaLeaderboardHistoryWithArenaInfoModel[]>)
-        .then((r) => setHistory(r));
-    }
-  }, [account]);
-
-  return r;
+  return isMobile ? <Mobile {...props} /> : <Desktop {...props} />;
 };
