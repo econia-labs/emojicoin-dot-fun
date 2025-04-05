@@ -8,6 +8,7 @@ import { toAccountAddressString } from "../../../utils/account-address";
 import { ORDER_BY } from "../../const";
 import {
   toArenaCandlestickModel,
+  toArenaInfoModel,
   toArenaMeleeModel,
   toArenaPositionModel,
   toMarketStateModel,
@@ -38,7 +39,7 @@ const selectArenaInfo = () =>
     .select("*")
     .order("melee_id", ORDER_BY.DESC)
     .limit(1)
-    .single();
+    .single<DatabaseJsonType["arena_info"]>();
 
 const selectPosition = ({ user, meleeID }: { user: AccountAddressInput; meleeID: bigint }) =>
   postgrest
@@ -107,7 +108,10 @@ const selectArenaCandlesticksSince = ({
 
 export const fetchMelee = queryHelperSingle(selectMelee, toArenaMeleeModel);
 export const fetchArenaInfo = queryHelperSingle(selectArenaInfo);
-export const fetchArenaInfoByMeleeID = queryHelperSingle(selectArenaInfoByMeleeID);
+export const fetchArenaInfoByMeleeID = queryHelperSingle(
+  selectArenaInfoByMeleeID,
+  toArenaInfoModel
+);
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
 export const fetchLatestPosition = queryHelperSingle(selectLatestPosition);
 export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(

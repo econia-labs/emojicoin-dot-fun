@@ -38,7 +38,7 @@ export const useLatestBalance = (
   return {
     balance: balance ?? 0n,
     isFetching: queryRes.isFetching,
-    refetchIfStale: queryRes.refetchIfStale,
+    refetchBalance: queryRes.refetchBalance,
   };
 };
 

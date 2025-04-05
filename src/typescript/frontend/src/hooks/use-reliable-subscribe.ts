@@ -23,7 +23,7 @@ export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
     // components unmounting don't undo/overwrite another component subscribing.
     const timeout = window.setTimeout(() => {
       subscribeEvents(eventTypes, {
-        baseEvents: arena,
+        arenaBaseEvents: arena,
       });
     }, 250);
 
@@ -31,7 +31,7 @@ export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
     return () => {
       clearTimeout(timeout);
       unsubscribeEvents(eventTypes, {
-        baseEvents: arena,
+        arenaBaseEvents: arena,
       });
     };
   }, [eventTypes, arena, subscribeEvents, unsubscribeEvents]);

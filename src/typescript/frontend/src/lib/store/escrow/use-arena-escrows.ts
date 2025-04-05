@@ -2,8 +2,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useMemo, useRef } from "react";
 import { useStore } from "zustand";
 
-import { toAccountAddressString, toUserEscrowJson } from "@/sdk/utils";
-import { serverLog } from "@/sdk/utils/server-log";
+import { toAccountAddressString } from "@/sdk/utils";
 
 import { useFetchArenaEscrows } from "../../hooks/queries/arena/use-fetch-arena-escrows";
 import { globalUserTransactionStore } from "../transaction/store";
@@ -19,13 +18,11 @@ export const useArenaEscrows = () => {
 
   useSyncEscrowsFromTransactionStore(accountAddress);
   const escrowsFromQuery = useFetchArenaEscrows(accountAddress);
-  console.log(escrowsFromQuery);
 
   // Update the arena escrow store with whichever state is more recent between the query data
   // and the global transaction store.
   useEffect(() => {
     if (accountAddress && escrowsFromQuery) {
-      serverLog({ data: escrowsFromQuery.map(toUserEscrowJson), label: "new escrows from query!" });
       globalEscrowStore.getState().pushIfLatest(accountAddress, ...escrowsFromQuery);
     }
   }, [accountAddress, escrowsFromQuery]);

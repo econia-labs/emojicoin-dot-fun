@@ -1,9 +1,14 @@
+import FEATURE_FLAGS from "lib/feature-flags";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchArenaCandlesticksRoute } from "./fetch";
 import { ArenaCandlesticksSearchParamsSchema } from "./search-params-schema";
 
 export async function GET(request: NextRequest) {
+  if (!FEATURE_FLAGS.Arena) {
+    return new NextResponse("Arena isn't enabled.", { status: 503 });
+  }
+
   const { searchParams } = request.nextUrl;
   const params = Object.fromEntries(searchParams.entries());
   const {

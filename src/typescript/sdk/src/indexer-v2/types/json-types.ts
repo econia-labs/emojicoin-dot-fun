@@ -85,11 +85,15 @@ type PostgresTimestamp = string;
  * @typedef {string} PostgresTimestamp A string in the format "YYYY-MM-DDTHH:mm:ss.SSSSSS"
  */
 export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): bigint => {
+  // If the incoming string ends with a "Z", remove it- we will add it later.
+  if (timestamp.endsWith("Z")) timestamp = timestamp.slice(0, -1);
+
   const spl = timestamp.split(".");
   const microseconds = spl.length === 1 ? 0n : BigInt(spl[1].padEnd(6, "0"));
 
   // Get the date to the nearest second. Ensure JavaScript parses it as a UTC date.
-  const dateToNearestSecond = new Date(spl[0].endsWith("Z") ? spl[0] : `${spl[0]}Z`);
+  const dateToNearestSecond = new Date(`${spl[0]}Z`);
+
   // Convert it to milliseconds.
   const inMilliseconds = dateToNearestSecond.getTime();
   // Convert it to microseconds; add the microseconds portion from the original timestamp.
@@ -97,7 +101,8 @@ export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): b
 };
 
 /**
- * Converts a PostgreSQL timestamp string to a JavaScript Date object.
+ * Converts a PostgreSQL timestamp string to a JavaScript Date object. If the input is already
+ * a Date object, just return it.
  *
  * Note:
  *
@@ -112,7 +117,8 @@ export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): b
  * to milliseconds to create the Date object. This approach preserves the full
  * precision of the PostgreSQL timestamp up to JavaScript Date's millisecond limit.
  */
-export const postgresTimestampToDate = (timestamp: PostgresTimestamp): Date => {
+export const postgresTimestampToDate = (timestamp: PostgresTimestamp | Date): Date => {
+  if (timestamp instanceof Date) return timestamp;
   const microseconds = postgresTimestampToMicroseconds(timestamp);
   return new Date(Number(microseconds / 1000n));
 };
