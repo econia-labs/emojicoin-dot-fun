@@ -17,8 +17,7 @@ import type { ArenaJsonTypes } from "../../types/arena-json-types";
 import { toEscrowResource } from "../../types/arena-types";
 import { toAccountAddressString } from "../account-address";
 import { maxBigInt } from "../compare-bigint";
-import { toCoinTypeString } from "../parse-changes-for-balances";
-import { type CoinTypeString, STRUCT_STRINGS } from "../type-tags";
+import { STRUCT_STRINGS } from "../type-tags";
 import { toArenaCoinTypes } from "./helpers";
 
 const isEscrowStruct = ({ value }: TypeTagStruct) => {
@@ -108,7 +107,7 @@ export const findEscrowsInTxn = ({ version, changes }: UserTransactionResponse) 
 type PositionAndInfo = ArenaPositionModel & ArenaInfoModel;
 type ArenaCoinTypeStructs = [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct];
 
-// Convert each user's current and historical positions to `UserEscrow` types.
+// Convert a user's current and historical positions to `UserEscrow` types.
 export const positionToUserEscrow = (
   pos: PositionAndInfo | ArenaLeaderboardHistoryWithArenaInfoModel
 ): UserEscrow => {
@@ -138,68 +137,3 @@ export const positionToUserEscrow = (
         matchAmount: SUBSTITUTE_MATCH_AMOUNT_FOR_HISTORICAL,
       };
 };
-
-export type UserEscrowJson = {
-  version: string;
-  user: `0x${string}`;
-  meleeID: string;
-  open: boolean;
-  emojicoin0: string;
-  emojicoin1: string;
-  matchAmount: string;
-  coinTypes: [CoinTypeString, CoinTypeString, CoinTypeString, CoinTypeString];
-};
-
-export function toUserEscrowJson({
-  version,
-  user,
-  meleeID,
-  open,
-  emojicoin0,
-  emojicoin1,
-  matchAmount,
-  coinTypes,
-}: UserEscrow): UserEscrowJson {
-  return {
-    version: version.toString(),
-    user: user.toString() as `0x${string}`,
-    meleeID: meleeID.toString(),
-    open,
-    emojicoin0: emojicoin0.toString(),
-    emojicoin1: emojicoin1.toString(),
-    matchAmount: (matchAmount ?? SUBSTITUTE_MATCH_AMOUNT_FOR_HISTORICAL).toString(),
-    coinTypes: coinTypes.map(toCoinTypeString) as [
-      CoinTypeString,
-      CoinTypeString,
-      CoinTypeString,
-      CoinTypeString,
-    ],
-  };
-}
-
-export function fromUserEscrowJson({
-  version,
-  user,
-  meleeID,
-  open,
-  emojicoin0,
-  emojicoin1,
-  matchAmount,
-  coinTypes,
-}: UserEscrowJson): UserEscrow {
-  return {
-    version: BigInt(version),
-    user,
-    meleeID: BigInt(meleeID),
-    open,
-    emojicoin0: BigInt(emojicoin0),
-    emojicoin1: BigInt(emojicoin1),
-    matchAmount: BigInt(matchAmount ?? SUBSTITUTE_MATCH_AMOUNT_FOR_HISTORICAL),
-    coinTypes: coinTypes.map((s) => parseTypeTag(s)).filter((t) => t.isStruct()) as [
-      TypeTagStruct,
-      TypeTagStruct,
-      TypeTagStruct,
-      TypeTagStruct,
-    ],
-  };
-}
