@@ -15,14 +15,14 @@ import { useTransactionBuilder } from "./use-transaction-builder";
 export const useEnterTransactionBuilder = (
   inputAmount: AnyNumberString,
   lockIn: boolean,
-  market0Address: `0x${string}`,
-  market1Address: `0x${string}`,
+  market0Address: `0x${string}` | undefined,
+  market1Address: `0x${string}` | undefined,
   targetMarketAddress: `0x${string}`
 ) => {
   const { account } = useAptos();
   const accountAddress = account?.address;
   const memoizedArgs = useMemo(() => {
-    if (!accountAddress) {
+    if (!accountAddress || !market0Address || !market1Address) {
       return null;
     }
     const [emojicoin0, emojicoinLP0, emojicoin1, emojicoinLP1] = toArenaCoinTypes({
