@@ -7,20 +7,21 @@ import { useEffect, useMemo, useRef } from "react";
 import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
 import { Column, Flex } from "@/components/layout";
 import { LoadMore } from "@/components/ui/table/loadMore";
-import type { ArenaPositionModel, MarketStateModel } from "@/sdk/index";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import type { MarketStateModel } from "@/sdk/index";
+import { useArenaEscrow } from "@/store/escrow/hooks";
 
 import { MessageContainer } from "../../emojicoin/components/chat/components";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
 import { useChatEventsQuery } from "../../emojicoin/components/chat/useChatEventsQuery";
-import { ifPositionTernary } from "../utils";
+import { ifEscrowTernary } from "../utils";
 
 interface Props {
   market0: MarketStateModel;
   market1: MarketStateModel;
-  position?: ArenaPositionModel | null;
 }
 
-export const ChatTab = ({ market0, market1, position }: Props) => {
+export const ChatTab = ({ market0, market1 }: Props) => {
   const setMode = useEmojiPicker((state) => state.setMode);
   const chats = useChatEventsQuery({
     marketID: [market0.market.marketID.toString(), market1.market.marketID.toString()],
@@ -31,12 +32,13 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
   const market1chatsFromStore = useEventStore(
     (s) => s.getMarket(market1.market.symbolEmojis)?.chatEvents ?? []
   );
+  const { meleeInfo } = useCurrentMeleeInfo();
+  const escrow = useArenaEscrow(meleeInfo?.meleeID);
 
   const side = useMemo(() => {
-    if (!position || (position.emojicoin0Balance === 0n && position.emojicoin1Balance === 0n))
-      return null;
-    return ifPositionTernary(position, market0, market1);
-  }, [market0, market1, position]);
+    if (!escrow || !escrow.open) return null;
+    return ifEscrowTernary(escrow, market0, market1);
+  }, [escrow, market0, market1]);
 
   const { sendChatMessage } = useChatBox(side?.market.marketAddress);
 

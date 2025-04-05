@@ -11,15 +11,13 @@ import { useTransactionBuilder } from "./use-transaction-builder";
  * passed on re-renders.
  */
 export const useExitTransactionBuilder = (
-  market0Address: `0x${string}`,
-  market1Address: `0x${string}`
+  market0Address?: `0x${string}`,
+  market1Address?: `0x${string}`
 ) => {
   const { account } = useAptos();
   const accountAddress = account?.address;
   const memoizedArgs = useMemo(() => {
-    if (!accountAddress) {
-      return null;
-    }
+    if (!accountAddress || !market0Address || !market1Address) return null;
     return {
       participant: accountAddress,
       typeTags: toArenaCoinTypes({ market0Address, market1Address }),
