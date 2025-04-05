@@ -38,6 +38,7 @@ export type MarketStoreMetadata = Flatten<
 export type MarketEventStore = {
   marketMetadata: MarketStoreMetadata;
   dailyVolume?: bigint;
+  dailyBaseVolume?: bigint;
   swapEvents: readonly Swap[];
   liquidityEvents: readonly Liquidity[];
   stateEvents: readonly (MarketLatestStateEvent | MarketLatestState)[];
@@ -71,7 +72,8 @@ export type SetLatestBarsArgs = {
 };
 
 type EventActions = {
-  getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
+  getMarket: (m?: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
+  getMarketLatestState: (m?: SymbolEmoji[]) => undefined | Readonly<MarketLatestState>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
   getMeleeMap: () => Readonly<ArenaState["meleeMap"]>;
   loadMarketStateFromServer: (states: DatabaseModels["market_state"][]) => void;
