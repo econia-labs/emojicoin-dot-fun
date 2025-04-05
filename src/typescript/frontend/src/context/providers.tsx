@@ -51,10 +51,7 @@ enableMapSet();
 
 const queryClient = new QueryClient();
 
-const Providers: React.FC<{ userAgent: string; children: React.ReactNode }> = ({
-  userAgent,
-  children,
-}) => {
+const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsWithChildren) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
   const isMobileMenuOpen = isOpen && !isDesktop;

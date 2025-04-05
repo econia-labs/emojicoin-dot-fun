@@ -1,46 +1,11 @@
-import { AccountAddress, TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import type { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 import { emoji } from "utils";
 
 import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun";
-import { getEventsAsProcessorModelsFromResponse } from "@/sdk/indexer-v2/mini-processor";
-import { getAptBalanceFromChanges, getCoinBalanceFromChanges, toCoinTypeString } from "@/sdk/utils";
-
-export const setBalancesFromWriteset = ({
-  response,
-  account,
-  emojicoin,
-  emojicoinLP,
-  setAptBalance,
-  setEmojicoinBalance,
-  setEmojicoinLPBalance,
-}: {
-  response: UserTransactionResponse;
-  account: AccountInfo | null;
-  emojicoin?: string;
-  emojicoinLP?: string;
-  setAptBalance: (num: bigint) => void;
-  setEmojicoinBalance: (num: bigint) => void;
-  setEmojicoinLPBalance: (num: bigint) => void;
-}) => {
-  const userAddress = AccountAddress.from(response.sender);
-  // Return if the account is not connected or the sender of the transaction is not the currently connected account.
-  if (!account || !userAddress.equals(AccountAddress.from(account.address))) return;
-
-  const newAptBalance = getAptBalanceFromChanges(response, userAddress);
-  const newEmojicoinBalance = emojicoin
-    ? getCoinBalanceFromChanges({ response, userAddress, coinType: toCoinTypeString(emojicoin) })
-    : undefined;
-  const newEmojicoinLPBalance = emojicoinLP
-    ? getCoinBalanceFromChanges({ response, userAddress, coinType: toCoinTypeString(emojicoinLP) })
-    : undefined;
-  // Update the user's balance if the coins are present in the write set changes.
-  if (typeof newAptBalance !== "undefined") setAptBalance(newAptBalance);
-  if (typeof newEmojicoinBalance !== "undefined") setEmojicoinBalance(newEmojicoinBalance);
-  if (typeof newEmojicoinLPBalance !== "undefined") setEmojicoinLPBalance(newEmojicoinLPBalance);
-};
+import { getEventsAsProcessorModelsFromResponse } from "@/sdk/indexer-v2/mini-processor/event-groups";
 
 export const setCoinTypeHelper = (
   set: Dispatch<SetStateAction<string | undefined>>,

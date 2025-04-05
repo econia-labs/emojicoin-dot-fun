@@ -1,98 +1,71 @@
-import type { Aptos } from "@aptos-labs/ts-sdk";
-import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback } from "react";
 
-import { Balance } from "@/move-modules";
-import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun";
+import type { StructTagString } from "@/sdk/index";
+import { getAptosClient } from "@/sdk/utils/aptos-client";
+import type { CoinTypeString } from "@/sdk/utils/type-tags";
+/* eslint-disable-next-line */ // So we can link the import in the doc comment.
+import { type useLatestBalance } from "@/store/latest-balance";
 
 import { withResponseError } from "./client";
 
-/**
- * __NOTE: If you're using this for a connected user's APT balance, you should use__
- * `aptBalance, setBalance, refetchBalance` in the `AptosContextProvider` instead of this hook,
- * because it will have persistent state across the whole application.
- *
- * A hook to get the user's account balance for a coin type. Defaults to APT if no type is provided.
- *
- * @param aptos The aptos client
- * @param accountAddress The account address for which to get the balance
- * @param coinTypeTag The coin type for which to get the balance
- * @param staleTime The time in milliseconds before the cache is considered stale
- * @param refetchInterval The time in milliseconds to refetch the balance
- * @returns {number} balance The balance of the account
- * @returns {boolean} isFetching Whether the query is fetching
- * @returns {(num: number) => void} setBalance A function to manually set the balance
- * @returns {() => void} forceRefetch A function to force refetch the balance
- * @returns {() => void} refetchIfStale A function to refetch the balance only if it is stale
- */
-export const useWalletBalance = ({
-  aptos,
-  account,
-  coinType,
-  staleTime = 10000,
-  refetchInterval,
-}: {
-  aptos: Aptos;
-  account: AccountInfo | null;
-  coinType?: TypeTagInput;
-  staleTime?: number;
-  refetchInterval?: number;
-}) => {
-  const accountAddress = account?.address;
-  // We use a nonce here because invalidateQuery for some reason does not work.
-  const [nonce, setNonce] = useState(0);
-  const manualBalance = useRef<bigint | null>(null);
-  const queryKey = useMemo(() => {
-    return ["getAccountCoinAmount", aptos.config.network, accountAddress, coinType, nonce];
-  }, [aptos.config.network, accountAddress, coinType, nonce]);
+const STALE_TIME = 10000;
 
-  // refetch if isStale technically calls the query twice, so we could optimize this with
-  // a ref, but it's not a big deal because the graphQL endpoint should be able to handle it.
-  const {
-    data: balance,
-    isFetching,
-    refetch,
-    isStale,
-  } = useQuery({
-    queryKey,
+const fetchFungibleAssetBalanceAndVersion = async (
+  accountAddress: `0x${string}`,
+  coinType: StructTagString,
+  minimumLedgerVersion?: number
+) => {
+  const res = await getAptosClient().fungibleAsset.getCurrentFungibleAssetBalances({
+    minimumLedgerVersion,
+    options: {
+      limit: 1,
+      where: {
+        asset_type: {
+          _eq: coinType,
+        },
+        owner_address: {
+          _eq: accountAddress,
+        },
+      },
+    },
+  });
+  const { amount, last_transaction_version } = res.at(0) ?? {};
+  return {
+    balance: amount ? BigInt(amount) : null,
+    version: last_transaction_version ? BigInt(last_transaction_version) : null,
+  };
+};
+
+/**
+ * Used in conjunction with {@link useLatestBalance}; not intended to be used alone unless you don't
+ * plan on tracking coin balances anywhere else.
+ */
+export const useFetchWalletBalanceQuery = (
+  accountAddress: `0x${string}` | undefined,
+  coinType: CoinTypeString | undefined,
+  minimumLedgerVersion?: number
+) => {
+  const { data, isFetching, refetch, isStale } = useQuery({
+    queryKey: ["fetch-wallet-balance-query", accountAddress, coinType],
     queryFn: () => {
-      if (!accountAddress || !coinType) return 0;
-      if (manualBalance.current !== null) {
-        const res = manualBalance.current;
-        // Only use the manual balance once.
-        manualBalance.current = null;
-        return res;
-      }
+      if (!accountAddress || !coinType) return null;
       return withResponseError(
-        Balance.view({
-          aptos,
-          owner: accountAddress,
-          typeTags: [coinType],
-        }).then((res) => BigInt(res))
+        fetchFungibleAssetBalanceAndVersion(accountAddress, coinType, minimumLedgerVersion)
       );
     },
-    placeholderData: (previousBalance) => previousBalance ?? 0,
-    staleTime,
-    refetchInterval,
+    staleTime: STALE_TIME,
+    enabled: !!accountAddress && !!coinType,
   });
 
-  const setBalance = useCallback((num: bigint) => {
-    manualBalance.current = num;
-    setNonce((n) => n + 1);
-  }, []);
-
   const refetchIfStale = useCallback(() => {
-    if (isStale) {
-      refetch();
-    }
+    if (isStale) refetch();
   }, [refetch, isStale]);
 
   return {
-    balance: BigInt(balance ?? 0),
+    balance: BigInt(data?.balance ?? 0),
+    version: BigInt(data?.version ?? -1n),
     isFetching,
-    setBalance,
-    forceRefetch: refetch,
     refetchIfStale,
   };
 };
