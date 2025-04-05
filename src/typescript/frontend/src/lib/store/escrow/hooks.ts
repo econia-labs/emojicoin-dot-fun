@@ -1,0 +1,88 @@
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
+import { useEffect, useMemo, useRef } from "react";
+import { useStore } from "zustand";
+
+import { useAccountAddress } from "@/hooks/use-account-address";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import { positionToUserEscrow } from "@/sdk/utils";
+
+import { globalUserTransactionStore } from "../transaction/store";
+import type { EscrowStore } from "./store";
+import { globalEscrowStore } from "./store";
+
+/**
+ * Set up the zustand store and react query hooks for the current user. If this hook is being
+ * rendered, it means it is actively listening to incoming transactions to know if it needs to
+ * fetch new data and update the latest escrow in the global store.
+ *
+ * Use this hook to fetch position data and sync it with app data.
+ * Use {@link useArenaEscrowStore} in individual components to get the latest escrow data.
+ */
+export const useSyncArenaEscrows = () => {
+  const accountAddress = useAccountAddress();
+
+  // Escrows from transaction submission data.
+  useSyncEscrowsFromTransactionStore(accountAddress);
+
+  // Escrows from position query data.
+  const escrowsFromPositions = useEscrowsFromPositions();
+
+  // Update the arena escrow store with whichever state is more recent between the query data
+  // and the global transaction store.
+  useEffect(() => {
+    if (accountAddress && escrowsFromPositions) {
+      globalEscrowStore.getState().pushIfLatest(accountAddress, ...escrowsFromPositions);
+    }
+  }, [accountAddress, escrowsFromPositions]);
+};
+
+function useEscrowsFromPositions() {
+  const { position } = useCurrentPositionQuery();
+  const { meleeInfo: info } = useCurrentMeleeInfo();
+  const { history } = useHistoricalPositionsQuery();
+
+  return useMemo(() => {
+    const positionWithInfo = position && info ? { ...position, ...info } : undefined;
+    return [positionWithInfo, ...history].filter((v) => !!v).map(positionToUserEscrow);
+  }, [info, position, history]);
+}
+
+/**
+ * See `useSyncBalanceFromTransactionStore` for a similar implementation and explanation.
+ * This essentially processes incoming transactions for the currently connected user, specifically
+ * for the arena escrow data.
+ * It then stores resulting escrows from the writeset changes in those transactions in the global
+ * escrow store.
+ */
+function useSyncEscrowsFromTransactionStore(address: `0x${string}` | undefined) {
+  const transactionsRef = useRef(
+    address && globalUserTransactionStore.getState().addresses.get(address)
+  );
+
+  useEffect(
+    () =>
+      globalUserTransactionStore.subscribe(
+        (state) => (transactionsRef.current = address && state.addresses.get(address)),
+        (newTransactions, _prevTransactions) => {
+          if (address && newTransactions) {
+            globalEscrowStore.getState().processTransactions(...newTransactions);
+          }
+        }
+      ),
+    [address]
+  );
+}
+
+export function useArenaEscrow(meleeID: bigint | undefined) {
+  const user = useAccountAddress();
+
+  return useArenaEscrowStore((s) => {
+    if (!user) return undefined;
+    return s.addressMap.get(user)?.get(meleeID ?? -1n);
+  });
+}
+
+function useArenaEscrowStore<T>(selector: (store: EscrowStore) => T): T {
+  return useStore(globalEscrowStore, selector);
+}
