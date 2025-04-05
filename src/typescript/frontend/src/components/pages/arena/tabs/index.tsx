@@ -11,15 +11,7 @@ import { InfoTab } from "./InfoTab";
 import { ProfileTab } from "./profile-tab/ProfileTab";
 
 const getTabs = (
-  {
-    market0,
-    market1,
-    history,
-    position,
-    setPosition,
-    setHistory,
-    arenaInfo,
-  }: ArenaPropsWithPositionHistoryAndEmojiData,
+  { market0, market1, position, setPosition, arenaInfo }: ArenaPropsWithPositionHistoryAndEmojiData,
   setSelectedTab: (tab: string) => void
 ) => [
   {
@@ -35,8 +27,6 @@ const getTabs = (
         {...{
           market0,
           market1,
-          history,
-          setHistory,
           position,
           goToEnter: () => setSelectedTab("Position"),
           arenaInfo,
