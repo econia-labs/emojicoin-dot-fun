@@ -12,7 +12,7 @@ import type { ArenaPositionModel, MarketStateModel } from "@/sdk/index";
 import { MessageContainer } from "../../emojicoin/components/chat/components";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
 import { useChatEventsQuery } from "../../emojicoin/components/chat/useChatEventsQuery";
-import { marketTernary } from "../utils";
+import { ifPositionTernary } from "../utils";
 
 interface Props {
   market0: MarketStateModel;
@@ -35,7 +35,7 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
   const side = useMemo(() => {
     if (!position || (position.emojicoin0Balance === 0n && position.emojicoin1Balance === 0n))
       return null;
-    return marketTernary(position, market0, market1);
+    return ifPositionTernary(position, market0, market1);
   }, [market0, market1, position]);
 
   const { sendChatMessage } = useChatBox(side?.market.marketAddress);
