@@ -51,7 +51,19 @@ export const createEventStore = () => {
     immer((set, get) => ({
       ...initialState(),
       ...initializeArenaStore(),
-      getMarket: (emojis) => get().markets.get(emojis.join("")),
+      getMarket: (emojis = []) => get().markets.get(emojis.join("")),
+      getMarketLatestState: (emojis = []) => {
+        const market = get().markets.get(emojis.join(""));
+        const latestState = market?.stateEvents.at(-1);
+        if (!market || !latestState) return undefined;
+        // TODO: Ensure volumes are properly propagated/set in state.
+        // For now, just return 0 if it's undefined.
+        return {
+          ...latestState,
+          dailyVolume: market.dailyVolume ?? 0n,
+          dailyBaseVolume: market.dailyBaseVolume ?? 0n,
+        };
+      },
       getRegisteredMarkets: () => {
         return get().markets;
       },
@@ -74,7 +86,10 @@ export const createEventStore = () => {
           const marketEmojis = e.market.symbolEmojis;
           const symbol = marketEmojis.join("");
           const market = get().markets.get(symbol);
-          // Filter by daily volume being undefined *or* the guid not already existing in `guids`.
+          // Filter by the current market store state's daily volume being undefined *or* the guid
+          // not already existing in `guids`.
+          // This to ensure that if `dailyVolume` is added, the data will still update, even if
+          // the guid already exists in state.
           return !market || typeof market.dailyVolume === "undefined" || !get().guids.has(symbol);
         });
         set((state) => {
