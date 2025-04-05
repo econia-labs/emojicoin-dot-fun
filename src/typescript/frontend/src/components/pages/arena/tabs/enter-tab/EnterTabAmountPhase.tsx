@@ -6,6 +6,8 @@ import { InputNumeric } from "@/components/inputs";
 import { AptosInputLabel } from "@/components/pages/emojicoin/components/trade-emojicoin/InputLabels";
 import type { MarketStateModel } from "@/sdk/index";
 
+import { useArenaPhaseStore } from "../../phase/store";
+
 const inputAndOutputStyles = `
     block text-[16px] font-normal h-[32px] outline-none w-full
     font-forma
@@ -17,9 +19,9 @@ const grayLabel = `
 
 export const EnterTabAmountPhase: React.FC<{
   market: MarketStateModel;
-  setAmount: (amount: bigint) => void;
-  nextPhase: () => void;
-}> = ({ market, setAmount, nextPhase }) => {
+}> = ({ market }) => {
+  const setAmount = useArenaPhaseStore((s) => s.setAmount);
+  const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const [innerAmount, setInnerAmount] = useState<bigint>(0n);
   return (
     <div className="grid place-items-center h-[100%]">
@@ -45,7 +47,7 @@ export const EnterTabAmountPhase: React.FC<{
           scale="lg"
           onClick={() => {
             setAmount(innerAmount);
-            nextPhase();
+            setPhase("lock");
           }}
           disabled={innerAmount <= 0n}
         >
