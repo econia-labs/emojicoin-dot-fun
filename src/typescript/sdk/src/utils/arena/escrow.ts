@@ -1,5 +1,4 @@
 import {
-  type Aptos,
   type MoveResource,
   parseTypeTag,
   type TypeTagStruct,
@@ -7,14 +6,19 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 
+import type {
+  ArenaInfoModel,
+  ArenaLeaderboardHistoryWithArenaInfoModel,
+  ArenaPositionModel,
+} from "../..";
 import type { AccountAddressString } from "../../emojicoin_dot_fun/types";
 import { type AnyNumberString, isWriteSetChangeWriteResource } from "../../types";
 import type { ArenaJsonTypes } from "../../types/arena-json-types";
 import { toEscrowResource } from "../../types/arena-types";
 import { toAccountAddressString } from "../account-address";
-import { getAccountResourcesWithInfo } from "../account-resources";
-import { getAptosClient } from "../aptos-client";
+import { maxBigInt } from "../compare-bigint";
 import { STRUCT_STRINGS } from "../type-tags";
+import { toArenaCoinTypes } from "./helpers";
 
 const isEscrowStruct = ({ value }: TypeTagStruct) => {
   const { address, moduleName, name } = value;
@@ -22,10 +26,21 @@ const isEscrowStruct = ({ value }: TypeTagStruct) => {
   return STRUCT_STRINGS["Escrow"] === structString;
 };
 
+/**
+ * NOTE: The `matchAmount` for historical positions queried from the indexer are populated with
+ * -1n to indicate they're invalid. They're not used in the app so it's fine- but it's good to
+ * note here in case of any future confusion.
+ */
+const SUBSTITUTE_MATCH_AMOUNT_FOR_HISTORICAL = -1n;
+
+/**
+ * Any user escrow— including historical ones.
+ */
 export type UserEscrow = {
   version: bigint;
-  user: AccountAddressString;
+  user: `0x${string}`;
   meleeID: bigint;
+  open: boolean;
   emojicoin0: bigint;
   emojicoin1: bigint;
   matchAmount: bigint;
@@ -54,13 +69,17 @@ export const parseResourceForEscrow = <T extends MoveResource>({
 }): UserEscrow | null => {
   const { type } = resource;
   if (isEscrowResource(resource)) {
-    const escrow = toEscrowResource(resource);
+    const { meleeID, emojicoin0, emojicoin1, matchAmount } = toEscrowResource(resource);
     const typeTag = parseTypeTag(type);
     if (typeTag.isStruct() && isEscrowStruct(typeTag)) {
       const innerTags = typeTag.value.typeArgs;
       if (innerTags.every((v) => v.isStruct()) && innerTags.length === 4) {
         return {
-          ...escrow,
+          meleeID,
+          open: emojicoin0 !== 0n && emojicoin1 !== 0n,
+          emojicoin0,
+          emojicoin1,
+          matchAmount,
           user: address,
           version: BigInt(version),
           coinTypes: innerTags as [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct],
@@ -85,19 +104,36 @@ export const findEscrowsInTxn = ({ version, changes }: UserTransactionResponse) 
     )
     .filter((v) => !!v);
 
-/**
- * Fetch all Escrow resources the user owns.
- */
-export const fetchUserArenaEscrows = async (
-  accountAddress: AccountAddressString,
-  aptosIn: Aptos = getAptosClient()
-) =>
-  await getAccountResourcesWithInfo({
-    aptosConfig: aptosIn?.config,
-    accountAddress,
-  }).then((resources) =>
-    resources
-      .map((resource) => ({ address: accountAddress, ...resource }))
-      .map(parseResourceForEscrow)
-      .filter((v) => !!v)
-  );
+type PositionAndInfo = ArenaPositionModel & ArenaInfoModel;
+type ArenaCoinTypeStructs = [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct];
+
+// Convert a user's current and historical positions to `UserEscrow` types.
+export const positionToUserEscrow = (
+  pos: PositionAndInfo | ArenaLeaderboardHistoryWithArenaInfoModel
+): UserEscrow => {
+  const { user, meleeID, emojicoin0Balance: emojicoin0, emojicoin1Balance: emojicoin1 } = pos;
+
+  const coinTypes = toArenaCoinTypes({
+    symbol0: pos.emojicoin0Symbols,
+    symbol1: pos.emojicoin1Symbols,
+  }).filter((t) => t.isStruct()) as ArenaCoinTypeStructs;
+
+  const sharedArgs = { user, meleeID, emojicoin0, emojicoin1, coinTypes };
+
+  return "open" in pos
+    ? {
+        ...sharedArgs,
+        version: pos.version,
+        open: pos.open,
+        matchAmount: pos.matchAmount,
+      }
+    : {
+        ...sharedArgs,
+        version: maxBigInt(
+          pos.arenaInfoLastTransactionVersion,
+          pos.leaderboardHistoryLastTransactionVersion
+        ),
+        open: !pos.exited,
+        matchAmount: SUBSTITUTE_MATCH_AMOUNT_FOR_HISTORICAL,
+      };
+};

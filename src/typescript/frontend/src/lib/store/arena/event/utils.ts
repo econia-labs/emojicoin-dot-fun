@@ -10,8 +10,8 @@ import {
 } from "@/sdk/types/arena-types";
 import { toNominal } from "@/sdk/utils";
 
-import { toBar } from "../event/candlestick-bars";
-import { callbackClonedLatestBarIfSubscribed } from "../utils";
+import { toBar } from "../../event/candlestick-bars";
+import { callbackClonedLatestBarIfSubscribed } from "../../utils";
 import type { MeleeState } from "./store";
 
 export const getMeleeIDFromArenaModel = (model: ArenaModelWithMeleeID): bigint => {

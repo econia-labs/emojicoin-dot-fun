@@ -28,7 +28,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   const setIsLoadingRegisteredMarket = useEmojiPicker(
     (state) => state.setIsLoadingRegisteredMarket
   );
-  const { aptBalance, refetchIfStale, aptos, account } = useAptos();
+  const { aptBalance, refetchBalance, aptos, account } = useAptos();
   const { sequenceNumber } = useAccountSequenceNumber(aptos, account);
 
   const { registerMarket, cost } = useRegisterMarket(sequenceNumber);
@@ -56,7 +56,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   }, [emojis]);
 
   useEffect(() => {
-    refetchIfStale("apt");
+    refetchBalance("apt");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
 

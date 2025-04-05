@@ -132,13 +132,13 @@ export class WebSocketClient {
   public subscribeEvents(
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
     arena?: {
-      baseEvents?: boolean;
+      arenaBaseEvents?: boolean;
       arenaPeriodRequest?: ArenaPeriodRequest;
     }
   ) {
     const newTypes = new Set(ensureArray(input));
     newTypes.forEach((e) => this.subscriptions.eventTypes.add(e));
-    this.subscriptions.arena = !!arena?.baseEvents;
+    this.subscriptions.arena = !!arena?.arenaBaseEvents;
     this.arenaPeriodRequest = arena?.arenaPeriodRequest;
   }
 
@@ -146,13 +146,13 @@ export class WebSocketClient {
   public unsubscribeEvents(
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
     arena?: {
-      baseEvents?: boolean;
+      arenaBaseEvents?: boolean;
       arenaPeriodRequest?: ArenaPeriodRequest;
     }
   ) {
     const newTypes = new Set(ensureArray(input));
     newTypes.forEach((e) => this.subscriptions.eventTypes.delete(e));
-    this.subscriptions.arena = !arena?.baseEvents;
+    this.subscriptions.arena = !arena?.arenaBaseEvents;
     this.arenaPeriodRequest = arena?.arenaPeriodRequest;
   }
 

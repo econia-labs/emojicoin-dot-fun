@@ -24,12 +24,12 @@ import {
 } from "@/sdk/types/arena-types";
 import { DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
 
-import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
+import { ensureMeleeInStore, initializeArenaStore } from "../arena/event/store";
 import {
   getMeleeIDFromArenaModel,
   handleLatestBarForArenaCandlestick,
   toMappedMelees,
-} from "../arena/utils";
+} from "../arena/event/utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import {
   cleanReadLocalStorage,
@@ -51,7 +51,20 @@ export const createEventStore = () => {
     immer((set, get) => ({
       ...initialState(),
       ...initializeArenaStore(),
-      getMarket: (emojis) => get().markets.get(emojis.join("")),
+      getMarket: (emojis = []) => get().markets.get(emojis.join("")),
+      getMarketLatestState: (emojis = []) => {
+        const market = get().markets.get(emojis.join(""));
+        const latestState = market?.stateEvents.at(-1);
+        if (!market || !latestState) return undefined;
+        // Note that volumes are only properly propagated/set in state when `loadMarketStateFromServer` is
+        // called. The volumes are optional because sometimes they're missing when data is loaded
+        // from live events rather than as a result of the indexer view with daily volumes.
+        return {
+          ...latestState,
+          dailyVolume: market.dailyVolume ?? 0n,
+          dailyBaseVolume: market.dailyBaseVolume ?? 0n,
+        };
+      },
       getRegisteredMarkets: () => {
         return get().markets;
       },
@@ -74,7 +87,10 @@ export const createEventStore = () => {
           const marketEmojis = e.market.symbolEmojis;
           const symbol = marketEmojis.join("");
           const market = get().markets.get(symbol);
-          // Filter by daily volume being undefined *or* the guid not already existing in `guids`.
+          // Filter by the current market store state's daily volume being undefined *or* the guid
+          // not already existing in `guids`.
+          // This to ensure that if `dailyVolume` is added, the data will still update, even if
+          // the guid already exists in state.
           return !market || typeof market.dailyVolume === "undefined" || !get().guids.has(symbol);
         });
         set((state) => {

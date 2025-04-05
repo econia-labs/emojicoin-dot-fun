@@ -11,21 +11,13 @@ import { InfoTab } from "./InfoTab";
 import { ProfileTab } from "./profile-tab/ProfileTab";
 
 const getTabs = (
-  {
-    market0,
-    market1,
-    history,
-    position,
-    setPosition,
-    setHistory,
-    arenaInfo,
-  }: ArenaPropsWithPositionHistoryAndEmojiData,
+  { market0, market1, position, arenaInfo }: ArenaPropsWithPositionHistoryAndEmojiData,
   setSelectedTab: (tab: string) => void
 ) => [
   {
     name: "Position",
     emoji: emoji("smiling face with horns"),
-    element: <EnterTab {...{ market0, market1, position, setPosition }} />,
+    element: <EnterTab />,
   },
   {
     name: "Profile",
@@ -35,8 +27,6 @@ const getTabs = (
         {...{
           market0,
           market1,
-          history,
-          setHistory,
           position,
           goToEnter: () => setSelectedTab("Position"),
           arenaInfo,
@@ -47,7 +37,7 @@ const getTabs = (
   {
     name: "Chat",
     emoji: emoji("left speech bubble"),
-    element: <ChatTab position={position} market0={market0} market1={market1} />,
+    element: <ChatTab market0={market0} market1={market1} />,
   },
   {
     name: "Info",

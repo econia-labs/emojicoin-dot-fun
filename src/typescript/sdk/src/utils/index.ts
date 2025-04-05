@@ -1,5 +1,4 @@
 export * from "./account-address";
-export * from "./account-resources";
 export * from "./aptos-client";
 export * from "./aptos-utils";
 export * from "./arena";

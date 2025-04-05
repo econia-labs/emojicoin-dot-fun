@@ -43,6 +43,8 @@ const nextConfig = {
    * @see {@link https://nextjs.org/docs/app/api-reference/config/next-config-js/staleTimes#version-history}
    */
   experimental: {
+    // Use turbo when running/building locally. Since it's experimental, avoid it in production.
+    turbo: process.env.NODE_ENV === "development" ? {} : undefined,
     staleTimes: {
       dynamic: 0, // Default is normally 30s.
       static: 60, // Default is normally 180s.
