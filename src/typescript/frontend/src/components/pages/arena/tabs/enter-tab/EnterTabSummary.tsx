@@ -29,7 +29,7 @@ export const EnterTabSummary: React.FC<{
   const [isTappingOut, setIsTappingOut] = useState<boolean>(false);
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const { account, submit } = useAptos();
-  const { market0, market1 } = useCurrentMeleeInfo();
+  const { market0, market1, symbol0, symbol1 } = useCurrentMeleeInfo();
   const exitTransactionBuilder = useExitTransactionBuilder(
     market0?.market.marketAddress,
     market1?.market.marketAddress
@@ -91,14 +91,10 @@ export const EnterTabSummary: React.FC<{
       {isSwapping && (
         <BlurModal close={() => setIsSwapping(false)}>
           <div className="flex flex-col justify-between items-center h-[100%] py-[3em]">
-            {market0 && market1 ? (
+            {symbol0 && symbol1 ? (
               <GlowingEmoji
                 className="text-6xl mt-[1em]"
-                emojis={ifEscrowTernary(
-                  escrow,
-                  market1.market.symbolEmojis.join(""),
-                  market0.market.symbolEmojis.join("")
-                )}
+                emojis={ifEscrowTernary(escrow, symbol1, symbol0)}
               />
             ) : (
               <AnimatedLoadingBoxes numSquares={4} />

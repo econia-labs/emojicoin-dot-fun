@@ -3,22 +3,24 @@ import { useEnterTransactionBuilder } from "lib/hooks/transaction-builders/use-e
 import { useState } from "react";
 
 import Button from "@/components/button";
-import { FormattedNumber } from "@/components/FormattedNumber";
 import ButtonWithConnectWalletFallback from "@/components/header/wallet-button/ConnectWalletButton";
 import { Switcher } from "@/components/switcher";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { MarketStateModel } from "@/sdk/index";
 
+import { useArenaPhaseStore } from "../../phase/store";
 import { FormattedAndNominalized } from "../utils";
 
 export const EnterTabLockPhase: React.FC<{
   market: MarketStateModel;
   amount: bigint;
-  errorOut: () => void;
-}> = ({ market, amount, errorOut }) => {
+}> = ({ market, amount }) => {
   const [innerLock, setInnerLock] = useState<boolean>(false);
   const { account, submit } = useAptos();
   const { market0, market1 } = useCurrentMeleeInfo();
+  const setPhase = useArenaPhaseStore((s) => s.setPhase);
+  const setError = useArenaPhaseStore((s) => s.setError);
+
   const transactionBuilder = useEnterTransactionBuilder(
     amount,
     innerLock,
@@ -58,7 +60,8 @@ export const EnterTabLockPhase: React.FC<{
                 if (!account) return;
                 submit(transactionBuilder).then((res) => {
                   if (!res || res?.error) {
-                    errorOut();
+                    setPhase("pick");
+                    setError(true);
                   }
                 });
               }}

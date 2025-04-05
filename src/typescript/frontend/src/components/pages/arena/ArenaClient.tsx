@@ -53,10 +53,7 @@ const Desktop = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) =>
       }}
     >
       <Box className="grid place-items-center">
-        <EmojiTitle
-          market0Symbols={market0.market.symbolEmojis}
-          market1Symbols={market1.market.symbolEmojis}
-        />
+        <EmojiTitle />
       </Box>
       <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
@@ -84,10 +81,7 @@ const Mobile = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) => 
     <>
       <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
         <Box className="grid place-items-center gap-[1em] py-[1em]">
-          <EmojiTitle
-            market0Symbols={market0.market.symbolEmojis}
-            market1Symbols={market1.market.symbolEmojis}
-          />
+          <EmojiTitle />
           <div className="text-4xl">
             <Countdown
               startTime={arenaInfo.startTime}
