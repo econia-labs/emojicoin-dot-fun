@@ -6,9 +6,9 @@ import { Emoji } from "utils/emoji";
 
 import type { ArenaPropsWithPositionHistoryAndEmojiData } from "../utils";
 import { ChatTab } from "./ChatTab";
-import { EnterTab } from "./EnterTab";
+import { EnterTab } from "./enter-tab/EnterTab";
 import { InfoTab } from "./InfoTab";
-import { ProfileTab } from "./ProfileTab";
+import { ProfileTab } from "./profile-tab/ProfileTab";
 
 const getTabs = (
   {
