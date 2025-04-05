@@ -21,6 +21,7 @@ import {
   isArenaMeleeModel,
   isArenaModelWithMeleeID,
   isArenaSwapModel,
+  isArenaVaultBalanceUpdateModel,
 } from "@/sdk/types/arena-types";
 import { DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
 
@@ -67,6 +68,11 @@ export const createEventStore = () => {
           );
           ensureMeleeInStore(state, info.meleeID);
           state.meleeMap.set(arenaSymbol, info.meleeID);
+        });
+      },
+      loadVaultBalance: (vaultBalance) => {
+        set((state) => {
+          state.vaultBalance = vaultBalance;
         });
       },
       loadMarketStateFromServer: (states) => {
@@ -173,14 +179,27 @@ export const createEventStore = () => {
                   const melee = state.melees.get(meleeID)!;
                   if (isArenaMeleeModel(event)) {
                     state.meleeEvents.unshift(event);
+                    if (state.arenaInfoFromServer) {
+                      state.arenaInfoFromServer.rewardsRemaining = event.melee.availableRewards;
+                    }
                   } else if (isArenaEnterModel(event)) {
                     melee.enters.unshift(event);
+                    if (state.arenaInfoFromServer) {
+                      state.arenaInfoFromServer.rewardsRemaining -= event.enter.matchAmount;
+                    }
                   } else if (isArenaExitModel(event)) {
                     melee.exits.unshift(event);
+                    if (state.arenaInfoFromServer) {
+                      state.arenaInfoFromServer.rewardsRemaining += event.exit.tapOutFee;
+                    }
                   } else if (isArenaSwapModel(event)) {
                     melee.swaps.unshift(event);
                   } else if (isArenaCandlestickModel(event)) {
                     handleLatestBarForArenaCandlestick(melee, event);
+                  }
+                } else if (isArenaVaultBalanceUpdateModel(event)) {
+                  if (state.vaultBalance !== undefined) {
+                    state.vaultBalance = event.arenaVaultBalanceUpdate.newBalance;
                   }
                 }
               }

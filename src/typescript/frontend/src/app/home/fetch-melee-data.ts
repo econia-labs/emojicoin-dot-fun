@@ -2,7 +2,7 @@ import FEATURE_FLAGS from "lib/feature-flags";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
-import { fetchArenaInfo, fetchSpecificMarkets } from "@/sdk/indexer-v2";
+import { fetchArenaInfo, fetchSpecificMarkets, fetchVaultBalance } from "@/sdk/indexer-v2";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
@@ -10,6 +10,7 @@ const logAndDefault = (e: unknown) => {
     arenaInfo: null,
     market0: null,
     market1: null,
+    vaultBalance: null,
   } as const;
 };
 
@@ -33,7 +34,14 @@ const fetchMeleeData = async () => {
     if (!market0 || !market1) {
       throw new Error("Couldn't fetch arena markets.");
     }
-    return { arenaInfo, market0, market1 };
+
+    const vaultBalance = await fetchVaultBalance({});
+    return {
+      arenaInfo,
+      market0,
+      market1,
+      vaultBalance: vaultBalance ? vaultBalance.arenaVaultBalanceUpdate.newBalance : 0n,
+    };
   } catch (e) {
     return logAndDefault(e);
   }

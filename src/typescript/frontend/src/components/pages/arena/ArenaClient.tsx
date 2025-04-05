@@ -48,8 +48,25 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
 
 const chartBoxClassName: ClassValue = "relative w-full h-full col-start-1 col-end-3";
 
+const useRewardsRemaining = () => {
+  return useEventStore((s) => {
+    if (s.arenaInfoFromServer !== undefined) {
+      if (s.vaultBalance !== undefined) {
+        return s.arenaInfoFromServer.rewardsRemaining > s.vaultBalance
+          ? s.vaultBalance
+          : s.arenaInfoFromServer.rewardsRemaining;
+      } else {
+        return s.arenaInfoFromServer.rewardsRemaining;
+      }
+    } else {
+      return 0n;
+    }
+  });
+};
+
 const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
   const { arenaInfo, market0, market1 } = props;
+  const rewardsRemaining = useRewardsRemaining();
   return (
     <div
       className="grid h-[90%] w-full p-[2em] gap-[2em]"
@@ -67,7 +84,7 @@ const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
       <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
-      <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
+      <RewardsRemainingBox rewardsRemaining={rewardsRemaining ?? 0n} />
       <Box className={chartBoxClassName}>
         <ChartContainer
           symbol={market0.market.symbolData.symbol}
@@ -84,6 +101,7 @@ const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
 
 const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
   const { arenaInfo, market0, market1 } = props;
+  const rewardsRemaining = useRewardsRemaining();
   return (
     <>
       <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
@@ -99,7 +117,7 @@ const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
             />
           </div>
         </Box>
-        <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
+        <RewardsRemainingBox rewardsRemaining={rewardsRemaining ?? 0n} />
         <Box className="h-[500px]">
           <Box className={chartBoxClassName}>
             <ChartContainer
@@ -119,7 +137,10 @@ export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
   const { account } = useAptos();
   const router = useRouter();
-  const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
+  const { loadArenaInfoFromServer, loadVaultBalance } = useEventStore((s) => ({
+    loadArenaInfoFromServer: s.loadArenaInfoFromServer,
+    loadVaultBalance: s.loadVaultBalance,
+  }));
 
   // Undefined while loading. Null means no position
   const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
@@ -132,6 +153,10 @@ export const ArenaClient = (props: ArenaProps) => {
       loadArenaInfoFromServer(props.arenaInfo);
     }
   }, [loadArenaInfoFromServer, props.arenaInfo]);
+
+  useEffect(() => {
+    loadVaultBalance(props.vaultBalance);
+  }, [loadVaultBalance, props.vaultBalance]);
 
   const latestMeleeID = useLatestMeleeID();
 
