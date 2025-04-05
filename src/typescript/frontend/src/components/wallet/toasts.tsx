@@ -12,6 +12,7 @@ import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
 
 import { PeriodDuration } from "@/sdk/const";
+import { ARENA_MODULE_NAME } from "@/sdk/index";
 import { getPeriodStartTimeFromTime, truncateAddress } from "@/sdk/utils/misc";
 
 const debouncedToastKey = (s: string, debouncePeriod: PeriodDuration) => {
@@ -130,5 +131,40 @@ export const successfulTransactionToast = (
     toastId: debouncedToastKey("transaction-success", PeriodDuration.PERIOD_1M),
     className: "cursor-text",
     closeOnClick: false,
+  });
+};
+
+export const crankedArenaMeleeToast = (functionName: `${string}::${string}::${string}`) => {
+  const tryingToEnter = functionName.endsWith(`::${ARENA_MODULE_NAME}::enter`);
+  const message = (
+    <div className="flex flex-col gap-[1em]">
+      <div className="text-[1em] text-white text-center">You just cranked the melee!</div>
+      <div className="text-sm font-forma text-lighter-gray leading-6">
+        In order for the next melee to start, a user has to crank the package. You happened to be
+        the first one to crank the melee!
+      </div>
+      <div className="text-sm font-forma text-white leading-6">
+        {tryingToEnter ? (
+          <>
+            <span>
+              As a result, <span className="text-warning">you were not entered</span> into the
+              previous melee, and no funds were moved.
+            </span>
+          </>
+        ) : (
+          <span>
+            Your position was <span className="text-ec-blue">successfully exited</span>.
+          </span>
+        )}
+      </div>
+    </div>
+  );
+  toast.dark(message, {
+    ...DEFAULT_TOAST_CONFIG,
+    pauseOnHover: true,
+    autoClose: 15000,
+    toastId: debouncedToastKey("cranked", PeriodDuration.PERIOD_15S),
+    className: "cursor-text",
+    closeOnClick: true,
   });
 };
