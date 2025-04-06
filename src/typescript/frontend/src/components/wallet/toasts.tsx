@@ -136,7 +136,9 @@ export const successfulTransactionToast = (
 
 export const crankedArenaMeleeToast = (response: UserTransactionResponse, network: NetworkInfo) => {
   if (!isEntryFunctionUserTransactionResponse(response))
-    throw new Error("This should never occur.");
+    throw new Error(
+      "This should never occur. It's just a type guard assertion to narrow the type."
+    );
   const tryingToEnter = response.payload.function.endsWith(`::${ARENA_MODULE_NAME}::enter`);
   const message = (
     <div className="flex flex-col gap-[1em] !letter-spacing-[1em]">

@@ -7,7 +7,7 @@ import type { MarketStateModel, UserEscrow } from "@/sdk/index";
 import { q64ToBig } from "@/sdk/index";
 
 import { ifEscrowTernary } from "../../../utils";
-import { FormattedAndNominalized } from "../../utils";
+import { FormattedNominalNumber } from "../../utils";
 
 export function EscrowAptValue({
   escrow,
@@ -54,7 +54,7 @@ export function AptDisplay({
   return amount === undefined || loading ? (
     <AnimatedLoadingBoxes numSquares={4} />
   ) : (
-    <FormattedAndNominalized
+    <FormattedNominalNumber
       className={cn("font-forma text-5xl text-white", className)}
       value={amount}
       suffix=" APT"

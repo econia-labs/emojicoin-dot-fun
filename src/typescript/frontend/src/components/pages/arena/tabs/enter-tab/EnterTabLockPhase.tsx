@@ -9,7 +9,7 @@ import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { MarketStateModel } from "@/sdk/index";
 
 import { useArenaPhaseStore } from "../../phase/store";
-import { FormattedAndNominalized } from "../utils";
+import { FormattedNominalNumber } from "../utils";
 
 export default function EnterTabLockPhase({
   market,
@@ -46,11 +46,11 @@ export default function EnterTabLockPhase({
       <div className="max-w-[350px] w-[100%]">
         <div className="flex justify-between p-[0.8em] rounded-[3px] bg-ec-blue text-2xl text-black uppercase">
           <div>Deposit amount</div>
-          <FormattedAndNominalized value={amount} suffix=" APT" />
+          <FormattedNominalNumber value={amount} suffix=" APT" />
         </div>
         <div className="flex uppercase justify-between text-2xl text-light-gray py-[0.8em] mx-[0.8em] border-dashed border-b-[1px] border-light-gray ">
           <div>Match amount</div>
-          <FormattedAndNominalized
+          <FormattedNominalNumber
             value={innerLock ? BigInt(Math.floor(Math.min(5 * 10 ** 8, Number(amount / 2n)))) : 0n}
             suffix=" APT"
           />

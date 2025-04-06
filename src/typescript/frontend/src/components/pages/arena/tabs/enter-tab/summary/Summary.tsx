@@ -12,7 +12,7 @@ import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { UserEscrow } from "@/sdk/index";
 
 import { ifLockedTernary } from "../../../utils";
-import { FormattedAndNominalized } from "../../utils";
+import { FormattedNominalNumber } from "../../utils";
 import { AptDisplay, EscrowAptValue } from "./utils";
 
 export default function Summary({
@@ -86,7 +86,7 @@ export default function Summary({
           <div className="flex flex-col items-end">
             <div className="text-light-gray uppercase text-2xl tracking-wider">Matched</div>
             {escrow.matchAmount ? (
-              <FormattedAndNominalized
+              <FormattedNominalNumber
                 className="font-forma text-white text-lg mr-1"
                 value={escrow.matchAmount}
                 prefix="+"
