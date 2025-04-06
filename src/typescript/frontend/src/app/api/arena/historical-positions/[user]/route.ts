@@ -3,7 +3,7 @@ import FEATURE_FLAGS from "lib/feature-flags";
 import { waitForVersionCached } from "lib/queries/latest-emojicoin-version";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { fetchArenaLeaderboardHistoryWithArenaInfo } from "@/queries/arena";
+import { fetchArenaLeaderboardHistoryWithArenaInfoJson } from "@/queries/arena";
 import { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 
 const ROWS_RETURNED = 100;
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return new NextResponse("Invalid address.", { status: 400 });
   }
 
-  const positions = await fetchArenaLeaderboardHistoryWithArenaInfo({
+  const positions = await fetchArenaLeaderboardHistoryWithArenaInfoJson({
     user,
     page: 1,
     pageSize: ROWS_RETURNED,

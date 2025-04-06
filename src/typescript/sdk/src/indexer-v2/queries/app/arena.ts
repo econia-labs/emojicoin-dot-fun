@@ -107,16 +107,13 @@ const selectArenaCandlesticksSince = ({
 };
 
 export const fetchMelee = queryHelperSingle(selectMelee, toArenaMeleeModel);
-export const fetchArenaInfo = queryHelperSingle(selectArenaInfo);
+export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoModel);
 export const fetchArenaInfoByMeleeID = queryHelperSingle(
   selectArenaInfoByMeleeID,
   toArenaInfoModel
 );
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
-export const fetchLatestPosition = queryHelperSingle(selectLatestPosition);
-export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
-  selectArenaLeaderboardHistoryWithInfo
-);
+export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionModel);
 export const fetchMarketStateByAddress = queryHelperSingle(
   selectMarketStateByAddress,
   toMarketStateModel
@@ -124,4 +121,10 @@ export const fetchMarketStateByAddress = queryHelperSingle(
 export const fetchArenaCandlesticksSince = queryHelper(
   selectArenaCandlesticksSince,
   toArenaCandlestickModel
+);
+
+export const fetchLatestPositionJson = queryHelperSingle(selectLatestPosition);
+export const fetchArenaInfoJson = queryHelperSingle(selectArenaInfo);
+export const fetchArenaLeaderboardHistoryWithArenaInfoJson = queryHelper(
+  selectArenaLeaderboardHistoryWithInfo
 );
