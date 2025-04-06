@@ -20,7 +20,7 @@ export type ProfileTabProps = {
 
 const headerFlexColClass = "flex flex-col justify-evenly";
 const headerTitleClass = "text-light-gray text-xl uppercase text-nowrap";
-const headerValueClass = "text-white text-4xl font-forma uppercase";
+const headerValueClass = "text-white text-3xl font-forma uppercase";
 const MeleeStatsHyphens = () => <div className={headerValueClass}>{"--"}</div>;
 
 const CurrentMeleeStats = () => {
@@ -138,7 +138,7 @@ const Inner = (
   );
 };
 
-export const ProfileTab = (props: ProfileTabProps & { goToEnter: () => void }) => {
+export default function ProfileTab(props: ProfileTabProps & { goToEnter: () => void }) {
   const [historyHidden, setHistoryHidden] = useState<boolean>(false);
   const { position } = useCurrentPositionQuery();
   const { history } = useHistoricalPositionsQuery();
@@ -157,4 +157,4 @@ export const ProfileTab = (props: ProfileTabProps & { goToEnter: () => void }) =
       <Inner {...props} historyHidden={historyHidden} setHistoryHidden={setHistoryHidden} />
     </div>
   );
-};
+}

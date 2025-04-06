@@ -143,7 +143,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           if (!functionName.endsWith("register_market")) {
             // Toast for the crank if it's there.
             if (awaitedResponse.events.find((e) => e.type === STRUCT_STRINGS.ArenaMeleeEvent)) {
-              crankedArenaMeleeToast(functionName);
+              crankedArenaMeleeToast(awaitedResponse, network);
             } else {
               // Otherwise, a normal successful txn toast.
               successfulTransactionToast(awaitedResponse, network);

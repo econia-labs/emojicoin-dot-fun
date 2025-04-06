@@ -9,6 +9,7 @@ import { Emoji } from "utils/emoji";
 import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "@/components/FormattedNumber";
 import Info from "@/components/info";
+import { Loading } from "@/components/loading";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
@@ -120,7 +121,7 @@ export function CurrentMeleeBreakdown({
   close: () => void;
 }) {
   const { position } = useCurrentPositionQuery();
-  const { pnl } = useArenaProfileStats(position);
+  const { pnl } = useArenaProfileStats();
   const { market0, market1 } = useCurrentMeleeInfo();
   const marketLastHeld = useMemo(() => {
     if (!position || !market0 || !market1) return undefined;
@@ -191,17 +192,20 @@ export const MeleeBreakdown = ({
   goToEnter?: () => void;
   close: () => void;
 }) => {
-  const { position } = useCurrentPositionQuery();
+  const { position, isFetching } = useCurrentPositionQuery();
   const { history } = useHistoricalPositionsQuery();
 
-  if (!position && selectedRow === undefined)
-    return (
+  if (!position && selectedRow === undefined) {
+    return isFetching ? (
+      <Loading />
+    ) : (
       <div className="grid place-items-center h-[100%] w-[100%]">
         <Button scale="lg" onClick={goToEnter}>
           {"Enter now"}
         </Button>
       </div>
     );
+  }
 
   if (selectedRow === undefined) return <></>;
 

@@ -16,6 +16,7 @@ export const useCurrentMeleeInfo = () => {
   const market1 = useEventStore((s) => s.getMarketLatestState(info?.emojicoin1Symbols));
   const selection = useArenaPhaseStore((s) => s.selectedMarket);
 
+  // Note this is *not* the market in the escrow- it's what's selected in the UI.
   const { selectedMarket, symbol0, symbol1 } = useMemo(() => {
     return {
       selectedMarket: selection === 0 ? market0 : selection === 1 ? market1 : undefined,

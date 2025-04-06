@@ -17,9 +17,7 @@ const grayLabel = `
     pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
   `;
 
-export const EnterTabAmountPhase: React.FC<{
-  market: MarketStateModel;
-}> = ({ market }) => {
+export default function EnterTabAmountPhase({ market }: { market: MarketStateModel }) {
   const setAmount = useArenaPhaseStore((s) => s.setAmount);
   const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const [innerAmount, setInnerAmount] = useState<bigint>(0n);
@@ -56,7 +54,7 @@ export const EnterTabAmountPhase: React.FC<{
       </div>
     </div>
   );
-};
+}
 
 function InnerWrapper({ children }: React.PropsWithChildren) {
   return (

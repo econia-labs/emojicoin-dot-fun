@@ -7,9 +7,8 @@ import { useEffect, useMemo, useRef } from "react";
 import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
 import { Column, Flex } from "@/components/layout";
 import { LoadMore } from "@/components/ui/table/loadMore";
-import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { MarketStateModel } from "@/sdk/index";
-import { useArenaEscrow } from "@/store/escrow/hooks";
+import { useCurrentEscrow } from "@/store/escrow/hooks";
 
 import { MessageContainer } from "../../emojicoin/components/chat/components";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
@@ -21,7 +20,7 @@ interface Props {
   market1: MarketStateModel;
 }
 
-export const ChatTab = ({ market0, market1 }: Props) => {
+export default function ChatTab({ market0, market1 }: Props) {
   const setMode = useEmojiPicker((state) => state.setMode);
   const chats = useChatEventsQuery({
     marketID: [market0.market.marketID.toString(), market1.market.marketID.toString()],
@@ -32,8 +31,7 @@ export const ChatTab = ({ market0, market1 }: Props) => {
   const market1chatsFromStore = useEventStore(
     (s) => s.getMarket(market1.market.symbolEmojis)?.chatEvents ?? []
   );
-  const { meleeInfo } = useCurrentMeleeInfo();
-  const escrow = useArenaEscrow(meleeInfo?.meleeID);
+  const escrow = useCurrentEscrow();
 
   const side = useMemo(() => {
     if (!escrow || !escrow.open) return null;
@@ -105,4 +103,4 @@ export const ChatTab = ({ market0, market1 }: Props) => {
       )}
     </Column>
   );
-};
+}

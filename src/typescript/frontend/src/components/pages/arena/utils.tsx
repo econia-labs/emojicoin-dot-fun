@@ -4,7 +4,7 @@ import { GlowingEmoji } from "utils/emoji";
 
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
-import type { UserEscrow } from "@/sdk/index";
+import type { HistoricalEscrow, UserEscrow } from "@/sdk/index";
 import type { ArenaInfoModel, ArenaPositionModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 
 export type ArenaProps = {
@@ -80,11 +80,11 @@ export const EmojiTitle = ({
 };
 
 /** If the escrow/position is on market0, return option0, else return option1 */
-export function ifEscrowTernary<T>(escrow: UserEscrow, option0: T, option1: T) {
+export function ifEscrowTernary<T>(escrow: UserEscrow | HistoricalEscrow, option0: T, option1: T) {
   return escrow.emojicoin0 > 0n ? option0 : option1;
 }
 
 /** If the position is locked, return option0, else return option1 */
-export function ifLockedTernary<T>(position: UserEscrow, option0: T, option1: T) {
-  return position.matchAmount > 0n ? option0 : option1;
+export function ifLockedTernary<T>(escrow: UserEscrow, option0: T, option1: T) {
+  return escrow.lockedIn ? option0 : option1;
 }

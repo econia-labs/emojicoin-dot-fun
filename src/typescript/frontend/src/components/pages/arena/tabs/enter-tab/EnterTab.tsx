@@ -9,18 +9,17 @@ import ProgressBar from "@/components/ProgressBar";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
 import type { UserEscrow } from "@/sdk/index";
-import { useArenaEscrow } from "@/store/escrow/hooks";
+import { useCurrentEscrow } from "@/store/escrow/hooks";
 
 import { useArenaPhaseStore } from "../../phase/store";
-import { EnterTabAmountPhase } from "./EnterTabAmountPhase";
-import { EnterTabLockPhase } from "./EnterTabLockPhase";
-import { EnterTabPickPhase } from "./EnterTabPickPhase";
-import { EnterTabSummary } from "./EnterTabSummary";
+import EnterTabAmountPhase from "./EnterTabAmountPhase";
+import EnterTabLockPhase from "./EnterTabLockPhase";
+import EnterTabPickPhase from "./EnterTabPickPhase";
+import EnterTabSummary from "./summary/EnterTabSummary";
 
 type Phase = "pick" | "amount" | "lock" | "summary";
 
-export const EnterTab = () => {
-  const selection = useArenaPhaseStore((s) => s.selectedMarket);
+export default function EnterTab() {
   const { selectedMarket: market } = useCurrentMeleeInfo();
   const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const setMarket = useArenaPhaseStore((s) => s.setMarket);
@@ -28,34 +27,24 @@ export const EnterTab = () => {
   const amount = useArenaPhaseStore((s) => s.amount);
 
   const latestMeleeID = useLatestMeleeID();
-  const { meleeInfo } = useCurrentMeleeInfo();
-  const { position } = useCurrentPositionQuery();
-  const escrow = useArenaEscrow(meleeInfo?.meleeID);
+  const { position, isLoading } = useCurrentPositionQuery();
+  const escrow = useCurrentEscrow();
 
   const { account } = useAptos();
 
   useEffect(() => {
-    if (account && position && position.meleeID >= latestMeleeID) {
+    if (position && position.open && position.meleeID >= latestMeleeID) {
       setPhase("summary");
-    } else {
+    } else if (!position?.open) {
       setPhase("pick");
     }
   }, [account, position, latestMeleeID, setPhase]);
 
-  // If somehow the phase is set to summary when there's no selection,
-  // set it to pick so there's not an infinite loading animation.
-  useEffect(() => {
-    if (selection === undefined && phase === "summary") {
-      setPhase("pick");
-    }
-  }, [selection, phase, setPhase]);
-
   if (phase === "summary") {
-    if (!escrow || !market) return <Loading />;
+    if (isLoading || !escrow) return <Loading />;
     return (
       <EnterTabSummary
         escrow={escrow}
-        market={market}
         topOff={() => {
           setPhase("amount");
           setMarket(escrow);
@@ -92,9 +81,7 @@ export const EnterTab = () => {
       </Container>
     );
   }
-
-  return <Loading />;
-};
+}
 
 function Container({
   children,

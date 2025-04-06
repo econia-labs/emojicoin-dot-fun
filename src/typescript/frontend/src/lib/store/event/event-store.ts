@@ -54,7 +54,7 @@ export const createEventStore = () => {
       getMarket: (emojis = []) => get().markets.get(emojis.join("")),
       getMarketLatestState: (emojis = []) => {
         const market = get().markets.get(emojis.join(""));
-        const latestState = market?.stateEvents.at(-1);
+        const latestState = market?.stateEvents.at(0);
         if (!market || !latestState) return undefined;
         // Note that volumes are only properly propagated/set in state when `loadMarketStateFromServer` is
         // called. The volumes are optional because sometimes they're missing when data is loaded

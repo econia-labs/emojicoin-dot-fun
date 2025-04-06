@@ -3,9 +3,9 @@ import React from "react";
 
 import { useArenaPhaseStore } from "../../phase/store";
 import { EmojiTitle } from "../../utils";
-import { BlurModal } from "../enter-tab/BlurModal";
+import BlurModal from "../enter-tab/BlurModal";
 
-export const EnterTabPickPhase = () => {
+export default function EnterTabPickPhase() {
   const setMarket = useArenaPhaseStore((s) => s.setMarket);
   const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const setError = useArenaPhaseStore((s) => s.setError);
@@ -44,4 +44,4 @@ export const EnterTabPickPhase = () => {
       </div>
     </div>
   );
-};
+}
