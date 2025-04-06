@@ -8,7 +8,7 @@ import { useMatchBreakpoints } from "@/hooks/index";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 
 import { useArenaProfileStats } from "../../../../../hooks/use-arena-profile-stats";
-import { FormattedAndNominalized } from "../utils";
+import { FormattedNominalNumber } from "../utils";
 import { MeleeBreakdown } from "./melee-breakdown/MeleeBreakdown";
 import { MeleeHistory } from "./melee-history/MeleeHistory";
 
@@ -38,7 +38,7 @@ const CurrentMeleeStats = () => {
         {isLoading || isFetching ? (
           <AnimatedLoadingBoxes numSquares={4} />
         ) : currentDeposited !== undefined ? (
-          <FormattedAndNominalized
+          <FormattedNominalNumber
             className={headerValueClass}
             value={currentDeposited}
             suffix=" APT"
@@ -52,7 +52,7 @@ const CurrentMeleeStats = () => {
         {isLoading || isFetching ? (
           <AnimatedLoadingBoxes numSquares={4} />
         ) : locked !== undefined ? (
-          <FormattedAndNominalized className={headerValueClass} value={locked} suffix=" APT" />
+          <FormattedNominalNumber className={headerValueClass} value={locked} suffix=" APT" />
         ) : (
           <MeleeStatsHyphens />
         )}
@@ -69,7 +69,7 @@ const CurrentMeleeStats = () => {
               suffix="%"
             />
             <span className={headerValueClass}> </span>
-            <FormattedAndNominalized
+            <FormattedNominalNumber
               className={headerValueClass + " !text-2xl text-nowrap"}
               value={pnlOctas}
               prefix="("

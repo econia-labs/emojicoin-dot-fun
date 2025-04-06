@@ -1,6 +1,6 @@
 import { FormattedNumber } from "@/components/FormattedNumber";
 
-export const FormattedAndNominalized = (props: {
+export const FormattedNominalNumber = (props: {
   className?: string;
   value: bigint;
   prefix?: string;

@@ -15,7 +15,7 @@ import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
 
 import { useArenaProfileStats } from "../../../../../../hooks/use-arena-profile-stats";
-import { FormattedAndNominalized } from "../../utils";
+import { FormattedNominalNumber } from "../../utils";
 import type { ProfileTabProps } from "../ProfileTab";
 
 export const MeleeBreakdownInner = ({
@@ -69,14 +69,14 @@ export const MeleeBreakdownInner = ({
       </div>
       <div className={smallCellClass}>
         <div className={smallCellTextClass}>{"Deposit"}</div>
-        <FormattedAndNominalized className={smallCellValueClass} value={deposit} suffix=" APT" />
+        <FormattedNominalNumber className={smallCellValueClass} value={deposit} suffix=" APT" />
       </div>
       <div className={smallCellClass}>
         <div className={cn(smallCellTextClass, "flex flex-row gap-2")}>
           <span>{"Withdrawn"}</span>
           <Info>{"The APT value of holdings withdrawn early"}</Info>
         </div>
-        <FormattedAndNominalized className={smallCellValueClass} value={withdrawn} suffix=" APT" />
+        <FormattedNominalNumber className={smallCellValueClass} value={withdrawn} suffix=" APT" />
       </div>
       <div className={smallCellClass}>
         <div className={cn(smallCellTextClass, "flex flex-row gap-2")}>
@@ -84,7 +84,7 @@ export const MeleeBreakdownInner = ({
           <Info>{"The APT value of holdings exactly when the melee ended"}</Info>
         </div>
         {endHolding !== undefined ? (
-          <FormattedAndNominalized
+          <FormattedNominalNumber
             className={smallCellValueClass}
             value={endHolding}
             suffix=" APT"

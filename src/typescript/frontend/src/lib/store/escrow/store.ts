@@ -1,3 +1,5 @@
+// cspell:word txns
+
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
