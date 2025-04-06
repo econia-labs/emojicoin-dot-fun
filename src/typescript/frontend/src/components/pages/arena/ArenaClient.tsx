@@ -12,7 +12,9 @@ import { useEffectOnce } from "react-use";
 import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
+import { STRUCT_STRINGS } from "@/sdk/index";
 import { useSyncArenaEscrows } from "@/store/escrow/hooks";
+import { globalUserTransactionStore } from "@/store/transaction/store";
 
 import { BottomNavigation, TabContainer } from "./tabs";
 import {
@@ -115,7 +117,7 @@ Mobile.displayName = "Mobile";
  * In a development environment, this is just a flat, shorter amount of time.
  */
 const randomlyStaggeredRefreshDelay = () =>
-  process.env.NODE_ENV === "development" ? 300 : 1000 + Math.random() * 4000;
+  process.env.NODE_ENV === "development" ? 777 : 1000 + Math.random() * 4000;
 
 export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
@@ -123,6 +125,7 @@ export const ArenaClient = (props: ArenaProps) => {
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const subscribeEvents = useEventStore((s) => s.subscribeEvents);
+  const latestTxnEvents = globalUserTransactionStore.getState().latestResponse?.events;
   const latestMeleeID = useLatestMeleeID();
 
   useSyncArenaEscrows();
@@ -137,10 +140,15 @@ export const ArenaClient = (props: ArenaProps) => {
     loadMarketStateFromServer([props.market1]);
   }, [loadArenaInfoFromServer, loadMarketStateFromServer, props]);
 
+  // Whenever the melee ID updates, wait a short, random amount of time so that the processor has time to process the
+  // new changes. Then refresh the page.
   useEffect(() => {
-    const shouldRefresh = latestMeleeID > props.arenaInfo.meleeID;
+    const userCrankedMelee = !!latestTxnEvents?.find(
+      ({ type }) => type === STRUCT_STRINGS.ArenaMeleeEvent
+    );
+    const newMeleeID = latestMeleeID > props.arenaInfo.meleeID;
+    const shouldRefresh = userCrankedMelee || newMeleeID;
 
-    // Need to wait for the processor to catch up- then refresh.
     const timeout = shouldRefresh
       ? setTimeout(() => {
           router.refresh();
@@ -148,7 +156,7 @@ export const ArenaClient = (props: ArenaProps) => {
       : undefined;
 
     return () => clearTimeout(timeout);
-  }, [latestMeleeID, props.arenaInfo.meleeID, router]);
+  }, [latestTxnEvents, latestMeleeID, props.arenaInfo.meleeID, router]);
 
   return isMobile ? <Mobile {...props} /> : <Desktop {...props} />;
 };

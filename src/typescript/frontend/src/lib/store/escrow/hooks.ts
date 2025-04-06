@@ -3,9 +3,10 @@ import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-histori
 import { useEffect, useMemo, useRef } from "react";
 import { useStore } from "zustand";
 
+import { ifEscrowTernary } from "@/components/pages/arena/utils";
 import { useAccountAddress } from "@/hooks/use-account-address";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
-import { positionToUserEscrow } from "@/sdk/utils";
+import { isUserEscrow, positionToUserEscrow } from "@/sdk/utils";
 
 import { globalUserTransactionStore } from "../transaction/store";
 import type { EscrowStore } from "./store";
@@ -74,12 +75,42 @@ function useSyncEscrowsFromTransactionStore(address: `0x${string}` | undefined) 
   );
 }
 
-export function useArenaEscrow(meleeID: bigint | undefined) {
+export function useCurrentEscrow() {
+  const user = useAccountAddress();
+  const { meleeInfo } = useCurrentMeleeInfo();
+  return useArenaEscrowStore((s) => {
+    if (!user || !meleeInfo) return undefined;
+    const res = s.addressMap.get(user)?.get(meleeInfo.meleeID);
+    if (!res) return undefined;
+
+    const currentSymbol = ifEscrowTernary(
+      res,
+      meleeInfo.emojicoin0Symbols,
+      meleeInfo.emojicoin1Symbols
+    ).join("");
+
+    if (!isUserEscrow(res)) {
+      console.warn("Match amount in current position/escrow is undefined somehow.");
+      return {
+        ...res,
+        matchAmount: 0n,
+        lockedIn: false,
+        currentSymbol,
+      };
+    }
+    return {
+      ...res,
+      currentSymbol,
+    };
+  });
+}
+
+export function useHistoricalEscrow(meleeID: bigint) {
   const user = useAccountAddress();
 
   return useArenaEscrowStore((s) => {
     if (!user) return undefined;
-    return s.addressMap.get(user)?.get(meleeID ?? -1n);
+    return s.addressMap.get(user)?.get(meleeID);
   });
 }
 

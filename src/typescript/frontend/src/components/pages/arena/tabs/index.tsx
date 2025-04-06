@@ -5,10 +5,10 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
 import type { ArenaPropsWithPositionHistoryAndEmojiData } from "../utils";
-import { ChatTab } from "./ChatTab";
-import { EnterTab } from "./enter-tab/EnterTab";
-import { InfoTab } from "./InfoTab";
-import { ProfileTab } from "./profile-tab/ProfileTab";
+import ChatTab from "./ChatTab";
+import EnterTab from "./enter-tab/EnterTab";
+import InfoTab from "./InfoTab";
+import ProfileTab from "./profile-tab/ProfileTab";
 
 const getTabs = (
   { market0, market1, position, arenaInfo }: ArenaPropsWithPositionHistoryAndEmojiData,
@@ -58,7 +58,7 @@ export const TabContainer = (props: ArenaPropsWithPositionHistoryAndEmojiData) =
 
   return (
     <div
-      className="grid h-[100%]"
+      className="grid h-[100%] bg-black bg-opacity-80"
       style={{
         gridTemplateRows: "auto 1fr",
       }}

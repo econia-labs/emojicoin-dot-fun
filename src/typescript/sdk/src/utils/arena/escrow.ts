@@ -10,6 +10,7 @@ import type {
   ArenaInfoModel,
   ArenaLeaderboardHistoryWithArenaInfoModel,
   ArenaPositionModel,
+  Flatten,
 } from "../..";
 import type { AccountAddressString } from "../../emojicoin_dot_fun/types";
 import { type AnyNumberString, isWriteSetChangeWriteResource } from "../../types";
@@ -27,13 +28,6 @@ const isEscrowStruct = ({ value }: TypeTagStruct) => {
 };
 
 /**
- * NOTE: The `matchAmount` for historical positions queried from the indexer are populated with
- * -1n to indicate they're invalid. They're not used in the app so it's fine- but it's good to
- * note here in case of any future confusion.
- */
-const SUBSTITUTE_MATCH_AMOUNT_FOR_HISTORICAL = -1n;
-
-/**
  * Any user escrow— including historical ones.
  */
 export type UserEscrow = {
@@ -44,8 +38,16 @@ export type UserEscrow = {
   emojicoin0: bigint;
   emojicoin1: bigint;
   matchAmount: bigint;
+  lockedIn: boolean;
   coinTypes: [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct];
 };
+
+export type HistoricalEscrow = Flatten<
+  Omit<UserEscrow, "matchAmount" | "lockedIn"> & { matchAmount?: bigint; lockedIn?: bigint }
+>;
+
+export const isUserEscrow = (v: UserEscrow | HistoricalEscrow): v is UserEscrow =>
+  v.matchAmount !== undefined && v.lockedIn !== undefined;
 
 export const isEscrowResource = (resource: MoveResource): resource is ArenaJsonTypes["Escrow"] =>
   /^0x([a-zA-Z0-9])+::emojicoin_arena::Escrow<0x.*LP>$/.test(resource.type);
@@ -76,10 +78,11 @@ export const parseResourceForEscrow = <T extends MoveResource>({
       if (innerTags.every((v) => v.isStruct()) && innerTags.length === 4) {
         return {
           meleeID,
-          open: emojicoin0 !== 0n && emojicoin1 !== 0n,
+          open: !!(emojicoin0 || emojicoin1),
           emojicoin0,
           emojicoin1,
           matchAmount,
+          lockedIn: matchAmount > 0n,
           user: address,
           version: BigInt(version),
           coinTypes: innerTags as [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct],
@@ -110,7 +113,7 @@ type ArenaCoinTypeStructs = [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTa
 // Convert a user's current and historical positions to `UserEscrow` types.
 export const positionToUserEscrow = (
   pos: PositionAndInfo | ArenaLeaderboardHistoryWithArenaInfoModel
-): UserEscrow => {
+): UserEscrow | HistoricalEscrow => {
   const { user, meleeID, emojicoin0Balance: emojicoin0, emojicoin1Balance: emojicoin1 } = pos;
 
   const coinTypes = toArenaCoinTypes({
@@ -126,6 +129,7 @@ export const positionToUserEscrow = (
         version: pos.version,
         open: pos.open,
         matchAmount: pos.matchAmount,
+        lockedIn: pos.matchAmount > 0n,
       }
     : {
         ...sharedArgs,
@@ -134,6 +138,7 @@ export const positionToUserEscrow = (
           pos.leaderboardHistoryLastTransactionVersion
         ),
         open: !pos.exited,
-        matchAmount: SUBSTITUTE_MATCH_AMOUNT_FOR_HISTORICAL,
+        matchAmount: undefined,
+        lockedIn: undefined,
       };
 };

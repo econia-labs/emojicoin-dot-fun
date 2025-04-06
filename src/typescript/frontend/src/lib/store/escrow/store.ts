@@ -2,12 +2,12 @@ import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-import type { UserEscrow } from "@/sdk/utils/arena/escrow";
+import type { HistoricalEscrow, UserEscrow } from "@/sdk/utils/arena/escrow";
 import { findEscrowsInTxn } from "@/sdk/utils/arena/escrow";
 
 type MeleeID = bigint;
 type UserAddress = `0x${string}`;
-type EscrowMap = Map<MeleeID, UserEscrow>;
+type EscrowMap = Map<MeleeID, UserEscrow | HistoricalEscrow>;
 
 export type EscrowState = {
   addressMap: Map<UserAddress, EscrowMap>;
@@ -20,7 +20,7 @@ export type EscrowActions = {
    * This function will push new escrows to a user's entry in the map, as long as the new escrow
    * data is later than the existing escrow data for that melee ID.
    */
-  pushIfLatest: (user: `0x${string}`, ...escrows: UserEscrow[]) => void;
+  pushIfLatest: (user: `0x${string}`, ...escrows: (UserEscrow | HistoricalEscrow)[]) => void;
   processTransactions: (...txns: UserTransactionResponse[]) => void;
 };
 

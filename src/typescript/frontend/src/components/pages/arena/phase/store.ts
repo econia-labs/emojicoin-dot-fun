@@ -4,7 +4,7 @@ import { immer } from "zustand/middleware/immer";
 import type { UserEscrow } from "@/sdk/index";
 
 type ArenaPhaseState = {
-  phase?: "pick" | "amount" | "lock" | "summary" | undefined;
+  phase: "pick" | "amount" | "lock" | "summary";
   selectedMarket: 0 | 1 | undefined;
   amount: bigint | undefined;
   error: boolean;
@@ -20,7 +20,7 @@ type ArenaPhaseActions = {
 type ArenaPhaseStore = ArenaPhaseState & ArenaPhaseActions;
 
 const initialArenaPhaseState = (): ArenaPhaseState => ({
-  phase: undefined,
+  phase: "pick",
   selectedMarket: undefined,
   amount: undefined,
   error: false,

@@ -1,11 +1,13 @@
 import Big from "big.js";
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
 import { useMemo } from "react";
 
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
-import { type ArenaPositionModel, q64ToBig } from "@/sdk/index";
+import { q64ToBig } from "@/sdk/index";
 
-export const useArenaProfileStats = (position: ArenaPositionModel | undefined | null) => {
+export const useArenaProfileStats = () => {
+  const { position } = useCurrentPositionQuery();
   const { meleeInfo: info, market0, market1 } = useCurrentMeleeInfo();
   const latestMeleeID = useLatestMeleeID();
 

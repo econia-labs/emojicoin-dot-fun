@@ -12,7 +12,7 @@ import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
 
 import { PeriodDuration } from "@/sdk/const";
-import { ARENA_MODULE_NAME } from "@/sdk/index";
+import { ARENA_MODULE_NAME, isEntryFunctionUserTransactionResponse } from "@/sdk/index";
 import { getPeriodStartTimeFromTime, truncateAddress } from "@/sdk/utils/misc";
 
 const debouncedToastKey = (s: string, debouncePeriod: PeriodDuration) => {
@@ -134,35 +134,49 @@ export const successfulTransactionToast = (
   });
 };
 
-export const crankedArenaMeleeToast = (functionName: `${string}::${string}::${string}`) => {
-  const tryingToEnter = functionName.endsWith(`::${ARENA_MODULE_NAME}::enter`);
+export const crankedArenaMeleeToast = (response: UserTransactionResponse, network: NetworkInfo) => {
+  if (!isEntryFunctionUserTransactionResponse(response))
+    throw new Error("This should never occur.");
+  const tryingToEnter = response.payload.function.endsWith(`::${ARENA_MODULE_NAME}::enter`);
   const message = (
-    <div className="flex flex-col gap-[1em]">
-      <div className="text-[1em] text-white text-center">You just cranked the melee!</div>
-      <div className="text-sm font-forma text-lighter-gray leading-6">
+    <div className="flex flex-col gap-[1em] !letter-spacing-[1em]">
+      <div className="text-xl text-white text-center">You just cranked the melee!</div>
+      <div className="text-[1em] font-forma text-lighter-gray leading-6">
         In order for the next melee to start, a user has to crank the package. You happened to be
         the first one to crank the melee!
       </div>
-      <div className="text-sm font-forma text-white leading-6">
+      <div className="text-[1em] font-forma text-lighter-gray leading-6">
         {tryingToEnter ? (
           <>
             <span>
-              As a result, <span className="text-warning">you were not entered</span> into the
-              previous melee, and no funds were moved.
+              As a result,{" "}
+              <span className="text-white">you were not entered into the previous melee</span>, and
+              no funds were moved.
             </span>
           </>
         ) : (
           <span>
-            Your position was <span className="text-ec-blue">successfully exited</span>.
+            Your position was <span className="text-white">successfully</span> exited.
           </span>
         )}
+      </div>
+      <div className="inline text-lighter-gray">
+        {"View the transaction here: "}
+        <ExplorerLink
+          className="font-forma inline font-bold text-orange-500 drop-shadow-text"
+          network={network.name}
+          value={response.hash}
+          type="transaction"
+        >
+          {truncateAddress(response.hash, false)}
+        </ExplorerLink>
       </div>
     </div>
   );
   toast.dark(message, {
     ...DEFAULT_TOAST_CONFIG,
     pauseOnHover: true,
-    autoClose: 15000,
+    autoClose: 20000,
     toastId: debouncedToastKey("cranked", PeriodDuration.PERIOD_15S),
     className: "cursor-text",
     closeOnClick: true,

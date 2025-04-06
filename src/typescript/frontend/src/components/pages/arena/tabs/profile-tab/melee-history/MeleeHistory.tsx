@@ -11,7 +11,7 @@ import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
-import { useArenaEscrow } from "@/store/escrow/hooks";
+import { useHistoricalEscrow } from "@/store/escrow/hooks";
 
 import { CurrentMeleeBreakdown, HistoricMeleeBreakdown } from "../melee-breakdown/MeleeBreakdown";
 import type { ProfileTabProps } from "../ProfileTab";
@@ -46,7 +46,7 @@ const HistoricalRow = ({
     row.emojicoin1MarketAddress as `0x${string}`
   );
   const { submit } = useAptos();
-  const escrow = useArenaEscrow(row.meleeID);
+  const escrow = useHistoricalEscrow(row.meleeID);
 
   return (
     <>

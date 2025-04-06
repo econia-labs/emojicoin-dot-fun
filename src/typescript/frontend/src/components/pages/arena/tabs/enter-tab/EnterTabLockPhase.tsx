@@ -11,10 +11,13 @@ import type { MarketStateModel } from "@/sdk/index";
 import { useArenaPhaseStore } from "../../phase/store";
 import { FormattedAndNominalized } from "../utils";
 
-export const EnterTabLockPhase: React.FC<{
+export default function EnterTabLockPhase({
+  market,
+  amount,
+}: {
   market: MarketStateModel;
   amount: bigint;
-}> = ({ market, amount }) => {
+}) {
   const [innerLock, setInnerLock] = useState<boolean>(false);
   const { account, submit } = useAptos();
   const { market0, market1 } = useCurrentMeleeInfo();
@@ -73,4 +76,4 @@ export const EnterTabLockPhase: React.FC<{
       </div>
     </div>
   );
-};
+}
