@@ -54,7 +54,15 @@ const resolveOwnerName = async (input?: AccountAddressInput | null): Promise<Pos
     }
   } catch (e) {
     if (isValidAptosName(input) || AccountAddress.isValid({ input })) {
+      // The ANS service is either down or the user is on a local network. Just return the address
+      // if it's a valid account address.
       console.warn(`${input} is a valid ANS name or account address but still threw an error ${e}`);
+      return {
+        address: AccountAddress.isValid({ input }).valid
+          ? AccountAddress.from(input).toString()
+          : undefined,
+        name: undefined,
+      };
     }
   }
 
