@@ -9,12 +9,11 @@ import { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 
 export const fetchCache = "force-no-store";
 
-export async function GET(
-  _: NextRequest,
-  { params }: { params: Promise<{ user: string; minimumVersion?: string }> }
-) {
-  const { user, minimumVersion } = await params;
-  const parsedMinimumVersion = PositiveBigIntSchema.safeParse(minimumVersion);
+export async function GET(request: NextRequest, { params }: { params: Promise<{ user: string }> }) {
+  const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries());
+
+  const { user } = await params;
+  const parsedMinimumVersion = PositiveBigIntSchema.safeParse(searchParams.minimumVersion);
 
   // If a minimum version is specified- wait for it.
   if (parsedMinimumVersion.success) {

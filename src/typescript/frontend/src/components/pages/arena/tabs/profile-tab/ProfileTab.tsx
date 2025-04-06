@@ -25,8 +25,8 @@ const MeleeStatsHyphens = () => <div className={headerValueClass}>{"--"}</div>;
 
 const CurrentMeleeStats = () => {
   const { isMobile } = useMatchBreakpoints();
-  const { position, isLoading, isFetching } = useCurrentPositionQuery();
-  const { currentDeposited, locked, pnl, pnlOctas } = useArenaProfileStats(position);
+  const { isLoading, isFetching } = useCurrentPositionQuery();
+  const { currentDeposited, locked, pnl, pnlOctas } = useArenaProfileStats();
 
   return (
     <div
