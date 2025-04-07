@@ -55,6 +55,8 @@ describe("escrow resource parser tests", () => {
       emojicoin0: 12097558542607n,
       emojicoin1: 0n,
       matchAmount: 0n,
+      open: true,
+      lockedIn: false,
       coinTypes: [
         "0xbd9ababccfd739d8bf39409d44a0868ba29495bf57c0b122c15027cf224ca78c::coin_factory::Emojicoin",
         "0xbd9ababccfd739d8bf39409d44a0868ba29495bf57c0b122c15027cf224ca78c::coin_factory::EmojicoinLP",

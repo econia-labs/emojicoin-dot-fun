@@ -213,6 +213,12 @@ export class LazyPromise<T> {
   }
 }
 
+/**
+ * The type must be specified with `as`, because an array of 0 elements can't have types properly
+ * inferred, since empty arrays carry no type data at runtime.
+ *
+ * The function overloads here are to ensure that the `as` arg matches the input array type.
+ */
 export function sum(array: number[], as?: "number"): number;
 export function sum(array: bigint[], as: "bigint"): bigint;
 export function sum<T extends number | bigint>(array: T[], as?: "number" | "bigint"): T {
