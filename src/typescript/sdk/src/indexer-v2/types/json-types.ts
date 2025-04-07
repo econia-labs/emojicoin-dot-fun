@@ -317,7 +317,7 @@ type ArenaPositionData = {
   emojicoin_1_balance: Uint64String;
   withdrawals: Uint64String;
   deposits: Uint64String;
-  last_exit_0: string | null;
+  last_exit_0: boolean | null;
   match_amount: Uint64String;
 };
 

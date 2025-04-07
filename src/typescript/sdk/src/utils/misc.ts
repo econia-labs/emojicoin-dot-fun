@@ -213,19 +213,35 @@ export class LazyPromise<T> {
   }
 }
 
-export function sum<T extends number | bigint>(array: T[]): T {
-  if (typeof array[0] === "bigint") {
+export function sum(array: number[], as?: "number"): number;
+export function sum(array: bigint[], as: "bigint"): bigint;
+export function sum<T extends number | bigint>(array: T[], as?: "number" | "bigint"): T {
+  if (as === "bigint") {
     return (array as bigint[]).reduce((acc, val) => acc + val, 0n) as T;
   }
   return (array as number[]).reduce((acc, val) => acc + val, 0) as T;
 }
 
-export function sumByKey<T, K extends keyof T>(array: T[], key: K): T[K] {
+export function sumByKey<T, K extends keyof T>(
+  array: T[],
+  key: K,
+  as?: "number"
+): T[K] extends number ? number : never;
+export function sumByKey<T, K extends keyof T>(
+  array: T[],
+  key: K,
+  as: "bigint"
+): T[K] extends bigint ? bigint : never;
+export function sumByKey<T, K extends keyof T>(
+  array: T[],
+  key: K,
+  as?: "number" | "bigint"
+): number | bigint {
   const arr = array.map((x) => x[key]);
-  if (typeof arr[0] === "bigint") {
-    return sum(arr as Array<bigint>) as T[K];
+  if (as === "bigint") {
+    return sum(arr as bigint[], "bigint");
   }
-  return sum(arr as Array<number>) as T[K];
+  return sum(arr as number[]);
 }
 
 export function ensureArray<T>(value: T | T[]): T[] {
