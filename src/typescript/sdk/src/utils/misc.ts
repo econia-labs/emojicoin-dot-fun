@@ -230,14 +230,14 @@ export function sum<T extends number | bigint>(array: T[], as?: "number" | "bigi
 
 export function sumByKey<T, K extends keyof T>(
   array: T[],
-  key: K,
+  key: K & (T[K] extends number ? K : never),
   as?: "number"
-): T[K] extends number ? number : never;
+): number;
 export function sumByKey<T, K extends keyof T>(
   array: T[],
-  key: K,
+  key: K & (T[K] extends bigint ? K : never),
   as: "bigint"
-): T[K] extends bigint ? bigint : never;
+): bigint;
 export function sumByKey<T, K extends keyof T>(
   array: T[],
   key: K,
