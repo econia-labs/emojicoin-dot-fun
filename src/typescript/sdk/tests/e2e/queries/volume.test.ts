@@ -84,7 +84,8 @@ describe("queries swap_events and returns accurate swap row data", () => {
       });
       const swapperVolume = sumByKey(
         swaps.map(({ swap }) => swap),
-        "quoteVolume"
+        "quoteVolume",
+        "bigint"
       );
       return [swapper, swaps.length, swapperVolume] as const;
     });
