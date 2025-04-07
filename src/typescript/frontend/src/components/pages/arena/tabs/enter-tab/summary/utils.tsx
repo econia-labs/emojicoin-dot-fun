@@ -1,43 +1,43 @@
+import type { CurrentUserPosition } from "lib/hooks/queries/arena/use-current-position";
 import { cn } from "lib/utils/class-name";
 import { useMemo } from "react";
 import type { ClassNameValue } from "tailwind-merge";
 
-import AnimatedLoadingBoxes from "@/components/pages/launch-emojicoin/animated-loading-boxes";
-import type { MarketStateModel, UserEscrow } from "@/sdk/index";
+import type { MarketStateModel } from "@/sdk/index";
 import { q64ToBig } from "@/sdk/index";
 
-import { ifEscrowTernary } from "../../../utils";
+import { marketTernary } from "../../../utils";
 import { FormattedNominalNumber } from "../../utils";
 
 export function EscrowAptValue({
-  escrow,
+  position,
   market0,
   market1,
   loading,
 }: {
-  escrow: UserEscrow;
+  position: CurrentUserPosition;
   market0?: MarketStateModel;
   market1?: MarketStateModel;
   loading?: boolean;
 }) {
   const amount = useMemo(() => {
     if (market0 === undefined || market1 === undefined) return undefined;
-    return ifEscrowTernary(
-      escrow,
+    return marketTernary(
+      position,
       BigInt(
         q64ToBig(market0.lastSwap.avgExecutionPriceQ64)
-          .mul(escrow.emojicoin0.toString())
+          .mul(position.emojicoin0Balance.toString())
           .round()
           .toString()
       ),
       BigInt(
         q64ToBig(market1.lastSwap.avgExecutionPriceQ64)
-          .mul(escrow.emojicoin1.toString())
+          .mul(position.emojicoin1Balance.toString())
           .round()
           .toString()
       )
     );
-  }, [escrow, market0, market1]);
+  }, [position, market0, market1]);
 
   return <AptDisplay amount={amount} loading={loading} className="text-6xl" />;
 }
@@ -46,18 +46,21 @@ export function AptDisplay({
   amount,
   loading,
   className,
+  scramble,
 }: {
   amount: bigint | undefined;
   loading?: boolean;
   className?: ClassNameValue;
+  scramble?: boolean;
 }) {
   return amount === undefined || loading ? (
-    <AnimatedLoadingBoxes numSquares={4} />
+    <span className={cn("font-forma text-5xl text-light-gray", className)}>--</span>
   ) : (
     <FormattedNominalNumber
       className={cn("font-forma text-5xl text-white", className)}
       value={amount}
       suffix=" APT"
+      scramble={scramble}
     />
   );
 }

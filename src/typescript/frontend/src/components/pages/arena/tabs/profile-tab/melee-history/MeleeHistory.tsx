@@ -11,7 +11,7 @@ import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
-import { useHistoricalEscrow } from "@/store/escrow/hooks";
+import { useHistoricalEscrow } from "@/store/arena/escrow/hooks";
 
 import { CurrentMeleeBreakdown, HistoricMeleeBreakdown } from "../melee-breakdown/MeleeBreakdown";
 import type { ProfileTabProps } from "../ProfileTab";
@@ -92,9 +92,6 @@ const HistoricalRow = ({
   );
 };
 
-/**
- * All melee history.
- */
 export const MeleeHistory = ({
   market0,
   market1,
@@ -111,8 +108,6 @@ export const MeleeHistory = ({
   const { position } = useCurrentPositionQuery();
   const { history } = useHistoricalPositionsQuery();
 
-  // Don't display the position as a current position if it's in the fetched historical positions; display it as
-  // a historical one, instead.
   const positionIsAlsoInHistory = useMemo(
     () => !!history.find((v) => v.meleeID === position?.meleeID),
     [position, history]
@@ -133,6 +128,7 @@ export const MeleeHistory = ({
       </div>
       <table className={styles["history-table"]}>
         <tbody>
+          {/* The row for the current melee. Don't display it if it's already in historical positions. */}
           {position && position.meleeID === arenaInfo.meleeID && !positionIsAlsoInHistory && (
             <>
               <tr
@@ -157,6 +153,7 @@ export const MeleeHistory = ({
               )}
             </>
           )}
+          {/* The rest of the rows; i.e., the historical positions. */}
           {history.map((m, i) => (
             <HistoricalRow
               key={`history-table-row-${i}`}

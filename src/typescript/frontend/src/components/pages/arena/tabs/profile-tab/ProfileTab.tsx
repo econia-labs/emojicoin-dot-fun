@@ -3,12 +3,11 @@ import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-pos
 import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
 import { useMemo, useState } from "react";
 
-import AnimatedLoadingBoxes from "@/components/pages/launch-emojicoin/animated-loading-boxes";
 import { useMatchBreakpoints } from "@/hooks/index";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 
-import { useArenaProfileStats } from "../../../../../hooks/use-arena-profile-stats";
-import { FormattedNominalNumber } from "../utils";
+import { useTradingStats } from "../../../../../hooks/use-trading-stats";
+import { AnimatedLoadingBoxesWithFallback, FormattedNominalNumber } from "../utils";
 import { MeleeBreakdown } from "./melee-breakdown/MeleeBreakdown";
 import { MeleeHistory } from "./melee-history/MeleeHistory";
 
@@ -25,8 +24,8 @@ const MeleeStatsHyphens = () => <div className={headerValueClass}>{"--"}</div>;
 
 const CurrentMeleeStats = () => {
   const { isMobile } = useMatchBreakpoints();
-  const { isLoading, isFetching } = useCurrentPositionQuery();
-  const { currentDeposited, locked, pnl, pnlOctas } = useArenaProfileStats();
+  const { isLoading } = useCurrentPositionQuery();
+  const { currentDeposited, locked, pnl, pnlOctas } = useTradingStats();
 
   return (
     <div
@@ -35,8 +34,8 @@ const CurrentMeleeStats = () => {
     >
       <div className={headerFlexColClass + isMobile ? "" : " h-[100%]"}>
         <div className={headerTitleClass}>{"Current deposits"}</div>
-        {isLoading || isFetching ? (
-          <AnimatedLoadingBoxes numSquares={4} />
+        {isLoading ? (
+          <AnimatedLoadingBoxesWithFallback numSquares={4} fallback={<MeleeStatsHyphens />} />
         ) : currentDeposited !== undefined ? (
           <FormattedNominalNumber
             className={headerValueClass}
@@ -49,8 +48,8 @@ const CurrentMeleeStats = () => {
       </div>
       <div className={headerFlexColClass + isMobile ? "" : " h-[100%]"}>
         <div className={headerTitleClass}>{"Current locked value"}</div>
-        {isLoading || isFetching ? (
-          <AnimatedLoadingBoxes numSquares={4} />
+        {isLoading ? (
+          <AnimatedLoadingBoxesWithFallback numSquares={4} fallback={<MeleeStatsHyphens />} />
         ) : locked !== undefined ? (
           <FormattedNominalNumber className={headerValueClass} value={locked} suffix=" APT" />
         ) : (
@@ -59,8 +58,8 @@ const CurrentMeleeStats = () => {
       </div>
       <div className={headerFlexColClass + isMobile ? "" : " h-[100%]"}>
         <div className={headerTitleClass}>{"Pnl"}</div>
-        {isLoading || isFetching ? (
-          <AnimatedLoadingBoxes numSquares={4} />
+        {isLoading ? (
+          <AnimatedLoadingBoxesWithFallback numSquares={4} fallback={<MeleeStatsHyphens />} />
         ) : pnl !== undefined && pnlOctas !== undefined ? (
           <span>
             <FormattedNumber

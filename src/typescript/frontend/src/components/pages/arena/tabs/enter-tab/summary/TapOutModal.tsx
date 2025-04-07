@@ -1,6 +1,6 @@
 import Button from "@/components/button";
 import ButtonWithConnectWalletFallback from "@/components/header/wallet-button/ConnectWalletButton";
-import type { ArenaPositionModel } from "@/sdk/index";
+import type { UserPositionWithInfo } from "@/sdk/indexer-v2/queries/api/user-position/types";
 
 import BlurModal from "../BlurModal";
 
@@ -13,7 +13,7 @@ export default function TapOutModal({
   onTapOut,
   setIsTappingOut,
 }: {
-  position?: ArenaPositionModel | null;
+  position?: UserPositionWithInfo | null;
   onTapOut: () => void;
   setIsTappingOut: (value: boolean) => void;
 }) {

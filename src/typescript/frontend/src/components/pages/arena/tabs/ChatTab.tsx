@@ -1,6 +1,7 @@
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { motion } from "framer-motion";
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
 import _ from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -8,12 +9,11 @@ import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput
 import { Column, Flex } from "@/components/layout";
 import { LoadMore } from "@/components/ui/table/loadMore";
 import type { MarketStateModel } from "@/sdk/index";
-import { useCurrentEscrow } from "@/store/escrow/hooks";
 
 import { MessageContainer } from "../../emojicoin/components/chat/components";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
 import { useChatEventsQuery } from "../../emojicoin/components/chat/useChatEventsQuery";
-import { ifEscrowTernary } from "../utils";
+import { marketTernary } from "../utils";
 
 interface Props {
   market0: MarketStateModel;
@@ -31,12 +31,12 @@ export default function ChatTab({ market0, market1 }: Props) {
   const market1chatsFromStore = useEventStore(
     (s) => s.getMarket(market1.market.symbolEmojis)?.chatEvents ?? []
   );
-  const escrow = useCurrentEscrow();
+  const { position } = useCurrentPositionQuery();
 
   const side = useMemo(() => {
-    if (!escrow || !escrow.open) return null;
-    return ifEscrowTernary(escrow, market0, market1);
-  }, [escrow, market0, market1]);
+    if (!position || !position.open) return null;
+    return marketTernary(position, market0, market1);
+  }, [position, market0, market1]);
 
   const { sendChatMessage } = useChatBox(side?.market.marketAddress);
 
@@ -49,9 +49,9 @@ export default function ChatTab({ market0, market1 }: Props) {
     return _.orderBy(
       _.uniqBy(
         [...market1chatsFromStore, ...market0chatsFromStore, ...(chats.data?.pages.flat() || [])],
-        (i) => i.market.marketNonce
+        (i) => i.transaction.version
       ),
-      (i) => i.market.marketNonce,
+      (i) => i.transaction.version,
       "desc"
     ).map((s, i) => ({
       message: {
