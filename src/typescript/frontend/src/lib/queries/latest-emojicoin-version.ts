@@ -10,7 +10,7 @@ import type { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 
 // The emojicoin indexer, not the Aptos Labs GraphQL indexer.
 const fetchLatestProcessorVersion = () =>
-  getProcessorStatus().then((res) => res.lastSuccessVersion);
+  getProcessorStatus().then((res) => res.lastSuccessVersion.toString());
 
 // Cache in-flight fetches within a single request with React's `cache`.
 // Then, wrap the inner indexer call with `unstable_cache`, so it's cached across multiple requests.
@@ -33,11 +33,13 @@ export const waitForVersionCached = async (
   const maxTries = Math.min(tries, MAX_TRIES);
 
   for (let i = 0; i < maxTries; i += 1) {
-    const latestVersion = await fetchCachedLatestProcessorVersion().catch((e) => {
-      // Log any errors, but keep fetching.
-      console.error(e);
-      return -1n;
-    });
+    const latestVersion = await fetchCachedLatestProcessorVersion()
+      .then(BigInt)
+      .catch((e) => {
+        // Log any errors, but keep fetching.
+        console.error(e);
+        return -1n;
+      });
 
     if (latestVersion >= minimumVersion) return true;
 
