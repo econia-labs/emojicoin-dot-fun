@@ -14,7 +14,7 @@ import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
 
-import { useArenaProfileStats } from "../../../../../../hooks/use-arena-profile-stats";
+import { useTradingStats } from "../../../../../../hooks/use-trading-stats";
 import { FormattedNominalNumber } from "../../utils";
 import type { ProfileTabProps } from "../ProfileTab";
 
@@ -121,7 +121,7 @@ export function CurrentMeleeBreakdown({
   close: () => void;
 }) {
   const { position } = useCurrentPositionQuery();
-  const { pnl } = useArenaProfileStats();
+  const { pnl } = useTradingStats();
   const { market0, market1 } = useCurrentMeleeInfo();
   const marketLastHeld = useMemo(() => {
     if (!position || !market0 || !market1) return undefined;
@@ -192,11 +192,11 @@ export const MeleeBreakdown = ({
   goToEnter?: () => void;
   close: () => void;
 }) => {
-  const { position, isFetching } = useCurrentPositionQuery();
+  const { position, isLoading } = useCurrentPositionQuery();
   const { history } = useHistoricalPositionsQuery();
 
   if (!position && selectedRow === undefined) {
-    return isFetching ? (
+    return isLoading ? (
       <Loading />
     ) : (
       <div className="grid place-items-center h-[100%] w-[100%]">

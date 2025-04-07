@@ -1,34 +1,36 @@
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import {
+  type CurrentUserPosition,
+  useCurrentPositionQuery,
+} from "lib/hooks/queries/arena/use-current-position";
 import { useArenaSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-arena-swap-builder";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { useCallback, useState } from "react";
 
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
-import type { UserEscrow } from "@/sdk/index";
 
 import Summary from "./Summary";
 import SwapModal from "./SwapModal";
 import TapOutModal from "./TapOutModal";
 
 export default function EnterTabSummary({
-  escrow,
+  position,
   topOff,
   tapOut,
   swap,
 }: {
   // Use the escrow value for things like which side the user is on and their current escrowed balance.
-  escrow: UserEscrow & { currentSymbol: string };
+  position: CurrentUserPosition;
   topOff: () => void;
   tapOut: () => void;
   swap: () => void;
 }) {
   // Use the current position info for indexed data that can't be derived from on-chain data.
-  const { position, isLoading, isFetching } = useCurrentPositionQuery();
   const [isTappingOut, setIsTappingOut] = useState<boolean>(false);
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const { account, submit } = useAptos();
   const { market0, market1 } = useCurrentMeleeInfo();
+  const { isLoading } = useCurrentPositionQuery();
 
   const swapTransactionBuilder = useArenaSwapTransactionBuilder(
     market0?.market.marketAddress,
@@ -69,15 +71,14 @@ export default function EnterTabSummary({
       )}
       {isSwapping && (
         <SwapModal
-          escrow={escrow}
+          position={position}
           onSwap={onSwap}
           setIsSwapping={setIsSwapping}
-          loading={isLoading || isFetching}
+          loading={isLoading}
         />
       )}
       <Summary
-        escrow={escrow}
-        loading={isLoading || isFetching}
+        position={position}
         onTapOut={onTapOut}
         setIsTappingOut={setIsTappingOut}
         setIsSwapping={setIsSwapping}

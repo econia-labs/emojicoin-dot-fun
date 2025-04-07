@@ -1,14 +1,12 @@
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
 import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
 import { useEffect, useMemo, useRef } from "react";
 import { useStore } from "zustand";
 
-import { ifEscrowTernary } from "@/components/pages/arena/utils";
 import { useAccountAddress } from "@/hooks/use-account-address";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { isUserEscrow, positionToUserEscrow } from "@/sdk/utils";
 
-import { globalUserTransactionStore } from "../transaction/store";
+import { globalUserTransactionStore } from "../../transaction/store";
 import type { EscrowStore } from "./store";
 import { globalEscrowStore } from "./store";
 
@@ -39,14 +37,11 @@ export const useSyncArenaEscrows = () => {
 };
 
 function useEscrowsFromPositions() {
-  const { position } = useCurrentPositionQuery();
-  const { meleeInfo: info } = useCurrentMeleeInfo();
   const { history } = useHistoricalPositionsQuery();
 
   return useMemo(() => {
-    const positionWithInfo = position && info ? { ...position, ...info } : undefined;
-    return [positionWithInfo, ...history].filter((v) => !!v).map(positionToUserEscrow);
-  }, [info, position, history]);
+    return history.map(positionToUserEscrow);
+  }, [history]);
 }
 
 /**
@@ -82,26 +77,15 @@ export function useCurrentEscrow() {
     if (!user || !meleeInfo) return undefined;
     const res = s.addressMap.get(user)?.get(meleeInfo.meleeID);
     if (!res) return undefined;
-
-    const currentSymbol = ifEscrowTernary(
-      res,
-      meleeInfo.emojicoin0Symbols,
-      meleeInfo.emojicoin1Symbols
-    ).join("");
-
     if (!isUserEscrow(res)) {
       console.warn("Match amount in current position/escrow is undefined somehow.");
       return {
         ...res,
         matchAmount: 0n,
         lockedIn: false,
-        currentSymbol,
       };
     }
-    return {
-      ...res,
-      currentSymbol,
-    };
+    return res;
   });
 }
 

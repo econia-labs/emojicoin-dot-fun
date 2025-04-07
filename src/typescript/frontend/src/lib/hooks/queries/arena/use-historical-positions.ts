@@ -1,18 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
 import { useAccountAddress } from "@/hooks/use-account-address";
 import type { DatabaseJsonType } from "@/sdk/index";
 import { compareBigInt, maxBigInt, toArenaLeaderboardHistoryWithArenaInfo } from "@/sdk/index";
-import { useUserTransactionStore } from "@/store/transaction/store";
 
+/**
+ * This doesn't need to refetch because any updates we can derive from on-chain activity.
+ * In other words, historical positions can be queried once, and then never again.
+ */
 export const useHistoricalPositionsQuery = () => {
   const accountAddress = useAccountAddress();
-  const latestUserTxnResponse = useUserTransactionStore((s) => s.latestResponse);
 
-  const { data, isFetching, refetch } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ["fetch-historical-positions", accountAddress ?? ""],
     queryFn: async () => {
       if (!accountAddress) return null;
@@ -41,19 +42,8 @@ export const useHistoricalPositionsQuery = () => {
       };
     },
     enabled: !!accountAddress,
-    // Refetching is handled by checking the latest user transaction response version below.
     staleTime: Infinity,
   });
-
-  const shouldRefetch = useMemo(() => {
-    if (!data || !latestUserTxnResponse) return false;
-    const latestVersion = maxBigInt(data.maxFetchedVersion, latestUserTxnResponse.version);
-    return latestVersion > data.maxFetchedVersion;
-  }, [latestUserTxnResponse, data]);
-
-  useEffect(() => {
-    if (shouldRefetch) refetch();
-  }, [shouldRefetch, refetch]);
 
   return {
     history: data?.historicalPositions ?? [],

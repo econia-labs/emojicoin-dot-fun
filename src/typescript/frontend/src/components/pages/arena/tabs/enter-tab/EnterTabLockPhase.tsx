@@ -1,12 +1,13 @@
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
 import { useEnterTransactionBuilder } from "lib/hooks/transaction-builders/use-enter-builder";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import Button from "@/components/button";
 import ButtonWithConnectWalletFallback from "@/components/header/wallet-button/ConnectWalletButton";
 import { Switcher } from "@/components/switcher";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
-import type { MarketStateModel } from "@/sdk/index";
+import { getEvents, type MarketStateModel } from "@/sdk/index";
 
 import { useArenaPhaseStore } from "../../phase/store";
 import { FormattedNominalNumber } from "../utils";
@@ -18,15 +19,21 @@ export default function EnterTabLockPhase({
   market: MarketStateModel;
   amount: bigint;
 }) {
+  const { position } = useCurrentPositionQuery();
   const [innerLock, setInnerLock] = useState<boolean>(false);
   const { account, submit } = useAptos();
   const { market0, market1 } = useCurrentMeleeInfo();
   const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const setError = useArenaPhaseStore((s) => s.setError);
 
+  const lockedInToggle = useMemo(
+    () => innerLock || position?.lockedIn === true,
+    [innerLock, position?.lockedIn]
+  );
+
   const transactionBuilder = useEnterTransactionBuilder(
     amount,
-    innerLock,
+    lockedInToggle,
     market0?.market.marketAddress,
     market1?.market.marketAddress,
     market.market.marketAddress
@@ -38,9 +45,9 @@ export default function EnterTabLockPhase({
         <div className="font-forma text-2xl uppercase text-white text-center">Lock in</div>
         <div className="flex gap-[1em] items-center">
           <div className="uppercase text-light-gray text-xl">
-            {innerLock ? "Enabled" : "Disabled"}
+            {lockedInToggle ? "Enabled" : "Disabled"}
           </div>
-          <Switcher checked={innerLock} onChange={(v) => setInnerLock(v.target.checked)} />
+          <Switcher checked={lockedInToggle} onChange={(v) => setInnerLock(v.target.checked)} />
         </div>
       </div>
       <div className="max-w-[350px] w-[100%]">
@@ -51,7 +58,9 @@ export default function EnterTabLockPhase({
         <div className="flex uppercase justify-between text-2xl text-light-gray py-[0.8em] mx-[0.8em] border-dashed border-b-[1px] border-light-gray ">
           <div>Match amount</div>
           <FormattedNominalNumber
-            value={innerLock ? BigInt(Math.floor(Math.min(5 * 10 ** 8, Number(amount / 2n)))) : 0n}
+            value={
+              lockedInToggle ? BigInt(Math.floor(Math.min(5 * 10 ** 8, Number(amount / 2n)))) : 0n
+            }
             suffix=" APT"
           />
         </div>
@@ -62,8 +71,12 @@ export default function EnterTabLockPhase({
               onClick={() => {
                 if (!account) return;
                 submit(transactionBuilder).then((res) => {
-                  if (!res || res?.error) {
+                  if (getEvents(res?.response).arenaMeleeEvents.length) {
                     setPhase("pick");
+                  } else {
+                    setPhase("summary");
+                  }
+                  if (!res || res?.error) {
                     setError(true);
                   }
                 });

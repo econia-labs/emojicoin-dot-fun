@@ -13,7 +13,8 @@ import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
 import { STRUCT_STRINGS } from "@/sdk/index";
-import { useSyncArenaEscrows } from "@/store/escrow/hooks";
+import { useSyncArenaActivity } from "@/store/arena/activity/hooks";
+import { useSyncArenaEscrows } from "@/store/arena/escrow/hooks";
 import { globalUserTransactionStore } from "@/store/transaction/store";
 
 import { BottomNavigation, TabContainer } from "./tabs";
@@ -129,6 +130,7 @@ export const ArenaClient = (props: ArenaProps) => {
   const latestMeleeID = useLatestMeleeID();
 
   useSyncArenaEscrows();
+  useSyncArenaActivity();
 
   useEffectOnce(() => {
     subscribeEvents(["Chat", "MarketLatestState"], { arenaBaseEvents: true });
