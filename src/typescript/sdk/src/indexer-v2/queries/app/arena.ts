@@ -47,14 +47,6 @@ const selectPosition = ({ user, meleeID }: { user: AccountAddressInput; meleeID:
     .select("*")
     .eq("user", toAccountAddressString(user))
     .eq("melee_id", meleeID)
-    .maybeSingle<DatabaseJsonType["arena_position"]>();
-
-const selectLatestPosition = ({ user }: { user: AccountAddressInput }) =>
-  postgrest
-    .from(TableName.ArenaPosition)
-    .select("*")
-    .eq("user", toAccountAddressString(user))
-    .order("melee_id", ORDER_BY.DESC)
     .limit(1)
     .maybeSingle<DatabaseJsonType["arena_position"]>();
 
@@ -113,7 +105,6 @@ export const fetchArenaInfoByMeleeID = queryHelperSingle(
   toArenaInfoModel
 );
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
-export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionModel);
 export const fetchMarketStateByAddress = queryHelperSingle(
   selectMarketStateByAddress,
   toMarketStateModel
@@ -123,7 +114,7 @@ export const fetchArenaCandlesticksSince = queryHelper(
   toArenaCandlestickModel
 );
 
-export const fetchLatestPositionJson = queryHelperSingle(selectLatestPosition);
+export const fetchPositionJson = queryHelperSingle(selectPosition);
 export const fetchArenaInfoJson = queryHelperSingle(selectArenaInfo);
 export const fetchArenaLeaderboardHistoryWithArenaInfoJson = queryHelper(
   selectArenaLeaderboardHistoryWithInfo

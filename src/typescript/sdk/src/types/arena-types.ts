@@ -99,7 +99,7 @@ export type ArenaTypes = {
     emojicoin1Balance: bigint;
     withdrawals: bigint;
     deposits: bigint;
-    lastExit0: string | null;
+    lastExit0: boolean | null;
     matchAmount: bigint;
   };
 

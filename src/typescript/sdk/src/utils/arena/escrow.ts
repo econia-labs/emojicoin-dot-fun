@@ -6,13 +6,9 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 
-import type {
-  ArenaInfoModel,
-  ArenaLeaderboardHistoryWithArenaInfoModel,
-  ArenaPositionModel,
-  Flatten,
-} from "../..";
+import type { ArenaLeaderboardHistoryWithArenaInfoModel, Flatten } from "../..";
 import type { AccountAddressString } from "../../emojicoin_dot_fun/types";
+import type { UserPositionWithInfo } from "../../indexer-v2/queries/api/user-position/types";
 import { type AnyNumberString, isWriteSetChangeWriteResource } from "../../types";
 import type { ArenaJsonTypes } from "../../types/arena-json-types";
 import { toEscrowResource } from "../../types/arena-types";
@@ -107,12 +103,11 @@ export const findEscrowsInTxn = ({ version, changes }: UserTransactionResponse) 
     )
     .filter((v) => !!v);
 
-type PositionAndInfo = ArenaPositionModel & ArenaInfoModel;
 type ArenaCoinTypeStructs = [TypeTagStruct, TypeTagStruct, TypeTagStruct, TypeTagStruct];
 
 // Convert a user's current and historical positions to `UserEscrow` types.
 export const positionToUserEscrow = (
-  pos: PositionAndInfo | ArenaLeaderboardHistoryWithArenaInfoModel
+  pos: UserPositionWithInfo | ArenaLeaderboardHistoryWithArenaInfoModel
 ): UserEscrow | HistoricalEscrow => {
   const { user, meleeID, emojicoin0Balance: emojicoin0, emojicoin1Balance: emojicoin1 } = pos;
 
