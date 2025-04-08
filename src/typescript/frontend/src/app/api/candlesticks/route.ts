@@ -48,7 +48,8 @@ export async function GET(request: NextRequest) {
 
   const queryHelper = new Parcel<CandlesticksDataType[number]>({
     parcelSize: 500,
-    fetchHistoricThreshold: () => getLatestProcessedEmojicoinTimestamp().then((r) => r.getTime()),
+    fetchHistoricThreshold: () =>
+      getLatestProcessedEmojicoinTimestamp().then((r) => Math.floor(r.getTime() / 1000)),
     fetchFirst: () => tryFetchMarketRegistration(validatedParams.marketID),
     cacheKey: "candlesticks",
     getKey: (s) => Number(s.periodicMetadata.startTime / 1000n / 1000n),
