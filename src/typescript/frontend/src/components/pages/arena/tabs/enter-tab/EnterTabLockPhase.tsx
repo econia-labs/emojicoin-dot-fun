@@ -40,7 +40,7 @@ export default function EnterTabLockPhase({
   );
 
   return (
-    <div className="flex flex-col gap-[2em] m-auto items-center w-[100%]">
+    <div className="flex flex-col gap-[2em] pt-14 m-auto items-center w-[100%]">
       <div className="flex justify-between w-[300px]">
         <div className="font-forma text-2xl uppercase text-white text-center">Lock in</div>
         <div className="flex gap-[1em] items-center">
