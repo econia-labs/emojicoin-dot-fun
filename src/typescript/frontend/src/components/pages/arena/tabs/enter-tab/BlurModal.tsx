@@ -5,13 +5,7 @@ export default function BlurModal({
   close,
 }: { close: () => void } & React.PropsWithChildren) {
   return (
-    <div
-      className="absolute w-[100%] h-[100%] z-[10] p-[1em] grid place-items-center"
-      style={{
-        background: "#000000ee",
-        backdropFilter: "blur(7px)",
-      }}
-    >
+    <div className="absolute w-[100%] h-[100%] z-[10] p-[1em] grid place-items-center">
       {children}
       <CloseIcon
         onClick={close}

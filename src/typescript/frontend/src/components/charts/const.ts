@@ -43,7 +43,7 @@ export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 
 export const EXCHANGE_NAME = "emojicoin.fun";
 
-const DEFAULT_RESOLUTION_STRING = "60" as ResolutionString;
+const DEFAULT_RESOLUTION_STRING = "15S" as ResolutionString;
 
 export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = {
   library_path: `${CDN_URL}/charting_library/`,

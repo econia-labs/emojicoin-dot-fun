@@ -70,7 +70,7 @@ export default function ChatTab({ market0, market1 }: Props) {
   }, []);
 
   return (
-    <div className="flex flex-col h-[100%] overflow-hidden">
+    <div className="flex flex-col mobile-sm:max-h-[calc(100vh-60px)] md:max-h-none mobile-sm:h-auto md:h-[100%] overflow-hidden">
       <motion.div layoutScroll className="flex flex-col-reverse grow px-[21px] py-0 overflow-auto">
         {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
           <MessageContainer
