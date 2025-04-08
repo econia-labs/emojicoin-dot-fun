@@ -1,23 +1,20 @@
+import type { MeleeEmojiData } from "../../../src";
 import {
   fetchArenaMeleeView,
   fetchMeleeEmojiData,
-  MeleeEmojiData,
   sleep,
   toArenaLeaderboardHistoryModel,
 } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import {
-  postgrest,
-  TableName,
-} from "../../../src/indexer-v2";
+import { postgrest, TableName } from "../../../src/indexer-v2";
+import { getPublisher } from "../../utils";
+import { DockerTestHarness } from "../../utils/docker/docker-test-harness";
 import { waitForProcessor } from "../helpers";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
-import { getPublisher } from "../../utils";
-import { DockerTestHarness } from "../../utils/docker/docker-test-harness";
 
 describe("ensures arena candlesticks work", () => {
   const emojicoin = new EmojicoinClient();
@@ -35,17 +32,38 @@ describe("ensures arena candlesticks work", () => {
 
   it("verifies that the processor restart with a correct price", async () => {
     await waitUntilCurrentMeleeEnds();
-    const crank = await emojicoin.arena.enter(account, 1n, false, melee.market0.symbolEmojis, melee.market1.symbolEmojis, "symbol0");
+    const crank = await emojicoin.arena.enter(
+      account,
+      1n,
+      false,
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis,
+      "symbol0"
+    );
     melee = await fetchArenaMeleeView(crank.arena.event.meleeID).then(fetchMeleeEmojiData);
 
-    const enter = await emojicoin.arena.enter(account, 1n, false, melee.market0.symbolEmojis, melee.market1.symbolEmojis, "symbol0");
+    const enter = await emojicoin.arena.enter(
+      account,
+      1n,
+      false,
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis,
+      "symbol0"
+    );
     expect(enter.events.arenaEnterEvents.length).toEqual(1);
     await waitUntilCurrentMeleeEnds();
     await DockerTestHarness.restartProcessor();
     await sleep(10000);
 
     // Crank
-    const res = await emojicoin.arena.enter(account, 1n, false, melee.market0.symbolEmojis, melee.market1.symbolEmojis, "symbol0");
+    const res = await emojicoin.arena.enter(
+      account,
+      1n,
+      false,
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis,
+      "symbol0"
+    );
 
     await waitForProcessor(res);
 

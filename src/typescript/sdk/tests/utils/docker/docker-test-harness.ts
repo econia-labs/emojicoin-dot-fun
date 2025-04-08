@@ -72,7 +72,9 @@ export class DockerTestHarness {
   }
 
   static async restartProcessor() {
-    await execPromise(`docker compose -f ${LOCAL_COMPOSE_PATH} --env-file ${LOCAL_ENV_PATH} restart processor`);
+    await execPromise(
+      `docker compose -f ${LOCAL_COMPOSE_PATH} --env-file ${LOCAL_ENV_PATH} restart processor`
+    );
   }
 
   /**
