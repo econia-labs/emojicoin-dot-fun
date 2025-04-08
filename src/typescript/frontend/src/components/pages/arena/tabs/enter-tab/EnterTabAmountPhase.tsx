@@ -22,36 +22,34 @@ export default function EnterTabAmountPhase({ market }: { market: MarketStateMod
   const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const [innerAmount, setInnerAmount] = useState<bigint>(0n);
   return (
-    <div className="grid place-items-center h-[100%]">
-      <div className="flex flex-col gap-[2em] items-center">
-        <div className="m-auto text-6xl">
-          <GlowingEmoji emojis={market.market.symbolEmojis.join("")} />
-        </div>
-        <div className="font-forma text-xl uppercase text-white text-center">Deposit amount</div>
-        <InnerWrapper>
-          <div className="flex flex-col">
-            <div className={grayLabel}>Amount</div>
-            <InputNumeric
-              className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-              value={innerAmount}
-              onUserInput={(v) => setInnerAmount(v)}
-              onSubmit={() => setAmount(innerAmount)}
-              decimals={8}
-            />
-          </div>
-          <AptosInputLabel />
-        </InnerWrapper>
-        <Button
-          scale="lg"
-          onClick={() => {
-            setAmount(innerAmount);
-            setPhase("lock");
-          }}
-          disabled={innerAmount <= 0n}
-        >
-          Next
-        </Button>
+    <div className="flex flex-col grow justify-center pt-6 items-center gap-[1rem]">
+      <div className="text-6xl">
+        <GlowingEmoji emojis={market.market.symbolEmojis.join("")} />
       </div>
+      <div className="font-forma text-xl uppercase text-white">Deposit amount</div>
+      <InnerWrapper>
+        <div className="flex flex-col">
+          <div className={grayLabel}>Amount</div>
+          <InputNumeric
+            className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
+            value={innerAmount}
+            onUserInput={(v) => setInnerAmount(v)}
+            onSubmit={() => setAmount(innerAmount)}
+            decimals={8}
+          />
+        </div>
+        <AptosInputLabel />
+      </InnerWrapper>
+      <Button
+        scale="lg"
+        onClick={() => {
+          setAmount(innerAmount);
+          setPhase("lock");
+        }}
+        disabled={innerAmount <= 0n}
+      >
+        Next
+      </Button>
     </div>
   );
 }

@@ -34,7 +34,7 @@ export default function Summary({
   const { pnl } = useTradingStats();
 
   return (
-    <div className="flex flex-col justify-between items-center h-[100%] pt-[3.5em]">
+    <div className="flex flex-col justify-center items-center h-[100%] py-2">
       {/* The glowing emoji header */}
       <GlowingEmoji className="text-7xl mt-[2em]" emojis={position.currentSymbol} />
       <div className="flex flex-col justify-between gap-[1em] items-center">
@@ -102,7 +102,7 @@ export default function Summary({
           </div>
         </div>
       </div>
-      <div className="flex justify-evenly w-[100%] pb-[2em]">
+      <div className="flex justify-evenly w-[100%]">
         <Button scale="lg" onClick={topOff}>
           Top off
         </Button>
