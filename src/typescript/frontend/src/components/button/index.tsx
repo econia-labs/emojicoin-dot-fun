@@ -41,7 +41,6 @@ const Button = <E extends React.ElementType = "button">({
 
   const textProps = {
     textScale: "pixelHeading4" as const,
-    color: isDisabled || fakeDisabled ? ("darkGray" as const) : ("econiaBlue" as const),
     textTransform: "uppercase" as const,
     fontSize:
       scale === "sm" ? ("20px" as const) : scale === "lg" ? ("24px" as const) : ("36px" as const),
@@ -51,7 +50,7 @@ const Button = <E extends React.ElementType = "button">({
     <StyledButton
       {...internalProps}
       {...rest}
-      varian={variant}
+      variant={variant}
       type={rest.type || "button"}
       disabled={isDisabled}
       $isLoading={isLoading}
@@ -69,12 +68,7 @@ const Button = <E extends React.ElementType = "button">({
             })}
 
           {!isScramble ? (
-            <FlexGap
-              gap="8px"
-              onMouseOver={replay}
-              justifyContent="space-between"
-              className="h-[1em]"
-            >
+            <FlexGap gap="8px" onMouseOver={replay} justifyContent="space-between">
               <Text {...textProps}>{"{ "}</Text>
               {icon && (
                 <Text {...textProps} className="flex flex-row">
@@ -95,12 +89,7 @@ const Button = <E extends React.ElementType = "button">({
               <Text {...textProps}>{" }"}</Text>
             </FlexGap>
           ) : (
-            <FlexGap
-              gap="8px"
-              onMouseOver={replay}
-              className="h-[1em]"
-              justifyContent="space-between"
-            >
+            <FlexGap gap="8px" onMouseOver={replay} justifyContent="space-between">
               <Text {...textProps}>{"{ "}</Text>
               {icon && (
                 <Text {...textProps} className="flex flex-row">

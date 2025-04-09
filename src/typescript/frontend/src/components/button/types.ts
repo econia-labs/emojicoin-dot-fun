@@ -6,6 +6,8 @@ import type { PolymorphicComponentProps } from "types";
 
 const variants = {
   OUTLINE: "outline",
+  BORDER: "border",
+  SOLID: "solid",
 } as const;
 
 export const scales = {
