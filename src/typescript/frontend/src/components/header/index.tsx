@@ -67,12 +67,12 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
       >
         <Link className="mt-[6px]" {...linkProps}>
           <StyledClickItem>
-            <LogoIcon width="170px" color="black" cursor="pointer" versionBadge={false} />
+            <LogoIcon width="170px" color="econiaBlue" cursor="pointer" versionBadge={true} />
           </StyledClickItem>
         </Link>
 
         <StyledCloseIcon>
-          <CloseIcon color="black" width="19px" onClick={handleCloseMobileMenu} />
+          <CloseIcon color="econiaBlue" width="19px" onClick={handleCloseMobileMenu} />
         </StyledCloseIcon>
       </StyledMobileHeader>
 
