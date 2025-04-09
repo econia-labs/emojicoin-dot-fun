@@ -1,12 +1,11 @@
 import styled from "styled-components";
-import { border, layout, opacity, shadow, space, typography, variant } from "styled-system";
+import { layout, opacity, shadow, space, typography, variant } from "styled-system";
 
 import { scaleVariants, variantStyles } from "./theme";
 import type { ButtonProps } from "./types";
 
 const StyledButton = styled.button<ButtonProps>`
   background-color: ${({ theme }) => theme.colors.transparent};
-  border-radius: ${({ theme }) => theme.radii.semiMedium};
   font-weight: ${({ theme }) => theme.fontWeight.regular};
   font-family: ${({ theme }) => theme.fonts.pixelar};
   text-transform: uppercase;
@@ -18,7 +17,6 @@ const StyledButton = styled.button<ButtonProps>`
   outline: 0;
   transition: all 0.3s ease;
   width: fit-content;
-  border: 0;
 
   ${variant({
     prop: "scale",
@@ -31,7 +29,6 @@ const StyledButton = styled.button<ButtonProps>`
   ${typography}
   ${layout}
   ${opacity}
-  ${border}
   ${shadow}
 `;
 
