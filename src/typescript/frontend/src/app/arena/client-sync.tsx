@@ -1,6 +1,8 @@
 "use client";
 
 import { useEventStore } from "context/event-store-context";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
+import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { useEffectOnce } from "react-use";
 
 import { useSyncLatestArenaInfo } from "@/hooks/use-sync-latest-arena-info";
@@ -9,6 +11,9 @@ import { useSyncArenaEscrows } from "@/store/arena/escrow/hooks";
 
 export default function ArenaClientSync() {
   const subscribeEvents = useEventStore((s) => s.subscribeEvents);
+
+  useCurrentPosition();
+  useHistoricalPositions();
 
   useSyncLatestArenaInfo();
   useSyncArenaEscrows();

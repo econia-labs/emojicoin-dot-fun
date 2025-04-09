@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SymbolEmoji } from "../../../emoji_data";
 import { chunk } from "../../../utils/misc";
+import type { DatabaseJsonType } from "../../types";
 import { TableName, toMarketStateModel } from "../../types";
 import { postgrest } from "../client";
 
@@ -25,14 +26,15 @@ export const joinEqClauses = (symbols: SymbolEmoji[][]) => symbols.map(toEqClaus
 
 /**
  * @see fetchSpecificMarkets for why this function on its own is potentially unsafe/incorrect.
+ * NOTE: This returns the JSON values.
  */
-const fetchSpecificMarketsUnsafe = async (symbols: SymbolEmoji[][]) =>
+export const fetchSpecificMarketsUnsafe = async (symbols: SymbolEmoji[][]) =>
   await postgrest
     .from(TableName.MarketState)
     .select("*")
     .or(joinEqClauses(symbols))
-    .then((res) => res.data ?? [])
-    .then((res) => res.map(toMarketStateModel));
+    .returns<DatabaseJsonType["market_state"][]>()
+    .then((res) => res.data ?? ([] as DatabaseJsonType["market_state"][]));
 
 const MAX_SYMBOLS_PER_FETCH = 100;
 
@@ -62,6 +64,6 @@ export const fetchSpecificMarkets = async (symbols: SymbolEmoji[][]) => {
   const deduped = Array.from(mapped.values());
   const chunks = chunk(deduped, MAX_SYMBOLS_PER_FETCH);
   const promises = chunks.map((arr) => fetchSpecificMarketsUnsafe(arr));
-  const flattened = (await Promise.all(promises)).flat();
+  const flattened = (await Promise.all(promises)).flat().map(toMarketStateModel);
   return flattened;
 };

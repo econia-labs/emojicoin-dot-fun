@@ -26,6 +26,7 @@ export const useCurrentPosition = (): {
   return useMemo(() => {
     const resIfNull = { position: null, isLoading };
     if (!meleeInfo) return resIfNull;
+    if (meleeInfo.meleeID !== (escrow?.meleeID || position?.meleeID)) resIfNull;
 
     const coalesced = coalescePositionAndEscrow(escrow, position);
     if (!coalesced) return resIfNull;
