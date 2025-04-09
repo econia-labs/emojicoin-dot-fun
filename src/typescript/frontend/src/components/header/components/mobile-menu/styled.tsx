@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import styled from "styled-components";
-import { ECONIA_BLUE } from "theme/colors";
 
 export const StyledMotion = styled(motion.div)`
   position: fixed;
@@ -9,7 +8,7 @@ export const StyledMotion = styled(motion.div)`
   right: 0;
   left: 0;
   z-index: ${({ theme }) => theme.zIndices.modal};
-  background-color: ${ECONIA_BLUE};
+  background-color: ${({ theme }) => theme.colors.black};
 `;
 
 export const MobileMenuWrapper = styled.div`
@@ -20,12 +19,5 @@ export const MobileMenuWrapper = styled.div`
   height: 100dvh;
   justify-content: center;
   align-items: center;
-  background-color: ${ECONIA_BLUE};
   padding: 0 18px;
-`;
-
-export const MobileMenuInner = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
 `;
