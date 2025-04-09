@@ -1,8 +1,8 @@
 import Button from "components/button";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
-import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
+import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
@@ -105,8 +105,8 @@ export const MeleeHistory = ({
   setHistoryHidden: (historyHidden: boolean) => void;
 }) => {
   const { isMobile } = useMatchBreakpoints();
-  const { position } = useCurrentPositionQuery();
-  const { history } = useHistoricalPositionsQuery();
+  const { position } = useCurrentPosition();
+  const { history } = useHistoricalPositions();
 
   const positionIsAlsoInHistory = useMemo(
     () => !!history.find((v) => v.meleeID === position?.meleeID),

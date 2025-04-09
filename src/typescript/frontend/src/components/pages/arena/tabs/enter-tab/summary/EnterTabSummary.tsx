@@ -1,8 +1,6 @@
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import {
-  type CurrentUserPosition,
-  useCurrentPositionQuery,
-} from "lib/hooks/queries/arena/use-current-position";
+import type { CurrentUserPosition} from "lib/hooks/positions/use-current-position";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useArenaSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-arena-swap-builder";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
 import { useCallback, useState } from "react";
@@ -30,7 +28,7 @@ export default function EnterTabSummary({
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const { account, submit } = useAptos();
   const { market0, market1 } = useCurrentMeleeInfo();
-  const { isLoading } = useCurrentPositionQuery();
+  const { isLoading } = useCurrentPosition();
 
   const swapTransactionBuilder = useArenaSwapTransactionBuilder(
     market0?.market.marketAddress,

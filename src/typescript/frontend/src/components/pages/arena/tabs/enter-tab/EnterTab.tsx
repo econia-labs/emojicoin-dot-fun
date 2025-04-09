@@ -1,6 +1,6 @@
 import Loading from "components/loading";
-import type { CurrentUserPosition } from "lib/hooks/queries/arena/use-current-position";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import type { PropsWithChildren } from "react";
 import React, { useEffect } from "react";
 
@@ -22,13 +22,14 @@ export default function EnterTab() {
   const phase = useArenaPhaseStore((s) => s.phase);
   const amount = useArenaPhaseStore((s) => s.amount);
 
-  const { position, isLoading } = useCurrentPositionQuery();
+  const { position, isLoading } = useCurrentPosition();
 
   useEffect(() => {
-    if (position?.open && phase !== "amount" && phase !== "lock") {
+    const { open } = position ?? {};
+    if (open && phase !== "amount" && phase !== "lock") {
       setPhase("summary");
     }
-    if ((position === null || position?.open === false) && phase === "summary") {
+    if ((position === null || open === false) && phase === "summary") {
       setPhase("pick");
     }
   }, [phase, position, setPhase]);

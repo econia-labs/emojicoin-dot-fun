@@ -1,6 +1,6 @@
 import { FormattedNumber } from "components/FormattedNumber";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
-import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
+import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { useMemo, useState } from "react";
 
 import { useMatchBreakpoints } from "@/hooks/index";
@@ -24,8 +24,8 @@ const MeleeStatsHyphens = () => <div className={headerValueClass}>{"--"}</div>;
 
 const CurrentMeleeStats = () => {
   const { isMobile } = useMatchBreakpoints();
-  const { isLoading } = useCurrentPositionQuery();
-  const { currentDeposited, locked, pnl, pnlOctas } = useTradingStats();
+  const { isLoading } = useCurrentPosition();
+  const { deposits, locked, pnl, pnlOctas } = useTradingStats();
 
   return (
     <div
@@ -36,12 +36,8 @@ const CurrentMeleeStats = () => {
         <div className={headerTitleClass}>{"Current deposits"}</div>
         {isLoading ? (
           <AnimatedLoadingBoxesWithFallback numSquares={4} fallback={<MeleeStatsHyphens />} />
-        ) : currentDeposited !== undefined ? (
-          <FormattedNominalNumber
-            className={headerValueClass}
-            value={currentDeposited}
-            suffix=" APT"
-          />
+        ) : deposits !== undefined ? (
+          <FormattedNominalNumber className={headerValueClass} value={deposits} suffix=" APT" />
         ) : (
           <MeleeStatsHyphens />
         )}
@@ -92,8 +88,8 @@ const Inner = (
 ) => {
   const { isMobile } = useMatchBreakpoints();
   const [selectedRow, setSelectedRow] = useState<number>();
-  const { position } = useCurrentPositionQuery();
-  const { history } = useHistoricalPositionsQuery();
+  const { position } = useCurrentPosition();
+  const { history } = useHistoricalPositions();
 
   const meleeBreakdown = useMemo(
     () => <MeleeBreakdown {...{ ...props, selectedRow, close: () => setSelectedRow(undefined) }} />,
@@ -139,8 +135,8 @@ const Inner = (
 
 export default function ProfileTab(props: ProfileTabProps & { goToEnter: () => void }) {
   const [historyHidden, setHistoryHidden] = useState<boolean>(false);
-  const { position } = useCurrentPositionQuery();
-  const { history } = useHistoricalPositionsQuery();
+  const { position } = useCurrentPosition();
+  const { history } = useHistoricalPositions();
   const { isMobile } = useMatchBreakpoints();
 
   return (

@@ -1,12 +1,11 @@
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { motion } from "framer-motion";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import _ from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 
 import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
-import { Column, Flex } from "@/components/layout";
 import { LoadMore } from "@/components/ui/table/loadMore";
 import type { MarketStateModel } from "@/sdk/index";
 
@@ -31,7 +30,7 @@ export default function ChatTab({ market0, market1 }: Props) {
   const market1chatsFromStore = useEventStore(
     (s) => s.getMarket(market1.market.symbolEmojis)?.chatEvents ?? []
   );
-  const { position } = useCurrentPositionQuery();
+  const { position } = useCurrentPosition();
 
   const side = useMemo(() => {
     if (!position || !position.open) return null;

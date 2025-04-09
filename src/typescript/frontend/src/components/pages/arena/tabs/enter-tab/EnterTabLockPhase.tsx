@@ -1,5 +1,5 @@
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useEnterTransactionBuilder } from "lib/hooks/transaction-builders/use-enter-builder";
 import { useMemo, useState } from "react";
 
@@ -19,7 +19,7 @@ export default function EnterTabLockPhase({
   market: MarketStateModel;
   amount: bigint;
 }) {
-  const { position } = useCurrentPositionQuery();
+  const { position } = useCurrentPosition();
   const [innerLock, setInnerLock] = useState<boolean>(false);
   const { account, submit } = useAptos();
   const { market0, market1 } = useCurrentMeleeInfo();

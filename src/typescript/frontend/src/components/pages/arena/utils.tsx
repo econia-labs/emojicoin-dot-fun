@@ -1,5 +1,5 @@
 import type { ClassValue } from "clsx";
-import type { CurrentUserPosition } from "lib/hooks/queries/arena/use-current-position";
+import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import React, { useMemo } from "react";
 import { GlowingEmoji } from "utils/emoji";
 

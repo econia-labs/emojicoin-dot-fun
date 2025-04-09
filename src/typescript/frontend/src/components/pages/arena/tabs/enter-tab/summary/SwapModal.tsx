@@ -1,4 +1,4 @@
-import type { CurrentUserPosition } from "lib/hooks/queries/arena/use-current-position";
+import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { GlowingEmoji } from "utils/emoji";
 
 import Button from "@/components/button";

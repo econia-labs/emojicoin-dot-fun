@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEventStore } from "context/event-store-context";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
@@ -6,15 +7,16 @@ import { useAccountAddress } from "@/hooks/use-account-address";
 import type { DatabaseJsonType } from "@/sdk/index";
 import { compareBigInt, maxBigInt, toArenaLeaderboardHistoryWithArenaInfo } from "@/sdk/index";
 
-/**
- * This doesn't need to refetch because any updates we can derive from on-chain activity.
- * In other words, historical positions can be queried once, and then never again.
- */
 export const useHistoricalPositionsQuery = () => {
   const accountAddress = useAccountAddress();
+  const arenaInfo = useEventStore((s) => s.arenaInfoFromServer);
 
-  const { data, isFetching } = useQuery({
-    queryKey: ["fetch-historical-positions", accountAddress ?? ""],
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: [
+      "fetch-historical-positions",
+      accountAddress ?? "",
+      arenaInfo?.meleeID.toString() ?? "",
+    ],
     queryFn: async () => {
       if (!accountAddress) return null;
       const historicalPositions = await fetch(
@@ -47,6 +49,7 @@ export const useHistoricalPositionsQuery = () => {
 
   return {
     history: data?.historicalPositions ?? [],
+    isLoading,
     isFetching,
   };
 };

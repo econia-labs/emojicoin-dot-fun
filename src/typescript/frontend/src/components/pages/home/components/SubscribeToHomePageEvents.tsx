@@ -5,11 +5,12 @@ import FEATURE_FLAGS from "lib/feature-flags";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
+import useLatestMeleeData from "@/hooks/use-latest-melee-event";
 import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
 import type { ArenaInfoModel } from "@/sdk/indexer-v2";
 
 export const SubscribeToHomePageEvents = ({ info }: { info?: ArenaInfoModel }) => {
+  const { latestMeleeEvent } = useLatestMeleeData();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const router = useRouter();
 
@@ -24,16 +25,16 @@ export const SubscribeToHomePageEvents = ({ info }: { info?: ArenaInfoModel }) =
     eventTypes: ["MarketLatestState"],
   });
 
-  const latestMeleeID = useLatestMeleeID();
   const currentMelee = useEventStore((s) => s.arenaInfoFromServer);
 
+  // cpsell fix
   useEffect(() => {
     if (currentMelee) {
-      if (latestMeleeID > currentMelee.meleeID) {
+      if ((latestMeleeEvent?.melee.meleeID ?? -1n) > currentMelee.meleeID) {
         router.refresh();
       }
     }
-  }, [latestMeleeID, currentMelee, router]);
+  }, [latestMeleeEvent, currentMelee, router]);
 
   return <></>;
 };
