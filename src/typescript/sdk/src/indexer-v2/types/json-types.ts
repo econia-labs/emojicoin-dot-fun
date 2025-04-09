@@ -84,7 +84,10 @@ type PostgresTimestamp = string;
  * - The function uses the BigInt type to ensure precision when dealing with microsecond timestamps.
  * @typedef {string} PostgresTimestamp A string in the format "YYYY-MM-DDTHH:mm:ss.SSSSSS"
  */
-export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): bigint => {
+export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp | Date): bigint => {
+  // If the timestamp is already a date, just return it as microseconds.
+  if (timestamp instanceof Date) return BigInt(timestamp.getTime() * 1000);
+
   // If the incoming string ends with a "Z", remove it- we will add it later.
   if (timestamp.endsWith("Z")) timestamp = timestamp.slice(0, -1);
 
