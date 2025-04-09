@@ -3,7 +3,7 @@ import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
 import { useAccountAddress } from "@/hooks/use-account-address";
-import type { DatabaseJsonType } from "@/sdk/index";
+import type { DatabaseJsonType, Types } from "@/sdk/index";
 import { compareBigInt, maxBigInt, toArenaLeaderboardHistoryWithArenaInfo } from "@/sdk/index";
 
 import { useRouteWithMinimumVersion } from "./use-url-with-min-version";
@@ -15,7 +15,7 @@ export const useHistoricalPositionsQuery = () => {
   );
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ["fetch-historical-positions", accountAddress ?? "", url],
+    queryKey: ["fetch-historical-positions", accountAddress ?? ""],
     queryFn: async () => {
       if (!accountAddress) return null;
       const historicalPositions = await fetch(url)
@@ -29,7 +29,7 @@ export const useHistoricalPositionsQuery = () => {
         )
         .catch((e) => {
           console.error(e);
-          return [];
+          return [] as Types["ArenaLeaderboardHistoryWithArenaInfo"][];
         });
       const versions = historicalPositions.flatMap((v) => [
         v.arenaInfoLastTransactionVersion,

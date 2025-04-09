@@ -153,10 +153,13 @@ export function HistoricMeleeBreakdown({
   historyHidden,
   close,
 }: {
-  melee: ArenaLeaderboardHistoryWithArenaInfoModel;
+  melee: ArenaLeaderboardHistoryWithArenaInfoModel | undefined;
   historyHidden: boolean;
   close: () => void;
 }) {
+  // Got a weird bug where this crashed on me once. Not sure what it was so I'm safeguarding it.
+  if (!melee || !("lastExit0" in melee)) return <Loading />;
+
   const lastHeld =
     melee.lastExit0 || melee.emojicoin0Balance > 0
       ? melee.emojicoin0Symbols.join("")

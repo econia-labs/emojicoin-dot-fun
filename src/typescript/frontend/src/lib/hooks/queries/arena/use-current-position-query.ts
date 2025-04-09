@@ -24,7 +24,7 @@ export const useCurrentPositionQuery = () => {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["fetch-current-position", accountAddress ?? "", url],
+    queryKey: ["fetch-current-position", accountAddress ?? ""],
     queryFn: async () => {
       if (!accountAddress) return null;
       const res = await fetch(url)
