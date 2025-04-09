@@ -4,18 +4,11 @@ import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useEventStore } from "context/event-store-context/hooks";
-import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useEffectOnce } from "react-use";
 
 import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
-import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
-import { STRUCT_STRINGS } from "@/sdk/index";
-import { useSyncArenaActivity } from "@/store/arena/activity/hooks";
-import { useSyncArenaEscrows } from "@/store/arena/escrow/hooks";
-import { globalUserTransactionStore } from "@/store/transaction/store";
 
 import { BottomNavigation, TabContainer } from "./tabs";
 import {
@@ -110,55 +103,16 @@ const Mobile = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) => 
 // Necessary to add a display name because of the React.memo wrapper.
 Mobile.displayName = "Mobile";
 
-/**
- * When a melee ends, all clients will refresh at once. To avoid hammering the indexer in case of huge traffic, stagger
- * the requests by randomly delaying them for 1-5 seconds. Getting the new melee data is a once a day thing, so it's
- * fine if this is delayed by a few seconds for a client.
- *
- * In a development environment, this is just a flat, shorter amount of time.
- */
-const randomlyStaggeredRefreshDelay = () =>
-  process.env.NODE_ENV === "development" ? 777 : 1000 + Math.random() * 4000;
-
 export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
-  const subscribeEvents = useEventStore((s) => s.subscribeEvents);
-  const latestTxnEvents = globalUserTransactionStore.getState().latestResponse?.events;
-  const latestMeleeID = useLatestMeleeID();
-
-  useSyncArenaEscrows();
-  useSyncArenaActivity();
-
-  useEffectOnce(() => {
-    subscribeEvents(["Chat", "MarketLatestState"], { arenaBaseEvents: true });
-  });
 
   useEffect(() => {
     loadArenaInfoFromServer(props.arenaInfo);
     loadMarketStateFromServer([props.market0]);
     loadMarketStateFromServer([props.market1]);
   }, [loadArenaInfoFromServer, loadMarketStateFromServer, props]);
-
-  // Whenever the melee ID updates, wait a short, random amount of time so that the processor has time to process the
-  // new changes. Then refresh the page.
-  useEffect(() => {
-    const userCrankedMelee = !!latestTxnEvents?.find(
-      ({ type }) => type === STRUCT_STRINGS.ArenaMeleeEvent
-    );
-    const newMeleeID = latestMeleeID > props.arenaInfo.meleeID;
-    const shouldRefresh = userCrankedMelee || newMeleeID;
-
-    const timeout = shouldRefresh
-      ? setTimeout(() => {
-          router.refresh();
-        }, randomlyStaggeredRefreshDelay())
-      : undefined;
-
-    return () => clearTimeout(timeout);
-  }, [latestTxnEvents, latestMeleeID, props.arenaInfo.meleeID, router]);
 
   return isMobile ? <Mobile {...props} /> : <Desktop {...props} />;
 };

@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
 import { useAccountAddress } from "@/hooks/use-account-address";
-import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { getEvents, sumByKey } from "@/sdk/index";
 import {
   diffFromEnter,
@@ -13,25 +12,30 @@ import { globalUserTransactionStore } from "@/store/transaction/store";
 
 import { type ArenaActivityStore, globalArenaActivityStore } from "./store";
 
-const maybeFiltered = (results: { version: bigint; delta: bigint }[], minimumVersion?: bigint) => {
+export const filterActivityByVersion = (
+  results: { version: bigint; delta: bigint }[],
+  minimumVersion?: bigint
+) => {
   const res =
     minimumVersion !== undefined ? results.filter((v) => v.version > minimumVersion) : results;
   const result = sumByKey(res, "delta", "bigint");
   return result;
 };
 
-export const useArenaActivity = (latestPositionVersion?: bigint) => {
+export const useArenaActivity = (
+  meleeID: bigint | undefined,
+  latestPositionVersion: bigint | undefined
+) => {
   const user = useAccountAddress();
-  const { meleeInfo } = useCurrentMeleeInfo();
 
   return useArenaActivityStore((s) => {
-    if (!user || !meleeInfo) return undefined;
-    const res = s.addressMap.get(user)?.get(meleeInfo?.meleeID);
+    if (!user || meleeID === undefined) return undefined;
+    const res = s.addressMap.get(user)?.get(meleeID);
     if (!res) return undefined;
     return {
-      deposits: maybeFiltered(res.deposits, latestPositionVersion),
-      withdrawals: maybeFiltered(res.withdrawals, latestPositionVersion),
-      matchAmount: maybeFiltered(res.matchAmount, latestPositionVersion),
+      deposits: filterActivityByVersion(res.deposits, latestPositionVersion),
+      withdrawals: filterActivityByVersion(res.withdrawals, latestPositionVersion),
+      matchAmount: filterActivityByVersion(res.matchAmount, latestPositionVersion),
       lastExit0: res.lastExit0,
     };
   });

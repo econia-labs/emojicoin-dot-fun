@@ -53,6 +53,7 @@ export const createEventStore = () => {
       ...initializeArenaStore(),
       getMarket: (emojis = []) => get().markets.get(emojis.join("")),
       getMarketLatestState: (emojis = []) => {
+        if (!emojis || !emojis.length) return undefined;
         const market = get().markets.get(emojis.join(""));
         const latestState = market?.stateEvents.at(0);
         if (!market || !latestState) return undefined;
@@ -146,7 +147,12 @@ export const createEventStore = () => {
             });
             DEBUG_ASSERT(() => events.length === 0);
           });
-          state.meleeEvents.push(...extractFilter(arenaEvents, isArenaMeleeModel));
+
+          const meleeEventModels = extractFilter(arenaEvents, isArenaMeleeModel);
+          meleeEventModels.forEach((model) => {
+            ensureMeleeInStore(state, model.melee.meleeID);
+            state.meleeEvents.push(model);
+          });
         });
       },
       pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {

@@ -3,14 +3,16 @@ import { immer } from "zustand/middleware/immer";
 
 import type { PositionDiff } from "@/sdk/indexer-v2/mini-processor/arena/position-diff";
 
+export type Activity = { version: bigint; delta: bigint }[];
+
 type UserAddress = `0x${string}`;
-type Activity = {
-  deposits: { version: bigint; delta: bigint }[];
-  withdrawals: { version: bigint; delta: bigint }[];
-  matchAmount: { version: bigint; delta: bigint }[];
+type AllActivity = {
+  deposits: Activity;
+  withdrawals: Activity;
+  matchAmount: Activity;
   lastExit0: boolean | null;
 };
-type ActivityMap = Map<bigint, Activity>;
+type ActivityMap = Map<bigint, AllActivity>;
 
 type State = {
   addressMap: Map<UserAddress, ActivityMap>;
@@ -68,7 +70,6 @@ export const globalArenaActivityStore = createStore<ArenaActivityStore>()(
         meleeActivity.withdrawals.push({ version, delta: withdrawals });
         meleeActivity.matchAmount.push({ version, delta: matchAmount });
         meleeActivity.lastExit0 = lastExit0;
-
         state.alreadyProcessed.add(version);
       });
     },

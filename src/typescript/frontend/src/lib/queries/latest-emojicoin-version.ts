@@ -22,17 +22,12 @@ export const fetchCachedLatestProcessorVersion = cache(
 );
 
 const FETCH_INTERVAL = 1000;
-const TIMEOUT = 10000;
-const MAX_TRIES = 10;
+const MAX_TRIES = 5;
 
 export const waitForVersionCached = async (
-  minimumVersion: z.infer<typeof PositiveBigIntSchema>,
-  timeout = TIMEOUT
+  minimumVersion: z.infer<typeof PositiveBigIntSchema>
 ) => {
-  const tries = Math.floor(timeout / FETCH_INTERVAL);
-  const maxTries = Math.min(tries, MAX_TRIES);
-
-  for (let i = 0; i < maxTries; i += 1) {
+  for (let i = 0; i < MAX_TRIES; i += 1) {
     const latestVersion = await fetchCachedLatestProcessorVersion()
       .then(BigInt)
       .catch((e) => {
@@ -46,6 +41,6 @@ export const waitForVersionCached = async (
     await sleep(FETCH_INTERVAL);
   }
 
-  console.trace(`Failed to wait for version ${minimumVersion} after ${maxTries}`);
+  console.trace(`Failed to wait for version ${minimumVersion} after ${MAX_TRIES}`);
   return false;
 };
