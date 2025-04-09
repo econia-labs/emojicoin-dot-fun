@@ -1,7 +1,7 @@
 import Big from "big.js";
 import Button from "components/button";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
-import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
+import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { cn } from "lib/utils/class-name";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
@@ -120,7 +120,7 @@ export function CurrentMeleeBreakdown({
   historyHidden: boolean;
   close: () => void;
 }) {
-  const { position } = useCurrentPositionQuery();
+  const { position } = useCurrentPosition();
   const { pnl } = useTradingStats();
   const { market0, market1 } = useCurrentMeleeInfo();
   const marketLastHeld = useMemo(() => {
@@ -192,8 +192,8 @@ export const MeleeBreakdown = ({
   goToEnter?: () => void;
   close: () => void;
 }) => {
-  const { position, isLoading } = useCurrentPositionQuery();
-  const { history } = useHistoricalPositionsQuery();
+  const { position, isLoading } = useCurrentPosition();
+  const { history } = useHistoricalPositions();
 
   if (!position && selectedRow === undefined) {
     return isLoading ? (

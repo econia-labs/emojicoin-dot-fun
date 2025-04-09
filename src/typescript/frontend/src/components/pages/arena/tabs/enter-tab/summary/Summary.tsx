@@ -1,5 +1,5 @@
-import type { CurrentUserPosition } from "lib/hooks/queries/arena/use-current-position";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { cn } from "lib/utils/class-name";
 import { Lock } from "lucide-react";
 import { GlowingEmoji } from "utils/emoji";
@@ -30,7 +30,7 @@ export default function Summary({
   topOff: () => void;
 }) {
   const { market0, market1 } = useCurrentMeleeInfo();
-  const { isLoading } = useCurrentPositionQuery();
+  const { isLoading } = useCurrentPosition();
   const { pnl } = useTradingStats();
 
   return (

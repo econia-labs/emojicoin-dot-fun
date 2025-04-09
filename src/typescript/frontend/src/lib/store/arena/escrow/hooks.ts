@@ -37,7 +37,7 @@ export const useSyncArenaEscrows = () => {
 };
 
 function useEscrowsFromPositions() {
-  const { historicalPositions: history } = useHistoricalPositionsQuery();
+  const { history } = useHistoricalPositionsQuery();
 
   return useMemo(() => {
     return history.map(positionToUserEscrow);
