@@ -1,8 +1,9 @@
-import { useNameResolver } from "@hooks/use-name-resolver";
-import { formatDisplayName } from "@sdk/utils";
 import { cn } from "lib/utils/class-name";
 import { useMemo } from "react";
 import { ROUTES } from "router/routes";
+
+import { useNameResolver } from "@/hooks/use-name-resolver";
+import { formatDisplayName } from "@/sdk/utils";
 
 export const WalletAddressCell = ({
   address,
@@ -22,7 +23,7 @@ export const WalletAddressCell = ({
 
   return (
     <a
-      href={`${ROUTES.wallet}/${address}`}
+      href={`${ROUTES.wallet}/${resolvedName}`}
       className={cn("flex h-full", className)}
       onClick={(e) => e.stopPropagation()}
     >

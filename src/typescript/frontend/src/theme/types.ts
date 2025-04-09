@@ -1,15 +1,15 @@
-import {
-  type mediaQueries,
-  type shadows,
-  type radii,
-  type zIndices,
-  type fontWeight,
-  type fonts,
-  type breakpoints,
-  type gradients,
-  type transitions,
+import type {
+  breakpoints,
+  fonts,
+  fontWeight,
+  gradients,
+  mediaQueries,
+  radii,
+  shadows,
+  transitions,
+  zIndices,
 } from "./base";
-import { type baseColors, type darkColors } from "./colors";
+import type { baseColors, darkColors } from "./colors";
 
 export type MediaQueries = typeof mediaQueries;
 
@@ -25,11 +25,11 @@ export type Fonts = typeof fonts;
 
 export type ZIndices = typeof zIndices;
 
-export type BaseColors = {
+type BaseColors = {
   [property in keyof typeof baseColors]: string;
 };
 
-export type CustomColors = {
+type CustomColors = {
   [property in keyof typeof darkColors]: string;
 };
 

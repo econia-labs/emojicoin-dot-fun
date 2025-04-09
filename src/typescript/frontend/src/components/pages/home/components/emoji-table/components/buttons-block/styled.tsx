@@ -1,6 +1,6 @@
-import styled from "styled-components";
-import Text from "components/text";
 import Svg from "components/svg/Svg";
+import Text from "components/text";
+import styled from "styled-components";
 
 export const StyledBtn = styled.div`
   display: flex;

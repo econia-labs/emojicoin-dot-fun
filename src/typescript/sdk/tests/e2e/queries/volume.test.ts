@@ -1,15 +1,12 @@
-import {
-  type AccountAddress,
-  type UserTransactionResponse,
-  type Account,
-} from "@aptos-labs/ts-sdk";
-import { maxBigInt, getEvents, sum, sumByKey } from "../../../src";
-import { Swap } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../utils";
-import { getFundedAccounts } from "../../utils/test-accounts";
-import { type Events } from "../../../src/emojicoin_dot_fun/events";
+import type { Account, AccountAddress, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+
+import { Swap } from "@/move-modules/emojicoin-dot-fun";
+
+import { getEvents, maxBigInt, sum, sumByKey } from "../../../src";
+import type { Events } from "../../../src/emojicoin_dot_fun/events";
+import { getAptosClient, registerMarketHelper } from "../../utils";
 import { getTxnBatchHighestVersion } from "../../utils/get-txn-batch-highest-version";
-import TestHelpers from "../../utils/helpers";
+import { getFundedAccounts } from "../../utils/test-accounts";
 import { fetchDailyVolumeForMarket, fetchSwapEventsBySwapper } from ".";
 
 // We need a long timeout because the test must wait for the 1-minute period to expire.
@@ -28,7 +25,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
       [fundedAccounts.pop()!, 500n] as const,
     ];
     const { marketAddress, emojicoin, emojicoinLP, integrator, events } =
-      await TestHelpers.registerMarketFromNames({
+      await registerMarketHelper({
         registrant: swappersAndVolumes[0][0],
         emojiNames: ["see-no-evil monkey", "scissors"],
       });

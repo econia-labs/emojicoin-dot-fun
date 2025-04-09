@@ -2,20 +2,20 @@
 
 import { getEvents, ONE_APT_BIGINT, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
-import { type MeleeEmojiData } from "../../../src/markets/arena-utils";
 import {
   isArenaEnterModel,
   isArenaExitModel,
   isArenaSwapModel,
   isArenaVaultBalanceUpdateModel,
 } from "../../../src/types/arena-types";
+import type { MeleeEmojiData } from "../../../src/utils/arena/helpers";
 import { getFundedAccount } from "../../utils/test-accounts";
 import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "../broker/utils";
 import {
+  depositToVault,
+  ONE_SECOND_MICROSECONDS,
   registerAndUnlockInitialMarketsForArenaTest,
   setNextMeleeDurationAndEnsureCrank,
-  ONE_SECOND_MICROSECONDS,
-  depositToVault,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
 
@@ -25,16 +25,16 @@ describe("tests to ensure that arena websocket events work as expected", () => {
   const emojicoin = new EmojicoinClient();
 
   // The next arena markets.
+  let symbol0: SymbolEmoji[];
   let symbol1: SymbolEmoji[];
-  let symbol2: SymbolEmoji[];
 
   beforeAll(async () => {
-    // Prepare the on-chain state for the arena contract to immediately exit the initial arena.
+    // Prepare the on-chain state for the arena module to immediately exit the initial arena.
     await registerAndUnlockInitialMarketsForArenaTest();
     await waitUntilCurrentMeleeEnds();
     await setNextMeleeDurationAndEnsureCrank(ONE_SECOND_MICROSECONDS * 15n).then((res) => {
+      symbol0 = res.symbol0;
       symbol1 = res.symbol1;
-      symbol2 = res.symbol2;
       melee = res.melee;
     });
 
@@ -51,11 +51,11 @@ describe("tests to ensure that arena websocket events work as expected", () => {
 
   it("receives enter, swap, and exit arena events within 2 seconds", async () => {
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
-    subscribe(client, [melee.market1.marketID, melee.market2.marketID], [], true);
+    subscribe(client, [melee.market0.marketID, melee.market1.marketID], [], true);
 
     const enterResponse = await emojicoin.arena
       // Do not lock in, otherwise vault balance updates are emitted.
-      .enter(user, ONE_APT_BIGINT, false, symbol1, symbol2, "symbol1")
+      .enter(user, ONE_APT_BIGINT, false, symbol0, symbol1, "symbol0")
       .then(({ arena, response }) => {
         if ("melee" in arena.model) {
           throw new Error("The crank for a new melee shouldn't have been pulled here.");
@@ -66,7 +66,7 @@ describe("tests to ensure that arena websocket events work as expected", () => {
       });
 
     const swapResponse = await emojicoin.arena
-      .swap(user, symbol1, symbol2)
+      .swap(user, symbol0, symbol1)
       .then(({ arena, response }) => {
         expect(arena.model.swap.meleeID).toEqual(melee.view.meleeID);
         expect(arena.model.swap.user).toEqual(user.accountAddress.toString());
@@ -74,7 +74,7 @@ describe("tests to ensure that arena websocket events work as expected", () => {
       });
 
     const exitResponse = await emojicoin.arena
-      .exit(user, symbol1, symbol2)
+      .exit(user, symbol0, symbol1)
       .then(({ arena, response }) => {
         expect(arena.model.exit.meleeID).toEqual(melee.view.meleeID);
         expect(arena.model.exit.user).toEqual(user.accountAddress.toString());
@@ -125,7 +125,7 @@ describe("tests to ensure that arena websocket events work as expected", () => {
 
   it("receives a vault update balance event within 2 seconds", async () => {
     const { client, events, messageEvents, brokerMessages } = await connectNewClient();
-    subscribe(client, [melee.market1.marketID, melee.market2.marketID], [], true);
+    subscribe(client, [melee.market0.marketID, melee.market1.marketID], [], true);
 
     const funder = user;
     const amount = 1n;

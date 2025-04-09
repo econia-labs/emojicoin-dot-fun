@@ -5,7 +5,7 @@
 
 import Text from "components/text";
 import Image from "next/image";
-import { type FC } from "react";
+import type { FC } from "react";
 
 export enum WinIcons {
   TEXT_FILE = "images/textfile.svg",

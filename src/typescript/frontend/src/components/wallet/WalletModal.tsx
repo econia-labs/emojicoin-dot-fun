@@ -1,26 +1,28 @@
 import {
+  AptosPrivacyPolicy,
   getAptosConnectWallets,
   partitionWallets,
   useWallet,
-  AptosPrivacyPolicy,
 } from "@aptos-labs/wallet-adapter-react";
 import { BaseModal } from "components/modal/BaseModal";
-import { DEFAULT_TOAST_CONFIG } from "const";
-import { toast } from "react-toastify";
-import { WalletItem, isSupportedWallet, walletSort } from "context/wallet-context/WalletItem";
-import { AptosConnectWalletRow } from "./AptosConnectWalletRow";
-import EmojicoinLogo from "@icons/EmojicoinLogo";
 import { Arrow } from "components/svg";
-import LearnMoreSlideshow, { SLIDE_INDICES } from "./LearnMoreSlideshow";
+import { DEFAULT_TOAST_CONFIG } from "const";
+import { isSupportedWallet, WalletItem, walletSort } from "context/wallet-context/WalletItem";
+import { motion, type MotionProps, type PanInfo } from "framer-motion";
 import { type Dispatch, type SetStateAction, useState } from "react";
-import { type MotionProps, motion, type PanInfo } from "framer-motion";
+import { toast } from "react-toastify";
+
+import EmojicoinLogo from "@/icons/EmojicoinLogo";
+
+import { AptosConnectWalletRow } from "./AptosConnectWalletRow";
+import LearnMoreSlideshow, { SLIDE_INDICES } from "./LearnMoreSlideshow";
 
 const WalletItemClassName =
   "relative flex h-[45px] w-full items-center p-4 text-neutral-600" +
   "transition-all hover:text-ec-blue hover:bg-[#0000000E] " +
   "text-black group";
 
-export const FirstSlide = ({
+const FirstSlide = ({
   slide,
   setOpen,
   increment,
@@ -143,6 +145,10 @@ export const WalletModal = ({
   // as a draggable carousel slider with AnimatePresence.
   const [slide, setSlide] = useState<SlideState>({ idx: 0, direction: "left" });
 
+  const reset = () => {
+    setSlide({ idx: 0, direction: "left" });
+  };
+
   const handleClose = () => {
     setOpen(false);
     setTimeout(() => reset(), 100);
@@ -167,10 +173,6 @@ export const WalletModal = ({
     setSlide(({ idx: curr }) => {
       return { idx: SLIDE_INDICES.at(curr - 1)!, direction: "left" };
     });
-  };
-
-  const reset = () => {
-    setSlide({ idx: 0, direction: "left" });
   };
 
   const dragProps: MotionProps = {

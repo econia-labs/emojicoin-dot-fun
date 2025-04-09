@@ -1,3 +1,4 @@
+// cspell:word nofunc
 // cspell:word tsup
 
 module.exports = {
@@ -26,8 +27,12 @@ module.exports = {
     sourceType: "module",
     warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "unused-imports", "import"],
+  plugins: ["@typescript-eslint", "unused-imports", "import", "simple-import-sort"],
   rules: {
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      { checksVoidReturn: { attributes: false } },
+    ],
     "import/no-cycle": [
       "error",
       {
@@ -63,7 +68,11 @@ module.exports = {
     "object-curly-newline": "off",
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": "off",
-    "@typescript-eslint/no-use-before-define": ["error", { functions: false, classes: false }],
+    /**
+     * Function hoisting is safe; because of this, "nofunc" is shorthand for allowing it.
+     * @see {@link https://eslint.org/docs/latest/rules/no-use-before-define#options}
+     */
+    "@typescript-eslint/no-use-before-define": ["error", "nofunc"],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
@@ -84,8 +93,14 @@ module.exports = {
     ],
     "@typescript-eslint/consistent-type-imports": [
       "error",
-      { prefer: "type-imports", fixStyle: "inline-type-imports" },
+      { prefer: "type-imports", fixStyle: "separate-type-imports", disallowTypeAnnotations: true },
     ],
+    "@typescript-eslint/no-import-type-side-effects": "error",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error",
   },
   settings: {
     "import/parsers": {

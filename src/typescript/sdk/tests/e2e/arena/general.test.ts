@@ -1,4 +1,5 @@
-import type { Ed25519Account, Account } from "@aptos-labs/ts-sdk";
+import type { Account, Ed25519Account } from "@aptos-labs/ts-sdk";
+
 import {
   ARENA_MODULE_ADDRESS,
   EmojicoinArena,
@@ -30,15 +31,15 @@ import {
   fetchArenaRegistryView,
   fetchMeleeEmojiData,
   type MeleeEmojiData,
-} from "../../../src/markets/arena-utils";
+} from "../../../src/utils/arena/helpers";
+import { getPublisher } from "../../utils/helpers";
 import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
+import { waitForProcessor } from "../helpers";
 import {
   ONE_SECOND_MICROSECONDS,
   setNextMeleeDurationAndEnsureCrank,
   waitUntilCurrentMeleeEnds,
 } from "./utils";
-import { getPublisher } from "../../utils/helpers";
-import { waitForProcessor } from "../helpers";
 
 const getEmojicoinLockedDiffFromSwapRes = (
   swapRes: Awaited<ReturnType<typeof EmojicoinClient.prototype.arena.swap>>,
@@ -47,8 +48,8 @@ const getEmojicoinLockedDiffFromSwapRes = (
   let emojicoin0Locked = 0n;
   let emojicoin1Locked = 0n;
   const swaps = swapRes.events.swapEvents;
-  const swap0 = swaps.find((s) => s.marketID === melee.market1.marketID)!;
-  const swap1 = swaps.find((s) => s.marketID === melee.market2.marketID)!;
+  const swap0 = swaps.find((s) => s.marketID === melee.market0.marketID)!;
+  const swap1 = swaps.find((s) => s.marketID === melee.market1.marketID)!;
   const swap = swapRes.events.arenaSwapEvents[0];
   if (swap1.isSell) {
     emojicoin0Locked += swap0.netProceeds;
@@ -143,12 +144,12 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(arenaInfo?.maxMatchAmount).toEqual(melee.view.maxMatchAmount);
     expect(arenaInfo?.maxMatchPercentage).toEqual(melee.view.maxMatchPercentage);
     expect(arenaInfo?.rewardsRemaining).toEqual(melee.view.availableRewards);
-    expect(arenaInfo?.emojicoin0Symbols).toEqual(melee.market1.symbolEmojis);
-    expect(arenaInfo?.emojicoin1Symbols).toEqual(melee.market2.symbolEmojis);
-    expect(arenaInfo?.emojicoin0MarketID).toEqual(melee.market1.marketID);
-    expect(arenaInfo?.emojicoin1MarketID).toEqual(melee.market2.marketID);
-    expect(arenaInfo?.emojicoin0MarketAddress).toEqual(melee.market1.marketAddress);
-    expect(arenaInfo?.emojicoin1MarketAddress).toEqual(melee.market2.marketAddress);
+    expect(arenaInfo?.emojicoin0Symbols).toEqual(melee.market0.symbolEmojis);
+    expect(arenaInfo?.emojicoin1Symbols).toEqual(melee.market1.symbolEmojis);
+    expect(arenaInfo?.emojicoin0MarketID).toEqual(melee.market0.marketID);
+    expect(arenaInfo?.emojicoin1MarketID).toEqual(melee.market1.marketID);
+    expect(arenaInfo?.emojicoin0MarketAddress).toEqual(melee.market0.marketAddress);
+    expect(arenaInfo?.emojicoin1MarketAddress).toEqual(melee.market1.marketAddress);
   });
 
   it("verifies an arena ends with no activity and nothing bad happens", async () => {
@@ -158,8 +159,8 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
 
     await waitUntilCurrentMeleeEnds();
 
-    const swaps0 = await fetchSwapEvents({ marketID: melee.market1.marketID });
-    const swaps1 = await fetchSwapEvents({ marketID: melee.market2.marketID });
+    const swaps0 = await fetchSwapEvents({ marketID: melee.market0.marketID });
+    const swaps1 = await fetchSwapEvents({ marketID: melee.market1.marketID });
 
     expect(swaps0).toHaveLength(0);
     expect(swaps1).toHaveLength(0);
@@ -168,14 +169,14 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
       getFundedAccount("007"),
       1n * 10n ** 8n,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
+      "symbol0"
     );
     await waitForProcessor(enterResponse);
 
+    await emojicoin.buy(publisher, melee.market0.symbolEmojis, 1n);
     await emojicoin.buy(publisher, melee.market1.symbolEmojis, 1n);
-    await emojicoin.buy(publisher, melee.market2.symbolEmojis, 1n);
 
     const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
       .from(TableName.ArenaLeaderboardHistory)
@@ -206,9 +207,9 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
       account,
       1n * 10n ** 8n,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
+      "symbol0"
     );
 
     expect(enterResponse.events.arenaEnterEvents).toHaveLength(1);
@@ -258,8 +259,8 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
 
     const swapResponse = await emojicoin.arena.swap(
       account,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis
     );
 
     expect(swapResponse.events.arenaSwapEvents).toHaveLength(1);
@@ -306,8 +307,8 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
 
     const exitResponse1 = await emojicoin.arena.exit(
       account,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis
     );
 
     expect(exitResponse1.events.arenaExitEvents).toHaveLength(1);
@@ -367,9 +368,9 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
         account,
         1n * 10n ** 8n,
         false,
+        melee.market0.symbolEmojis,
         melee.market1.symbolEmojis,
-        melee.market2.symbolEmojis,
-        "symbol1"
+        "symbol0"
       )
     );
 
@@ -377,8 +378,8 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
 
     const exitResponse2 = await emojicoin.arena.exit(
       account,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis
     );
     await waitForProcessor(exitResponse2);
     viewExitEvent = exitResponse2.events.arenaExitEvents[0];
@@ -419,13 +420,13 @@ describe("ensures leaderboard history is working", () => {
   const getNextAccount = () => getNextAccountHelper(accountIndex++);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
-  const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
+  const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
     emojicoin.arena.enter(
       account,
       ONE_APT_BIGINT,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
       escrowCoin
     );
 
@@ -444,9 +445,9 @@ describe("ensures leaderboard history is working", () => {
       publisher,
       1n,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
+      "symbol0"
     );
     melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
     await waitForProcessor(res);
@@ -458,15 +459,15 @@ describe("ensures leaderboard history is working", () => {
     const account1 = getNextAccount();
     const account2 = getNextAccount();
     const account3 = getNextAccount();
-    await enterHelper(account1, "symbol1");
-    await enterHelper(account2, "symbol1");
-    await enterHelper(account3, "symbol1");
+    await enterHelper(account1, "symbol0");
+    await enterHelper(account2, "symbol0");
+    await enterHelper(account3, "symbol0");
 
-    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
-    await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
-    await emojicoin.arena.exit(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
+    await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
+    await emojicoin.arena.exit(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
     await waitUntilCurrentMeleeEnds();
-    const res = await enterHelper(account1, "symbol1");
+    const res = await enterHelper(account1, "symbol0");
 
     await waitForProcessor(res);
     const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
@@ -515,9 +516,9 @@ describe("ensures leaderboard history is working", () => {
       getNextAccount(),
       1n * 10n ** 8n,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
+      "symbol0"
     );
     await waitForProcessor(res);
     const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
@@ -535,14 +536,14 @@ describe("ensures leaderboard history is working", () => {
     const account1 = getNextAccount();
     const account2 = getNextAccount();
     const account3 = getNextAccount();
-    await enterHelper(account1, "symbol1");
-    await enterHelper(account2, "symbol2");
-    await enterHelper(account3, "symbol1");
+    await enterHelper(account1, "symbol0");
+    await enterHelper(account2, "symbol1");
+    await enterHelper(account3, "symbol0");
 
-    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
-    await emojicoin.arena.exit(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
+    await emojicoin.arena.exit(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
     await waitUntilCurrentMeleeEnds();
-    const res = await enterHelper(account1, "symbol1");
+    const res = await enterHelper(account1, "symbol0");
 
     await waitForProcessor(res);
     const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
@@ -583,14 +584,14 @@ describe("ensures leaderboard history is working", () => {
     const account1 = getNextAccount();
     const account2 = getNextAccount();
     const account3 = getNextAccount();
-    await enterHelper(account1, "symbol1");
-    await enterHelper(account2, "symbol2");
-    await enterHelper(account3, "symbol1");
+    await enterHelper(account1, "symbol0");
+    await enterHelper(account2, "symbol1");
+    await enterHelper(account3, "symbol0");
 
-    await emojicoin.arena.swap(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
-    await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+    await emojicoin.arena.swap(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
+    await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
     await waitUntilCurrentMeleeEnds();
-    const res = await enterHelper(account1, "symbol1");
+    const res = await enterHelper(account1, "symbol0");
 
     await waitForProcessor(res);
     const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
@@ -631,13 +632,13 @@ describe("ensures leaderboard history is working", () => {
     const account1 = getFundedAccount("420");
     const account2 = getFundedAccount("421");
     const account3 = getFundedAccount("422");
-    await enterHelper(account1, "symbol1");
-    await enterHelper(account2, "symbol2");
+    await enterHelper(account1, "symbol0");
+    await enterHelper(account2, "symbol1");
 
-    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
 
     await waitUntilCurrentMeleeEnds();
-    const crankRes = await enterHelper(account3, "symbol2");
+    const crankRes = await enterHelper(account3, "symbol1");
 
     await waitForProcessor(crankRes);
 
@@ -665,8 +666,8 @@ describe("ensures leaderboard history is working", () => {
 
     const exitRes = await emojicoin.arena.exit(
       account2,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis
     );
 
     await waitForProcessor(exitRes);
@@ -706,13 +707,13 @@ describe("ensures arena info is working", () => {
   const getNextAccount = () => getNextAccountHelper(accountIndex++);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
-  const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
+  const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
     emojicoin.arena.enter(
       account,
       ONE_APT_BIGINT,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
       escrowCoin
     );
 
@@ -731,9 +732,9 @@ describe("ensures arena info is working", () => {
       publisher,
       1n,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
+      "symbol0"
     );
     melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
     await waitForProcessor(res);
@@ -748,25 +749,25 @@ describe("ensures arena info is working", () => {
 
     let volume = 0n;
 
-    const account1EnterRes = await enterHelper(account1, "symbol1");
-    const account2EnterRes = await enterHelper(account2, "symbol1");
-    const account3EnterRes = await enterHelper(account3, "symbol1");
+    const account1EnterRes = await enterHelper(account1, "symbol0");
+    const account2EnterRes = await enterHelper(account2, "symbol0");
+    const account3EnterRes = await enterHelper(account3, "symbol0");
 
     volume += account1EnterRes.events.arenaEnterEvents[0].quoteVolume;
     volume += account2EnterRes.events.arenaEnterEvents[0].quoteVolume;
     volume += account3EnterRes.events.arenaEnterEvents[0].quoteVolume;
 
-    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
     const swapRes = await emojicoin.arena.swap(
       account2,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis
     );
     volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
     const res = await emojicoin.arena.exit(
       account2,
-      melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis
+      melee.market0.symbolEmojis,
+      melee.market1.symbolEmojis
     );
     await waitForProcessor(res);
 
@@ -805,7 +806,7 @@ describe("ensures arena info is working", () => {
     for (const [account, index] of accounts.map((a, i) => [a, i] as [Ed25519Account, number])) {
       const enterRes = await enterHelper(
         account,
-        `symbol${(index % 2) + 1}` as "symbol1" | "symbol2"
+        `symbol${(index % 2) + 1}` as "symbol0" | "symbol1"
       );
       volume += enterRes.events.arenaEnterEvents[0].quoteVolume;
       emojicoin0Locked += enterRes.events.arenaEnterEvents[0].emojicoin0Proceeds;
@@ -816,8 +817,8 @@ describe("ensures arena info is working", () => {
     for (const account of accounts) {
       const swapRes = await emojicoin.arena.swap(
         account,
-        melee.market1.symbolEmojis,
-        melee.market2.symbolEmojis
+        melee.market0.symbolEmojis,
+        melee.market1.symbolEmojis
       );
       volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
       const diff = getEmojicoinLockedDiffFromSwapRes(swapRes, melee);
@@ -829,8 +830,8 @@ describe("ensures arena info is working", () => {
     for (const account of accounts.slice(0, Math.floor(accounts.length / 2))) {
       const swapRes = await emojicoin.arena.swap(
         account,
-        melee.market1.symbolEmojis,
-        melee.market2.symbolEmojis
+        melee.market0.symbolEmojis,
+        melee.market1.symbolEmojis
       );
       volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
       const diff = getEmojicoinLockedDiffFromSwapRes(swapRes, melee);
@@ -842,8 +843,8 @@ describe("ensures arena info is working", () => {
     for (const account of accounts.slice(Math.floor(accounts.length / 2))) {
       lastExitRes = await emojicoin.arena.exit(
         account,
-        melee.market1.symbolEmojis,
-        melee.market2.symbolEmojis
+        melee.market0.symbolEmojis,
+        melee.market1.symbolEmojis
       );
       emojicoin0Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin0Proceeds;
       emojicoin1Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin1Proceeds;
@@ -890,13 +891,13 @@ describe("ensures arena works in edge cases", () => {
   const getNextAccount = () => getNextAccountHelper(accountIndex++);
 
   // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
-  const enterHelper = (account: Account, escrowCoin: "symbol1" | "symbol2") =>
+  const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
     emojicoin.arena.enter(
       account,
       ONE_APT_BIGINT,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
       escrowCoin
     );
 
@@ -915,9 +916,9 @@ describe("ensures arena works in edge cases", () => {
       publisher,
       1n,
       false,
+      melee.market0.symbolEmojis,
       melee.market1.symbolEmojis,
-      melee.market2.symbolEmojis,
-      "symbol1"
+      "symbol0"
     );
     melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
     await waitForProcessor(res);
@@ -929,15 +930,15 @@ describe("ensures arena works in edge cases", () => {
     const account1 = getNextAccount();
     const account2 = getNextAccount();
 
-    await enterHelper(account1, "symbol1");
-    await enterHelper(account2, "symbol1");
+    await enterHelper(account1, "symbol0");
+    await enterHelper(account2, "symbol0");
 
-    await emojicoin.arena.exit(account1, melee.market1.symbolEmojis, melee.market2.symbolEmojis);
+    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
 
     await waitUntilCurrentMeleeEnds();
 
     // In order to crank
-    await enterHelper(account1, "symbol1");
+    await enterHelper(account1, "symbol0");
 
     const registry = await fetchArenaRegistryView();
 
@@ -946,7 +947,7 @@ describe("ensures arena works in edge cases", () => {
     await sleep(2000);
 
     await waitForProcessor(
-      await emojicoin.arena.swap(account2, melee.market1.symbolEmojis, melee.market2.symbolEmojis)
+      await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis)
     );
 
     const swaps = await postgrest

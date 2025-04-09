@@ -1,31 +1,33 @@
 "use client";
 
-import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import { type PropsWithChildren, useEffect, useState, useMemo } from "react";
-import FlipInputsArrow from "./FlipInputsArrow";
+import { EmojiPill } from "components/EmojiPill";
+import { FormattedNumber } from "components/FormattedNumber";
+import { InputNumeric } from "components/inputs";
 import { Column, Row } from "components/layout/components/FlexContainers";
-import { SwapButton } from "./SwapButton";
-import { type SwapComponentProps } from "components/pages/emojicoin/types";
-import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
-import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-simulate-swap";
+import type { SwapComponentProps } from "components/pages/emojicoin/types";
+import { getTooltipStyles } from "components/selects/theme";
+import { TradeOptions } from "components/selects/trade-options";
 import { useEventStore } from "context/event-store-context";
-import { useTooltip } from "@hooks/index";
-import { useSearchParams } from "next/navigation";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { AnimatePresence, motion } from "framer-motion";
-import { toCoinTypes } from "@sdk/markets/utils";
-import { Flex, FlexGap } from "@containers";
-import { InputNumeric } from "components/inputs";
-import { emoji } from "utils";
-import { getTooltipStyles } from "components/selects/theme";
-import { useThemeContext } from "context";
-import { TradeOptions } from "components/selects/trade-options";
-import { getMaxSlippageSettings } from "utils/slippage";
-import { Emoji } from "utils/emoji";
-import { EmojiPill } from "components/EmojiPill";
+import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-get-swap-gas";
 import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
-import { FormattedNumber } from "components/FormattedNumber";
+import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
+import { useSearchParams } from "next/navigation";
+import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
+import darkTheme from "theme/dark";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+import { getMaxSlippageSettings } from "utils/slippage";
+
+import { Flex, FlexGap } from "@/containers";
+import { useTooltip } from "@/hooks/index";
+import { toEmojicoinTypes } from "@/sdk/markets/utils";
+
+import FlipInputsArrow from "./FlipInputsArrow";
+import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
+import { SwapButton } from "./SwapButton";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -102,7 +104,7 @@ export default function SwapComponent({
   });
 
   useEffect(() => {
-    const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
+    const emojicoinType = toEmojicoinTypes(marketAddress).emojicoin.toString();
     setEmojicoinType(emojicoinType);
   }, [marketAddress, setEmojicoinType]);
 
@@ -151,15 +153,13 @@ export default function SwapComponent({
     );
   }, [t, account, isSell, aptBalance, emojicoinBalance, sufficientBalance]);
 
-  const { theme } = useThemeContext();
-
   const { targetRef, tooltip: gearTooltip } = useTooltip(
     <TradeOptions
       onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
     />,
     {
       placement: "bottom",
-      customStyles: getTooltipStyles(theme),
+      customStyles: getTooltipStyles(darkTheme),
       trigger: "click",
       tooltipOffset: [100, 10],
     }

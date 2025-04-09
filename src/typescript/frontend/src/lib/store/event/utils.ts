@@ -1,17 +1,19 @@
-import { Period, NON_ARENA_PERIODS, periodEnumToRawDuration } from "@sdk/const";
-import { type WritableDraft } from "immer";
-import { type EventState, type MarketEventStore, type MarketStoreMetadata } from "./types";
-import {
-  type PeriodicStateEventModel,
-  type SwapEventModel,
-  type EventModelWithMarket,
-} from "@sdk/indexer-v2/types";
-import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";
-import { q64ToBig, toNominal } from "@sdk/utils/nominal-price";
-import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } from "../utils";
+import type { WritableDraft } from "immer";
 
-export const createInitialMarketState = (
+import { NON_ARENA_PERIODS, Period, periodEnumToRawDuration } from "@/sdk/const";
+import type {
+  EventModelWithMarket,
+  PeriodicStateEventModel,
+  SwapEventModel,
+} from "@/sdk/indexer-v2/types";
+import { getPeriodStartTimeFromTime } from "@/sdk/utils";
+import { q64ToBig, toNominal } from "@/sdk/utils/nominal-price";
+
+import { callbackClonedLatestBarIfSubscribed, createInitialCandlestickData } from "../utils";
+import { createBarFromPeriodicState, createBarFromSwap } from "./candlestick-bars";
+import type { EventState, MarketEventStore, MarketStoreMetadata } from "./types";
+
+const createInitialMarketState = (
   marketMetadata: MarketStoreMetadata
 ): WritableDraft<MarketEventStore> => ({
   marketMetadata,

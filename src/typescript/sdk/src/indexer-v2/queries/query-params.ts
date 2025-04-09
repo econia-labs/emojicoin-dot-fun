@@ -1,5 +1,5 @@
 import { SortMarketsBy } from "../types/common";
-import { type DatabaseJsonType } from "../types/json-types";
+import type { DatabaseJsonType } from "../types/json-types";
 
 /* eslint-disable-next-line import/no-unused-modules */
 export const sortByToColumn = (sortBy: SortMarketsBy): keyof DatabaseJsonType["market_state"] => {

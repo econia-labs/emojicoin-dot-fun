@@ -1,7 +1,7 @@
-import { type BoxProps } from "components/layout/components/types";
-import { type SvgProps } from "components/svg/types";
-import { type TextProps } from "components/text/types";
-import { type TooltipOptions } from "hooks/use-tooltip/types";
+import type { BoxProps } from "components/layout/components/types";
+import type { SvgProps } from "components/svg/types";
+import type { TextProps } from "components/text/types";
+import type { TooltipOptions } from "hooks/use-tooltip/types";
 
 export type Option = {
   title: string;
@@ -15,14 +15,6 @@ export interface SingleSelectProps extends Omit<SelectProps, "targetRef" | "tool
   options: Option[];
   value: Option | null;
   setValue: (values: Option) => void;
-  onHover: (value: Option) => void;
-}
-
-export interface MultipleSelectProps
-  extends Omit<SingleSelectProps, "value" | "setValue" | "title"> {
-  value: Option[];
-  title?: string | React.ReactNode;
-  setValue: (values: Option[]) => void;
   onHover: (value: Option) => void;
 }
 

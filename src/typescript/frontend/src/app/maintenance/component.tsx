@@ -1,9 +1,10 @@
 "use client";
 
+import { Text } from "components";
 import { translationFunction } from "context/language-context";
 import React from "react";
 import { useScramble } from "use-scramble";
-import { Text } from "components";
+
 import MatrixRain from "./matrix";
 
 export default function Maintenance() {

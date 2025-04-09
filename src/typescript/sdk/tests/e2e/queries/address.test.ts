@@ -1,10 +1,11 @@
-import { getEvents, toCoinTypesForEntry } from "../../../src";
-import { Chat } from "@/contract-apis/emojicoin-dot-fun";
+import { Chat } from "@/move-modules/emojicoin-dot-fun";
+
+import { getEvents, toEmojicoinTypesForEntry } from "../../../src";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { fetchChatEvents } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
-import checkRows from "../helpers/equality-checks";
 import { getFundedAccount } from "../../utils/test-accounts";
-import { EmojicoinClient } from "../../../src/client/emojicoin-client";
+import checkRows from "../helpers/equality-checks";
 
 jest.setTimeout(20000);
 
@@ -17,7 +18,6 @@ describe("address standardization tests", () => {
     const { marketAddress, emojis } = await emojicoin
       .register(user, ["🍿"])
       .then((res) => res.registration.model.market);
-    const typeTags = toCoinTypesForEntry(marketAddress);
 
     const res = await Chat.submit({
       aptosConfig: aptos.config,
@@ -25,7 +25,7 @@ describe("address standardization tests", () => {
       marketAddress,
       emojiBytes: emojis.map((e) => e.hex),
       emojiIndicesSequence: new Uint8Array(Array.from({ length: emojis.length }, (_, i) => i)),
-      typeTags,
+      typeTags: toEmojicoinTypesForEntry(marketAddress),
     });
 
     const events = getEvents(res);

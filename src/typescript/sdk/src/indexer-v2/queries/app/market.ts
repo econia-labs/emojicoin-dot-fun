@@ -1,12 +1,10 @@
-if (process.env.NODE_ENV !== "test") {
-  require("server-only");
-}
+import "server-only";
 
+import type { AccountAddress } from "@aptos-labs/ts-sdk";
+
+import type { SymbolEmoji } from "../../../emoji_data/types";
+import type { AnyNumberString } from "../../../types";
 import { LIMIT, ORDER_BY } from "../../const";
-import { type AnyNumberString } from "../../../types";
-import { TableName } from "../../types/json-types";
-import { postgrest, toQueryArray } from "../client";
-import { queryHelper, queryHelperSingle } from "../utils";
 import {
   toChatEventModel,
   toMarketRegistrationEventModel,
@@ -14,9 +12,10 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
-import { type SymbolEmoji } from "../../../emoji_data/types";
-import { type AccountAddress } from "@aptos-labs/ts-sdk";
+import type { MarketStateQueryArgs, PeriodicStateEventQueryArgs } from "../../types/common";
+import { TableName } from "../../types/json-types";
+import { postgrest, toQueryArray } from "../client";
+import { queryHelper, queryHelperSingle } from "../utils";
 
 const selectSwaps = ({
   sender,
@@ -57,13 +56,22 @@ const selectChatsByMarketID = ({
   marketID,
   page = 1,
   pageSize = LIMIT,
-}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
-  postgrest
+}: { marketID: AnyNumberString | AnyNumberString[] } & MarketStateQueryArgs) => {
+  const query = postgrest
     .from(TableName.ChatEvents)
     .select("*")
-    .eq("market_id", marketID)
-    .order("market_nonce", ORDER_BY.DESC)
+    .order("transaction_version", ORDER_BY.DESC)
+    .order("event_index", ORDER_BY.DESC)
     .range((page - 1) * pageSize, page * pageSize - 1);
+
+  if (Array.isArray(marketID)) {
+    query.in("market_id", marketID);
+  } else {
+    query.eq("market_id", marketID);
+  }
+
+  return query;
+};
 
 // This query uses `offset` instead of `page` because the periodic state events query requires
 // more granular pagination due to the requirements of the private TradingView charting library.

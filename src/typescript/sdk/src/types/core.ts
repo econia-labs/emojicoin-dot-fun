@@ -1,15 +1,16 @@
 import {
+  type EntryFunctionPayloadResponse,
+  type EventGuid,
+  isUserTransactionResponse,
+  type TransactionResponse,
+  type UserTransactionResponse,
   type WriteSetChange,
   type WriteSetChangeWriteResource,
   type WriteSetChangeWriteTableItem,
-  type EventGuid,
-  type TransactionResponse,
-  type UserTransactionResponse,
-  type EntryFunctionPayloadResponse,
-  isUserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { type AccountAddressString } from "../emojicoin_dot_fun/types";
-import { type Flatten } from ".";
+
+import type { AccountAddressString } from "../emojicoin_dot_fun/types";
+import type { Flatten } from ".";
 
 // JSON representation of the Event data from a UserTransactionResponse.
 // We allow `guid` and `sequence_number` to be optional because we don't
@@ -18,9 +19,9 @@ import { type Flatten } from ".";
 // The fields have essentially been deprecated since event v2 because
 // they've been zeroed out in the Aptos VM in order to parallelize event
 // emission.
-// Note that the `guid` here is NOT the same as the `guid` in the contract event types in
-// `Types["ts"]`. The `guid` here is a deprecated Move resource emitted in the v1 event data,
-// where as the `guid` in our contract event types is a unique identifier for the event type
+// Note that the `guid` here is NOT the same as the `guid` in the module event types in
+// `types.ts`. The `guid` here is a deprecated Move resource emitted in the v1 event data,
+// where as the `guid` in our module event types is a unique identifier for the event type
 // we use to avoid storing duplicate events in state.
 export type EventJSON = {
   guid?: EventGuid;

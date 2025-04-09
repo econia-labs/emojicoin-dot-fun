@@ -1,14 +1,16 @@
 /* eslint-disable no-await-in-loop */
 
-import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
+
+import { ProvideLiquidity, Swap } from "@/move-modules/emojicoin-dot-fun";
+
 import { maxBigInt, type SymbolEmoji } from "../../../src";
-import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
-import { getFundedAccounts } from "../../utils/test-accounts";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
-import { ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../utils";
-import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
 import { LIMIT } from "../../../src/indexer-v2/const";
+import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
+import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
+import { getAptosClient } from "../../utils";
+import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketHelper } from "../../utils/helpers";
+import { getFundedAccounts } from "../../utils/test-accounts";
 
 jest.setTimeout(20000);
 
@@ -18,7 +20,7 @@ describe("queries for liquidity pools", () => {
   const inputAmount = EXACT_TRANSITION_INPUT_AMOUNT;
   const integrator = registrants[0].accountAddress;
 
-  it("queries a user's liquidity pools with the rpc function call", async () => {
+  it("queries a user's liquidity pools", async () => {
     const registrant = registrants[0];
     const [swapper, provider] = [registrant, registrant];
 
@@ -26,10 +28,10 @@ describe("queries for liquidity pools", () => {
       Array.from([e])
     );
 
-    const markets: Awaited<ReturnType<typeof TestHelpers.registerMarketFromEmojis>>[] = [];
+    const markets: Awaited<ReturnType<typeof registerMarketHelper>>[] = [];
     for (const emojis of symbols) {
       markets.push(
-        await TestHelpers.registerMarketFromEmojis({
+        await registerMarketHelper({
           registrant,
           emojis,
         })
@@ -38,7 +40,6 @@ describe("queries for liquidity pools", () => {
 
     const responses: UserTransactionResponse[] = [];
     for (const { marketAddress, emojicoin, emojicoinLP } of markets) {
-      const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
       await Swap.submit({
         aptosConfig,
         swapper,
@@ -48,7 +49,7 @@ describe("queries for liquidity pools", () => {
         minOutputAmount: 1n,
         integrator,
         integratorFeeRateBPs: 0,
-        typeTags,
+        typeTags: [emojicoin, emojicoinLP],
       });
       const res = await ProvideLiquidity.submit({
         aptosConfig,
@@ -56,7 +57,7 @@ describe("queries for liquidity pools", () => {
         marketAddress,
         quoteAmount: 1000n,
         minLpCoinsOut: 1n,
-        typeTags,
+        typeTags: [emojicoin, emojicoinLP],
       });
       responses.push(res);
     }
@@ -78,7 +79,7 @@ describe("queries for liquidity pools", () => {
     const registrant = registrants[1];
     const swapper = registrant;
     const emojis: SymbolEmoji[] = ["🌊"];
-    const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromEmojis({
+    const { marketAddress, emojicoin, emojicoinLP } = await registerMarketHelper({
       registrant,
       emojis,
     });

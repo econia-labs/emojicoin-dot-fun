@@ -1,22 +1,23 @@
 import type { ArenaPeriod } from "../const";
-import { type SymbolEmoji } from "../emoji_data";
-import { type AccountAddressString } from "../emojicoin_dot_fun";
-import {
-  type BrokerEventModels,
-  type ArenaEnterModel,
-  type ArenaExitModel,
-  type ArenaMeleeModel,
-  type ArenaSwapModel,
-  type ArenaVaultBalanceUpdateModel,
-  type ArenaEventModels,
-  type ArenaModelWithMeleeID,
-  type ArenaCandlestickModel,
+import type { SymbolEmoji } from "../emoji_data";
+import type { AccountAddressString } from "../emojicoin_dot_fun";
+import type {
+  ArenaCandlestickModel,
+  ArenaEnterModel,
+  ArenaEventModels,
+  ArenaExitModel,
+  ArenaMeleeModel,
+  ArenaModelWithMeleeID,
+  ArenaSwapModel,
+  ArenaVaultBalanceUpdateModel,
+  BrokerEventModels,
   // Note that if you import anything more than a type here, you'll get lots of import issues.
 } from "../indexer-v2/types";
 import { postgresTimestampToDate } from "../indexer-v2/types/json-types";
-import { dateFromMicroseconds, toAccountAddressString } from "../utils";
-import type JsonTypes from "./json-types";
-import { type AnyNumberString, type Types } from "./types";
+import { toAccountAddressString } from "../utils/account-address";
+import { dateFromMicroseconds } from "../utils/misc";
+import type { JsonTypes } from "./json-types";
+import type { AnyNumberString, Types } from "./types";
 
 export const ARENA_CANDLESTICK_NAME = "ArenaCandlestick";
 
@@ -134,6 +135,9 @@ export type ArenaTypes = {
     emojicoin1MarketID: bigint;
     startTime: Date;
     duration: bigint;
+
+    arenaInfoLastTransactionVersion: bigint;
+    leaderboardHistoryLastTransactionVersion: bigint;
   };
 
   ArenaLeaderboard: {
@@ -207,7 +211,7 @@ const withVersionAndEventIndex = (data: {
 const isValidBigIntString = (str: string) => /^\d+$/.test(str);
 
 /**
- * Since we've coalesced the types for the database and emitted contract event data, it's helpful
+ * Since we've coalesced the types for the database and emitted module event data, it's helpful
  * to have a function that can handle either an incoming bigint string or a postgres timestamp.
  *
  * NOTE: This function returns `new Date(0)` if all attempts at parsing fail. Explanation below.

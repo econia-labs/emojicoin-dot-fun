@@ -1,26 +1,29 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { translationFunction } from "context/language-context";
-import { FlexGap } from "@containers";
+import "./module.css";
+
+import type { HomePageProps } from "app/home/HomePage";
+import { FormattedNumber } from "components/FormattedNumber";
+import { PriceDelta } from "components/price-feed/inner";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
+import { translationFunction } from "context/language-context";
+import { AnimatePresence, motion } from "framer-motion";
+import _ from "lodash";
 import Image from "next/image";
 import Link from "next/link";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useInterval } from "react-use";
 import { ROUTES } from "router/routes";
-import planetHome from "../../../../../../public/images/planet-home.png";
-import { emojiNamesToPath } from "utils/pathname-helpers";
-import { type HomePageProps } from "app/home/HomePage";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
-import "./module.css";
-import { PriceDelta } from "components/price-feed/inner";
-import { AnimatePresence, motion } from "framer-motion";
-import { useInterval } from "react-use";
-import { FormattedNumber } from "components/FormattedNumber";
-import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
-import _ from "lodash";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 
-export interface MainCardProps {
+import { FlexGap } from "@/containers";
+import { useUsdMarketCap } from "@/hooks/use-usd-market-cap";
+
+import planetHome from "../../../../../../public/images/planet-home.png";
+
+interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
   page: HomePageProps["page"];
   sortBy: HomePageProps["sortBy"];

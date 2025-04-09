@@ -1,5 +1,5 @@
-import { type AnyNumberString, type Flatten } from "@sdk-types";
-import { toNominal } from "@sdk/utils";
+import { toNominal } from "@/sdk/utils";
+import type { AnyNumberString, Flatten } from "@/sdk-types";
 
 /**
  * Sliding precision will show `decimals` decimals when Math.abs(number) is
@@ -7,7 +7,7 @@ import { toNominal } from "@sdk/utils";
  *
  * Fixed will always show `decimals` digits.
  */
-export type FormattedNumberStyle = "sliding-precision" | "fixed";
+type FormattedNumberStyle = "sliding-precision" | "fixed";
 
 // Must be an independent type for `Flatten<...>` to work properly.
 type MaybeNominalizeProps =

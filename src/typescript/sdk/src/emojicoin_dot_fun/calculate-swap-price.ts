@@ -1,3 +1,5 @@
+import Big from "big.js";
+
 import {
   BASE_VIRTUAL_FLOOR,
   BASIS_POINTS_PER_UNIT,
@@ -7,8 +9,7 @@ import {
   QUOTE_REAL_CEILING,
   QUOTE_VIRTUAL_CEILING,
 } from "../const";
-import { type AnyNumberString, type Types } from "../types";
-import Big from "big.js";
+import type { AnyNumberString, Types } from "../types";
 
 export class CustomCalculatedSwapError extends Error {
   constructor(msg: string) {
@@ -179,7 +180,7 @@ type NetProceedsReturnTypes =
 
 /**
  * The wrapper function for calculating the swap proceeds. This function rounds
- * the returned value down like the Move contract does, since technically
+ * the returned value down like the Move module does, since technically
  * this code is more precise than the Move code with truncated uint values.
  *
  * @returns the total net proceeds- denominated in quote or volume based on `isSell`.

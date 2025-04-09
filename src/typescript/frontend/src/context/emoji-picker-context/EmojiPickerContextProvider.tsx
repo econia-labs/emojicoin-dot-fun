@@ -1,8 +1,9 @@
 "use client";
 
-import { type ReactNode, createContext, useRef } from "react";
-import { type StoreApi } from "zustand";
-import { type EmojiPickerStore } from "@/store/emoji-picker-store";
+import { createContext, type ReactNode, useRef } from "react";
+import type { StoreApi } from "zustand";
+
+import type { EmojiPickerStore } from "@/store/emoji-picker-store";
 import createEmojiPickerStore from "@/store/emoji-picker-store";
 
 /**
@@ -14,7 +15,7 @@ import createEmojiPickerStore from "@/store/emoji-picker-store";
  */
 export const EmojiPickerContext = createContext<StoreApi<EmojiPickerStore> | null>(null);
 
-export interface EmojiPickerProviderProps {
+interface EmojiPickerProviderProps {
   children: ReactNode;
   initialState?: Partial<EmojiPickerStore>;
 }

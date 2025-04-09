@@ -6,71 +6,44 @@ type Info = {
 };
 const INFO: Info[] = [
   {
-    title: "What is an emojicoin.fun melee?",
+    title: "What is the emojicoin arena?",
     paragraph:
-      "An emojicoin.fun melee is a 24-hour trading event featuring two randomly " +
-      "selected emojicoins. During a melee, participants can trade exclusively " +
-      "between these two emojicoins for reduced fees. Users can also choose to " +
-      '"lock in" for the full duration, receiving matched APT amounts based on ' +
-      "how early they lock in and while rewards last. " +
-      "The arena refers to the ongoing series of daily melees.",
+      "emojicoin arena is a gamified trading venue with a daily free-for-all known as a melee. Think of it like the coliseum (arena) with a different game (melee) every day of the week. Each melee features two randomly selected emojicoins that traders can swap between with reduced fees. emojicoin arena offers rewards, performance tracking, and a fun competitive environment where the best traders rack up the highest earnings.",
   },
   {
-    title: "How long does a melee last?",
+    title: "How do melees work?",
     paragraph:
-      "A melee lasts for 24 hours. When a melee ends, the next one starts " +
-      "with two new random emojicoins.",
+      "A melee is a daily trading event featuring two randomly selected emojicoins. When one melee ends, another begins with two new random emojicoins. You can enter a melee by swapping APT into one of the featured emojicoins using the arena page. Your position is then tracked in the arena, allowing you to easily swap between the two emojicoins or exit when ready.",
   },
   {
-    title: "Can I request an emojicoin to be part of a melee?",
+    title: "Why trade in the arena?",
     paragraph:
-      "No. Emojicoins are randomly selected using Aptos randomness. Nobody is " +
-      "able to choose or alter the random selection of emojicoins.",
+      "emojicoin arena answers the age-old question: what are we trading today? In other words, emojicoin arena concentrates activity around a single trading pair each day, allowing the best traders to compete purely on trading strategies without any confusing guesswork. Trading in the arena offers three key benefits: 1) lower fees compared to regular swaps, 2) rewards through a 'lock in' feature where your deposits can be matched with additional APT, and 3) performance tracking to see your profits and losses.",
   },
   {
-    title: "What does locking in mean?",
+    title: "How do I 'win' in the arena?",
     paragraph:
-      "Locking in is a reward mechanism that will match a portion of the APT" +
-      "you deposit upon entering a melee. The exact amount matched is displayed" +
-      "during the entering process. The matched amount percentage decreases" +
-      "over time for each melee, so locking in earlier yields a higher matched" +
-      "deposit amount. Deposits are only matched if there are rewards remaining." +
-      'Once locked in, you can only exit when the melee ends or by "tapping out".' +
-      "Tapping out means exiting before the melee ends by returning the APT amount" +
-      "you were matched upon deposit. For example, let's say you enter " +
-      "a melee with 2 APT, and you get matched 1 APT, and 3 APT gets you " +
-      "1000 of one of the two emojicoins. After 30 minutes, you managed to " +
-      "triple your emojicoins, and you now have 3000 of them. If you wish to " +
-      "withdraw them before the melee has ended, in order to sell them for " +
-      "example, you can do so, but you'll have to pay back the 1 APT you got " +
-      "matched at the start.",
+      "Success in emojicoin arena comes from strategic trading between the two emojicoins featured in a melee. By entering early, locking in for matched rewards, and skillfully timing your swaps between the two emojicoins, you can maximize your returns. Your goal is to simply end with more value than you started with, either by holding the emojicoins you believe will increase in value or by actively trading between them to capture price movements.",
   },
   {
-    title: "What is the difference between trading inside the melee and outside the melee?",
+    title: "What is 'locking in' and why should I do it?",
     paragraph:
-      "Trades you make in the arena incur 50% less fees than manually swapping between" +
-      "two emojicoins individually. Your profits and losses are tracked as percentages for" +
-      'each individual melee you participate in. The arena\'s "lock in" feature is a' +
-      "rewards mechanism in which your APT deposits are matched up to a certain amount.",
+      "Locking in is a reward mechanism that matches a portion of your APT deposit with additional APT from the rewards pool. The earlier you lock in during a melee, the higher percentage match you receive. When locked in, your position remains in the melee until it ends, unless you 'tap out' by returning the matched APT. This feature rewards early participants and encourages commitment for the full melee duration.",
   },
   {
-    title: "What does the price chart represent?",
+    title: "How does trading work in a melee?",
     paragraph:
-      "The price chart shows the price of the emojicoin on the left side in " +
-      "terms of the emojicoin of the right side. For example, if the price is " +
-      "3, that means that one of the emojicoins on the left can buy you " +
-      "three of the emojicoins on the right. If the price goes up, to " +
-      "4 for example, then one emojicoin on the left can buy you 4 " +
-      "emojicoins on the right.",
+      "When you enter a melee, you choose one of the two featured emojicoins to hold. If you want to swap to the other emojicoin, all of your holdings are exchanged at once. This all-or-nothing approach simplifies trading and helps track performance. The price chart shows how many of the right-side emojicoin you can get for one of the left-side emojicoin, making it easy to see which emojicoin is gaining value relative to the other.",
   },
   {
-    title:
-      "I participated in a melee but didn't exit before the end of the " +
-      "melee. How do I exit a melee that has already ended?",
+    title: "How do I exit a melee?",
     paragraph:
-      "To exit a melee that has already ended, go to the Profile tab, and " +
-      "click the exit button next to the melee you wish to exit. If the exit " +
-      "button is not present, it means you already exited that melee.",
+      "You can exit an active melee at any time if you haven't locked in. If you've locked in, you can only exit when the melee ends or by 'tapping out' (returning your matched APT). For melees that have already ended, go to your Profile tab and click the exit button next to the relevant melee.",
+  },
+  {
+    title: "How are emojicoins selected for a melee?",
+    paragraph:
+      "emojicoins are selected using Aptos randomness. Nobody, including the developers, can choose or influence which emojicoins are featured in a melee. This ensures fair and unpredictable daily competitions.",
   },
   {
     title: "I don't fully understand how the arena works, what should I do?",

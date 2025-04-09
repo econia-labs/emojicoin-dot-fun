@@ -1,13 +1,13 @@
 // cspell:word DDTHH
 
-import { type SymbolEmoji } from "../../emoji_data";
+import type { SymbolEmoji } from "../../emoji_data";
 import type {
-  UnsizedDecimalString,
   AccountAddressString,
-  Uint128String,
   Uint64String,
+  Uint128String,
+  UnsizedDecimalString,
 } from "../../emojicoin_dot_fun/types";
-import { type JsonTypes, type Flatten } from "../../types";
+import type { Flatten, JsonTypes } from "../../types";
 
 export type PeriodTypeFromDatabase =
   | "period_15s"
@@ -370,7 +370,10 @@ type ArenaLeaderboardHistoryWithArenaInfoData = Flatten<
       | "emojicoin_1_market_id"
       | "start_time"
       | "duration"
-    >
+    > & {
+      leaderboard_history_last_transaction_version: Uint64String;
+      arena_info_last_transaction_version: Uint64String;
+    }
 >;
 
 type ArenaLeaderboardData = {
@@ -623,6 +626,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaCandlesticks] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
+  DatabaseJsonType[TableName.ArenaLeaderboardHistoryWithArenaInfo] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.AggregateMarketState];
 

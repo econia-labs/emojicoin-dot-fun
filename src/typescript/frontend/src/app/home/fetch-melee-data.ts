@@ -1,7 +1,8 @@
-import { fetchArenaInfo, fetchSpecificMarkets } from "@sdk/indexer-v2";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
+
+import { fetchArenaInfo, fetchSpecificMarkets } from "@/sdk/indexer-v2";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);

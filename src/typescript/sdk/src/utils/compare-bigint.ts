@@ -1,4 +1,4 @@
-import { type AnyNumberString } from "../types";
+import type { AnyNumberString } from "../types";
 import { zip } from "./misc";
 
 export const compareNumber = (a: number | string, b: number | string): 0 | -1 | 1 => {

@@ -1,14 +1,12 @@
+import Text from "components/text";
+import { translationFunction } from "context/language-context";
 import React from "react";
-
 import { useScramble } from "use-scramble";
 
+import { FlexGap } from "@/containers";
+
+import type { SelectProps } from "../types";
 import { DropdownSelectWrapper } from "./styled";
-import { FlexGap } from "@containers";
-import { Text } from "components/text";
-
-import { translationFunction } from "context/language-context";
-
-import { type SelectProps } from "../types";
 
 export const Select: React.FC<SelectProps> = ({
   targetRef,

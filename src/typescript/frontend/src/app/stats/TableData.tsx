@@ -1,14 +1,15 @@
-import { useCallback, useMemo } from "react";
-import { toNominal } from "@sdk/utils";
-import { calculateCurvePrice, calculateCirculatingSupply } from "@sdk/markets";
-import { MiniBondingCurveProgress } from "./MiniBondingCurveProgress";
-import { toNominalPrice } from "@sdk/utils";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
-import { ROUTES } from "router/routes";
 import { EXTERNAL_LINK_PROPS } from "components/link/const";
-import { type DatabaseModels } from "@sdk/indexer-v2/types";
-import { PriceDelta } from "components/price-feed/inner";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
+import { PriceDelta } from "components/price-feed/inner";
+import { useCallback, useMemo } from "react";
+import { ROUTES } from "router/routes";
+
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
+import { calculateCirculatingSupply, calculateCurvePrice } from "@/sdk/markets";
+import { toNominal, toNominalPrice } from "@/sdk/utils";
+
+import { MiniBondingCurveProgress } from "./MiniBondingCurveProgress";
 
 export enum Column {
   Price,

@@ -1,13 +1,16 @@
-import { type fetchChatEvents } from "@sdk/indexer-v2";
-import { LIMIT } from "@sdk/indexer-v2/const";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { type GetChatsSchema } from "app/api/chats/schema";
+import type { GetChatsSchema } from "app/api/chats/schema";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 import { addSearchParams } from "utils/url-utils";
-import { type z } from "zod";
+import type { z } from "zod";
 
-export type ChatEvent = Awaited<ReturnType<typeof fetchChatEvents>>[number];
+import type { fetchChatEvents } from "@/sdk/indexer-v2";
+import { LIMIT } from "@/sdk/indexer-v2/const";
+
+type ChatEvent = Awaited<ReturnType<typeof fetchChatEvents>>[number];
+
+const TEN_SECONDS = 10000;
 
 export const useChatEventsQuery = (args: z.input<typeof GetChatsSchema>) => {
   const query = useInfiniteQuery({
@@ -25,6 +28,7 @@ export const useChatEventsQuery = (args: z.input<typeof GetChatsSchema>) => {
       lastPage?.length === LIMIT ? allPages.length + 1 : undefined,
     // Disable the query when a marketID isn't provided
     enabled: !!args.marketID,
+    staleTime: TEN_SECONDS,
   });
 
   return query;

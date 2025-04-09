@@ -1,13 +1,14 @@
-import { type SymbolEmoji } from "../../../src";
-import TestHelpers from "../../utils/helpers";
-import { getFundedAccount } from "../../utils/test-accounts";
-import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
-import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
-import { getAptosClient } from "../../utils";
-import { fetchMarketState } from "../../../src/indexer-v2/queries";
-import { type MarketStateModel } from "../../../src/indexer-v2/types";
-import { type JsonValue } from "../../../src/types/json-types";
+import { SwapWithRewards } from "@/move-modules/emojicoin-dot-fun";
+
+import type { SymbolEmoji } from "../../../src";
 import { getEventsAsProcessorModelsFromResponse } from "../../../src/indexer-v2/mini-processor";
+import { fetchMarketState } from "../../../src/indexer-v2/queries";
+import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
+import type { MarketStateModel } from "../../../src/indexer-v2/types";
+import type { JsonValue } from "../../../src/types/json-types";
+import { getAptosClient } from "../../utils";
+import { registerMarketHelper } from "../../utils/helpers";
+import { getFundedAccount } from "../../utils/test-accounts";
 
 jest.setTimeout(20000);
 
@@ -17,11 +18,10 @@ describe("queries a market by market state", () => {
 
   it("fetches the market state for a market based on an emoji symbols array", async () => {
     const emojis: SymbolEmoji[] = ["🧐", "🧐"];
-    const { registerResponse, marketAddress, emojicoin, emojicoinLP } =
-      await TestHelpers.registerMarketFromEmojis({
-        registrant,
-        emojis,
-      });
+    const { registerResponse, marketAddress, emojicoin, emojicoinLP } = await registerMarketHelper({
+      registrant,
+      emojis,
+    });
     const { version } = registerResponse;
     await waitForEmojicoinIndexer(version);
     const res = (await fetchMarketState({

@@ -13,7 +13,7 @@ should be taken seriously. He just likes to listen to himself talk and has
 caught the emojicoin bug.*
 -->
 
-**Q: What is the cost to launch an Emojicoin?**
+**Q: What is the cost to launch an emojicoin?**
 
 A: 1 APT, plus a 1 APT deposit that is automatically refunded after the market
 exits the bonding curve
@@ -28,7 +28,7 @@ A: 4,500 APT
 
 <!-- markdownlint-disable MD013 -->
 
-**Q: Assuming nobody sells their tokens, how much buy pressure is required for the Emojicoin reach a 4,500 APT market cap?**
+**Q: Assuming nobody sells their tokens, how much buy pressure is required for the emojicoin reach a 4,500 APT market cap?**
 
 <!-- markdownlint-enable MD013 -->
 
@@ -36,7 +36,7 @@ A: 1,000 APT
 
 <!-- markdownlint-disable MD013 -->
 
-**Q: If an Emojicoin market is already launched, can I launch a second one of the same Emoji?**
+**Q: If an emojicoin market is already launched, can I launch a second one of the same Emoji?**
 
 <!-- markdownlint-enable MD013 -->
 
@@ -52,5 +52,5 @@ account for onchain transactions across a variety of use cases.
 
 So get ready to live, laugh, and love with emojicoins! They're not just a
 trend; they're a revolution. Embrace the future, where every transaction is a
-smile, a laugh, and a story. Emojicoins are here to stay, and they're going
+smile, a laugh, and a story. emojicoins are here to stay, and they're going
 to change the world one emoji at a time. 🌈🚀💖

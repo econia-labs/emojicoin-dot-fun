@@ -1,15 +1,14 @@
+import Info from "components/info";
+import { Arrows } from "components/svg";
+import Text from "components/text";
+import { translationFunction } from "context/language-context";
+import { useMatchBreakpoints } from "hooks";
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { translationFunction } from "context/language-context";
-import { useMatchBreakpoints } from "hooks";
+import { Flex, FlexGap } from "@/containers";
 
-import { FlexGap, Flex } from "@containers";
-import { Text } from "components/text";
-import Info from "components/info";
-import { Arrows } from "components/svg";
-
-import { type TableHeaderProps } from "./types";
+import type { TableHeaderProps } from "./types";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   const { t } = translationFunction();

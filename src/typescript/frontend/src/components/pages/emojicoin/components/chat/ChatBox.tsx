@@ -1,48 +1,27 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
-import { Flex, Column } from "@containers";
-import { MessageContainer } from "./components";
-import { type ChatProps } from "../../types";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEventStore } from "context/event-store-context";
-import { useEmojiPicker } from "context/emoji-picker-context";
-import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
-import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
-import { useChatTransactionBuilder } from "lib/hooks/transaction-builders/use-chat-builder";
-import { useChatEventsQuery } from "./useChatEventsQuery";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
 import _ from "lodash";
-import { LoadMore } from "@/components/ui/table/loadMore";
+import { useEffect, useMemo, useRef } from "react";
+
 import Loading from "@/components/loading";
+import { LoadMore } from "@/components/ui/table/loadMore";
+import { Column, Flex } from "@/containers";
+
+import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
+import type { ChatProps } from "../../types";
+import { MessageContainer } from "./components";
+import { useChatBox } from "./useChatBox";
+import { useChatEventsQuery } from "./useChatEventsQuery";
 
 const ChatBox = (props: ChatProps) => {
-  const { submit } = useAptos();
-  const clear = useEmojiPicker((state) => state.clear);
-  const setMode = useEmojiPicker((state) => state.setMode);
+  const { addressName: connectedWalletName } = useAptos();
   const chatsFromStore = useEventStore(
     (s) => s.getMarket(props.data.symbolEmojis)?.chatEvents ?? []
   );
-  const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
-
-  useEffect(() => {
-    setMode("chat");
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
-
-  const transactionBuilder = useChatTransactionBuilder(props.data.marketAddress);
-
-  const sendChatMessage = async () => {
-    // Set the picker invisible while the transaction is being processed.
-    setPickerInvisible(true);
-    const res = await submit(transactionBuilder);
-    if (res && res.response && isUserTransactionResponse(res.response)) {
-      clear();
-    } else {
-      setPickerInvisible(false);
-    }
-  };
 
   const initialLoad = useRef(true);
   useEffect(() => {
@@ -63,12 +42,14 @@ const ChatBox = (props: ChatProps) => {
       message: {
         sender: s.chat.user,
         text: s.chat.message,
-        senderRank: getRankFromEvent(s.chat).rankIcon,
+        label: getRankFromEvent(s.chat).rankIcon,
         version: s.transaction.version,
       },
       shouldAnimateAsInsertion: i === 0 && !initialLoad.current,
     }));
   }, [chatsFromStore, chatsQuery.data?.pages]);
+
+  const { sendChatMessage } = useChatBox(props.data.marketAddress);
 
   if (chatsQuery.isLoading) return <Loading />;
 
@@ -90,6 +71,7 @@ const ChatBox = (props: ChatProps) => {
               message={message}
               key={message.version}
               index={sortedChats.length - index}
+              alignLeft={message.sender === connectedWalletName}
               shouldAnimateAsInsertion={shouldAnimateAsInsertion}
             />
           ))}

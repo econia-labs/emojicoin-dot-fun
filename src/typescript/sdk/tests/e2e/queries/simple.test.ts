@@ -1,17 +1,18 @@
-import { type SymbolEmojiName, getEvents, ONE_APT } from "../../../src";
-import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
-import { Chat, ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
+import { Chat, ProvideLiquidity, Swap } from "@/move-modules/emojicoin-dot-fun";
+
+import { getEvents, ONE_APT, type SymbolEmojiName } from "../../../src";
 import {
   fetchChatEvents,
   fetchSwapEvents,
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
-import { getAptosClient } from "../../utils";
-import checkRows from "../helpers/equality-checks";
+import { postgrest } from "../../../src/indexer-v2/queries/client";
 import { queryHelper } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/json-types";
+import { getAptosClient } from "../../utils";
+import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
-import { postgrest } from "../../../src/indexer-v2/queries/client";
+import checkRows from "../helpers/equality-checks";
 import { fetchLatestStateEventForMarket, fetchLiquidityEvents } from ".";
 
 jest.setTimeout(20000);
@@ -38,7 +39,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
   });
 
   it("performs a simple registerMarket fetch accurately", async () => {
-    const { registerResponse: response } = await TestHelpers.registerMarketFromNames({
+    const { registerResponse: response } = await registerMarketHelper({
       registrant,
       emojiNames: marketEmojiNames[0],
     });
@@ -54,7 +55,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
   });
 
   it("performs a simple swap fetch accurately", async () => {
-    const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromNames({
+    const { marketAddress, emojicoin, emojicoinLP } = await registerMarketHelper({
       registrant: swapper,
       emojiNames: marketEmojiNames[1],
     });
@@ -80,11 +81,10 @@ describe("queries swap_events and returns accurate swap row data", () => {
   });
 
   it("performs a simple chat fetch accurately", async () => {
-    const { marketAddress, emojicoin, emojicoinLP, emojis } =
-      await TestHelpers.registerMarketFromNames({
-        registrant: user,
-        emojiNames: marketEmojiNames[2],
-      });
+    const { marketAddress, emojicoin, emojicoinLP, emojis } = await registerMarketHelper({
+      registrant: user,
+      emojiNames: marketEmojiNames[2],
+    });
 
     const res = await Chat.submit({
       aptosConfig: aptos.config,
@@ -105,7 +105,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
   });
 
   it("performs a simple liquidity fetch accurately", async () => {
-    const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromNames({
+    const { marketAddress, emojicoin, emojicoinLP } = await registerMarketHelper({
       registrant: provider,
       emojiNames: marketEmojiNames[3],
     });

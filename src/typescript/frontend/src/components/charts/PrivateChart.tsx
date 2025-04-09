@@ -1,13 +1,15 @@
-import { useEffect, useRef } from "react";
-import { WIDGET_OPTIONS } from "./const";
-import { type IChartingLibraryWidget, type Timezone, widget } from "@static/charting_library";
-import { encodeSymbolsForChart, formatSymbolWithParams } from "lib/chart-utils";
-import { type ChartContainerProps } from "./types";
-import { useUserSettings } from "context/event-store-context";
-import { BrowserNotSupported } from "./BrowserNotSupported";
 import { createSwitch } from "components/charts/EmptyCandlesSwitch";
-import { useDatafeed } from "./use-datafeed";
+import { useUserSettings } from "context/event-store-context";
+import { encodeSymbolsForChart, formatSymbolWithParams } from "lib/chart-utils";
 import { cn } from "lib/utils/class-name";
+import { useEffect, useRef } from "react";
+
+import { type IChartingLibraryWidget, type Timezone, widget } from "@/static/charting_library";
+
+import { BrowserNotSupported } from "./BrowserNotSupported";
+import { WIDGET_OPTIONS } from "./const";
+import type { ChartContainerProps } from "./types";
+import { useDatafeed } from "./use-datafeed";
 
 /**
  * The TradingView Chart component. This component is responsible for rendering the TradingView chart with the usage of
@@ -20,7 +22,7 @@ import { cn } from "lib/utils/class-name";
  * {@link https://github.com/econia-labs/emojicoin-dot-fun/tree/main/src/typescript/frontend/src/components/charts/README.md}
  * for a more detailed explanation of the architectural data flow.
  */
-export const Chart = ({
+const Chart = ({
   symbol,
   secondarySymbol = undefined,
   className = "",

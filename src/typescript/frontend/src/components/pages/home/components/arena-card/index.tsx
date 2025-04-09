@@ -1,18 +1,20 @@
 "use client";
 
-import { FlexGap } from "@containers";
+import "./module.css";
+
+import type { HomePageProps } from "app/home/HomePage";
 import Button from "components/button";
+import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
 import Link from "next/link";
+import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { GlowingEmoji } from "utils/emoji";
-import "./module.css";
-import { useMatchBreakpoints } from "@hooks/index";
-import { getEmojisInString } from "@sdk/emoji_data";
-import { Countdown } from "components/Countdown";
-import { type HomePageProps } from "app/home/HomePage";
-import { useMemo } from "react";
-import { toTotalAptLocked } from "@sdk/indexer-v2/types";
+
+import { FlexGap } from "@/containers";
+import { useMatchBreakpoints } from "@/hooks/index";
+import { getEmojisInString } from "@/sdk/emoji_data";
+import { toTotalAptLocked } from "@/sdk/indexer-v2/types";
 
 type ArenaCardProps = {
   meleeData: NonNullable<HomePageProps["meleeData"]>;

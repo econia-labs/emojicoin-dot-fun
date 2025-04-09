@@ -18,6 +18,7 @@ import {
 } from "../../src/indexer-v2";
 import { getFundedAccount } from "../utils/test-accounts";
 import { waitForProcessor } from "./helpers";
+
 const TWO_SECONDS = 2000;
 
 const waitForNew15sPeriodBoundary = async () => {

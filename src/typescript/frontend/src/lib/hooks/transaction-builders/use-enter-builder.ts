@@ -1,10 +1,12 @@
-import { type AnyNumberString } from "@sdk-types";
-import { toCoinTypes } from "@sdk/markets";
+import type { TypeTag } from "@aptos-labs/ts-sdk";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
+
+import { Enter } from "@/move-modules/emojicoin-arena";
+import { toArenaCoinTypes } from "@/sdk/utils/arena/helpers";
+import type { AnyNumberString } from "@/sdk-types";
+
 import { useTransactionBuilder } from "./use-transaction-builder";
-import { Enter } from "@/contract-apis/emojicoin-arena";
-import { type TypeTag } from "@aptos-labs/ts-sdk";
 
 /**
  * The individual args here must be passed to avoid re-renders due to a new object of args being
@@ -23,8 +25,10 @@ export const useEnterTransactionBuilder = (
     if (!accountAddress) {
       return null;
     }
-    const { emojicoin: emojicoin0, emojicoinLP: emojicoinLP0 } = toCoinTypes(market0Address);
-    const { emojicoin: emojicoin1, emojicoinLP: emojicoinLP1 } = toCoinTypes(market1Address);
+    const [emojicoin0, emojicoinLP0, emojicoin1, emojicoinLP1] = toArenaCoinTypes({
+      market0Address,
+      market1Address,
+    });
     return {
       entrant: accountAddress,
       inputAmount: BigInt(inputAmount),

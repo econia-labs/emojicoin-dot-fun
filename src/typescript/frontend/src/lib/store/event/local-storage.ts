@@ -1,7 +1,8 @@
-import { type EventModelWithMarket } from "@sdk/indexer-v2";
 import { parseJSON, stringifyJSON } from "utils";
 
-export const LOCAL_STORAGE_EXPIRATION_TIME = 1000 * 60; // 10 minutes.
+import type { EventModelWithMarket } from "@/sdk/indexer-v2";
+
+const LOCAL_STORAGE_EXPIRATION_TIME = 1000 * 60; // 10 minutes.
 
 export const LOCAL_STORAGE_EVENT_TYPES = [
   "swap",
@@ -24,6 +25,8 @@ export const maybeUpdateLocalStorage = (
   key: EventLocalStorageKey,
   event: EventModelWithMarket
 ) => {
+  if (typeof window === "undefined") return;
+
   if (!update) return;
   const str = localStorage.getItem(key) ?? "[]";
   const data: EventModelWithMarket[] = parseJSON(str);
@@ -32,6 +35,8 @@ export const maybeUpdateLocalStorage = (
 };
 
 export const cleanReadLocalStorage = (key: EventLocalStorageKey) => {
+  if (typeof window === "undefined") return [];
+
   const str = localStorage.getItem(key) ?? "[]";
   const data: EventModelWithMarket[] = parseJSON(str);
   const relevantItems = data.filter(shouldKeep);
@@ -40,5 +45,7 @@ export const cleanReadLocalStorage = (key: EventLocalStorageKey) => {
 };
 
 export const clearLocalStorage = (key: EventLocalStorageKey) => {
+  if (typeof window === "undefined") return;
+
   localStorage.setItem(key, "[]");
 };

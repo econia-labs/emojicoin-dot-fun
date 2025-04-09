@@ -1,17 +1,19 @@
-import { type AnyPeriod, type Period } from "@sdk/const";
-import { type SymbolEmoji } from "@sdk/emoji_data";
-import {
-  type MarketMetadataModel,
-  type DatabaseModels,
-  type BrokerEventModels,
-} from "@sdk/indexer-v2/types";
-import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
-import { type LatestBar } from "./candlestick-bars";
-import { type WritableDraft } from "immer";
-import { type ClientState, type ClientActions } from "../websocket/store";
-import { type ArenaActions, type ArenaState } from "../arena/store";
-import { type Flatten } from "@sdk-types";
-import { type ArenaChartSymbol } from "lib/chart-utils";
+import type { WritableDraft } from "immer";
+import type { ArenaChartSymbol } from "lib/chart-utils";
+
+import type { AnyPeriod, Period } from "@/sdk/const";
+import type { SymbolEmoji } from "@/sdk/emoji_data";
+import type {
+  BrokerEventModels,
+  DatabaseModels,
+  MarketMetadataModel,
+} from "@/sdk/indexer-v2/types";
+import type { Flatten } from "@/sdk-types";
+import type { SubscribeBarsCallback } from "@/static/charting_library/datafeed-api";
+
+import type { ArenaActions, ArenaState } from "../arena/store";
+import type { ClientActions, ClientState } from "../websocket/store";
+import type { LatestBar } from "./candlestick-bars";
 
 // Aliased to avoid repeating the type names over and over.
 type Swap = DatabaseModels["swap_events"];
@@ -57,7 +59,7 @@ export type EventState = {
   globalStateEvents: Readonly<GlobalState[]>;
 };
 
-export type PeriodSubscription = {
+type PeriodSubscription = {
   symbol: string | ArenaChartSymbol;
   period: AnyPeriod;
   cb: SubscribeBarsCallback;
@@ -68,7 +70,7 @@ export type SetLatestBarsArgs = {
   latestBars: readonly LatestBar[];
 };
 
-export type EventActions = {
+type EventActions = {
   getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
   getMeleeMap: () => Readonly<ArenaState["meleeMap"]>;
@@ -86,7 +88,8 @@ export type EventAndClientStore = EventState &
   EventActions &
   ClientState &
   ClientActions &
-  ArenaState;
+  ArenaState &
+  ArenaActions;
 
 export type ImmerSetEventAndClientStore = (
   nextStateOrUpdater:

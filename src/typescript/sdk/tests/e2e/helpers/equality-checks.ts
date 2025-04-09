@@ -1,28 +1,5 @@
-import {
-  type EntryFunctionPayloadResponse,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
-import {
-  type withChatEventData,
-  type withGlobalStateEventData,
-  type withLastSwap,
-  type withLiquidityEventData,
-  type withMarketAndStateMetadataAndBumpTime,
-  type withMarketAndStateMetadataAndEmitTime,
-  type withMarketRegistrationEventData,
-  type withPeriodicStateEventData,
-  type withPeriodicStateMetadata,
-  type withStateEventData,
-  type withSwapEventData,
-  type withTransactionMetadata,
-  type SwapEventModel,
-  type GlobalStateEventModel,
-  type MarketRegistrationEventModel,
-  type ChatEventModel,
-  type LiquidityEventModel,
-  type PeriodicStateEventModel,
-  type MarketLatestStateEventModel,
-} from "../../../src/indexer-v2/types";
+import type { EntryFunctionPayloadResponse, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+
 import {
   type AnyEmojicoinEvent,
   calculateTvlGrowth,
@@ -34,7 +11,28 @@ import {
   standardizeAddress,
   type Types,
 } from "../../../src";
-import { type JsonValue } from "../../../src/types/json-types";
+import type {
+  ChatEventModel,
+  GlobalStateEventModel,
+  LiquidityEventModel,
+  MarketLatestStateEventModel,
+  MarketRegistrationEventModel,
+  PeriodicStateEventModel,
+  SwapEventModel,
+  withChatEventData,
+  withGlobalStateEventData,
+  withLastSwap,
+  withLiquidityEventData,
+  withMarketAndStateMetadataAndBumpTime,
+  withMarketAndStateMetadataAndEmitTime,
+  withMarketRegistrationEventData,
+  withPeriodicStateEventData,
+  withPeriodicStateMetadata,
+  withStateEventData,
+  withSwapEventData,
+  withTransactionMetadata,
+} from "../../../src/indexer-v2/types";
+import type { JsonValue } from "../../../src/types/json-types";
 
 type Indexer = {
   TransactionMetadata: ReturnType<typeof withTransactionMetadata>;
@@ -111,7 +109,7 @@ export const compareTransactionMetadata = <T extends Indexer["TransactionMetadat
     ["row.transaction.time", row.transaction.time, BigInt(response.timestamp)],
   ]);
 
-export const compareMarketAndStateMetadata = <
+const compareMarketAndStateMetadata = <
   T extends
     | Indexer["MarketAndStateMetadataAndBumpTime"]
     | Indexer["MarketAndStateMetadataAndEmitTime"],
@@ -137,10 +135,7 @@ export const compareMarketAndStateMetadata = <
     ],
   ]);
 
-export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
-  row: T,
-  event: Types["SwapEvent"]
-) =>
+const compareSwapEvents = <T extends Indexer["SwapEventData"]>(row: T, event: Types["SwapEvent"]) =>
   checkTuples([
     ["row.swap.swapper", row.swap.swapper, event.swapper],
     ["row.swap.integrator", row.swap.integrator, event.integrator],
@@ -171,7 +166,7 @@ export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
     ],
   ]);
 
-export const compareStateEvents = <T extends Indexer["StateEventData"]>(
+const compareStateEvents = <T extends Indexer["StateEventData"]>(
   row: T,
   event: Types["StateEvent"]
 ) =>

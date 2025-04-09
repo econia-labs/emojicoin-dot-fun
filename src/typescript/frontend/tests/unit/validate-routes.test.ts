@@ -1,7 +1,8 @@
+import fs from "fs";
 import path from "path";
+
 import { getGitRoot } from "../../../sdk/tests/utils/helpers";
 import { ROUTES } from "../../src/router/routes";
-import fs from "fs";
 
 /**
  * There are four basic structures employed by the nextjs file-based routing system.
@@ -40,7 +41,7 @@ const validateRoutePath = (fullPath: string) => {
 const validateDotNotation = (currPath: string, newValue: string | object) => {
   const isString = typeof newValue === "string";
   expect(isString).toBe(true);
-  if (!isString) throw "Never.";
+  if (!isString) throw new Error("Never.");
   const fullPath = path.join(currPath, newValue);
   const fullPathExists = fs.existsSync(fullPath);
   const isDirectory = fs.statSync(fullPath).isDirectory();
@@ -52,10 +53,11 @@ const validateDotNotation = (currPath: string, newValue: string | object) => {
   return isString && fullPathExists && isDirectory && isNotPage;
 };
 
-const walkDir = <T extends Record<string, any> | string>(
-  currValue: T,
-  currPath: string
-): boolean => {
+type RecursiveObject = {
+  [key: string]: string | RecursiveObject;
+};
+
+const walkDir = <T extends RecursiveObject | string>(currValue: T, currPath: string): boolean => {
   expect(typeof currValue === "string" || typeof currValue === "object").toBe(true);
   if (typeof currValue === "string") {
     const newPath = path.join(currPath, currValue);

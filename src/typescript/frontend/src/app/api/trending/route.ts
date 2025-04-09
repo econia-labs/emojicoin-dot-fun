@@ -1,15 +1,17 @@
+// Disable to allow for doc-comment links and sorted imports.
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { AccountAddress } from "@aptos-labs/ts-sdk";
+import { getAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedPriceFeed, type NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
 import { NextResponse } from "next/server";
+
+import type { DECIMALS } from "@/sdk/const";
 import {
   toTrendingMarket,
   type TrendingMarket,
   type TrendingMarketArgs,
-} from "@sdk/indexer-v2/queries";
-import { getAptPrice } from "lib/queries/get-apt-price";
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { DECIMALS } from "@sdk/const";
-import { q64ToBig } from "@sdk/utils";
-import { fetchCachedPriceFeed, NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
-import { type AccountAddress } from "@aptos-labs/ts-sdk";
+} from "@/sdk/indexer-v2/queries";
+import type { q64ToBig } from "@/sdk/utils";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 export const revalidate = 10;
@@ -26,7 +28,7 @@ export const revalidate = 10;
  *
  * #### NOTE: `market_cap_usd` and `usd_price` may be absent if APT/USD isn't fetched successfully.
  *
- * All q64 values in the contract are normalized to decimalized values with {@link q64ToBig}
+ * All q64 values in the module are normalized to decimalized values with {@link q64ToBig}
  *
  * All APT and emojicoin values are converted to their decimalized formats; that is, they are
  * divided by 10 ^ {@link DECIMALS}.
