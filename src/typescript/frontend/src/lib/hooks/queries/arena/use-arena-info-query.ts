@@ -39,7 +39,7 @@ export function useResyncArenaInfoQuery() {
 
   return {
     data,
-    // Named resync because it refetches and then updates the state immediately with the new data.
+    // Named resync because it re-fetches and then updates the state immediately with the new data.
     resync: refetch,
   };
 }
