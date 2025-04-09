@@ -1,7 +1,9 @@
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position-query";
 import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
 import { useAccountAddress } from "@/hooks/use-account-address";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { getEvents, sumByKey } from "@/sdk/index";
 import {
   diffFromEnter,
@@ -22,22 +24,28 @@ export const filterActivityByVersion = (
   return result;
 };
 
-export const useArenaActivity = (
-  meleeID: bigint | undefined,
-  latestPositionVersion: bigint | undefined
-) => {
+export const useArenaActivity = () => {
   const user = useAccountAddress();
+  const { meleeInfo } = useCurrentMeleeInfo();
+  const { position } = useCurrentPositionQuery();
 
   return useArenaActivityStore((s) => {
+    const { meleeID } = meleeInfo ?? {};
     if (!user || meleeID === undefined) return undefined;
     const res = s.addressMap.get(user)?.get(meleeID);
-    if (!res) return undefined;
-    return {
-      deposits: filterActivityByVersion(res.deposits, latestPositionVersion),
-      withdrawals: filterActivityByVersion(res.withdrawals, latestPositionVersion),
-      matchAmount: filterActivityByVersion(res.matchAmount, latestPositionVersion),
-      lastExit0: res.lastExit0,
-    };
+    return res
+      ? {
+          deposits: filterActivityByVersion(res.deposits, position?.version),
+          withdrawals: filterActivityByVersion(res.withdrawals, position?.version),
+          matchAmount: filterActivityByVersion(res.matchAmount, position?.version),
+          lastExit0: res.lastExit0,
+        }
+      : {
+          deposits: 0n,
+          withdrawals: 0n,
+          matchAmount: 0n,
+          lastExit0: null,
+        };
   });
 };
 

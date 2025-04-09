@@ -1,7 +1,7 @@
 import { useEventStore } from "context/event-store-context";
 import { useMemo } from "react";
 
-import { compareBigInt } from "@/sdk/index";
+import { compareBigInt, maxBigInt } from "@/sdk/index";
 
 export default function useLatestMeleeData() {
   const meleeEvents = useEventStore((s) => s.meleeEvents);
@@ -10,7 +10,7 @@ export default function useLatestMeleeData() {
     const latestMeleeEvent = meleeEvents
       .toSorted(({ melee: a }, { melee: b }) => compareBigInt(a.meleeID, b.meleeID))
       .at(-1);
-    const latestMeleeID = compareBigInt(
+    const latestMeleeID = maxBigInt(
       meleeInfo?.meleeID ?? -1n,
       latestMeleeEvent?.melee.meleeID ?? -1n
     );

@@ -1,9 +1,11 @@
 import type { ArenaInfoResponse } from "app/api/arena/info/route";
 import { useEventStore } from "context/event-store-context";
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position-query";
+import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions-query";
+import { useRouteWithMinimumVersion } from "lib/hooks/queries/arena/use-url-with-min-version";
 import { useEffect } from "react";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
-import { addSearchParams } from "utils/url-utils";
 
 import { toArenaInfoModel, toMarketStateModel } from "@/sdk/index";
 
@@ -14,13 +16,16 @@ export const useSyncLatestArenaInfo = () => {
   const currentMeleeID = useEventStore((s) => s.arenaInfoFromServer?.meleeID ?? -1n);
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
+  const { refetch: positionRefetch } = useCurrentPositionQuery();
+  const { refetch: historicalRefetch } = useHistoricalPositionsQuery();
+  const { url } = useRouteWithMinimumVersion(ROUTES.api.arena.info);
 
   useEffect(() => {
     if (latestMeleeEvent && latestMeleeEvent.melee.meleeID > currentMeleeID) {
-      const { version } = latestMeleeEvent.transaction;
-      const baseUrl = ROUTES.api.arena.info;
-      const url = addSearchParams(baseUrl, { minimumVersion: version.toString() });
-      fetch(`${url}`)
+      positionRefetch();
+      historicalRefetch();
+
+      fetch(url)
         .then((res) => res.text())
         .then(parseJSON<ArenaInfoResponse>)
         .then(({ arena_info, market_0, market_1 }) => ({
@@ -33,5 +38,13 @@ export const useSyncLatestArenaInfo = () => {
           loadArenaInfoFromServer(arenaInfo);
         });
     }
-  }, [latestMeleeEvent, currentMeleeID, loadArenaInfoFromServer, loadMarketStateFromServer]);
+  }, [
+    url,
+    latestMeleeEvent,
+    currentMeleeID,
+    loadArenaInfoFromServer,
+    loadMarketStateFromServer,
+    positionRefetch,
+    historicalRefetch,
+  ]);
 };

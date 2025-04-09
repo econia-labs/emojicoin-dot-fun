@@ -21,12 +21,12 @@ export const useCurrentPosition = (): {
   const { meleeInfo } = useCurrentMeleeInfo();
   const { position, isLoading } = useCurrentPositionQuery();
   const escrow = useCurrentEscrow();
-  const activity = useArenaActivity(position?.meleeID, position?.version);
+  const activity = useArenaActivity();
 
   return useMemo(() => {
     const resIfNull = { position: null, isLoading };
     if (!meleeInfo) return resIfNull;
-    if (meleeInfo.meleeID !== (escrow?.meleeID || position?.meleeID)) resIfNull;
+    if (meleeInfo.meleeID !== (escrow?.meleeID || position?.meleeID)) return resIfNull;
 
     const coalesced = coalescePositionAndEscrow(escrow, position);
     if (!coalesced) return resIfNull;
