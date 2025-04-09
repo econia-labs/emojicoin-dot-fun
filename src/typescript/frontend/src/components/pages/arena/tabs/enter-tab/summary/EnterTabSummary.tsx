@@ -64,24 +64,24 @@ export default function EnterTabSummary({
 
   return (
     <div className="relative h-[100%]">
-      {isTappingOut ? (
+      {isTappingOut && (
         <TapOutModal position={position} onTapOut={onTapOut} setIsTappingOut={setIsTappingOut} />
-      ) : isSwapping ? (
+      )}
+      {isSwapping && (
         <SwapModal
           position={position}
           onSwap={onSwap}
           setIsSwapping={setIsSwapping}
           loading={isLoading}
         />
-      ) : (
-        <Summary
-          position={position}
-          onTapOut={onTapOut}
-          setIsTappingOut={setIsTappingOut}
-          setIsSwapping={setIsSwapping}
-          topOff={topOff}
-        />
       )}
+      <Summary
+        position={position}
+        onTapOut={onTapOut}
+        setIsTappingOut={setIsTappingOut}
+        setIsSwapping={setIsSwapping}
+        topOff={topOff}
+      />
     </div>
   );
 }
