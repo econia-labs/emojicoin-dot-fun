@@ -9,14 +9,10 @@ import { createPortal } from "react-dom";
 
 import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 
 import { BottomNavigation, TabContainer } from "./tabs";
-import {
-  type ArenaProps,
-  type ArenaPropsWithPositionHistoryAndEmojiData,
-  Box,
-  EmojiTitle,
-} from "./utils";
+import { type ArenaProps, Box, EmojiTitle } from "./utils";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -38,7 +34,7 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
 
 const chartBoxClassName: ClassValue = "relative w-full h-full col-start-1 col-end-3";
 
-const Desktop = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+const Desktop = React.memo((props: ArenaProps) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <div
@@ -71,7 +67,7 @@ const Desktop = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) =>
 // Necessary to add a display name because of the React.memo wrapper.
 Desktop.displayName = "Desktop";
 
-const Mobile = React.memo((props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+const Mobile = React.memo((props: ArenaProps) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <>
@@ -107,6 +103,7 @@ export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
+  const { meleeInfo: arenaInfo, market0, market1 } = useCurrentMeleeInfo();
 
   useEffect(() => {
     loadArenaInfoFromServer(props.arenaInfo);
@@ -114,5 +111,17 @@ export const ArenaClient = (props: ArenaProps) => {
     loadMarketStateFromServer([props.market1]);
   }, [loadArenaInfoFromServer, loadMarketStateFromServer, props]);
 
-  return isMobile ? <Mobile {...props} /> : <Desktop {...props} />;
+  return isMobile ? (
+    <Mobile
+      arenaInfo={arenaInfo ?? props.arenaInfo}
+      market0={market0 ?? props.market0}
+      market1={market1 ?? props.market1}
+    />
+  ) : (
+    <Desktop
+      arenaInfo={arenaInfo ?? props.arenaInfo}
+      market0={market0 ?? props.market0}
+      market1={market1 ?? props.market1}
+    />
+  );
 };

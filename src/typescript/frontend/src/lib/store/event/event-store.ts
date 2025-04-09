@@ -22,7 +22,7 @@ import {
   isArenaModelWithMeleeID,
   isArenaSwapModel,
 } from "@/sdk/types/arena-types";
-import { DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
+import { compareBigInt, DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
 
 import { ensureMeleeInStore, initializeArenaStore } from "../arena/event/store";
 import {
@@ -73,6 +73,8 @@ export const createEventStore = () => {
         return get().meleeMap;
       },
       loadArenaInfoFromServer: (info) => {
+        // Don't update if the data is stale/outdated.
+        if ((get().arenaInfoFromServer?.version ?? -1n) > info.version) return;
         set((state) => {
           state.arenaInfoFromServer = info;
           const arenaSymbol = encodeSymbolsForChart(
@@ -102,6 +104,11 @@ export const createEventStore = () => {
             ensureMarketInStore(state, marketEvents[0].market);
             const market = state.markets.get(marketSymbol)!;
             marketEvents.forEach((event) => market.stateEvents.push(event));
+            // Sort in reverse order (b, a), aka descending, aka highest nonce first.
+            // This sorts on each insertion but we only ever insert 1 or 2 at a time so it's fine.
+            market.stateEvents.sort((a, b) =>
+              compareBigInt(b.market.marketNonce, a.market.marketNonce)
+            );
           });
         });
       },

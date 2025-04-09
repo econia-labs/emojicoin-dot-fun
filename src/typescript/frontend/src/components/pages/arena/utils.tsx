@@ -6,16 +6,12 @@ import { GlowingEmoji } from "utils/emoji";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { HistoricalEscrow } from "@/sdk/index";
-import type { ArenaInfoModel, ArenaPositionModel, MarketStateModel } from "@/sdk/indexer-v2/types";
+import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 
 export type ArenaProps = {
   arenaInfo: ArenaInfoModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
-};
-
-export type ArenaPropsWithPositionHistoryAndEmojiData = ArenaProps & {
-  position?: ArenaPositionModel | null;
 };
 
 export const Box = ({

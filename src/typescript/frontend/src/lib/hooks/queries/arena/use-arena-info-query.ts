@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ArenaInfoResponse } from "app/api/arena/info/route";
 import { useEventStore } from "context/event-store-context/hooks";
+import { useEffect } from "react";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
@@ -28,14 +29,22 @@ export function useResyncArenaInfoQuery() {
           market0: toMarketStateModel(market_0),
           market1: toMarketStateModel(market_1),
         }))
-        .then(({ arenaInfo, market0, market1 }) => {
-          loadMarketStateFromServer([market0, market1]);
-          loadArenaInfoFromServer(arenaInfo);
+        .catch((e) => {
+          console.error(e);
+          return null;
         }),
     // Only fetch if explicitly instructed to do so with refetch.
     enabled: false,
     staleTime: Infinity,
   });
+
+  useEffect(() => {
+    if (data) {
+      const { arenaInfo, market0, market1 } = data;
+      loadMarketStateFromServer([market0, market1]);
+      loadArenaInfoFromServer(arenaInfo);
+    }
+  }, [data, loadMarketStateFromServer, loadArenaInfoFromServer]);
 
   return {
     data,

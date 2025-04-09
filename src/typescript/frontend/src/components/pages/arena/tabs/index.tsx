@@ -4,14 +4,14 @@ import { createPortal } from "react-dom";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
-import type { ArenaPropsWithPositionHistoryAndEmojiData } from "../utils";
+import type { ArenaProps } from "../utils";
 import ChatTab from "./ChatTab";
 import EnterTab from "./enter-tab/EnterTab";
 import InfoTab from "./InfoTab";
 import ProfileTab from "./profile-tab/ProfileTab";
 
 const getTabs = (
-  { market0, market1, position, arenaInfo }: ArenaPropsWithPositionHistoryAndEmojiData,
+  { market0, market1, arenaInfo }: ArenaProps,
   setSelectedTab: (tab: string) => void
 ) => [
   {
@@ -27,7 +27,6 @@ const getTabs = (
         {...{
           market0,
           market1,
-          position,
           goToEnter: () => setSelectedTab("Position"),
           arenaInfo,
         }}
@@ -46,7 +45,7 @@ const getTabs = (
   },
 ];
 
-export const TabContainer = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+export const TabContainer = (props: ArenaProps) => {
   const [selectedTab, setSelectedTab] = useState<string>();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
@@ -122,7 +121,7 @@ const BottomNavigationItem = ({
   );
 };
 
-export const BottomNavigation = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+export const BottomNavigation = (props: ArenaProps) => {
   const [selectedTab, setSelectedTab] = useState<string>();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
