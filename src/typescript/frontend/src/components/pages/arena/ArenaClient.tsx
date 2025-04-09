@@ -4,29 +4,15 @@ import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { FormattedNumber } from "components/FormattedNumber";
 import { useEventStore } from "context/event-store-context/hooks";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
 
 import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
-import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
-import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
-import type {
-  ArenaLeaderboardHistoryWithArenaInfoModel,
-  ArenaPositionModel,
-} from "@/sdk/indexer-v2/types";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 
 import { BottomNavigation, TabContainer } from "./tabs";
-import {
-  type ArenaProps,
-  type ArenaPropsWithPositionHistoryAndEmojiData,
-  Box,
-  EmojiTitle,
-} from "./utils";
+import { type ArenaProps, Box, EmojiTitle } from "./utils";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -48,7 +34,7 @@ const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint })
 
 const chartBoxClassName: ClassValue = "relative w-full h-full col-start-1 col-end-3";
 
-const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+const Desktop = React.memo((props: ArenaProps) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <div
@@ -59,10 +45,7 @@ const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
       }}
     >
       <Box className="grid place-items-center">
-        <EmojiTitle
-          market0Symbols={market0.market.symbolEmojis}
-          market1Symbols={market1.market.symbolEmojis}
-        />
+        <EmojiTitle />
       </Box>
       <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
@@ -80,18 +63,17 @@ const Desktop = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
       </Box>
     </div>
   );
-};
+});
+// Necessary to add a display name because of the React.memo wrapper.
+Desktop.displayName = "Desktop";
 
-const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+const Mobile = React.memo((props: ArenaProps) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <>
       <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
         <Box className="grid place-items-center gap-[1em] py-[1em]">
-          <EmojiTitle
-            market0Symbols={market0.market.symbolEmojis}
-            market1Symbols={market1.market.symbolEmojis}
-          />
+          <EmojiTitle />
           <div className="text-4xl">
             <Countdown
               startTime={arenaInfo.startTime}
@@ -113,58 +95,33 @@ const Mobile = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
       {createPortal(<BottomNavigation {...props} />, document.body)}
     </>
   );
-};
+});
+// Necessary to add a display name because of the React.memo wrapper.
+Mobile.displayName = "Mobile";
 
 export const ArenaClient = (props: ArenaProps) => {
   const { isMobile } = useMatchBreakpoints();
-  const { account } = useAptos();
-  const router = useRouter();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
-
-  // Undefined while loading. Null means no position
-  const [position, setPosition] = useState<ArenaPositionModel | undefined | null>(null);
-  const [history, setHistory] = useState<ArenaLeaderboardHistoryWithArenaInfoModel[]>([]);
-
-  useReliableSubscribe({ eventTypes: ["Chat"], arena: true });
+  const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
+  const { meleeInfo: arenaInfo, market0, market1 } = useCurrentMeleeInfo();
 
   useEffect(() => {
-    if (props.arenaInfo) {
-      loadArenaInfoFromServer(props.arenaInfo);
-    }
-  }, [loadArenaInfoFromServer, props.arenaInfo]);
+    loadArenaInfoFromServer(props.arenaInfo);
+    loadMarketStateFromServer([props.market0]);
+    loadMarketStateFromServer([props.market1]);
+  }, [loadArenaInfoFromServer, loadMarketStateFromServer, props]);
 
-  const latestMeleeID = useLatestMeleeID();
-
-  useEffect(() => {
-    if (latestMeleeID > props.arenaInfo.meleeID) {
-      router.refresh();
-    }
-  }, [latestMeleeID, props.arenaInfo.meleeID, router]);
-
-  const r = useMemo(
-    () =>
-      isMobile ? (
-        <Mobile {...props} {...{ position, setPosition, history, setHistory }} />
-      ) : (
-        <Desktop {...props} {...{ position, setPosition, history, setHistory }} />
-      ),
-    [isMobile, props, position, setPosition, history, setHistory]
+  return isMobile ? (
+    <Mobile
+      arenaInfo={arenaInfo ?? props.arenaInfo}
+      market0={market0 ?? props.market0}
+      market1={market1 ?? props.market1}
+    />
+  ) : (
+    <Desktop
+      arenaInfo={arenaInfo ?? props.arenaInfo}
+      market0={market0 ?? props.market0}
+      market1={market1 ?? props.market1}
+    />
   );
-
-  useEffect(() => {
-    // This is done because account refreshes often and we don't want to refetch
-    if (account) {
-      setPosition(undefined);
-      fetch(`${ROUTES.api.arena.position}/${account.address}`)
-        .then((r) => r.text())
-        .then(parseJSON<ArenaPositionModel | null>)
-        .then((r) => setPosition(r));
-      fetch(`${ROUTES.api.arena["historical-positions"]}/${account.address}`)
-        .then((r) => r.text())
-        .then(parseJSON<ArenaLeaderboardHistoryWithArenaInfoModel[]>)
-        .then((r) => setHistory(r));
-    }
-  }, [account]);
-
-  return r;
 };

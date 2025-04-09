@@ -2,14 +2,13 @@ import "server-only";
 
 import type { AccountAddressInput } from "@aptos-labs/ts-sdk";
 
-import type { ArenaPeriod } from "../../..";
+import type { ArenaPeriod, DatabaseJsonType } from "../../..";
 import type { AnyNumberString } from "../../../types";
 import { toAccountAddressString } from "../../../utils/account-address";
 import { ORDER_BY } from "../../const";
 import {
   toArenaCandlestickModel,
   toArenaInfoModel,
-  toArenaLeaderboardHistoryWithArenaInfo,
   toArenaMeleeModel,
   toArenaPositionModel,
   toMarketStateModel,
@@ -40,7 +39,7 @@ const selectArenaInfo = () =>
     .select("*")
     .order("melee_id", ORDER_BY.DESC)
     .limit(1)
-    .single();
+    .single<DatabaseJsonType["arena_info"]>();
 
 const selectPosition = ({ user, meleeID }: { user: AccountAddressInput; meleeID: bigint }) =>
   postgrest
@@ -48,16 +47,8 @@ const selectPosition = ({ user, meleeID }: { user: AccountAddressInput; meleeID:
     .select("*")
     .eq("user", toAccountAddressString(user))
     .eq("melee_id", meleeID)
-    .maybeSingle();
-
-const selectLatestPosition = ({ user }: { user: AccountAddressInput }) =>
-  postgrest
-    .from(TableName.ArenaPosition)
-    .select("*")
-    .eq("user", toAccountAddressString(user))
-    .order("melee_id", ORDER_BY.DESC)
     .limit(1)
-    .maybeSingle();
+    .maybeSingle<DatabaseJsonType["arena_position"]>();
 
 const selectArenaLeaderboardHistoryWithInfo = ({
   user,
@@ -74,7 +65,8 @@ const selectArenaLeaderboardHistoryWithInfo = ({
     .eq("user", toAccountAddressString(user))
     .order("melee_id", ORDER_BY.DESC)
     .limit(pageSize)
-    .range((page - 1) * pageSize, page * pageSize - 1);
+    .range((page - 1) * pageSize, page * pageSize - 1)
+    .returns<DatabaseJsonType["arena_leaderboard_history_with_arena_info"][]>();
 
 const selectMarketStateByAddress = ({ address }: { address: string }) =>
   postgrest
@@ -113,11 +105,6 @@ export const fetchArenaInfoByMeleeID = queryHelperSingle(
   toArenaInfoModel
 );
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
-export const fetchLatestPosition = queryHelperSingle(selectLatestPosition, toArenaPositionModel);
-export const fetchArenaLeaderboardHistoryWithArenaInfo = queryHelper(
-  selectArenaLeaderboardHistoryWithInfo,
-  toArenaLeaderboardHistoryWithArenaInfo
-);
 export const fetchMarketStateByAddress = queryHelperSingle(
   selectMarketStateByAddress,
   toMarketStateModel
@@ -125,4 +112,10 @@ export const fetchMarketStateByAddress = queryHelperSingle(
 export const fetchArenaCandlesticksSince = queryHelper(
   selectArenaCandlesticksSince,
   toArenaCandlestickModel
+);
+
+export const fetchPositionJson = queryHelperSingle(selectPosition);
+export const fetchArenaInfoJson = queryHelperSingle(selectArenaInfo);
+export const fetchArenaLeaderboardHistoryWithArenaInfoJson = queryHelper(
+  selectArenaLeaderboardHistoryWithInfo
 );

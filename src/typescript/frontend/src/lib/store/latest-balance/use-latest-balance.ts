@@ -6,7 +6,7 @@ import type { TypeTagInput } from "@/sdk/index";
 import type { CoinTypeString } from "@/sdk/utils";
 import { toCoinTypeString } from "@/sdk/utils";
 
-import { globalTransactionStore } from "../transaction/store";
+import { globalUserTransactionStore } from "../transaction/store";
 import type { LatestBalanceStore } from "./store";
 import { globalLatestBalanceStore } from "./store";
 
@@ -38,7 +38,7 @@ export const useLatestBalance = (
   return {
     balance: balance ?? 0n,
     isFetching: queryRes.isFetching,
-    refetchIfStale: queryRes.refetchIfStale,
+    refetchBalance: queryRes.refetchBalance,
   };
 };
 
@@ -58,12 +58,12 @@ function useSyncBalanceFromTransactionStore(
   coinType: CoinTypeString | undefined
 ) {
   const transactionsRef = useRef(
-    address && globalTransactionStore.getState().addresses.get(address)
+    address && globalUserTransactionStore.getState().addresses.get(address)
   );
 
   useEffect(
     () =>
-      globalTransactionStore.subscribe(
+      globalUserTransactionStore.subscribe(
         (state) => (transactionsRef.current = address && state.addresses.get(address)),
         (newTransactions, _prevTransactions) => {
           if (address && coinType && newTransactions) {

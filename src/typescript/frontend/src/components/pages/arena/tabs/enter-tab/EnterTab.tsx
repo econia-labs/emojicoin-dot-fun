@@ -1,113 +1,83 @@
 import Loading from "components/loading";
+import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import type { PropsWithChildren } from "react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 import Button from "@/components/button";
 import ProgressBar from "@/components/ProgressBar";
-import type { ArenaPositionModel } from "@/sdk/index";
-import type { MarketStateModel } from "@/sdk/indexer-v2/types";
 
-import { marketTernary } from "../../utils";
-import { EnterTabAmountPhase } from "./EnterTabAmountPhase";
-import { EnterTabLockPhase } from "./EnterTabLockPhase";
-import { EnterTabPickPhase } from "./EnterTabPickPhase";
-import { EnterTabSummary } from "./EnterTabSummary";
+import { useArenaPhaseStore, useSelectedMarket } from "../../phase/store";
+import EnterTabAmountPhase from "./EnterTabAmountPhase";
+import EnterTabLockPhase from "./EnterTabLockPhase";
+import EnterTabPickPhase from "./EnterTabPickPhase";
+import EnterTabSummary from "./summary/EnterTabSummary";
 
 type Phase = "pick" | "amount" | "lock" | "summary";
 
-export const EnterTab: React.FC<{
-  market0: MarketStateModel;
-  market1: MarketStateModel;
-  position?: ArenaPositionModel | null;
-  setPosition: (position: ArenaPositionModel | null) => void;
-}> = ({ market0, market1, position, setPosition }) => {
-  const [phase, setPhase] = useState<Phase>();
-  const [market, setMarket] = useState<MarketStateModel>();
-  const [amount, setAmount] = useState<bigint>();
-  const [error, setError] = useState<boolean>(false);
-  const [cranked, setCranked] = useState<boolean>(false);
+export default function EnterTab() {
+  const selectedMarket = useSelectedMarket();
+  const setPhase = useArenaPhaseStore((s) => s.setPhase);
+  const setMarket = useArenaPhaseStore((s) => s.setMarket);
+  const phase = useArenaPhaseStore((s) => s.phase);
+  const amount = useArenaPhaseStore((s) => s.amount);
+
+  const { position, isLoading } = useCurrentPosition();
 
   useEffect(() => {
-    if (position !== undefined && position !== null && position.open) {
+    const { open } = position ?? {};
+    if (open && phase !== "amount" && phase !== "lock") {
       setPhase("summary");
-    } else if (position === null || position?.open === false) {
+    }
+    if ((position === null || open === false) && phase === "summary") {
       setPhase("pick");
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [position]);
+  }, [phase, position, setPhase]);
+
+  if (isLoading) return <Loading />;
 
   if (phase === "summary") {
     if (!position) return <Loading />;
     return (
       <EnterTabSummary
-        market={marketTernary(position, market0, market1)}
+        position={position}
         topOff={() => {
           setPhase("amount");
-          setMarket(marketTernary(position, market0, market1));
+          setMarket(position);
         }}
         tapOut={() => setPhase("pick")}
-        swap={() => setMarket(marketTernary(position, market1, market0))}
-        {...{ market0, market1, setPosition, position }}
+        swap={() => setMarket(position, "reversed")}
       />
     );
   }
 
   if (phase === "pick") {
     return (
-      <Container progress={1} {...{ phase, position, setPhase }}>
-        <EnterTabPickPhase
-          {...{
-            market0,
-            market1,
-            setMarket,
-            error,
-            closeError: () => setError(false),
-            cranked,
-            closeCranked: () => setCranked(false),
-            nextPhase: () => setPhase("amount"),
-          }}
-        />
+      <Container progress={1} phase={phase} position={position} setPhase={setPhase}>
+        <EnterTabPickPhase />
       </Container>
     );
   }
 
   if (phase === "amount") {
-    if (!market) throw new Error("Market is undefined in amount phase");
+    if (!selectedMarket) throw new Error("Market is undefined in amount phase");
     return (
-      <Container progress={2} {...{ phase, position, setPhase }}>
-        <EnterTabAmountPhase {...{ market, setAmount, nextPhase: () => setPhase("lock") }} />
+      <Container progress={2} phase={phase} position={position} setPhase={setPhase}>
+        <EnterTabAmountPhase market={selectedMarket} />
       </Container>
     );
   }
 
   if (phase === "lock") {
-    if (!market || amount === undefined)
+    if (!selectedMarket || amount === undefined)
       throw new Error("Market or amount is undefined in lock phase");
     return (
-      <Container progress={3} {...{ phase, position, setPhase }}>
-        <EnterTabLockPhase
-          {...{
-            market,
-            market0,
-            market1,
-            amount,
-            errorOut: () => {
-              setPhase("pick");
-              setError(true);
-            },
-            setCranked: () => {
-              setPhase("pick");
-              setCranked(true);
-            },
-            position,
-            setPosition,
-          }}
-        />
+      <Container progress={3} phase={phase} position={position} setPhase={setPhase}>
+        <EnterTabLockPhase market={selectedMarket} amount={amount} />
       </Container>
     );
   }
-  return <Loading />;
-};
+}
 
 function Container({
   children,
@@ -119,7 +89,7 @@ function Container({
   progress: number;
   phase: Phase;
   setPhase: (phase: Phase) => void;
-  position?: ArenaPositionModel | null;
+  position?: CurrentUserPosition | null;
 }) {
   return (
     <div className="relative flex flex-col h-[100%] gap-[3em]">

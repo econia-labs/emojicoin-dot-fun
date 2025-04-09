@@ -2,16 +2,19 @@
 
 import { useEventStore } from "context/event-store-context";
 import FEATURE_FLAGS from "lib/feature-flags";
-import { useRouter } from "next/navigation";
+import { useResyncArenaInfoQuery } from "lib/hooks/queries/arena/use-arena-info-query";
 import { useEffect } from "react";
 
-import { useLatestMeleeID } from "@/hooks/use-latest-melee-id";
-import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
+import useLatestMeleeData from "@/hooks/use-latest-melee-event";
 import type { ArenaInfoModel } from "@/sdk/indexer-v2";
 
 export const SubscribeToHomePageEvents = ({ info }: { info?: ArenaInfoModel }) => {
+  const { latestMeleeEvent } = useLatestMeleeData();
+  const currentMeleeID = useEventStore((s) => s.arenaInfoFromServer?.meleeID ?? -1n);
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
-  const router = useRouter();
+  const { resync } = useResyncArenaInfoQuery();
+  const subscribeEvents = useEventStore((s) => s.subscribeEvents);
+  const unsubscribeEvents = useEventStore((s) => s.unsubscribeEvents);
 
   useEffect(() => {
     if (FEATURE_FLAGS.Arena && info) {
@@ -19,21 +22,19 @@ export const SubscribeToHomePageEvents = ({ info }: { info?: ArenaInfoModel }) =
     }
   }, [loadArenaInfoFromServer, info]);
 
-  useReliableSubscribe({
-    arena: FEATURE_FLAGS.Arena,
-    eventTypes: ["MarketLatestState"],
-  });
+  useEffect(() => {
+    subscribeEvents(["MarketLatestState"], { arenaBaseEvents: FEATURE_FLAGS.Arena });
 
-  const latestMeleeID = useLatestMeleeID();
-  const currentMelee = useEventStore((s) => s.arenaInfoFromServer);
+    return () => unsubscribeEvents(["MarketLatestState"], { arenaBaseEvents: FEATURE_FLAGS.Arena });
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   useEffect(() => {
-    if (currentMelee) {
-      if (latestMeleeID > currentMelee.meleeID) {
-        router.refresh();
-      }
+    // Make sure this logic matches what's in `use-sync-latest-arena-info`. This one just doesn't refetch positions.
+    if (latestMeleeEvent && latestMeleeEvent.melee.meleeID > currentMeleeID) {
+      resync();
     }
-  }, [latestMeleeID, currentMelee, router]);
+  }, [latestMeleeEvent, currentMeleeID, resync]);
 
   return <></>;
 };

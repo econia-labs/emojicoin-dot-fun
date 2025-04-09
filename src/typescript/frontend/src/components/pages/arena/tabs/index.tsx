@@ -4,28 +4,20 @@ import { createPortal } from "react-dom";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
-import type { ArenaPropsWithPositionHistoryAndEmojiData } from "../utils";
-import { ChatTab } from "./ChatTab";
-import { EnterTab } from "./enter-tab/EnterTab";
-import { InfoTab } from "./InfoTab";
-import { ProfileTab } from "./profile-tab/ProfileTab";
+import type { ArenaProps } from "../utils";
+import ChatTab from "./ChatTab";
+import EnterTab from "./enter-tab/EnterTab";
+import InfoTab from "./InfoTab";
+import ProfileTab from "./profile-tab/ProfileTab";
 
 const getTabs = (
-  {
-    market0,
-    market1,
-    history,
-    position,
-    setPosition,
-    setHistory,
-    arenaInfo,
-  }: ArenaPropsWithPositionHistoryAndEmojiData,
+  { market0, market1, arenaInfo }: ArenaProps,
   setSelectedTab: (tab: string) => void
 ) => [
   {
     name: "Position",
     emoji: emoji("smiling face with horns"),
-    element: <EnterTab {...{ market0, market1, position, setPosition }} />,
+    element: <EnterTab />,
   },
   {
     name: "Profile",
@@ -35,9 +27,6 @@ const getTabs = (
         {...{
           market0,
           market1,
-          history,
-          setHistory,
-          position,
           goToEnter: () => setSelectedTab("Position"),
           arenaInfo,
         }}
@@ -47,7 +36,7 @@ const getTabs = (
   {
     name: "Chat",
     emoji: emoji("left speech bubble"),
-    element: <ChatTab position={position} market0={market0} market1={market1} />,
+    element: <ChatTab market0={market0} market1={market1} />,
   },
   {
     name: "Info",
@@ -56,7 +45,7 @@ const getTabs = (
   },
 ];
 
-export const TabContainer = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+export const TabContainer = (props: ArenaProps) => {
   const [selectedTab, setSelectedTab] = useState<string>();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
@@ -68,7 +57,7 @@ export const TabContainer = (props: ArenaPropsWithPositionHistoryAndEmojiData) =
 
   return (
     <div
-      className="grid h-[100%]"
+      className="grid h-[100%] bg-black bg-opacity-80"
       style={{
         gridTemplateRows: "auto 1fr",
       }}
@@ -110,9 +99,7 @@ export const TabContainer = (props: ArenaPropsWithPositionHistoryAndEmojiData) =
         })}
         <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
       </div>
-      <div className="h-[100%] overflow-scroll">
-        {tabs.find((t) => t.name === selectedTab)?.element}
-      </div>
+      <div className="overflow-y-auto">{tabs.find((t) => t.name === selectedTab)?.element}</div>
     </div>
   );
 };
@@ -134,7 +121,7 @@ const BottomNavigationItem = ({
   );
 };
 
-export const BottomNavigation = (props: ArenaPropsWithPositionHistoryAndEmojiData) => {
+export const BottomNavigation = (props: ArenaProps) => {
   const [selectedTab, setSelectedTab] = useState<string>();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);

@@ -95,7 +95,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
     account,
     submit,
     aptBalance,
-    refetchIfStale,
+    refetchBalance,
     setEmojicoinType,
     emojicoinBalance,
     emojicoinLPBalance,
@@ -136,11 +136,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
 
   useEffect(() => {
     if (account) {
-      refetchIfStale("apt");
+      refetchBalance("apt");
     }
     if (market && account) {
-      refetchIfStale("emojicoin");
-      refetchIfStale("emojicoinLP");
+      refetchBalance("emojicoin");
+      refetchBalance("emojicoinLP");
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [market, account]);
