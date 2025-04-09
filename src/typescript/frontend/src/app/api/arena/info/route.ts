@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Couldn't find the current arena info.", { status: 404 });
   }
 
+  // Not unsafe because there's only 2 symbols. It's only "unsafe" if there's lots of symbols.
   const { market_0, market_1 } = await fetchSpecificMarketsUnsafe([
     arena_info.emojicoin_0_symbols,
     arena_info.emojicoin_1_symbols,
