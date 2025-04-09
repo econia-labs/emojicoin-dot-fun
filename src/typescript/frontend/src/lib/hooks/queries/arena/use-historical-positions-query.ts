@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEventStore } from "context/event-store-context";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
@@ -7,21 +6,19 @@ import { useAccountAddress } from "@/hooks/use-account-address";
 import type { DatabaseJsonType } from "@/sdk/index";
 import { compareBigInt, maxBigInt, toArenaLeaderboardHistoryWithArenaInfo } from "@/sdk/index";
 
+import { useRouteWithMinimumVersion } from "./use-url-with-min-version";
+
 export const useHistoricalPositionsQuery = () => {
   const accountAddress = useAccountAddress();
-  const arenaInfo = useEventStore((s) => s.arenaInfoFromServer);
+  const { url } = useRouteWithMinimumVersion(
+    `${ROUTES.api.arena["historical-positions"]}/${accountAddress}`
+  );
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: [
-      "fetch-historical-positions",
-      accountAddress ?? "",
-      arenaInfo?.meleeID.toString() ?? "",
-    ],
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ["fetch-historical-positions", accountAddress ?? "", url],
     queryFn: async () => {
       if (!accountAddress) return null;
-      const historicalPositions = await fetch(
-        `${ROUTES.api.arena["historical-positions"]}/${accountAddress}`
-      )
+      const historicalPositions = await fetch(url)
         .then((res) => res.text())
         .then(parseJSON<DatabaseJsonType["arena_leaderboard_history_with_arena_info"][]>)
         .then((res) =>
@@ -49,6 +46,7 @@ export const useHistoricalPositionsQuery = () => {
 
   return {
     history: data?.historicalPositions ?? [],
+    refetch,
     isLoading,
     isFetching,
   };
