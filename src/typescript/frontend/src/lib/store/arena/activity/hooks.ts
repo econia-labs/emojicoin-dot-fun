@@ -1,3 +1,4 @@
+import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position-query";
 import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
@@ -13,27 +14,38 @@ import { globalUserTransactionStore } from "@/store/transaction/store";
 
 import { type ArenaActivityStore, globalArenaActivityStore } from "./store";
 
-const maybeFiltered = (results: { version: bigint; delta: bigint }[], minimumVersion?: bigint) => {
+export const filterActivityByVersion = (
+  results: { version: bigint; delta: bigint }[],
+  minimumVersion?: bigint
+) => {
   const res =
     minimumVersion !== undefined ? results.filter((v) => v.version > minimumVersion) : results;
   const result = sumByKey(res, "delta", "bigint");
   return result;
 };
 
-export const useArenaActivity = (latestPositionVersion?: bigint) => {
+export const useArenaActivity = () => {
   const user = useAccountAddress();
   const { meleeInfo } = useCurrentMeleeInfo();
+  const { position } = useCurrentPositionQuery();
 
   return useArenaActivityStore((s) => {
-    if (!user || !meleeInfo) return undefined;
-    const res = s.addressMap.get(user)?.get(meleeInfo?.meleeID);
-    if (!res) return undefined;
-    return {
-      deposits: maybeFiltered(res.deposits, latestPositionVersion),
-      withdrawals: maybeFiltered(res.withdrawals, latestPositionVersion),
-      matchAmount: maybeFiltered(res.matchAmount, latestPositionVersion),
-      lastExit0: res.lastExit0,
-    };
+    const { meleeID } = meleeInfo ?? {};
+    if (!user || meleeID === undefined) return undefined;
+    const res = s.addressMap.get(user)?.get(meleeID);
+    return res
+      ? {
+          deposits: filterActivityByVersion(res.deposits, position?.version),
+          withdrawals: filterActivityByVersion(res.withdrawals, position?.version),
+          matchAmount: filterActivityByVersion(res.matchAmount, position?.version),
+          lastExit0: res.lastExit0,
+        }
+      : {
+          deposits: 0n,
+          withdrawals: 0n,
+          matchAmount: 0n,
+          lastExit0: null,
+        };
   });
 };
 

@@ -100,9 +100,7 @@ export const TabContainer = (props: ArenaPropsWithPositionHistoryAndEmojiData) =
         })}
         <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
       </div>
-      <div className="h-[100%] overflow-scroll">
-        {tabs.find((t) => t.name === selectedTab)?.element}
-      </div>
+      <div className="overflow-y-auto">{tabs.find((t) => t.name === selectedTab)?.element}</div>
     </div>
   );
 };

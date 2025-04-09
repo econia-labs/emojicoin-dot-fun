@@ -1,5 +1,5 @@
 import { useEventStore } from "context/event-store-context/hooks";
-import type { CurrentUserPosition } from "lib/hooks/queries/arena/use-current-position";
+import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { useMemo } from "react";
 import { createStore, useStore } from "zustand";
 import { immer } from "zustand/middleware/immer";

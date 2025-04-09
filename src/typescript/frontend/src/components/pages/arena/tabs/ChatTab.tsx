@@ -1,12 +1,11 @@
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { motion } from "framer-motion";
-import { useCurrentPositionQuery } from "lib/hooks/queries/arena/use-current-position";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import _ from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 
 import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
-import { Column, Flex } from "@/components/layout";
 import { LoadMore } from "@/components/ui/table/loadMore";
 import type { MarketStateModel } from "@/sdk/index";
 
@@ -31,7 +30,7 @@ export default function ChatTab({ market0, market1 }: Props) {
   const market1chatsFromStore = useEventStore(
     (s) => s.getMarket(market1.market.symbolEmojis)?.chatEvents ?? []
   );
-  const { position } = useCurrentPositionQuery();
+  const { position } = useCurrentPosition();
 
   const side = useMemo(() => {
     if (!position || !position.open) return null;
@@ -71,36 +70,31 @@ export default function ChatTab({ market0, market1 }: Props) {
   }, []);
 
   return (
-    <Column className="relative" width="100%" height="100%" flexGrow={1}>
-      <Flex flexGrow="1" width="100%" overflowY="auto" flexDirection="column-reverse">
-        <motion.div
-          layoutScroll
-          className="flex flex-col-reverse w-full justify-center px-[21px] py-0"
-        >
-          {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
-            <MessageContainer
-              message={message}
-              key={message.version}
-              index={sortedChats.length - index}
-              shouldAnimateAsInsertion={shouldAnimateAsInsertion}
-              alignLeft={message.marketID === market0.market.marketID}
-            />
-          ))}
-          <LoadMore
-            query={chats}
-            className="mt-2 mb-4"
-            endOfListText="This is the beginning of the chat"
+    <div className="flex flex-col h-[100%] overflow-hidden">
+      <motion.div layoutScroll className="flex flex-col-reverse grow px-[21px] py-0 overflow-auto">
+        {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
+          <MessageContainer
+            message={message}
+            key={message.version}
+            index={sortedChats.length - index}
+            shouldAnimateAsInsertion={shouldAnimateAsInsertion}
+            alignLeft={message.marketID === market0.market.marketID}
           />
-        </motion.div>
-      </Flex>
+        ))}
+        <LoadMore
+          query={chats}
+          className="mt-2 mb-4"
+          endOfListText="This is the beginning of the chat"
+        />
+      </motion.div>
 
       {!side ? (
-        <div className="flex pixel-heading-3b justify-center items-center">
+        <div className="flex pixel-heading-3b justify-center items-center mb-4">
           {"You must enter a position first"}
         </div>
       ) : (
         <EmojiPickerWithInput inputGroupProps={{ disabled: !side }} handleClick={sendChatMessage} />
       )}
-    </Column>
+    </div>
   );
 }

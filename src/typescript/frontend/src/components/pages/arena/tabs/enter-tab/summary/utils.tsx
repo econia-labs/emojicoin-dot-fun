@@ -1,4 +1,4 @@
-import type { CurrentUserPosition } from "lib/hooks/queries/arena/use-current-position";
+import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { cn } from "lib/utils/class-name";
 import { useMemo } from "react";
 import type { ClassNameValue } from "tailwind-merge";

@@ -1,4 +1,4 @@
-import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions";
+import { useHistoricalPositionsQuery } from "lib/hooks/queries/arena/use-historical-positions-query";
 import { useEffect, useMemo, useRef } from "react";
 import { useStore } from "zustand";
 

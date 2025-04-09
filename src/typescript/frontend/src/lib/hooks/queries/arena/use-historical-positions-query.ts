@@ -6,20 +6,19 @@ import { useAccountAddress } from "@/hooks/use-account-address";
 import type { DatabaseJsonType } from "@/sdk/index";
 import { compareBigInt, maxBigInt, toArenaLeaderboardHistoryWithArenaInfo } from "@/sdk/index";
 
-/**
- * This doesn't need to refetch because any updates we can derive from on-chain activity.
- * In other words, historical positions can be queried once, and then never again.
- */
+import { useRouteWithMinimumVersion } from "./use-url-with-min-version";
+
 export const useHistoricalPositionsQuery = () => {
   const accountAddress = useAccountAddress();
+  const { url } = useRouteWithMinimumVersion(
+    `${ROUTES.api.arena["historical-positions"]}/${accountAddress}`
+  );
 
-  const { data, isFetching } = useQuery({
-    queryKey: ["fetch-historical-positions", accountAddress ?? ""],
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ["fetch-historical-positions", accountAddress ?? "", url],
     queryFn: async () => {
       if (!accountAddress) return null;
-      const historicalPositions = await fetch(
-        `${ROUTES.api.arena["historical-positions"]}/${accountAddress}`
-      )
+      const historicalPositions = await fetch(url)
         .then((res) => res.text())
         .then(parseJSON<DatabaseJsonType["arena_leaderboard_history_with_arena_info"][]>)
         .then((res) =>
@@ -47,6 +46,8 @@ export const useHistoricalPositionsQuery = () => {
 
   return {
     history: data?.historicalPositions ?? [],
+    refetch,
+    isLoading,
     isFetching,
   };
 };

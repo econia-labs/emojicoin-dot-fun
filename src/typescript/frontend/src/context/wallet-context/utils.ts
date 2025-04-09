@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { emoji } from "utils";
 
 import type { TypeTagInput } from "@/sdk/emojicoin_dot_fun";
+import { getArenaEventsAsProcessorModels } from "@/sdk/indexer-v2/mini-processor/arena";
 import { getEventsAsProcessorModelsFromResponse } from "@/sdk/indexer-v2/mini-processor/event-groups";
 
 export const setCoinTypeHelper = (
@@ -39,6 +40,7 @@ export const copyAddressHelper = async (account: AccountInfo | null) => {
 
 export const getFlattenedEventModelsFromResponse = (response: UserTransactionResponse) => {
   const models = getEventsAsProcessorModelsFromResponse(response);
+  const arenaModels = getArenaEventsAsProcessorModels(response);
   return [
     ...models.marketRegistrationEvents,
     ...models.periodicStateEvents,
@@ -46,5 +48,10 @@ export const getFlattenedEventModelsFromResponse = (response: UserTransactionRes
     ...models.chatEvents,
     ...models.liquidityEvents,
     ...models.marketLatestStateEvents,
+    ...arenaModels.arenaEnterEvents,
+    ...arenaModels.arenaExitEvents,
+    ...arenaModels.arenaMeleeEvents,
+    ...arenaModels.arenaSwapEvents,
+    ...arenaModels.arenaVaultBalanceUpdateEvents,
   ];
 };
