@@ -89,6 +89,10 @@
       "cache": false,
       "outputs": []
     },
+    "test:e2e:arena-restart": {
+      "cache": false,
+      "outputs": []
+    },
     "test:e2e:arena-ws": {
       "cache": false,
       "outputs": []
