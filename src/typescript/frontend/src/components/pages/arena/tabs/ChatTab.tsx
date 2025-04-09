@@ -1,13 +1,13 @@
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";
 import { motion } from "framer-motion";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import _ from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 
 import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput";
-import { Column, Flex } from "@/components/layout";
 import { LoadMore } from "@/components/ui/table/loadMore";
-import type { ArenaPositionModel, MarketStateModel } from "@/sdk/index";
+import type { MarketStateModel } from "@/sdk/index";
 
 import { MessageContainer } from "../../emojicoin/components/chat/components";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
@@ -17,10 +17,9 @@ import { marketTernary } from "../utils";
 interface Props {
   market0: MarketStateModel;
   market1: MarketStateModel;
-  position?: ArenaPositionModel | null;
 }
 
-export const ChatTab = ({ market0, market1, position }: Props) => {
+export default function ChatTab({ market0, market1 }: Props) {
   const setMode = useEmojiPicker((state) => state.setMode);
   const chats = useChatEventsQuery({
     marketID: [market0.market.marketID.toString(), market1.market.marketID.toString()],
@@ -31,12 +30,12 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
   const market1chatsFromStore = useEventStore(
     (s) => s.getMarket(market1.market.symbolEmojis)?.chatEvents ?? []
   );
+  const { position } = useCurrentPosition();
 
   const side = useMemo(() => {
-    if (!position || (position.emojicoin0Balance === 0n && position.emojicoin1Balance === 0n))
-      return null;
+    if (!position || !position.open) return null;
     return marketTernary(position, market0, market1);
-  }, [market0, market1, position]);
+  }, [position, market0, market1]);
 
   const { sendChatMessage } = useChatBox(side?.market.marketAddress);
 
@@ -49,9 +48,9 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
     return _.orderBy(
       _.uniqBy(
         [...market1chatsFromStore, ...market0chatsFromStore, ...(chats.data?.pages.flat() || [])],
-        (i) => i.market.marketNonce
+        (i) => i.transaction.version
       ),
-      (i) => i.market.marketNonce,
+      (i) => i.transaction.version,
       "desc"
     ).map((s, i) => ({
       message: {
@@ -71,36 +70,31 @@ export const ChatTab = ({ market0, market1, position }: Props) => {
   }, []);
 
   return (
-    <Column className="relative" width="100%" height="100%" flexGrow={1}>
-      <Flex flexGrow="1" width="100%" overflowY="auto" flexDirection="column-reverse">
-        <motion.div
-          layoutScroll
-          className="flex flex-col-reverse w-full justify-center px-[21px] py-0"
-        >
-          {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
-            <MessageContainer
-              message={message}
-              key={message.version}
-              index={sortedChats.length - index}
-              shouldAnimateAsInsertion={shouldAnimateAsInsertion}
-              alignLeft={message.marketID === market0.market.marketID}
-            />
-          ))}
-          <LoadMore
-            query={chats}
-            className="mt-2 mb-4"
-            endOfListText="This is the beginning of the chat"
+    <div className="flex flex-col h-[100%] overflow-hidden">
+      <motion.div layoutScroll className="flex flex-col-reverse grow px-[21px] py-0 overflow-auto">
+        {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
+          <MessageContainer
+            message={message}
+            key={message.version}
+            index={sortedChats.length - index}
+            shouldAnimateAsInsertion={shouldAnimateAsInsertion}
+            alignLeft={message.marketID === market0.market.marketID}
           />
-        </motion.div>
-      </Flex>
+        ))}
+        <LoadMore
+          query={chats}
+          className="mt-2 mb-4"
+          endOfListText="This is the beginning of the chat"
+        />
+      </motion.div>
 
       {!side ? (
-        <div className="flex pixel-heading-3b justify-center items-center">
+        <div className="flex pixel-heading-3b justify-center items-center mb-4">
           {"You must enter a position first"}
         </div>
       ) : (
         <EmojiPickerWithInput inputGroupProps={{ disabled: !side }} handleClick={sendChatMessage} />
       )}
-    </Column>
+    </div>
   );
-};
+}

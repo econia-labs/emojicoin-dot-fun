@@ -6,9 +6,10 @@ const _ = "";
 const expanded = expandRoutes({
   api: {
     arena: {
-      position: _,
-      "historical-positions": _,
       candlesticks: _,
+      "historical-positions": _,
+      info: _,
+      position: _,
     },
     candlesticks: _,
     chats: _,

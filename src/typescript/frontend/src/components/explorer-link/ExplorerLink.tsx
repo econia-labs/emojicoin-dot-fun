@@ -10,6 +10,7 @@ export const ExplorerLink = ({
   network,
   children,
   style,
+  title,
   className,
 }: {
   value: AnyNumberString;
@@ -17,11 +18,18 @@ export const ExplorerLink = ({
   children: React.ReactNode;
   network?: string;
   style?: React.CSSProperties;
+  title?: string;
   className?: string;
 }) => {
   const href = toExplorerLink({ value, linkType: type, network });
   return (
-    <a style={style} className={className + " explorer-link"} href={href} {...EXTERNAL_LINK_PROPS}>
+    <a
+      style={style}
+      className={className + " explorer-link"}
+      href={href}
+      title={title}
+      {...EXTERNAL_LINK_PROPS}
+    >
       {children}
     </a>
   );

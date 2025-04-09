@@ -133,7 +133,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
   });
 
   it("verifies arena data is correctly inserted into the processor", async () => {
-    const arenaInfo = await fetchArenaInfo({});
+    const arenaInfo = await fetchArenaInfo();
     expect(arenaInfo).toBeTruthy();
     expect(arenaInfo?.meleeID).toEqual(melee.view.meleeID);
     expect(arenaInfo?.duration).toEqual(melee.view.duration);
@@ -230,7 +230,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
       .eq("melee_id", melee.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    let arenaInfo = await fetchArenaInfo({});
+    let arenaInfo = await fetchArenaInfo();
 
     expect(arenaEnters).not.toBeNull();
     expect(arenaEnters).toHaveLength(1);
@@ -282,7 +282,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
       .eq("melee_id", melee.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    arenaInfo = await fetchArenaInfo({});
+    arenaInfo = await fetchArenaInfo();
 
     expect(arenaSwaps).not.toBeNull();
     expect(arenaSwaps).toHaveLength(1);
@@ -329,7 +329,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
       .eq("melee_id", melee.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    arenaInfo = await fetchArenaInfo({});
+    arenaInfo = await fetchArenaInfo();
 
     expect(arenaExits).not.toBeNull();
     expect(arenaExits).toHaveLength(1);
@@ -771,7 +771,7 @@ describe("ensures arena info is working", () => {
     );
     await waitForProcessor(res);
 
-    const arenaInfo = await fetchArenaInfo({});
+    const arenaInfo = await fetchArenaInfo();
 
     expect(arenaInfo).toBeTruthy();
     expect(arenaInfo!.meleeID).toEqual(melee.view.meleeID);
@@ -863,7 +863,7 @@ describe("ensures arena info is working", () => {
     expect(arenaPositions!.reduce((p, c) => p + c.emojicoin0Balance, 0n)).toEqual(emojicoin0Locked);
     expect(arenaPositions!.reduce((p, c) => p + c.emojicoin1Balance, 0n)).toEqual(emojicoin1Locked);
 
-    const arenaInfo = await fetchArenaInfo({});
+    const arenaInfo = await fetchArenaInfo();
 
     expect(arenaInfo).toBeTruthy();
     expect(arenaInfo!.meleeID).toEqual(melee.view.meleeID);

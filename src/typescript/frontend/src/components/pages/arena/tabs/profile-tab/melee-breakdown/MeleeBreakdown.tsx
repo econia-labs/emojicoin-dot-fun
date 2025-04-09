@@ -1,17 +1,26 @@
 import Big from "big.js";
+import Button from "components/button";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
+import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
+import { cn } from "lib/utils/class-name";
+import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
-import Button from "@/components/button";
+import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "@/components/FormattedNumber";
+import Info from "@/components/info";
+import { Loading } from "@/components/loading";
 import { useMatchBreakpoints } from "@/hooks/index";
-import type {
-  ArenaLeaderboardHistoryWithArenaInfoModel,
-  ArenaPositionModel,
-  MarketStateModel,
-} from "@/sdk/index";
-import { q64ToBig } from "@/sdk/utils";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
 
-const MeleeBreakdownInner = ({
+import { useTradingStats } from "../../../../../../hooks/use-trading-stats";
+import { FormattedNominalNumber } from "../../utils";
+import type { ProfileTabProps } from "../ProfileTab";
+
+export const MeleeBreakdownInner = ({
+  meleeID,
+  lastVersion,
   deposit,
   endHolding,
   withdrawn,
@@ -20,6 +29,8 @@ const MeleeBreakdownInner = ({
   historyHidden,
   close,
 }: {
+  meleeID: bigint;
+  lastVersion: bigint;
   deposit: bigint;
   endHolding: bigint | undefined;
   withdrawn: bigint;
@@ -47,43 +58,45 @@ const MeleeBreakdownInner = ({
         className={`col-start-1 col-end-3 ${historyHidden ? "row-start-1" : ""} ${historyHidden ? "row-end-3" : ""} h-[100%] w-[100%] grid place-items-center`}
       >
         <div className="flex flex-col gap-[1em]">
-          <div className="uppercase text-light-gray text-3xl text-center">Summary</div>
+          <div className="uppercase text-light-gray text-3xl text-center">{"Summary"}</div>
           <div className="text-5xl text-center">
             <Emoji emojis={lastHeld} />
           </div>
+          <ExplorerLink value={lastVersion} type={"version"} className="hover:underline">
+            <div className="text-[1em] text-center uppercase text-ec-blue">{`Melee #${meleeID}`}</div>
+          </ExplorerLink>
         </div>
       </div>
       <div className={smallCellClass}>
-        <div className={smallCellTextClass}>Deposit</div>
-        <FormattedNumber className={smallCellValueClass} value={deposit} suffix=" APT" nominalize />
+        <div className={smallCellTextClass}>{"Deposit"}</div>
+        <FormattedNominalNumber className={smallCellValueClass} value={deposit} suffix=" APT" />
       </div>
       <div className={smallCellClass}>
-        <div className={smallCellTextClass}>Withdrawn</div>
-        <FormattedNumber
-          className={smallCellValueClass}
-          value={withdrawn}
-          suffix=" APT"
-          nominalize
-        />
+        <div className={cn(smallCellTextClass, "flex flex-row gap-2")}>
+          <span>{"Withdrawn"}</span>
+          <Info>{"The APT value of holdings withdrawn early"}</Info>
+        </div>
+        <FormattedNominalNumber className={smallCellValueClass} value={withdrawn} suffix=" APT" />
       </div>
       <div className={smallCellClass}>
-        <div className={smallCellTextClass}>End holdings</div>
+        <div className={cn(smallCellTextClass, "flex flex-row gap-2")}>
+          <span>{"End holdings"}</span>
+          <Info>{"The APT value of holdings exactly when the melee ended"}</Info>
+        </div>
         {endHolding !== undefined ? (
-          <FormattedNumber
+          <FormattedNominalNumber
             className={smallCellValueClass}
             value={endHolding}
             suffix=" APT"
-            nominalize
           />
         ) : (
-          <div className={smallCellValueClass}>--</div>
+          <div className={smallCellValueClass}>{"--"}</div>
         )}
       </div>
       <div className={smallCellClass}>
-        <div className={smallCellTextClass}>Pnl</div>
+        <div className={smallCellTextClass}>{"Pnl"}</div>
         <FormattedNumber
           className={smallCellValueClass + " " + ((pnl ?? 0) >= 0 ? "!text-green" : "!text-pink")}
-          decimals={2}
           value={pnl}
           suffix="%"
         />
@@ -93,7 +106,7 @@ const MeleeBreakdownInner = ({
           className="absolute right-0 top-0 uppercase text-xl text-light-gray cursor-pointer"
           onClick={close}
         >
-          &lt;&lt; Hide
+          {"<< Hide"}
         </div>
       )}
     </div>
@@ -101,43 +114,37 @@ const MeleeBreakdownInner = ({
 };
 
 export function CurrentMeleeBreakdown({
-  melee,
-  market0,
-  market1,
   historyHidden,
   close,
 }: {
-  melee: ArenaPositionModel;
-  market0: MarketStateModel;
-  market1: MarketStateModel;
   historyHidden: boolean;
   close: () => void;
 }) {
-  const emojicoin0BalanceInApt = q64ToBig(market0.lastSwap.avgExecutionPriceQ64).mul(
-    melee.emojicoin0Balance.toString()
-  );
-  const emojicoin1BalanceInApt = q64ToBig(market1.lastSwap.avgExecutionPriceQ64).mul(
-    melee.emojicoin1Balance.toString()
-  );
-  const totalBalance = Big(melee.withdrawals.toString())
-    .add(emojicoin0BalanceInApt)
-    .add(emojicoin1BalanceInApt);
-  const pnl = Big(totalBalance.toString())
-    .mul(100)
-    .div(melee.deposits.toString())
-    .sub(100)
-    .toNumber();
-  const lastHeld =
-    melee.lastExit0 || emojicoin0BalanceInApt.gt(0)
-      ? market0.market.symbolEmojis.join("")
-      : market1.market.symbolEmojis.join("");
+  const { position } = useCurrentPosition();
+  const { pnl } = useTradingStats();
+  const { market0, market1 } = useCurrentMeleeInfo();
+  const marketLastHeld = useMemo(() => {
+    if (!position || !market0 || !market1) return undefined;
+    const { market } = position.lastExit0 || position.emojicoin0Balance > 0n ? market0 : market1;
+    return market.symbolData.symbol;
+  }, [position, market0, market1]);
+
   return (
-    <MeleeBreakdownInner
-      deposit={melee.deposits}
-      withdrawn={melee.withdrawals}
-      endHolding={undefined}
-      {...{ historyHidden, pnl, lastHeld, close }}
-    />
+    position &&
+    pnl &&
+    marketLastHeld && (
+      <MeleeBreakdownInner
+        meleeID={position.meleeID}
+        lastVersion={position.version}
+        deposit={position.deposits}
+        withdrawn={position.withdrawals}
+        endHolding={undefined}
+        historyHidden={historyHidden}
+        pnl={pnl}
+        lastHeld={marketLastHeld}
+        close={close}
+      />
+    )
   );
 }
 
@@ -146,10 +153,13 @@ export function HistoricMeleeBreakdown({
   historyHidden,
   close,
 }: {
-  melee: ArenaLeaderboardHistoryWithArenaInfoModel;
+  melee: ArenaLeaderboardHistoryWithArenaInfoModel | undefined;
   historyHidden: boolean;
   close: () => void;
 }) {
+  // Got a weird bug where this crashed on me once. Not sure what it was so I'm safeguarding it.
+  if (!melee || !("lastExit0" in melee)) return <Loading />;
+
   const lastHeld =
     melee.lastExit0 || melee.emojicoin0Balance > 0
       ? melee.emojicoin0Symbols.join("")
@@ -161,54 +171,55 @@ export function HistoricMeleeBreakdown({
     .toNumber();
   return (
     <MeleeBreakdownInner
+      meleeID={melee.meleeID}
+      lastVersion={melee.arenaInfoLastTransactionVersion}
       deposit={melee.losses}
-      withdrawn={melee.profits}
+      withdrawn={melee.withdrawals}
       endHolding={melee.profits - melee.withdrawals}
-      {...{ historyHidden, pnl, lastHeld, close }}
+      historyHidden={historyHidden}
+      pnl={pnl}
+      lastHeld={lastHeld}
+      close={close}
     />
   );
 }
 
 export const MeleeBreakdown = ({
   selectedRow,
-  history,
-  position,
-  market0,
-  market1,
   historyHidden,
   goToEnter,
   close,
-}: {
-  position?: ArenaPositionModel | null;
-  market0: MarketStateModel;
-  market1: MarketStateModel;
-  history: ArenaLeaderboardHistoryWithArenaInfoModel[];
+}: Omit<ProfileTabProps, "setHistory" | "arenaInfo"> & {
   selectedRow: number | undefined;
   historyHidden: boolean;
   goToEnter?: () => void;
   close: () => void;
 }) => {
+  const { position, isLoading } = useCurrentPosition();
+  const { history } = useHistoricalPositions();
+
   if (!position && selectedRow === undefined) {
-    return (
+    return isLoading ? (
+      <Loading />
+    ) : (
       <div className="grid place-items-center h-[100%] w-[100%]">
         <Button scale="lg" onClick={goToEnter}>
-          Enter now
+          {"Enter now"}
         </Button>
       </div>
     );
   }
-  if (selectedRow === undefined) {
-    return <></>;
-  }
-  if (selectedRow === -1) {
-    return (
-      <CurrentMeleeBreakdown melee={position!} {...{ market0, market1, historyHidden, close }} />
-    );
-  }
+
+  if (selectedRow === undefined) return <></>;
+
+  if (selectedRow === -1)
+    return <CurrentMeleeBreakdown historyHidden={historyHidden} close={close} />;
+
   return (
     <HistoricMeleeBreakdown
-      melee={history[history.length - selectedRow - 1]}
-      {...{ historyHidden, close }}
+      melee={history[selectedRow]}
+      historyHidden={historyHidden}
+      close={close}
     />
   );
 };

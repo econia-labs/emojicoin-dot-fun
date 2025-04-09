@@ -77,7 +77,10 @@ export const GlobalStats = (
     const normalizeCoinDecimal = (n: bigint) => Number(toCoinDecimalString(n));
     return {
       cumulativeDailyVolume: normalizeCoinDecimal(
-        sum(props.dailyVolumeData.map((v) => v.dailyVolume))
+        sum(
+          props.dailyVolumeData.map((v) => v.dailyVolume),
+          "bigint"
+        )
       ),
       numPostBondingCurve: allTimeVolumeData.filter((v) => !v.inBondingCurve).length,
       numInBondingCurve: allTimeVolumeData.filter((v) => v.inBondingCurve).length,

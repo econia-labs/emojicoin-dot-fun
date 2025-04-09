@@ -13,6 +13,7 @@ import { GlowingEmoji } from "utils/emoji";
 
 import { FlexGap } from "@/containers";
 import { useMatchBreakpoints } from "@/hooks/index";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { getEmojisInString } from "@/sdk/emoji_data";
 import { toTotalAptLocked } from "@/sdk/indexer-v2/types";
 
@@ -20,27 +21,32 @@ type ArenaCardProps = {
   meleeData: NonNullable<HomePageProps["meleeData"]>;
 };
 
-const meleeDataToArenaCardProps = (meleeData: ArenaCardProps["meleeData"]) => ({
-  market0Symbol: meleeData.market0.market.symbolEmojis.join(""),
-  market1Symbol: meleeData.market1.market.symbolEmojis.join(""),
-  rewardsRemaining: meleeData.arenaInfo.rewardsRemaining,
-  meleeVolume: meleeData.arenaInfo.volume,
+const meleeDataToArenaCardProps = ({
+  arenaInfo,
+  market0,
+  market1,
+}: ArenaCardProps["meleeData"]) => ({
+  market0Symbol: market0.market.symbolEmojis.join(""),
+  market1Symbol: market1.market.symbolEmojis.join(""),
+  rewardsRemaining: arenaInfo.rewardsRemaining,
+  meleeVolume: arenaInfo.volume,
   aptLocked: toTotalAptLocked({
     market0: {
-      state: meleeData.market0.state,
-      locked: meleeData.arenaInfo.emojicoin0Locked,
+      state: market0.state,
+      locked: arenaInfo.emojicoin0Locked,
     },
     market1: {
-      state: meleeData.market1.state,
-      locked: meleeData.arenaInfo.emojicoin1Locked,
+      state: market1.state,
+      locked: arenaInfo.emojicoin1Locked,
     },
   }),
-  startTime: meleeData.arenaInfo.startTime,
-  duration: meleeData.arenaInfo.duration / 1000n / 1000n,
+  startTime: arenaInfo.startTime,
+  duration: arenaInfo.duration / 1000n / 1000n,
 });
 
 export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
   const { isMobile } = useMatchBreakpoints();
+  const currentMeleeInfo = useCurrentMeleeInfo();
 
   const {
     market0Symbol,
@@ -50,7 +56,12 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
     aptLocked,
     startTime,
     duration,
-  } = useMemo(() => meleeDataToArenaCardProps(meleeData), [meleeData]);
+  } = useMemo(() => {
+    const { meleeInfo: arenaInfo, market0, market1 } = currentMeleeInfo;
+    return arenaInfo && market0 && market1
+      ? meleeDataToArenaCardProps({ arenaInfo, market0, market1 })
+      : meleeDataToArenaCardProps(meleeData);
+  }, [currentMeleeInfo, meleeData]);
 
   const headerText = (
     <span

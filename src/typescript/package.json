@@ -27,7 +27,7 @@
     "check:tests": "turbo run check:tests",
     "clean": "turbo run clean --no-cache --force && rm -rf .turbo",
     "clean:full": "pnpm run clean && rm -rf node_modules && rm -rf sdk/node_modules && rm -rf frontend/node_modules",
-    "dev": "pnpm load-env -- turbo run dev --force --parallel --continue",
+    "dev": "pnpm load-env -- turbo run dev --force --parallel --continue --log-prefix none",
     "dev:debug": "FETCH_DEBUG=true pnpm load-env -- pnpm run dev",
     "dev:debug-verbose": "FETCH_DEBUG_VERBOSE=true pnpm load-env -- pnpm run dev",
     "docker:prune": "../docker/utils/prune.sh --reset-localnet --yes",

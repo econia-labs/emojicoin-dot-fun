@@ -84,7 +84,8 @@ describe("queries swap_events and returns accurate swap row data", () => {
       });
       const swapperVolume = sumByKey(
         swaps.map(({ swap }) => swap),
-        "quoteVolume"
+        "quoteVolume",
+        "bigint"
       );
       return [swapper, swaps.length, swapperVolume] as const;
     });
@@ -100,7 +101,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const dailyVolumeQueryResult = (await fetchDailyVolumeForMarket({ marketID })).at(0)!;
     expect(dailyVolumeQueryResult).toBeDefined();
 
-    const totalVolume = sum(Array.from(volume.values()));
+    const totalVolume = sum(Array.from(volume.values()), "bigint");
     expect(dailyVolumeQueryResult.dailyVolume).toEqual(totalVolume);
   });
 });

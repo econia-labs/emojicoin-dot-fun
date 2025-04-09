@@ -1,17 +1,35 @@
 import Button from "components/button";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
+import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
+import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
+import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
+import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
+import { useHistoricalEscrow } from "@/store/arena/escrow/hooks";
 
 import { CurrentMeleeBreakdown, HistoricMeleeBreakdown } from "../melee-breakdown/MeleeBreakdown";
 import type { ProfileTabProps } from "../ProfileTab";
 import styles from "./History.module.css";
 
-const HistoryRow = ({
+const ScaledSymbolDisplay = ({ emojis }: { emojis: SymbolEmoji[] }) => {
+  const { symbol, length } = useMemo(
+    () => ({ symbol: emojis.join(""), length: emojis.length }),
+    [emojis]
+  );
+  return (
+    <td className={length >= 3 ? "text-xs" : length === 2 ? "text-sm" : "text-lg"}>
+      {<Emoji emojis={symbol} />}
+    </td>
+  );
+};
+
+const HistoricalRow = ({
   row,
   isSelected,
   select,
@@ -28,27 +46,31 @@ const HistoryRow = ({
     row.emojicoin1MarketAddress as `0x${string}`
   );
   const { submit } = useAptos();
+  const escrow = useHistoricalEscrow(row.meleeID);
+
   return (
     <>
       <tr className={isSelected ? styles["selected-row"] : ""} onClick={select}>
-        <td className={styles["emoji"]}>
-          <Emoji emojis={row.emojicoin0Symbols.join("")} />
+        <ScaledSymbolDisplay emojis={row.emojicoin0Symbols} />
+        <td className={styles["text"]}>{"vs"}</td>
+        <ScaledSymbolDisplay emojis={row.emojicoin1Symbols} />
+        {/* If the position is open still, it means the arena is complete but the user hasn't exited yet. */}
+        <td className={styles["text"]}>
+          <ExplorerLink
+            value={row.leaderboardHistoryLastTransactionVersion}
+            type="version"
+            className="hover:text-ec-blue hover:underline"
+            title={escrow?.open ? "melee end txn— when your end holdings were calculated" : ""}
+          >
+            {escrow?.open ? "Complete" : "Exited"}
+          </ExplorerLink>
         </td>
-        <td className={styles["text"]}>vs</td>
-        <td className={styles["emoji"]}>
-          <Emoji emojis={row.emojicoin1Symbols.join("")} />
-        </td>
-        <td className={styles["text"]}>{row.exited ? "Exited" : "Complete"}</td>
         <td>
-          {!row.exited ? (
+          {escrow?.open ? (
             <ButtonWithConnectWalletFallback>
               <Button
                 onClick={() => {
-                  submit(exitTransactionBuilder).then((r) => {
-                    if (r && !r.error) {
-                      row.exited = true;
-                    }
-                  });
+                  submit(exitTransactionBuilder);
                 }}
               >
                 Exit
@@ -71,10 +93,8 @@ const HistoryRow = ({
 };
 
 export const MeleeHistory = ({
-  position,
   market0,
   market1,
-  history,
   selectedRow,
   setSelectedRow,
   setHistoryHidden,
@@ -85,10 +105,18 @@ export const MeleeHistory = ({
   setHistoryHidden: (historyHidden: boolean) => void;
 }) => {
   const { isMobile } = useMatchBreakpoints();
+  const { position } = useCurrentPosition();
+  const { history } = useHistoricalPositions();
+
+  const positionIsAlsoInHistory = useMemo(
+    () => !!history.find((v) => v.meleeID === position?.meleeID),
+    [position, history]
+  );
+
   return (
     <div className="h-[100%] overflow-auto">
       <div className="flex justify-between px-[1em] h-[3em] items-center border-dark-gray border-b-[1px] border-solid">
-        <div className="uppercase text-md font-forma">History</div>
+        <div className="uppercase text-md font-forma">{"History"}</div>
         {!isMobile && (
           <div
             className="uppercase text-xl text-light-gray cursor-pointer"
@@ -100,38 +128,34 @@ export const MeleeHistory = ({
       </div>
       <table className={styles["history-table"]}>
         <tbody>
-          {position && position.meleeID === arenaInfo.meleeID && (
+          {/* The row for the current melee. Don't display it if it's already in historical positions. */}
+          {position && position.meleeID === arenaInfo.meleeID && !positionIsAlsoInHistory && (
             <>
               <tr
                 className={selectedRow === -1 ? styles["selected-row"] : ""}
                 onClick={() => setSelectedRow(-1)}
               >
-                <td className={styles["emoji"]}>
-                  <Emoji emojis={market0.market.symbolEmojis.join("")} />
-                </td>
-                <td className={styles["text"]}>vs</td>
-                <td className={styles["emoji"]}>
-                  <Emoji emojis={market1.market.symbolEmojis.join("")} />
-                </td>
-                <td className={styles["text"]}>Active</td>
+                <ScaledSymbolDisplay emojis={market0.market.symbolEmojis} />
+                <td className={styles["text"]}>{"vs"}</td>
+                <ScaledSymbolDisplay emojis={market1.market.symbolEmojis} />
+                <td className={styles["text"]}>{"Active"}</td>
                 <td></td>
               </tr>
               {selectedRow === -1 && isMobile && (
                 <tr>
                   <td colSpan={5}>
                     <CurrentMeleeBreakdown
-                      melee={position}
                       historyHidden={false}
                       close={() => setSelectedRow(undefined)}
-                      {...{ market0, market1 }}
                     />
                   </td>
                 </tr>
               )}
             </>
           )}
-          {history.toReversed().map((m, i) => (
-            <HistoryRow
+          {/* The rest of the rows; i.e., the historical positions. */}
+          {history.map((m, i) => (
+            <HistoricalRow
               key={`history-table-row-${i}`}
               row={m}
               isSelected={selectedRow === i}
