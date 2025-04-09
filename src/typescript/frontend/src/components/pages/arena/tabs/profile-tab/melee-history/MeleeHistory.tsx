@@ -7,7 +7,6 @@ import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-ex
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
-import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
@@ -55,16 +54,7 @@ const HistoricalRow = ({
         <td className={styles["text"]}>{"vs"}</td>
         <ScaledSymbolDisplay emojis={row.emojicoin1Symbols} />
         {/* If the position is open still, it means the arena is complete but the user hasn't exited yet. */}
-        <td className={styles["text"]}>
-          <ExplorerLink
-            value={row.leaderboardHistoryLastTransactionVersion}
-            type="version"
-            className="hover:text-ec-blue hover:underline"
-            title={escrow?.open ? "melee end txn— when your end holdings were calculated" : ""}
-          >
-            {escrow?.open ? "Complete" : "Exited"}
-          </ExplorerLink>
-        </td>
+        <td className={styles["text"]}>{escrow?.open ? "Complete" : "Exited"}</td>
         <td>
           {escrow?.open ? (
             <ButtonWithConnectWalletFallback>

@@ -111,7 +111,7 @@ export const successfulTransactionToast = (
 ) => {
   const message = (
     <>
-      <div className="flex flex-col cursor-text">
+      <div className="flex flex-col">
         <div className="inline">
           {"Transaction confirmed! "}
           <ExplorerLink
@@ -129,7 +129,6 @@ export const successfulTransactionToast = (
   toast.success(message, {
     ...DEFAULT_TOAST_CONFIG,
     toastId: debouncedToastKey("transaction-success", PeriodDuration.PERIOD_1M),
-    className: "cursor-text",
     closeOnClick: false,
   });
 };
@@ -178,9 +177,8 @@ export const crankedArenaMeleeToast = (response: UserTransactionResponse, networ
   toast.dark(message, {
     ...DEFAULT_TOAST_CONFIG,
     pauseOnHover: true,
-    autoClose: 20000,
+    autoClose: 15000,
     toastId: debouncedToastKey("cranked", PeriodDuration.PERIOD_15S),
-    className: "cursor-text",
     closeOnClick: true,
   });
 };

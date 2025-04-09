@@ -6,7 +6,7 @@ import { immer } from "zustand/middleware/immer";
 import { compareBigInt, toAccountAddressString } from "@/sdk/utils";
 
 type Actions = {
-  ensureInStore: (uniqueAddresses: Set<`0x${string}`>) => void;
+  ensureInStore: (uniqueAddresses: `0x${string}`[]) => void;
   pushTransactions: (...transactions: UserTransactionResponse[]) => void;
 };
 
@@ -21,10 +21,11 @@ export const globalUserTransactionStore = createStore<UserTransactionStore>()(
   subscribeWithSelector(
     immer((set, get) => ({
       ensureInStore: (uniqueAddresses) => {
-        const missingUniques = uniqueAddresses
-          .keys()
-          .filter((addr) => !get().addresses.get(addr))
-          .toArray();
+        const missingUniquesSet = new Set(uniqueAddresses).keys();
+
+        const missingUniques = Array.from(missingUniquesSet).filter(
+          (addr) => !get().addresses.get(addr)
+        );
 
         if (!missingUniques.length) return;
 
@@ -35,9 +36,10 @@ export const globalUserTransactionStore = createStore<UserTransactionStore>()(
         });
       },
       pushTransactions: (...transactions) => {
-        const addresses = transactions.map(({ sender }) => toAccountAddressString(sender));
-        const uniqueAddresses = new Set(addresses);
-        if (!uniqueAddresses.size) return;
+        const uniqueAddresses = Array.from(
+          new Set(transactions.map(({ sender }) => toAccountAddressString(sender)))
+        );
+        if (!uniqueAddresses.length) return;
 
         get().ensureInStore(uniqueAddresses);
 

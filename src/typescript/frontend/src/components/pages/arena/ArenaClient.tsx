@@ -11,7 +11,7 @@ import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 
-import { BottomNavigation, TabContainer } from "./tabs";
+import { MobileNavigation, TabContainer } from "./tabs";
 import { type ArenaProps, Box, EmojiTitle } from "./utils";
 
 const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
@@ -92,7 +92,7 @@ const Mobile = React.memo((props: ArenaProps) => {
           </Box>
         </Box>
       </div>
-      {createPortal(<BottomNavigation {...props} />, document.body)}
+      {createPortal(<MobileNavigation {...props} />, document.body)}
     </>
   );
 });
