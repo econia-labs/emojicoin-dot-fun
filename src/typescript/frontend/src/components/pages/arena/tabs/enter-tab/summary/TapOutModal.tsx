@@ -23,24 +23,26 @@ export default function TapOutModal({
 
   return (
     <BlurModal close={() => setIsTappingOut(false)}>
-      <div className="flex flex-col gap-[3em] max-w-[58ch]">
-        <div className="text-4xl uppercase text-white text-center">
-          Are you sure you want to tap out?
-        </div>
-        <div className="font-forma text-light-gray leading-7 uppercase tracking-wide">
-          You have been matched a total of{" "}
-          <span className="text-warning">{matchNumberText ?? "?"}</span> APT since your first
-          deposit to an empty escrow. To exit before the melee is over, you must pay back the{" "}
-          <span className="text-warning">{matchNumberText ?? "?"}</span> APT in order to tap out.
-        </div>
-        <div className="font-forma text-light-gray leading-7 uppercase tracking-wide">
-          If you don&apos;t want to pay the tap out penalty, wait to exit until the melee has ended
-          and then you&apos;ll be able to keep all matched deposits.
+      <div className="flex flex-col gap-[1.5em] uppercase max-w-[58ch]">
+        <div className="text-4xl text-white text-center">Are you sure you want to tap out?</div>
+        <div className="flex flex-col gap-[2em]">
+          <div className="font-forma text-light-gray leading-6">
+            You have been matched a total of{" "}
+            <span className="text-warning">{(matchNumberText ?? "?") + " APT"}</span> since your
+            first deposit to an empty escrow.{" "}
+            <span className="text-lighter-gray font-bold">
+              To exit before the melee is over, you must return the matched amount.
+            </span>
+          </div>
+          <div className="font-forma text-light-gray leading-6">
+            If you don&apos;t want to pay the tap out penalty, wait to exit until the melee has
+            ended and then you&apos;ll be able to keep all matched deposits.
+          </div>
         </div>
       </div>
       <ButtonWithConnectWalletFallback>
         <Button scale="lg" onClick={onTapOut}>
-          {`Accept and exit, incurring a ${matchNumberText ?? "?"} APT tap out fee`}
+          Yes, pay fee and tap out
         </Button>
       </ButtonWithConnectWalletFallback>
     </BlurModal>
