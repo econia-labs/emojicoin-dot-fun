@@ -8,6 +8,7 @@ const expanded = expandRoutes({
     arena: {
       candlesticks: _,
       "historical-positions": _,
+      info: _,
       position: _,
     },
     candlesticks: _,
