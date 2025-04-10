@@ -2,7 +2,6 @@
 
 import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
-import { FormattedNumber } from "components/FormattedNumber";
 import { useEventStore } from "context/event-store-context/hooks";
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -11,26 +10,10 @@ import ChartContainer from "@/components/charts/ChartContainer";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 
+import RewardsRemainingBox from "./RewardsRemainingBox";
 import { MobileNavigation, TabContainer } from "./tabs";
-import { type ArenaProps, Box, EmojiTitle } from "./utils";
-
-const RewardsRemainingBox = ({ rewardsRemaining }: { rewardsRemaining: bigint }) => {
-  const { isMobile } = useMatchBreakpoints();
-  return (
-    <Box className="grid grid-rows-[auto_1fr] place-items-center p-[1em]">
-      <div
-        className={`uppercase ${isMobile ? "text-2xl" : "text-3xl"} text-light-gray tracking-widest text-center`}
-      >
-        {"Rewards remaining"}
-      </div>
-      <div
-        className={`uppercase font-forma ${isMobile ? "text-4xl" : "text-6xl lg:text-7xl xl:text-8xl"} text-white`}
-      >
-        <FormattedNumber value={rewardsRemaining} nominalize />
-      </div>
-    </Box>
-  );
-};
+import type { ArenaProps, ArenaPropsWithVaultBalance } from "./utils";
+import { Box, EmojiTitle } from "./utils";
 
 const chartBoxClassName: ClassValue = "relative w-full h-full col-start-1 col-end-3";
 
@@ -50,7 +33,7 @@ const Desktop = React.memo((props: ArenaProps) => {
       <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
-      <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
+      <RewardsRemainingBox />
       <Box className={chartBoxClassName}>
         <ChartContainer
           symbol={market0.market.symbolData.symbol}
@@ -81,7 +64,7 @@ const Mobile = React.memo((props: ArenaProps) => {
             />
           </div>
         </Box>
-        <RewardsRemainingBox rewardsRemaining={arenaInfo.rewardsRemaining} />
+        <RewardsRemainingBox />
         <Box className="h-[500px]">
           <Box className={chartBoxClassName}>
             <ChartContainer
@@ -99,17 +82,19 @@ const Mobile = React.memo((props: ArenaProps) => {
 // Necessary to add a display name because of the React.memo wrapper.
 Mobile.displayName = "Mobile";
 
-export const ArenaClient = (props: ArenaProps) => {
+export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
   const { isMobile } = useMatchBreakpoints();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
+  const loadVaultBalanceFromServer = useEventStore((s) => s.loadVaultBalanceFromServer);
   const { meleeInfo: arenaInfo, market0, market1 } = useCurrentMeleeInfo();
 
   useEffect(() => {
     loadArenaInfoFromServer(props.arenaInfo);
     loadMarketStateFromServer([props.market0]);
     loadMarketStateFromServer([props.market1]);
-  }, [loadArenaInfoFromServer, loadMarketStateFromServer, props]);
+    loadVaultBalanceFromServer(props.vaultBalance);
+  }, [loadArenaInfoFromServer, loadMarketStateFromServer, loadVaultBalanceFromServer, props]);
 
   return isMobile ? (
     <Mobile

@@ -24,7 +24,11 @@ import {
 } from "@/sdk/types/arena-types";
 import { compareBigInt, DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
 
-import { ensureMeleeInStore, initializeArenaStore } from "../arena/event/store";
+import {
+  ensureMeleeInStore,
+  initializeArenaStore,
+  updateRewardsRemainingAndVaultBalance,
+} from "../arena/event/store";
 import {
   getMeleeIDFromArenaModel,
   handleLatestBarForArenaCandlestick,
@@ -83,6 +87,11 @@ export const createEventStore = () => {
           );
           ensureMeleeInStore(state, info.meleeID);
           state.meleeMap.set(arenaSymbol, info.meleeID);
+        });
+      },
+      loadVaultBalanceFromServer: (vaultBalance) => {
+        set((state) => {
+          state.vaultBalance = vaultBalance;
         });
       },
       loadMarketStateFromServer: (states) => {
@@ -213,6 +222,7 @@ export const createEventStore = () => {
                   }
                 }
               }
+              updateRewardsRemainingAndVaultBalance(state, event);
             }
           });
         });
