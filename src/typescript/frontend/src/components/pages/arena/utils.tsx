@@ -14,6 +14,8 @@ export type ArenaProps = {
   market1: MarketStateModel;
 };
 
+export type ArenaPropsWithVaultBalance = ArenaProps & { vaultBalance: bigint };
+
 export const Box = ({
   className,
   children,
