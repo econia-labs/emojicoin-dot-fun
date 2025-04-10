@@ -43,11 +43,17 @@ export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 
 export const EXCHANGE_NAME = "emojicoin.fun";
 
-const DEFAULT_RESOLUTION_STRING = "15S" as ResolutionString;
+export type ArenaOrMarketChart = "arena" | "market";
+const DEFAULT_RESOLUTIONS = {
+  arena: "15S" as ResolutionString,
+  market: "60" as ResolutionString,
+};
 
-export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = {
+export const getWidgetOptions: (
+  chartType: ArenaOrMarketChart
+) => Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = (chartType) => ({
   library_path: `${CDN_URL}/charting_library/`,
-  interval: DEFAULT_RESOLUTION_STRING,
+  interval: DEFAULT_RESOLUTIONS[chartType],
   theme: "Dark" as ThemeName,
   locale: "en" as LanguageCode,
   custom_css_url: `${CDN_URL}/charting_library_stylesheets/emojicoin-dot-fun.css`,
@@ -122,4 +128,4 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
       title: "All",
     },
   ],
-};
+});
