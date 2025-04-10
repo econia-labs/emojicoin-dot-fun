@@ -13,11 +13,12 @@ export const FormattedNominalNumber = (props: {
   prefix?: string;
   suffix?: string;
   scramble?: boolean;
+  decimals?: number;
 }) => (
   <FormattedNumber
     className={props.className}
     value={props.value}
-    decimals={2}
+    decimals={props.decimals ?? 2}
     nominalize
     prefix={props.prefix}
     suffix={props.suffix}
