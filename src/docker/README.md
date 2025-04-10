@@ -2,13 +2,6 @@
 
 # Running the emojicoin dot fun indexer with Docker
 
-Ensure you've successfully pulled all submodule repositories required to
-build the processor, otherwise you will get errors.
-
-```shell
-git submodule update --init --recursive
-```
-
 ## Run the indexer processor by itself for `mainnet` or `testnet`
 
 ```shell

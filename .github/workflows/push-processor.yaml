@@ -1,11 +1,10 @@
 # cspell:word imagetools
 ---
 env:
-  BUILD_ARGS: 'FEATURES=ws'
   BUILD_CONTEXT: 'src/rust'
-  BUILD_FILE: 'src/rust/broker/Dockerfile'
-  DOCKER_REPO: 'econialabs/emojicoin-dot-fun-indexer-broker'
-  GIT_TAG_PREFIX: 'broker'
+  BUILD_FILE: 'src/rust/processor/Dockerfile'
+  DOCKER_REPO: 'econialabs/emojicoin-dot-fun-indexer-processor'
+  GIT_TAG_PREFIX: 'processor'
 jobs:
   build:
     outputs:
@@ -61,9 +60,9 @@ jobs:
         docker buildx imagetools create ${TAG_ARGS} \
         ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-amd64 }} \
         ${{ env.DOCKER_REPO }}@${{ needs.build.outputs.digest-arm64 }}
-name: 'Push multi-platform broker image to Docker Hub'
+name: 'Push multi-platform processor image to Docker Hub'
 'on':
   push:
     tags:
-    - 'broker-v*'
+    - 'processor-v*'
 ...
