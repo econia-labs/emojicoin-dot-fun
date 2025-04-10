@@ -1,3 +1,5 @@
+import Big from "big.js";
+import { useEventStore } from "context/event-store-context/hooks";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useEnterTransactionBuilder } from "lib/hooks/transaction-builders/use-enter-builder";
@@ -7,6 +9,7 @@ import Button from "@/components/button";
 import ButtonWithConnectWalletFallback from "@/components/header/wallet-button/ConnectWalletButton";
 import { Switcher } from "@/components/switcher";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import useRewardsRemaining from "@/hooks/use-rewards-remaining";
 import { getEvents, type MarketStateModel } from "@/sdk/index";
 
 import { useArenaPhaseStore } from "../../phase/store";
@@ -25,6 +28,8 @@ export default function EnterTabLockPhase({
   const { market0, market1 } = useCurrentMeleeInfo();
   const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const setError = useArenaPhaseStore((s) => s.setError);
+  const rewardsRemaining = useRewardsRemaining();
+  const arenaInfo = useEventStore((s) => s.arenaInfoFromServer);
 
   const lockedInToggle = useMemo(
     () => innerLock || position?.lockedIn === true,
@@ -38,6 +43,42 @@ export default function EnterTabLockPhase({
     market1?.market.marketAddress,
     market.market.marketAddress
   );
+
+  const matchAmount = useMemo(() => {
+    try {
+      if (!arenaInfo) {
+        return 0n;
+      }
+      if (!rewardsRemaining) {
+        return 0n;
+      }
+
+      const duration = Number(arenaInfo.duration / 1000n);
+      const remainingTime = duration - (new Date().getTime() - arenaInfo.startTime.getTime());
+      if (remainingTime < 0) return 0n;
+      const durationPercentage = Big(remainingTime / duration).mul(100);
+
+      let matchAmount = BigInt(
+        Big(amount.toString())
+          .mul(durationPercentage)
+          .div(100)
+          .mul(arenaInfo.maxMatchPercentage.toString())
+          .div(100)
+          .round(0)
+          .toString()
+      );
+      const eligibleMatchAmount = arenaInfo.maxMatchAmount - (position?.matchAmount ?? 0n);
+      if (matchAmount > eligibleMatchAmount) {
+        matchAmount = eligibleMatchAmount;
+      }
+      if (matchAmount > rewardsRemaining) {
+        matchAmount = rewardsRemaining;
+      }
+      return matchAmount;
+    } catch (_) {
+      return 0n;
+    }
+  }, [rewardsRemaining, arenaInfo, position?.matchAmount, amount]);
 
   return (
     <div className="flex flex-col gap-[2em] pt-14 m-auto items-center w-[100%]">
@@ -57,12 +98,7 @@ export default function EnterTabLockPhase({
         </div>
         <div className="flex uppercase justify-between text-2xl text-light-gray py-[0.8em] mx-[0.8em] border-dashed border-b-[1px] border-light-gray ">
           <div>Match amount</div>
-          <FormattedNominalNumber
-            value={
-              lockedInToggle ? BigInt(Math.floor(Math.min(5 * 10 ** 8, Number(amount / 2n)))) : 0n
-            }
-            suffix=" APT"
-          />
+          <FormattedNominalNumber value={lockedInToggle ? matchAmount : 0n} suffix=" APT" />
         </div>
         <div className="pt-[2em] grid place-items-center">
           <ButtonWithConnectWalletFallback>
