@@ -31,14 +31,14 @@ export default function EnterTabLockPhase({
   const rewardsRemaining = useRewardsRemaining();
   const arenaInfo = useEventStore((s) => s.arenaInfoFromServer);
 
-  const lockedInToggle = useMemo(
+  const lockedIn = useMemo(
     () => innerLock || position?.lockedIn === true,
     [innerLock, position?.lockedIn]
   );
 
   const transactionBuilder = useEnterTransactionBuilder(
     amount,
-    lockedInToggle,
+    lockedIn,
     market0?.market.marketAddress,
     market1?.market.marketAddress,
     market.market.marketAddress
@@ -86,9 +86,9 @@ export default function EnterTabLockPhase({
         <div className="font-forma text-2xl uppercase text-white text-center">Lock in</div>
         <div className="flex gap-[1em] items-center">
           <div className="uppercase text-light-gray text-xl">
-            {lockedInToggle ? "Enabled" : "Disabled"}
+            {lockedIn ? "Enabled" : "Disabled"}
           </div>
-          <Switcher checked={lockedInToggle} onChange={(v) => setInnerLock(v.target.checked)} />
+          <Switcher checked={lockedIn} onChange={(v) => setInnerLock(v.target.checked)} />
         </div>
       </div>
       <div className="max-w-[350px] w-[100%]">
@@ -98,7 +98,11 @@ export default function EnterTabLockPhase({
         </div>
         <div className="flex uppercase justify-between text-2xl text-light-gray py-[0.8em] mx-[0.8em] border-dashed border-b-[1px] border-light-gray ">
           <div>Match amount</div>
-          <FormattedNominalNumber value={lockedInToggle ? matchAmount : 0n} suffix=" APT" />
+          <FormattedNominalNumber
+            className={lockedIn && matchAmount ? "text-green" : ""}
+            value={lockedIn ? matchAmount : 0n}
+            suffix=" APT"
+          />
         </div>
         <div className="pt-[2em] grid place-items-center">
           <ButtonWithConnectWalletFallback>
