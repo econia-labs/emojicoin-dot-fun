@@ -1,5 +1,6 @@
 "use client";
 
+import type { PoolsData } from "app/pools/page";
 import { Button, InputNumeric, Text } from "components";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
@@ -20,13 +21,12 @@ import {
 import { useLiquidityTransactionBuilder } from "lib/hooks/transaction-builders/use-liquidity-builder";
 import { toActualCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
-import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 
 import { Column, Flex, FlexGap } from "@/containers";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { toEmojicoinTypes } from "@/sdk/markets/utils";
 
-import type { PoolsData } from "../../ClientPoolsPage";
 import { StyledAddLiquidityWrapper } from "./styled";
 
 type LiquidityProps = {
