@@ -1,13 +1,14 @@
 import { createSwitch } from "components/charts/EmptyCandlesSwitch";
 import { useUserSettings } from "context/event-store-context";
-import { encodeSymbolsForChart, formatSymbolWithParams } from "lib/chart-utils";
+import { encodeSymbolsForChart, formatSymbolWithParams, isArenaChartSymbol } from "lib/chart-utils";
 import { cn } from "lib/utils/class-name";
 import { useEffect, useRef } from "react";
 
 import { type IChartingLibraryWidget, type Timezone, widget } from "@/static/charting_library";
 
 import { BrowserNotSupported } from "./BrowserNotSupported";
-import { WIDGET_OPTIONS } from "./const";
+import type { ArenaOrMarketChart } from "./const";
+import { getWidgetOptions } from "./const";
 import type { ChartContainerProps } from "./types";
 import { useDatafeed } from "./use-datafeed";
 
@@ -35,9 +36,12 @@ const Chart = ({
 
   useEffect(() => {
     if (ref.current) {
+      const widgetSymbol = encodeSymbolsForChart(symbol, secondarySymbol);
+      const chartType: ArenaOrMarketChart = isArenaChartSymbol(widgetSymbol) ? "arena" : "market";
+
       tvWidget.current = new widget({
-        ...WIDGET_OPTIONS,
-        symbol: encodeSymbolsForChart(symbol, secondarySymbol),
+        ...getWidgetOptions(chartType),
+        symbol: widgetSymbol,
         datafeed,
         container: ref.current,
         timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone ?? "Etc/UTC") as Timezone,
