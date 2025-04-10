@@ -127,6 +127,32 @@ aptos move run \
     --profile $PROFILE
 ```
 
+## Try cranking
+
+Deliberately use invalid type arguments to ensure abortion if cranking is not
+possible:
+
+```sh
+EMOJICOIN_ARENA=0xaaa...
+PROFILE=my-profile
+BOGUS_TYPE_ARG="0x1::aptos_coin::AptosCoin"
+```
+
+```sh
+aptos move run \
+    --args \
+        u64:0 \
+        bool:true \
+    --type-args \
+        $BOGUS_TYPE_ARG \
+        $BOGUS_TYPE_ARG \
+        $BOGUS_TYPE_ARG \
+        $BOGUS_TYPE_ARG \
+        $BOGUS_TYPE_ARG \
+    --function-id $EMOJICOIN_ARENA::emojicoin_arena::enter \
+    --profile $PROFILE
+```
+
 <!-- markdownlint-enable MD013 -->
 
 [a simulator issue]: https://github.com/aptos-labs/aptos-core/issues/15769
