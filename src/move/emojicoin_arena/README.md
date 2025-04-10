@@ -143,15 +143,18 @@ aptos move run \
     --args \
         u64:0 \
         bool:true \
+    --function-id $EMOJICOIN_ARENA::emojicoin_arena::enter \
+    --max-gas 500000 \
+    --profile $PROFILE \
     --type-args \
         $BOGUS_TYPE_ARG \
         $BOGUS_TYPE_ARG \
         $BOGUS_TYPE_ARG \
         $BOGUS_TYPE_ARG \
-        $BOGUS_TYPE_ARG \
-    --function-id $EMOJICOIN_ARENA::emojicoin_arena::enter \
-    --profile $PROFILE
+        $BOGUS_TYPE_ARG
 ```
+
+Here, `--max-gas` sidesteps the simulator to ensure transaction submission.
 
 <!-- markdownlint-enable MD013 -->
 
