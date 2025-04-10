@@ -7,7 +7,7 @@ import { Box } from "./utils";
 export default function RewardsRemainingBox() {
   const rewardsRemaining = useRewardsRemaining();
   const { isMobile } = useMatchBreakpoints();
-  
+
   return (
     <Box className="grid grid-rows-[auto_1fr] place-items-center p-[1em]">
       <div
