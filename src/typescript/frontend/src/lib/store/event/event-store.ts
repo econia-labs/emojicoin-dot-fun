@@ -1,3 +1,4 @@
+import { enableMapSet } from "immer";
 import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
 import { immer } from "zustand/middleware/immer";
 import { createStore } from "zustand/vanilla";
@@ -33,6 +34,7 @@ import {
   getMeleeIDFromArenaModel,
   handleLatestBarForArenaCandlestick,
   toMappedMelees,
+  updateLatestBarFromDatafeed,
 } from "../arena/event/utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import {
@@ -49,6 +51,9 @@ import {
   initialState,
   toMappedMarketEvents,
 } from "./utils";
+
+// Ensure maps/sets are enabled for immer by the time this is instantiated.
+enableMapSet();
 
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
@@ -225,6 +230,15 @@ export const createEventStore = () => {
               updateRewardsRemainingAndVaultBalance(state, event);
             }
           });
+        });
+      },
+      // For updating the latest bar with the new candlestick types.
+      maybeUpdateMeleeLatestBar(latestBarFromDatafeed, period, meleeID) {
+        if (!latestBarFromDatafeed) return;
+        set((state) => {
+          ensureMeleeInStore(state, meleeID);
+          const melee = state.melees.get(meleeID)!;
+          updateLatestBarFromDatafeed(melee, { ...latestBarFromDatafeed, period });
         });
       },
       setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => {

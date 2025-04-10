@@ -21,10 +21,11 @@ import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { XOR } from "@/sdk/utils/utility-types";
 import type { Flatten, Types } from "@/sdk-types";
 import type { Bar, PeriodParams } from "@/static/charting_library";
+import type { BarWithNonce } from "@/store/event/candlestick-bars";
 import {
   marketToLatestBars,
   periodicStateTrackerToLatestBar,
-  toBar,
+  toBarWithNonce,
 } from "@/store/event/candlestick-bars";
 
 export const fetchCandlesticksForChart = async ({
@@ -37,7 +38,7 @@ export const fetchCandlesticksForChart = async ({
     periodParams: PeriodParams;
     period: ArenaPeriod | Period;
   }
->): Promise<Bar[]> => {
+>) => {
   const params = new URLSearchParams({
     ...(marketID !== undefined ? { marketID } : { meleeID }),
     period: period.toString(),
@@ -53,13 +54,13 @@ export const fetchCandlesticksForChart = async ({
   )
     .then((res) =>
       res
-        .map(toBar)
+        .map(toBarWithNonce)
         .sort((a, b) => a.time - b.time)
         .reduce(curriedBarsReducer(periodParams.to), [])
     )
     .catch((error) => {
       console.error(`Couldn't fetch candlesticks from ${route}: ${error}`);
-      return [];
+      return [] as BarWithNonce[];
     });
 };
 
@@ -77,7 +78,9 @@ export const fetchCandlesticksForChart = async ({
  * @param event
  * @returns
  */
-function curriedBarsReducer(to: number): (acc: Bar[], bar: Bar) => Bar[] {
+function curriedBarsReducer(
+  to: number
+): (acc: BarWithNonce[], bar: BarWithNonce) => BarWithNonce[] {
   return (acc, bar) => {
     const inTimeRange = bar.time <= to * 1000;
     if (inTimeRange && hasTradingActivity(bar)) {
@@ -97,7 +100,7 @@ function curriedBarsReducer(to: number): (acc: Bar[], bar: Bar) => Bar[] {
  *
  * This logic is very similar to what's used in `createBarFrom[Swap|PeriodicState]`.
  */
-export const updateLastTwoBars = (bars: Bar[], onChainLatest: Bar) => {
+export const updateLastBar = (bars: Bar[], onChainLatest: Bar) => {
   const emittedLatest = bars.at(-1);
   if (emittedLatest) {
     if (!hasTradingActivity(onChainLatest)) {
@@ -126,6 +129,7 @@ export const createDummyBar = (
     low: defaultValue,
     close: defaultValue,
     volume: 0,
+    nonce: 0n,
   };
 };
 

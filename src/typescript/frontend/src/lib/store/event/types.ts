@@ -13,7 +13,7 @@ import type { SubscribeBarsCallback } from "@/static/charting_library/datafeed-a
 
 import type { ArenaActions, ArenaState } from "../arena/event/store";
 import type { ClientActions, ClientState } from "../websocket/store";
-import type { LatestBar } from "./candlestick-bars";
+import type { BarWithNonce, LatestBar } from "./candlestick-bars";
 
 // Aliased to avoid repeating the type names over and over.
 type Swap = DatabaseModels["swap_events"];
@@ -79,6 +79,11 @@ type EventActions = {
   loadMarketStateFromServer: (states: DatabaseModels["market_state"][]) => void;
   loadEventsFromServer: (events: BrokerEventModels[]) => void;
   pushEventsFromClient: (event: BrokerEventModels[], pushToLocalStorage?: boolean) => void;
+  maybeUpdateMeleeLatestBar: (
+    bar: BarWithNonce | undefined,
+    period: AnyPeriod,
+    meleeID: bigint
+  ) => void;
   setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => void;
   subscribeToPeriod: ({ symbol, period, cb }: PeriodSubscription) => void;
   unsubscribeFromPeriod: ({ symbol, period }: Omit<PeriodSubscription, "cb">) => void;
