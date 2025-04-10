@@ -54,15 +54,17 @@ const INFO: Info[] = [
   },
 ];
 
-export const InfoTab = () => (
-  <div className="w-[100%] h-[100%]">
-    <div className="w-[100%] p-[1em] flex flex-col gap-[2em] max-w-[80ch] m-auto overflow-scroll">
-      {INFO.map((i, index) => (
-        <div key={`info-p-${index}`} className="flex flex-col gap-[1em]">
-          <div className="text-3xl uppercase text-white">{i.title}</div>
-          <div className="font-forma text-light-gray">{i.paragraph}</div>
-        </div>
-      ))}
+export default function InfoTab() {
+  return (
+    <div className="w-[100%] h-[100%]">
+      <div className="w-[100%] p-[1em] flex flex-col gap-[2em] max-w-[80ch] m-auto overflow-scroll">
+        {INFO.map((i, index) => (
+          <div key={`info-p-${index}`} className="flex flex-col gap-[1em]">
+            <div className="text-3xl uppercase text-white">{i.title}</div>
+            <div className="font-forma text-light-gray">{i.paragraph}</div>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+}

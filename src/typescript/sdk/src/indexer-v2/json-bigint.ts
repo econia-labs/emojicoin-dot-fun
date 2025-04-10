@@ -3,7 +3,12 @@ import Big from "big.js";
 import parse from "json-bigint";
 
 import type { AnyColumnName } from "./types/json-types";
-import { bigintColumns, floatColumns, integerColumns } from "./types/postgres-numeric-types";
+import {
+  bigintColumns,
+  floatColumns,
+  integerColumns,
+  timestampColumns,
+} from "./types/postgres-numeric-types";
 
 const JSON_BIGINT = parse({
   alwaysParseAsBig: false,
@@ -29,15 +34,23 @@ const tryWithFallbackParse = (parser: (v: any) => any) => (v: any) => {
 const parseFloat = (v: any) => Big(v).toString();
 const parseBigInt = (v: any) => BigInt(v);
 const parseInteger = (v: any) => Number(v);
+// Ensure the Zulu/UTC indicator is there, since it's stored as a timestamp with no timezone
+// although it definitely has one. Don't convert to `Date`, because it loses some microsecond
+// precision, although it's totally possible to call new Date(...) and have it work as expected.
+const parseTimestamp = (v: any) => `${v}Z`;
 const parseDefault = (v: any) => v;
 const floatConversions = [...Array.from(floatColumns).map((c) => [c, parseFloat] as const)];
 const bigintConversions = [...Array.from(bigintColumns).map((c) => [c, parseBigInt] as const)];
 const integerConversions = [...Array.from(integerColumns).map((c) => [c, parseInteger] as const)];
+const timestampConversions = [
+  ...Array.from(timestampColumns).map((c) => [c, parseTimestamp] as const),
+];
 
 const converter = new Map<AnyColumnName, (value: any) => any>([
   ...floatConversions,
   ...bigintConversions,
   ...integerConversions,
+  ...timestampConversions,
 ]);
 
 /**

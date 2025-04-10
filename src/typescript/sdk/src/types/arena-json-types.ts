@@ -1,6 +1,13 @@
+import type { ARENA_MODULE_NAME } from "../const";
 import type { AccountAddressString, Uint64String } from "../emojicoin_dot_fun";
 import type { DatabaseStructType } from "../indexer-v2";
 import type { JsonTypes } from "./json-types";
+
+// The generics on the Escrow resource type.
+type Escrow = `0x${string}::${typeof ARENA_MODULE_NAME}::Escrow`;
+type Coin = `0x${string}::coin_factory::Emojicoin`;
+type LP = `${Coin}LP`;
+type EscrowResourceGenerics = `${Escrow}<${Coin}, ${LP}, ${Coin}, ${LP}>`;
 
 export type ArenaJsonTypes = {
   ExchangeRate: {
@@ -94,4 +101,35 @@ export type ArenaJsonTypes = {
    * Only exists as JSON data from the database or broker.
    */
   ArenaCandlestick: DatabaseStructType["ArenaCandlestick"];
+
+  /**
+   * Resource/struct
+   * ___::emojicoin_arena::Escrow
+   */
+  Escrow: {
+    data: {
+      melee_id: Uint64String;
+      emojicoin_0: {
+        value: Uint64String;
+      };
+      emojicoin_1: {
+        value: Uint64String;
+      };
+      match_amount: Uint64String;
+    };
+    type: EscrowResourceGenerics;
+  };
+
+  /**
+   * #[view]
+   * ___::emojicoin_arena::EscrowView
+   *
+   * Return value of `public fun escrow`
+   */
+  EscrowView: {
+    melee_id: Uint64String;
+    emojicoin_0: Uint64String;
+    emojicoin_1: Uint64String;
+    match_amount: Uint64String;
+  };
 };

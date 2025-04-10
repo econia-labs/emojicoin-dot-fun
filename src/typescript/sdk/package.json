@@ -104,6 +104,7 @@
     "test:e2e:candlesticks": "pnpm jest tests/e2e/candlesticks.test.ts --runInBand",
     "test:e2e:arena-candlesticks": "pnpm jest tests/e2e/arena/candlesticks.test.ts --runInBand",
     "test:e2e:arena-general": "pnpm jest tests/e2e/arena/general.test.ts --runInBand",
+    "test:e2e:arena-restart": "pnpm jest tests/e2e/arena/restart.test.ts --runInBand",
     "test:e2e:arena-ws": "pnpm jest tests/e2e/arena/websockets.test.ts --runInBand",
     "test:unit": "pnpm jest tests/unit",
     "verify-processor-data": "pnpm dotenv -e ../.env -- pnpm tsx --conditions=react-server src/scripts/verify-processor-data.ts"

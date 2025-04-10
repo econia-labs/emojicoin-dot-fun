@@ -15,9 +15,16 @@ export const metadata: Metadata = {
 export default async function Arena() {
   if (!FEATURE_FLAGS.Arena) redirect(ROUTES.home);
 
-  const { arenaInfo, market0, market1 } = await fetchCachedMeleeData();
+  const { arenaInfo, market0, market1, rewardsRemaining } = await fetchCachedMeleeData();
 
-  if (!arenaInfo || !market0 || !market1) redirect(ROUTES.home);
+  if (!arenaInfo || !market0 || !market1 || rewardsRemaining === null) redirect(ROUTES.home);
 
-  return <ArenaClient arenaInfo={arenaInfo} market0={market0} market1={market1} />;
+  return (
+    <ArenaClient
+      arenaInfo={arenaInfo}
+      market0={market0}
+      market1={market1}
+      vaultBalance={rewardsRemaining}
+    />
+  );
 }

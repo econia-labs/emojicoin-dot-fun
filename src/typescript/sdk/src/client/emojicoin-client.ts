@@ -28,7 +28,7 @@ import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../in
 import {
   type ArenaEventsModels,
   getArenaEventsAsProcessorModels,
-} from "../indexer-v2/mini-processor/arena-events-to-models";
+} from "../indexer-v2/mini-processor/arena";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
