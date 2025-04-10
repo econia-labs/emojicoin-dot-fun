@@ -43,7 +43,10 @@ export function MatchAmount({
     >
       <FormattedNominalNumber
         className={
-          lockedIn && matchAmount ? "text-green" : !lockedIn && !mustLockIn ? "text-error" : ""
+          // If they're locked in and there's a match amount, make it green.
+          // Otherwise, if they don't have to lock in and there's a match amount being missed out on, show it as pink.
+          // Otherwise, don't color it at all.
+          lockedIn && matchAmount ? "text-green" : !mustLockIn && matchAmount ? "text-error" : ""
         }
         value={lockedIn ? matchAmount : 0n}
         suffix=" APT"

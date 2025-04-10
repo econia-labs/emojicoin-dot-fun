@@ -72,7 +72,7 @@ export default function EnterTabLockPhase({
             ) : lockedIn ? (
               <span className="text-green">Enabled</span>
             ) : (
-              <span className="text-pink">Disabled</span>
+              <span className={rewardsRemaining ? "text-pink" : ""}>Disabled</span>
             )}
           </div>
           {!mustLockIn && (
