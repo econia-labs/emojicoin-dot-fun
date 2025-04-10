@@ -34,9 +34,9 @@ const ChatBox = (props: ChatProps) => {
     return _.orderBy(
       _.uniqBy(
         [...chatsFromStore, ...(chatsQuery.data?.pages.flat() || [])],
-        (i) => i.transaction.version
+        (i) => i.market.marketNonce
       ),
-      (i) => i.transaction.version,
+      (i) => i.market.marketNonce,
       "desc"
     ).map((s, i) => ({
       message: {

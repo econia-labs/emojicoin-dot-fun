@@ -11,7 +11,7 @@ import type {
 import type { Flatten } from "@/sdk-types";
 import type { SubscribeBarsCallback } from "@/static/charting_library/datafeed-api";
 
-import type { ArenaActions, ArenaState } from "../arena/store";
+import type { ArenaActions, ArenaState } from "../arena/event/store";
 import type { ClientActions, ClientState } from "../websocket/store";
 import type { LatestBar } from "./candlestick-bars";
 
@@ -38,6 +38,7 @@ export type MarketStoreMetadata = Flatten<
 export type MarketEventStore = {
   marketMetadata: MarketStoreMetadata;
   dailyVolume?: bigint;
+  dailyBaseVolume?: bigint;
   swapEvents: readonly Swap[];
   liquidityEvents: readonly Liquidity[];
   stateEvents: readonly (MarketLatestStateEvent | MarketLatestState)[];
@@ -71,7 +72,8 @@ export type SetLatestBarsArgs = {
 };
 
 type EventActions = {
-  getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
+  getMarket: (m?: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
+  getMarketLatestState: (m?: SymbolEmoji[]) => undefined | Readonly<MarketLatestState>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
   getMeleeMap: () => Readonly<ArenaState["meleeMap"]>;
   loadMarketStateFromServer: (states: DatabaseModels["market_state"][]) => void;

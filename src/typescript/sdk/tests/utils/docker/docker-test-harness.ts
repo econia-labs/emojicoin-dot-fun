@@ -71,6 +71,12 @@ export class DockerTestHarness {
     return execPromise(`bash ${PRUNE_SCRIPT} --reset-localnet --yes`);
   }
 
+  static async restartProcessor() {
+    await execPromise(
+      `docker compose -f ${LOCAL_COMPOSE_PATH} --env-file ${LOCAL_ENV_PATH} restart processor`
+    );
+  }
+
   /**
    * Stops the Docker containers.
    */

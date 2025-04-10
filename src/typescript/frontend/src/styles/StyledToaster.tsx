@@ -4,7 +4,7 @@ import { ToastContainer } from "react-toastify";
 const StyledToaster = () => {
   return (
     <ToastContainer
-      style={{ width: "500px" }}
+      style={{ width: "500px", maxWidth: "100dvw" }}
       toastStyle={{ background: "black", border: "1px solid #33343D" }}
       position="bottom-left"
       autoClose={7100}

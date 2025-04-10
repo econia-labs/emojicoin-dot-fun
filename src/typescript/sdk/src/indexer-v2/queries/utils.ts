@@ -9,11 +9,16 @@ import type {
 } from "@supabase/postgrest-js";
 
 import type { AnyNumberString } from "../../types/types";
-import type { DatabaseModels } from "../types";
 import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
 import { postgrest } from "./client";
 
 type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
+
+type GenericSchema = {
+  Tables: Record<string, never>;
+  Views: Record<string, never>;
+  Functions: Record<string, never>;
+};
 
 type QueryFunction<
   Row extends Record<string, unknown>,
@@ -21,11 +26,12 @@ type QueryFunction<
   RelationName,
   Relationships extends EnumLiteralType<TableName>,
   QueryArgs extends Record<string, any> | undefined,
+  Schema extends GenericSchema = never,
 > = (
   args: QueryArgs
 ) =>
-  | PostgrestFilterBuilder<any, Row, Result, RelationName, Relationships>
-  | PostgrestTransformBuilder<any, Row, Result, RelationName, Relationships>;
+  | PostgrestFilterBuilder<Schema, Row, Result, RelationName, Relationships>
+  | PostgrestTransformBuilder<Schema, Row, Result, RelationName, Relationships>;
 
 type WithConfig<T> = T & { minimumVersion?: AnyNumberString };
 
@@ -120,10 +126,11 @@ export function queryHelper<
   RelationName,
   Relationships extends TableName,
   QueryArgs extends Record<string, any> | undefined,
-  OutputType,
+  OutputType = Result[number],
 >(
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
-  convert: (rows: Row) => OutputType
+  // Default to (v) => v if no conversion function is passed.
+  convert: (row: Row) => OutputType = (v) => v as unknown as OutputType
 ): (args: WithConfig<QueryArgs>) => Promise<OutputType[]> {
   // Return the curried version of queryHelperWithCount that extracts just the rows.
   return async (args) => (await queryHelperWithCount(queryFn, convert)(args)).rows;
@@ -131,12 +138,16 @@ export function queryHelper<
 
 export function queryHelperSingle<
   T extends TableName,
-  Row extends DatabaseJsonType[T],
-  Model extends DatabaseModels[T],
-  QueryArgs extends Record<string, any> | undefined,
->(queryFn: (args: QueryArgs) => PostgrestBuilder<Row>, convert: (row: Row) => Model) {
-  const query = async (args: WithConfig<QueryArgs>) => {
-    const { minimumVersion, ...queryArgs } = args;
+  Row extends DatabaseJsonType[T] | null,
+  QueryArgs extends Record<string, any> | Record<string, never> | undefined,
+  OutputType = Row,
+>(
+  queryFn: (args: QueryArgs) => PostgrestBuilder<Row>,
+  // Default to (v) => v if no conversion function is passed.
+  convert: (row: NonNullable<Row>) => OutputType = (v) => v as unknown as OutputType
+) {
+  const query = async (args?: WithConfig<QueryArgs>) => {
+    const { minimumVersion, ...queryArgs } = args ?? {};
     const innerQuery = queryFn(queryArgs as QueryArgs);
 
     if (minimumVersion) {
@@ -162,7 +173,8 @@ export function queryHelperSingle<
  * @param queryFn Takes in a query function that's used to be called after waiting for the indexer
  * to reach a certain version. Then it extracts the row data and returns it.
  * @param convert A function that converts the raw row data into the desired output, usually
- * by converting it into a camelCased representation of the database row.
+ * by converting it into a camelCased representation of the database row. If no conversion function
+ * is passed, this simply returns the input value.
  * @returns A curried function that applies the logic to the new query function.
  */
 export function queryHelperWithCount<
@@ -171,15 +183,16 @@ export function queryHelperWithCount<
   RelationName,
   Relationships extends TableName,
   QueryArgs extends Record<string, any> | undefined,
-  OutputType,
+  OutputType = Result[number],
 >(
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
-  convert: (rows: Row) => OutputType
+  // Default to (v) => v if no conversion function is passed.
+  convert: (row: Row) => OutputType = (v) => v as unknown as OutputType
 ): (
   args: WithConfig<QueryArgs>
 ) => Promise<{ rows: OutputType[]; count: number | null; error: unknown }> {
-  const query = async (args: WithConfig<QueryArgs>) => {
-    const { minimumVersion, ...queryArgs } = args;
+  const query = async (args?: WithConfig<QueryArgs>) => {
+    const { minimumVersion, ...queryArgs } = args ?? {};
     const innerQuery = queryFn(queryArgs as QueryArgs);
 
     if (minimumVersion) {
