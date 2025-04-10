@@ -13,7 +13,6 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
-    - run: 'git submodule update --init --recursive src/rust/processor'
     - uses: 'actions/setup-python@v3'
       with:
         python-version: '${{ env.PYTHON_VERSION }}'
