@@ -22,7 +22,7 @@ parameters:
   EnableWafRulesWebSocket: 'false'
   Environment: 'production'
   Network: 'mainnet'
-  ProcessorImageVersion: '7.0.3'
+  ProcessorImageVersion: '7.0.4'
   VpcStackName: 'emoji-vpc'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
