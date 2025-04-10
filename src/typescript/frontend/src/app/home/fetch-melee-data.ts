@@ -3,7 +3,7 @@ import { fetchCachedArenaInfo } from "lib/queries/arena-info";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
-import { fetchSpecificMarkets, toArenaInfoModel } from "@/sdk/indexer-v2";
+import { fetchSpecificMarkets, fetchVaultBalance, toArenaInfoModel } from "@/sdk/indexer-v2";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
@@ -11,12 +11,14 @@ const logAndDefault = (e: unknown) => {
     arenaInfo: null,
     market0: null,
     market1: null,
+    rewardsRemaining: null,
   } as const;
 };
 
 type MeleeData = Awaited<ReturnType<typeof fetchMeleeData>>;
 const fetchMeleeData = async () => {
   try {
+    const vaultBalancePromise = fetchVaultBalance();
     const arenaInfo = await fetchCachedArenaInfo()
       .then((res) => (res ? toArenaInfoModel(res) : null))
       .catch(() => null);
@@ -36,7 +38,14 @@ const fetchMeleeData = async () => {
     if (!market0 || !market1) {
       throw new Error("Couldn't fetch arena markets.");
     }
-    return { arenaInfo, market0, market1 };
+
+    const vaultBalance = await vaultBalancePromise;
+    return {
+      arenaInfo,
+      market0,
+      market1,
+      rewardsRemaining: vaultBalance ? vaultBalance.arenaVaultBalanceUpdate.newBalance : 0n,
+    };
   } catch (e) {
     return logAndDefault(e);
   }

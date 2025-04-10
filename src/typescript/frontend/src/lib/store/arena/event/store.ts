@@ -8,7 +8,14 @@ import type {
   ArenaInfoModel,
   ArenaMeleeModel,
   ArenaSwapModel,
+  BrokerEventModels,
 } from "@/sdk/indexer-v2";
+import {
+  isArenaEnterModel,
+  isArenaExitModel,
+  isArenaMeleeModel,
+  isArenaVaultBalanceUpdateModel,
+} from "@/sdk/types/arena-types";
 
 import type { CandlestickData } from "../../event/types";
 import { createInitialCandlestickData } from "../../utils";
@@ -32,10 +39,12 @@ export type ArenaState = {
   meleeEvents: readonly ArenaMeleeModel[];
   melees: Readonly<Map<bigint, MeleeState>>;
   meleeMap: Readonly<Map<ArenaChartSymbol, bigint>>;
+  vaultBalance: bigint | undefined;
 };
 
 export type ArenaActions = {
   loadArenaInfoFromServer: (info: ArenaInfoModel) => void;
+  loadVaultBalanceFromServer: (vaultBalance: bigint) => void;
 };
 
 const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
@@ -63,4 +72,25 @@ export const initializeArenaStore = (): ArenaState => ({
   meleeEvents: [],
   melees: new Map(),
   meleeMap: new Map(),
+  vaultBalance: undefined,
 });
+
+export function updateRewardsRemainingAndVaultBalance(
+  state: WritableDraft<ArenaState>,
+  event: BrokerEventModels
+) {
+  if (state.arenaInfoFromServer) {
+    const info = state.arenaInfoFromServer;
+    if (isArenaMeleeModel(event)) {
+      info.rewardsRemaining = event.melee.availableRewards;
+    } else if (isArenaEnterModel(event)) {
+      info.rewardsRemaining -= event.enter.matchAmount;
+    } else if (isArenaExitModel(event)) {
+      info.rewardsRemaining += event.exit.tapOutFee;
+    } else if (isArenaVaultBalanceUpdateModel(event)) {
+      if (state.vaultBalance !== undefined) {
+        state.vaultBalance = event.arenaVaultBalanceUpdate.newBalance;
+      }
+    }
+  }
+}
