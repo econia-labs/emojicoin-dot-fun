@@ -61,9 +61,11 @@ export default function EnterTabLockPhase({
               <Popup
                 content={
                   <span>
-                    Your existing position is already locked
+                    You&apos;re already locked in.
                     <br />
-                    in, so you must remain locked in.
+                    Any additional deposits
+                    <br />
+                    must also be locked in.
                   </span>
                 }
               >
