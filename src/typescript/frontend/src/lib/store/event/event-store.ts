@@ -24,7 +24,6 @@ import {
   isArenaSwapModel,
 } from "@/sdk/types/arena-types";
 import { compareBigInt, DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
-import { Bar } from "@/static/charting_library/datafeed-api";
 
 import {
   ensureMeleeInStore,
@@ -38,7 +37,6 @@ import {
   updateLatestBarFromDatafeed,
 } from "../arena/event/utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
-import type { LatestBar } from "./candlestick-bars";
 import {
   cleanReadLocalStorage,
   clearLocalStorage,

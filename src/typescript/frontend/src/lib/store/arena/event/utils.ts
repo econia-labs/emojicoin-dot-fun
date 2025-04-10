@@ -8,7 +8,6 @@ import {
   isArenaMeleeModel,
   isArenaSwapModel,
 } from "@/sdk/types/arena-types";
-import { toNominal } from "@/sdk/utils";
 
 import type { LatestBar } from "../../event/candlestick-bars";
 import { getCandlestickModelNonce, toBarWithNonce } from "../../event/candlestick-bars";
