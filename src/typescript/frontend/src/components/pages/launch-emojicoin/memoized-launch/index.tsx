@@ -12,6 +12,7 @@ import { useScramble } from "use-scramble";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@/sdk/const";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { sumBytes } from "@/sdk/utils/sum-emoji-bytes";
@@ -28,8 +29,9 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   const setIsLoadingRegisteredMarket = useEmojiPicker(
     (state) => state.setIsLoadingRegisteredMarket
   );
-  const { aptBalance, refetchBalance, aptos, account } = useAptos();
-  const { sequenceNumber } = useAccountSequenceNumber(aptos, account);
+  const { aptBalance, refetchBalance, aptos } = useAptos();
+  const accountAddress = useAccountAddress();
+  const { sequenceNumber } = useAccountSequenceNumber(aptos, accountAddress);
 
   const { registerMarket, cost } = useRegisterMarket(sequenceNumber);
   const { invalid, registered } = useIsMarketRegistered();
