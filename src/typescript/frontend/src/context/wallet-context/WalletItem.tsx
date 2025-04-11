@@ -1,11 +1,7 @@
 // cspell:word bitget
 // cspell:word pontem
-import {
-  type AptosStandardSupportedWallet,
-  useWallet,
-  type Wallet,
-  WalletReadyState,
-} from "@aptos-labs/wallet-adapter-react";
+import type { AdapterNotDetectedWallet, AdapterWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet, WalletReadyState } from "@aptos-labs/wallet-adapter-react";
 import { Arrow } from "components/svg";
 import { type MouseEventHandler, type ReactElement, useCallback, useEffect, useState } from "react";
 import { useScramble } from "use-scramble";
@@ -37,8 +33,8 @@ const WALLET_ICON: { [key: string]: ReactElement } = {
 };
 
 export const walletSort = (
-  a: Wallet | AptosStandardSupportedWallet,
-  b: Wallet | AptosStandardSupportedWallet
+  a: AdapterWallet | AdapterNotDetectedWallet,
+  b: AdapterWallet | AdapterNotDetectedWallet
 ) => {
   const keys = Object.keys(WALLET_ICON);
   return keys.indexOf(a.name.toLowerCase()) - keys.indexOf(b.name.toLowerCase());
@@ -102,7 +98,7 @@ export const WalletItem = ({
   className,
   onClick,
 }: {
-  wallet: Wallet | AptosStandardSupportedWallet;
+  wallet: AdapterWallet | AdapterNotDetectedWallet;
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }) => {
@@ -119,10 +115,7 @@ export const WalletItem = ({
           <ScrambledRow
             active={wallet.name === current?.name}
             text={wallet.name}
-            installed={
-              wallet.readyState === WalletReadyState.Installed ||
-              wallet.readyState === WalletReadyState.Loadable
-            }
+            installed={wallet.readyState === WalletReadyState.Installed}
             hover={hover}
           />
         </div>
