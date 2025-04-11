@@ -2,15 +2,15 @@
 
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
 import { cn } from "lib/utils/class-name";
 import { useEffect, useState } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
-import { standardizeAddress, truncateAddress } from "@/sdk/utils";
+import { truncateAddress } from "@/sdk/utils";
 
 import { getIsOnCustomAllowlist } from "./get-verification-status";
 
@@ -28,21 +28,20 @@ const ClientVerifyPage = ({
   country: string | null;
   region: string | null;
 }) => {
-  const { account } = useAptos();
+  const accountAddress = useAccountAddress();
   const { connected, disconnect } = useWallet();
   const [galxe, setGalxe] = useState(false);
   const [customAllowlisted, setCustomAllowlisted] = useState(false);
   const geoblocked = useIsUserGeoblocked();
 
   useEffect(() => {
-    if (!account || !connected) {
+    if (!accountAddress || !connected) {
       setGalxe(false);
       setCustomAllowlisted(false);
     } else {
-      const address = standardizeAddress(account.address);
-      getIsOnCustomAllowlist(address).then((res) => setCustomAllowlisted(res));
+      getIsOnCustomAllowlist(accountAddress).then((res) => setCustomAllowlisted(res));
     }
-  }, [account, connected]);
+  }, [accountAddress, connected]);
 
   return (
     <>
@@ -76,7 +75,7 @@ const ClientVerifyPage = ({
                 <div>
                   Wallet address:{" "}
                   <span className="text-warning">
-                    {account && <span>{`${truncateAddress(account.address)}`}</span>}
+                    {accountAddress && <span>{`${truncateAddress(accountAddress)}`}</span>}
                   </span>
                 </div>
                 <div>Galxe: {checkmarkOrX(galxe)}</div>
