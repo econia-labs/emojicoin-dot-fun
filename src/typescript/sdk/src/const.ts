@@ -57,7 +57,7 @@ if (!APTOS_NETWORK) {
   throw new Error(`Invalid network: ${network}`);
 }
 
-const clientKeys: Record<Network, string | undefined> = {
+export const clientKeys: Record<Network, string | undefined> = {
   [Network.LOCAL]: undefined,
   [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
   [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
