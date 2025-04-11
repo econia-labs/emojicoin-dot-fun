@@ -12,7 +12,6 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import darkTheme from "theme/dark";
-import type { Colors } from "theme/types";
 import { Emoji } from "utils/emoji";
 
 import { useMatchBreakpoints } from "@/hooks/index";
