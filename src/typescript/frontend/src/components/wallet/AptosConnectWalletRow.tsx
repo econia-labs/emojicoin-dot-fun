@@ -1,9 +1,10 @@
-import { type AnyAptosWallet, WalletItem } from "@aptos-labs/wallet-adapter-react";
+import type { AdapterNotDetectedWallet, AdapterWallet } from "@aptos-labs/wallet-adapter-react";
+import { WalletItem } from "@aptos-labs/wallet-adapter-react";
 import { type MouseEventHandler, useCallback, useEffect, useState } from "react";
 import { useScramble } from "use-scramble";
 
 interface WalletRowProps {
-  wallet: AnyAptosWallet;
+  wallet: AdapterWallet | AdapterNotDetectedWallet;
   onConnect?: () => void;
   onClick?: MouseEventHandler<HTMLElement>;
 }
