@@ -1,7 +1,6 @@
 import {
   AptosPrivacyPolicy,
-  getAptosConnectWallets,
-  partitionWallets,
+  groupAndSortWallets,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
 import { BaseModal } from "components/modal/BaseModal";
@@ -9,7 +8,7 @@ import { Arrow } from "components/svg";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { isSupportedWallet, WalletItem, walletSort } from "context/wallet-context/WalletItem";
 import { motion, type MotionProps, type PanInfo } from "framer-motion";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import EmojicoinLogo from "@/icons/EmojicoinLogo";
@@ -32,11 +31,23 @@ const FirstSlide = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   increment: () => void;
 }) => {
-  const { connect, disconnect, wallets = [], wallet: activeWallet } = useWallet();
-  // The Aptos Connect social login wallets.
-  const { aptosConnectWallets } = getAptosConnectWallets(wallets);
-  // The wallets we specify as `optIn` in the provider.
-  const { defaultWallets, moreWallets } = partitionWallets(wallets);
+  const {
+    connect,
+    disconnect,
+    wallets = [],
+    notDetectedWallets = [],
+    wallet: activeWallet,
+  } = useWallet();
+
+  const { aptosConnectWallets, availableWallets, installableWallets } = groupAndSortWallets([
+    ...wallets,
+    ...notDetectedWallets,
+  ]);
+  
+  const allNonAptosConnectWallets = useMemo(
+    () => [...availableWallets, ...installableWallets],
+    [availableWallets, installableWallets]
+  );
 
   return slide.idx === 0 ? (
     <div className="px-[46px] py-[25.5px]" {...props}>
@@ -92,10 +103,8 @@ const FirstSlide = ({
 
       <div className="flex flex-col divide-y-2 divide-dotted divide-slate-800 pb-2">
         <span>{""}</span>
-        {defaultWallets
-          .concat(moreWallets)
+        {allNonAptosConnectWallets
           .sort(walletSort)
-          .filter((w) => !aptosConnectWallets.map((w) => w.name).includes(w.name))
           .filter((w) => isSupportedWallet(w.name))
           .map((wallet) => (
             <WalletItem

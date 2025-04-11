@@ -2,7 +2,7 @@
 "use client";
 
 import { Network } from "@aptos-labs/ts-sdk";
-import { type AccountInfo, useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
+import { type AccountInfo, AdapterWallet, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { APTOS_NETWORK } from "lib/env";
@@ -22,7 +22,7 @@ import {
   RegisterMarket,
   Swap,
 } from "@/move-modules";
-import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@/sdk/const";
+import { CHAIN_IDS, INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, ONE_APT } from "@/sdk/const";
 import { encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
 import { getEvents, getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 import { toEmojicoinTypesForEntry } from "@/sdk/markets";
@@ -66,7 +66,7 @@ const InnerDisplayDebugData = () => {
       duration: 60 * 1_000_000,
     }).then((res) => {
       if (res.success) {
-        successfulTransactionToast(res, { name: Network.LOCAL });
+        successfulTransactionToast(res, { name: Network.LOCAL, chainId: CHAIN_IDS.local });
       } else {
         toast.error("Fail.");
       }
@@ -118,9 +118,7 @@ const InnerDisplayDebugData = () => {
   // Curry a function to force a connection if the wallet isn't connected or call the original function otherwise.
   const forceConnectOrRunFunction = useCallback(
     (functionToCallIfConnected: (definedAccount: AccountInfo) => Promise<void>) => () =>
-      account && connected
-        ? functionToCallIfConnected(account)
-        : connect(wallet?.name ?? ("Petra" as WalletName)),
+      account && connected ? functionToCallIfConnected(account) : connect(wallet?.name ?? "Petra"),
     [account, connect, connected, wallet]
   );
 
