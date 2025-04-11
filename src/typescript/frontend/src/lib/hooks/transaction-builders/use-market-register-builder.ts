@@ -1,8 +1,8 @@
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS } from "lib/env";
 import { useMemo } from "react";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { RegisterMarket } from "@/move-modules/emojicoin-dot-fun";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data/emoji-data";
 
@@ -17,11 +17,10 @@ export const useMarketRegisterTransactionBuilder = (
   gasAmount: number,
   gasUnitPrice: number
 ) => {
-  const { account } = useAptos();
+  const accountAddress = useAccountAddress();
   const emojis = useEmojiPicker((s) => s.emojis);
 
   const { memoizedArgs, options } = useMemo(() => {
-    const accountAddress = account?.address;
     const emojiBytes = emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.bytes);
     const memoizedArgs = accountAddress
       ? {
@@ -42,7 +41,7 @@ export const useMarketRegisterTransactionBuilder = (
       memoizedArgs,
       options,
     };
-  }, [account?.address, emojis, accountSequenceNumber, gasAmount, gasUnitPrice]);
+  }, [accountAddress, emojis, accountSequenceNumber, gasAmount, gasUnitPrice]);
 
   return useTransactionBuilderWithOptions(memoizedArgs, RegisterMarket, options);
 };

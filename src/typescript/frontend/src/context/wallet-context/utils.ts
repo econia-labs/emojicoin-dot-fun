@@ -1,5 +1,4 @@
 import { TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import type { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 import { emoji } from "utils";
@@ -22,10 +21,10 @@ export const setCoinTypeHelper = (
   }
 };
 
-export const copyAddressHelper = async (account: AccountInfo | null) => {
-  if (!account?.address) return;
+export const copyAddressHelper = async (accountAddress: `0x${string}` | undefined) => {
+  if (!accountAddress) return;
   try {
-    await navigator.clipboard.writeText(account.address);
+    await navigator.clipboard.writeText(accountAddress);
     toast.success(`Copied address to clipboard! ${emoji("clipboard")}`, {
       pauseOnFocusLoss: false,
       autoClose: 2000,

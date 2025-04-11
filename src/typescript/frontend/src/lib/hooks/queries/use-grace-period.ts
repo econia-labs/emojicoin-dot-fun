@@ -3,8 +3,8 @@ import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useMemo, useState } from "react";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { getRegistrationGracePeriodFlag } from "@/sdk/markets/utils";
-import { standardizeAddress } from "@/sdk/utils/account-address";
 
 // -------------------------------------------------------------------------------------------------
 //                        Utilities for calculating the number of seconds left.
@@ -78,21 +78,21 @@ const useGracePeriod = (symbol: string, hasSwaps: boolean) => {
 //          The actual hook to be used in a component to display the amount of seconds left.
 // -------------------------------------------------------------------------------------------------
 export const useCanTradeMarket = (symbol: string) => {
-  const { account } = useAptos();
+  const accountAddress = useAccountAddress();
   const hasSwaps = useEventStore((s) => (s.markets.get(symbol)?.swapEvents.length ?? 0) > 0);
   const { isLoading, data } = useGracePeriod(symbol, hasSwaps);
 
   const { canTrade, marketRegistrationTime } = useMemo(() => {
     const notInGracePeriod = data?.gracePeriodOver;
-    const userAddress = account?.address && standardizeAddress(account.address);
+    const userAddress = accountAddress;
     // Assume the user is the market registrant while the query is fetching in order to prevent
     // disallowing the actual registrant from trading while the query result is being fetched.
-    const userIsRegistrant = data?.flag?.marketRegistrant === userAddress;
+    const userIsRegistrant = userAddress && data?.flag?.marketRegistrant === userAddress;
     return {
       canTrade: isLoading || userIsRegistrant || notInGracePeriod || hasSwaps,
       marketRegistrationTime: data?.flag?.marketRegistrationTime,
     };
-  }, [isLoading, data, account?.address, hasSwaps]);
+  }, [isLoading, data, accountAddress, hasSwaps]);
 
   const displayTimeLeft = useDisplayTimeLeft(marketRegistrationTime);
 
