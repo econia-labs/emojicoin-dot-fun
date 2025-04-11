@@ -34,14 +34,14 @@ const LinkButton = ({
 }: {
   name: string;
   link: string | undefined;
-  icon?: (color: keyof Colors) => React.ReactNode;
+  icon?: React.ReactNode;
 }) => {
   const button = (
     <Button
       scale="lg"
       fakeDisabled={!link && !!LINKS?.discord && !!DISCORD_METADATA_REQUEST_CHANNEL}
       disabled={!link && !LINKS?.discord && !DISCORD_METADATA_REQUEST_CHANNEL}
-      icon={icon && icon(link ? "econiaBlue" : "darkGray")}
+      icon={icon}
     >
       {name}
     </Button>
@@ -138,9 +138,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
     <LinkButton
       name={"telegram"}
       link={marketProperties?.get("Telegram")}
-      icon={(color) => (
-        <TelegramOutlineIcon className="h-[1.5em] w-[1.5em] ml-[-8px]" color={color} />
-      )}
+      icon={<TelegramOutlineIcon className="scale-[1.8]" />}
     />
   );
 
@@ -148,18 +146,12 @@ const MainInfo = ({ data }: MainInfoProps) => {
     <LinkButton
       name={"twitter"}
       link={marketProperties?.get("X profile")}
-      icon={(color) => (
-        <TwitterOutlineIcon className="h-[1.2em] w-[1.2em] ml-[-8px]" color={color} />
-      )}
+      icon={<TwitterOutlineIcon className="scale-[1.8]" />}
     />
   );
 
   const websiteButton = (
-    <LinkButton
-      name={"website"}
-      link={marketProperties?.get("Website")}
-      icon={(color) => <Planet className="h-[.7em] w-[.7em] self-center mr-[8px]" color={color} />}
-    />
+    <LinkButton name={"website"} link={marketProperties?.get("Website")} icon={<Planet />} />
   );
 
   const switcher = (
