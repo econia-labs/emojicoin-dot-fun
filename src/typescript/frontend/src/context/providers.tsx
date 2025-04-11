@@ -4,15 +4,11 @@
 // cspell:word pontem
 // cspell:word okwallet
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
-import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
-import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
-import { PontemWallet } from "@pontem/wallet-adapter-plugin";
-import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { init } from "emoji-mart";
 import { enableMapSet } from "immer";
 import { APTOS_NETWORK } from "lib/env";
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
@@ -27,7 +23,7 @@ import { HeaderSpacer } from "@/components/header-spacer";
 import Loader from "@/components/loader";
 import type { EmojiMartData } from "@/components/pages/emoji-picker/types";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
-import { getAptosApiKey } from "@/sdk/const";
+import { clientKeys } from "@/sdk/const";
 
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import ContentWrapper from "./ContentWrapper";
@@ -57,11 +53,6 @@ const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsW
   const isMobileMenuOpen = isOpen && !isDesktop;
   const [isMounted, setIsMounted] = useState(false);
 
-  const wallets = useMemo(
-    () => [new PontemWallet(), new RiseWallet(), new MartianWallet(), new OKXWallet()],
-    []
-  );
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -72,10 +63,9 @@ const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsW
         <QueryClientProvider client={queryClient}>
           <UserSettingsProvider userAgent={userAgent}>
             <AptosWalletAdapterProvider
-              plugins={wallets}
               autoConnect={true}
               dappConfig={{
-                aptosApiKey: getAptosApiKey(),
+                aptosApiKeys: clientKeys,
                 network: APTOS_NETWORK,
               }}
             >
