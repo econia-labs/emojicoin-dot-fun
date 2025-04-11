@@ -1,10 +1,12 @@
 import { CloseIcon } from "components/svg";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
 import type { ArenaProps } from "../utils";
+import { ArenaLoading } from "./ArenaLoading";
 import ChatTab from "./ChatTab";
 import EnterTab from "./enter-tab/EnterTab";
 import InfoTab from "./InfoTab";
@@ -49,8 +51,10 @@ const getTabs = (
 
 export const TabContainer = (props: ArenaProps) => {
   const [selectedTab, setSelectedTab] = useState<TabName>("Position");
+  const { status } = useAptos();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
+  const currentTab = useMemo(() => tabs.find((t) => t.name === selectedTab), [selectedTab, tabs]);
 
   return (
     <div
@@ -96,7 +100,12 @@ export const TabContainer = (props: ArenaProps) => {
         })}
         <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
       </div>
-      <div className="overflow-y-auto">{tabs.find((t) => t.name === selectedTab)?.element}</div>
+      {/* Show ArenaLoading for every transaction that happens on Position tab. */}
+      {status === "pending" && currentTab?.name === "Position" ? (
+        <ArenaLoading />
+      ) : (
+        <div className="overflow-y-auto">{currentTab?.element}</div>
+      )}
     </div>
   );
 };
