@@ -17,7 +17,6 @@ const Button = <E extends React.ElementType = "button">({
   children,
   isLoading = false,
   disabled = false,
-  fakeDisabled = false,
   external,
   isScramble = true,
   scale = "sm",
@@ -27,7 +26,6 @@ const Button = <E extends React.ElementType = "button">({
   ...rest
 }: ButtonProps<E> & { scrambleProps?: UseScrambleProps } & {
   icon?: React.ReactNode;
-  fakeDisabled?: boolean;
 }): JSX.Element => {
   const isDisabled = isLoading || disabled;
   const internalProps = external ? EXTERNAL_LINK_PROPS : {};
@@ -41,23 +39,25 @@ const Button = <E extends React.ElementType = "button">({
 
   const textProps = {
     textScale: "pixelHeading4" as const,
-    color: isDisabled || fakeDisabled ? ("darkGray" as const) : ("econiaBlue" as const),
     textTransform: "uppercase" as const,
     fontSize:
       scale === "sm" ? ("20px" as const) : scale === "lg" ? ("24px" as const) : ("36px" as const),
   };
 
+  const isChildrenString = typeof children === "string";
+  const shouldScramble = isScramble && isChildrenString && !disabled;
+
   return (
     <StyledButton
       {...internalProps}
       {...rest}
-      varian={variant}
+      variant={variant}
       type={rest.type || "button"}
       disabled={isDisabled}
       $isLoading={isLoading}
       scale={scale}
-      onMouseOver={isScramble ? replay : undefined}
-      onFocus={isScramble ? replay : undefined}
+      onMouseOver={shouldScramble ? replay : undefined}
+      onFocus={shouldScramble ? replay : undefined}
     >
       {isLoading ? (
         <SpinnerIcon />
@@ -68,57 +68,26 @@ const Button = <E extends React.ElementType = "button">({
               mr: "0.5rem",
             })}
 
-          {!isScramble ? (
-            <FlexGap
-              gap="8px"
-              onMouseOver={replay}
-              justifyContent="space-between"
-              className="h-[1em]"
-            >
-              <Text {...textProps}>{"{ "}</Text>
-              {icon && (
-                <Text {...textProps} className="flex flex-row">
-                  {icon}
-                </Text>
-              )}
-              <Text
-                {...textProps}
-                className="flex flex-row"
-                style={
-                  typeof children === "string"
-                    ? { minWidth: `${children.length + 1}ch`, textAlign: "center" }
-                    : {}
-                }
-              >
-                {children}
+          <FlexGap gap="8px" justifyContent="space-between">
+            <Text {...textProps}>{"{ "}</Text>
+            {icon && (
+              <Text {...textProps} className="flex flex-row">
+                {icon}
               </Text>
-              <Text {...textProps}>{" }"}</Text>
-            </FlexGap>
-          ) : (
-            <FlexGap
-              gap="8px"
-              onMouseOver={replay}
-              className="h-[1em]"
-              justifyContent="space-between"
+            )}
+            <Text
+              {...textProps}
+              ref={shouldScramble ? ref : undefined}
+              style={
+                typeof children === "string"
+                  ? { minWidth: `${children.length + 1}ch`, textAlign: "center" }
+                  : {}
+              }
             >
-              <Text {...textProps}>{"{ "}</Text>
-              {icon && (
-                <Text {...textProps} className="flex flex-row">
-                  {icon}
-                </Text>
-              )}
-              <Text
-                {...textProps}
-                ref={isScramble ? ref : undefined}
-                style={
-                  typeof children === "string"
-                    ? { minWidth: `${children.length + 1}ch`, textAlign: "center" }
-                    : {}
-                }
-              />
-              <Text {...textProps}>{" }"}</Text>
-            </FlexGap>
-          )}
+              {!shouldScramble ? children : null}
+            </Text>
+            <Text {...textProps}>{" }"}</Text>
+          </FlexGap>
 
           {React.isValidElement(endIcon) &&
             React.cloneElement(endIcon, {

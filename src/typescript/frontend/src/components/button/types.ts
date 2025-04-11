@@ -6,6 +6,8 @@ import type { PolymorphicComponentProps } from "types";
 
 const variants = {
   OUTLINE: "outline",
+  BORDER: "border",
+  SOLID: "solid",
 } as const;
 
 export const scales = {
@@ -31,6 +33,7 @@ interface BaseButtonProps
       startIcon?: ReactNode & SvgProps;
       endIcon?: ReactNode & SvgProps;
       isScramble?: boolean;
+      fakeDisabled?: boolean;
     }> {}
 
 export type ButtonProps<P extends ElementType = "button"> = PolymorphicComponentProps<
