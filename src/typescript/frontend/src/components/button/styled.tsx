@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { layout, opacity, shadow, space, typography, variant } from "styled-system";
+import { border, layout, opacity, shadow, space, typography, variant } from "styled-system";
 
 import { scaleVariants, variantStyles } from "./theme";
 import type { ButtonProps } from "./types";
@@ -29,6 +29,7 @@ const StyledButton = styled.button<ButtonProps>`
   ${typography}
   ${layout}
   ${opacity}
+  ${border}
   ${shadow}
 `;
 
