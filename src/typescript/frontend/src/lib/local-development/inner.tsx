@@ -2,7 +2,7 @@
 "use client";
 
 import { Network } from "@aptos-labs/ts-sdk";
-import { type AccountInfo, AdapterWallet, useWallet } from "@aptos-labs/wallet-adapter-react";
+import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { APTOS_NETWORK } from "lib/env";
