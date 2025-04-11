@@ -34,7 +34,7 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
   );
   const clear = useEmojiPicker((state) => state.clear);
   const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
-  const { aptos, signThenSubmit, account } = useAptos();
+  const { aptos, account, signThenSubmit } = useAptos();
 
   const { data: numMarkets } = useNumMarkets();
 

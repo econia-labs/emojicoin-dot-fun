@@ -43,7 +43,7 @@ const FirstSlide = ({
     ...wallets,
     ...notDetectedWallets,
   ]);
-  
+
   const allNonAptosConnectWallets = useMemo(
     () => [...availableWallets, ...installableWallets],
     [availableWallets, installableWallets]
