@@ -6,14 +6,15 @@ import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 
 import { isNonArenaPeriod, periodEnumToRawDuration } from "@/sdk/const";
-import type { Bar, IBasicDataFeed } from "@/static/charting_library";
+import type { IBasicDataFeed } from "@/static/charting_library";
+import type { BarWithNonce } from "@/store/event/candlestick-bars";
 
 import { ResolutionStringToPeriod } from "./const";
 import {
   createDummyBar,
   fetchCandlesticksForChart,
   fetchLatestBarsFromMarketResource,
-  updateLastTwoBars,
+  updateLastBar,
 } from "./get-bars";
 import {
   CONFIGURATION_DATA,
@@ -31,6 +32,7 @@ export const useDatafeed = (symbol: string) => {
   const setLatestBars = useEventStore((s) => s.setLatestBars);
   const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarkets);
   const getMeleeMap = useEventStore((s) => s.getMeleeMap);
+  const maybeUpdateMeleeLatestBar = useEventStore((s) => s.maybeUpdateMeleeLatestBar);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -76,7 +78,7 @@ export const useDatafeed = (symbol: string) => {
         const endDate = new Date(to * 1000);
         const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
 
-        let bars: Bar[] = [];
+        let bars: BarWithNonce[] = [];
 
         try {
           if (isArenaChartSymbol(symbol)) {
@@ -91,6 +93,10 @@ export const useDatafeed = (symbol: string) => {
               periodParams,
               period,
             });
+
+            if (isFetchForMostRecentBars) {
+              maybeUpdateMeleeLatestBar(bars.at(-1), period, meleeID);
+            }
           } else {
             if (!isNonArenaPeriod(period)) {
               throw new Error("Invalid period type for a non-arena symbol.");
@@ -120,7 +126,7 @@ export const useDatafeed = (symbol: string) => {
               setLatestBars({ marketMetadata, latestBars });
               if (latestBar) {
                 // Mutates the `bars` array.
-                updateLastTwoBars(bars, latestBar);
+                updateLastBar(bars, latestBar);
               }
             }
           }
@@ -174,6 +180,7 @@ export const useDatafeed = (symbol: string) => {
       unsubscribeFromPeriod,
       getMeleeMap,
       getShowEmptyBars,
+      maybeUpdateMeleeLatestBar,
       symbol,
       router,
     ]
