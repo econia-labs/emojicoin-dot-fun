@@ -8,7 +8,7 @@ import {
 import type { MarketStateQueryArgs } from "../../types/common";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
-import { queryHelper } from "../utils";
+import { queryHelper, queryHelperSingle } from "../utils";
 
 const selectMarketRegistrationEventBySymbolEmojis = ({
   searchEmojis,
@@ -20,6 +20,13 @@ const selectMarketRegistrationEventBySymbolEmojis = ({
     .select("*")
     .eq("symbol_emojis", toQueryArray(searchEmojis))
     .range((page - 1) * pageSize, page * pageSize - 1);
+
+const selectMarketRegistrationByAddress = ({ marketAddress }: { marketAddress: `0x${string}` }) =>
+  postgrest
+    .from(TableName.MarketRegistrationEvents)
+    .select("*")
+    .eq("market_address", marketAddress)
+    .maybeSingle();
 
 const selectSwapEventsByBlock = ({
   fromBlock,
@@ -49,6 +56,11 @@ const selectLiquidityEventsByBlock = ({
 
 export const fetchMarketRegistrationEventBySymbolEmojis = queryHelper(
   selectMarketRegistrationEventBySymbolEmojis,
+  toMarketRegistrationEventModel
+);
+
+export const fetchMarketRegistrationByAddress = queryHelperSingle(
+  selectMarketRegistrationByAddress,
   toMarketRegistrationEventModel
 );
 
