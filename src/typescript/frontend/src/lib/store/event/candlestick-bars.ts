@@ -1,28 +1,29 @@
 import Big from "big.js";
 
 import { type AnyPeriod, type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@/sdk/const";
-import {
-  type ArenaCandlestickModel,
-  isPeriodicStateEventModel,
-  type PeriodicStateEventModel,
-  type SwapEventModel,
+import type {
+  ArenaCandlestickModel,
+  CandlestickModel,
+  PeriodicStateEventModel,
+  SwapEventModel,
 } from "@/sdk/indexer-v2/types";
+import { isPeriodicStateEventModel } from "@/sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime, toNominal } from "@/sdk/utils";
 import { q64ToBig } from "@/sdk/utils/nominal-price";
 import type { Types } from "@/sdk-types";
 
-type Bar = {
+export type BarWithNonce = {
   time: number;
   open: number;
   high: number;
   low: number;
   close: number;
   volume: number;
+  nonce: bigint;
 };
 
-export type LatestBar = Bar & {
+export type LatestBar = BarWithNonce & {
   period: AnyPeriod;
-  nonce: bigint;
 };
 
 export const periodicStateTrackerToLatestBar = (
@@ -59,7 +60,16 @@ export const marketToLatestBars = <
   return latestBars;
 };
 
-export function toBar(event: PeriodicStateEventModel | ArenaCandlestickModel): Bar {
+/**
+ * These candlestick models are emitted once per transaction block, so the comparator nonce can just
+ * be the candlestick's latest transaction version.
+ */
+export const getCandlestickModelNonce = (model: ArenaCandlestickModel | CandlestickModel) =>
+  model.version;
+
+export function toBarWithNonce(
+  event: PeriodicStateEventModel | ArenaCandlestickModel | CandlestickModel
+): BarWithNonce {
   return isPeriodicStateEventModel(event)
     ? {
         time: Number(event.periodicMetadata.startTime / 1000n),
@@ -68,6 +78,7 @@ export function toBar(event: PeriodicStateEventModel | ArenaCandlestickModel): B
         low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
         close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
         volume: toNominal(event.periodicState.volumeQuote),
+        nonce: event.market.marketNonce,
       }
     : {
         time: event.startTime.getTime(),
@@ -76,6 +87,7 @@ export function toBar(event: PeriodicStateEventModel | ArenaCandlestickModel): B
         low: event.lowPrice,
         close: event.closePrice,
         volume: toNominal(event.volume),
+        nonce: getCandlestickModelNonce(event),
       };
 }
 
