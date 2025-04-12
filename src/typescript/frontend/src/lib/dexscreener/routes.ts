@@ -1,9 +1,11 @@
 import { INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { type NextRequest, NextResponse } from "next/server";
 
+import type { MarketRegistrationEventModel } from "@/sdk/index";
 import { calculateCirculatingSupply, EMOJICOIN_SUPPLY, toMarketEmojiData } from "@/sdk/index";
 import {
   fetchLiquidityEventsByBlock,
+  fetchMarketRegistrationByAddress,
   fetchMarketRegistrationEventBySymbolEmojis,
   fetchMarketState,
   fetchSwapEventsByBlock,
@@ -100,19 +102,43 @@ export async function latestBlock(
   });
 }
 
-export async function pair(request: NextRequest): Promise<NextResponse<PairResponse>> {
+export async function pair(
+  request: NextRequest,
+  options: { geckoTerminal: boolean } = { geckoTerminal: false }
+): Promise<NextResponse<PairResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const pairId = searchParams.get("id");
   if (!pairId) {
     return new NextResponse("id is a required parameter", { status: 400 });
   }
 
-  const symbolEmojis = pairIdToSymbolEmojis(pairId);
+  let marketRegistration: MarketRegistrationEventModel | undefined | null;
+  let asset0Id: string;
+  let asset1Id: string;
 
-  const marketRegistrations = await fetchMarketRegistrationEventBySymbolEmojis({
-    searchEmojis: symbolEmojis,
-  });
-  const marketRegistration = marketRegistrations.pop();
+  if (options.geckoTerminal) {
+    if (!pairId.startsWith("0x") && pairId.length != 66) {
+      return new NextResponse("id is not a valid Aptos address", { status: 400 });
+    }
+    marketRegistration = await fetchMarketRegistrationByAddress({
+      marketAddress: pairId as `0x${string}`,
+    });
+    asset0Id = `${marketRegistration?.market.marketAddress}::coin_factory::Emojicoin`;
+    asset1Id = "0x1::aptos_coin::AptosCoin";
+  } else {
+    const symbolEmojis = pairIdToSymbolEmojis(pairId);
+    if (pairId != `${symbolEmojis.join("")}-APT`) {
+      return new NextResponse("id is not a valid pair ID", { status: 400 });
+    }
+
+    const marketRegistrations = await fetchMarketRegistrationEventBySymbolEmojis({
+      searchEmojis: symbolEmojis,
+    });
+    marketRegistration = marketRegistrations.pop();
+    asset0Id = symbolEmojisToString(symbolEmojis);
+    asset1Id = "APT";
+  }
+
   if (!marketRegistration) {
     return new NextResponse(`Market registration not found for pairId: ${pairId}`, {
       status: 404,
@@ -128,8 +154,8 @@ export async function pair(request: NextRequest): Promise<NextResponse<PairRespo
     pair: {
       id: pairId,
       dexKey: "emojicoin.fun",
-      asset0Id: symbolEmojisToString(symbolEmojis),
-      asset1Id: "APT",
+      asset0Id,
+      asset1Id,
       createdAtBlockNumber: parseInt(block.block_height),
       createdAtBlockTimestamp: Math.floor(
         marketRegistration.transaction.timestamp.getTime() / 1000
