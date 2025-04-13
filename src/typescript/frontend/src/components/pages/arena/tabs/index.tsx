@@ -118,7 +118,7 @@ export const MobileNavigation = (props: ArenaProps) => {
     <>
       {!tab && (
         <div
-          className="fixed bottom-0 border-solid border-t-[1px] border-dark-gray h-[4em] bg-black"
+          className="fixed bottom-0 w-full border-solid border-t-[1px] border-dark-gray h-[4em] bg-black"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr 1fr",

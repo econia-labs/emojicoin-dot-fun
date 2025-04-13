@@ -107,7 +107,7 @@
     "check:ci": "tsc -p tests/tsconfig-ci.json",
     "check:tests": "tsc -p tests/tsconfig.json",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
-    "dev": "NODE_OPTIONS='--inspect' next dev --turbo -H 0.0.0.0 --port 3001",
+    "dev": "NODE_OPTIONS='--inspect' next dev --turbo --port 3001",
     "format": "pnpm _format --list-different --write",
     "format:check": "pnpm _format --check",
     "lint": "eslint --max-warnings=0 -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
