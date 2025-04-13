@@ -12,7 +12,7 @@ import { useEffectOnce } from "react-use";
 import { ROUTES } from "router/routes";
 
 import AptosIconBlack from "@/icons/AptosBlack";
-import type { SymbolEmoji } from "@/sdk/emoji_data";
+import { namesToEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
 import { formatDisplayName, type ValidAptosName } from "@/sdk/utils";
 
 import { WalletPortfolioTable } from "./WalletPortfolioTable";
@@ -59,13 +59,19 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
         </span>
       </div>
       <Tabs value={tab} onValueChange={(v) => setTab(v)}>
-        <div className="flex min-h-[45px] items-end justify-between w-full flex-wrap">
-          <TabsList>
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="trade-history">Trade History</TabsTrigger>
-          </TabsList>
-          {tab === "trade-history" && <SearchBar />}
-        </div>
+        <TabsList>
+          <TabsTrigger value="portfolio" endSlot={namesToEmojis("money bag")}>
+            Portfolio
+          </TabsTrigger>
+          <TabsTrigger value="trade-history" endSlot={namesToEmojis("rocket")}>
+            Trade History
+          </TabsTrigger>
+          {tab === "trade-history" && (
+            <div className="flex grow justify-end min-w-[150px]">
+              <SearchBar className="ml-auto" />
+            </div>
+          )}
+        </TabsList>
         <TabsContent value="portfolio">
           <WalletPortfolioTable address={address} />
         </TabsContent>

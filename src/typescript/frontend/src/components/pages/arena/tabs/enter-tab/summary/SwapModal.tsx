@@ -3,11 +3,11 @@ import { GlowingEmoji } from "utils/emoji";
 
 import Button from "@/components/button";
 import ButtonWithConnectWalletFallback from "@/components/header/wallet-button/ConnectWalletButton";
+import { CloseIcon } from "@/components/svg";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 
 import { marketTernary } from "../../../utils";
 import { AnimatedLoadingBoxesWithFallback } from "../../utils";
-import BlurModal from "../BlurModal";
 import { EscrowAptValue } from "./utils";
 
 /**
@@ -27,8 +27,13 @@ export default function SwapModal({
   const { market0, market1, symbol0, symbol1 } = useCurrentMeleeInfo();
 
   return (
-    <BlurModal close={() => setIsSwapping(false)}>
-      <div className="flex flex-col justify-between items-center h-[100%] py-[3em] mt-[1em]">
+    <div className="flex flex-col justify-around items-center grow relative">
+      <CloseIcon
+        onClick={() => setIsSwapping(false)}
+        className="absolute right-[.5em] top-[.5em] p-[.5em] h-[2.5em] w-[2.5em] cursor-pointer"
+        color="econiaBlue"
+      />
+      <div className="flex flex-col items-center justify-center gap-8 grow">
         {symbol0 && symbol1 ? (
           <GlowingEmoji className="text-6xl" emojis={marketTernary(position, symbol1, symbol0)} />
         ) : (
@@ -43,12 +48,12 @@ export default function SwapModal({
             loading={loading}
           />
         </div>
-        <ButtonWithConnectWalletFallback>
-          <Button scale="lg" onClick={onSwap}>
-            Swap
-          </Button>
-        </ButtonWithConnectWalletFallback>
       </div>
-    </BlurModal>
+      <ButtonWithConnectWalletFallback>
+        <Button scale="lg" onClick={onSwap}>
+          Swap
+        </Button>
+      </ButtonWithConnectWalletFallback>
+    </div>
   );
 }

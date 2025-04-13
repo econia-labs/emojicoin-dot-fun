@@ -51,38 +51,39 @@ const ChatBox = (props: ChatProps) => {
 
   const { sendChatMessage } = useChatBox(props.data.marketAddress);
 
-  if (chatsQuery.isLoading) return <Loading />;
-
   return (
-    <Column className="relative" width="100%" flexGrow={1}>
-      <Flex
-        flexGrow="1"
-        width="100%"
-        overflowY="auto"
-        maxHeight="328px"
-        flexDirection="column-reverse"
-      >
-        <motion.div
-          layoutScroll
-          className="flex flex-col-reverse w-full justify-center px-[21px] py-0 border-r border-solid border-r-dark-gray"
+    <Column className="relative w-full min-h-[328px] grow">
+      {chatsQuery.isLoading ? (
+        <Loading />
+      ) : (
+        <Flex
+          flexGrow="1"
+          width="100%"
+          overflowY="auto"
+          maxHeight="328px"
+          flexDirection="column-reverse"
         >
-          {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
-            <MessageContainer
-              message={message}
-              key={message.version}
-              index={sortedChats.length - index}
-              alignLeft={message.sender === connectedWalletName}
-              shouldAnimateAsInsertion={shouldAnimateAsInsertion}
+          <motion.div
+            layoutScroll
+            className="flex flex-col-reverse w-full justify-center px-[21px] py-0 border-r border-solid border-r-dark-gray"
+          >
+            {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
+              <MessageContainer
+                message={message}
+                key={message.version}
+                index={sortedChats.length - index}
+                alignLeft={message.sender === connectedWalletName}
+                shouldAnimateAsInsertion={shouldAnimateAsInsertion}
+              />
+            ))}
+            <LoadMore
+              query={chatsQuery}
+              className="mt-2 mb-4"
+              endOfListText="This is the beginning of the chat"
             />
-          ))}
-          <LoadMore
-            query={chatsQuery}
-            className="mt-2 mb-4"
-            endOfListText="This is the beginning of the chat"
-          />
-        </motion.div>
-      </Flex>
-
+          </motion.div>
+        </Flex>
+      )}
       <EmojiPickerWithInput handleClick={sendChatMessage} />
     </Column>
   );

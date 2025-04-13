@@ -63,7 +63,7 @@ export default function EnterTabSummary({
   }, [account, swapTransactionBuilder, swap, submit]);
 
   return (
-    <div className="relative h-[100%]">
+    <div className="flex flex-col grow py-4">
       {isTappingOut && (
         <TapOutModal position={position} onTapOut={onTapOut} setIsTappingOut={setIsTappingOut} />
       )}
@@ -75,13 +75,16 @@ export default function EnterTabSummary({
           loading={isLoading}
         />
       )}
-      <Summary
-        position={position}
-        onTapOut={onTapOut}
-        setIsTappingOut={setIsTappingOut}
-        setIsSwapping={setIsSwapping}
-        topOff={topOff}
-      />
+
+      {!isTappingOut && !isSwapping && (
+        <Summary
+          position={position}
+          onTapOut={onTapOut}
+          setIsTappingOut={setIsTappingOut}
+          setIsSwapping={setIsSwapping}
+          topOff={topOff}
+        />
+      )}
     </div>
   );
 }
