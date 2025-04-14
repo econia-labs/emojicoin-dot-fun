@@ -37,7 +37,6 @@ export class EntryFunctionTransactionBuilder {
 
   public readonly rawTransactionInput: AnyRawTransaction;
 
-  // TODO: This should probably be private, if it's possible.
   constructor(
     payloadBuilder: EntryFunctionPayloadBuilder,
     aptos: Aptos,
@@ -174,7 +173,6 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
         function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,
         typeArguments: this.typeTags.map((t) => t.toString()),
         functionArguments: serializeEntryArgsToJsonArray(this.args),
-        // abi: undefined, // TODO: Add pre-defined ABIs.
       },
       // options are ignored here by the wallet adapter, so there's no need to pretend it's possible
       // to set them. The only way to use them is to use the sign then submit flow, not sign *and*

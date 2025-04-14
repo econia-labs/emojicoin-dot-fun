@@ -220,9 +220,6 @@ const TableCard = ({
                 >
                   {t("Market Cap")}
                 </div>
-                {/* TODO: Have these do a "damage"-like animation, as if it's health is being chunked.
-                  Like you'd see -0.03 (the diff) pop out of the total value in red and it'd shake horizontally,
-                  then fall off the screen. */}
                 <motion.div
                   animate={controls}
                   variants={animationsOn ? textVariants : {}}
