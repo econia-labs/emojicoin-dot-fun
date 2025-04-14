@@ -1,13 +1,14 @@
 import { INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { type NextRequest, NextResponse } from "next/server";
 
-import type { MarketRegistrationEventModel } from "@/sdk/index";
+import type { MarketRegistrationEventModel, MarketStateModel } from "@/sdk/index";
 import { calculateCirculatingSupply, EMOJICOIN_SUPPLY, toMarketEmojiData } from "@/sdk/index";
 import {
   fetchLiquidityEventsByBlock,
   fetchMarketRegistrationByAddress,
   fetchMarketRegistrationEventBySymbolEmojis,
   fetchMarketState,
+  fetchMarketStateByAddress,
   fetchSwapEventsByBlock,
   getProcessorStatus,
   isLiquidityEventModel,
@@ -25,7 +26,7 @@ import {
 
 export async function asset(
   request: NextRequest,
-  ops = { withDecimals: false }
+  ops = { geckoTerminal: false }
 ): Promise<NextResponse<AssetResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const assetId = searchParams.get("id");
@@ -33,9 +34,25 @@ export async function asset(
     // This is a required field, and is an error otherwise.
     return new NextResponse("id is a parameter", { status: 400 });
   }
-  const marketEmojiData = toMarketEmojiData(assetId);
-  const symbolEmojis = symbolEmojiStringToArray(assetId);
-  const marketState = await fetchMarketState({ searchEmojis: symbolEmojis });
+
+  let marketState: MarketStateModel | null;
+
+  if (ops.geckoTerminal) {
+    if (!/^0x[a-f0-9]{64}::coin_factory::Emojicoin$/.test(assetId)) {
+      return new NextResponse("id must be a valid asset ID", { status: 400 });
+    }
+    const marketAddress = assetId.split(/::/)[0];
+    marketState = await fetchMarketStateByAddress({ address: marketAddress });
+  } else {
+    const symbolEmojis = symbolEmojiStringToArray(assetId);
+    marketState = await fetchMarketState({ searchEmojis: symbolEmojis });
+  }
+
+  if (!marketState) {
+    return new NextResponse("Could not find asset", { status: 404 });
+  }
+
+  const marketEmojiData = toMarketEmojiData(marketState.market.symbolEmojis.join(""));
 
   const circulatingSupply: { circulatingSupply?: number | string } = {};
   if (marketState && marketState.state) {
@@ -48,7 +65,7 @@ export async function asset(
       name: marketEmojiData.symbolData.name,
       symbol: marketEmojiData.symbolData.symbol,
       totalSupply: toNominal(EMOJICOIN_SUPPLY),
-      ...(ops.withDecimals ? { decimals: 8 } : {}),
+      ...(ops.geckoTerminal ? { decimals: 8 } : {}),
       ...circulatingSupply,
     },
   });
