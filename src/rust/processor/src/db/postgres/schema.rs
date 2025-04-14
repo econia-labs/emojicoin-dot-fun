@@ -488,6 +488,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    processor_status (processor) {
+        #[max_length = 50]
+        processor -> Varchar,
+        last_success_version -> Int8,
+        last_transaction_timestamp -> Timestamp,
+        last_updated -> Timestamp,
+    }
+}
+
+diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::TriggerType;
 
@@ -599,6 +609,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     market_latest_state_event,
     market_registration_events,
     periodic_state_events,
+    processor_status,
     swap_events,
     unregistered_markets,
     user_liquidity_pools,

@@ -182,6 +182,7 @@ async fn insert_to_db(
     insert_events: InsertEvents,
     per_table_chunk_sizes: &AHashMap<String, usize>,
     max_transaction_version: u64,
+    last_transaction: &Transaction,
 ) -> Result<(Vec<CandlestickModel>, Vec<ArenaCandlestickModel>), diesel::result::Error> {
     tracing::trace!(name = name, "Inserting to db",);
     let InsertEvents {
@@ -423,6 +424,19 @@ async fn insert_to_db(
                     .on_conflict(id)
                     .do_update()
                     .set(version.eq(excluded(version)))
+                    .execute(conn)
+                    .await?;
+            }
+
+            {
+                use schema::processor_status::dsl::*;
+                let timestamp =  parse_timestamp(last_transaction.timestamp.as_ref().unwrap(), last_transaction.version as i64)
+                    .naive_utc();
+                diesel::insert_into(processor_status)
+                    .values((processor.eq("emojicoin"), last_success_version.eq(last_transaction.version as i64), last_transaction_timestamp.eq(timestamp)))
+                    .on_conflict(processor)
+                    .do_update()
+                    .set((last_success_version.eq(last_transaction.version as i64), last_transaction_timestamp.eq(timestamp)))
                     .execute(conn)
                     .await?;
             }
@@ -943,7 +957,8 @@ impl EmojicoinProcessor {
             return Ok(());
         }
         let first_transaction_version = transactions.iter().next().unwrap().version;
-        let last_transaction_version = transactions.iter().last().unwrap().version;
+        let last_transaction = transactions.iter().last().unwrap();
+        let last_transaction_version = last_transaction.version;
 
         let processing_start = std::time::Instant::now();
 
@@ -1079,6 +1094,7 @@ impl EmojicoinProcessor {
             insert_events,
             &self.per_table_chunk_sizes,
             max_transaction_version,
+            last_transaction,
         )
         .await;
 
