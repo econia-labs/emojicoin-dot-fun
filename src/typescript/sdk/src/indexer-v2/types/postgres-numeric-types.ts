@@ -153,3 +153,14 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
  * @see schema.test.ts
  */
 export const integerColumns: Set<AnyColumnName> = new Set(["integrator_fee_rate_bps"]);
+
+export const timestampColumns: Set<AnyColumnName> = new Set([
+  "bump_time",
+  "emit_time",
+  "inserted_at",
+  "last_swap_time",
+  "last_bump_time",
+  "last_transaction_timestamp",
+  "start_time",
+  "transaction_timestamp",
+]);

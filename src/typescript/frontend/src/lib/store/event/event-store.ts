@@ -1,3 +1,4 @@
+import { enableMapSet } from "immer";
 import { encodeSymbolsForChart, isArenaChartSymbol } from "lib/chart-utils";
 import { immer } from "zustand/middleware/immer";
 import { createStore } from "zustand/vanilla";
@@ -22,14 +23,19 @@ import {
   isArenaModelWithMeleeID,
   isArenaSwapModel,
 } from "@/sdk/types/arena-types";
-import { DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
+import { compareBigInt, DEBUG_ASSERT, extractFilter } from "@/sdk/utils";
 
-import { ensureMeleeInStore, initializeArenaStore } from "../arena/store";
+import {
+  ensureMeleeInStore,
+  initializeArenaStore,
+  updateRewardsRemainingAndVaultBalance,
+} from "../arena/event/store";
 import {
   getMeleeIDFromArenaModel,
   handleLatestBarForArenaCandlestick,
   toMappedMelees,
-} from "../arena/utils";
+  updateLatestBarFromDatafeed,
+} from "../arena/event/utils";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import {
   cleanReadLocalStorage,
@@ -46,12 +52,29 @@ import {
   toMappedMarketEvents,
 } from "./utils";
 
+// Ensure maps/sets are enabled for immer by the time this is instantiated.
+enableMapSet();
+
 export const createEventStore = () => {
   const store = createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
       ...initialState(),
       ...initializeArenaStore(),
-      getMarket: (emojis) => get().markets.get(emojis.join("")),
+      getMarket: (emojis = []) => get().markets.get(emojis.join("")),
+      getMarketLatestState: (emojis = []) => {
+        if (!emojis || !emojis.length) return undefined;
+        const market = get().markets.get(emojis.join(""));
+        const latestState = market?.stateEvents.at(0);
+        if (!market || !latestState) return undefined;
+        // Note that volumes are only properly propagated/set in state when `loadMarketStateFromServer` is
+        // called. The volumes are optional because sometimes they're missing when data is loaded
+        // from live events rather than as a result of the indexer view with daily volumes.
+        return {
+          ...latestState,
+          dailyVolume: market.dailyVolume ?? 0n,
+          dailyBaseVolume: market.dailyBaseVolume ?? 0n,
+        };
+      },
       getRegisteredMarkets: () => {
         return get().markets;
       },
@@ -59,6 +82,8 @@ export const createEventStore = () => {
         return get().meleeMap;
       },
       loadArenaInfoFromServer: (info) => {
+        // Don't update if the data is stale/outdated.
+        if ((get().arenaInfoFromServer?.version ?? -1n) > info.version) return;
         set((state) => {
           state.arenaInfoFromServer = info;
           const arenaSymbol = encodeSymbolsForChart(
@@ -69,12 +94,20 @@ export const createEventStore = () => {
           state.meleeMap.set(arenaSymbol, info.meleeID);
         });
       },
+      loadVaultBalanceFromServer: (vaultBalance) => {
+        set((state) => {
+          state.vaultBalance = vaultBalance;
+        });
+      },
       loadMarketStateFromServer: (states) => {
         const filtered = states.filter((e) => {
           const marketEmojis = e.market.symbolEmojis;
           const symbol = marketEmojis.join("");
           const market = get().markets.get(symbol);
-          // Filter by daily volume being undefined *or* the guid not already existing in `guids`.
+          // Filter by the current market store state's daily volume being undefined *or* the guid
+          // not already existing in `guids`.
+          // This to ensure that if `dailyVolume` is added, the data will still update, even if
+          // the guid already exists in state.
           return !market || typeof market.dailyVolume === "undefined" || !get().guids.has(symbol);
         });
         set((state) => {
@@ -85,6 +118,11 @@ export const createEventStore = () => {
             ensureMarketInStore(state, marketEvents[0].market);
             const market = state.markets.get(marketSymbol)!;
             marketEvents.forEach((event) => market.stateEvents.push(event));
+            // Sort in reverse order (b, a), aka descending, aka highest nonce first.
+            // This sorts on each insertion but we only ever insert 1 or 2 at a time so it's fine.
+            market.stateEvents.sort((a, b) =>
+              compareBigInt(b.market.marketNonce, a.market.marketNonce)
+            );
           });
         });
       },
@@ -130,7 +168,12 @@ export const createEventStore = () => {
             });
             DEBUG_ASSERT(() => events.length === 0);
           });
-          state.meleeEvents.push(...extractFilter(arenaEvents, isArenaMeleeModel));
+
+          const meleeEventModels = extractFilter(arenaEvents, isArenaMeleeModel);
+          meleeEventModels.forEach((model) => {
+            ensureMeleeInStore(state, model.melee.meleeID);
+            state.meleeEvents.push(model);
+          });
         });
       },
       pushEventsFromClient: (eventsIn: BrokerEventModels[], pushToLocalStorage = false) => {
@@ -184,8 +227,18 @@ export const createEventStore = () => {
                   }
                 }
               }
+              updateRewardsRemainingAndVaultBalance(state, event);
             }
           });
+        });
+      },
+      // For updating the latest bar with the new candlestick types.
+      maybeUpdateMeleeLatestBar(latestBarFromDatafeed, period, meleeID) {
+        if (!latestBarFromDatafeed) return;
+        set((state) => {
+          ensureMeleeInStore(state, meleeID);
+          const melee = state.melees.get(meleeID)!;
+          updateLatestBarFromDatafeed(melee, { ...latestBarFromDatafeed, period });
         });
       },
       setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => {

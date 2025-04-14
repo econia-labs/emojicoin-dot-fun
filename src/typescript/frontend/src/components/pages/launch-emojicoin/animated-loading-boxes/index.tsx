@@ -9,12 +9,12 @@ import { emoji } from "utils";
 type StaggerSpeed = 1 | 2 | 3 | 4 | 5;
 
 /**
- * @param speed The speed of the animation. Higher is faster. 1 is the default.
+ * @param speed The speed of the animation. Higher is faster. 2 is the default.
  * @param delay The delay before the animation starts. 0 is the default.
  * @returns The scope ref to pass to the animated component's shared parent.
  */
 const useStaggerAnimation = ({
-  speed = 1,
+  speed = 2,
   delay = 0,
 }: {
   speed?: StaggerSpeed;
@@ -27,12 +27,12 @@ const useStaggerAnimation = ({
     [
       ".item-1",
       { opacity: [0, 1], scale: [1, 1.05] },
-      { delay: stagger(0.06 - 0.01 * boundedSpeed, { from: "first" }) },
+      { delay: stagger(0.06 - 0.005 * boundedSpeed, { from: "first" }) },
     ],
     [
       ".item-1",
       { opacity: [1, 0], scale: [1.05, 1] },
-      { delay: stagger(0.06 - 0.01 * boundedSpeed, { from: "first" }), at: "-0.25" },
+      { delay: stagger(0.06 - 0.005 * boundedSpeed, { from: "first" }), at: "-0.25" },
     ],
   ];
 
