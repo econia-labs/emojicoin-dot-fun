@@ -53,6 +53,32 @@ pub struct EmojicoinProcessor {
     version: Arc<RwLock<u64>>,
 }
 
+async fn get_market_price_from_db(
+    connection_pool: ArcDbPool,
+    m_id: BigDecimal,
+) -> anyhow::Result<BigDecimal> {
+    use schema::market_latest_state_event::dsl::*;
+    let (lp_supply, clamm_base, clamm_quote, cpamm_base, cpamm_quote) = market_latest_state_event
+        .filter(market_id.eq(m_id))
+        .select((
+            lp_coin_supply,
+            clamm_virtual_reserves_base,
+            clamm_virtual_reserves_quote,
+            cpamm_real_reserves_base,
+            cpamm_real_reserves_quote,
+        ))
+        .first::<(BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal)>(
+            &mut connection_pool.get().await?,
+        )
+        .await?;
+    let price = if lp_supply.is_zero() {
+        clamm_quote / clamm_base
+    } else {
+        cpamm_quote / cpamm_base
+    };
+    Ok(price)
+}
+
 /// Gets MeleeData from the database.
 async fn get_melee_data_from_db(connection_pool: ArcDbPool) -> anyhow::Result<Option<MeleeData>> {
     if ARENA_MODULE_ADDRESS.is_none() {
@@ -75,17 +101,10 @@ async fn get_melee_data_from_db(connection_pool: ArcDbPool) -> anyhow::Result<Op
     let (melee_id, market_id_0, market_id_1) = melee.unwrap();
     let (market_id_0, market_id_1) = (market_id_0.unwrap(), market_id_1.unwrap());
     let (price_0, price_1) = {
-        use schema::market_latest_state_event::dsl::*;
-        let price_0 = market_latest_state_event
-            .filter(market_id.eq(market_id_0.clone()))
-            .select(last_swap_avg_execution_price_q64)
-            .first::<BigDecimal>(conn)
-            .await?;
-        let price_1 = market_latest_state_event
-            .filter(market_id.eq(market_id_1.clone()))
-            .select(last_swap_avg_execution_price_q64)
-            .first::<BigDecimal>(conn)
-            .await?;
+        let price_0 =
+            get_market_price_from_db(connection_pool.clone(), market_id_0.clone()).await?;
+        let price_1 =
+            get_market_price_from_db(connection_pool.clone(), market_id_1.clone()).await?;
         (price_0, price_1)
     };
     Ok(Some(MeleeData {
