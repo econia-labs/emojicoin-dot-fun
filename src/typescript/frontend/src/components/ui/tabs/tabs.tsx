@@ -10,9 +10,21 @@ import SyncedScrollView from "@/components/synced-scrollview";
 
 const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Root ref={ref} className={cn(className)} {...props} />
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> & {
+    activeBg?: "gray" | "black";
+  }
+>(({ className, activeBg = "gray", ...props }, ref) => (
+  <TabsPrimitive.Root
+    ref={ref}
+    className={cn(
+      // Apply styles targeting descendant active tabs and direct child tab panels
+      activeBg === "black"
+        ? "[&_[role=tab][data-state=active]]:bg-black [&>[role=tabpanel][data-state=active]]:bg-black"
+        : "[&_[role=tab][data-state=active]]:bg-darker-gray [&>[role=tabpanel][data-state=active]]:bg-darker-gray",
+      className
+    )}
+    {...props}
+  />
 ));
 Tabs.displayName = TabsPrimitive.Root.displayName;
 
@@ -44,7 +56,7 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex whitespace-nowrap items-center -mb-[1px] relative rounded-t-xl px-4 py-2 data-[state=active]:border border-dark-gray !text-[1.2rem] pixel-heading-3b uppercase transition-all",
-      "text-light-gray data-[state=active]:border-b-0 data-[state=active]:text-white data-[state=active]:bg-black",
+      "text-light-gray data-[state=active]:border-b-0 data-[state=active]:text-white",
       "data-[state=active]:shadow-md data-[state=active]:z-20",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
@@ -61,7 +73,7 @@ TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content> & {}
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}

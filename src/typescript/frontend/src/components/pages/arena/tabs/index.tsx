@@ -62,6 +62,7 @@ export const TabContainer = (props: ArenaProps) => {
       }}
     >
       <Tabs
+        activeBg="black"
         value={selectedTab}
         onValueChange={(tab) => setSelectedTab(tab as TabName)}
         className="h-full flex flex-col w-full"
