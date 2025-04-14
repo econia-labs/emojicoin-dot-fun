@@ -98,8 +98,8 @@ function Container({
 }) {
   return (
     <div className="relative flex flex-col grow py-4">
-      <div className="px-2 w-[100%] text-white flex items-center *:grow *:basis-0">
-        {(phase === "amount" || phase === "lock") && (
+      <div className="px-2 w-[100%] text-white flex items-center *:grow *:basis-0 h-[20px]">
+        {phase === "amount" || phase === "lock" ? (
           <div>
             <Button
               scale="lg"
@@ -113,9 +113,13 @@ function Container({
               Back
             </Button>
           </div>
+        ) : (
+          <div />
         )}
-        <div>
-          <ProgressBar length={3} position={progress} />
+        <div className="flex flex-col items-center">
+          <div className="max-w-[160px]">
+            <ProgressBar length={3} position={progress} />
+          </div>
         </div>
         <div />
       </div>

@@ -10,6 +10,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useEffectOnce } from "react-use";
 import { ROUTES } from "router/routes";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 import AptosIconBlack from "@/icons/AptosBlack";
 import { namesToEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
@@ -60,10 +62,10 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
       </div>
       <Tabs value={tab} onValueChange={(v) => setTab(v)}>
         <TabsList>
-          <TabsTrigger value="portfolio" endSlot={namesToEmojis("money bag")}>
+          <TabsTrigger value="portfolio" endSlot={<Emoji emojis={emoji("money bag")} />}>
             Portfolio
           </TabsTrigger>
-          <TabsTrigger value="trade-history" endSlot={namesToEmojis("rocket")}>
+          <TabsTrigger value="trade-history" endSlot={<Emoji emojis={emoji("money bag")} />}>
             Trade History
           </TabsTrigger>
           {tab === "trade-history" && (

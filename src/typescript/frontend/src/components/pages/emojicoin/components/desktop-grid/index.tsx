@@ -1,9 +1,10 @@
 import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
 import React, { Suspense } from "react";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
-import { namesToEmojis } from "@/sdk/index";
 
 import type { GridProps } from "../../types";
 import ChatBox from "../chat/ChatBox";
@@ -22,17 +23,17 @@ import {
 const tabs = [
   {
     name: "Trade History",
-    emoji: namesToEmojis("money-mouth face"),
+    emoji: emoji("money-mouth face"),
     component: (props: GridProps) => <TradeHistory data={props.data} />,
   },
   {
     name: "My Trade History",
-    emoji: namesToEmojis("person raising hand"),
+    emoji: emoji("person raising hand"),
     component: (props: GridProps) => <PersonalTradeHistory data={props.data} />,
   },
   {
     name: "Top Holders",
-    emoji: namesToEmojis("1st place medal"),
+    emoji: emoji("1st place medal"),
     component: (props: GridProps) => (
       <CoinHolders
         emojicoin={props.data.symbol}
@@ -78,7 +79,7 @@ const DesktopGrid = (props: GridProps) => {
                   <TabsTrigger
                     key={tab.name}
                     value={tab.name}
-                    endSlot={<div className="text-[1.1rem]">{tab.emoji}</div>}
+                    endSlot={<Emoji emojis={tab.emoji} />}
                   >
                     {tab.name}
                   </TabsTrigger>
