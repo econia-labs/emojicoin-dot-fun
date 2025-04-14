@@ -10,6 +10,18 @@ use tokio::sync::{
     RwLock,
 };
 
+// This static variables are needed in order to work with the new SDK approach.
+//
+// Since the SDK expects you to pass a function, there is no other (clean) way to pass a stateful
+// processor to the function.
+//
+// For this reason, the channel used to communicate between the processor and the WebSocket server,
+// as well as the processor itself are stored in static read write locks behind atomic reference
+// counting pointers. This allows the processor and it's state to be accessed by the function
+// passed to the SDK.
+//
+// Since the processor needs to be initialized with an SQL connection, and that it is only
+// available inside the SDK function, we do not initialize it here, and use an Option instead.
 static CHANNEL: LazyLock<(
     RwLock<UnboundedSender<EmojicoinDbEvent>>,
     Arc<RwLock<UnboundedReceiver<EmojicoinDbEvent>>>,
@@ -41,6 +53,8 @@ async fn main() -> anyhow::Result<()> {
                     .unwrap(),
                 )
             }
+            // Fancy way of accessing the processor. This will ALWAYS run, as if the processor was
+            // a None, it would have been set to a Some(_) in the if just above.
             if let Some(processor) = &*processor {
                 processor
                     .process_transactions(transactions, conn_pool)
