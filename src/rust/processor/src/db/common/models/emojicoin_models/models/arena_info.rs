@@ -117,7 +117,7 @@ impl From<ArenaExitEventModel> for ArenaInfoDiffUpdate {
             melee_id: value.melee_id,
             last_transaction_version: value.transaction_version,
             volume: BigDecimal::zero(),
-            rewards_remaining: -value.tap_out_fee,
+            rewards_remaining: value.tap_out_fee,
             emojicoin_0_locked: -value.emojicoin_0_proceeds,
             emojicoin_1_locked: -value.emojicoin_1_proceeds,
         }
