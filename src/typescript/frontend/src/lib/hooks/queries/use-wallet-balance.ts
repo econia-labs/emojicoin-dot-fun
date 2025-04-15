@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 
-import { removeLeadingZerosFromStructString, type StructTagString } from "@/sdk/index";
+import { removeLeadingZerosFromStructString } from "@/sdk/index";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
-import type { CoinTypeString } from "@/sdk/utils/type-tags";
+import type { CoinTypeString, StructTagString } from "@/sdk/utils/type-tags";
 /* eslint-disable-next-line */ // So we can link the import in the doc comment.
 import { type useLatestBalance } from "@/store/latest-balance";
 
