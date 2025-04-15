@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 
-import type { StructTagString } from "@/sdk/index";
+import { removeLeadingZerosFromStructString, type StructTagString } from "@/sdk/index";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 import type { CoinTypeString } from "@/sdk/utils/type-tags";
 /* eslint-disable-next-line */ // So we can link the import in the doc comment.
@@ -22,7 +22,7 @@ const fetchFungibleAssetBalanceAndVersion = async (
       limit: 1,
       where: {
         asset_type: {
-          _eq: coinType,
+          _eq: removeLeadingZerosFromStructString(coinType),
         },
         owner_address: {
           _eq: accountAddress,
