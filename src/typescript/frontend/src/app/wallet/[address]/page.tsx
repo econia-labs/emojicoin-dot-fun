@@ -1,5 +1,6 @@
 // cspell:Word vibing
 
+import { sha3_256 } from "@noble/hashes/sha3";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { getAptPrice } from "lib/queries/get-apt-price";
@@ -23,7 +24,9 @@ const descriptions: ((owner: string) => string)[] = [
 ];
 
 function generateDescription(owner: string) {
-  const idx = Math.floor(Math.random() * descriptions.length);
+  // Create a deterministic index based on the hash of the owner string input.
+  const hash = sha3_256(owner);
+  const idx = hash[0] % descriptions.length;
   const interpolate = descriptions[idx];
   return interpolate(owner);
 }
@@ -39,6 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: generateDescription(owner),
   };
 }
+
 export default async function WalletPage({ params }: Props) {
   const { address, name } = await resolveOwnerNameCached(params.address);
 
