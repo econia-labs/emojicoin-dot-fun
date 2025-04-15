@@ -12,6 +12,22 @@ type Props = {
   params: { address: string };
 };
 
+const descriptions: ((owner: string) => string)[] = [
+  (owner) =>
+    `peep inside ${owner}'s wallet like it's a situationship. are they holding or just holding on?`,
+  (owner) =>
+    `watch ${owner}'s  trading history like it's a red flag. are they up or emotionally down?`,
+  (owner) => `${owner}'s wallet reveals everything. charts, choices, coping mechanisms.`,
+  (owner) => `see what ${owner}'s holding. and maybe why they haven't texted back.`,
+  (owner) => `scroll ${owner}'s  wallet like a breakup playlist. no judgment. just data.`,
+];
+
+function generateDescription(owner: string) {
+  const idx = Math.floor(Math.random() * descriptions.length);
+  const interpolate = descriptions[idx];
+  return interpolate(owner);
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const input = params.address;
 
@@ -20,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${owner}'s wallet`,
-    description: `👀 Peep what's inside ${owner}'s wallet— are they stacking, trading, or just vibing?`,
+    description: generateDescription(owner),
   };
 }
 export default async function WalletPage({ params }: Props) {

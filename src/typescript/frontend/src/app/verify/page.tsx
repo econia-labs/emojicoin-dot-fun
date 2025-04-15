@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "verify",
-  description: "Verify your wallet to access all emojicoin.fun features!",
+  description: "verify so we know who to blame when the chart dips",
 };
 
 const Verify = async () => {

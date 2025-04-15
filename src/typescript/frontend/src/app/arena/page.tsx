@@ -9,7 +9,7 @@ export const revalidate = 2;
 
 export const metadata: Metadata = {
   title: "arena",
-  description: "⚔️ Step into the Emojicoin Arena! Trade, battle and rise to glory.",
+  description: "two emojicoins. one arena. 20 hours of emotional instability",
 };
 
 export default async function Arena() {
