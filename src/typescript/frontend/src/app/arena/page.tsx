@@ -1,16 +1,16 @@
 import { fetchCachedMeleeData } from "app/home/fetch-melee-data";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
 import FEATURE_FLAGS from "lib/feature-flags";
+import generateMetadataHelper from "lib/utils/generate-metadata-helper";
 import { redirect } from "next/navigation";
-import type { Metadata } from "next/types";
 import { ROUTES } from "router/routes";
 
 export const revalidate = 2;
 
-export const metadata: Metadata = {
+export const metadata = generateMetadataHelper({
   title: "arena",
   description: "two emojicoins. one arena. 20 hours of emotional instability",
-};
+});
 
 export default async function Arena() {
   if (!FEATURE_FLAGS.Arena) redirect(ROUTES.home);

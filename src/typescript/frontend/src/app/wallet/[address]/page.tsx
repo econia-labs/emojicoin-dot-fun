@@ -4,6 +4,7 @@ import { sha3_256 } from "@noble/hashes/sha3";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import { getAptPrice } from "lib/queries/get-apt-price";
+import generateMetadataHelper from "lib/utils/generate-metadata-helper";
 import type { Metadata } from "next";
 
 import { customTruncateAddress, resolveOwnerNameCached } from "../utils";
@@ -37,10 +38,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name, address } = await resolveOwnerNameCached(input);
   const owner = name ?? (address ? customTruncateAddress(address) : input);
 
-  return {
-    title: `${owner}'s wallet`,
-    description: generateDescription(owner),
-  };
+  const title = `${owner}'s wallet`;
+  const description = generateDescription(owner);
+
+  return generateMetadataHelper({ title, description });
 }
 
 export default async function WalletPage({ params }: Props) {
