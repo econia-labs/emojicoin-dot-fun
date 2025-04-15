@@ -1,4 +1,4 @@
-// cspell:Word vibing
+// cspell:word situationship
 
 import { sha3_256 } from "@noble/hashes/sha3";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
