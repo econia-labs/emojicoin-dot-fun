@@ -4,17 +4,17 @@ import {
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
 import VerifyPage from "components/pages/verify/VerifyPage";
-import type { Metadata } from "next";
+import generateMetadataHelper from "lib/utils/generate-metadata-helper";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata = generateMetadataHelper({
   title: "verify",
-  description: "Verify your wallet to access all emojicoin.fun features!",
-};
+  description: "verify so we know who to blame when the chart dips",
+});
 
 const Verify = async () => {
   const hashed = cookies().get(COOKIE_FOR_HASHED_ADDRESS)?.value;
