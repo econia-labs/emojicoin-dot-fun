@@ -2,25 +2,40 @@ import "./styles.css";
 
 import * as RadixPopover from "@radix-ui/react-popover";
 import * as RadixTooltip from "@radix-ui/react-tooltip";
+import type { ClassValue } from "clsx";
+import { cn } from "lib/utils/class-name";
 import React from "react";
 import isTouchDevice from "utils/is-touch-device";
 
-const Popup: React.FC<
-  React.PropsWithChildren<{ content: React.ReactNode; className?: string; uppercase?: boolean }>
-> = ({ children, content, className, uppercase = true }) => {
+const Popup = ({
+  children,
+  content,
+  className = "",
+  arrowClassName = "",
+  uppercase = true,
+  popover = false,
+}: React.PropsWithChildren<{
+  content: React.ReactNode;
+  className?: ClassValue;
+  arrowClassName?: ClassValue;
+  uppercase?: boolean;
+  // Click makes the content appear and persist, rather than just displaying it while hovering.
+  // On touch devices, this parameter is ignored because a popover is always used.
+  popover?: boolean;
+}>) => {
   const tooltipContent = (
     <div className={`text-black pixel-heading-4 font-pixelar ${uppercase ? "uppercase" : ""}`}>
       {content}
     </div>
   );
 
-  return isTouchDevice() ? (
+  return popover || isTouchDevice() ? (
     <RadixPopover.Root>
       <RadixPopover.Trigger asChild>{children}</RadixPopover.Trigger>
       <RadixPopover.Portal>
-        <RadixPopover.Content className={`TooltipContent ${className}`} sideOffset={5}>
+        <RadixPopover.Content className={cn("TooltipContent", className)} sideOffset={5}>
           {tooltipContent}
-          <RadixPopover.Arrow className="TooltipArrow" />
+          <RadixPopover.Arrow className={cn("fill-ec-blue", arrowClassName)} />
         </RadixPopover.Content>
       </RadixPopover.Portal>
     </RadixPopover.Root>
@@ -29,9 +44,9 @@ const Popup: React.FC<
       <RadixTooltip.Root>
         <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
         <RadixTooltip.Portal>
-          <RadixTooltip.Content className={`TooltipContent ${className}`} sideOffset={5}>
+          <RadixTooltip.Content className={cn("TooltipContent", className)} sideOffset={5}>
             {tooltipContent}
-            <RadixTooltip.Arrow className="TooltipArrow" />
+            <RadixTooltip.Arrow className={cn("fill-ec-blue", arrowClassName)} />
           </RadixTooltip.Content>
         </RadixTooltip.Portal>
       </RadixTooltip.Root>
