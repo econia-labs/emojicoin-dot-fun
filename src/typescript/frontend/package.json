@@ -14,7 +14,7 @@
   "dependencies": {
     "@aptos-labs/ts-sdk": "1.38.0",
     "@aptos-labs/wallet-adapter-core": "^5.4.0",
-    "@aptos-labs/wallet-adapter-react": "5.0.3",
+    "@aptos-labs/wallet-adapter-react": "5.0.4",
     "@emoji-mart/react": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.2.0.tgz",
     "@emotion/is-prop-valid": "^1.3.1",
     "@headlessui/react": "^2.2.1",
