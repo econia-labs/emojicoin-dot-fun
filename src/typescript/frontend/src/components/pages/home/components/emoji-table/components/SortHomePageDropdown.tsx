@@ -49,10 +49,9 @@ export default function SortHomePageDropdown({
           >
             <span className="text-dark-gray">{"{"}</span>
             <span className="text-light-gray">Sort:</span>
-            {/* Min 12 chars because that's the length of the longest sort option.
-                This makes the div not resize while scrambling. */}
             <span
               className="text-dark-gray"
+              // Ensure min width based on the text scrambled so the container size doesn't change rapidly on scramble.
               style={{ minWidth: `${sortOptions[sortMarketsBy].length + 0.5}ch` }}
               ref={ref}
             />
