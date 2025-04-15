@@ -64,7 +64,7 @@ const TabsTrigger = React.forwardRef<
     )}
     {...props}
   >
-    {startSlot && <div className="ml-2">{startSlot}</div>}
+    {startSlot && <div className="mr-2">{startSlot}</div>}
     <Slottable>{children}</Slottable>
     {endSlot && <div className="ml-2">{endSlot}</div>}
   </TabsPrimitive.Trigger>
