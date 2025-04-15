@@ -47,10 +47,7 @@ const INFO: Info[] = [
   },
   {
     title: "I don't fully understand how the arena works, what should I do?",
-    paragraph:
-      "You can join the discord" + LINKS?.discord
-        ? ` (${LINKS!.discord}) `
-        : " " + "where developers and other community members can help you.",
+    paragraph: `You can join the discord <a class="underline" target=blank href=${LINKS!.discord}>(${LINKS!.discord})</a> where developers and other community members can help you.`,
   },
 ];
 
@@ -61,7 +58,10 @@ export default function InfoTab() {
         {INFO.map((i, index) => (
           <div key={`info-p-${index}`} className="flex flex-col gap-[1em]">
             <div className="text-3xl uppercase text-white">{i.title}</div>
-            <div className="font-forma text-light-gray">{i.paragraph}</div>
+            <div
+              className="font-forma text-light-gray"
+              dangerouslySetInnerHTML={{ __html: i.paragraph }}
+            />
           </div>
         ))}
       </div>
