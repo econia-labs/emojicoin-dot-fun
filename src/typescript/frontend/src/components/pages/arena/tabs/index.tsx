@@ -64,12 +64,7 @@ export const TabContainer = (props: ArenaProps) => {
       >
         <TabsList>
           {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.name}
-              value={tab.name}
-              className="!text-[1.8rem]"
-              endSlot={<Emoji emojis={tab.emoji} className="text-[1.5rem]" />}
-            >
+            <TabsTrigger key={tab.name} value={tab.name} endSlot={<Emoji emojis={tab.emoji} />}>
               {tab.name}
             </TabsTrigger>
           ))}

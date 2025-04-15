@@ -65,7 +65,7 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
           <TabsTrigger value="portfolio" endSlot={<Emoji emojis={emoji("money bag")} />}>
             Portfolio
           </TabsTrigger>
-          <TabsTrigger value="trade-history" endSlot={<Emoji emojis={emoji("money bag")} />}>
+          <TabsTrigger value="trade-history" endSlot={<Emoji emojis={emoji("scroll")} />}>
             Trade History
           </TabsTrigger>
           {tab === "trade-history" && (
