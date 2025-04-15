@@ -21,15 +21,15 @@ export default function TapOutModal({
     : undefined;
 
   return (
-    <div className="flex flex-col items-center grow pt-10 relative">
+    <div className="flex flex-col items-center grow relative gap-4 px-4">
       <CloseIcon
         onClick={() => setIsTappingOut(false)}
         className="absolute right-[.5em] top-[.5em] p-[.5em] h-[2.5em] w-[2.5em] cursor-pointer"
         color="econiaBlue"
       />
-      <div className="flex flex-col gap-[1.5em] uppercase max-w-[58ch] grow">
+      <div className="flex flex-col gap-[1.5em] justify-center uppercase max-w-[58ch] grow">
         <div className="text-4xl text-white text-center">Are you sure you want to tap out?</div>
-        <div className="flex flex-col gap-[2em]">
+        <div className="flex flex-col gap-[1.5em]">
           <div className="font-forma text-light-gray leading-6">
             You have been matched a total of{" "}
             <span className="text-warning">{(matchNumberText ?? "?") + " APT"}</span> since your

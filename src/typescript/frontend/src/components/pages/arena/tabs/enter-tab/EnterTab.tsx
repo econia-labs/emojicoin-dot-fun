@@ -117,7 +117,7 @@ function Container({
           <div />
         )}
         <div className="flex flex-col items-center">
-          <div className="max-w-[160px]">
+          <div className="max-w-[250px]">
             <ProgressBar length={3} position={progress} />
           </div>
         </div>

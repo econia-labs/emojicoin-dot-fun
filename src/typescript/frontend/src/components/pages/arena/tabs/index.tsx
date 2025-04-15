@@ -55,12 +55,7 @@ export const TabContainer = (props: ArenaProps) => {
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
 
   return (
-    <div
-      className="flex h-[100%] bg-black"
-      style={{
-        gridTemplateRows: "auto 1fr",
-      }}
-    >
+    <div className="flex h-[100%] bg-black">
       <Tabs
         activeBg="black"
         value={selectedTab}

@@ -1,5 +1,5 @@
 import { cn } from "lib/utils/class-name";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /**
  * A component that provides synchronized horizontal scrolling between two elements,
@@ -31,13 +31,15 @@ const SyncedScrollView: React.FC<{ className?: string; children: React.ReactNode
   className,
   children,
 }) => {
+  const [hasOverflow, setHasOverflow] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
   const topInnerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const contentInnerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll sync
   useEffect(() => {
+    if (!hasOverflow) return;
+
     const top = topRef.current;
     const content = contentRef.current;
     if (!top || !content) return;
@@ -56,10 +58,63 @@ const SyncedScrollView: React.FC<{ className?: string; children: React.ReactNode
       top.removeEventListener("scroll", syncTopToContent);
       content.removeEventListener("scroll", syncContentToTop);
     };
+  }, [hasOverflow]);
+
+  useLayoutEffect(() => {
+    const checkRefs = () => {
+      const contentInner = contentInnerRef.current;
+      const content = contentRef.current;
+      if (!contentInner || !content) return false;
+      return true;
+    };
+
+    const updateOverflow = () => {
+      const contentInner = contentInnerRef.current;
+      const content = contentRef.current;
+      if (!contentInner || !content) return;
+
+      const isOverflowing = contentInner.scrollWidth > content.clientWidth;
+      setHasOverflow(isOverflowing);
+    };
+
+    if (!checkRefs()) {
+      const frame = requestAnimationFrame(() => {
+        if (checkRefs()) {
+          updateOverflow();
+        }
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+
+    const observer = new ResizeObserver(updateOverflow);
+    observer.observe(contentInnerRef.current!);
+    observer.observe(contentRef.current!);
+
+    updateOverflow();
+
+    window.addEventListener("resize", updateOverflow);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateOverflow);
+    };
   }, []);
 
-  // Resize observer to sync top width
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const contentInner = contentInnerRef.current;
+      const content = contentRef.current;
+      if (contentInner && content) {
+        const isOverflowing = contentInner.scrollWidth > content.clientWidth;
+        setHasOverflow(isOverflowing);
+      }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    if (!hasOverflow) return;
+
     const topInner = topInnerRef.current;
     const contentInner = contentInnerRef.current;
     if (!topInner || !contentInner) return;
@@ -68,23 +123,12 @@ const SyncedScrollView: React.FC<{ className?: string; children: React.ReactNode
       topInner.style.width = `${contentInner.scrollWidth}px`;
     };
 
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(contentInner);
-
-    // Initial width calculation
     updateWidth();
+  }, [hasOverflow]);
 
-    // Handle window resize
-    window.addEventListener("resize", updateWidth);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateWidth);
-    };
-  }, []);
-
-  // Touch scroll support for top bar
   useEffect(() => {
+    if (!hasOverflow) return;
+
     const top = topRef.current;
     const content = contentRef.current;
     if (!top || !content) return;
@@ -109,14 +153,16 @@ const SyncedScrollView: React.FC<{ className?: string; children: React.ReactNode
       top.removeEventListener("touchstart", handleTouchStart);
       top.removeEventListener("touchmove", handleTouchMove);
     };
-  }, []);
+  }, [hasOverflow]);
 
   return (
     <div className={cn("w-full", className)}>
-      {/* Top Scrollbar */}
-      <div ref={topRef} className="overflow-x-auto overflow-y-hidden h-3 touch-pan-x">
-        <div ref={topInnerRef} className="h-[1px]" />
-      </div>
+      {/* Top Scrollbar - only shown when content overflows */}
+      {hasOverflow && (
+        <div ref={topRef} className="overflow-x-auto overflow-y-hidden h-3 touch-pan-x">
+          <div ref={topInnerRef} className="h-[1px]" />
+        </div>
+      )}
 
       <div ref={contentRef} className="overflow-auto scrollbar-hide">
         <div ref={contentInnerRef} className="whitespace-nowrap">

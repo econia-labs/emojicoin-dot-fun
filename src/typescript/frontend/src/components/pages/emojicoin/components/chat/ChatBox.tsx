@@ -60,7 +60,7 @@ const ChatBox = (props: ChatProps) => {
           flexGrow="1"
           width="100%"
           overflowY="auto"
-          maxHeight="328px"
+          maxHeight="350px"
           flexDirection="column-reverse"
         >
           <motion.div

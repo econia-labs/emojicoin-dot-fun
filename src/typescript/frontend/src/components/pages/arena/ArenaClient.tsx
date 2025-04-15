@@ -3,6 +3,7 @@
 import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { useEventStore } from "context/event-store-context/hooks";
+import { cn } from "lib/utils/class-name";
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -21,27 +22,28 @@ const Desktop = React.memo((props: ArenaProps) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <div
-      className="grid h-[90%] w-full p-[2em] gap-[2em]"
+      className="grid p-[2em] gap-[2em]"
       style={{
-        gridTemplateRows: "1fr minmax(0, 3.5fr)",
         gridTemplateColumns: "1fr 0.65fr 0.85fr 1fr",
       }}
     >
       <Box className="grid place-items-center">
         <EmojiTitle />
       </Box>
-      <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
+      <Box className="col-span-2 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
       <RewardsRemainingBox />
-      <Box className={chartBoxClassName}>
+      {/* These should have a fixed height. Otherwise they get smaller as the screen height decreases
+      which creates a vertical scroll on some screens because the content doesn't fit anymore.*/}
+      <Box className={cn(chartBoxClassName, "h-[450px]")}>
         <ChartContainer
           symbol={market0.market.symbolData.symbol}
           secondarySymbol={market1.market.symbolData.symbol}
           className="w-full h-full"
         />
       </Box>
-      <Box className="col-start-3 col-end-5 h-[100%]">
+      <Box className="col-start-3 col-end-5 h-[450px]">
         <TabContainer {...props} />
       </Box>
     </div>
