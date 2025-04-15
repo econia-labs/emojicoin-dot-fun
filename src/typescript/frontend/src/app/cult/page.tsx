@@ -1,12 +1,12 @@
 import CultClientPage from "components/pages/cult/CultClientPage";
-import type { Metadata } from "next";
+import generateMetadataHelper from "lib/utils/generate-metadata-helper";
 
 export const dynamic = "force-static";
 
-export const metadata: Metadata = {
+export const metadata = generateMetadataHelper({
   title: "cult",
-  description: `The emojicoin cult awaits...👹`,
-};
+  description: "we speak in tickers and tongues. welcome to the inner circle.",
+});
 
 export default function CultPage() {
   return <CultClientPage />;
