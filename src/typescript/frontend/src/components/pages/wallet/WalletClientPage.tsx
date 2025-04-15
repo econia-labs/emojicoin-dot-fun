@@ -14,7 +14,7 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
 import AptosIconBlack from "@/icons/AptosBlack";
-import { namesToEmojis, type SymbolEmoji } from "@/sdk/emoji_data";
+import type { SymbolEmoji } from "@/sdk/emoji_data";
 import { formatDisplayName, type ValidAptosName } from "@/sdk/utils";
 
 import { WalletPortfolioTable } from "./WalletPortfolioTable";
