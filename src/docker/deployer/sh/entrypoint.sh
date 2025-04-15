@@ -129,11 +129,11 @@ fund_test_accounts() {
 	done
 }
 
-# Run the initialization steps if the contract doesn't exist.
+# Run the initialization steps if the module hasn't been published yet.
 if ! already_published; then
-	log_info "Funding the publisher and publishing the contract."
+	log_info "Funding the publisher and publishing the module."
 	fund_and_publish
 	fund_test_accounts
 fi
 
-log_info "Smart contract is published and test accounts are funded!"
+log_info "Module is published and test accounts are funded!"
