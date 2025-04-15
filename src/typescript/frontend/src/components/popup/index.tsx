@@ -19,8 +19,7 @@ const Popup = ({
   className?: ClassValue;
   arrowClassName?: ClassValue;
   uppercase?: boolean;
-  // Click makes the content appear and persist, rather than just displaying it while hovering.
-  // On touch devices, this parameter is ignored because a popover is always used.
+  // Force a popover instead of a tooltip (click instead of hover). On touch devices, popover is used regardless.
   popover?: boolean;
 }>) => {
   const tooltipContent = (
