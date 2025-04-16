@@ -8,6 +8,8 @@
 # cspell:word mypy
 # cspell:word shfmt
 ---
+default_language_version:
+  python: 'python3.10'
 exclude: 'doc\/move\/emojicoin_dot_fun\/.+' # Ignore DocGen.
 repos:
 -
