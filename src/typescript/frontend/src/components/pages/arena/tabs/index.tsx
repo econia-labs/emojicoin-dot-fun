@@ -1,12 +1,12 @@
 import { CloseIcon } from "components/svg";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
+
 import type { ArenaProps } from "../utils";
-import { ArenaLoading } from "./ArenaLoading";
 import ChatTab from "./ChatTab";
 import EnterTab from "./enter-tab/EnterTab";
 import InfoTab from "./InfoTab";
@@ -21,12 +21,12 @@ const getTabs = (
   {
     name: "Position" as TabName,
     emoji: emoji("smiling face with horns"),
-    element: <EnterTab />,
+    component: <EnterTab />,
   },
   {
     name: "Profile" as TabName,
     emoji: emoji("ninja"),
-    element: (
+    component: (
       <ProfileTab
         {...{
           market0,
@@ -40,72 +40,45 @@ const getTabs = (
   {
     name: "Chat" as TabName,
     emoji: emoji("left speech bubble"),
-    element: <ChatTab market0={market0} market1={market1} />,
+    component: <ChatTab market0={market0} market1={market1} />,
   },
   {
     name: "Info" as TabName,
     emoji: emoji("books"),
-    element: <InfoTab />,
+    component: <InfoTab />,
   },
 ];
 
 export const TabContainer = (props: ArenaProps) => {
   const [selectedTab, setSelectedTab] = useState<TabName>("Position");
-  const { status } = useAptos();
 
   const tabs = useMemo(() => getTabs(props, setSelectedTab), [props]);
-  const currentTab = useMemo(() => tabs.find((t) => t.name === selectedTab), [selectedTab, tabs]);
 
   return (
-    <div
-      className="grid h-[100%] bg-black bg-opacity-80"
-      style={{
-        gridTemplateRows: "auto 1fr",
-      }}
-    >
-      <div className="relative flex flex-row mt-[.5em] overflow-y-auto">
-        {tabs.map((t) => {
-          return (
-            <div className="flex flex-row" key={`tab-${t.name}`}>
-              <div className="w-[1em] border-solid border-b-[2px] border-dark-gray"></div>
-              <div className="flex flex-col">
-                <div
-                  onClick={() => setSelectedTab(t.name)}
-                  className={`flex flex-row gap-[.2em] uppercase pixel-heading-3 border-solid cursor-pointer select-none ${t.name === selectedTab ? "rounded-t-[6px] border-t-dark-gray border-x-dark-gray border-x-[2px] border-t-[2px] text-white" : "mt-[2px] text-light-gray"}`}
-                  style={
-                    t.name !== selectedTab
-                      ? {
-                          paddingLeft: "calc(.5em + 2px)",
-                          paddingRight: "calc(.5em + 2px)",
-                        }
-                      : {
-                          paddingLeft: ".5em",
-                          paddingRight: ".5em",
-                        }
-                  }
-                >
-                  <div>{t.name}</div> <Emoji className="text-[.75em]" emojis={t.emoji} />
-                </div>
-                {t.name === selectedTab ? (
-                  <div className="flex flex-row justify-between">
-                    <div className="w-[2px] bg-dark-gray h-[2px]"></div>
-                    <div className="w-[2px] bg-dark-gray h-[2px]"></div>
-                  </div>
-                ) : (
-                  <div className="w-[100%] bg-dark-gray h-[2px]"></div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-        <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
-      </div>
-      {/* Show ArenaLoading for every transaction that happens on Position tab. */}
-      {status === "pending" && currentTab?.name === "Position" ? (
-        <ArenaLoading />
-      ) : (
-        <div className="overflow-y-auto">{currentTab?.element}</div>
-      )}
+    <div className="flex h-[100%] bg-black">
+      <Tabs
+        activeBg="black"
+        value={selectedTab}
+        onValueChange={(tab) => setSelectedTab(tab as TabName)}
+        className="h-full flex flex-col w-full"
+      >
+        <TabsList>
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.name} value={tab.name} endSlot={<Emoji emojis={tab.emoji} />}>
+              {tab.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {tabs.map((tab) => (
+          <TabsContent
+            key={tab.name}
+            value={tab.name}
+            className="data-[state=active]:flex data-[state=active]:grow flex-col overflow-auto"
+          >
+            {tab.component}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 };
@@ -205,7 +178,7 @@ export const MobileNavigation = (props: ArenaProps) => {
                     <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
                   </div>
                 </div>
-                {tab.element}
+                {tab.component}
               </div>
             </div>
           </>,

@@ -34,7 +34,7 @@ export default function Summary({
   const { pnl } = useTradingStats();
 
   return (
-    <div className="flex flex-col justify-center grow items-center h-[100%] py-4">
+    <div className="flex flex-col justify-center grow items-center">
       <div className="flex flex-col justify-center gap-[1em] grow items-center">
         {/* The glowing emoji header */}
         <GlowingEmoji className="text-7xl mt-[2em]" emojis={position.currentSymbol} />

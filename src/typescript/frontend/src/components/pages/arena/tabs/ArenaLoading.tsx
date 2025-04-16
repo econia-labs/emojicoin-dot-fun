@@ -9,7 +9,7 @@ export const ArenaLoading = ({ text = "Loading" }: { text?: string }) => {
   const [position, setPosition] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => setPosition((prev) => (prev + 1) % 4), 700);
+    const interval = setInterval(() => setPosition((prev) => (prev + 1) % 4), 2000 / 3);
     return () => clearInterval(interval);
   }, []);
   return (

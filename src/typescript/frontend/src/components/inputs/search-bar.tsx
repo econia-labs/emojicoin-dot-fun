@@ -36,14 +36,14 @@ const Border = styled(Flex)`
   }
 `;
 
-const SearchBar = () => {
+const SearchBar = ({ className }: { className?: string }) => {
   const setMode = useEmojiPicker((state) => state.setMode);
   useEffect(() => {
     setMode("search");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
   return (
-    <Container>
+    <Container className={className}>
       <Border>
         <div
           style={{
