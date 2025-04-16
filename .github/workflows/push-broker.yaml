@@ -21,8 +21,6 @@ jobs:
       with:
         password: '${{ secrets.DOCKERHUB_TOKEN }}'
         username: '${{ secrets.DOCKERHUB_USERNAME }}'
-    - name: 'Check out processor submodule'
-      run: 'git submodule update --init --recursive src/rust/processor'
     - id: 'build'
       name: 'Build and push untagged ${{ matrix.arch }} digest to Docker Hub'
       uses: 'docker/build-push-action@v6'

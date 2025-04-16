@@ -70,8 +70,8 @@ services:
     extra_hosts:
     - 'host.docker.internal:host-gateway'
     build:
-      context: '../rust/processor/rust'
-      dockerfile: 'Dockerfile'
+      context: '../rust'
+      dockerfile: 'processor/Dockerfile'
     environment:
       DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
       GRPC_AUTH_TOKEN: '${GRPC_AUTH_TOKEN}'
@@ -83,7 +83,7 @@ services:
     depends_on:
       postgres:
         condition: 'service_healthy'
-    image: 'econialabs/emojicoin-dot-fun-indexer-processor:7.0.4'
+    image: 'econialabs/emojicoin-dot-fun-indexer-processor:10.0.0-rc.1'
     container_name: 'processor'
     healthcheck:
       test: 'curl -sf http://localhost:${PROCESSOR_WS_PORT} || exit 1'
