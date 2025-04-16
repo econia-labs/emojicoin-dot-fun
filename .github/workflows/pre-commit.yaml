@@ -31,7 +31,7 @@ jobs:
         virtualenvs-create: true
         virtualenvs-in-project: true
     - id: 'restore-deps'
-      uses: 'actions/cache/restore@v4'
+      uses: 'actions/cache@v4'
       with:
         key: >-
           pydeps-${{ runner.os }}-
@@ -44,15 +44,6 @@ jobs:
       run: |
         cd ./src/python/hooks
         poetry install --no-interaction --no-root
-    - id: 'save-deps'
-      uses: 'actions/cache/save@v4'
-      with:
-        # Same key in `restore-deps`.
-        key: >-
-          pydeps-${{ runner.os }}-
-          ${{ steps.setup-python.outputs.python-version }}-
-          ${{ hashFiles('./src/python/hooks/poetry.lock') }}
-        path: './src/python/hooks/.venv'
     - uses: 'pre-commit/action@v3.0.1'
       with:
         extra_args: '--all-files --config cfg/pre-commit-config.yaml'
