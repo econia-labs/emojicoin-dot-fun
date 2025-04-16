@@ -1,6 +1,6 @@
 # cspell:word localnet
 # Pushes the latest localnet deployer image to Dockerhub. This image handles
-# the initialization of the emojicoin contract and test accounts for local
+# the initialization of the emojicoin module and test accounts for local
 # feature/e2e tests and e2e tests in CI.
 ---
 env:

@@ -10,7 +10,7 @@
 
 ## Environment variable explanations
 
-### Aptos Network & Contract Addresses
+### Aptos Network & Module Addresses
 
 #### `NEXT_PUBLIC_APTOS_NETWORK`
 
