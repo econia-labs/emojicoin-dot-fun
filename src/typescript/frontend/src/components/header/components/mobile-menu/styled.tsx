@@ -8,7 +8,11 @@ export const StyledMotion = styled(motion.div)`
   right: 0;
   left: 0;
   z-index: ${({ theme }) => theme.zIndices.modal};
-  background-color: ${({ theme }) => theme.colors.black};
+  background-image: linear-gradient(
+    to bottom,
+    ${({ theme }) => theme.colors.black} 60%,
+    rgb(14, 14, 14) 100%
+  );
 `;
 
 export const MobileMenuWrapper = styled.div`
