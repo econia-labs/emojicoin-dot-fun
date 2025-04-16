@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    INSERT INTO candlestick (\n                        codepoints,\n                        start,\n                        duration,\n                        open,\n                        close,\n                        low,\n                        high\n                    ) VALUES (\n                        $1, $2, $3, $4, $5, $6, $7\n                    )\n                    ON CONFLICT (codepoints, duration, start)\n                    DO UPDATE\n                    SET\n                        close = $5,\n                        low = LEAST(candlestick.low, $6),\n                        high = GREATEST(candlestick.high, $7)\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Timestamptz",
+        {
+          "Custom": {
+            "name": "candlestick_duration",
+            "kind": {
+              "Enum": [
+                "fifteen_seconds",
+                "one_minute",
+                "five_minutes",
+                "fifteen_minutes",
+                "thirty_minutes",
+                "one_hour",
+                "four_hours",
+                "one_day"
+              ]
+            }
+          }
+        },
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "61003adb49574dd78f037b698d53047543632aae69e734958835d7764ca9043f"
+}

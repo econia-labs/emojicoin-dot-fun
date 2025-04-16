@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    INSERT INTO melee_position (\n                        melee_id,\n                        account,\n                        open,\n                        emojicoin_0_balance,\n                        emojicoin_1_balance,\n                        emojicoin_0_balance_before_last_exit,\n                        emojicoin_1_balance_before_last_exit,\n                        deposits,\n                        withdrawals,\n                        match_amount\n                    )\n                    VALUES (\n                        $1,\n                        $2,\n                        $3,\n                        $4,\n                        $5,\n                        $6,\n                        $7,\n                        $8,\n                        $9,\n                        $10\n                    )\n                    ON CONFLICT (melee_id, account) DO UPDATE\n                    SET\n                        open = $3,\n                        emojicoin_0_balance = $4,\n                        emojicoin_1_balance = $5,\n                        emojicoin_0_balance_before_last_exit = $6,\n                        emojicoin_1_balance_before_last_exit = $7,\n                        deposits = melee_position.deposits + $8,\n                        withdrawals = melee_position.withdrawals + $9,\n                        match_amount = melee_position.match_amount + $10\n                    WHERE melee_position.melee_id = $1\n                    AND melee_position.account = $2\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Text",
+        "Bool",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a52f5b30fcf53a8cebaa5864e36b5f1a3ebc5bd89ee3a809331167d1c9f146d"
+}

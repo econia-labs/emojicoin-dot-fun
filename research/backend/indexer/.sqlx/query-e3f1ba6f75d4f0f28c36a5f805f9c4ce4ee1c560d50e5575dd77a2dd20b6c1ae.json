@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    UPDATE melee\n                    SET\n                        emojicoin_0_locked = melee.emojicoin_0_locked + $2,\n                        emojicoin_0_price = $3,\n                        emojicoin_1_locked = melee.emojicoin_1_locked + $4,\n                        emojicoin_1_price = $5,\n                        volume = melee.volume + $6,\n                        rewards_remaining = melee.rewards_remaining - $7\n                    WHERE melee.melee_id = $1\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e3f1ba6f75d4f0f28c36a5f805f9c4ce4ee1c560d50e5575dd77a2dd20b6c1ae"
+}

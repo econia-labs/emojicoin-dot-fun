@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE arena_reward_vault SET balance = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "56b10cd8c416da3e2a289b9943bc8ba384fc993a75b23dff0fc7447aa6d9a1a2"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                        INSERT INTO favorite (\n                            sender,\n                            codepoints\n                        )\n                        SELECT $1, (SELECT codepoints FROM market WHERE address = $2)\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "93766e59f74f5afb12760e970ca67ed02fd650497826f181c25aadcc7d26531c"
+}

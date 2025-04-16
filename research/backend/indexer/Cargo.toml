@@ -1,0 +1,24 @@
+[package]
+name = "indexer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aptos-protos = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "4ace64e" }
+chrono = "0.4.40"
+clap = { version = "4.5.32", features = ["derive", "env"] }
+serde = { version = "1.0.219", features = ["derive", "rc"] }
+serde_json = { version = "1.0.140", features = ["preserve_order"] }
+tracing = "0.1.34"
+tokio = { version = "1.44.1", features = ["full"] }
+url = { version = "2.5.4", features = ["serde"] }
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "tls-native-tls", "postgres", "bigdecimal", "chrono"] }
+
+sdk = { path = "../sdk" }
+futures-util = "0.3.31"
+itertools = "0.14.0"
+tonic = "0.12.3"
+anyhow = { version = "1.0.97", features = ["backtrace"] }
+bigdecimal = "0.4.7"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+async-trait = "0.1.88"

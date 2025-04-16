@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event VALUES ($1, $2, $3, $4, $5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Numeric",
+        "Timestamptz",
+        {
+          "Custom": {
+            "name": "event_type",
+            "kind": {
+              "Enum": [
+                "global_state",
+                "state",
+                "periodic_state",
+                "market_registration",
+                "swap",
+                "chat",
+                "liquidity",
+                "melee",
+                "arena_enter",
+                "arena_swap",
+                "arena_exit",
+                "arena_vault_balance_update"
+              ]
+            }
+          }
+        },
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c950115fb8a98d92056406adb0c8fafc04417c159ac7c9e7100009e64f879fcc"
+}

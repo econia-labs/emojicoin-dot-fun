@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                        UPDATE market\n                        SET\n                            reserves_cpamm_base = $2,\n                            reserves_cpamm_quote = $3,\n                            reserves_clamm_base = $4,\n                            reserves_clamm_quote = $5,\n                            volume_base = $6,\n                            volume_quote = $7,\n                            pool_fees_base = $8,\n                            pool_fees_quote = $9,\n                            swaps = $10,\n                            chats = $11,\n                            daily_percentage_return = COALESCE($12, market.daily_percentage_return),\n                            fully_diluted_value = $13,\n                            integrator_fees = $14,\n                            last_swap_quote_volume = $15,\n                            lp_coin_supply = $16,\n                            market_cap = $17,\n                            total_quote_locked = $18,\n                            total_value_locked = $19\n                        WHERE codepoints = $1\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "90fc37459b279efc36e17b58fb748c9889c03369bdd9d3e4052800549eef346a"
+}

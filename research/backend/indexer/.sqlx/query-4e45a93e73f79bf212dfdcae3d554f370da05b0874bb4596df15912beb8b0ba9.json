@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                        WITH\n                            market_0 AS (SELECT codepoints, price FROM market WHERE address = $2),\n                            market_1 AS (SELECT codepoints, price FROM market WHERE address = $3)\n                        INSERT INTO melee (\n                            melee_id,\n                            emojicoin_0_codepoints,\n                            emojicoin_0_price,\n                            emojicoin_1_codepoints,\n                            emojicoin_1_price,\n                            rewards_remaining,\n                            start,\n                            duration,\n                            max_match_amount,\n                            max_match_percentage\n                        )\n                        SELECT\n                            $1,\n                            (SELECT codepoints FROM market_0),\n                            (SELECT price FROM market_0),\n                            (SELECT codepoints FROM market_1),\n                            (SELECT price FROM market_1),\n                            $4,\n                            $5,\n                            $6,\n                            $7,\n                            $8\n                        FROM market_0, market_1\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Text",
+        "Text",
+        "Numeric",
+        "Timestamptz",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4e45a93e73f79bf212dfdcae3d554f370da05b0874bb4596df15912beb8b0ba9"
+}
