@@ -140,8 +140,8 @@ export async function pair(
   let asset1Id: string;
 
   if (options.geckoTerminal) {
-    if (!pairId.startsWith("0x") && pairId.length != 66) {
-      return new NextResponse("id is not a valid Aptos address", { status: 400 });
+    if (!/^0x[a-f0-9]{64}$/.test(pairId)) {
+      return new NextResponse("Pair ID must follow the form: 0x[a-f0-9]{64}", { status: 400 });
     }
     marketRegistration = await fetchMarketRegistrationByAddress({
       marketAddress: pairId as `0x${string}`,
