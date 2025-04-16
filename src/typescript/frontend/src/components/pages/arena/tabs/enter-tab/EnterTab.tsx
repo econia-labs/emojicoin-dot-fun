@@ -1,5 +1,4 @@
 import Loading from "components/loading";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import type { PropsWithChildren } from "react";
@@ -9,7 +8,6 @@ import Button from "@/components/button";
 import ProgressBar from "@/components/ProgressBar";
 
 import { useArenaPhaseStore, useSelectedMarket } from "../../phase/store";
-import { ArenaLoading } from "../ArenaLoading";
 import EnterTabAmountPhase from "./EnterTabAmountPhase";
 import EnterTabLockPhase from "./EnterTabLockPhase";
 import EnterTabPickPhase from "./EnterTabPickPhase";
@@ -23,7 +21,6 @@ export default function EnterTab() {
   const setMarket = useArenaPhaseStore((s) => s.setMarket);
   const phase = useArenaPhaseStore((s) => s.phase);
   const amount = useArenaPhaseStore((s) => s.amount);
-  const { status } = useAptos();
 
   const { position, isLoading } = useCurrentPosition();
 
@@ -38,8 +35,6 @@ export default function EnterTab() {
   }, [phase, position, setPhase]);
 
   if (isLoading) return <Loading />;
-
-  if (status === "pending") return <ArenaLoading />;
 
   if (phase === "summary") {
     if (!position) return <Loading />;
@@ -97,7 +92,7 @@ function Container({
   position?: CurrentUserPosition | null;
 }) {
   return (
-    <div className="relative flex flex-col grow py-4">
+    <div className="relative flex flex-col grow pt-4 pb-7">
       <div className="px-2 w-[100%] text-white flex items-center *:grow *:basis-0 h-[20px]">
         {phase === "amount" || phase === "lock" ? (
           <div>
