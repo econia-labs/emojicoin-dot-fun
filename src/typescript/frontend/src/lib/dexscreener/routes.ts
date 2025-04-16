@@ -39,7 +39,10 @@ export async function asset(
 
   if (ops.geckoTerminal) {
     if (!/^0x[a-f0-9]{64}::coin_factory::Emojicoin$/.test(assetId)) {
-      return new NextResponse("id must be a valid asset ID", { status: 400 });
+      return new NextResponse(
+        "Asset ID must follow the form: 0x[a-f0-9]{64}::coin_factory::Emojicoin",
+        { status: 400 }
+      );
     }
     const marketAddress = assetId.split(/::/)[0];
     marketState = await fetchMarketStateByAddress({ address: marketAddress });
