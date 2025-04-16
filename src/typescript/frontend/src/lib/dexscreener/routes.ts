@@ -74,7 +74,10 @@ export async function asset(
   });
 }
 
-export async function events(request: NextRequest): Promise<NextResponse<EventsResponse>> {
+export async function events(
+  request: NextRequest,
+  ops = { geckoTerminal: false }
+): Promise<NextResponse<EventsResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const fromBlock = searchParams.get("fromBlock");
   const toBlock = searchParams.get("toBlock");
@@ -96,8 +99,8 @@ export async function events(request: NextRequest): Promise<NextResponse<EventsR
     .sort((a, b) => compareBigInt(a.transaction.version, b.transaction.version))
     .map((event) =>
       isLiquidityEventModel(event)
-        ? toDexscreenerJoinExitEvent(event)
-        : toDexscreenerSwapEvent(event)
+        ? toDexscreenerJoinExitEvent(event, ops)
+        : toDexscreenerSwapEvent(event, ops)
     );
 
   return NextResponse.json({ events });

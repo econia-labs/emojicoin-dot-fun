@@ -10,5 +10,5 @@ export const fetchCache = "force-no-store";
  * This requires dexscreener to have relatively large `fromBlock - toBlock` ranges to keep up
  * */
 export async function GET(request: NextRequest): Promise<NextResponse<EventsResponse>> {
-  return events(request);
+  return events(request, { geckoTerminal: true });
 }
