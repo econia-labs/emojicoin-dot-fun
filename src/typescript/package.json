@@ -73,6 +73,9 @@
       "bs58": "6.0.0",
       "cross-spawn": ">=7.0.5",
       "keyv": "npm:@keyvhq/core@2.1.1"
+    },
+    "patchedDependencies": {
+      "bigint-buffer@1.1.5": "patches/bigint-buffer@1.1.5.patch"
     }
   }
 }

@@ -14,6 +14,11 @@ overrides:
   cross-spawn: '>=7.0.5'
   keyv: npm:@keyvhq/core@2.1.1
 
+patchedDependencies:
+  bigint-buffer@1.1.5:
+    hash: qogj6adhlpdp2dopbpsuxi645m
+    path: patches/bigint-buffer@1.1.5.patch
+
 importers:
 
   .:
@@ -45,7 +50,7 @@ importers:
         version: 5.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/core@1.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/protocol@0.0.6)(graphql-request@7.1.2(graphql@16.10.0)))(@mizuwallet-sdk/protocol@0.0.6)(@telegram-apps/bridge@1.9.2)(@wallet-standard/core@1.1.1)(aptos@1.21.0)(axios@1.8.4)(got@11.8.6)
       '@aptos-labs/wallet-adapter-react':
         specifier: 5.0.4
-        version: 5.0.4(@aptos-labs/derived-wallet-ethereum@0.1.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bufferutil@4.0.9)(typescript@5.6.2)(utf-8-validate@5.0.10)(zod@3.24.2))(@aptos-labs/derived-wallet-solana@0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/core@1.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/protocol@0.0.6)(graphql-request@7.1.2(graphql@16.10.0)))(@mizuwallet-sdk/protocol@0.0.6)(@telegram-apps/bridge@1.9.2)(@types/react@18.3.20)(@wallet-standard/core@1.1.1)(aptos@1.21.0)(axios@1.8.4)(got@11.8.6)(react@18.3.1)
+        version: 5.0.4(@aptos-labs/derived-wallet-ethereum@0.1.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bufferutil@4.0.9)(typescript@5.6.2)(utf-8-validate@5.0.10)(zod@3.24.2))(@aptos-labs/derived-wallet-solana@0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/core@1.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/protocol@0.0.6)(graphql-request@7.1.2(graphql@16.10.0)))(@mizuwallet-sdk/protocol@0.0.6)(@telegram-apps/bridge@1.9.2)(@types/react@18.3.20)(@wallet-standard/core@1.1.1)(aptos@1.21.0)(axios@1.8.4)(got@11.8.6)(react@18.3.1)
       '@emoji-mart/react':
         specifier: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.2.0.tgz
         version: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.2.0.tgz(emoji-mart@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.7.0.tgz)(react@18.3.1)
@@ -2810,6 +2815,9 @@ packages:
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
+  encoding@0.1.13:
+    resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
+
   end-of-stream@1.4.4:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
 
@@ -5377,16 +5385,16 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@aptos-labs/derived-wallet-solana@0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+  '@aptos-labs/derived-wallet-solana@0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)':
     dependencies:
       '@aptos-labs/derived-wallet-base': 0.1.2(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)
       '@aptos-labs/siwa': 0.2.5(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)
       '@aptos-labs/ts-sdk': 1.38.0(axios@1.8.4)(got@11.8.6)
       '@aptos-labs/wallet-standard': 0.3.1(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)
-      '@solana/wallet-adapter-base': 0.9.24(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/wallet-adapter-base': 0.9.24(@solana/web3.js@1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))
       '@solana/wallet-standard-util': 1.1.2
-      '@solana/wallet-standard-wallet-adapter-base': 1.1.4(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(bs58@6.0.0)
-      '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@solana/wallet-standard-wallet-adapter-base': 1.1.4(@solana/web3.js@1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(bs58@6.0.0)
+      '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
       '@wallet-standard/app': 1.1.0
     transitivePeerDependencies:
       - '@wallet-standard/core'
@@ -5446,10 +5454,10 @@ snapshots:
       - debug
       - got
 
-  '@aptos-labs/wallet-adapter-react@5.0.4(@aptos-labs/derived-wallet-ethereum@0.1.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bufferutil@4.0.9)(typescript@5.6.2)(utf-8-validate@5.0.10)(zod@3.24.2))(@aptos-labs/derived-wallet-solana@0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/core@1.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/protocol@0.0.6)(graphql-request@7.1.2(graphql@16.10.0)))(@mizuwallet-sdk/protocol@0.0.6)(@telegram-apps/bridge@1.9.2)(@types/react@18.3.20)(@wallet-standard/core@1.1.1)(aptos@1.21.0)(axios@1.8.4)(got@11.8.6)(react@18.3.1)':
+  '@aptos-labs/wallet-adapter-react@5.0.4(@aptos-labs/derived-wallet-ethereum@0.1.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bufferutil@4.0.9)(typescript@5.6.2)(utf-8-validate@5.0.10)(zod@3.24.2))(@aptos-labs/derived-wallet-solana@0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/core@1.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/protocol@0.0.6)(graphql-request@7.1.2(graphql@16.10.0)))(@mizuwallet-sdk/protocol@0.0.6)(@telegram-apps/bridge@1.9.2)(@types/react@18.3.20)(@wallet-standard/core@1.1.1)(aptos@1.21.0)(axios@1.8.4)(got@11.8.6)(react@18.3.1)':
     dependencies:
       '@aptos-labs/derived-wallet-ethereum': 0.1.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bufferutil@4.0.9)(typescript@5.6.2)(utf-8-validate@5.0.10)(zod@3.24.2)
-      '@aptos-labs/derived-wallet-solana': 0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@aptos-labs/derived-wallet-solana': 0.2.3(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@wallet-standard/core@1.1.1)(bs58@6.0.0)(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
       '@aptos-labs/wallet-adapter-core': 5.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/core@1.4.0(@aptos-labs/ts-sdk@1.38.0(axios@1.8.4)(got@11.8.6))(@mizuwallet-sdk/protocol@0.0.6)(graphql-request@7.1.2(graphql@16.10.0)))(@mizuwallet-sdk/protocol@0.0.6)(@telegram-apps/bridge@1.9.2)(@wallet-standard/core@1.1.1)(aptos@1.21.0)(axios@1.8.4)(got@11.8.6)
       '@radix-ui/react-slot': 1.2.0(@types/react@18.3.20)(react@18.3.1)
       react: 18.3.1
@@ -6795,10 +6803,10 @@ snapshots:
     dependencies:
       buffer: 6.0.3
 
-  '@solana/wallet-adapter-base@0.9.24(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@solana/wallet-adapter-base@0.9.24(@solana/web3.js@1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/wallet-standard-features': 1.3.0
-      '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
       '@wallet-standard/base': 1.1.0
       '@wallet-standard/features': 1.1.0
       eventemitter3: 4.0.7
@@ -6818,34 +6826,34 @@ snapshots:
       '@solana/wallet-standard-chains': 1.1.1
       '@solana/wallet-standard-features': 1.3.0
 
-  '@solana/wallet-standard-wallet-adapter-base@1.1.4(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(bs58@6.0.0)':
+  '@solana/wallet-standard-wallet-adapter-base@1.1.4(@solana/web3.js@1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(bs58@6.0.0)':
     dependencies:
-      '@solana/wallet-adapter-base': 0.9.24(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/wallet-adapter-base': 0.9.24(@solana/web3.js@1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))
       '@solana/wallet-standard-chains': 1.1.1
       '@solana/wallet-standard-features': 1.3.0
       '@solana/wallet-standard-util': 1.1.2
-      '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
       '@wallet-standard/app': 1.1.0
       '@wallet-standard/base': 1.1.0
       '@wallet-standard/features': 1.1.0
       '@wallet-standard/wallet': 1.1.0
       bs58: 6.0.0
 
-  '@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+  '@solana/web3.js@1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)':
     dependencies:
       '@babel/runtime': 7.27.0
       '@noble/curves': 1.8.2
       '@noble/hashes': 1.7.2
       '@solana/buffer-layout': 4.0.1
       agentkeepalive: 4.6.0
-      bigint-buffer: 1.1.5
+      bigint-buffer: 1.1.5(patch_hash=qogj6adhlpdp2dopbpsuxi645m)
       bn.js: 5.2.1
       borsh: 0.7.0
       bs58: 6.0.0
       buffer: 6.0.3
       fast-stable-stringify: 1.0.0
       jayson: 4.1.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      node-fetch: 2.7.0
+      node-fetch: 2.7.0(encoding@0.1.13)
       rpc-websockets: 9.1.1
       superstruct: 2.0.2
     transitivePeerDependencies:
@@ -7568,7 +7576,7 @@ snapshots:
 
   big.js@6.2.2: {}
 
-  bigint-buffer@1.1.5:
+  bigint-buffer@1.1.5(patch_hash=qogj6adhlpdp2dopbpsuxi645m):
     dependencies:
       bindings: 1.5.0
 
@@ -7963,6 +7971,11 @@ snapshots:
   emoji-regex@8.0.0: {}
 
   emoji-regex@9.2.2: {}
+
+  encoding@0.1.13:
+    dependencies:
+      iconv-lite: 0.6.3
+    optional: true
 
   end-of-stream@1.4.4:
     dependencies:
@@ -9558,9 +9571,11 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  node-fetch@2.7.0:
+  node-fetch@2.7.0(encoding@0.1.13):
     dependencies:
       whatwg-url: 5.0.0
+    optionalDependencies:
+      encoding: 0.1.13
 
   node-gyp-build@4.8.4:
     optional: true
@@ -9653,7 +9668,7 @@ snapshots:
   ox@0.6.9(typescript@5.6.2)(zod@3.24.2):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.8.1
+      '@noble/curves': 1.8.2
       '@noble/hashes': 1.7.2
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
