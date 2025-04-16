@@ -1,10 +1,8 @@
 import { LINKS } from "lib/env";
 
-type Info = {
-  title: string;
-  paragraph: string;
-};
-const INFO: Info[] = [
+import { EXTERNAL_LINK_PROPS } from "@/components/link";
+
+const INFO = [
   {
     title: "What is the emojicoin arena?",
     paragraph:
@@ -45,11 +43,23 @@ const INFO: Info[] = [
     paragraph:
       "emojicoins are selected using Aptos randomness. Nobody, including the developers, can choose or influence which emojicoins are featured in a melee. This ensures fair and unpredictable daily competitions.",
   },
-  {
-    title: "I don't fully understand how the arena works, what should I do?",
-    paragraph: `You can join the discord <a class="underline" target=blank href=${LINKS!.discord}>(${LINKS!.discord})</a> where developers and other community members can help you.`,
-  },
-];
+  ...(LINKS
+    ? [
+        {
+          title: "I don't fully understand how the arena works, what should I do?",
+          paragraph: (
+            <>
+              You can join the discord{" "}
+              <a className="underline" href={LINKS.discord} {...EXTERNAL_LINK_PROPS}>
+                {LINKS.discord}
+              </a>{" "}
+              where developers and other community members can help you.
+            </>
+          ),
+        },
+      ]
+    : []),
+] as const;
 
 export default function InfoTab() {
   return (
@@ -58,10 +68,7 @@ export default function InfoTab() {
         {INFO.map((i, index) => (
           <div key={`info-p-${index}`} className="flex flex-col gap-[1em]">
             <div className="text-3xl uppercase text-white">{i.title}</div>
-            <div
-              className="font-forma text-light-gray"
-              dangerouslySetInnerHTML={{ __html: i.paragraph }}
-            />
+            <div className="font-forma text-light-gray">{i.paragraph}</div>
           </div>
         ))}
       </div>
