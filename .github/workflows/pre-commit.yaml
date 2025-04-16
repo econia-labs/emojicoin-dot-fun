@@ -14,38 +14,29 @@ jobs:
     steps:
     - uses: 'actions/checkout@v4'
     - run: 'git submodule update --init --recursive src/rust/processor'
-    - uses: 'actions/setup-python@v3'
+    - id: 'setup-python'
+      uses: 'actions/setup-python@v5'
       with:
         python-version: '${{ env.PYTHON_VERSION }}'
     - name: 'Install libdw-dev'
       run: |
         sudo apt-get update
         sudo apt-get install -y libdw-dev
-    - uses: 'actions/setup-node@v4'
-      with:
-        node-version-file: '${{ env.TS_DIR }}/.node-version'
-        registry-url: 'https://registry.npmjs.org'
-    - uses: 'pnpm/action-setup@v4'
-      with:
-        package_json_file: '${{ env.TS_DIR }}/package.json'
-    - run: 'cd ${{ env.TS_DIR }} && pnpm i'
-    - name: 'Cache Poetry Install'
-      uses: 'actions/cache@v3'
-      with:
-        key: 'poetry-${{ env.POETRY_VERSION }}'
-        path: '${{ runner.home }}/.local/src/python/hooks'
+    - uses: './.github/actions/pnpm-install'
     - name: 'Install Poetry'
-      uses: 'snok/install-poetry@v1.3.4'
+      uses: 'snok/install-poetry@v1.4.1'
       with:
         installer-parallel: true
         version: '${{ env.POETRY_VERSION }}'
         virtualenvs-create: true
         virtualenvs-in-project: true
     - id: 'restore-deps'
-      uses: 'actions/cache/restore@v3'
+      uses: 'actions/cache/restore@v4'
       with:
-        key: |
-          pydeps-${{ hashFiles('./src/python/hooks/poetry.lock') }}
+        key: >
+          pydeps-${{ runner.os }}-
+          ${{ steps.setup-python.outputs.python-version }}-
+          ${{ hashFiles('./src/python/hooks/poetry.lock') }}
         path: './src/python/hooks/.venv'
     - if: |
         steps.restore-deps.outputs.cache-hit != 'true'
@@ -54,12 +45,15 @@ jobs:
         cd ./src/python/hooks
         poetry install --no-interaction --no-root
     - id: 'save-deps'
-      uses: 'actions/cache/save@v3'
+      uses: 'actions/cache/save@v4'
       with:
-        key: |
-          pydeps-${{ hashFiles('./src/python/hooks/poetry.lock') }}
+        # Same key in `restore-deps`.
+        key: >
+          pydeps-${{ runner.os }}-
+          ${{ steps.setup-python.outputs.python-version }}-
+          ${{ hashFiles('./src/python/hooks/poetry.lock') }}
         path: './src/python/hooks/.venv'
-    - uses: 'pre-commit/action@v3.0.0'
+    - uses: 'pre-commit/action@v3.0.1'
       with:
         extra_args: '--all-files --config cfg/pre-commit-config.yaml'
 name: 'pre-commit'
