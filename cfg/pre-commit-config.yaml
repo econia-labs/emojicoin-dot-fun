@@ -8,6 +8,8 @@
 # cspell:word mypy
 # cspell:word shfmt
 ---
+default_language_version:
+  python: 'python3.10'
 exclude: 'doc\/move\/emojicoin_dot_fun\/.+' # Ignore DocGen.
 repos:
 -
@@ -134,7 +136,7 @@ repos:
     id: 'pretty-format-json'
   - id: 'trailing-whitespace'
   repo: 'https://github.com/pre-commit/pre-commit-hooks'
-  rev: 'v4.5.0'
+  rev: 'v5.0.0'
 -
   hooks:
   - additional_dependencies:
@@ -177,7 +179,7 @@ repos:
   hooks:
   - id: 'shfmt'
   repo: 'https://github.com/scop/pre-commit-shfmt'
-  rev: 'v3.8.0-1'
+  rev: 'v3.11.0-1'
 -
   hooks:
   -
