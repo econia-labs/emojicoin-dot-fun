@@ -43,22 +43,20 @@ const INFO = [
     paragraph:
       "emojicoins are selected using Aptos randomness. Nobody, including the developers, can choose or influence which emojicoins are featured in a melee. This ensures fair and unpredictable daily competitions.",
   },
-  ...(LINKS
-    ? [
-        {
-          title: "I don't fully understand how the arena works, what should I do?",
-          paragraph: (
-            <>
-              You can join the discord{" "}
-              <a className="underline" href={LINKS.discord} {...EXTERNAL_LINK_PROPS}>
-                {LINKS.discord}
-              </a>{" "}
-              where developers and other community members can help you.
-            </>
-          ),
-        },
-      ]
-    : []),
+  {
+    title: "I don't fully understand how the arena works, what should I do?",
+    paragraph: (
+      <>
+        You can join the discord at{" "}
+        {LINKS && (
+          <a className="underline" href={LINKS.discord} {...EXTERNAL_LINK_PROPS}>
+            {LINKS.discord}{" "}
+          </a>
+        )}
+        where developers and other community members can help you.
+      </>
+    ),
+  },
 ] as const;
 
 export default function InfoTab() {
