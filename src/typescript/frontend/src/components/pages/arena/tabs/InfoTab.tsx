@@ -1,10 +1,8 @@
 import { LINKS } from "lib/env";
 
-type Info = {
-  title: string;
-  paragraph: string;
-};
-const INFO: Info[] = [
+import { EXTERNAL_LINK_PROPS } from "@/components/link";
+
+const INFO = [
   {
     title: "What is the emojicoin arena?",
     paragraph:
@@ -47,12 +45,19 @@ const INFO: Info[] = [
   },
   {
     title: "I don't fully understand how the arena works, what should I do?",
-    paragraph:
-      "You can join the discord" + LINKS?.discord
-        ? ` (${LINKS!.discord}) `
-        : " " + "where developers and other community members can help you.",
+    paragraph: (
+      <>
+        You can join the discord at{" "}
+        {LINKS?.discord && (
+          <a className="underline" href={LINKS.discord} {...EXTERNAL_LINK_PROPS}>
+            {LINKS.discord}{" "}
+          </a>
+        )}
+        where developers and other community members can help you.
+      </>
+    ),
   },
-];
+] as const;
 
 export default function InfoTab() {
   return (
