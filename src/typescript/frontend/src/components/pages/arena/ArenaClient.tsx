@@ -3,6 +3,7 @@
 import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { useEventStore } from "context/event-store-context/hooks";
+import { cn } from "lib/utils/class-name";
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -30,18 +31,18 @@ const Desktop = React.memo((props: ArenaProps) => {
       <Box className="grid place-items-center">
         <EmojiTitle />
       </Box>
-      <Box className="col-start-2 col-end-4 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
+      <Box className="col-span-2 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
       <RewardsRemainingBox />
-      <Box className={chartBoxClassName}>
+      <Box className={cn(chartBoxClassName, "min-h-[440px]")}>
         <ChartContainer
           symbol={market0.market.symbolData.symbol}
           secondarySymbol={market1.market.symbolData.symbol}
           className="w-full h-full"
         />
       </Box>
-      <Box className="col-start-3 col-end-5 h-[100%]">
+      <Box className="col-start-3 col-end-5 min-h-[440px]">
         <TabContainer {...props} />
       </Box>
     </div>

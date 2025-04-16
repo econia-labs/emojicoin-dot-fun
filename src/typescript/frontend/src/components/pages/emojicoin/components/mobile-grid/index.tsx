@@ -1,10 +1,10 @@
-import { Text } from "components";
 import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
-import { translationFunction } from "context/language-context";
-import React, { Suspense, useState } from "react";
+import React, { Suspense } from "react";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
-import { Flex } from "@/containers";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 
 import type { GridProps } from "../../types";
 import ChatBox from "../chat/ChatBox";
@@ -23,12 +23,53 @@ import {
 const DISPLAY_HEADER_ABOVE_CHART = false;
 const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";
 
-const TABS = ["Trades", "My Trades", "Swap", "Chat", "Holders"] as const;
+const tabs = [
+  {
+    name: "Trades",
+    emoji: emoji("money-mouth face"),
+    component: (props: GridProps) => <TradeHistory data={props.data} />,
+  },
+  {
+    name: "My Trades",
+    emoji: emoji("person raising hand"),
+    component: (props: GridProps) => <PersonalTradeHistory data={props.data} />,
+  },
+  {
+    name: "Swap",
+    emoji: emoji("counterclockwise arrows button"),
+    component: (props: GridProps) => (
+      <div className="flex flex-col items-center">
+        <LiquidityButton data={props.data} />
+        <div className="flex items-center justify-center pt-10 py-8 w-full bg-black">
+          <SwapComponent
+            emojicoin={props.data.symbol}
+            marketAddress={props.data.marketAddress}
+            marketEmojis={props.data.symbolEmojis}
+            initNumSwaps={props.data.swaps.length}
+          />
+        </div>
+      </div>
+    ),
+  },
+  {
+    name: "Chat",
+    emoji: emoji("speech balloon"),
+    component: (props: GridProps) => <ChatBox data={props.data} />,
+  },
+  {
+    name: "Holders",
+    emoji: emoji("1st place medal"),
+    component: (props: GridProps) => (
+      <CoinHolders
+        emojicoin={props.data.symbol}
+        marketView={props.data.marketView}
+        holders={props.data.holders}
+      />
+    ),
+  },
+] as const;
 
 const MobileGrid = (props: GridProps) => {
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Swap");
-  const { t } = translationFunction();
-
   return (
     <StyledMobileContentWrapper>
       <StyledMobileContentBlock className="">
@@ -42,52 +83,20 @@ const MobileGrid = (props: GridProps) => {
       </StyledMobileContentBlock>
 
       <StyledMobileContentBlock>
-        <StyledMobileContentHeader>
-          <div className="overflow-x-auto">
-            <div className="flex gap-6">
-              {TABS.map((tb) => (
-                <Flex key={tb} cursor="pointer" onClick={() => setTab(tb)}>
-                  <Text
-                    textScale="pixelHeading4"
-                    color={tab === tb ? "lightGray" : "darkGray"}
-                    textTransform="uppercase"
-                    className="whitespace-nowrap"
-                  >
-                    {t(tb)}
-                  </Text>
-                </Flex>
-              ))}
-            </div>
-          </div>
-        </StyledMobileContentHeader>
-        {tab === "Swap" && (
-          <div style={{ width: "100%" }}>
-            <LiquidityButton data={props.data} />
-          </div>
-        )}
-
-        <StyledMobileContentInner>
-          {tab === "Trades" && <TradeHistory data={props.data} />}
-          {tab === "My Trades" && <PersonalTradeHistory data={props.data} />}
-          {tab === "Holders" && (
-            <CoinHolders
-              emojicoin={props.data.symbol}
-              holders={props.data.holders}
-              marketView={props.data.marketView}
-            />
-          )}
-          {tab === "Chat" && <ChatBox data={props.data} />}
-          {tab === "Swap" && (
-            <Flex width="100%" justifyContent="center" px="17px">
-              <SwapComponent
-                emojicoin={props.data.symbol}
-                marketAddress={props.data.marketAddress}
-                marketEmojis={props.data.symbolEmojis}
-                initNumSwaps={props.data.swaps.length}
-              />
-            </Flex>
-          )}
-        </StyledMobileContentInner>
+        <Tabs defaultValue={tabs[0].name}>
+          <TabsList>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.name} value={tab.name} endSlot={<Emoji emojis={tab.emoji} />}>
+                {tab.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {tabs.map((tab) => (
+            <TabsContent key={tab.name} value={tab.name}>
+              {tab.component(props)}
+            </TabsContent>
+          ))}
+        </Tabs>
       </StyledMobileContentBlock>
     </StyledMobileContentWrapper>
   );

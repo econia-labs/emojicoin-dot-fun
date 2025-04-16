@@ -1,4 +1,5 @@
 import Loading from "components/loading";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import type { PropsWithChildren } from "react";
@@ -8,6 +9,7 @@ import Button from "@/components/button";
 import ProgressBar from "@/components/ProgressBar";
 
 import { useArenaPhaseStore, useSelectedMarket } from "../../phase/store";
+import { ArenaLoading } from "../ArenaLoading";
 import EnterTabAmountPhase from "./EnterTabAmountPhase";
 import EnterTabLockPhase from "./EnterTabLockPhase";
 import EnterTabPickPhase from "./EnterTabPickPhase";
@@ -23,6 +25,17 @@ export default function EnterTab() {
   const amount = useArenaPhaseStore((s) => s.amount);
 
   const { position, isLoading } = useCurrentPosition();
+  const { status } = useAptos();
+  const [showLoading, setShowLoading] = React.useState(false);
+
+  useEffect(() => {
+    if (status === "pending") {
+      setShowLoading(true);
+      setTimeout(() => {
+        setShowLoading(false);
+      }, 2300);
+    }
+  }, [status]);
 
   useEffect(() => {
     const { open } = position ?? {};
@@ -35,6 +48,8 @@ export default function EnterTab() {
   }, [phase, position, setPhase]);
 
   if (isLoading) return <Loading />;
+
+  if (showLoading || status === "pending") return <ArenaLoading />;
 
   if (phase === "summary") {
     if (!position) return <Loading />;
@@ -92,13 +107,10 @@ function Container({
   position?: CurrentUserPosition | null;
 }) {
   return (
-    <div className="relative flex flex-col h-[100%] gap-[3em]">
-      <div className="absolute left-0 w-[100%] text-white flex">
-        <div className="m-auto w-[33%] pt-[2em]">
-          <ProgressBar length={3} position={progress} />
-        </div>
-        {(phase === "amount" || phase === "lock") && (
-          <div className="absolute top-[1.5em] left-[1em]">
+    <div className="relative flex flex-col grow pt-4 pb-7">
+      <div className="px-2 w-[100%] text-white flex items-center *:grow *:basis-0 h-[20px]">
+        {phase === "amount" || phase === "lock" ? (
+          <div>
             <Button
               scale="lg"
               onClick={() => {
@@ -111,7 +123,15 @@ function Container({
               Back
             </Button>
           </div>
+        ) : (
+          <div />
         )}
+        <div className="flex flex-col items-center">
+          <div className="max-w-[250px]">
+            <ProgressBar length={3} position={progress} />
+          </div>
+        </div>
+        <div />
       </div>
       {children}
     </div>
