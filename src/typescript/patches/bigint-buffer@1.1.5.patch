@@ -25,4 +25,4 @@ index 3c78463c2fac414612aa49a9fd27d529a2041ec0..c604f186fc48aebed1248d140d2c0cf1
 +        // 'bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');
    }
  }
- 
+
