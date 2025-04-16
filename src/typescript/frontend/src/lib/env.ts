@@ -6,10 +6,10 @@ import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
 import packageInfo from "../../package.json";
 
 type Links = {
-  x: string;
-  github: string;
-  discord: string;
-  tos: string;
+  x?: string | undefined;
+  github?: string | undefined;
+  discord?: string | undefined;
+  tos?: string | undefined;
 };
 
 const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;

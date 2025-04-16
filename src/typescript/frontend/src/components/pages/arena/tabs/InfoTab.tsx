@@ -48,7 +48,7 @@ const INFO = [
     paragraph: (
       <>
         You can join the discord at{" "}
-        {LINKS && (
+        {LINKS?.discord && (
           <a className="underline" href={LINKS.discord} {...EXTERNAL_LINK_PROPS}>
             {LINKS.discord}{" "}
           </a>
