@@ -50,7 +50,7 @@ Only considered true if the value is set to the string value `true`.
 
 <!-- markdownlint-enable MD013 -->
 
----
+______________________________________________________________________
 
 ### Emojicoin Indexer, Broker, and Allowlister
 
@@ -77,7 +77,7 @@ This field can be empty if `NEXT_PUBLIC_IS_ALLOWLIST_ENABLED` is not `"true"`.
 
 - **Example**: `"http://localhost:3000"`
 
----
+______________________________________________________________________
 
 ### Unit/E2E Tests
 
@@ -99,7 +99,7 @@ Used for publishing the Move module.
 
 **Note**: These variables can be empty when not running unit tests.
 
----
+______________________________________________________________________
 
 ### Miscellaneous Frontend Configurations
 
@@ -171,7 +171,7 @@ Without this variable being set, the application will:
 - Use different fonts.
 - Fail to properly display the TradingView chart on each market page.
 
----
+______________________________________________________________________
 
 ### API Keys
 
