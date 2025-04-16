@@ -1,4 +1,5 @@
 import Loading from "components/loading";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import type { PropsWithChildren } from "react";
@@ -8,6 +9,7 @@ import Button from "@/components/button";
 import ProgressBar from "@/components/ProgressBar";
 
 import { useArenaPhaseStore, useSelectedMarket } from "../../phase/store";
+import { ArenaLoading } from "../ArenaLoading";
 import EnterTabAmountPhase from "./EnterTabAmountPhase";
 import EnterTabLockPhase from "./EnterTabLockPhase";
 import EnterTabPickPhase from "./EnterTabPickPhase";
@@ -23,6 +25,17 @@ export default function EnterTab() {
   const amount = useArenaPhaseStore((s) => s.amount);
 
   const { position, isLoading } = useCurrentPosition();
+  const { status } = useAptos();
+  const [showLoading, setShowLoading] = React.useState(false);
+
+  useEffect(() => {
+    if (status === "pending") {
+      setShowLoading(true);
+      setTimeout(() => {
+        setShowLoading(false);
+      }, 2300);
+    }
+  }, [status]);
 
   useEffect(() => {
     const { open } = position ?? {};
@@ -35,6 +48,8 @@ export default function EnterTab() {
   }, [phase, position, setPhase]);
 
   if (isLoading) return <Loading />;
+
+  if (showLoading || status === "pending") return <ArenaLoading />;
 
   if (phase === "summary") {
     if (!position) return <Loading />;
