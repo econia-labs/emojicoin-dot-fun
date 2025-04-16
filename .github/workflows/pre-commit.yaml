@@ -34,8 +34,8 @@ jobs:
       uses: 'actions/cache/restore@v4'
       with:
         key: >-
-          pydeps-${{ runner.os }}-\
-          ${{ steps.setup-python.outputs.python-version }}-\
+          pydeps-${{ runner.os }}-
+          ${{ steps.setup-python.outputs.python-version }}-
           ${{ hashFiles('./src/python/hooks/poetry.lock') }}
         path: './src/python/hooks/.venv'
     - if: |
@@ -49,8 +49,8 @@ jobs:
       with:
         # Same key in `restore-deps`.
         key: >-
-          pydeps-${{ runner.os }}-\
-          ${{ steps.setup-python.outputs.python-version }}-\
+          pydeps-${{ runner.os }}-
+          ${{ steps.setup-python.outputs.python-version }}-
           ${{ hashFiles('./src/python/hooks/poetry.lock') }}
         path: './src/python/hooks/.venv'
     - uses: 'pre-commit/action@v3.0.1'
