@@ -51,9 +51,9 @@ export const radii = {
 } as const;
 
 export const zIndices = {
-  modal: 100,
+  modal: 1000,
   tooltip: 101,
-  header: 11,
+  header: 100,
   dropdown: 10,
 } as const;
 

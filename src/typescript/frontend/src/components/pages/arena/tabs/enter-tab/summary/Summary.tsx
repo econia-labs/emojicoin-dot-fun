@@ -34,10 +34,11 @@ export default function Summary({
   const { pnl } = useTradingStats();
 
   return (
-    <div className="flex flex-col justify-center items-center h-[100%] py-2">
-      {/* The glowing emoji header */}
-      <GlowingEmoji className="text-7xl mt-[2em]" emojis={position.currentSymbol} />
-      <div className="flex flex-col justify-between gap-[1em] items-center">
+    <div className="flex flex-col justify-center grow items-center">
+      <div className="flex flex-col justify-center gap-[1em] grow items-center">
+        {/* The glowing emoji header */}
+        <GlowingEmoji className="text-7xl mt-[2em]" emojis={position.currentSymbol} />
+
         {/* Line 1 – Current Value display */}
         <div className="flex flex-col gap-[0.3em] items-center">
           <div className="text-light-gray uppercase text-2xl tracking-widest">Position value</div>
