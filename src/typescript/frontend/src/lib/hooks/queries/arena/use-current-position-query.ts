@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
@@ -17,6 +18,7 @@ export const useCurrentPositionQuery = () => {
   const { url, minimumVersion } = useRouteWithMinimumVersion(
     `${ROUTES.api.arena.position}/${accountAddress}`
   );
+  const queryKey = useCurrentPositionQueryKey(accountAddress);
 
   const {
     data: position,
@@ -24,7 +26,7 @@ export const useCurrentPositionQuery = () => {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["fetch-current-position", accountAddress ?? ""],
+    queryKey,
     queryFn: async () => {
       if (!accountAddress) return null;
       const res = await fetch(url)
@@ -46,3 +48,7 @@ export const useCurrentPositionQuery = () => {
     isLoading,
   };
 };
+
+export function useCurrentPositionQueryKey(accountAddress: `0x${string}` | undefined) {
+  return useMemo(() => ["fetch-current-position", accountAddress ?? ""], [accountAddress]);
+}

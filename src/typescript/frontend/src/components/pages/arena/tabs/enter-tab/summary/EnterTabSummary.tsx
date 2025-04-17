@@ -3,10 +3,12 @@ import type { CurrentUserPosition } from "lib/hooks/positions/use-current-positi
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useArenaSwapTransactionBuilder } from "lib/hooks/transaction-builders/use-arena-swap-builder";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
+import { useArenaSubmissionSnapshot } from "lib/hooks/use-arena-submission-snapshot";
 import { useCallback, useState } from "react";
 
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 
+import { globalArenaPhaseStore } from "../../../phase/store";
 import Summary from "./Summary";
 import SwapModal from "./SwapModal";
 import TapOutModal from "./TapOutModal";
@@ -29,6 +31,7 @@ export default function EnterTabSummary({
   const { account, submit } = useAptos();
   const { market0, market1 } = useCurrentMeleeInfo();
   const { isLoading } = useCurrentPosition();
+  const snapshot = useArenaSubmissionSnapshot();
 
   const swapTransactionBuilder = useArenaSwapTransactionBuilder(
     market0?.market.marketAddress,
@@ -41,6 +44,7 @@ export default function EnterTabSummary({
 
   const onTapOut = useCallback(() => {
     if (!account) return;
+    globalArenaPhaseStore.getState().setSubmitSnapshot(snapshot, exitTransactionBuilder);
     submit(exitTransactionBuilder).then((r) => {
       if (!r || r?.error) {
         console.error("Could not exit", { error: r?.error });
@@ -48,10 +52,11 @@ export default function EnterTabSummary({
         tapOut();
       }
     });
-  }, [account, exitTransactionBuilder, tapOut, submit]);
+  }, [snapshot, account, exitTransactionBuilder, tapOut, submit]);
 
   const onSwap = useCallback(() => {
     if (!account) return;
+    globalArenaPhaseStore.getState().setSubmitSnapshot(snapshot, swapTransactionBuilder);
     submit(swapTransactionBuilder).then((r) => {
       if (!r || r?.error) {
         console.error("Could not swap", { error: r?.error });
@@ -60,7 +65,7 @@ export default function EnterTabSummary({
         setIsSwapping(false);
       }
     });
-  }, [account, swapTransactionBuilder, swap, submit]);
+  }, [snapshot, account, swapTransactionBuilder, swap, submit]);
 
   return (
     <div className="flex flex-col grow pt-[2em] pb-[3em]">

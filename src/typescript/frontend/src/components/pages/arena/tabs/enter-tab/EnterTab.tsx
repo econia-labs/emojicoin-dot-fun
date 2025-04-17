@@ -9,7 +9,7 @@ import Button from "@/components/button";
 import ProgressBar from "@/components/ProgressBar";
 
 import { useArenaPhaseStore, useSelectedMarket } from "../../phase/store";
-import { ArenaLoading } from "../ArenaLoading";
+import { ArenaLoading, MAX_LOADING_TIME } from "../ArenaLoading";
 import EnterTabAmountPhase from "./EnterTabAmountPhase";
 import EnterTabLockPhase from "./EnterTabLockPhase";
 import EnterTabPickPhase from "./EnterTabPickPhase";
@@ -33,7 +33,7 @@ export default function EnterTab() {
       setShowLoading(true);
       setTimeout(() => {
         setShowLoading(false);
-      }, 2300);
+      }, MAX_LOADING_TIME);
     }
   }, [status]);
 

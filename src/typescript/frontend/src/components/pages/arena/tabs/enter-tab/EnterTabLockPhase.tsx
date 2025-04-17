@@ -2,6 +2,7 @@ import { useEventStore } from "context/event-store-context/hooks";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useEnterTransactionBuilder } from "lib/hooks/transaction-builders/use-enter-builder";
+import { useArenaSubmissionSnapshot } from "lib/hooks/use-arena-submission-snapshot";
 import { Lock } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -13,7 +14,7 @@ import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import useRewardsRemaining from "@/hooks/use-rewards-remaining";
 import { getEvents, type MarketStateModel } from "@/sdk/index";
 
-import { useArenaPhaseStore } from "../../phase/store";
+import { globalArenaPhaseStore, useArenaPhaseStore } from "../../phase/store";
 import { FormattedNominalNumber } from "../utils";
 import { MatchAmount } from "./MatchAmount";
 
@@ -31,6 +32,7 @@ export default function EnterTabLockPhase({
   const setError = useArenaPhaseStore((s) => s.setError);
   const rewardsRemaining = useRewardsRemaining();
   const arenaInfo = useEventStore((s) => s.arenaInfoFromServer);
+  const snapshot = useArenaSubmissionSnapshot();
   // Lock in by default if there are rewards remaining.
   const [innerLock, setInnerLock] = useState<boolean>(position?.lockedIn || !!rewardsRemaining);
 
@@ -106,6 +108,7 @@ export default function EnterTabLockPhase({
           scale="lg"
           onClick={() => {
             if (!account) return;
+            globalArenaPhaseStore.getState().setSubmitSnapshot(snapshot, transactionBuilder);
             submit(transactionBuilder).then((res) => {
               if (getEvents(res?.response).arenaMeleeEvents.length) {
                 setPhase("pick");
