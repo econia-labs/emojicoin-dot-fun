@@ -1,10 +1,10 @@
-import {
-  type Aptos,
-  AptosApiError,
-  isUserTransactionResponse,
-  type PendingTransactionResponse,
-  type UserTransactionResponse,
+import type {
+  Aptos,
+  MoveFunctionId,
+  PendingTransactionResponse,
+  UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
+import { AptosApiError, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   checkNetworkAndToast,
@@ -118,7 +118,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       functionName,
       res,
     }: {
-      functionName: `${string}::${string}::${string}`;
+      functionName: MoveFunctionId;
       res: PendingTransactionResponse;
     }) => {
       let response: PendingTransactionResponse | UserTransactionResponse | null = null;
@@ -187,11 +187,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     async (input) => {
       if (geoblocked || !input) return null;
       if (checkNetworkAndToast(network, true)) {
+        const { function: functionName } = input.data;
         setStatus("prompt");
-        const { functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
-          functionName: input.data.function,
-          res,
-        }));
+        const res = await adapterSignAndSubmitTxn(input);
         return await handleTransactionSubmission({ functionName, res });
       }
       return null;
@@ -206,20 +204,17 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     async (transactionBuilder) => {
       if (geoblocked || !transactionBuilder) return null;
       if (checkNetworkAndToast(network, true)) {
+        const functionName = [
+          transactionBuilder.payloadBuilder.moduleAddress,
+          transactionBuilder.payloadBuilder.moduleName,
+          transactionBuilder.payloadBuilder.functionName,
+        ].join("::") as `${string}::${string}::${string}`;
         setStatus("prompt");
         const senderAuthenticator = await signTransaction(transactionBuilder.rawTransactionInput);
-        const { functionName, res } = await submitTransaction({
+        const res = await submitTransaction({
           transaction: transactionBuilder.rawTransactionInput,
           senderAuthenticator,
-        }).then((res) => ({
-          functionName: [
-            transactionBuilder.payloadBuilder.moduleAddress,
-            transactionBuilder.payloadBuilder.moduleName,
-            transactionBuilder.payloadBuilder.functionName,
-          ].join("::") as `${string}::${string}::${string}`,
-          res,
-        }));
-
+        });
         return await handleTransactionSubmission({ functionName, res });
       }
       return null;

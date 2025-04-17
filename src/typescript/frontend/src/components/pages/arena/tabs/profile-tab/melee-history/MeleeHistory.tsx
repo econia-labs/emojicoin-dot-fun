@@ -4,6 +4,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
+import { useArenaSubmissionSnapshot } from "lib/hooks/use-arena-submission-snapshot";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
@@ -12,6 +13,7 @@ import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
 import { useHistoricalEscrow } from "@/store/arena/escrow/hooks";
 
+import { globalArenaPhaseStore } from "../../../phase/store";
 import { CurrentMeleeBreakdown, HistoricMeleeBreakdown } from "../melee-breakdown/MeleeBreakdown";
 import type { ProfileTabProps } from "../ProfileTab";
 import styles from "./History.module.css";
@@ -46,6 +48,7 @@ const HistoricalRow = ({
   );
   const { submit } = useAptos();
   const escrow = useHistoricalEscrow(row.meleeID);
+  const snapshot = useArenaSubmissionSnapshot();
 
   return (
     <>
@@ -60,6 +63,9 @@ const HistoricalRow = ({
             <ButtonWithConnectWalletFallback>
               <Button
                 onClick={() => {
+                  globalArenaPhaseStore
+                    .getState()
+                    .setSubmitSnapshot(snapshot, exitTransactionBuilder);
                   submit(exitTransactionBuilder);
                 }}
               >
