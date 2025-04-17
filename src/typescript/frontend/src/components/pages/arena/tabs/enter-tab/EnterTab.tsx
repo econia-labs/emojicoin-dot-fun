@@ -107,7 +107,7 @@ function Container({
   position?: CurrentUserPosition | null;
 }) {
   return (
-    <div className="relative flex flex-col grow pt-4 pb-7">
+    <div className="relative flex flex-col grow pt-[2em] pb-[3em]">
       <div className="px-2 w-[100%] text-white flex items-center *:grow *:basis-0 h-[20px]">
         {phase === "amount" || phase === "lock" ? (
           <div>

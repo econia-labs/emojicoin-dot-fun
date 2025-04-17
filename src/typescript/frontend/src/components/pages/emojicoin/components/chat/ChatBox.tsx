@@ -52,7 +52,7 @@ const ChatBox = (props: ChatProps) => {
   const { sendChatMessage } = useChatBox(props.data.marketAddress);
 
   return (
-    <Column className="relative w-full min-h-[328px] grow">
+    <Column className="relative w-full min-h-[328px] grow bg-black border-t border-t-dark-gray border-solid z-20">
       {chatsQuery.isLoading ? (
         <Loading />
       ) : (

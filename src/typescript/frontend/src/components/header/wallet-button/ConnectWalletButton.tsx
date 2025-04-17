@@ -110,7 +110,7 @@ const ButtonWithConnectWalletFallback = ({
             <div className={!mobile ? "" : "text-ec-blue text-[32px] leading-[40px]"}>
               <div
                 className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
-                style={{ minWidth: width }}
+                style={mobile ? {} : { minWidth: width }}
                 ref={ref}
               />
             </div>
