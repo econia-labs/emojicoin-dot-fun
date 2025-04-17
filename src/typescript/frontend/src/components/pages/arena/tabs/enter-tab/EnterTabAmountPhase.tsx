@@ -22,24 +22,26 @@ export default function EnterTabAmountPhase({ market }: { market: MarketStateMod
   const setPhase = useArenaPhaseStore((s) => s.setPhase);
   const [innerAmount, setInnerAmount] = useState<bigint>(0n);
   return (
-    <div className="flex flex-col grow justify-center pt-6 items-center gap-[1rem]">
-      <div className="text-6xl">
-        <GlowingEmoji emojis={market.market.symbolEmojis.join("")} />
-      </div>
-      <div className="font-forma text-xl uppercase text-white">Deposit amount</div>
-      <InnerWrapper>
-        <div className="flex flex-col">
-          <div className={grayLabel}>Amount</div>
-          <InputNumeric
-            className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-            value={innerAmount}
-            onUserInput={(v) => setInnerAmount(v)}
-            onSubmit={() => setAmount(innerAmount)}
-            decimals={8}
-          />
+    <div className="flex flex-col grow justify-center items-center">
+      <div className="w-full flex flex-col grow justify-center items-center gap-[1rem]">
+        <div className="text-6xl">
+          <GlowingEmoji emojis={market.market.symbolEmojis.join("")} />
         </div>
-        <AptosInputLabel />
-      </InnerWrapper>
+        <div className="font-forma text-xl uppercase text-white">Deposit amount</div>
+        <div className="flex justify-between border border-solid border-dark-gray radii-xs px-[18px] py-[7px] items-center h-[55px] md:items-stretch max-w-[300px]">
+          <div className="flex flex-col">
+            <div className={grayLabel}>Amount</div>
+            <InputNumeric
+              className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
+              value={innerAmount}
+              onUserInput={(v) => setInnerAmount(v)}
+              onSubmit={() => setAmount(innerAmount)}
+              decimals={8}
+            />
+          </div>
+          <AptosInputLabel />
+        </div>
+      </div>
       <Button
         scale="lg"
         onClick={() => {
@@ -50,19 +52,6 @@ export default function EnterTabAmountPhase({ market }: { market: MarketStateMod
       >
         Next
       </Button>
-    </div>
-  );
-}
-
-function InnerWrapper({ children }: React.PropsWithChildren) {
-  return (
-    <div
-      className={
-        `flex justify-between border border-solid border-dark-gray ` +
-        `radii-xs px-[18px] py-[7px] items-center h-[55px] md:items-stretch max-w-[300px]`
-      }
-    >
-      {children}
     </div>
   );
 }

@@ -50,34 +50,3 @@ export const StyledMobileContentBlock = styled.div`
     }
   }
 `;
-
-export const StyledMobileContentHeader = styled.div`
-  display: flex;
-  position: relative;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
-  padding: 3px 10px;
-
-  ${({ theme }) => theme.mediaQueries.tablet} {
-    min-height: 45px;
-    align-items: center;
-  }
-
-  &:after,
-  &:before {
-    content: "";
-    display: block;
-    position: absolute;
-    width: 1200vw;
-    background-color: ${({ theme }) => theme.colors.darkGray};
-    height: 1px;
-    transform: translateX(-20%);
-  }
-
-  &:after {
-    top: -1px;
-  }
-
-  &:before {
-    bottom: -1px;
-  }
-`;
