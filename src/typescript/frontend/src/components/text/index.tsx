@@ -25,7 +25,7 @@ const wordBreak = ({ wordBreak }: ThemedProps) => {
 const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
   textScale,
 }))`
-  color: ${({ theme, color }) => (color ? theme.colors[color] : theme.colors.white)};
+  color: ${({ theme, color }) => (color ? theme.colors[color] : undefined)};
   text-transform: ${({ textTransform }) => textTransform};
 
   ${({ textScale }) => textScale && textStyles(textScale as keyof typeof scales)}

@@ -16,14 +16,14 @@ import { ROUTES } from "router/routes";
 
 import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
 
-import { MobileMenuItem } from "../index";
+import MobileMenuItem from "../mobile-menu-item/mobile-menu-item";
 import { slideVariants } from "./animations";
 import AnimatedDropdownItem from "./components/animated-dropdown-item";
 import { MobileSocialLinks } from "./components/mobile-social-links";
-import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
+import { MobileMenuWrapper, StyledMotion } from "./styled";
 import type { MobileMenuProps } from "./types";
 
-const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-black";
+const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-ec-blue";
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
@@ -98,10 +98,10 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   return (
     <StyledMotion initial="hidden" animate={isOpen ? "visible" : "hidden"} variants={slideVariants}>
       <MobileMenuWrapper>
-        <MobileMenuInner>
+        <div className="flex flex-col w-full">
           {!geoblocked && (
             <ButtonWithConnectWalletFallback
-              className={"w-full pl-0"}
+              className={"w-full"}
               mobile={true}
               onClick={subMenuOnClick}
               arrow
@@ -120,7 +120,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                       title="Account"
                       icon={<User className={IconClass} />}
                       controls={subMenuControls}
-                      borderControls={borderControls}
                     />
                   </a>
                 )}
@@ -133,7 +132,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                   title="My emojicoins"
                   icon={<UserRound className={IconClass} />}
                   controls={subMenuControls}
-                  borderControls={borderControls}
                 />
                 <AnimatedDropdownItem
                   key="copy-address-dropdown"
@@ -141,7 +139,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                   icon={<Copy className={IconClass} />}
                   onClick={copyAddress}
                   controls={subMenuControls}
-                  borderControls={borderControls}
                 />
                 <AnimatedDropdownItem
                   key="disconnect-dropdown"
@@ -149,7 +146,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                   icon={<LogOut className={IconClass} />}
                   onClick={disconnect}
                   controls={subMenuControls}
-                  borderControls={borderControls}
                 />
               </>
             )}
@@ -165,12 +161,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
               >
                 <MobileMenuItem
                   title={title}
-                  borderBottom={i !== linksForCurrentPage.length - 1}
+                  noBorder={i === linksForCurrentPage.length - 1}
                   pill={
                     title === "arena"
                       ? {
                           className: "flex flex-row items-center gap-[.5em]",
-                          pill: <Badge color="black">NEW</Badge>,
+                          pill: <Badge color="econiaBlue">NEW</Badge>,
                         }
                       : undefined
                   }
@@ -178,7 +174,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
               </Link>
             );
           })}
-        </MobileMenuInner>
+        </div>
 
         <div className="flex fixed bottom-[60px] justify-center w-full">
           <MobileSocialLinks />
