@@ -101,7 +101,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
         <div className="flex flex-col w-full">
           {!geoblocked && (
             <ButtonWithConnectWalletFallback
-              className={"w-full pl-0"}
+              className={"w-full"}
               mobile={true}
               onClick={subMenuOnClick}
               arrow
@@ -150,7 +150,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
               </>
             )}
           </AnimatePresence>
-          {linksForCurrentPage.map(({ title, path }) => {
+          {linksForCurrentPage.map(({ title, path }, i) => {
             return (
               <Link
                 key={title}
@@ -161,6 +161,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
               >
                 <MobileMenuItem
                   title={title}
+                  noBorder={i === linksForCurrentPage.length - 1}
                   pill={
                     title === "arena"
                       ? {

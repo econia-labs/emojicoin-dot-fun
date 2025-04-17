@@ -133,7 +133,7 @@ export const MobileNavigation = (props: ArenaProps) => {
       )}
       {!!tab &&
         createPortal(
-          <>
+          <div className="relative z-[100]">
             {/* Backdrop, to hide the app behind the tab overlay */}
             <div className="fixed inset-0 bg-black z-[49]" />
 
@@ -181,7 +181,7 @@ export const MobileNavigation = (props: ArenaProps) => {
                 {tab.component}
               </div>
             </div>
-          </>,
+          </div>,
           document.body
         )}
     </>

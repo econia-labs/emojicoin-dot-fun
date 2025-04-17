@@ -15,13 +15,11 @@ import SwapComponent from "../trade-emojicoin/SwapComponent";
 import { TradeHistory } from "../trade-history/trade-history";
 import {
   StyledMobileContentBlock,
-  StyledMobileContentHeader,
   StyledMobileContentInner,
   StyledMobileContentWrapper,
 } from "./styled";
 
-const DISPLAY_HEADER_ABOVE_CHART = false;
-const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";
+const CHART_HEIGHT = "min-h-[365px]";
 
 const tabs = [
   {
@@ -72,10 +70,8 @@ const tabs = [
 const MobileGrid = (props: GridProps) => {
   return (
     <StyledMobileContentWrapper>
-      <StyledMobileContentBlock className="">
-        {/* Add this back in if we decide to use the custom emoji picker search bar. */}
-        {DISPLAY_HEADER_ABOVE_CHART && <StyledMobileContentHeader></StyledMobileContentHeader>}
-        <StyledMobileContentInner className={HEIGHT}>
+      <StyledMobileContentBlock>
+        <StyledMobileContentInner className={CHART_HEIGHT}>
           <Suspense fallback={<Loading />}>
             <ChartContainer symbol={props.data.symbol} className="relative w-full h-[420px]" />
           </Suspense>
