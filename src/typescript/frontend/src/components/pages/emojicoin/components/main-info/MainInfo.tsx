@@ -3,7 +3,7 @@ import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";
 import { Planet, TwitterOutlineIcon } from "components/svg";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
-import { useEventStore } from "context/event-store-context";
+import { useEventStore, useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
@@ -83,7 +83,8 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const [allTimeVolume, setAllTimeVolume] = useState(
     BigInt(data.state.state.cumulativeStats.quoteVolume)
   );
-  const [showUSD, setShowUSD] = useState<boolean>(false);
+  const showUsd = useUserSettings((s) => s.showUsd);
+  const setShowUsd = useUserSettings((s) => s.setShowUsd);
 
   useEffect(() => {
     if (stateEvents.length === 0) return;
@@ -164,13 +165,13 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const switcher = (
     <Switcher
       disabled={usdMarketCap === undefined}
-      checked={showUSD}
-      onChange={() => setShowUSD((v) => !v)}
+      checked={showUsd}
+      onChange={() => setShowUsd(!showUsd)}
     />
   );
 
   function aptOrUsd(value: bigint, valueUsd: number | undefined) {
-    if (valueUsd !== undefined && showUSD) {
+    if (valueUsd !== undefined && showUsd) {
       return (
         <>
           <FormattedNumber value={valueUsd} scramble />

@@ -262,7 +262,7 @@ export const toTrigger = (s: DatabaseStructType["GlobalStateEventData"]["trigger
   })();
 
 /// As defined in the Move module, not in the database; i.e., numbers, not enum strings.
-export enum TriggerFromContract {
+export enum TriggerFromMoveCode {
   PackagePublication = 0,
   MarketRegistration = 1,
   SwapBuy = 2,
@@ -300,24 +300,24 @@ export const periodEnumToRawDuration = (period: Period | ArenaPeriod): PeriodDur
 };
 
 export const triggerEnumToRawTrigger = (trigger: Trigger): number => {
-  if (trigger === Trigger.PackagePublication) return TriggerFromContract.PackagePublication;
-  if (trigger === Trigger.MarketRegistration) return TriggerFromContract.MarketRegistration;
-  if (trigger === Trigger.SwapBuy) return TriggerFromContract.SwapBuy;
-  if (trigger === Trigger.SwapSell) return TriggerFromContract.SwapSell;
-  if (trigger === Trigger.ProvideLiquidity) return TriggerFromContract.ProvideLiquidity;
-  if (trigger === Trigger.RemoveLiquidity) return TriggerFromContract.RemoveLiquidity;
-  if (trigger === Trigger.Chat) return TriggerFromContract.Chat;
+  if (trigger === Trigger.PackagePublication) return TriggerFromMoveCode.PackagePublication;
+  if (trigger === Trigger.MarketRegistration) return TriggerFromMoveCode.MarketRegistration;
+  if (trigger === Trigger.SwapBuy) return TriggerFromMoveCode.SwapBuy;
+  if (trigger === Trigger.SwapSell) return TriggerFromMoveCode.SwapSell;
+  if (trigger === Trigger.ProvideLiquidity) return TriggerFromMoveCode.ProvideLiquidity;
+  if (trigger === Trigger.RemoveLiquidity) return TriggerFromMoveCode.RemoveLiquidity;
+  if (trigger === Trigger.Chat) return TriggerFromMoveCode.Chat;
   throw new Error(`Invalid state trigger: ${trigger}`);
 };
 
 export const rawTriggerToEnum = (num: number): Trigger => {
-  if (num === TriggerFromContract.PackagePublication) return Trigger.PackagePublication;
-  if (num === TriggerFromContract.MarketRegistration) return Trigger.MarketRegistration;
-  if (num === TriggerFromContract.SwapBuy) return Trigger.SwapBuy;
-  if (num === TriggerFromContract.SwapSell) return Trigger.SwapSell;
-  if (num === TriggerFromContract.ProvideLiquidity) return Trigger.ProvideLiquidity;
-  if (num === TriggerFromContract.RemoveLiquidity) return Trigger.RemoveLiquidity;
-  if (num === TriggerFromContract.Chat) return Trigger.Chat;
+  if (num === TriggerFromMoveCode.PackagePublication) return Trigger.PackagePublication;
+  if (num === TriggerFromMoveCode.MarketRegistration) return Trigger.MarketRegistration;
+  if (num === TriggerFromMoveCode.SwapBuy) return Trigger.SwapBuy;
+  if (num === TriggerFromMoveCode.SwapSell) return Trigger.SwapSell;
+  if (num === TriggerFromMoveCode.ProvideLiquidity) return Trigger.ProvideLiquidity;
+  if (num === TriggerFromMoveCode.RemoveLiquidity) return Trigger.RemoveLiquidity;
+  if (num === TriggerFromMoveCode.Chat) return Trigger.Chat;
   throw new Error(`Invalid state trigger: ${num}`);
 };
 
