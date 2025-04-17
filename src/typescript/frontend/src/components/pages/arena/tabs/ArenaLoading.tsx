@@ -5,11 +5,19 @@ import { EmojiAsImage } from "utils/emoji";
 import Text from "@/components/text";
 import BondingCurveArrow from "@/icons/BondingCurveArrow";
 
-export const ArenaLoading = ({ text = "Loading" }: { text?: string }) => {
+import useArenaLoadingInfo from "./ArenaLoadingElement";
+
+export const MAX_LOADING_TIME = 1500;
+
+export const ArenaLoading = () => {
   const [position, setPosition] = useState(0);
+  const { text } = useArenaLoadingInfo();
 
   useEffect(() => {
-    const interval = setInterval(() => setPosition((prev) => (prev + 1) % 4), 2000 / 3);
+    const interval = setInterval(
+      () => setPosition((prev) => (prev + 1) % 4),
+      (MAX_LOADING_TIME - 200) / 3
+    );
     return () => clearInterval(interval);
   }, []);
   return (
@@ -18,13 +26,14 @@ export const ArenaLoading = ({ text = "Loading" }: { text?: string }) => {
         <div className="flex flex-row">
           <EmojiAsImage
             className="translate-x-4"
-            size="40px"
+            size="47px"
             emojis={emoji("collision")}
             set="apple"
           />
           {Array.from({ length: 3 }).map((_, i) => {
             return (
               <BondingCurveArrow
+                asMotion
                 key={`progress-bar-element-${i}`}
                 color={i < position ? "econiaBlue" : "darkGray"}
               />
@@ -32,13 +41,13 @@ export const ArenaLoading = ({ text = "Loading" }: { text?: string }) => {
           })}
           <EmojiAsImage
             className="-translate-x-4"
-            size="40px"
+            size="47px"
             emojis={emoji("rocket")}
             set="apple"
           />
         </div>
         <Text className="tracking-widest" textTransform="uppercase" textScale={"pixelHeading4"}>
-          {text}...
+          {`${text ?? ""}...`}
         </Text>
       </div>
     </div>

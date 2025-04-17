@@ -1,6 +1,6 @@
 import type { Aptos, PublicKey, UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { AptosApiError, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import type { AptosSignAndSubmitTransactionOutput } from "@aptos-labs/wallet-adapter-react";
+import { AptosApiError, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   checkNetworkAndToast,
@@ -235,7 +235,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     async (transactionBuilder) => {
       if (geoblocked || !transactionBuilder) return null;
       if (checkNetworkAndToast(network, true)) {
-        setStatus("prompt");
         const { authenticator: senderAuthenticator } = await signTransaction({
           transactionOrPayload: transactionBuilder.rawTransactionInput,
         });
@@ -250,7 +249,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           ].join("::") as `${string}::${string}::${string}`,
           res,
         }));
-
         return await handleTransactionSubmission({ functionName, res });
       }
       return null;

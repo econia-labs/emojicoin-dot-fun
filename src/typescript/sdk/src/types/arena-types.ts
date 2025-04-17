@@ -1,4 +1,4 @@
-import type { ArenaPeriod } from "../const";
+import { ARENA_MODULE_PREFIX, type ArenaPeriod } from "../const";
 import type { SymbolEmoji } from "../emoji_data";
 import type { AccountAddressString } from "../emojicoin_dot_fun";
 import type {
@@ -400,5 +400,19 @@ export const isArenaModelWithMeleeID = (e: BrokerEventModels): e is ArenaModelWi
 
 export const isArenaEventModel = (e: BrokerEventModels): e is ArenaEventModels =>
   isArenaModelWithMeleeID(e) || isArenaVaultBalanceUpdateModel(e);
+
+const fullyQualifiedLookup = {
+  [`${ARENA_MODULE_PREFIX}::swap`]: "Swap",
+  [`${ARENA_MODULE_PREFIX}::exit`]: "Exit",
+  [`${ARENA_MODULE_PREFIX}::enter`]: "Enter",
+} as const;
+
+export function toSubmittedArenaFunctionName(functionName: string) {
+  const res = fullyQualifiedLookup[functionName];
+  if (!res) return undefined;
+  return res;
+}
+export type SubmittableArenaFunctions =
+  (typeof fullyQualifiedLookup)[keyof typeof fullyQualifiedLookup];
 
 /* eslint-enable import/no-unused-modules */
