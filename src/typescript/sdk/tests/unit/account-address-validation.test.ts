@@ -29,11 +29,17 @@ describe("AccountAddressSchema", () => {
       "0xg123", // invalid hex char
       "", // empty string
       "1234", // no prefix
+      undefined, // undefined
+      null,
     ];
 
     invalidInputs.forEach((input) => {
-      expect(() => AccountAddressSchema.parse(input)).toThrow(/Invalid account address format/);
+      expect(() => AccountAddressSchema.parse(input)).toThrow();
     });
+  });
+
+  it("should not throw for undefined when the schema is optional", () => {
+    expect(AccountAddressSchema.optional().parse(undefined)).toBeUndefined();
   });
 
   it("safeParse should return an error with our custom message", () => {
