@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-aptos-protos = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "4ace64e" }
-bigdecimal = "0.4.7"
+aptos-protos.workspace = true
+bigdecimal.workspace = true
 finl_unicode = "1.3.0"
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = { version = "1.0.140", features = ["preserve_order"] }
+serde.workspace = true
+serde_json.workspace = true

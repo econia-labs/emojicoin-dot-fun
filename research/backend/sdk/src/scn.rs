@@ -1,3 +1,5 @@
+use std::char;
+
 use finl_unicode::grapheme_clusters::Graphemes;
 
 fn to_codepoint(c: char) -> String {
@@ -28,6 +30,24 @@ pub fn to_scn(bytes: Vec<u8>) -> String {
         .into_iter()
         .reduce(|p, c| format!("{p}+{c}"))
         .unwrap_or(String::new())
+}
+
+pub fn to_emojis(scn: String) -> Option<Vec<String>> {
+    let mut emojis = vec![];
+    let codepoints = scn.split("+");
+    for emoji_codepoints in codepoints {
+        let mut emoji = String::new();
+        for codepoint_str in emoji_codepoints.split("_") {
+            let codepoint: u32 = codepoint_str.parse().ok()?;
+            emoji.push(char::from_u32(codepoint)?)
+        }
+        emojis.push(emoji);
+    }
+    Some(emojis)
+}
+
+pub fn to_emoji_string(scn: String) -> Option<String> {
+    to_emojis(scn).map(|s| s.join(""))
 }
 
 pub trait Scn {

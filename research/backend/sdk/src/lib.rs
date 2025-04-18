@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use util::Addresses;
 
 pub mod arena;
+pub mod consts;
 pub mod emojicoin;
 pub mod favorites;
 pub mod scn;

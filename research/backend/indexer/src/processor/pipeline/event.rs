@@ -11,6 +11,7 @@ use super::{Pipeline, TransactionData};
 struct Builder {
     transaction_version: BigDecimal,
     event_index: BigDecimal,
+    block: BigDecimal,
     timestamp: DateTime<Utc>,
     event_type: EventType,
     json_value: Value,
@@ -59,6 +60,7 @@ impl Pipeline for EventPipeline {
             let builder = Builder {
                 transaction_version: transaction.version.clone(),
                 event_index,
+                block: transaction.block.clone(),
                 timestamp: transaction.timestamp,
                 event_type,
                 json_value,
@@ -76,9 +78,10 @@ impl Pipeline for EventPipeline {
         std::mem::swap(&mut builders, &mut self.builders);
         for builder in builders {
             query!(
-                "INSERT INTO event VALUES ($1, $2, $3, $4, $5)",
+                "INSERT INTO event VALUES ($1, $2, $3, $4, $5, $6)",
                 builder.transaction_version,
                 builder.event_index,
+                builder.block,
                 builder.timestamp,
                 builder.event_type as _,
                 builder.json_value

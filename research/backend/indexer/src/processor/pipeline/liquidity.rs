@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use bigdecimal::{BigDecimal, FromPrimitive};
 use chrono::{DateTime, Utc};
-use sdk::{Event, emojicoin::events::EmojicoinEvent, util::unq64};
+use sdk::{Event, emojicoin::events::EmojicoinEvent};
 use sqlx::{Postgres, query};
 
 use super::{Pipeline, TransactionData};
@@ -14,38 +14,36 @@ struct Builder {
     market_id: BigDecimal,
     nonce: BigDecimal,
     sender: String,
-    input_amount: BigDecimal,
-    net_proceeds: BigDecimal,
-    is_sell: bool,
-    average_price: BigDecimal,
-    integrator_fees: BigDecimal,
-    pool_fees: BigDecimal,
-    volume_base: BigDecimal,
-    volume_quote: BigDecimal,
+    base_amount: BigDecimal,
+    quote_amount: BigDecimal,
+    lp_coin_amount: BigDecimal,
+    liquidity_provided: bool,
+    base_donation_claim_amount: BigDecimal,
+    quote_donation_claim_amount: BigDecimal,
 }
 
-/// Pipeline that updates the swap table.
-pub struct SwapPipeline {
+/// Pipeline that updates the liquidity table.
+pub struct LiquidityPipeline {
     builders: Vec<Builder>,
 }
 
-impl SwapPipeline {
+impl LiquidityPipeline {
     pub fn new() -> Self {
         Self { builders: vec![] }
     }
 }
 
 #[async_trait]
-impl Pipeline for SwapPipeline {
+impl Pipeline for LiquidityPipeline {
     fn name(&self) -> &'static str {
-        "swap"
+        "liquidity"
     }
 
     async fn process(&mut self, transaction: &TransactionData) -> anyhow::Result<()> {
         for (index, event) in transaction.events.iter().enumerate() {
-            if let Event::Emojicoin(EmojicoinEvent::Swap(swap)) = event {
-                let seconds = swap.time / 1_000_000;
-                let rest = swap.time % 1_000_000;
+            if let Event::Emojicoin(EmojicoinEvent::Liquidity(liquidity)) = event {
+                let seconds = liquidity.time / 1_000_000;
+                let rest = liquidity.time % 1_000_000;
                 let timestamp =
                     DateTime::<Utc>::from_timestamp(seconds as i64, rest as u32).unwrap();
                 let builder = Builder {
@@ -53,17 +51,15 @@ impl Pipeline for SwapPipeline {
                     event_index: BigDecimal::from_usize(index).unwrap(),
                     block: transaction.block.clone(),
                     timestamp,
-                    market_id: BigDecimal::from(swap.market_id),
-                    nonce: BigDecimal::from(swap.market_nonce),
-                    sender: swap.swapper.clone(),
-                    input_amount: BigDecimal::from(swap.input_amount),
-                    net_proceeds: BigDecimal::from(swap.net_proceeds),
-                    is_sell: swap.is_sell,
-                    average_price: unq64(swap.avg_execution_price_q64),
-                    integrator_fees: BigDecimal::from(swap.integrator_fee),
-                    pool_fees: BigDecimal::from(swap.pool_fee),
-                    volume_base: BigDecimal::from(swap.base_volume),
-                    volume_quote: BigDecimal::from(swap.quote_volume),
+                    market_id: BigDecimal::from(liquidity.market_id),
+                    nonce: BigDecimal::from(liquidity.market_nonce),
+                    sender: liquidity.provider.clone(),
+                    base_amount: BigDecimal::from(liquidity.base_amount),
+                    quote_amount: BigDecimal::from(liquidity.quote_amount),
+                    lp_coin_amount: BigDecimal::from(liquidity.lp_coin_amount),
+                    base_donation_claim_amount: BigDecimal::from(liquidity.base_donation_claim_amount),
+                    quote_donation_claim_amount: BigDecimal::from(liquidity.quote_donation_claim_amount),
+                    liquidity_provided: liquidity.liquidity_provided,
                 };
                 self.builders.push(builder);
             }
@@ -79,7 +75,7 @@ impl Pipeline for SwapPipeline {
         std::mem::swap(&mut builders, &mut self.builders);
         for builder in builders {
             query!(r#"
-                    INSERT INTO swap (
+                    INSERT INTO liquidity (
                         transaction_version,
                         event_index,
                         block,
@@ -87,16 +83,14 @@ impl Pipeline for SwapPipeline {
                         codepoints,
                         nonce,
                         sender,
-                        input_amount,
-                        net_proceeds,
-                        is_sell,
-                        average_price,
-                        integrator_fees,
-                        pool_fees,
-                        volume_base,
-                        volume_quote
+                        base_amount,
+                        quote_amount,
+                        lp_coin_amount,
+                        base_donation_claim_amount,
+                        quote_donation_claim_amount,
+                        liquidity_provided
                     )
-                    SELECT $1, $2, $3, $4, (SELECT codepoints FROM market WHERE market_id = $5), $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+                    SELECT $1, $2, $3, $4, (SELECT codepoints FROM market WHERE market_id = $5), $6, $7, $8, $9, $10, $11, $12, $13
                 "#,
                 builder.transaction_version,
                 builder.event_index,
@@ -105,14 +99,12 @@ impl Pipeline for SwapPipeline {
                 builder.market_id,
                 builder.nonce,
                 builder.sender,
-                builder.input_amount,
-                builder.net_proceeds,
-                builder.is_sell,
-                builder.average_price,
-                builder.integrator_fees,
-                builder.pool_fees,
-                builder.volume_base,
-                builder.volume_quote,
+                builder.base_amount,
+                builder.quote_amount,
+                builder.lp_coin_amount,
+                builder.base_donation_claim_amount,
+                builder.quote_donation_claim_amount,
+                builder.liquidity_provided,
             )
             .execute(&mut **db_tx)
             .await?;

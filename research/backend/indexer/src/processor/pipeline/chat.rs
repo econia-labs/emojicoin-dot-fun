@@ -9,6 +9,7 @@ use super::{Pipeline, TransactionData};
 struct Builder {
     transaction_version: BigDecimal,
     event_index: BigDecimal,
+    block: BigDecimal,
     timestamp: DateTime<Utc>,
     codepoints: String,
     nonce: BigDecimal,
@@ -45,6 +46,7 @@ impl Pipeline for ChatPipeline {
                 let builder = Builder {
                     transaction_version: transaction.version.clone(),
                     event_index: BigDecimal::from_usize(index).unwrap(),
+                    block: transaction.block.clone(),
                     timestamp,
                     codepoints: chat.scn(),
                     nonce: BigDecimal::from(chat.emit_market_nonce),
@@ -71,6 +73,7 @@ impl Pipeline for ChatPipeline {
                     INSERT INTO chat (
                         transaction_version,
                         event_index,
+                        block,
                         timestamp,
                         codepoints,
                         nonce,
@@ -80,11 +83,12 @@ impl Pipeline for ChatPipeline {
                         supply
                     )
                     VALUES (
-                         $1, $2, $3, $4, $5, $6, $7, $8, $9
+                         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
                     )
                 "#,
                 builder.transaction_version,
                 builder.event_index,
+                builder.block,
                 builder.timestamp,
                 builder.codepoints,
                 builder.nonce,

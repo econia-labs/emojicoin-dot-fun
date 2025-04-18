@@ -131,6 +131,8 @@ impl Processor {
             Box::new(MarketPipeline::new()),
             Box::new(SwapPipeline::new()),
             Box::new(ChatPipeline::new()),
+            Box::new(LiquidityPipeline::new()),
+            Box::new(ReservesPipeline::new()),
             Box::new(CandlestickPipeline::new()),
             Box::new(FavoritePipeline::new()),
             Box::new(VaultPipeline::new()),
@@ -141,7 +143,7 @@ impl Processor {
         loop {
             let mut db_tx = self.pool.begin().await?;
             let events = query!(r#"
-                    SELECT transaction_version, event_index, timestamp, data
+                    SELECT transaction_version, event_index, timestamp, data, block
                     FROM event
                     WHERE transaction_version > $1
                     AND COALESCE(transaction_version <= (SELECT DISTINCT transaction_version FROM event WHERE transaction_version > $1 ORDER BY transaction_version OFFSET 1000 LIMIT 1), true)
@@ -169,6 +171,7 @@ impl Processor {
                     .or_insert_with(|| TransactionData {
                         events: vec![event_data],
                         version: event.transaction_version.clone(),
+                        block: event.block.clone(),
                         timestamp: event.timestamp,
                     });
                 version = version.max(event.transaction_version);
@@ -202,6 +205,8 @@ impl Processor {
                 Box::new(MarketPipeline::new()),
                 Box::new(SwapPipeline::new()),
                 Box::new(ChatPipeline::new()),
+                Box::new(LiquidityPipeline::new()),
+                Box::new(ReservesPipeline::new()),
                 Box::new(CandlestickPipeline::new()),
                 Box::new(FavoritePipeline::new()),
                 Box::new(VaultPipeline::new()),
@@ -215,9 +220,10 @@ impl Processor {
 }
 
 pub struct TransactionData {
-    pub events: Vec<Event>,
     pub version: BigDecimal,
+    pub block: BigDecimal,
     pub timestamp: DateTime<Utc>,
+    pub events: Vec<Event>,
 }
 
 impl TransactionData {
@@ -241,6 +247,7 @@ impl TransactionData {
                                         .collect_vec();
                                     return Some(TransactionData {
                                         version: BigDecimal::from(transaction.version),
+                                        block: BigDecimal::from(transaction.block_height),
                                         events,
                                         timestamp: DateTime::from_timestamp(
                                             timestamp.seconds,

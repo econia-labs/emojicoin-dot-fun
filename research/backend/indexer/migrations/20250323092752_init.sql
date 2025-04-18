@@ -16,6 +16,7 @@ CREATE TYPE event_type AS ENUM (
 CREATE TABLE event (
     transaction_version NUMERIC NOT NULL,
     event_index NUMERIC NOT NULL,
+    block NUMERIC NOT NULL,
     timestamp TIMESTAMPTZ NOT NULL,
     event_type event_type NOT NULL,
     data JSONB NOT NULL,
@@ -27,8 +28,10 @@ CREATE TABLE event (
 CREATE TABLE market (
     codepoints TEXT PRIMARY KEY,
 
+    creator TEXT NOT NULL,
     creation_timestamp TIMESTAMPTZ NOT NULL,
     creation_transaction NUMERIC NOT NULL,
+    creation_block NUMERIC NOT NULL,
 
     codepoints_array TEXT[] NOT NULL,
 
@@ -69,6 +72,7 @@ CREATE TABLE market (
 CREATE TABLE swap (
     transaction_version NUMERIC NOT NULL,
     event_index NUMERIC NOT NULL,
+    block NUMERIC NOT NULL,
     timestamp TIMESTAMPTZ NOT NULL,
 
     codepoints TEXT NOT NULL REFERENCES market,
@@ -95,6 +99,7 @@ CREATE TABLE swap (
 CREATE TABLE chat (
     transaction_version NUMERIC NOT NULL,
     event_index NUMERIC NOT NULL,
+    block NUMERIC NOT NULL,
     timestamp TIMESTAMPTZ NOT NULL,
 
     codepoints TEXT NOT NULL REFERENCES market,
@@ -109,6 +114,49 @@ CREATE TABLE chat (
     PRIMARY KEY (transaction_version, event_index),
     FOREIGN KEY (transaction_version, event_index) REFERENCES event
 );
+
+CREATE TABLE liquidity (
+    transaction_version NUMERIC NOT NULL,
+    event_index NUMERIC NOT NULL,
+    block NUMERIC NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
+
+    codepoints TEXT NOT NULL REFERENCES market,
+    nonce NUMERIC NOT NULL,
+
+    sender TEXT NOT NULL,
+
+    base_amount NUMERIC NOT NULL,
+    quote_amount NUMERIC NOT NULL,
+    lp_coin_amount NUMERIC NOT NULL,
+
+    liquidity_provided BOOLEAN NOT NULL,
+
+    base_donation_claim_amount NUMERIC NOT NULL,
+    quote_donation_claim_amount NUMERIC NOT NULL,
+
+    PRIMARY KEY (transaction_version, event_index),
+    FOREIGN KEY (transaction_version, event_index) REFERENCES event
+);
+
+CREATE TABLE reserves (
+    transaction_version NUMERIC NOT NULL,
+    event_index NUMERIC NOT NULL,
+    block NUMERIC NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
+
+    codepoints TEXT NOT NULL REFERENCES market,
+
+    clamm_base NUMERIC NOT NULL,
+    clamm_quote NUMERIC NOT NULL,
+    cpamm_base NUMERIC NOT NULL,
+    cpamm_quote NUMERIC NOT NULL,
+    lp_coin_supply NUMERIC NOT NULL,
+
+    PRIMARY KEY (transaction_version, event_index),
+    FOREIGN KEY (transaction_version, event_index) REFERENCES event
+);
+
 
 CREATE TYPE candlestick_duration AS ENUM (
     'fifteen_seconds',

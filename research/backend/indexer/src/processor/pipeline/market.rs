@@ -111,6 +111,7 @@ impl Pipeline for MarketPipeline {
                     r#"
                         INSERT INTO market (
                             codepoints,
+                            creator,
                             creation_timestamp,
                             creation_transaction,
                             codepoints_array,
@@ -135,10 +136,11 @@ impl Pipeline for MarketPipeline {
                             address,
                             market_id
                         ) VALUES (
-                            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
+                            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
                         )
                     "#,
                     state.scn(),
+                    market_reg.registrant,
                     datetime,
                     builder.registration_version.unwrap(),
                     &state.codepoints(),
