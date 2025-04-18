@@ -1,10 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO event VALUES ($1, $2, $3, $4, $5)",
+  "query": "INSERT INTO event VALUES ($1, $2, $3, $4, $5, $6)",
   "describe": {
     "columns": [],
     "parameters": {
       "Left": [
+        "Numeric",
         "Numeric",
         "Numeric",
         "Timestamptz",
@@ -34,5 +35,5 @@
     },
     "nullable": []
   },
-  "hash": "c950115fb8a98d92056406adb0c8fafc04417c159ac7c9e7100009e64f879fcc"
+  "hash": "d85b022ea07e2c2777ef2ae67c32038fe616280cc459a84adf88b747a0c60f09"
 }

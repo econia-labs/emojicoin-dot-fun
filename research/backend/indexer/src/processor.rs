@@ -29,6 +29,9 @@ impl Processor {
             .max_connections(5)
             .connect(&db_url)
             .await?;
+        sqlx::migrate!("./migrations")
+            .run(&pool)
+            .await?;
         Ok(Self { pool, addresses })
     }
 

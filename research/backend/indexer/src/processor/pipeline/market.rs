@@ -16,6 +16,7 @@ use super::{Pipeline, TransactionData};
 struct Builder {
     market_registration: Option<MarketRegistration>,
     registration_version: Option<BigDecimal>,
+    registration_block: Option<BigDecimal>,
     state: State,
     daily_percentage_return: Option<BigDecimal>,
 }
@@ -78,6 +79,11 @@ impl Pipeline for MarketPipeline {
                 } else {
                     None
                 },
+                registration_block: if market_registration.is_some() {
+                    Some(transaction.block.clone())
+                } else {
+                    None
+                },
                 market_registration,
                 daily_percentage_return,
                 state,
@@ -114,6 +120,7 @@ impl Pipeline for MarketPipeline {
                             creator,
                             creation_timestamp,
                             creation_transaction,
+                            creation_block,
                             codepoints_array,
                             reserves_cpamm_base,
                             reserves_cpamm_quote,
@@ -136,13 +143,14 @@ impl Pipeline for MarketPipeline {
                             address,
                             market_id
                         ) VALUES (
-                            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
+                            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26
                         )
                     "#,
                     state.scn(),
                     market_reg.registrant,
                     datetime,
                     builder.registration_version.unwrap(),
+                    builder.registration_block.unwrap(),
                     &state.codepoints(),
                     BigDecimal::from(state.cpamm_real_reserves.base),
                     BigDecimal::from(state.cpamm_real_reserves.quote),

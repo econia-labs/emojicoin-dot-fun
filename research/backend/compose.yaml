@@ -1,0 +1,61 @@
+# yamllint disable rule:empty-lines rule:key-ordering
+---
+name: 'emojicoin-dot-fun-research'
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: 'emojicoin'
+      POSTGRES_DB: 'emojicoin'
+      POSTGRES_PASSWORD: 'emojicoin'
+    image: 'postgres:14-bookworm'
+    container_name: 'postgres'
+    volumes:
+    - 'db:/var/lib/postgresql/data'
+    healthcheck:
+      test: 'pg_isready -h localhost -p 5432 -U emojicoin || exit 1'
+      interval: '60s'
+      timeout: '1s'
+      retries: '1'
+      start_period: '15s'
+      start_interval: '1s'
+    ports:
+    - '5432:5432'
+
+  indexer:
+    build:
+      context: '.'
+      dockerfile: 'indexer/Dockerfile'
+    environment:
+      EMOJICOIN_DOT_FUN_ADDRESS: '${EMOJICOIN_DOT_FUN_ADDRESS}'
+      EMOJICOIN_ARENA_ADDRESS: '${EMOJICOIN_ARENA_ADDRESS}'
+      EMOJICOIN_FAVORITES_ADDRESS: '${EMOJICOIN_FAVORITES_ADDRESS}'
+      GRPC_URL: '${GRPC_URL}'
+      GRPC_AUTH: '${GRPC_AUTH}'
+      START_VERSION: '${START_VERSION}'
+      DB_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
+    depends_on:
+      postgres:
+        condition: 'service_healthy'
+    image: 'econialabs/emojicoin-research-indexer'
+    container_name: 'indexer'
+
+  restapi:
+    build:
+      context: '.'
+      dockerfile: 'restapi/Dockerfile'
+    environment:
+      DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
+    depends_on:
+      postgres:
+        condition: 'service_healthy'
+      indexer:
+        condition: 'service_started'
+    image: 'econialabs/emojicoin-research-restapi'
+    container_name: 'restapi'
+    ports:
+    - '6666:6666'
+
+volumes:
+  db:
+    driver: 'local'
+...

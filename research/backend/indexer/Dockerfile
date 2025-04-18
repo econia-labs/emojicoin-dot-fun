@@ -26,17 +26,17 @@ RUN cargo chef cook \
      --release \
      --recipe-path recipe.json
 COPY . .
-RUN cargo build --release --bin restapi
+RUN cargo build --release --bin indexer
 
 # Install runtime dependencies, copy over binary.
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir app
-COPY --from=builder /app/target/release/restapi /app
+COPY --from=builder /app/target/release/indexer /app
 
 # This helps the container stop faster.
 STOPSIGNAL SIGKILL
 
-ENTRYPOINT ["/app/restapi"]
+ENTRYPOINT ["/app/indexer"]

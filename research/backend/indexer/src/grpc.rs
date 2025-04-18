@@ -75,6 +75,7 @@ pub async fn get_stream(
             .max_decoding_message_size(MAX_RESPONSE_SIZE)
             .max_encoding_message_size(MAX_RESPONSE_SIZE),
         Err(e) => {
+            println!("{e:#?}");
             bail!("Error connecting to GRPC client: {e}.");
         }
     };
