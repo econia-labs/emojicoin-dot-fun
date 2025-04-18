@@ -1,4 +1,4 @@
-ARG BUILDER_VERSION=1.1.0
+ARG BUILDER_VERSION=1.2.0
 
 # Configure base image with buildtime dependencies.
 FROM econialabs/rust-builder:$BUILDER_VERSION AS base
@@ -30,8 +30,7 @@ RUN cargo chef cook \
     --release
 COPY . .
 # hadolint ignore=DL3003,DL4006
-RUN rustup default nightly \
-    && cargo build --bin processor --package processor --release \
+RUN cargo build --bin processor --package processor --release \
     && cp target/release/processor /usr/local/bin \
     && apt-get update && apt-get install -y --no-install-recommends \
         postgresql-common=248* \
