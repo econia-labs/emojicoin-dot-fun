@@ -1,0 +1,31 @@
+[package]
+name = "restapi"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+restapi-macro = { path = "../restapi-macro" }
+sdk = { path = "../sdk" }
+
+anyhow.workspace = true
+axum = "0.8.1"
+bigdecimal = { workspace = true, features = ["serde"] }
+chrono.workspace = true
+clap.workspace = true
+governor = "0.8.0"
+moka = { version = "0.12.10", features = ["future"] }
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+tower = "0.5.2"
+tower-http = { version = "0.6.2", features = ["trace"] }
+tower_governor = "0.7.0"
+tracing.workspace = true
+tracing-subscriber.workspace = true
+regex = "1.11.1"

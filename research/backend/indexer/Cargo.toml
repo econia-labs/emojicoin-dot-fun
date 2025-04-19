@@ -1,0 +1,29 @@
+[package]
+name = "indexer"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+sdk = { path = "../sdk" }
+
+anyhow.workspace = true
+aptos-protos.workspace = true
+async-trait = "0.1.88"
+bigdecimal.workspace = true
+chrono.workspace = true
+clap.workspace = true
+futures-util = "0.3.31"
+itertools = "0.14.0"
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+tokio.workspace = true
+tonic = { version = "0.12.3", features = ["tls-native-roots"] }
+url = { version = "2.5.4", features = ["serde"] }

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    INSERT INTO liquidity (\n                        transaction_version,\n                        event_index,\n                        block,\n                        timestamp,\n                        codepoints,\n                        nonce,\n                        sender,\n                        base_amount,\n                        quote_amount,\n                        lp_coin_amount,\n                        base_donation_claim_amount,\n                        quote_donation_claim_amount,\n                        liquidity_provided\n                    )\n                    SELECT $1, $2, $3, $4, (SELECT codepoints FROM market WHERE market_id = $5), $6, $7, $8, $9, $10, $11, $12, $13\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Timestamptz",
+        "Numeric",
+        "Numeric",
+        "Text",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f0323838bd741f4c040380654a150c5b0b26c95f3bc9e2b034c283e7b97d81f2"
+}

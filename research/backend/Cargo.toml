@@ -1,0 +1,32 @@
+[workspace]
+# Exclude the processor, which is a workspace in a submodule.
+members = [
+  "restapi",
+  "restapi-macro",
+  "indexer",
+  "sdk"
+]
+resolver = "2"
+
+[workspace.package]
+authors = ["Econia Labs <developers@econialabs.com>"]
+edition = "2024"
+homepage = "https://www.econialabs.com/"
+license = "Apache License"
+publish = false
+repository = "https://github.com/econia-labs/emojicoin-dot-fun"
+rust-version = "1.85"
+
+[workspace.dependencies]
+aptos-protos = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "4ace64e" }
+
+anyhow = { version = "1.0.98", features = ["backtrace"] }
+bigdecimal = "0.4.8"
+chrono = "0.4.40"
+clap = { version = "4.5.36", features = ["derive", "env"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tokio = { version = "1.44.2", features = ["full"] }
+sqlx = { version = "0.8.5", features = ["runtime-tokio", "tls-native-tls", "postgres", "bigdecimal", "chrono"] }

@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT creator, creation_block, codepoints, creation_timestamp, creation_transaction\nFROM market\nWHERE address = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "creator",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "creation_block",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 2,
+        "name": "codepoints",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "creation_timestamp",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "creation_transaction",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "7ac7ab5f05b2101750db31e19192e306f19d4647aaa05a17e6f019739b9dca86"
+}

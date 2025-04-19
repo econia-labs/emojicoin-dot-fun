@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM favorite WHERE sender = $1 AND codepoints = (SELECT codepoints FROM market WHERE address = $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cc548af0e273dae7686e1405e1499fdb8cdea7eb0748c25d6f9174c85be63bbf"
+}

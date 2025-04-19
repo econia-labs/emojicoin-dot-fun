@@ -1,0 +1,125 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n    swap.sender as \"sender!\",\n    swap.block as \"block_number!\",\n    swap.timestamp as \"transaction_timestamp!\",\n    swap.transaction_version as \"transaction_version!\",\n    swap.event_index as \"event_index!\",\n    address as \"market_address!\",\n    is_sell as \"is_sell!\",\n    net_proceeds as \"net_proceeds!\",\n    input_amount as \"input_amount!\",\n    average_price as \"average_price!\",\n    reserves.lp_coin_supply as \"lp_coin_supply!\",\n    reserves.clamm_base as \"clamm_virtual_reserves_base!\",\n    reserves.clamm_quote as \"clamm_virtual_reserves_quote!\",\n    reserves.cpamm_base as \"cpamm_real_reserves_base!\",\n    reserves.cpamm_quote as \"cpamm_real_reserves_quote!\",\n    0 as \"base_amount!\",\n    0 as \"quote_amount!\",\n    'swap' AS \"event_type!\"\nFROM swap\nINNER JOIN reserves ON reserves.transaction_version = swap.transaction_version AND reserves.event_index = swap.event_index\nINNER JOIN market ON market.codepoints = swap.codepoints\nWHERE swap.block >= $1 AND swap.block <= $2\nUNION ALL\nSELECT\n    liquidity.sender,\n    liquidity.block,\n    liquidity.timestamp,\n    liquidity.transaction_version,\n    liquidity.event_index,\n    address,\n    false AS is_sell,\n    0 AS net_proceeds,\n    0 AS input_amount,\n    0 AS avg_execution_price_q64,\n    reserves.lp_coin_supply,\n    reserves.clamm_base,\n    reserves.clamm_quote,\n    reserves.cpamm_base,\n    reserves.cpamm_quote,\n    base_amount,\n    quote_amount,\n    'swap' AS \"event_type!\"\nFROM liquidity\nINNER JOIN reserves ON reserves.transaction_version = liquidity.transaction_version AND reserves.event_index = liquidity.event_index\nINNER JOIN market ON market.codepoints = liquidity.codepoints\nWHERE liquidity.block >= $1 AND liquidity.block <= $2\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sender!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "block_number!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 2,
+        "name": "transaction_timestamp!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "transaction_version!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 4,
+        "name": "event_index!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 5,
+        "name": "market_address!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "is_sell!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "net_proceeds!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "input_amount!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 9,
+        "name": "average_price!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 10,
+        "name": "lp_coin_supply!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 11,
+        "name": "clamm_virtual_reserves_base!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 12,
+        "name": "clamm_virtual_reserves_quote!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 13,
+        "name": "cpamm_real_reserves_base!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 14,
+        "name": "cpamm_real_reserves_quote!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 15,
+        "name": "base_amount!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 16,
+        "name": "quote_amount!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 17,
+        "name": "event_type!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "e1f529ed6cb951cd547b68e32acbcac3c53b2f82a3ea6755022e0ca7e3558f24"
+}

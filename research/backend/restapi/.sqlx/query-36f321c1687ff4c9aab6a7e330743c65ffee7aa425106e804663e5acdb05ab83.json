@@ -1,0 +1,178 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM market WHERE address = $1;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "codepoints",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "creator",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "creation_timestamp",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "creation_transaction",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 4,
+        "name": "creation_block",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 5,
+        "name": "codepoints_array",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 6,
+        "name": "reserves_cpamm_base",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "reserves_cpamm_quote",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "reserves_clamm_base",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 9,
+        "name": "reserves_clamm_quote",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 10,
+        "name": "volume_base",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 11,
+        "name": "volume_quote",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 12,
+        "name": "pool_fees_base",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 13,
+        "name": "pool_fees_quote",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 14,
+        "name": "swaps",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 15,
+        "name": "chats",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 16,
+        "name": "daily_percentage_return",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 17,
+        "name": "fully_diluted_value",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 18,
+        "name": "integrator_fees",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 19,
+        "name": "last_swap_quote_volume",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 20,
+        "name": "lp_coin_supply",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 21,
+        "name": "market_cap",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 22,
+        "name": "total_quote_locked",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 23,
+        "name": "total_value_locked",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 24,
+        "name": "address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 25,
+        "name": "market_id",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 26,
+        "name": "price",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "36f321c1687ff4c9aab6a7e330743c65ffee7aa425106e804663e5acdb05ab83"
+}

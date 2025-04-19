@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    INSERT INTO swap (\n                        transaction_version,\n                        event_index,\n                        block,\n                        timestamp,\n                        codepoints,\n                        nonce,\n                        sender,\n                        input_amount,\n                        net_proceeds,\n                        is_sell,\n                        average_price,\n                        integrator_fees,\n                        pool_fees,\n                        volume_base,\n                        volume_quote\n                    )\n                    SELECT $1, $2, $3, $4, (SELECT codepoints FROM market WHERE market_id = $5), $6, $7, $8, $9, $10, $11, $12, $13, $14, $15\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Timestamptz",
+        "Numeric",
+        "Numeric",
+        "Text",
+        "Numeric",
+        "Numeric",
+        "Bool",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "599321119631538a2138058691684aff99a06dc6ab5be6e8aff28673d12e530d"
+}
