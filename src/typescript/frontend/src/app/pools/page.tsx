@@ -1,11 +1,11 @@
 import { getPoolData } from "app/api/pools/getPoolDataQuery";
-import ClientPoolsPage, { type PoolsData } from "components/pages/pools/ClientPoolsPage";
-import { handleEmptySearchBytes, safeParsePageWithDefault } from "lib/routes/home-page-params";
+import { GetPoolsSchema } from "app/api/pools/schema";
 import generateMetadataHelper from "lib/utils/generate-metadata-helper";
 import { emoji, parseJSON } from "utils";
+import type { z } from "zod";
 
-import { symbolBytesToEmojis } from "@/sdk/emoji_data/utils";
-import { getValidSortByForPoolsPage } from "@/sdk/indexer-v2/queries/query-params";
+import ClientPoolsPage from "@/components/pages/pools/ClientPoolsPage";
+import type { MarketStateModel, UserPoolsRPCModel } from "@/sdk/index";
 
 export const revalidate = 2;
 
@@ -14,35 +14,21 @@ export const metadata = generateMetadataHelper({
   description: `provide ${emoji("water wave")}liquidity${emoji("water wave")} and earn APR using your emojis!`,
 });
 
-type PoolsSearchParams = {
-  page: string | null;
-  sortby: string | null;
-  orderby: string | null;
-  searchBytes: string | null;
-  pool: string | null;
-  account: string | null;
-};
+export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
 /**
  * Uses the same exact parsing logic as the /pools/api route.
  * @see {@link src/pools/api/route.ts}
  */
-export default async function PoolsPage({ searchParams }: { searchParams: PoolsSearchParams }) {
-  const page = safeParsePageWithDefault(searchParams.page);
-  const sortBy = getValidSortByForPoolsPage(searchParams.sortby);
-  const orderBy = searchParams.orderby ?? "desc";
-  const q = handleEmptySearchBytes(searchParams.searchBytes);
-  const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
-
-  if (orderBy !== "asc" && orderBy !== "desc") {
-    throw new Error("Invalid params");
-  }
-
-  // The liquidity `provider`, aka the account to search for in the user liquidity pools.
-  const provider = searchParams.account;
+export default async function PoolsPage({
+  searchParams,
+}: {
+  searchParams: z.input<typeof GetPoolsSchema>;
+}) {
+  const { orderBy, page, sortBy, account, searchBytes } = GetPoolsSchema.parse(searchParams);
 
   const initialData: PoolsData[] = parseJSON(
-    await getPoolData(page, sortBy, orderBy, searchEmojis, provider ?? undefined)
+    await getPoolData(page, sortBy, orderBy, searchBytes, account)
   );
 
   return <ClientPoolsPage initialData={initialData} />;
