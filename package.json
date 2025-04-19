@@ -10,6 +10,7 @@
     "dev": "pnpm --prefix src/typescript run dev",
     "dev:debug": "pnpm --prefix src/typescript run dev:debug",
     "dev:debug-verbose": "pnpm --prefix src/typescript run dev:debug-verbose",
+    "dev:lan": "pnpm --prefix src/typescript run dev:lan",
     "docker:prune": "pnpm --prefix src/typescript run docker:prune",
     "docker:restart": "pnpm --prefix src/typescript run docker:restart",
     "docker:up": "pnpm --prefix src/typescript run docker:up",
