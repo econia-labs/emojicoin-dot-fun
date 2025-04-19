@@ -55,6 +55,10 @@
       "cache": false,
       "persistent": true
     },
+    "dev:lan": {
+      "cache": false,
+      "persistent": true
+    },
     "format": {
       "outputs": []
     },
