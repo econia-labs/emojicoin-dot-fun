@@ -19,7 +19,7 @@ import { toNominal } from "@/sdk/utils";
 
 import type { TradeHistoryProps } from "../../types";
 
-const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
+const toTableItem = ({ swap, transaction, market, guid }: SwapEventModel) => ({
   ...getRankFromEvent(swap),
   apt: swap.quoteVolume,
   emoji: swap.baseVolume,
@@ -28,6 +28,7 @@ const toTableItem = ({ swap, transaction, guid }: SwapEventModel) => ({
   priceQ64: swap.avgExecutionPriceQ64,
   sender: swap.sender,
   version: transaction.version,
+  marketNonce: market.marketNonce,
   guid,
 });
 
@@ -128,7 +129,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       }
       textFormat="body-sm"
       columns={columns}
-      getKey={(item) => item.version.toString()}
+      getKey={(item) => item.marketNonce.toString()}
       items={sortedSwaps}
       pagination={swapsQuery}
     />
