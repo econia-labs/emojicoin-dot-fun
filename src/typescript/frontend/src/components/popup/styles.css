@@ -28,10 +28,6 @@
   animation-name: slideRightAndFade;
 }
 
-.TooltipArrow {
-  fill: var(--ec-blue);
-}
-
 @keyframes slideUpAndFade {
   from {
     opacity: 0;

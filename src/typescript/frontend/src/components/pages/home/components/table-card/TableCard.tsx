@@ -70,7 +70,7 @@ const TableCard = ({
       sortBy === SortMarketsBy.BumpOrder
         ? ["Last Swap", lastSwapVolume]
         : sortBy === SortMarketsBy.AllTimeVolume
-          ? ["All Time Vol", allTimeVolume]
+          ? ["All-Time Vol", allTimeVolume]
           : ["24h Volume", staticVolume24H];
     return {
       secondaryLabel,
