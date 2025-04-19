@@ -58,7 +58,7 @@ export const Loading = ({
             className={
               centered +
               " text-center mt-[.3rem]" +
-              " mobile-sm:pixel-display-2 sm:pixel-display-2 !text-5xl"
+              " xs:pixel-display-2 md:pixel-display-2 !text-5xl"
             }
             title={emojiName}
             emojis={emoji}

@@ -60,10 +60,8 @@ module.exports = {
         "forma-thin": ["var(--font-formaDR)", ...fontFamily.sans],
       },
       screens: {
-        "mobile-sm": "0px",
-        "mobile-md": "375px",
-        "mobile-lg": "425px",
-        sm: "640.1px",
+        xs: "0px",
+        sm: "425px",
         md: "768.1px", // tablet
         lg: "1024.1px", // laptop
         xl: "1440px", // laptop L

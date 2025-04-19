@@ -1,15 +1,12 @@
-import { Text } from "components";
 import type { GridProps } from "components/pages/emojicoin/types";
 import { useEventStore } from "context/event-store-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { darkColors } from "theme/colors";
 
-import { useMatchBreakpoints } from "@/hooks/index";
 import { getBondingCurveProgress } from "@/sdk/utils/bonding-curve";
 
 export const AnimatedProgressBar = (props: GridProps) => {
-  const { isDesktop } = useMatchBreakpoints();
   const data = props.data;
   const { state, transaction } = data.state;
   const stateEvents = useEventStore((s) => s.markets.get(props.data.symbol)?.stateEvents ?? []);
@@ -67,34 +64,16 @@ export const AnimatedProgressBar = (props: GridProps) => {
   return (
     <motion.div className="flex w-full rounded-sm h-[100%] !p-0">
       <motion.div
-        style={
-          isDesktop
-            ? {
-                filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
-              }
-            : {
-                filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
-                width: "100%",
-                padding: ".7em",
-              }
-        }
-        className="relative flex my-auto px-[21px] opacity-[0.9]"
+        style={{ filter: "brightness(1) drop-shadow(0 1px 2px #fff0)" }}
+        className="xs:w-100% md:w-auto xs:p-[0.7em] relative flex my-auto px-[21px] opacity-[0.9]"
         animate={flickerControls}
       >
-        <Text
-          textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
-          color="lightGray"
-          textTransform="uppercase"
-        >
+        <p className="xs:pixel-heading-4 md:pixel-heading-3 uppercase text-light-gray">
           Bonding progress:&nbsp;
-        </Text>
-        <Text
-          textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
-          color="white"
-          textTransform="uppercase"
-        >
+        </p>
+        <p className="xs:pixel-heading-4 md:pixel-heading-3 uppercase">
           {`${progress.toFixed(1)}%`}
-        </Text>
+        </p>
       </motion.div>
       <motion.div
         className="absolute drop-shadow-voltage bottom-0 bg-blue h-[1px]"

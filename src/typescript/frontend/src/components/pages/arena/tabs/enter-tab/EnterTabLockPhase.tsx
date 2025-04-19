@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import Button from "@/components/button";
 import ButtonWithConnectWalletFallback from "@/components/header/wallet-button/ConnectWalletButton";
 import Popup from "@/components/popup";
-import { Switcher } from "@/components/switcher";
+import { Switch } from "@/components/ui/Switch";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import useRewardsRemaining from "@/hooks/use-rewards-remaining";
 import { getEvents, type MarketStateModel } from "@/sdk/index";
@@ -79,7 +79,7 @@ export default function EnterTabLockPhase({
               )}
             </div>
             {!mustLockIn && (
-              <Switcher checked={lockedIn} onChange={(v) => setInnerLock(v.target.checked)} />
+              <Switch checked={lockedIn} onCheckedChange={(checked) => setInnerLock(checked)} />
             )}
           </div>
         </div>

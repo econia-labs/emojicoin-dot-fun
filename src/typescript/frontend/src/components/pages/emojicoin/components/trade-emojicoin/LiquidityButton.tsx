@@ -7,14 +7,12 @@ import Link from "next/link";
 import { ROUTES } from "router/routes";
 
 import { Flex } from "@/containers";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { isInBondingCurve } from "@/sdk/utils/bonding-curve";
 
 import { StyledContentHeader } from "../desktop-grid/styled";
 import { AnimatedProgressBar } from "./AnimatedProgressBar";
 
 export const LiquidityButton = (props: GridProps) => {
-  const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
   const { canTrade, displayTimeLeft } = useCanTradeMarket(props.data.symbol);
 
@@ -40,13 +38,9 @@ export const LiquidityButton = (props: GridProps) => {
       ) : (
         <StyledContentHeader>
           <Flex width="100%" justifyContent="left">
-            <Text
-              textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
-              color="lightGray"
-              textTransform="uppercase"
-            >
+            <p className="xs:pixel-heading-4 md:pixel-heading-3 text-light-gray uppercase">
               Grace period ends in {displayTimeLeft}
-            </Text>
+            </p>
           </Flex>
         </StyledContentHeader>
       )}

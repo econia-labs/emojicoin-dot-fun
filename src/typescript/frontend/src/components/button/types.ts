@@ -34,6 +34,7 @@ interface BaseButtonProps
       endIcon?: ReactNode & SvgProps;
       isScramble?: boolean;
       fakeDisabled?: boolean;
+      className?: string;
     }> {}
 
 export type ButtonProps<P extends ElementType = "button"> = PolymorphicComponentProps<

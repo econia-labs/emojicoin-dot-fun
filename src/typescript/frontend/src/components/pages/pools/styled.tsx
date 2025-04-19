@@ -84,7 +84,6 @@ export const StyledInner = styled(Flex)`
 `;
 
 export const StyledSubHeader = styled.div`
-  display: flex;
   padding-left: 30px;
   padding-right: 30px;
   width: 100%;

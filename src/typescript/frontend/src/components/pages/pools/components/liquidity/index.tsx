@@ -24,7 +24,6 @@ import { useSearchParams } from "next/navigation";
 import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 
 import { Column, Flex, FlexGap } from "@/containers";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { toEmojicoinTypes } from "@/sdk/markets/utils";
 
 import { StyledAddLiquidityWrapper } from "./styled";
@@ -62,8 +61,6 @@ const inputAndOutputStyles = `
 
 const Liquidity = ({ market }: LiquidityProps) => {
   const { t } = translationFunction();
-
-  const { isMobile } = useMatchBreakpoints();
 
   const searchParams = useSearchParams();
 
@@ -285,13 +282,9 @@ const Liquidity = ({ market }: LiquidityProps) => {
                 <Arrows color="econiaBlue" />
               </button>
 
-              <Text
-                textScale={isMobile ? "heading2" : "heading1"}
-                textTransform="uppercase"
-                className={isMobile ? "w-min" : ""}
-              >
+              <p className="uppercase xs:heading-2 md:heading-1 xs:w-min md:w-auto">
                 {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
-              </Text>
+              </p>
 
               <Info>
                 Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
@@ -380,9 +373,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </ButtonWithConnectWalletFallback>
         </Flex>
 
-        <Text textScale={isMobile ? "heading2" : "heading1"} textTransform="uppercase" mb="16px">
-          {t("Reserves")}
-        </Text>
+        <p className="uppercase xs:heading-2 md:heading-1 mb-4">{t("Reserves")}</p>
 
         <StyledAddLiquidityWrapper>
           <Flex

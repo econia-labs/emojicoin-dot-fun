@@ -112,9 +112,6 @@ export const EmptyTr = styled.tr<TrProps>`
 `;
 
 export const Td = styled.td<TdProps>`
-  display: inline-block;
-  color: ${({ theme }) => theme.colors.lightGray};
-  padding: 7px;
   vertical-align: middle;
   position: relative;
 

@@ -12,7 +12,6 @@ import { ROUTES } from "router/routes";
 import { GlowingEmoji } from "utils/emoji";
 
 import { FlexGap } from "@/containers";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { getEmojisInString } from "@/sdk/emoji_data";
 import { toTotalAptLocked } from "@/sdk/indexer-v2/types";
@@ -45,7 +44,6 @@ const meleeDataToArenaCardProps = ({
 });
 
 export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
-  const { isMobile } = useMatchBreakpoints();
   const currentMeleeInfo = useCurrentMeleeInfo();
 
   const {
@@ -63,13 +61,7 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
       : meleeDataToArenaCardProps(meleeData);
   }, [currentMeleeInfo, meleeData]);
 
-  const headerText = (
-    <span
-      className={`arena-pixel-heading-text text-white uppercase ${isMobile ? "text-center" : ""}`}
-    >
-      Lock in early to get the most rewards !
-    </span>
-  );
+  const headerText = "Lock in early to get the most rewards !";
 
   const arenaVs = (
     <div
@@ -94,25 +86,26 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
 
   return (
     <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
-      <div
-        className="w-full max-w-full gap-[2em]"
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gridTemplateRows: !isMobile ? "1fr" : "1fr 1fr",
-        }}
-      >
+      <div className="grid xs:grid-rows-[1fr_1fr] md:grid-rows-[1fr] xs:grid-cols-[1fr] md:grid-cols-[1fr_1fr] w-full max-w-full gap-[2em]">
         <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena}>
-          {isMobile && headerText}
+          <span
+            className={`xs:inline md:hidden arena-pixel-heading-text text-white uppercase text-center`}
+          >
+            {headerText}
+          </span>
           {arenaVs}
-          {!isMobile && (
+          <div className="xs:hidden md:flex justify-center items-center">
             <Button scale="xl" className="mx-auto">
               Enter now
             </Button>
-          )}
+          </div>
         </Link>
-        <div className={`flex flex-col gap-[2em] max-w-full ${isMobile ? "items-center" : ""}`}>
-          {!isMobile && headerText}
+        <div className={`flex flex-col gap-[2em] max-w-full xs:items-center md:items-stretch`}>
+          <span
+            className={`xs:hidden md:inline arena-pixel-heading-text text-white uppercase text-start`}
+          >
+            {headerText}
+          </span>
           <Countdown duration={duration} startTime={startTime} />
 
           <div className="flex flex-col gap-[.4em] arena-market-data-text">

@@ -12,7 +12,10 @@ export default function EnterTabPickPhase() {
   const error = useArenaPhaseStore((s) => s.error);
 
   return (
-    <div className="relative flex flex-col grow gap-[3em] justify-center place-items-center w-[100%]">
+    <div
+      className="relative flex flex-col grow gap-[3em] justify-center place-items-center w-[100%]"
+      style={{ containerType: "size" }}
+    >
       {error && (
         <BlurModal close={() => setError(false)}>
           <div className="flex flex-col gap-[3em] max-w-[58ch]">
@@ -30,6 +33,7 @@ export default function EnterTabPickPhase() {
       <div className="w-[100%]">
         <div className="font-forma text-xl uppercase text-white text-center">Pick your side</div>
         <EmojiTitle
+          fontSizeMultiplier={1.5}
           onClicks={{
             emoji0: () => {
               setMarket(0);

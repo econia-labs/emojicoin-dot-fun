@@ -4,10 +4,10 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
+import { cn } from "lib/utils/class-name";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
-import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
 import { useHistoricalEscrow } from "@/store/arena/escrow/hooks";
@@ -39,7 +39,6 @@ const HistoricalRow = ({
   select: () => void;
   close: () => void;
 }) => {
-  const { isMobile } = useMatchBreakpoints();
   const exitTransactionBuilder = useExitTransactionBuilder(
     row.emojicoin0MarketAddress as `0x${string}`,
     row.emojicoin1MarketAddress as `0x${string}`
@@ -71,8 +70,8 @@ const HistoricalRow = ({
           )}
         </td>
       </tr>
-      {isSelected && isMobile && (
-        <tr>
+      {isSelected && (
+        <tr className="xs:table-cell md:hidden">
           <td colSpan={5}>
             <HistoricMeleeBreakdown melee={row} historyHidden={false} close={close} />
           </td>
@@ -89,12 +88,13 @@ export const MeleeHistory = ({
   setSelectedRow,
   setHistoryHidden,
   arenaInfo,
+  className,
 }: ProfileTabProps & {
   selectedRow: number | undefined;
   setSelectedRow: (selectedRow: number | undefined) => void;
   setHistoryHidden: (historyHidden: boolean) => void;
+  className?: string;
 }) => {
-  const { isMobile } = useMatchBreakpoints();
   const { position } = useCurrentPosition();
   const { history } = useHistoricalPositions();
 
@@ -104,17 +104,15 @@ export const MeleeHistory = ({
   );
 
   return (
-    <div className="h-[100%] overflow-auto">
+    <div className={cn("h-[100%] overflow-auto", className)}>
       <div className="flex justify-between px-[1em] h-[3em] items-center border-dark-gray border-b-[1px] border-solid">
         <div className="uppercase text-md font-forma">{"History"}</div>
-        {!isMobile && (
-          <div
-            className="uppercase text-xl text-light-gray cursor-pointer"
-            onClick={() => setHistoryHidden(true)}
-          >
-            &lt;&lt; Hide
-          </div>
-        )}
+        <div
+          className="xs:hidden md:block uppercase text-xl text-light-gray cursor-pointer"
+          onClick={() => setHistoryHidden(true)}
+        >
+          &lt;&lt; Hide
+        </div>
       </div>
       <table className={styles["history-table"]}>
         <tbody>
@@ -131,8 +129,8 @@ export const MeleeHistory = ({
                 <td className={styles["text"]}>{"Active"}</td>
                 <td></td>
               </tr>
-              {selectedRow === -1 && isMobile && (
-                <tr>
+              {selectedRow === -1 && (
+                <tr className="md:hidden">
                   <td colSpan={5}>
                     <CurrentMeleeBreakdown
                       historyHidden={false}

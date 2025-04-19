@@ -43,11 +43,11 @@ export const CommunityCreationWinDesktopItem: FC<Props & { pos: { x: number; y: 
   return (
     <>
       {/* useMatchBreakpoints seems to be unreliable. Need to duplicate this component and rely on tailwind for the breakpoints */}
-      <div className={"mobile-sm:block mobile-lg:hidden"}>
+      <div className={"xs:block sm:hidden"}>
         <WinDesktopItem {...rest} />
       </div>
       <div
-        className={"mobile-sm:hidden mobile-lg:block absolute"}
+        className={"xs:hidden sm:block absolute"}
         style={{
           left: pos.x,
           top: pos.y,

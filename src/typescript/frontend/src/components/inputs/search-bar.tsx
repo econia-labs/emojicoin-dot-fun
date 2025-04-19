@@ -1,5 +1,6 @@
 import { EMOJI_GRID_ITEM_WIDTH } from "components/pages/home/components/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
+import { cn } from "lib/utils/class-name";
 import Image from "next/image";
 import { useEffect } from "react";
 import styled from "styled-components";
@@ -12,17 +13,6 @@ import { Flex } from "../layout";
 import { InputGroup } from ".";
 
 const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
-
-const Container = styled(Flex)`
-  width: ${EMOJI_GRID_ITEM_WIDTH - 20}px;
-  margin: 0;
-  padding: 0;
-  align-items: center;
-
-  @media screen and (max-width: ${breakpointsArray[3]}) {
-    width: 100%;
-  }
-`;
 
 const Border = styled(Flex)`
   align-items: center;
@@ -43,7 +33,7 @@ const SearchBar = ({ className }: { className?: string }) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
   return (
-    <Container className={className}>
+    <div className={cn("flex m-0 p-0 items-center xs:w-full md:w-auto", className)}>
       <Border>
         <div
           style={{
@@ -68,7 +58,7 @@ const SearchBar = ({ className }: { className?: string }) => {
           </InputGroup>
         </div>
       </Border>
-    </Container>
+    </div>
   );
 };
 

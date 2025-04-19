@@ -14,17 +14,17 @@ import React, { useEffect, useState } from "react";
 import darkTheme from "theme/dark";
 import { Emoji } from "utils/emoji";
 
+import { Switch } from "@/components/ui/Switch";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useUsdMarketCap, useUSDValue } from "@/hooks/use-usd-market-cap";
 import TelegramOutlineIcon from "@/icons/TelegramOutlineIcon";
 import { MarketProperties } from "@/move-modules";
 import { isMarketStateModel } from "@/sdk/indexer-v2/types";
 
-import { Switcher } from "../../../../switcher";
 import type { MainInfoProps } from "../../types";
 import BondingProgress from "./BondingProgress";
 
-const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
+const statsTextClasses = "flex items-center uppercase ellipses font-forma text-[24px]";
 
 const LinkButton = ({
   name,
@@ -154,10 +154,10 @@ const MainInfo = ({ data }: MainInfoProps) => {
   );
 
   const switcher = (
-    <Switcher
+    <Switch
       disabled={usdMarketCap === undefined}
-      checked={showUsd}
-      onChange={() => setShowUsd(!showUsd)}
+      checked={usdMarketCap === undefined ? false : showUsd}
+      onCheckedChange={(checked) => setShowUsd(checked)}
     />
   );
 
