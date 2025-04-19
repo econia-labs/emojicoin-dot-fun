@@ -1,4 +1,3 @@
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { FormattedNumber } from "components/FormattedNumber";
 import { ColoredPriceDisplay } from "components/misc/ColoredPriceDisplay";
 import { type SwapEvent, useSwapEventsQuery } from "components/pages/wallet/useSwapEventsQuery";
@@ -9,19 +8,20 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { toNominal } from "@/sdk/utils";
 
 import type { TradeHistoryProps } from "../../types";
 
 export const PersonalTradeHistory = (props: TradeHistoryProps) => {
-  const { account, connected } = useWallet();
+  const accountAddress = useAccountAddress();
 
   const query = useSwapEventsQuery(
     {
-      sender: account?.address,
+      sender: accountAddress,
       marketID: props.data.marketID.toString(),
     },
-    { disabled: !connected, queryKey: "PersonalTradeHistory" }
+    { disabled: !accountAddress, queryKey: "PersonalTradeHistory" }
   );
 
   const columns: EcTableColumn<SwapEvent>[] = useMemo(

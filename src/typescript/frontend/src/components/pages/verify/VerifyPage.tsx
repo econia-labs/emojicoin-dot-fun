@@ -1,9 +1,8 @@
 "use client";
 
-import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import Text from "components/text";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
 import { LINKS } from "lib/env";
 import Link from "next/link";
@@ -12,12 +11,12 @@ import { ROUTES } from "router/routes";
 import { useScramble } from "use-scramble";
 
 import { Flex } from "@/containers";
-import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
+import { useAccountAddress } from "@/hooks/use-account-address";
 
 import { createSession } from "./session";
 
 const ClientVerifyPage = () => {
-  const { account } = useAptos();
+  const accountAddress = useAccountAddress();
   const { connected, disconnect } = useWallet();
   const [verified, setVerified] = useState<boolean | null>(null);
 
@@ -38,8 +37,8 @@ const ClientVerifyPage = () => {
   });
 
   const verify = useCallback(
-    async (account: AccountInfo) => {
-      const res = await createSession(account.address as AccountAddressString);
+    async (accountAddress: `0x${string}`) => {
+      const res = await createSession(accountAddress);
       setVerified(res);
       replay();
     },
@@ -48,10 +47,10 @@ const ClientVerifyPage = () => {
   );
 
   useEffect(() => {
-    if (connected && account) {
-      verify(account);
+    if (connected && accountAddress) {
+      verify(accountAddress);
     }
-  }, [account, connected, verify]);
+  }, [accountAddress, connected, verify]);
 
   useEffect(() => {
     setTimeout(() => {

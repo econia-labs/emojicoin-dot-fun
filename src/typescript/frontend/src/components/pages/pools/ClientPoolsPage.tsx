@@ -11,7 +11,6 @@ import {
   StyledWrapper,
 } from "components/pages/pools/styled";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMatchBreakpoints } from "hooks";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
@@ -21,6 +20,7 @@ import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 
 import { FlexGap } from "@/containers";
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@/sdk/emoji_data";
 import { DEFAULT_POOLS_SORT_BY } from "@/sdk/indexer-v2/queries/query-params";
 import type { MarketStateModel, UserPoolsRPCModel } from "@/sdk/indexer-v2/types";
@@ -47,7 +47,7 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const { account } = useAptos();
+  const accountAddress = useAccountAddress();
 
   useEffect(() => {
     setRealEmojis(emojis as SymbolEmoji[]);
@@ -59,8 +59,8 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
       orderby: orderBy,
       page: page.toString(),
     });
-    if (pools === "mypools" && account?.address) {
-      params.set("account", account.address);
+    if (pools === "mypools" && accountAddress) {
+      params.set("account", accountAddress);
     }
     if (realEmojis.length) {
       params.set("searchBytes", encodeEmojis(realEmojis));
@@ -75,7 +75,7 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
         }
         setMarkets((markets) => (page === 1 ? [...data] : [...markets, ...data]));
       });
-  }, [page, orderBy, sortBy, account, pools, realEmojis]);
+  }, [page, orderBy, sortBy, accountAddress, pools, realEmojis]);
 
   const { isMobile } = useMatchBreakpoints();
 

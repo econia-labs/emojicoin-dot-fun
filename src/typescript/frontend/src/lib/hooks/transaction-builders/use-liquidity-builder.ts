@@ -1,6 +1,6 @@
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { ProvideLiquidity, RemoveLiquidity } from "@/move-modules";
 import { toEmojicoinTypesForEntry } from "@/sdk/markets";
 
@@ -18,11 +18,10 @@ export const useLiquidityTransactionBuilder = (
   minLpCoinsOut: bigint = 1n,
   minQuoteOut: bigint = 1n
 ) => {
-  const { account } = useAptos();
+  const accountAddress = useAccountAddress();
 
   const { memoizedArgs, ProvideOrRemove } = useMemo(() => {
     const ProvideOrRemove = direction === "add" ? ProvideLiquidity : RemoveLiquidity;
-    const accountAddress = account?.address;
     if (!accountAddress || !marketAddress) {
       return {
         memoizedArgs: null,
@@ -52,7 +51,7 @@ export const useLiquidityTransactionBuilder = (
       },
     };
   }, [
-    account?.address,
+    accountAddress,
     direction,
     lpCoinAmount,
     marketAddress,

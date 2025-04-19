@@ -1,10 +1,9 @@
-import {
-  Ed25519PublicKey,
-  isUserTransactionResponse,
-  type PendingTransactionResponse,
-  type UserTransactionResponse,
+import type {
+  PendingTransactionResponse,
+  PublicKey,
+  UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { Ed25519PublicKey, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -20,11 +19,9 @@ import {
 } from "@/sdk/const";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 
-export const tryEd25519PublicKey = (account: AccountInfo) => {
+export const tryEd25519PublicKey = (publicKey: PublicKey) => {
   try {
-    return new Ed25519PublicKey(
-      typeof account.publicKey === "string" ? account.publicKey : account.publicKey[0]
-    );
+    return new Ed25519PublicKey(publicKey.toString());
   } catch (_) {
     return undefined;
   }
@@ -52,7 +49,7 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
       if (account === null) {
         return undefined;
       }
-      const publicKey = tryEd25519PublicKey(account);
+      const publicKey = tryEd25519PublicKey(account.publicKey);
       if (!publicKey) {
         return {
           error: true,
@@ -65,7 +62,7 @@ export const useRegisterMarket = (sequenceNumber: bigint | null) => {
       try {
         const r = await RegisterMarket.getGasCost({
           aptosConfig: aptos.config,
-          registrant: account.address,
+          registrant: account.address.toString(),
           registrantPubKey: publicKey,
           emojis: numMarkets === 0 ? [SYMBOL_EMOJI_DATA.byName("Virgo")!.bytes] : emojiBytes,
         });

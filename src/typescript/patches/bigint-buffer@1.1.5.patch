@@ -1,0 +1,28 @@
+diff --git a/dist/node.js b/dist/node.js
+index 513168c89e387668a79b6beb109587b3eb41a7d0..e2ea95cbe6b4bca4bbe950e21b6cff5ede61090c 100644
+--- a/dist/node.js
++++ b/dist/node.js
+@@ -7,7 +7,7 @@ let converter;
+         converter = require('bindings')('bigint_buffer');
+     }
+     catch (e) {
+-        console.warn('bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');
++        // console.warn('bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');
+     }
+ }
+ /**
+diff --git a/src/index.ts b/src/index.ts
+index 3c78463c2fac414612aa49a9fd27d529a2041ec0..c604f186fc48aebed1248d140d2c0cf199c15820 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -12,8 +12,8 @@ if (!process.browser) {
+   try {
+     converter = require('bindings')('bigint_buffer');
+   } catch (e) {
+-    console.warn(
+-        'bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');
++    // console.warn(
++        // 'bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)');
+   }
+ }
+

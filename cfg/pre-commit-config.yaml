@@ -119,7 +119,9 @@ repos:
     id: 'check-added-large-files'
   - id: 'check-case-conflict'
   - id: 'detect-private-key'
-  - id: 'end-of-file-fixer'
+  -
+    exclude: 'src/typescript/patches/'
+    id: 'end-of-file-fixer'
   -
     files: 'cfg/cspell-dictionary.txt'
     id: 'file-contents-sorter'

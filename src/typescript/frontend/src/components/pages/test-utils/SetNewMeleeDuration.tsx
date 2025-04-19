@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { successfulTransactionToast } from "@/components/wallet/toasts";
 import { EmojicoinArena } from "@/move-modules";
+import { CHAIN_IDS } from "@/sdk/index";
 import { isNumberInConstruction } from "@/sdk/utils";
 
 import { getLocalPublisher } from "./local-publisher";
@@ -34,7 +35,7 @@ export const SetMeleeDurationForm = ({ className }: React.HTMLAttributes<HTMLDiv
       duration: durationAsMicroseconds,
     }).then((res) => {
       if (res.success) {
-        successfulTransactionToast(res, { name: Network.LOCAL });
+        successfulTransactionToast(res, { name: Network.LOCAL, chainId: CHAIN_IDS.local });
       } else {
         toast.error("Fail.");
       }
