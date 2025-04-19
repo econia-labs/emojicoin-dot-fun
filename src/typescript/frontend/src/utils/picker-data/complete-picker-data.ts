@@ -1,8 +1,10 @@
 import type { EmojiMartData } from "components/pages/emoji-picker/types";
 
-// Stub
-// TODO: Add the missing emojis to this.
-// It's currently missing some newer emojis. This can be checked by comparing the set of emojis
-// in the emoji data generated in chat-emojis.ts and symbol-emojis.ts.
-// For example: "handshake: medium-light skin tone, medium-dark skin tone"
+/**
+ * Some of the emojis in the larger set of chat emojis are not included by default in the emoji-mart
+ * data. If there's ever a desire to replace the data with the complete set of emoji data, this
+ * function can be filled out instead of being a stub.
+ *
+ * For example: "handshake: medium-light skin tone, medium-dark skin tone"
+ */
 export const completePickerData = (data: EmojiMartData): EmojiMartData => data;

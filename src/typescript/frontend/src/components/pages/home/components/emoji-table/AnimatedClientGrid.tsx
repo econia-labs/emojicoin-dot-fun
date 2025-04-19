@@ -15,10 +15,6 @@ import TableCard from "../table-card/TableCard";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "./utils";
 
-// TODO: Consider queueing up the changes by storing each state update in a queue and then updating the state
-// by popping off the queue. This would allow us to update the state in a more controlled manner and avoid lots of
-// simultaneous state updates and expensive re-renders.
-// For now, we probably don't need to worry about this since we're not sure how frequent the state updates will be.
 export const LiveClientGrid = ({
   markets,
   sortBy,
