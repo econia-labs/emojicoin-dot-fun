@@ -1,7 +1,7 @@
-import { Td, Text, Tr } from "components";
+import { Td, Tr } from "components";
 import { FormattedNumber } from "components/FormattedNumber";
 import Popup from "components/popup";
-import { useMatchBreakpoints } from "hooks";
+import { cn } from "lib/utils/class-name";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import Link from "next/link";
 import React, { useMemo } from "react";
@@ -30,8 +30,9 @@ const formatXPR = (time: number, bigDailyTvl: number) => {
   return <FormattedNumber value={xprIn} style="fixed" suffix="%" decimals={4} />;
 };
 
+const tdClassName = "py-2 px-3 body-sm text-light-gray uppercase ellipses";
+
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
-  const { isMobile } = useMatchBreakpoints();
   const bigDailyTvl = Number(item.dailyTvlPerLPCoinGrowth);
 
   const { dpr, wpr, apr } = useMemo(
@@ -45,73 +46,42 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
 
   return (
     <Tr hover selected={selected} onClick={onClick}>
-      <Td p="7px 12px" width={{ _: "25%", tablet: "11.5%" }}>
+      <Td className="py-2 px-3 w-1/4 md:w-[11.5%]">
         <Popup content="go to market">
           <Link href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}>
             <Flex justifyContent="space-between" className="cursor-pointer">
               <div className="font-pixelar font-sm text-ec-blue">{"{"}</div>
-              <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
+              <p className="body-sm text-light-gray uppercase ellipses">
                 <Emoji emojis={item.market.emojis} />
-              </Text>
+              </p>
               <div className="font-pixelar font-sm text-ec-blue">{"}"}</div>
             </Flex>
           </Link>
         </Popup>
       </Td>
 
-      <Td p="7px 12px" width={{ _: "30%", tablet: "26.5%" }}>
-        <Flex>
-          <Text
-            textScale="bodySmall"
-            color="lightGray"
-            textTransform="uppercase"
-            ellipsis
-            title={`${toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT`}
-          >
-            <FormattedNumber
-              value={item.state.cumulativeStats.quoteVolume}
-              suffix=" APT"
-              nominalize
-            />
-          </Text>
-        </Flex>
+      <Td
+        className={cn(tdClassName, "w-[30%] md:w-[26.5%]")}
+        title={`${toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT`}
+      >
+        <FormattedNumber value={item.state.cumulativeStats.quoteVolume} suffix=" APT" nominalize />
       </Td>
 
-      {!isMobile && (
-        <Td p="7px 12px" width="18%">
-          <Flex>
-            <Text
-              textScale="bodySmall"
-              color="lightGray"
-              textTransform="uppercase"
-              ellipsis
-              title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
-            >
-              <FormattedNumber value={item.dailyVolume} suffix=" APT" nominalize />
-            </Text>
-          </Flex>
-        </Td>
-      )}
-
-      <Td p="7px 12px" width={{ _: "25%", tablet: "20%" }}>
-        <Flex>
-          <Text
-            textScale="bodySmall"
-            color="lightGray"
-            textTransform="uppercase"
-            ellipsis
-            title={`${toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT`}
-          >
-            <FormattedNumber
-              value={item.state.cpammRealReserves.quote * 2n}
-              suffix=" APT"
-              nominalize
-            />
-          </Text>
-        </Flex>
+      <Td
+        className={cn(tdClassName, "hidden md:table-cell w-[18%]")}
+        title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
+      >
+        <FormattedNumber value={item.dailyVolume} suffix=" APT" nominalize />
       </Td>
 
-      <Td p="7px 12px" width={{ _: "20%", tablet: "24%" }}>
+      <Td
+        className={cn(tdClassName, "w-1/4 md:w-[20%]")}
+        title={`${toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT`}
+      >
+        <FormattedNumber value={item.state.cpammRealReserves.quote * 2n} suffix=" APT" nominalize />
+      </Td>
+
+      <Td className={cn(tdClassName, "w-1/5 md:w-[24%]")}>
         <Flex justifyContent="start" className="relative">
           <Popup
             content={
@@ -126,9 +96,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               )
             }
           >
-            <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
-              {dpr}
-            </Text>
+            <p>{dpr}</p>
           </Popup>
         </Flex>
       </Td>

@@ -3,6 +3,7 @@
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import SpinnerIcon from "components/svg/icons/Spinner";
 import Text from "components/text";
+import { cn } from "lib/utils/class-name";
 import React from "react";
 import { useScramble, type UseScrambleProps } from "use-scramble";
 
@@ -23,6 +24,7 @@ const Button = <E extends React.ElementType = "button">({
   variant = "outline",
   scrambleProps = {},
   icon,
+  className,
   ...rest
 }: ButtonProps<E> & { scrambleProps?: UseScrambleProps } & {
   icon?: React.ReactNode;
@@ -49,6 +51,7 @@ const Button = <E extends React.ElementType = "button">({
 
   return (
     <StyledButton
+      className={cn("inline-flex", className)}
       {...internalProps}
       {...rest}
       variant={variant}

@@ -13,7 +13,6 @@ import { GlowingEmoji } from "utils/emoji";
 
 import ArenaMarketsPriceDeltaPopover from "@/components/pages/arena/ArenaMarketsPriceDeltaPopover";
 import { FlexGap } from "@/containers";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { getEmojisInString } from "@/sdk/emoji_data";
 import { toTotalAptLocked } from "@/sdk/indexer-v2/types";
@@ -52,7 +51,6 @@ const meleeDataToArenaCardProps = ({
 });
 
 export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
-  const { isMobile } = useMatchBreakpoints();
   const currentMeleeInfo = useCurrentMeleeInfo();
 
   const {
@@ -102,25 +100,18 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
 
   return (
     <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
-      <div
-        className="w-full max-w-full gap-[2em]"
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gridTemplateRows: !isMobile ? "1fr" : "1fr 1fr",
-        }}
-      >
+      <div className="grid grid-rows-[1fr_1fr] md:grid-rows-[1fr] grid-cols-[1fr] md:grid-cols-[1fr_1fr] w-full max-w-full gap-[2em]">
         <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena}>
-          {isMobile && <GetMatchedEarlyMessage />}
+          <GetMatchedEarlyMessage className="inline md:hidden text-center" />
           {arenaVs}
-          {!isMobile && (
+          <div className="hidden md:flex justify-center items-center">
             <Button scale="xl" className="mx-auto">
               Enter now
             </Button>
-          )}
+          </div>
         </Link>
-        <div className={`flex flex-col gap-[2em] max-w-full ${isMobile ? "items-center" : ""}`}>
-          {!isMobile && <GetMatchedEarlyMessage />}
+        <div className={`flex flex-col gap-[2em] max-w-full items-center md:items-stretch`}>
+          <GetMatchedEarlyMessage className="hidden md:inline text-start" />
           <Countdown duration={duration} startTime={startTime} />
 
           <div className="flex flex-col gap-[.4em] arena-market-data-text">

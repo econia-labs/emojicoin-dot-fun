@@ -2,7 +2,6 @@ import Info from "components/info";
 import { Arrows } from "components/svg";
 import Text from "components/text";
 import { translationFunction } from "context/language-context";
-import { useMatchBreakpoints } from "hooks";
 import React from "react";
 import { useScramble } from "use-scramble";
 
@@ -12,8 +11,6 @@ import type { TableHeaderProps } from "./types";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   const { t } = translationFunction();
-  const { isMobile } = useMatchBreakpoints();
-
   const { ref, replay } = useScramble({
     text: `${t(item.text)}`,
     overdrive: false,
@@ -63,11 +60,11 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
         >
           {t(item.text)}
         </Text>
-        {item.sortBy && !isMobile ? (
-          <Flex>
+        {item.sortBy && (
+          <div className="hidden md:flex">
             <Arrows color="econiaBlue" />
-          </Flex>
-        ) : null}
+          </div>
+        )}
       </FlexGap>
     </Flex>
   );

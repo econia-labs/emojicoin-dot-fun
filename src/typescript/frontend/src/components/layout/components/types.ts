@@ -1,4 +1,4 @@
-import type { HTMLAttributes, PropsWithChildren } from "react";
+import type { HTMLAttributes } from "react";
 import type { DefaultTheme } from "styled-components";
 import type { CSS } from "styled-components/dist/types";
 import type {
@@ -31,12 +31,6 @@ export interface BoxThemedProps extends BoxProps {
 }
 
 export interface FlexProps extends BoxProps, FlexboxProps {}
-
-export interface PageProps extends PropsWithChildren<BoxProps> {
-  title?: string;
-  description?: string;
-  image?: string;
-}
 
 export interface FlexGapProps extends FlexProps, GapProps {}
 

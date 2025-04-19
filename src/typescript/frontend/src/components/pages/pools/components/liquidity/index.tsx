@@ -1,7 +1,7 @@
 "use client";
 
 import type { PoolsData } from "app/pools/page";
-import { Button, InputNumeric, Text } from "components";
+import { Button, InputNumeric } from "components";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
@@ -24,7 +24,6 @@ import { useSearchParams } from "next/navigation";
 import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 
 import { Column, Flex, FlexGap } from "@/containers";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { toEmojicoinTypes } from "@/sdk/markets/utils";
 
 import { StyledAddLiquidityWrapper } from "./styled";
@@ -62,8 +61,6 @@ const inputAndOutputStyles = `
 
 const Liquidity = ({ market }: LiquidityProps) => {
   const { t } = translationFunction();
-
-  const { isMobile } = useMatchBreakpoints();
 
   const searchParams = useSearchParams();
 
@@ -273,7 +270,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
   );
 
   return (
-    <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
+    <div className="flex w-full justify-center py-16 px-4 md:px-8">
       <Column width="100%" maxWidth="414px" justifyContent="center">
         <Flex width="100%" justifyContent="space-between" alignItems="center" mb="10px">
           <Flex flexDirection="row">
@@ -285,13 +282,9 @@ const Liquidity = ({ market }: LiquidityProps) => {
                 <Arrows color="econiaBlue" />
               </button>
 
-              <Text
-                textScale={isMobile ? "heading2" : "heading1"}
-                textTransform="uppercase"
-                className={isMobile ? "w-min" : ""}
-              >
+              <p className="uppercase heading-2 md:heading-1 w-min md:w-auto">
                 {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
-              </Text>
+              </p>
 
               <Info>
                 Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
@@ -360,12 +353,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </StyledAddLiquidityWrapper>
         )}
 
-        <Flex
-          width="100%"
-          justifyContent="center"
-          mb={{ _: "17px", tablet: "37px" }}
-          position="relative"
-        >
+        <div className="flex relative w-full justify-center mb-4 md:mb-9">
           <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
@@ -378,23 +366,18 @@ const Liquidity = ({ market }: LiquidityProps) => {
               {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
             </Button>
           </ButtonWithConnectWalletFallback>
-        </Flex>
+        </div>
 
-        <Text textScale={isMobile ? "heading2" : "heading1"} textTransform="uppercase" mb="16px">
-          {t("Reserves")}
-        </Text>
+        <p className="uppercase heading-2 md:heading-1 mb-4">{t("Reserves")}</p>
 
         <StyledAddLiquidityWrapper>
-          <Flex
-            p={{ _: "10px 12px 7px 10px", tablet: "18px 25px 7px 25px" }}
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <Flex className="items-center justify-between py-2.5 px-2 md:py-4 md:px-6">
             <AptosInputLabel />
 
-            <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
+            <p className="body-sm md:body-lg uppercase">
               {market ? (
                 <FormattedNumber
+                  className="pixel-heading-4"
                   value={market.state.cpammRealReserves.quote}
                   nominalize
                   decimals={3}
@@ -402,19 +385,16 @@ const Liquidity = ({ market }: LiquidityProps) => {
               ) : (
                 "-"
               )}
-            </Text>
+            </p>
           </Flex>
 
-          <Flex
-            p={{ _: "0px 12px 10px 12px", tablet: "0px 25px 18px 25px" }}
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <div className="flex items-center justify-between pt-0 px-3 pb-2.5 md:px-6 md:pb-4">
             <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
 
-            <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
+            <p className="body-sm md:body-lg uppercase">
               {market ? (
                 <FormattedNumber
+                  className="pixel-heading-4"
                   value={market.state.cpammRealReserves.base}
                   nominalize
                   decimals={3}
@@ -422,11 +402,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
               ) : (
                 "-"
               )}
-            </Text>
-          </Flex>
+            </p>
+          </div>
         </StyledAddLiquidityWrapper>
       </Column>
-    </Flex>
+    </div>
   );
 };
 

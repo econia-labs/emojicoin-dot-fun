@@ -1,10 +1,8 @@
 import type {
-  Breakpoints,
   Colors,
   Fonts,
   FontWeight,
   Gradients,
-  MediaQueries,
   Radii,
   Shadows,
   Transitions,
@@ -14,9 +12,6 @@ import type {
 export { appearanceAnimationMap, appearanceAnimationVariants, scaleAnimation } from "./animations";
 export { darkColors } from "./colors";
 export interface CustomTheme {
-  siteWidth: number;
-  breakpoints: Breakpoints;
-  mediaQueries: MediaQueries;
   shadows: Shadows;
   radii: Radii;
   zIndices: ZIndices;

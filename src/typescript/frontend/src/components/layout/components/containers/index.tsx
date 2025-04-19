@@ -1,9 +1,9 @@
 "use client";
 
+import { cn } from "lib/utils/class-name";
 import React, { type PropsWithChildren } from "react";
 import styled, { css } from "styled-components";
 import { border, flexbox, layout, position, space, system } from "styled-system";
-import { siteWidth } from "theme/base";
 
 import type { BoxProps, BoxThemedProps, ColumnProps, FlexGapProps, FlexProps } from "@/containers";
 
@@ -39,12 +39,15 @@ export const Flex = styled(Box)<FlexProps>`
   display: flex;
   ${flexbox}
 `;
-
-export const Container: React.FC<PropsWithChildren<BoxProps>> = ({ children, ...props }) => {
+export const Container: React.FC<PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>> = ({
+  children,
+  className,
+  ...props
+}) => {
   return (
-    <Box px={{ _: "16px", mobileL: "24px" }} mx="auto" maxWidth={siteWidth} {...props}>
+    <div className={cn("px-6 md:px-6 mx-auto max-w-max", className)} {...props}>
       {children}
-    </Box>
+    </div>
   );
 };
 

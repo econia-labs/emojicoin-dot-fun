@@ -7,9 +7,8 @@ import { cn } from "lib/utils/class-name";
 
 import { FlexGap } from "@/components/layout";
 import Popup from "@/components/popup";
-import { Switcher } from "@/components/switcher";
 import Text from "@/components/text";
-import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
+import { Switch } from "@/components/ui/Switch";
 
 import styles from "../ExtendedGridLines.module.css";
 import type { SortHomePageDropdownProps } from "./SortHomePageDropdown";
@@ -30,7 +29,6 @@ export default function SortAndAnimate({
 }: Props) {
   const animate = useUserSettings((s) => s.animate);
   const toggleAnimate = useUserSettings((s) => s.toggleAnimate);
-  const { isLaptopL } = useMatchBreakpoints();
   const { t } = translationFunction();
 
   const { account } = useAptos();
@@ -72,19 +70,17 @@ export default function SortAndAnimate({
                 <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
                   {t("Favorites:")}
                 </Text>
-
-                <Switcher
+                <Switch
                   disabled={disableFavoritesToggle || favoritesDisabled}
                   checked={!favoritesDisabled && isFilterFavorites}
-                  onChange={() => setIsFilterFavorites(!isFilterFavorites)}
-                  scale={isLaptopL ? "md" : "sm"}
+                  onCheckedChange={() => setIsFilterFavorites(!isFilterFavorites)}
                 />
               </FlexGap>
             </Popup>
           )}
-          <div className="flex flex-row gap-3">
+          <div className="flex flex-row gap-3 items-center">
             <span className=" med-pixel-text text-light-gray uppercase">Animate: </span>
-            <Switcher checked={animate} onChange={toggleAnimate} scale={isLaptopL ? "md" : "sm"} />
+            <Switch checked={animate} onCheckedChange={toggleAnimate} />
           </div>
         </div>
       </div>

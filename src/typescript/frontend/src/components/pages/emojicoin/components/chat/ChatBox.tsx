@@ -13,7 +13,7 @@ import { Column, Flex } from "@/containers";
 
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import type { ChatProps } from "../../types";
-import { MessageContainer } from "./components";
+import MessageContainer from "./components/message-container";
 import { useChatBox } from "./useChatBox";
 import { useChatEventsQuery } from "./useChatEventsQuery";
 
