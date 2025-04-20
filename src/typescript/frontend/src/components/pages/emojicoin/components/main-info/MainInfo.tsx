@@ -101,8 +101,6 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const usdDailyVolume = useUSDValue(dailyVolume);
   const usdAllTimeVolume = useUSDValue(allTimeVolume);
 
-  const { isMobile, isTablet } = useMatchBreakpoints();
-
   const explorerLink = toExplorerLink({
     linkType: "coin",
     value: `${data.marketView.metadata.marketAddress}::coin_factory::Emojicoin`,
@@ -187,27 +185,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
         borderTop: `1px solid ${darkTheme.colors.darkGray}`,
       }}
     >
-      <div
-        className="mx-[2vw]"
-        style={
-          isMobile || isTablet
-            ? {
-                display: "flex",
-                gap: "1em",
-                flexDirection: "column",
-                width: "100%",
-                padding: "40px 0px",
-              }
-            : {
-                display: "grid",
-                gridTemplateColumns: "25fr 35fr 40fr",
-                gap: "32px",
-                width: "100%",
-                maxWidth: "1362px",
-                padding: "20px 0",
-              }
-        }
-      >
+      <div className="xs:flex xs:flex-col lg:grid xs:gap-4 lg:gap-8 lg:grid-cols-[25fr_35fr_40fr] lg:py-5 xs:py-10 px-0 w-full mx-[2vw]">
         <div className={`grid place-items-center text-center ${borderStyle}`}>
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />
