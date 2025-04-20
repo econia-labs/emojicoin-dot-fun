@@ -72,7 +72,7 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
             alignItems="center"
             gap="13px"
           >
-            <SearchBar className="xs:hidden md:flex" />
+            <SearchBar className="hidden md:flex" />
 
             <TableHeaderSwitcher
               title1="Pools"
@@ -88,7 +88,7 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
           </FlexGap>
         </StyledHeaderInner>
       </StyledHeader>
-      <StyledSubHeader className="xs:flex md:hidden">
+      <StyledSubHeader className="flex md:hidden">
         <StyledHeaderInner>
           <SearchBar />
         </StyledHeaderInner>

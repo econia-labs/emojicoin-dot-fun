@@ -86,23 +86,23 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
 
   return (
     <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
-      <div className="grid xs:grid-rows-[1fr_1fr] md:grid-rows-[1fr] xs:grid-cols-[1fr] md:grid-cols-[1fr_1fr] w-full max-w-full gap-[2em]">
+      <div className="grid grid-rows-[1fr_1fr] md:grid-rows-[1fr] grid-cols-[1fr] md:grid-cols-[1fr_1fr] w-full max-w-full gap-[2em]">
         <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena}>
           <span
-            className={`xs:inline md:hidden arena-pixel-heading-text text-white uppercase text-center`}
+            className={`inline md:hidden arena-pixel-heading-text text-white uppercase text-center`}
           >
             {headerText}
           </span>
           {arenaVs}
-          <div className="xs:hidden md:flex justify-center items-center">
+          <div className="hidden md:flex justify-center items-center">
             <Button scale="xl" className="mx-auto">
               Enter now
             </Button>
           </div>
         </Link>
-        <div className={`flex flex-col gap-[2em] max-w-full xs:items-center md:items-stretch`}>
+        <div className={`flex flex-col gap-[2em] max-w-full items-center md:items-stretch`}>
           <span
-            className={`xs:hidden md:inline arena-pixel-heading-text text-white uppercase text-start`}
+            className={`hidden md:inline arena-pixel-heading-text text-white uppercase text-start`}
           >
             {headerText}
           </span>

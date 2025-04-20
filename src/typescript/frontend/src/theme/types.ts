@@ -1,5 +1,4 @@
 import type {
-  breakpoints,
   fonts,
   fontWeight,
   gradients,
@@ -12,8 +11,6 @@ import type {
 import type { baseColors, darkColors } from "./colors";
 
 export type MediaQueries = typeof mediaQueries;
-
-export type Breakpoints = typeof breakpoints;
 
 export type Radii = typeof radii;
 

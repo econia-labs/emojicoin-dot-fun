@@ -1,6 +1,7 @@
 "use client";
 // cspell:word unpathify
 
+import { cn } from "lib/utils/class-name";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import { Emoji } from "utils/emoji";
@@ -55,11 +56,10 @@ export const Loading = ({
       <div className="flex relative w-full h-full m-auto">
         <div className="flex flex-col m-auto gap-10 max-w-[420px] justify-center items-center align-middle">
           <Emoji
-            className={
-              centered +
-              " text-center mt-[.3rem]" +
-              " xs:pixel-display-2 md:pixel-display-2 !text-5xl"
-            }
+            className={cn(
+              centered,
+              "text-center mt-[.3rem] pixel-display-2 md:pixel-display-2 !text-5xl"
+            )}
             title={emojiName}
             emojis={emoji}
           />

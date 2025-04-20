@@ -27,7 +27,7 @@ const CurrentMeleeStats = () => {
 
   return (
     <div
-      className={`border-b row-[1] col-[1/3] border-solid border-dark-gray text-ec-blue flex xs:flex-wrap md:flex-nowrap p-[2em] gap-[2em]`}
+      className={`border-b row-[1] col-[1/3] border-solid border-dark-gray text-ec-blue flex flex-wrap md:flex-nowrap p-[2em] gap-[2em]`}
     >
       <div className={headerFlexColClass}>
         <div className={headerTitleClass}>{"Current deposits"}</div>
@@ -106,7 +106,7 @@ const Inner = (
     <>
       <MeleeHistory className="md:hidden" {...{ ...props, selectedRow, setSelectedRow }} />
       <div
-        className="xs:hidden md:block text-ec-blue overflow-hidden"
+        className="hidden md:block text-ec-blue overflow-hidden"
         style={{ gridRow: "2", gridColumn: "1" }}
       >
         {props.historyHidden ? (
@@ -122,7 +122,7 @@ const Inner = (
         )}
       </div>
       <div
-        className="xs:hidden md:block border-solid border-dark-gray border-[0] border-l-[1px] text-ec-blue"
+        className="hidden md:block border-solid border-dark-gray border-[0] border-l-[1px] text-ec-blue"
         style={{ gridRow: "2", gridColumn: "2" }}
       >
         {meleeBreakdown}
@@ -138,7 +138,7 @@ export default function ProfileTab(props: ProfileTabProps & { goToEnter: () => v
 
   return (
     <div
-      className={"xs:flex xs:flex-col md:grid md:h-full w-full"}
+      className={"flex flex-col md:grid md:h-full w-full"}
       style={{
         gridTemplateRows: "1fr 2fr",
         gridTemplateColumns:

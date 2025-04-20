@@ -71,7 +71,7 @@ const HistoricalRow = ({
         </td>
       </tr>
       {isSelected && (
-        <tr className="xs:table-cell md:hidden">
+        <tr className="table-cell md:hidden">
           <td colSpan={5}>
             <HistoricMeleeBreakdown melee={row} historyHidden={false} close={close} />
           </td>
@@ -108,7 +108,7 @@ export const MeleeHistory = ({
       <div className="flex justify-between px-[1em] h-[3em] items-center border-dark-gray border-b-[1px] border-solid">
         <div className="uppercase text-md font-forma">{"History"}</div>
         <div
-          className="xs:hidden md:block uppercase text-xl text-light-gray cursor-pointer"
+          className="hidden md:block uppercase text-xl text-light-gray cursor-pointer"
           onClick={() => setHistoryHidden(true)}
         >
           &lt;&lt; Hide

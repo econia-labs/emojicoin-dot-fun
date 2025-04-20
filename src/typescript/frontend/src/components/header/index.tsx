@@ -82,7 +82,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
             </StyledClickItem>
           </Link>
 
-          <div className="xs:hidden lg:flex mr-[50px] gap-[24px] items-center">
+          <div className="hidden lg:flex mr-[50px] gap-[24px] items-center">
             {NAVIGATE_LINKS.map(({ title, path }) => {
               return (
                 <Link
@@ -100,7 +100,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
           </div>
 
           <Button
-            className="xs:inline-flex lg:hidden"
+            className="inline-flex lg:hidden"
             marginRight="50px"
             scale="lg"
             onClick={() => setIsOpen(!isOpen)}

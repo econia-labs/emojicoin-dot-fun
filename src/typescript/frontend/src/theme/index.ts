@@ -1,5 +1,4 @@
 import type {
-  Breakpoints,
   Colors,
   Fonts,
   FontWeight,
@@ -15,7 +14,6 @@ export { appearanceAnimationMap, appearanceAnimationVariants, scaleAnimation } f
 export { darkColors } from "./colors";
 export interface CustomTheme {
   siteWidth: number;
-  breakpoints: Breakpoints;
   mediaQueries: MediaQueries;
   shadows: Shadows;
   radii: Radii;

@@ -38,7 +38,7 @@ export const LiquidityButton = (props: GridProps) => {
       ) : (
         <StyledContentHeader>
           <Flex width="100%" justifyContent="left">
-            <p className="xs:pixel-heading-4 md:pixel-heading-3 text-light-gray uppercase">
+            <p className="uppercase text-light-gray pixel-heading-4 md:pixel-heading-3">
               Grace period ends in {displayTimeLeft}
             </p>
           </Flex>

@@ -15,7 +15,6 @@ import darkTheme from "theme/dark";
 import { Emoji } from "utils/emoji";
 
 import { Switch } from "@/components/ui/Switch";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { useUsdMarketCap, useUSDValue } from "@/hooks/use-usd-market-cap";
 import TelegramOutlineIcon from "@/icons/TelegramOutlineIcon";
 import { MarketProperties } from "@/move-modules";
@@ -185,7 +184,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
         borderTop: `1px solid ${darkTheme.colors.darkGray}`,
       }}
     >
-      <div className="xs:flex xs:flex-col lg:grid xs:gap-4 lg:gap-8 lg:grid-cols-[25fr_35fr_40fr] lg:py-5 xs:py-10 px-0 w-full mx-[2vw]">
+      <div className="flex flex-col lg:grid gap-4 lg:gap-8 lg:grid-cols-[25fr_35fr_40fr] lg:py-5 py-10 px-0 w-full mx-[2vw]">
         <div className={`grid place-items-center text-center ${borderStyle}`}>
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />

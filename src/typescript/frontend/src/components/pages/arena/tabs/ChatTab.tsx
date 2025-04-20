@@ -9,7 +9,7 @@ import EmojiPickerWithInput from "@/components/emoji-picker/EmojiPickerWithInput
 import { LoadMore } from "@/components/ui/table/loadMore";
 import type { MarketStateModel } from "@/sdk/index";
 
-import { MessageContainer } from "../../emojicoin/components/chat/components";
+import MessageContainer from "../../emojicoin/components/chat/components/message-container";
 import { useChatBox } from "../../emojicoin/components/chat/useChatBox";
 import { useChatEventsQuery } from "../../emojicoin/components/chat/useChatEventsQuery";
 import { marketTernary } from "../utils";
@@ -70,7 +70,7 @@ export default function ChatTab({ market0, market1 }: Props) {
   }, []);
 
   return (
-    <div className="flex flex-col xs:max-h-[calc(100vh-60px)] md:max-h-none xs:h-auto md:h-[100%] overflow-hidden">
+    <div className="flex flex-col max-h-[calc(100vh-60px)] md:max-h-none h-auto md:h-[100%] overflow-hidden">
       <motion.div layoutScroll className="flex flex-col-reverse grow px-[21px] py-0 overflow-auto">
         {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
           <MessageContainer

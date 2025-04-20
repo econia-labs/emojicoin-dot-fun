@@ -10,7 +10,7 @@ export const StyledPoolsPage = styled.div`
   flex-grow: 1;
   margin-top: 15px;
 
-  ${({ theme }) => theme.mediaQueries.laptopL} {
+  ${({ theme }) => theme.mediaQueries.xl} {
     max-height: calc(100vh - 200px);
   }
 `;
@@ -25,7 +25,7 @@ export const StyledWrapper = styled.div`
   margin-left: 30px;
   margin-right: 30px;
 
-  ${({ theme }) => theme.mediaQueries.laptopL} {
+  ${({ theme }) => theme.mediaQueries.xl} {
     flex-direction: row;
     margin-left: 0;
     margin-right: 0;
@@ -42,11 +42,11 @@ export const StyledHeader = styled.div`
   padding-left: 30px;
   padding-right: 30px;
 
-  ${({ theme }) => theme.mediaQueries.tablet} {
+  ${({ theme }) => theme.mediaQueries.md} {
     min-height: 45px;
   }
 
-  ${({ theme }) => theme.mediaQueries.laptopL} {
+  ${({ theme }) => theme.mediaQueries.xl} {
     padding-left: 0;
     padding-right: 0;
   }
@@ -76,7 +76,7 @@ export const StyledInner = styled(Flex)`
     bottom: -1px;
   }
 
-  ${({ theme }) => theme.mediaQueries.laptopL} {
+  ${({ theme }) => theme.mediaQueries.xl} {
     &:last-child {
       border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
     }
@@ -90,7 +90,7 @@ export const StyledSubHeader = styled.div`
   height: 47px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 
-  ${({ theme }) => theme.mediaQueries.tablet} {
+  ${({ theme }) => theme.mediaQueries.md} {
     height: 43px;
   }
 `;

@@ -69,7 +69,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
       </Td>
 
       <Td
-        className={cn(tdClassName, "xs:hidden md:table-cell")}
+        className={cn(tdClassName, "hidden md:table-cell")}
         width="18%"
         title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
       >

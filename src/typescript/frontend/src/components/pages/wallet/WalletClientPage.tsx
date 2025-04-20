@@ -38,13 +38,13 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
 
   return (
     <div className="max-w-[100vw] px-2 md:min-w-[80vw]">
-      <span className="pixel-heading-2 xs:px-4 md:px-0 flex flex-wrap gap-x-2 mb-4">
+      <span className="pixel-heading-2 px-4 md:px-0 flex flex-wrap gap-x-2 mb-4">
         Portfolio of{" "}
         <ExplorerLink className="text-ec-blue hover:underline" type="account" value={address}>
           {formatDisplayName(resolvedName, { noTruncateANSName: true })}
         </ExplorerLink>
       </span>
-      <div className="flex justify-between w-full mb-4 flex-wrap gap-x-2 xs:px-4 md:px-0">
+      <div className="flex justify-between w-full mb-4 flex-wrap gap-x-2 px-4 md:px-0">
         <span className="pixel-heading-3b">
           {"Total value: "}
           {isLoading ? (

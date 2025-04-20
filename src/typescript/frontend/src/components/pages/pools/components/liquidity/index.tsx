@@ -282,7 +282,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
                 <Arrows color="econiaBlue" />
               </button>
 
-              <p className="uppercase xs:heading-2 md:heading-1 xs:w-min md:w-auto">
+              <p className="uppercase heading-2 md:heading-1 w-min md:w-auto">
                 {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
               </p>
 
@@ -373,7 +373,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </ButtonWithConnectWalletFallback>
         </Flex>
 
-        <p className="uppercase xs:heading-2 md:heading-1 mb-4">{t("Reserves")}</p>
+        <p className="uppercase heading-2 md:heading-1 mb-4">{t("Reserves")}</p>
 
         <StyledAddLiquidityWrapper>
           <Flex

@@ -61,7 +61,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
           {t(item.text)}
         </Text>
         {item.sortBy && (
-          <div className="xs:hidden md:flex">
+          <div className="hidden md:flex">
             <Arrows color="econiaBlue" />
           </div>
         )}

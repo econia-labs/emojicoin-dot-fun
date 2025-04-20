@@ -80,7 +80,7 @@ export default function CultClientPage() {
       )}
       <Clippy monologue={clippyMonologue} />
 
-      <div className="grid xs:self-center sm:self-start xs:grid-cols-1 sm:grid-cols-4 gap4 grow xs:p-2 md:p-20 align-start gap-12">
+      <div className="grid self-center sm:self-start grid-cols-1 sm:grid-cols-4 gap4 grow p-2 md:p-20 align-start gap-12">
         <div className="flex flex-col gap-12">
           <WinDesktopItem
             icon={WinIcons.MY_COMPUTER}

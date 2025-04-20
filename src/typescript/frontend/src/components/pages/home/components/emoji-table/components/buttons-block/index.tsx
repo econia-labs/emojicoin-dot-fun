@@ -19,7 +19,7 @@ const ButtonText = ({ text }: { text: number | string }) => (
 
 export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBlockProps) => {
   return (
-    <div className={cn("flex xs:gap-3 md:gap-4 justify-center", className)}>
+    <div className={cn("flex gap-3 md:gap-4 justify-center", className)}>
       {/* First */}
       <StyledBtn onClick={() => onChange(1)}>
         <ButtonText text={"{"} />

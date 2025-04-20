@@ -1,32 +1,11 @@
-export const siteWidth = 1440; //px
-export const breakpointMap = {
-  mobileS: 320,
-  mobileM: 375,
-  mobileL: 425,
-  tablet: 768,
-  laptop: 1024,
-  laptopL: 1440,
-} as const;
+import { tailwindBreakpoints } from "../../tailwind.config";
 
-export const breakpointsArray = ["320px", "375px", "425px", "768px", "1024px", "1440px"];
-
-export const breakpoints = Object.assign(breakpointsArray, {
-  mobileS: breakpointsArray[0],
-  mobileM: breakpointsArray[1],
-  mobileL: breakpointsArray[2],
-  tablet: breakpointsArray[3],
-  laptop: breakpointsArray[4],
-  laptopL: breakpointsArray[5],
-});
-
+// Will remove this after refactoring pools page with new EcTable
 export const mediaQueries = {
-  mobileS: `@media screen and (min-width: ${breakpointsArray[0]})`,
-  mobileM: `@media screen and (min-width: ${breakpointsArray[1]})`,
-  mobileL: `@media screen and (min-width: ${breakpointsArray[2]})`,
-  tablet: `@media screen and (min-width: ${breakpointsArray[3]})`,
-  laptop: `@media screen and (min-width: ${breakpointsArray[4]})`,
-  laptopL: `@media screen and (min-width: ${breakpointsArray[5]})`,
-  largeHeight: `@media screen and (min-height: ${siteWidth + 1}px)`,
+  sm: `@media screen and (min-width: ${tailwindBreakpoints.sm})`,
+  md: `@media screen and (min-width: ${tailwindBreakpoints.md})`,
+  lg: `@media screen and (min-width: ${tailwindBreakpoints.lg})`,
+  xl: `@media screen and (min-width: ${tailwindBreakpoints.xl})`,
 } as const;
 
 export const shadows = {
@@ -70,8 +49,6 @@ export const fonts = {
 } as const;
 
 const theme = {
-  siteWidth,
-  breakpoints,
   mediaQueries,
   shadows,
   radii,

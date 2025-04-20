@@ -1,7 +1,6 @@
 "use client";
 
 import LogoIcon from "components/svg/icons/LogoIcon";
-import Text from "components/text";
 import { LINKS } from "lib/env";
 import Link from "next/link";
 import React from "react";
@@ -13,14 +12,14 @@ import { Container, Flex, FlexGap } from "@/containers";
 import MenuItem from "../header/components/menu-item";
 import { EXTERNAL_LINK_PROPS } from "../link";
 import { SocialLinks } from "./components/social-links";
-import { StyledClickItem, StyledContainer, StyledSocialWrapper } from "./styled";
+import { StyledClickItem } from "./styled";
 
 const Footer: React.FC = () => {
   return (
-    <Container width="100%">
+    <Container className="w-full">
       <Flex justifyContent="center">
-        <StyledContainer>
-          <StyledSocialWrapper>
+        <div className="flex w-full flex-col items-center justify-between max-w-[1108px]">
+          <div className="flex py-6 md:py-12 w-full items-center justify-between border-b border-solid border-dark-gray">
             <StyledClickItem>
               <LogoIcon width="170px" cursor="pointer" versionBadge={true} />
             </StyledClickItem>
@@ -31,22 +30,14 @@ const Footer: React.FC = () => {
               </Link>
               <SocialLinks />
             </FlexGap>
-          </StyledSocialWrapper>
+          </div>
 
-          <Flex alignItems="center">
-            <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
-              <Text
-                textScale="display6"
-                $fontWeight="bold"
-                fontSize={{ _: "8px", tablet: "15px" }}
-                textTransform="uppercase"
-                py={{ _: "16px", tablet: "24px" }}
-              >
-                TERMS OF USE
-              </Text>
-            </Link>
-          </Flex>
-        </StyledContainer>
+          <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
+            <p className="uppercase font-bold py-4 md:py-6 text-[8px] md:text-[15px] font-forma">
+              TERMS OF USE
+            </p>
+          </Link>
+        </div>
       </Flex>
     </Container>
   );
