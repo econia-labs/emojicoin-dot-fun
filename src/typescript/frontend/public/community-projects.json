@@ -22,5 +22,11 @@
     "id": "3",
     "name": "Egirl Invader",
     "url": "https://anime-invader.vercel.app/"
+  },
+  {
+    "description": "Start drawing! Upload one drawing per day to keep improving your art skills and get some rewards. Constancy + Focus + Urgency are the key.",
+    "id": "4",
+    "name": "Art Shrine",
+    "url": "https://artshrine.aptosweebs.fun/"
   }
 ]
