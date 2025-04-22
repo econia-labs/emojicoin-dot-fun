@@ -2,7 +2,6 @@
 
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import Text from "components/text";
 import { motion } from "framer-motion";
 import { LINKS } from "lib/env";
 import Link from "next/link";

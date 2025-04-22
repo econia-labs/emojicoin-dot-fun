@@ -12,7 +12,6 @@ import type {
 export { appearanceAnimationMap, appearanceAnimationVariants, scaleAnimation } from "./animations";
 export { darkColors } from "./colors";
 export interface CustomTheme {
-  siteWidth: number;
   shadows: Shadows;
   radii: Radii;
   zIndices: ZIndices;

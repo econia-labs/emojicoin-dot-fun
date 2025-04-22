@@ -2,8 +2,6 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { cn } from "lib/utils/class-name";
 import Image from "next/image";
 import { useEffect } from "react";
-import styled from "styled-components";
-import { DARK_GRAY } from "theme/colors";
 
 import icon from "../../../public/images/search-icon.svg";
 import EmojiPickerWithInput from "../emoji-picker/EmojiPickerWithInput";

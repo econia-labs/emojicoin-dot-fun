@@ -1,7 +1,7 @@
 "use client";
 
 import type { PoolsData } from "app/pools/page";
-import { Button, InputNumeric, Text } from "components";
+import { Button, InputNumeric } from "components";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
