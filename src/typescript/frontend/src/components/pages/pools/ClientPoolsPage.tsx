@@ -3,14 +3,6 @@
 import type { PoolsData } from "app/pools/page";
 import SearchBar from "components/inputs/search-bar";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
-import {
-  StyledHeader,
-  StyledHeaderInner,
-  StyledInner,
-  StyledPoolsPage,
-  StyledSubHeader,
-  StyledWrapper,
-} from "components/pages/pools/styled";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
@@ -62,40 +54,28 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   );
 
   return (
-    <StyledPoolsPage>
-      <StyledHeader>
-        <StyledHeaderInner>
-          <FlexGap
-            justifyContent={{ _: "unset", tablet: "space-between" }}
-            width="100%"
-            maxWidth={{ _: "800px", laptopL: "57%" }}
-            alignItems="center"
-            gap="13px"
-          >
-            <SearchBar className="hidden md:flex" />
-
-            <TableHeaderSwitcher
-              title1="Pools"
-              title2="My pools"
-              onSelect={(title) => {
-                if (title === "Pools" && pools !== "all") {
-                  setPools("all");
-                } else if (title === "My pools" && pools !== "mypools") {
-                  setPools("mypools");
-                }
-              }}
-            />
-          </FlexGap>
-        </StyledHeaderInner>
-      </StyledHeader>
-      <StyledSubHeader className="flex md:hidden">
-        <StyledHeaderInner>
+    <div className="flex flex-col justify-center items-center mt-[15px] border-y border-solid border-dark-gray">
+      <div className="w-full px-8 border-b border-solid border-dark-gray">
+        <div className="flex h-[43px] px-3 w-full border-x border-solid border-dark-gray *:grow *:basis-0">
           <SearchBar />
-        </StyledHeaderInner>
-      </StyledSubHeader>
 
-      <StyledWrapper>
-        <StyledInner width={{ _: "100%", laptopL: "57%" }}>
+          <TableHeaderSwitcher
+            title1="Pools"
+            title2="My pools"
+            onSelect={(title) => {
+              if (title === "Pools" && pools !== "all") {
+                setPools("all");
+              } else if (title === "My pools" && pools !== "mypools") {
+                setPools("mypools");
+              }
+            }}
+          />
+          <div />
+        </div>
+      </div>
+
+      <div className="flex flex-col xl:flex-row px-8">
+        <div className="flex relative w-full border-x border-solid border-dark-gray xl:w-[57%]">
           <PoolsTable
             index={selectedIndex}
             data={markets}
@@ -118,13 +98,13 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
               }
             }}
           />
-        </StyledInner>
-
-        <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
+        </div>
+        <div className="xl:hidden -ml-8 w-[calc(100%+64px)] border-t border-solid border-dark-gray" />
+        <div className="flex grow relative w-full xl:w-[43%] border-x border-solid border-dark-gray">
           <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
-        </StyledInner>
-      </StyledWrapper>
-    </StyledPoolsPage>
+        </div>
+      </div>
+    </div>
   );
 };
 

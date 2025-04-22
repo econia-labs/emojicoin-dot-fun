@@ -84,6 +84,7 @@ export const Tr = styled.tr<TrProps>`
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
   display: flex;
   width: 100%;
+  height: 32px;
   ${getStylesOnSelected}
 
   &:hover {
