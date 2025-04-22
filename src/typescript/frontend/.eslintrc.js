@@ -26,7 +26,7 @@ module.exports = {
     "next.config.mjs",
     "playwright.config.js",
     "postcss.config.js",
-    "tailwind.config.js",
+    "tailwind.config.ts",
     "jest.config.js",
     "public/static",
   ],
