@@ -72,8 +72,7 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
         </thead>
         <TBody
           ref={tableRef}
-          height={{ _: "calc(50vh)", laptopL: "calc(100vh - 353px)" }}
-          maxHeight={{ _: "204px", tablet: "340px", laptopL: "unset" }}
+          className="max-h-[204px] md:max-h-[340px] xl:max-h-none h-[50vh] xl:h-[calc(100vh-353px)]"
           id="poolsTableBody"
           onScroll={() => {
             if (tableRef && tableRef.current) {

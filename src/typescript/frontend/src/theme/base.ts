@@ -1,13 +1,3 @@
-import { tailwindBreakpoints } from "../../tailwind.config";
-
-// Will remove this after refactoring pools page with new EcTable
-export const mediaQueries = {
-  sm: `@media screen and (min-width: ${tailwindBreakpoints.sm})`,
-  md: `@media screen and (min-width: ${tailwindBreakpoints.md})`,
-  lg: `@media screen and (min-width: ${tailwindBreakpoints.lg})`,
-  xl: `@media screen and (min-width: ${tailwindBreakpoints.xl})`,
-} as const;
-
 export const shadows = {
   tooltip: "0px 40px 64px -12px rgba(0, 0, 0, 0.02), 0px 32px 48px -8px rgba(0, 0, 0, 0.08)",
   dropdown: "0px 0px 30px rgba(202, 199, 226, 0.5)",
@@ -49,7 +39,6 @@ export const fonts = {
 } as const;
 
 const theme = {
-  mediaQueries,
   shadows,
   radii,
   zIndices,

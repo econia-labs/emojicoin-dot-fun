@@ -46,7 +46,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
 
   return (
     <Tr hover selected={selected} onClick={onClick}>
-      <Td className="py-2 px-3" width={{ _: "25%", tablet: "11.5%" }}>
+      <Td className="py-2 px-3 w-1/4 md:w-[11.5%]">
         <Popup content="go to market">
           <Link href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}>
             <Flex justifyContent="space-between" className="cursor-pointer">
@@ -61,30 +61,27 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
       </Td>
 
       <Td
-        width={{ _: "30%", tablet: "26.5%" }}
-        className={tdClassName}
+        className={cn(tdClassName, "w-[30%] md:w-[26.5%]")}
         title={`${toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT`}
       >
         <FormattedNumber value={item.state.cumulativeStats.quoteVolume} suffix=" APT" nominalize />
       </Td>
 
       <Td
-        className={cn(tdClassName, "hidden md:table-cell")}
-        width="18%"
+        className={cn(tdClassName, "hidden md:table-cell w-[18%]")}
         title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
       >
         <FormattedNumber value={item.dailyVolume} suffix=" APT" nominalize />
       </Td>
 
       <Td
-        width={{ _: "25%", tablet: "20%" }}
-        className={tdClassName}
+        className={cn(tdClassName, "w-1/4 md:w-[20%]")}
         title={`${toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT`}
       >
         <FormattedNumber value={item.state.cpammRealReserves.quote * 2n} suffix=" APT" nominalize />
       </Td>
 
-      <Td className={tdClassName} width={{ _: "20%", tablet: "24%" }}>
+      <Td className={cn(tdClassName, "w-1/5 md:w-[24%]")}>
         <Flex justifyContent="start" className="relative">
           <Popup
             content={

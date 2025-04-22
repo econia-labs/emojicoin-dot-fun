@@ -270,7 +270,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
   );
 
   return (
-    <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
+    <div className="flex w-full justify-center py-16 px-4 md:px-8">
       <Column width="100%" maxWidth="414px" justifyContent="center">
         <Flex width="100%" justifyContent="space-between" alignItems="center" mb="10px">
           <Flex flexDirection="row">
@@ -353,12 +353,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </StyledAddLiquidityWrapper>
         )}
 
-        <Flex
-          width="100%"
-          justifyContent="center"
-          mb={{ _: "17px", tablet: "37px" }}
-          position="relative"
-        >
+        <div className="flex relative w-full justify-center mb-4 md:mb-9">
           <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
@@ -371,21 +366,18 @@ const Liquidity = ({ market }: LiquidityProps) => {
               {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
             </Button>
           </ButtonWithConnectWalletFallback>
-        </Flex>
+        </div>
 
         <p className="uppercase heading-2 md:heading-1 mb-4">{t("Reserves")}</p>
 
         <StyledAddLiquidityWrapper>
-          <Flex
-            p={{ _: "10px 12px 7px 10px", tablet: "18px 25px 7px 25px" }}
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <Flex className="items-center justify-between py-2.5 px-2 md:py-4 md:px-6">
             <AptosInputLabel />
 
-            <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
+            <p className="body-sm md:body-lg uppercase">
               {market ? (
                 <FormattedNumber
+                  className="pixel-heading-4"
                   value={market.state.cpammRealReserves.quote}
                   nominalize
                   decimals={3}
@@ -393,19 +385,16 @@ const Liquidity = ({ market }: LiquidityProps) => {
               ) : (
                 "-"
               )}
-            </Text>
+            </p>
           </Flex>
 
-          <Flex
-            p={{ _: "0px 12px 10px 12px", tablet: "0px 25px 18px 25px" }}
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <div className="flex items-center justify-between pt-0 px-3 pb-2.5 md:px-6 md:pb-4">
             <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
 
-            <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
+            <p className="body-sm md:body-lg uppercase">
               {market ? (
                 <FormattedNumber
+                  className="pixel-heading-4"
                   value={market.state.cpammRealReserves.base}
                   nominalize
                   decimals={3}
@@ -413,11 +402,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
               ) : (
                 "-"
               )}
-            </Text>
-          </Flex>
+            </p>
+          </div>
         </StyledAddLiquidityWrapper>
       </Column>
-    </Flex>
+    </div>
   );
 };
 

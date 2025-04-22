@@ -3,7 +3,6 @@ import type {
   Fonts,
   FontWeight,
   Gradients,
-  MediaQueries,
   Radii,
   Shadows,
   Transitions,
@@ -14,7 +13,6 @@ export { appearanceAnimationMap, appearanceAnimationVariants, scaleAnimation } f
 export { darkColors } from "./colors";
 export interface CustomTheme {
   siteWidth: number;
-  mediaQueries: MediaQueries;
   shadows: Shadows;
   radii: Radii;
   zIndices: ZIndices;

@@ -9,7 +9,6 @@ import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { FlexGap } from "@/containers";
 import { useAccountAddress } from "@/hooks/use-account-address";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@/sdk/emoji_data";
 import type { SortMarketsBy } from "@/sdk/index";
@@ -56,9 +55,9 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   return (
     <div className="flex flex-col justify-center items-center mt-[15px] border-y border-solid border-dark-gray">
       <div className="w-full px-8 border-b border-solid border-dark-gray">
-        <div className="flex h-[43px] px-3 w-full border-x border-solid border-dark-gray *:grow *:basis-0">
+        <div className="flex-col-reverse md:flex-row justify-between flex px-3 w-full border-x border-solid border-dark-gray *:grow *:basis-0">
           <SearchBar />
-
+          <div className="md:hidden -ml-3 w-[calc(100%+24px)] border-t border-solid border-dark-gray" />
           <TableHeaderSwitcher
             title1="Pools"
             title2="My pools"
@@ -70,7 +69,6 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
               }
             }}
           />
-          <div />
         </div>
       </div>
 
