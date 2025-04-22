@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import resolveConfig from "tailwindcss/resolveConfig";
 
-import { tailwindBreakpoints } from "../../tailwind.config";
+import tailwindConfig from "../../tailwind.config";
 
-type ScreenKey = keyof typeof tailwindBreakpoints;
-export type Breakpoints = Record<keyof typeof tailwindBreakpoints, boolean>;
+// Get the full config
+const fullConfig = resolveConfig(tailwindConfig);
+const tailwindBreakpoints = fullConfig.theme.screens as Record<string, string>;
+
+// The keys here should always match the breakpoint keys in tailwind.config.js
+type ScreenKey = "sm" | "md" | "lg" | "xl";
+export type Breakpoints = Record<ScreenKey, boolean>;
 
 /**
  * A hook that tracks Tailwind's breakpoint states using window.matchMedia.
@@ -38,10 +44,15 @@ export type Breakpoints = Record<keyof typeof tailwindBreakpoints, boolean>;
  * ```
  */
 export function useTailwindBreakpoints(): Breakpoints {
-  // Initialize state based on current window size
   const [matches, setMatches] = useState<Breakpoints>(() => {
+    if (typeof window === "undefined") {
+      return Object.fromEntries(
+        Object.keys(tailwindBreakpoints).map((key) => [key, false])
+      ) as Breakpoints;
+    }
+
     return Object.fromEntries(
-      (Object.entries(tailwindBreakpoints) as [ScreenKey, string][]).map(([key, size]) => {
+      Object.entries(tailwindBreakpoints).map(([key, size]) => {
         const mql = window.matchMedia(`(min-width: ${size})`);
         return [key, mql.matches];
       })
@@ -49,25 +60,21 @@ export function useTailwindBreakpoints(): Breakpoints {
   });
 
   useEffect(() => {
-    // Keep track of all listeners so we can clean up later
     const handlers: Array<{
       key: ScreenKey;
       mql: MediaQueryList;
       listener: (e: MediaQueryListEvent) => void;
     }> = [];
 
-    // Set up a listener for each breakpoint
-    (Object.entries(tailwindBreakpoints) as [ScreenKey, string][]).forEach(([key, size]) => {
+    Object.entries(tailwindBreakpoints).forEach(([key, size]) => {
       const mql = window.matchMedia(`(min-width: ${size})`);
       const listener = (e: MediaQueryListEvent) =>
         setMatches((prev) => ({ ...prev, [key]: e.matches }));
 
       mql.addEventListener("change", listener);
-
-      handlers.push({ key, mql, listener });
+      handlers.push({ key: key as ScreenKey, mql, listener });
     });
 
-    // Cleanup on unmount
     return () => {
       handlers.forEach(({ mql, listener }) => {
         mql.removeEventListener("change", listener);

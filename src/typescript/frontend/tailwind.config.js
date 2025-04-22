@@ -2,42 +2,12 @@
 /** @type {import('tailwindcss').Config} */
 import colors from "tailwindcss/colors";
 import { fontFamily } from "tailwindcss/defaultTheme";
-import type { DefaultColors } from "tailwindcss/types/generated/colors";
 
-delete (colors as Partial<DefaultColors>).warmGray;
-delete (colors as Partial<DefaultColors>).lightBlue;
-delete (colors as Partial<DefaultColors>).trueGray;
-delete (colors as Partial<DefaultColors>).coolGray;
-delete (colors as Partial<DefaultColors>).blueGray;
-
-/**
- * Breakpoint configuration for responsive design using TailwindCSS.
- *
- * TailwindCSS follows a mobile-first approach, meaning styles are first defined
- * for the smallest viewport (0px and up) and then progressively enhanced for
- * larger screens using these breakpoints.
- *
- * For example, if you write:
- * - `text-sm md:text-base`: text will be small on mobile (0px+) and base size on tablet (768px+)
- *
- * The breakpoints defined here represent the minimum width at which these styles take effect:
- * - Default (0px+): Base styles, no prefix needed
- * - sm (425px+): Mobile styles with 'sm:' prefix
- * - md (768px+): Tablet styles with 'md:' prefix
- * - lg (1024px+): Laptop styles with 'lg:' prefix
- * - xl (1440px+): Large laptop styles with 'xl:' prefix
- *
- * @example
- * <div class="w-full md:w-1/2 lg:w-1/3">
- *   Full width on mobile, half width on tablet, one-third on laptop
- * </div>
- */
-export const tailwindBreakpoints = {
-  sm: "425px", // mobile
-  md: "768px", // tablet
-  lg: "1024px", // laptop
-  xl: "1440px", // laptop L
-} as const;
+delete colors.warmGray;
+delete colors.lightBlue;
+delete colors.trueGray;
+delete colors.coolGray;
+delete colors.blueGray;
 
 // These should only be used for test components or prototyping.
 const shadCnTheme = {
@@ -83,7 +53,7 @@ const tailwindConfig = {
   theme: {
     extend: {
       maxWidth: {
-        max: tailwindBreakpoints.xl,
+        max: "1440px",
       },
       typography: {},
       fontFamily: {
@@ -92,7 +62,34 @@ const tailwindConfig = {
         "forma-bold": ["var(--font-formaM)", ...fontFamily.sans],
         "forma-thin": ["var(--font-formaDR)", ...fontFamily.sans],
       },
-      screens: tailwindBreakpoints,
+      /**
+       * Breakpoint configuration for responsive design using TailwindCSS.
+       *
+       * TailwindCSS follows a mobile-first approach, meaning styles are first defined
+       * for the smallest viewport (0px and up) and then progressively enhanced for
+       * larger screens using these breakpoints.
+       *
+       * For example, if you write:
+       * - `text-sm md:text-base`: text will be small on mobile (0px+) and base size on tablet (768px+)
+       *
+       * The breakpoints defined here represent the minimum width at which these styles take effect:
+       * - Default (0px+): Base styles, no prefix needed
+       * - sm (425px+): Mobile styles with 'sm:' prefix
+       * - md (768px+): Tablet styles with 'md:' prefix
+       * - lg (1024px+): Laptop styles with 'lg:' prefix
+       * - xl (1440px+): Large laptop styles with 'xl:' prefix
+       *
+       * @example
+       * <div class="w-full md:w-1/2 lg:w-1/3">
+       *   Full width on mobile, half width on tablet, one-third on laptop
+       * </div>
+       */
+      screens: {
+        sm: "425px", // mobile
+        md: "768px", // tablet
+        lg: "1024px", // laptop
+        xl: "1440px", // laptop L
+      },
       boxShadow: {
         pretty:
           "-0.5px 0.5px 0.3px rgba(0,0,0,0.04), -1.1px 1.1px 0.7px rgba(0,0,0,0.055), -1.8px 1.8px 1.2px rgba(0,0,0,0.064), -2.7px 2.7px 1.8px rgba(0,0,0,0.071), -3.9px 3.9px 2.6px rgba(0,0,0,0.077), -5.5px 5.5px 3.7px rgba(0,0,0,0.083), -7.8px 7.8px 5.3px rgba(0,0,0,0.089)",
