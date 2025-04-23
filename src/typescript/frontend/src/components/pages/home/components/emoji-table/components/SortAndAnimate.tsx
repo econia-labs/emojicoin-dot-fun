@@ -1,10 +1,14 @@
 import { useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { getSetting, saveSetting } from "lib/cookie-user-settings/cookie-user-settings";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { useGetFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
 import { cn } from "lib/utils/class-name";
 import { useEffect, useState } from "react";
 
 import { FlexGap } from "@/components/layout";
+import Popup from "@/components/popup";
 import { Switcher } from "@/components/switcher";
 import Text from "@/components/text";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
@@ -19,6 +23,10 @@ export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHome
   const { isLaptopL } = useMatchBreakpoints();
   const { t } = translationFunction();
 
+  const { account } = useAptos();
+  const {
+    favoritesQuery: { data: favorites },
+  } = useGetFavoriteMarkets();
   const [isFilterFavorites, setIsFilterFavorites] = useState(false);
 
   useEffect(() => {
@@ -29,6 +37,8 @@ export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHome
     saveSetting("homePageFilterFavorites", !isFilterFavorites);
     setIsFilterFavorites((prev) => !prev);
   };
+
+  const favoritesDisabled = !favorites || favorites.size === 0;
 
   return (
     <>
@@ -48,17 +58,28 @@ export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHome
           )}
         >
           <SortHomePageDropdown sortMarketsBy={sortMarketsBy} onSortChange={onSortChange} />
-          <FlexGap gap="12px" className={"med-pixel-text"}>
-            <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
-              {t("Favorites:")}
-            </Text>
+          {account?.address && FEATURE_FLAGS.Favorites && (
+            <Popup
+              content={
+                favoritesDisabled
+                  ? "Add an Emojicoin to your favorites to use this filter"
+                  : "Filter your favorite Emojicoins"
+              }
+            >
+              <FlexGap gap="12px" className={"med-pixel-text"}>
+                <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
+                  {t("Favorites:")}
+                </Text>
 
-            <Switcher
-              checked={isFilterFavorites || false}
-              onChange={toggleFavorites}
-              scale={isLaptopL ? "md" : "sm"}
-            />
-          </FlexGap>
+                <Switcher
+                  disabled={favoritesDisabled}
+                  checked={isFilterFavorites || false}
+                  onChange={toggleFavorites}
+                  scale={isLaptopL ? "md" : "sm"}
+                />
+              </FlexGap>
+            </Popup>
+          )}
           <div className="flex flex-row gap-3">
             <span className=" med-pixel-text text-light-gray uppercase">Animate: </span>
             <Switcher checked={animate} onChange={toggleAnimate} scale={isLaptopL ? "md" : "sm"} />
