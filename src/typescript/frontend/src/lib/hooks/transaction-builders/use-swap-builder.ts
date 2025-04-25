@@ -1,7 +1,7 @@
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { useMemo } from "react";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { Swap } from "@/move-modules";
 import { toEmojicoinTypesForEntry } from "@/sdk/markets";
 import type { AnyNumberString } from "@/sdk-types";
@@ -18,8 +18,7 @@ export const useSwapTransactionBuilder = (
   isSell: boolean,
   minOutputAmount: AnyNumberString
 ) => {
-  const { account } = useAptos();
-  const accountAddress = account?.address;
+  const accountAddress = useAccountAddress();
   const memoizedArgs = useMemo(() => {
     if (!accountAddress) {
       return null;

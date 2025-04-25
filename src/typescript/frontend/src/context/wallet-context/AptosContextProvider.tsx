@@ -1,11 +1,7 @@
-import {
-  type Aptos,
-  AptosApiError,
-  isUserTransactionResponse,
-  type PendingTransactionResponse,
-  type UserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
-import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
+import type { Aptos, PublicKey, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { AptosApiError, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { AptosSignAndSubmitTransactionOutput } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   checkNetworkAndToast,
   crankedArenaMeleeToast,
@@ -40,11 +36,8 @@ import { globalUserTransactionStore } from "@/store/transaction/store";
 
 import { copyAddressHelper, getFlattenedEventModelsFromResponse, setCoinTypeHelper } from "./utils";
 
-type WalletContextState = ReturnType<typeof useWallet> & {
-  account: (AccountInfo & { address: `0x${string}` }) | null;
-};
 type SubmissionResponse = Promise<{
-  response: PendingTransactionResponse | UserTransactionResponse | null;
+  response: UserTransactionResponse | null;
   error: unknown;
 } | null>;
 
@@ -58,7 +51,11 @@ type AptosContextState = {
   signThenSubmit: (
     transactionBuilder: EntryFunctionTransactionBuilder | null
   ) => SubmissionResponse;
-  account: WalletContextState["account"];
+  account: {
+    address: `0x${string}`;
+    ansName: string | undefined;
+    publicKey: PublicKey;
+  } | null;
   copyAddress: () => Promise<void>;
   status: TransactionStatus;
   lastResponse: ResponseType;
@@ -76,18 +73,30 @@ const AptosContext = createContext<AptosContextState | undefined>(undefined);
 export function AptosContextProvider({ children }: PropsWithChildren) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
-    account: untypedAccount,
+    account: walletAccount,
     network,
     submitTransaction,
     signTransaction,
   } = useWallet();
-  const account = untypedAccount as AptosContextState["account"];
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [lastResponse, setLastResponse] = useState<ResponseType>(null);
   const pushEventsFromClient = useEventStore((s) => s.pushEventsFromClient);
   const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
   const [emojicoinType, setEmojicoinType] = useState<string>();
   const geoblocked = useIsUserGeoblocked();
+
+  const account = useMemo(
+    () =>
+      walletAccount
+        ? {
+            address: walletAccount.address.toString(),
+            ansName: walletAccount.ansName,
+            publicKey: walletAccount.publicKey,
+          }
+        : null,
+    [walletAccount]
+  );
+
   // We could check `account?.ansName` here but it would require conditional hook logic, plus not all wallets provide it
   // so it's not really worth the extra effort and complexity.
   const addressName = useNameResolver(account?.address);
@@ -105,13 +114,13 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     return getAptosClient();
   }, [network]);
 
-  const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account);
+  const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account?.address);
 
   const aptHelper = useLatestBalance(account?.address, APTOS_COIN_TYPE_STRING);
   const emojicoinHelper = useLatestBalance(account?.address, emojicoin);
   const emojicoinLPHelper = useLatestBalance(account?.address, emojicoinLP);
 
-  const copyAddress = useCallback(async () => copyAddressHelper(account), [account]);
+  const copyAddress = useCallback(async () => copyAddressHelper(account?.address), [account]);
 
   const handleTransactionSubmission = useCallback(
     async ({
@@ -119,9 +128,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       res,
     }: {
       functionName: `${string}::${string}::${string}`;
-      res: PendingTransactionResponse;
+      res: AptosSignAndSubmitTransactionOutput;
     }) => {
-      let response: PendingTransactionResponse | UserTransactionResponse | null = null;
+      let response: UserTransactionResponse | null = null;
       let error: unknown;
       if (!network) {
         return {
@@ -130,14 +139,22 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         };
       }
       try {
-        response = res;
         setStatus("pending");
+        const awaitedResponse = await aptos
+          .waitForTransaction({
+            transactionHash: res.hash,
+          })
+          .then((r) => {
+            if (isUserTransactionResponse(r)) {
+              return r;
+            } else {
+              throw new Error("Didn't get a user transaction response.");
+            }
+          });
+
         try {
           // If the transaction submission succeeds, mark the account's sequence number as stale.
           markSequenceNumberStale();
-          const awaitedResponse = (await aptos.waitForTransaction({
-            transactionHash: res.hash,
-          })) as UserTransactionResponse;
           setStatus("success");
           // We handle the `register_market` indicators manually with the animation orchestration.
           if (!functionName.endsWith("register_market")) {
@@ -207,7 +224,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       if (geoblocked || !transactionBuilder) return null;
       if (checkNetworkAndToast(network, true)) {
         setStatus("prompt");
-        const senderAuthenticator = await signTransaction(transactionBuilder.rawTransactionInput);
+        const { authenticator: senderAuthenticator } = await signTransaction({
+          transactionOrPayload: transactionBuilder.rawTransactionInput,
+        });
         const { functionName, res } = await submitTransaction({
           transaction: transactionBuilder.rawTransactionInput,
           senderAuthenticator,
