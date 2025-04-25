@@ -22,7 +22,7 @@ import { Emoji } from "utils/emoji";
 
 import { formatDisplayName } from "@/sdk/utils/misc";
 
-import { WalletDropdownItem } from "./WalletDropdownItem";
+import ScrambledDropdownItem from "../dropdown-menu/ScrambledDropdownItem";
 
 const WIDTH = "24ch";
 
@@ -87,7 +87,7 @@ const WalletDropdownMenu = () => {
         <DropdownContent
           sideOffset={4}
           className={
-            "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer z-[50] " +
+            "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer z-[101] " +
             "rounded-[3px] min-w-[155px] pl-[2px]"
           }
           align="center"
@@ -96,20 +96,20 @@ const WalletDropdownMenu = () => {
           <DropdownArrow className="fill-ec-blue" visibility="visible" />
           {wallet && isAptosConnectWallet(wallet) && (
             <a href={APTOS_CONNECT_ACCOUNT_URL} {...EXTERNAL_LINK_PROPS}>
-              <WalletDropdownItem scrambleText="Account" icon={<User className="h-4 w-4" />} />
+              <ScrambledDropdownItem scrambleText="Account" icon={<User className="h-4 w-4" />} />
             </a>
           )}
-          <WalletDropdownItem
+          <ScrambledDropdownItem
             onSelect={() => router.push(`${ROUTES.wallet}/${account?.address}`)}
             scrambleText="My emojicoins"
             icon={<UserRound className="h-4 w-4" />}
           />
-          <WalletDropdownItem
+          <ScrambledDropdownItem
             onSelect={copyAddress}
             scrambleText="Copy address"
             icon={<Copy className="h-4 w-4" />}
           />
-          <WalletDropdownItem
+          <ScrambledDropdownItem
             onSelect={disconnect}
             scrambleText="Disconnect"
             icon={<LogOut className="h-4 w-4" />}

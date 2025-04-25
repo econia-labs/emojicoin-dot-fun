@@ -8,6 +8,7 @@ import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
+import { cn } from "lib/utils/class-name";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -22,15 +23,14 @@ import { EMOJI_GRID_ITEM_WIDTH } from "../const";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import { ClientGrid } from "./ClientGrid";
 import { ButtonsBlock } from "./components/buttons-block";
-import FilterOptions from "./components/FilterOptions";
+import SortAndAnimate from "./components/SortAndAnimate";
+import styles from "./ExtendedGridLines.module.css";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import {
-  FilterOptionsWrapper,
   GRID_PADDING,
   InnerGridContainer,
   OuterContainer,
   OutermostContainer,
-  SearchWrapper,
   StyledGrid,
 } from "./styled";
 
@@ -120,15 +120,20 @@ const EmojiTable = (props: EmojiTableProps) => {
                 },
               }}
             >
-              <SearchWrapper>
+              {/* Search wrapper */}
+              <div
+                className={cn(
+                  styles["extended-grid-lines"],
+                  "py-0 px-[10px] border-none ml-0 mr-0 w-[75%] md:w-full justify-center after:left-0",
+                  "md:border-l md:border-solid md:border-l-dark-gray md:justify-start"
+                )}
+              >
                 <SearchBar />
-              </SearchWrapper>
-              <FilterOptionsWrapper>
-                <FilterOptions
-                  filter={sort ?? SortMarketsBy.MarketCap}
-                  onChange={handleSortChange}
-                />
-              </FilterOptionsWrapper>
+              </div>
+              <SortAndAnimate
+                sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
+                onSortChange={handleSortChange}
+              />
             </motion.div>
             {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
                 This provides a smooth transition from grids of varying row lengths. */}
