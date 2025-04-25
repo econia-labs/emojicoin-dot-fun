@@ -87,7 +87,7 @@ const WalletDropdownMenu = () => {
         <DropdownContent
           sideOffset={4}
           className={
-            "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer z-[50] " +
+            "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer z-[51] " +
             "rounded-[3px] min-w-[155px] pl-[2px]"
           }
           align="center"
