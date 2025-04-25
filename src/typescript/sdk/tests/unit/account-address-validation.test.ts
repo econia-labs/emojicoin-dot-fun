@@ -1,4 +1,5 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
+
 import { AccountAddressSchema } from "../../src/utils/validation/account-address";
 
 describe("AccountAddressSchema", () => {
