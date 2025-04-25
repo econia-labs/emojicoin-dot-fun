@@ -1,7 +1,7 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { SetMarketProperties } from "@/move-modules";
 
 import { useTransactionBuilder } from "./use-transaction-builder";
@@ -15,8 +15,7 @@ export const useMarketMetadataTransactionBuilder = (
   isSubmitEnabled: boolean,
   filledFields: [string, string][]
 ) => {
-  const { account } = useAptos();
-  const accountAddress = account?.address;
+  const accountAddress = useAccountAddress();
   const memoizedArgs = useMemo(() => {
     const isValidAddress = AccountAddress.isValid({ input: marketAddress }).valid;
     if (!accountAddress || !isSubmitEnabled || !isValidAddress) {

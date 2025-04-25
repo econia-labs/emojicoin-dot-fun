@@ -1,7 +1,7 @@
 import type { TypeTag } from "@aptos-labs/ts-sdk";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useMemo } from "react";
 
+import { useAccountAddress } from "@/hooks/use-account-address";
 import { Enter } from "@/move-modules/emojicoin-arena";
 import { toArenaCoinTypes } from "@/sdk/utils/arena/helpers";
 import type { AnyNumberString } from "@/sdk-types";
@@ -19,8 +19,7 @@ export const useEnterTransactionBuilder = (
   market1Address: `0x${string}` | undefined,
   targetMarketAddress: `0x${string}`
 ) => {
-  const { account } = useAptos();
-  const accountAddress = account?.address;
+  const accountAddress = useAccountAddress();
   const memoizedArgs = useMemo(() => {
     if (!accountAddress || !market0Address || !market1Address) {
       return null;

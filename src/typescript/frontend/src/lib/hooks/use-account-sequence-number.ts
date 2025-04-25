@@ -1,5 +1,4 @@
 import type { AccountAddressInput, Aptos } from "@aptos-labs/ts-sdk";
-import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -18,15 +17,11 @@ const TEN_SECONDS = 10 * 1000;
 // Ensure that the API key isn't hammered fetching an account's sequence number with this hook.
 // This decouples the account sequence number from other params that might normally cause a
 // re-render and re-fetch.
-export const useAccountSequenceNumber = (aptos: Aptos, account: AccountInfo | null) => {
-  const { accountAddress, network } = useMemo(
-    () => ({
-      accountAddress: account?.address,
-      network: aptos.config.network,
-    }),
-    [account?.address, aptos.config.network]
-  );
-
+export const useAccountSequenceNumber = (
+  aptos: Aptos,
+  accountAddress: `0x${string}` | undefined
+) => {
+  const network = useMemo(() => aptos.config.network, [aptos.config.network]);
   const queryClient = useQueryClient();
 
   const query = useQuery({
