@@ -1,0 +1,13 @@
+.extended-grid-lines {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
+.extended-grid-lines::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  border-bottom: 1px solid var(--dark-gray);
+  width: 200vw;
+}
