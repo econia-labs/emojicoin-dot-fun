@@ -124,13 +124,12 @@ export default function SwapComponent({
   }, [netProceeds, isSell, error]);
 
   const sufficientBalance = useMemo(() => {
-    if (!account || (isSell && !emojicoinBalance) || (!isSell && !aptBalance)) return false;
-    if (account) {
-      if (isSell) {
-        return emojicoinBalance >= inputAmount;
-      }
-      return aptBalance >= inputAmount;
+    if (!account) return false;
+    if ((isSell && !emojicoinBalance) || (!isSell && !aptBalance)) return false;
+    if (isSell) {
+      return emojicoinBalance >= inputAmount;
     }
+    return aptBalance >= inputAmount;
   }, [account, aptBalance, emojicoinBalance, isSell, inputAmount]);
 
   const balanceLabel = useMemo(() => {
