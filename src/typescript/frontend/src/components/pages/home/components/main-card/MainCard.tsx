@@ -81,7 +81,7 @@ const MainCard = (props: MainCardProps) => {
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
-    <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
+    <div className="flex flex-col w-full my-[20px] max-w-full">
       <div className="flex flex-col md:flex-row w-full max-w-full items-center justify-center">
         <Link
           className="flex relative items-center ml-[-8%]"
