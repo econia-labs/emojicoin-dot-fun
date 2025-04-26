@@ -19,23 +19,18 @@ import useEvent from "@/hooks/use-event";
 import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
-import { EMOJI_GRID_ITEM_WIDTH } from "../const";
+import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import { ClientGrid } from "./ClientGrid";
 import { ButtonsBlock } from "./components/buttons-block";
 import SortAndAnimate from "./components/SortAndAnimate";
 import styles from "./ExtendedGridLines.module.css";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import {
-  GRID_PADDING,
-  InnerGridContainer,
-  OuterContainer,
-  OutermostContainer,
-  StyledGrid,
-} from "./styled";
 
 interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
+
+const GRID_PADDING = 40;
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();
@@ -106,9 +101,12 @@ const EmojiTable = (props: EmojiTableProps) => {
         onChange={handlePageChange}
         numPages={pages}
       />
-      <OutermostContainer>
-        <OuterContainer>
-          <InnerGridContainer>
+      <div className="flex px-10 border-t border-solid border-dark-gray">
+        <div className="flex justify-center w-full">
+          <div
+            className="flex flex-col items-center w-full justify-center"
+            style={{ maxWidth: MAX_WIDTH + "px" }}
+          >
             <motion.div
               key={rowLength}
               id="emoji-grid-header"
@@ -159,13 +157,18 @@ const EmojiTable = (props: EmojiTableProps) => {
                       },
                     }}
                   >
-                    <StyledGrid>
+                    <div
+                      className="grid relative justify-center w-full gap-0"
+                      style={{
+                        gridTemplateColumns: `repeat(auto-fill, ${EMOJI_GRID_ITEM_WIDTH}px)`,
+                      }}
+                    >
                       {shouldAnimateGrid ? (
                         <LiveClientGrid markets={markets} sortBy={sort} />
                       ) : (
                         <ClientGrid markets={markets} page={page} sortBy={sort} />
                       )}
-                    </StyledGrid>
+                    </div>
                   </motion.div>
                 </AnimatePresence>
                 <ButtonsBlock
@@ -184,9 +187,9 @@ const EmojiTable = (props: EmojiTableProps) => {
                 </Link>
               </div>
             )}
-          </InnerGridContainer>
-        </OuterContainer>
-      </OutermostContainer>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
