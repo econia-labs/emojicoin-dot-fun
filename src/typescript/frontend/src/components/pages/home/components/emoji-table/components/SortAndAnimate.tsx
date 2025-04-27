@@ -53,7 +53,7 @@ export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHome
         {/* Inner wrapper. */}
         <div
           className={cn(
-            "flex items-center w-full justify-around md:justify-between p-[10px]",
+            "flex items-center w-full justify-around md:justify-between p-[10px] gap-3",
             "md:p-0 md:w-[unset]"
           )}
         >
