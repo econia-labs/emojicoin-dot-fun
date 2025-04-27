@@ -1,5 +1,4 @@
 import { useUserSettings } from "context/event-store-context";
-import { cn } from "lib/utils/class-name";
 
 import { Switch } from "@/components/ui/Switch";
 
