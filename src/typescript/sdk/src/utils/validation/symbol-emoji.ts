@@ -5,7 +5,7 @@ import { isValidEmojiHex, isValidMarketSymbol, symbolBytesToEmojis } from "../..
 export const SymbolEmojisSchema = z
   .string()
   .refine((arg) => {
-    if (!arg?.length) return true;
+    if (!arg?.length) return false;
     if (!isValidEmojiHex(arg)) return false;
     if (
       !isValidMarketSymbol(

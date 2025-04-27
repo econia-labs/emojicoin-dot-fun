@@ -17,9 +17,8 @@ describe("SymbolEmojisSchema", () => {
       expect(() => SymbolEmojisSchema.parse(tooManyEmojis)).toThrow();
     });
 
-    it("should return empty array for empty string", () => {
-      const result = SymbolEmojisSchema.parse("");
-      expect(result).toEqual([]);
+    it("should fail for empty string", () => {
+      expect(() => SymbolEmojisSchema.parse("")).toThrow();
     });
 
     it("should fail for non-emoji strings", () => {

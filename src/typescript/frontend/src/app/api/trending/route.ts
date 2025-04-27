@@ -4,6 +4,7 @@ import type { AccountAddress } from "@aptos-labs/ts-sdk";
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { fetchCachedPriceFeed, type NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import type { DECIMALS } from "@/sdk/const";
@@ -91,7 +92,7 @@ export const revalidate = 10;
  * ]
  * ```
  */
-export const GET = apiRouteErrorHandler(async () => {
+export const GET = apiRouteErrorHandler(async (_req: NextRequest) => {
   const aptPrice = await getAptPrice();
   const priceFeed = await fetchCachedPriceFeed();
   const res = priceFeed.map((mkt) => {
