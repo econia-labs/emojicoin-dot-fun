@@ -12,7 +12,7 @@ export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHome
   return (
     <div className={"flex w-full justify-between md:justify-end py-2 items-center"}>
       <SortHomePageDropdown sortMarketsBy={sortMarketsBy} onSortChange={onSortChange} />
-      <div className="flex flex-row gap-3">
+      <div className="flex flex-row gap-3 items-center">
         <span className=" med-pixel-text text-light-gray uppercase">Animate: </span>
         <Switch checked={animate} onCheckedChange={toggleAnimate} />
       </div>
