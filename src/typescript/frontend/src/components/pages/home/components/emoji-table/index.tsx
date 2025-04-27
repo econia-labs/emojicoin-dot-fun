@@ -6,13 +6,12 @@ import Text from "components/text";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
-import { getSetting, saveSetting } from "lib/cookie-user-settings/cookie-user-settings";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
