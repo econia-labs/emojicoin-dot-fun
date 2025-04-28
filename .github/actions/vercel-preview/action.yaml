@@ -4,5 +4,6 @@ name: 'Vercel preview'
 runs:
   steps:
   - run: pnpm install --global vercel@latest
+    shell: 'sh'
   using: 'composite'
 ...
