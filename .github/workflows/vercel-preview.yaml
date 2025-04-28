@@ -1,0 +1,15 @@
+---
+jobs:
+  build-preview:
+    name: 'Vercel preview'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v4'
+    - uses: './.github/actions/vercel-preview'
+name: 'Vercel preview'
+on:
+  pull_request:
+    branches-ignore:
+    - 'fallback'
+    - 'production'
+...

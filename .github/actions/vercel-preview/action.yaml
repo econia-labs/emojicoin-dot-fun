@@ -1,0 +1,8 @@
+# check-workflow: exempt
+description: 'Build a Vercel preview of the project'
+name: 'Vercel preview'
+runs:
+  steps:
+  - run: pnpm install --global vercel@latest
+  using: 'composite'
+...
