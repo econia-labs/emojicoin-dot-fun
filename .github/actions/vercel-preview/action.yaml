@@ -3,14 +3,10 @@ description: 'Build a Vercel preview of the project'
 name: 'Vercel preview'
 runs:
   steps:
-  - uses: pnpm/action-setup@v4
-    with:
-      run_install: false
-      version: '9.4.0'
   - uses: actions/setup-node@v4
     with:
       node-version: 20
       cache: 'pnpm'
-      cache-dependency-path: 'src/typescript/frontend/pnpm-lock.yaml'
+      cache-dependency-path: 'src/typescript/pnpm-lock.yaml'
   using: 'composite'
 ...
