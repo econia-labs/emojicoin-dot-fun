@@ -12,5 +12,6 @@ runs:
       node-version: 20
       cache: 'pnpm'
       cache-dependency-path: 'src/typescript/pnpm-lock.yaml'
+  - run: npm install --global vercel@latest
   using: 'composite'
 ...
