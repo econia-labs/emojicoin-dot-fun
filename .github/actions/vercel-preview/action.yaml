@@ -3,6 +3,10 @@ description: 'Build a Vercel preview of the project'
 name: 'Vercel preview'
 runs:
   steps:
+  - uses: pnpm/action-setup@v4
+    with:
+      package_json_file: 'src/typescript/frontend/package.json'
+      run_install: false
   - uses: actions/setup-node@v4
     with:
       node-version: 20
