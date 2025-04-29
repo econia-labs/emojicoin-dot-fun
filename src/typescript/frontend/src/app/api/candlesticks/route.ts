@@ -1,28 +1,13 @@
+import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { CandlesticksSearchParamsSchema } from "./search-params-schema";
 import { getCandlesticksRoute } from "./utils";
 
-export async function GET(request: NextRequest) {
+export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
   const { searchParams } = request.nextUrl;
   const paramsObject = Object.fromEntries(searchParams.entries());
-  const {
-    data: validatedParams,
-    success,
-    error,
-  } = CandlesticksSearchParamsSchema.safeParse(paramsObject);
-
-  if (!success) {
-    return NextResponse.json(
-      {
-        error: "Invalid search params",
-        details: error.flatten().fieldErrors,
-      },
-      {
-        status: 400,
-      }
-    );
-  }
+  const validatedParams = CandlesticksSearchParamsSchema.parse(paramsObject);
 
   try {
     const data = await getCandlesticksRoute(validatedParams);
@@ -30,4 +15,4 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     return new NextResponse((e as Error).message, { status: 400 });
   }
-}
+});

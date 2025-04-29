@@ -1,5 +1,6 @@
 "use client";
 
+import type { PoolsData } from "app/pools/page";
 import SearchBar from "components/inputs/search-bar";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
 import {
@@ -12,29 +13,24 @@ import {
 } from "components/pages/pools/styled";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useMatchBreakpoints } from "hooks";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { useEffect, useState } from "react";
 
 import { FlexGap } from "@/containers";
 import { useAccountAddress } from "@/hooks/use-account-address";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@/sdk/emoji_data";
+import type { SortMarketsBy } from "@/sdk/index";
 import { DEFAULT_POOLS_SORT_BY } from "@/sdk/indexer-v2/queries/query-params";
-import type { MarketStateModel, UserPoolsRPCModel } from "@/sdk/indexer-v2/types";
 
-export type PoolsData = MarketStateModel | UserPoolsRPCModel;
+import { usePoolData } from "./usePoolData";
 
 const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
-  const [sortBy, setSortBy] = useState<SortByPageQueryParams>(DEFAULT_POOLS_SORT_BY);
+  const [sortBy, setSortBy] = useState<SortMarketsBy>(DEFAULT_POOLS_SORT_BY);
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
   const [page, setPage] = useState<number>(1);
-  const [markets, setMarkets] = useState<PoolsData[]>(initialData);
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
   const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));
@@ -53,29 +49,16 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
     setRealEmojis(emojis as SymbolEmoji[]);
   }, [emojis]);
 
-  useEffect(() => {
-    const params = new URLSearchParams({
-      sortby: sortBy,
-      orderby: orderBy,
-      page: page.toString(),
-    });
-    if (pools === "mypools" && accountAddress) {
-      params.set("account", accountAddress);
-    }
-    if (realEmojis.length) {
-      params.set("searchBytes", encodeEmojis(realEmojis));
-    }
-    const url = `${ROUTES.api.pools}?${params.toString()}`;
-    fetch(url)
-      .then((res) => res.text())
-      .then((txt) => parseJSON(txt) as PoolsData[])
-      .then((data) => {
-        if (data.length < MARKETS_PER_PAGE) {
-          setAllDataIsLoaded(true);
-        }
-        setMarkets((markets) => (page === 1 ? [...data] : [...markets, ...data]));
-      });
-  }, [page, orderBy, sortBy, accountAddress, pools, realEmojis]);
+  const { data: markets } = usePoolData(
+    {
+      account: pools === "mypools" ? accountAddress : undefined,
+      page,
+      sortBy,
+      orderBy,
+      searchBytes: realEmojis?.length ? encodeEmojis(realEmojis) : undefined,
+    },
+    initialData
+  );
 
   const { isMobile } = useMatchBreakpoints();
 
