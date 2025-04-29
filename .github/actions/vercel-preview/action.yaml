@@ -14,5 +14,8 @@ runs:
       cache-dependency-path: 'src/typescript/pnpm-lock.yaml'
   - run: npm install --global vercel@latest
     shell: 'sh'
+  - run: 'pnpm run vercel-install'
+    shell: 'sh'
+    working-directory: 'src/typescript/frontend'
   using: 'composite'
 ...
