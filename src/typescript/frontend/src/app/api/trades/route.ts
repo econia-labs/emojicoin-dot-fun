@@ -1,5 +1,8 @@
+import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { stringifyJSON } from "utils";
+import { parseSearchParams } from "utils/url-utils";
 
 import { fetchSwapEvents } from "@/queries/market";
 
@@ -8,9 +11,9 @@ import { GetTradesSchema } from "./schema";
 // Don't cache this route's response.
 export const revalidate = 0;
 
-export const GET = async (req: Request) => {
+export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
-  const params = Object.fromEntries(searchParams.entries());
+  const params = parseSearchParams(searchParams);
   const { page, sender, limit, marketID, orderBy, symbolEmojis } = GetTradesSchema.parse(params);
   if (!sender && !marketID && !symbolEmojis) {
     return NextResponse.json(
@@ -31,4 +34,4 @@ export const GET = async (req: Request) => {
   });
 
   return new NextResponse(stringifyJSON(swaps));
-};
+});
