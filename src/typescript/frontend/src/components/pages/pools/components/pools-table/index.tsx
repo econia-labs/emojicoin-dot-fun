@@ -1,5 +1,6 @@
 "use client";
 
+import type { PoolsData } from "app/pools/page";
 import { EmptyTr, HeaderTr, Table, TBody, Th, ThInner } from "components";
 import { useMatchBreakpoints } from "hooks";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
@@ -7,9 +8,9 @@ import React, { useRef, useState } from "react";
 import { getEmptyListTr } from "utils";
 
 import useElementDimensions from "@/hooks/use-element-dimensions";
+import type { SortMarketsBy } from "@/sdk/index";
 import type { OrderByStrings } from "@/sdk/indexer-v2/const";
 
-import type { PoolsData } from "../../ClientPoolsPage";
 import { TableHeader, TableRowDesktop } from "./components";
 import { HEADERS, MOBILE_HEADERS } from "./constants";
 import { StyledPoolsWrapper } from "./styled";
@@ -17,7 +18,7 @@ import { StyledPoolsWrapper } from "./styled";
 interface PoolsTableProps {
   data: PoolsData[];
   index: number | undefined;
-  sortBy: (sortBy: SortByPageQueryParams) => void;
+  sortBy: (sortBy: SortMarketsBy) => void;
   orderBy: (orderBy: OrderByStrings) => void;
   onSelect: (index: number) => void;
   onEnd: () => void;
@@ -52,7 +53,7 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
                           props.orderBy(newDirection);
                           setSelectedSort({ col: selectedSort.col, direction: newDirection });
                         } else {
-                          props.sortBy(th.sortBy as SortByPageQueryParams);
+                          props.sortBy(th.sortBy as SortMarketsBy);
                           if (selectedSort.direction !== "desc") {
                             props.orderBy("desc");
                           }

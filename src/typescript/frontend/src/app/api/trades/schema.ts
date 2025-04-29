@@ -1,17 +1,10 @@
-import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { PaginationSchema } from "lib/api/schemas/api-pagination";
 import { z } from "zod";
 
-import { isValidEmojiHex, symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { Schemas } from "@/sdk/utils";
 
 export const GetTradesSchema = PaginationSchema.extend({
-  sender: z
-    .string()
-    .refine((arg) => AccountAddress.isValid({ input: arg }), {
-      message: "Invalid account address format",
-    })
-    .optional()
-    .transform((val) => (val ? AccountAddress.from(val) : undefined)),
+  sender: Schemas.AccountAddress.optional(),
   marketID: z
     .union([
       z.coerce.number(),
@@ -24,11 +17,5 @@ export const GetTradesSchema = PaginationSchema.extend({
       z.number().int("Market ID must be an integer").min(1, "Market ID must be a positive integer")
     )
     .optional(),
-  symbolEmojis: z
-    .string()
-    .refine((e) => isValidEmojiHex(e), {
-      message: "Invalid emoji hex format",
-    })
-    .optional()
-    .transform((e) => (e ? symbolBytesToEmojis(e).emojis.map((e) => e.emoji) : undefined)),
+  symbolEmojis: Schemas.SymbolEmojis.optional(),
 });

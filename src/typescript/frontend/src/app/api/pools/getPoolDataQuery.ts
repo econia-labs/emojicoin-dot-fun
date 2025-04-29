@@ -1,22 +1,23 @@
+import type { AccountAddress } from "@aptos-labs/ts-sdk";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { stringifyJSON } from "utils";
 
 import { fetchMarkets } from "@/queries/home";
 import { fetchUserLiquidityPools } from "@/queries/pools";
-import { toOrderBy } from "@/sdk/indexer-v2/const";
+import type { OrderBy } from "@/sdk/indexer-v2/const";
 import type { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 export async function getPoolData(
   page: number,
   sortBy: SortMarketsBy,
-  orderBy: "asc" | "desc",
+  orderBy?: OrderBy,
   searchEmojis?: string[],
-  provider?: string
+  provider?: AccountAddress
 ) {
   const res = provider
     ? fetchUserLiquidityPools({
         page,
-        orderBy: toOrderBy(orderBy),
+        orderBy: orderBy,
         sortBy,
         provider,
         searchEmojis,
@@ -25,7 +26,7 @@ export async function getPoolData(
     : fetchMarkets({
         page,
         inBondingCurve: false,
-        orderBy: toOrderBy(orderBy),
+        orderBy: orderBy,
         sortBy,
         searchEmojis,
         pageSize: MARKETS_PER_PAGE,
