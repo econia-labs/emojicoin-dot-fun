@@ -11,6 +11,7 @@ export type HomePageSearchParams = {
   order: OrderByStrings | undefined;
   bonding: boolean | undefined;
   q: string | undefined;
+  isFilterFavorites: string | undefined;
 };
 
 export const constructURLForHomePage = ({

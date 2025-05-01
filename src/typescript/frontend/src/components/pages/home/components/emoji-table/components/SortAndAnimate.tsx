@@ -1,11 +1,9 @@
 import { useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { getSetting, saveSetting } from "lib/cookie-user-settings/cookie-user-settings";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { useGetFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
 import { cn } from "lib/utils/class-name";
-import { useEffect, useState } from "react";
 
 import { FlexGap } from "@/components/layout";
 import Popup from "@/components/popup";
@@ -17,7 +15,17 @@ import styles from "../ExtendedGridLines.module.css";
 import type { SortHomePageDropdownProps } from "./SortHomePageDropdown";
 import SortHomePageDropdown from "./SortHomePageDropdown";
 
-export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHomePageDropdownProps) {
+interface Props extends SortHomePageDropdownProps {
+  isFilterFavorites: boolean;
+  setIsFilterFavorites: (value: boolean) => void;
+}
+
+export default function SortAndAnimate({
+  sortMarketsBy,
+  onSortChange,
+  isFilterFavorites,
+  setIsFilterFavorites,
+}: Props) {
   const animate = useUserSettings((s) => s.animate);
   const toggleAnimate = useUserSettings((s) => s.toggleAnimate);
   const { isLaptopL } = useMatchBreakpoints();
@@ -27,16 +35,6 @@ export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHome
   const {
     favoritesQuery: { data: favorites },
   } = useGetFavoriteMarkets();
-  const [isFilterFavorites, setIsFilterFavorites] = useState(false);
-
-  useEffect(() => {
-    getSetting("homePageFilterFavorites").then((res) => setIsFilterFavorites(res || false));
-  }, []);
-
-  const toggleFavorites = () => {
-    saveSetting("homePageFilterFavorites", !isFilterFavorites);
-    setIsFilterFavorites((prev) => !prev);
-  };
 
   const favoritesDisabled = !favorites || favorites.size === 0;
 
@@ -74,7 +72,7 @@ export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHome
                 <Switcher
                   disabled={favoritesDisabled}
                   checked={isFilterFavorites || false}
-                  onChange={toggleFavorites}
+                  onChange={() => setIsFilterFavorites(!isFilterFavorites)}
                   scale={isLaptopL ? "md" : "sm"}
                 />
               </FlexGap>

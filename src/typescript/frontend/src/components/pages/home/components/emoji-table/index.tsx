@@ -6,6 +6,7 @@ import Text from "components/text";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
+import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-client";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
@@ -16,6 +17,7 @@ import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
 import useEvent from "@/hooks/use-event";
+import { useUpdateSearchParam } from "@/hooks/use-update-search-params";
 import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
@@ -51,6 +53,8 @@ const EmojiTable = (props: EmojiTableProps) => {
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
   const emojis = useEmojiPicker((s) => s.emojis);
+
+  const updateSearchParam = useUpdateSearchParam();
 
   useEffect(() => {
     loadMarketStateFromServer(markets);
@@ -98,6 +102,13 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const rowLength = useGridRowLength();
 
+  // We update the URL and also save the setting in cookies for next time /home page is loaded.
+  // The logic could probably be made more generic and reused to also save bump order preference in cookies in a separate PR.
+  const setIsFilterFavorites = (newVal: boolean) => {
+    updateSearchParam({ isFilterFavorites: newVal ? "true" : "false" });
+    clientCookies.saveSetting("homePageFilterFavorites", newVal);
+  };
+
   return (
     <>
       <ButtonsBlock
@@ -133,6 +144,8 @@ const EmojiTable = (props: EmojiTableProps) => {
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
+                isFilterFavorites={props.isFavoriteFilterEnabled}
+                setIsFilterFavorites={setIsFilterFavorites}
               />
             </motion.div>
             {/* Each version of the grid must wait for the other to fully exit animate out before appearing.

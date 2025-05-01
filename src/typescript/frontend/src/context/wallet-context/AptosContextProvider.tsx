@@ -10,7 +10,7 @@ import {
 } from "components/wallet/toasts";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { useEventStore } from "context/event-store-context";
-import { getSetting, saveSetting } from "lib/cookie-user-settings/cookie-user-settings";
+import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-client";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import {
   createContext,
@@ -121,12 +121,10 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (isLoading) return;
-    getSetting("accountAddress").then((savedAddress) => {
-      if (savedAddress !== account?.address) {
-        return saveSetting("accountAddress", account?.address);
-      }
-    });
-
+    const savedAddress = clientCookies.getSetting("accountAddress");
+    if (savedAddress !== account?.address) {
+      clientCookies.saveSetting("accountAddress", account?.address);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account?.address]);
 
