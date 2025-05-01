@@ -1,17 +1,12 @@
-import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { z } from "zod";
+
+import { Schemas } from "@/sdk/index";
 
 // Define Zod schema for settings validation
 export const CookieUserSettingsSchema = z.object({
   homePageFilterFavorites: z.boolean().optional(),
   version: z.number().int().positive(),
-  accountAddress: z
-    .string()
-    .refine((arg) => AccountAddress.isValid({ input: arg }).valid, {
-      message: "Invalid account address format",
-    })
-    .optional()
-    .nullable(),
+  accountAddress: Schemas.AccountAddress.optional().nullable(),
 });
 
 export type UserSettingsWithVersion = z.infer<typeof CookieUserSettingsSchema>;
