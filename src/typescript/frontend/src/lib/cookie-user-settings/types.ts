@@ -14,8 +14,8 @@ export const CookieUserSettingsSchema = z.object({
     .nullable(),
 });
 
-// Derive TypeScript type from Zod schema
-export type UserSettings = z.infer<typeof CookieUserSettingsSchema>;
+export type UserSettingsWithVersion = z.infer<typeof CookieUserSettingsSchema>;
+export type UserSettings = Omit<UserSettingsWithVersion, "version">;
 
 // Constants
 export const COOKIE_USER_SETTINGS_CURRENT_VERSION = 1;
@@ -23,12 +23,11 @@ export const COOKIE_USER_SETTINGS_NAME = "ec_user_settings";
 export const COOKIE_USER_SETTINGS_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 
 export const COOKIE_USER_SETTINGS_DEFAULT_STATE: UserSettings = {
-  version: COOKIE_USER_SETTINGS_CURRENT_VERSION,
   homePageFilterFavorites: false,
   accountAddress: undefined,
 };
 
-export function validateSettings(settings: unknown): UserSettings | null {
+export function validateSettings(settings: unknown): UserSettingsWithVersion | null {
   try {
     return CookieUserSettingsSchema.parse(settings);
   } catch (error) {

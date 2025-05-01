@@ -1,3 +1,4 @@
+import { CookieUserSettingsManager } from "lib/cookie-user-settings/cookie-user-settings-common";
 import {
   COOKIE_USER_SETTINGS_DEFAULT_STATE,
   COOKIE_USER_SETTINGS_MAX_AGE,
@@ -5,16 +6,11 @@ import {
 } from "lib/cookie-user-settings/types";
 import { cookies } from "next/headers";
 
-import {
-  clearSettings,
-  getSetting,
-  getSettings,
-  saveSetting,
-  saveSettings,
-} from "../../src/lib/cookie-user-settings/cookie-user-settings";
-
 const ACCOUNT_ADDRESS_1 = "0x000000000000000000000000000000000000000000000000000000000000000A";
 const ACCOUNT_ADDRESS_2 = "0x000000000000000000000000000000000000000000000000000000000000000B";
+
+const { getSettings, getSetting, saveSettings, saveSetting, clearSettings } =
+  new CookieUserSettingsManager(cookies());
 
 // Mock next/headers and next/cache
 jest.mock("next/headers", () => ({
