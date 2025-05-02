@@ -1,4 +1,3 @@
-# check-workflow: exempt
 ---
 description: 'Ensure consistent indexer versions across various contexts'
 name: 'Indexer versions'
