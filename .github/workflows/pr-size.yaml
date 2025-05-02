@@ -13,6 +13,5 @@ jobs:
 name: 'PR size'
 'on':
   merge_group: null
-  pull_request: null
-  pull_request_review: null
+  pull_request_target: null
 ...
