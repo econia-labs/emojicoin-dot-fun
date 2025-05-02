@@ -71,7 +71,7 @@ const HistoricalRow = ({
         </td>
       </tr>
       {isSelected && (
-        <tr className="table-cell md:hidden">
+        <tr className="table-row md:hidden">
           <td colSpan={5}>
             <HistoricMeleeBreakdown melee={row} historyHidden={false} close={close} />
           </td>
@@ -142,7 +142,7 @@ export const MeleeHistory = ({
             </>
           )}
           {/* The rest of the rows; i.e., the historical positions. */}
-          {history.map((m, i) => (
+          {[...history].map((m, i) => (
             <HistoricalRow
               key={`history-table-row-${i}`}
               row={m}
