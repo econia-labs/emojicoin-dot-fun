@@ -4,8 +4,6 @@ import type { PoolsData } from "app/pools/page";
 import SearchBar from "components/inputs/search-bar";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
