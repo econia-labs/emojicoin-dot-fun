@@ -4,6 +4,7 @@ jobs:
     defaults:
       run:
         working-directory: 'doc/doc-site'
+    environment: 'github-actions'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'

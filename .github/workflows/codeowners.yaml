@@ -1,6 +1,7 @@
 ---
 jobs:
   pr-size:
+    environment: 'github-actions'
     name: 'Code owners'
     runs-on: 'ubuntu-latest'
     steps:
