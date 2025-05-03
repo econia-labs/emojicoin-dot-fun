@@ -21,7 +21,7 @@ export const EmojiPill = ({
         className="flex justify-center items-center w-10 h-6 border border-dark-gray border-solid rounded-xl"
         onClick={onClick}
       >
-        <Emoji className="translate-y-[2px]" emojis={emoji(emojiName)} />
+        <Emoji emojis={emoji(emojiName)} />
       </div>
     </Popup>
   );
