@@ -1,6 +1,7 @@
 ---
 jobs:
   indexer-versions:
+    environment: 'github-actions'
     name: 'Indexer versions'
     runs-on: 'ubuntu-latest'
     steps:

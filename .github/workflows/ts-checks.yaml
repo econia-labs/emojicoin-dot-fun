@@ -14,6 +14,7 @@ defaults:
 
 jobs:
   lint:
+    environment: 'github-actions'
     name: 'TS lint'
     runs-on: 'ubuntu-latest'
     steps:
@@ -24,6 +25,7 @@ jobs:
     - run: 'pnpm run lint'
 
   format:
+    environment: 'github-actions'
     name: 'TS format'
     runs-on: 'ubuntu-latest'
     steps:
@@ -34,6 +36,7 @@ jobs:
     - run: 'pnpm run format:check'
 
   tsc-check:
+    environment: 'github-actions'
     name: 'TS compile check'
     runs-on: 'ubuntu-latest'
     steps:
@@ -44,6 +47,7 @@ jobs:
     - run: 'pnpm run check:ci'
 
   tests:
+    environment: 'github-actions'
     name: 'test suite / (${{ matrix.pretty-suffix }})'
     runs-on: 'ubuntu-latest'
     steps:
