@@ -26,7 +26,7 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
   const emojis = useEmojiPicker((s) => s.emojis);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
-  const updateSearchParam = useUpdateSearchParam();
+  const updateSearchParam = useUpdateSearchParam({ shallow: true });
   const tab = searchParams.get("tab") ?? "portfolio";
 
   // Replace the address in the router URL if the name is defined.
