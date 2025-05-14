@@ -3,13 +3,16 @@ import Button from "components/button";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { cn } from "lib/utils/class-name";
-import { useMemo } from "react";
+import { Share } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Emoji } from "utils/emoji";
 
 import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "@/components/FormattedNumber";
 import Info from "@/components/info";
 import { Loading } from "@/components/loading";
+import { PnlModal } from "@/components/pnl-modal/pnl-modal";
+import Popup from "@/components/popup";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
 
@@ -38,6 +41,8 @@ export const MeleeBreakdownInner = ({
   historyHidden: boolean;
   close: () => void;
 }) => {
+  const [isPnlModalOpen, setIsPnlModalOpen] = useState(false);
+
   const smallCellClass = "flex flex-col gap-[.2em]";
   const smallCellTextClass = "uppercase text-light-gray text-1xl";
   const smallCellValueClass = "text-white font-forma text-2xl";
@@ -52,6 +57,15 @@ export const MeleeBreakdownInner = ({
         padding: historyHidden ? "2em 2em" : "0 2em",
       }}
     >
+      {isPnlModalOpen && (
+        <PnlModal
+          market={lastHeld}
+          deposits={deposit}
+          endHolding={endHolding}
+          onClose={() => setIsPnlModalOpen(false)}
+          pnl={pnl}
+        />
+      )}
       <div
         className={`col-start-1 col-end-3 ${historyHidden ? "row-start-1" : ""} ${historyHidden ? "row-end-3" : ""} h-[100%] w-[100%] grid place-items-center`}
       >
@@ -93,11 +107,23 @@ export const MeleeBreakdownInner = ({
       </div>
       <div className={smallCellClass}>
         <div className={smallCellTextClass}>{"Pnl"}</div>
-        <FormattedNumber
-          className={smallCellValueClass + " " + ((pnl ?? 0) >= 0 ? "!text-green" : "!text-pink")}
-          value={pnl}
-          suffix="%"
-        />
+        <div className="flex gap-2 items-center">
+          <FormattedNumber
+            className={cn(pnl >= 0 ? "!text-green" : "!text-pink", "font-forma text-2xl")}
+            value={pnl}
+            suffix="%"
+          />
+          <Popup content={"Share your PNL with the world!"}>
+            <Share
+              className="text-ec-blue cursor-pointer"
+              size={16}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsPnlModalOpen(true);
+              }}
+            />
+          </Popup>
+        </div>
       </div>
       <div
         className="md:hidden absolute right-0 top-0 uppercase text-xl text-light-gray cursor-pointer"
@@ -165,6 +191,7 @@ export function HistoricMeleeBreakdown({
     .div(melee.losses.toString())
     .sub(100)
     .toNumber();
+
   return (
     <MeleeBreakdownInner
       meleeID={melee.meleeID}
