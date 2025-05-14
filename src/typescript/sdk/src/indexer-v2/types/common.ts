@@ -24,6 +24,13 @@ export type MarketStateQueryArgs = {
   count?: boolean;
 };
 
+export type PriceFeedQueryArgs = {
+  sortBy: SortMarketsBy | "delta";
+  page: number;
+  pageSize: number;
+  orderBy: OrderBy;
+};
+
 export type PeriodicStateEventQueryArgs = {
   marketID: AnyNumberString;
   start: Date;
