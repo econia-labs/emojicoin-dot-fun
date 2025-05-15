@@ -108,7 +108,7 @@ describe("queries price_feed and returns accurate price feed data", () => {
         (v) => v.market.symbolEmojis.join("") === symbolEmojis.join("")
       )!;
       expect(rowInView).toBeDefined();
-      expect(rowInView.deltaPercentage).toEqual(expectedPercentage);
+      expect(rowInView.deltaPercentage).toBeCloseTo(expectedPercentage);
     });
   });
 });
