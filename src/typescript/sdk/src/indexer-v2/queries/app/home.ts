@@ -62,7 +62,12 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
 const selectMarketStates = (args: MarketStateQueryArgs) =>
   selectMarketHelper({ ...args, tableName: TableName.MarketState });
 
-const selectMarketsFromPriceFeed = ({ page, pageSize, orderBy, sortBy }: PriceFeedQueryArgs) => {
+const selectMarketsFromPriceFeed = ({
+  page = 1,
+  pageSize,
+  orderBy,
+  sortBy,
+}: PriceFeedQueryArgs) => {
   return postgrest
     .from(TableName.PriceFeed)
     .select("*")

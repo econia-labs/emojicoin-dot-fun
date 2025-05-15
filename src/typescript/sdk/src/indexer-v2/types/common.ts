@@ -26,7 +26,7 @@ export type MarketStateQueryArgs = {
 
 export type PriceFeedQueryArgs = {
   sortBy: SortMarketsBy | "delta";
-  page: number;
+  page?: number;
   pageSize: number;
   orderBy: OrderBy;
 };
