@@ -51,6 +51,7 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "daily_base_volume",
   "daily_tvl_per_lp_coin_growth",
   "daily_volume",
+  "delta_percentage",
   "fully_diluted_value",
   "high_price_q64",
   "input_amount",

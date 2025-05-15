@@ -7,7 +7,11 @@ import { toRegistryView } from "../../../types";
 import { getAptosClient } from "../../../utils/aptos-client";
 import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
 import { DatabaseTypeConverter } from "../../types";
-import { DEFAULT_SORT_BY, type MarketStateQueryArgs } from "../../types/common";
+import {
+  DEFAULT_SORT_BY,
+  type MarketStateQueryArgs,
+  type PriceFeedQueryArgs,
+} from "../../types/common";
 import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { sortByWithFallback } from "../query-params";
@@ -58,11 +62,18 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
 const selectMarketStates = (args: MarketStateQueryArgs) =>
   selectMarketHelper({ ...args, tableName: TableName.MarketState });
 
-const selectMarketsFromPriceFeed = ({ ...args }: MarketStateQueryArgs) =>
-  selectMarketHelper({
-    ...args,
-    tableName: TableName.PriceFeed,
-  });
+const selectMarketsFromPriceFeed = ({
+  page = 1,
+  pageSize,
+  orderBy,
+  sortBy,
+}: PriceFeedQueryArgs) => {
+  return postgrest
+    .from(TableName.PriceFeed)
+    .select("*")
+    .order(sortBy === "delta" ? "delta_percentage" : sortByWithFallback(sortBy), orderBy)
+    .range((page - 1) * pageSize, page * pageSize - 1);
+};
 
 export const fetchMarkets = queryHelper(
   selectMarketStates,
