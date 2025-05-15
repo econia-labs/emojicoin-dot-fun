@@ -69,6 +69,7 @@ describe("queries price_feed and returns accurate price feed data", () => {
 
     const limit = 500;
     const priceFeedView = await fetchPriceFeedWithMarketState({
+      page: 1,
       sortBy: SortMarketsBy.DailyVolume,
       orderBy: ORDER_BY.DESC,
       pageSize: limit,
