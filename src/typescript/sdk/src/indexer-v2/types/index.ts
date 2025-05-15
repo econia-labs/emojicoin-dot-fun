@@ -937,12 +937,10 @@ export const toArenaCandlestickModel = (data: DatabaseJsonType["arena_candlestic
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
-export const toPriceFeedData = (
-  data: Pick<DatabaseJsonType["price_feed"], "open_price_q64" | "close_price_q64">
-) => ({
+export const toPriceFeedData = (data: DatabaseJsonType["price_feed"]) => ({
   openPrice: q64ToBig(data.open_price_q64).toNumber(),
   closePrice: q64ToBig(data.close_price_q64).toNumber(),
-  deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
+  deltaPercentage: Big(data.delta_percentage).toNumber(),
 });
 
 export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
