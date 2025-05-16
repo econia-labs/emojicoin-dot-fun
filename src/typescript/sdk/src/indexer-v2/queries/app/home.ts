@@ -1,7 +1,5 @@
 import "server-only";
 
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-
 import { RegistryView } from "../../../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
 import { toRegistryView } from "../../../types";
 import { getAptosClient } from "../../../utils/aptos-client";
@@ -28,21 +26,10 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   inBondingCurve,
   count,
   /* eslint-disable @typescript-eslint/no-explicit-any */
-}: MarketStateQueryArgs & { tableName: T }): PostgrestFilterBuilder<
-  any,
-  any,
-  any[],
-  TableName,
-  T
-> => {
-  let query: any = postgrest.from(tableName);
-  /* eslint-enable @typescript-eslint/no-explicit-any */
-
-  if (count === true) {
-    query = query.select("*", { count: "exact" });
-  } else {
-    query = query.select("*");
-  }
+}: MarketStateQueryArgs & { tableName: T }) => {
+  const tableBuilder = postgrest.from(tableName);
+  let query =
+    count === true ? tableBuilder.select("*", { count: "exact" }) : tableBuilder.select("*");
 
   query = query
     .order(sortByWithFallback(sortBy), orderBy)
@@ -56,7 +43,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.eq("in_bonding_curve", inBondingCurve);
   }
 
-  return query;
+  return query.returns<DatabaseJsonType["market_state"][]>();
 };
 
 const selectMarketStates = (args: MarketStateQueryArgs) =>
@@ -79,6 +66,8 @@ export const fetchMarkets = queryHelper(
   selectMarketStates,
   DatabaseTypeConverter[TableName.MarketState]
 );
+
+export const fetchMarketsJson = queryHelper(selectMarketStates);
 
 export const fetchMarketsWithCount = queryHelperWithCount(
   selectMarketStates,
