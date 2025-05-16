@@ -20,6 +20,7 @@ const expanded = expandRoutes({
       "latest-block": _,
     },
     pools: _,
+    stats: _,
     trades: _,
     trending: _,
   },
