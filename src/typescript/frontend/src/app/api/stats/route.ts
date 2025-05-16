@@ -1,19 +1,14 @@
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
-import { unstable_cache } from "next/cache";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { parseSearchParams } from "utils/url-utils";
 
-import { fetchMarketsBy } from "./query";
+import fetchCachedPaginatedMarketStats from "./query";
 import { createStatsSchema } from "./schema";
 
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
-
-const fetchCachedPaginatedMarketStats = unstable_cache(fetchMarketsBy, ["stats-markets"], {
-  revalidate: 10,
-});
 
 /**
  * @param page - the pagination page number
@@ -26,11 +21,8 @@ export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   return await fetchCachedNumMarketsFromAptosNode()
     .then(async (numMarkets) => {
       const statsParams = createStatsSchema(numMarkets).parse(params);
-      console.log(statsParams);
-      return fetchCachedPaginatedMarketStats(statsParams).then((res) => {
-        console.log(res);
-        return NextResponse.json(res, { status: 200 })
-      }
+      return fetchCachedPaginatedMarketStats(statsParams).then((res) =>
+        NextResponse.json(res, { status: 200 })
       );
     })
     .catch((e) => {

@@ -13,6 +13,8 @@ const sortByValues = [
 ] as const;
 
 export type StatsColumn = (typeof sortByValues)[number];
+export type StatsSchemaInput = z.input<ReturnType<typeof createStatsSchema>>;
+export type StatsSchemaOutput = z.infer<ReturnType<typeof createStatsSchema>>;
 
 export const STATS_MARKETS_PER_PAGE = 100;
 
@@ -31,7 +33,7 @@ export const createStatsSchema = (totalNumberOfMarkets: number) => {
     page: PageSchema.refine((val) => val <= maxPageNumber, {
       message: `Page number cannot exceed ${maxPageNumber}`,
     }),
-    sortBy: z.enum(sortByValues),
+    sortBy: z.enum(sortByValues).default(SortMarketsBy.DailyVolume),
     orderBy: OrderBySchema,
   });
 };
