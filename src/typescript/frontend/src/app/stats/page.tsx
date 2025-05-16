@@ -15,17 +15,15 @@ interface StatsPageParams {
   searchParams?: StatsSchemaInput;
 }
 
+const getDefaultParams = (numMarkets: number) => createStatsSchema(numMarkets).parse({});
+
 export default async function Stats({ searchParams }: StatsPageParams) {
   const res = await fetchCachedNumMarketsFromAptosNode()
     .then(async (numMarkets) => {
       const { data: validatedParams, success } =
         createStatsSchema(numMarkets).safeParse(searchParams);
-      if (!success) {
-        // Parsing failed, use default params.
-        const defaultParams = createStatsSchema(numMarkets).parse({});
-        return fetchCachedPaginatedMarketStats(defaultParams);
-      }
-      return fetchCachedPaginatedMarketStats(validatedParams);
+      const finalParams = success ? validatedParams : getDefaultParams(numMarkets);
+      return fetchCachedPaginatedMarketStats(finalParams);
     })
     .catch((e) => {
       console.error(e);
