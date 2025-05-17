@@ -948,6 +948,29 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
   ...toPriceFeedData(data),
 });
 
+export type PartialPriceFeedJson =
+  | DatabaseJsonType["price_feed"]
+  | (Omit<
+      DatabaseJsonType["price_feed"],
+      "open_price_q64" | "close_price_q64" | "delta_percentage"
+    > & {
+      open_price_q64: null;
+      close_price_q64: null;
+      delta_percentage: null;
+    });
+
+export type PartialPriceFeedModel = ReturnType<typeof toPartialPriceFeed>;
+export const toPartialPriceFeed = (data: PartialPriceFeedJson) => ({
+  ...toMarketStateModel(data),
+  ...(data.open_price_q64 === null
+    ? {
+        openPrice: null,
+        closePrice: null,
+        deltaPercentage: null,
+      }
+    : toPriceFeedData(data)),
+});
+
 export const toCandlestickModel = (data: DatabaseJsonType["candlesticks"]) => ({
   ...toCandlestickFromDatabase(data),
   ...GuidGetters.candlestick(data),

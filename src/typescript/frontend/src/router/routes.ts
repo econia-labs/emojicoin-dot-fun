@@ -39,6 +39,7 @@ const expanded = expandRoutes({
   market: _,
   "not-found": _,
   pools: _,
+  stats: _,
   test: _,
   "test-utils": _,
   verify: _,

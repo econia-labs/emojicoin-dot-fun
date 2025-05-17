@@ -3,6 +3,7 @@ import "server-only";
 import Big from "big.js";
 import { unstable_cache } from "next/cache";
 
+import type { PartialPriceFeedJson } from "@/sdk/index";
 import { DEBUG_ASSERT } from "@/sdk/index";
 import {
   fetchMarketsJson,
@@ -22,10 +23,10 @@ import { STATS_MARKETS_PER_PAGE } from "./schema";
  * param before calling this function.
  */
 const fetchCachedPaginatedMarketStats = unstable_cache(
-  async (args: StatsSchemaOutput) => {
+  async (args: StatsSchemaOutput): Promise<PartialPriceFeedJson[]> => {
     const { sortBy } = args;
     const pageSize = STATS_MARKETS_PER_PAGE;
-    
+
     // If sorting by the price delta percentage, simply query the `price_feed` table.
     if (sortBy === "delta") {
       return fetchPriceFeedWithMarketState({ ...args, pageSize });
@@ -37,7 +38,7 @@ const fetchCachedPaginatedMarketStats = unstable_cache(
     return fetchMarketsJson({ ...args, sortBy, pageSize }).then(async (markets) => {
       // Preserve the original ordering when sorting by `sortBy`.
       const originalOrdering = markets.map((mkt) => mkt.market_id);
-      
+
       // Map the markets without daily volume to an object of market ID => market data.
       const marketsWithoutDailyVolume = Object.fromEntries(
         markets

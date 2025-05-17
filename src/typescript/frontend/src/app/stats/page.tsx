@@ -7,10 +7,15 @@ import type { StatsSchemaInput } from "app/api/stats/schema";
 import { createStatsSchema } from "app/api/stats/schema";
 import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 
+import type { PartialPriceFeedModel } from "@/sdk/index";
+import { toPartialPriceFeed } from "@/sdk/index";
+
+import StatsPageComponent from "./StatsPage";
+
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
-interface StatsPageParams {
+export interface StatsPageParams {
   params?: {};
   searchParams?: StatsSchemaInput;
 }
@@ -18,19 +23,23 @@ interface StatsPageParams {
 const getDefaultParams = (numMarkets: number) => createStatsSchema(numMarkets).parse({});
 
 export default async function Stats({ searchParams }: StatsPageParams) {
-  const res = await fetchCachedNumMarketsFromAptosNode()
+  const { finalParams, data } = await fetchCachedNumMarketsFromAptosNode()
     .then(async (numMarkets) => {
       const { data: validatedParams, success } =
         createStatsSchema(numMarkets).safeParse(searchParams);
       const finalParams = success ? validatedParams : getDefaultParams(numMarkets);
-      return fetchCachedPaginatedMarketStats(finalParams);
+      return fetchCachedPaginatedMarketStats(finalParams).then((data) => ({
+        finalParams,
+        data: data.map(toPartialPriceFeed),
+      }));
     })
     .catch((e) => {
       console.error(e);
-      return [];
+      return {
+        finalParams: getDefaultParams(1),
+        data: [] as PartialPriceFeedModel[],
+      };
     });
 
-  console.log(res);
-
-  return <></>;
+  return <StatsPageComponent params={finalParams} data={data} />;
 }
