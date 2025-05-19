@@ -4,14 +4,17 @@ import { createStore } from "zustand";
 type UserSettingsState = {
   animate: boolean;
   showEmptyBars: boolean;
+  showUsd: boolean;
 };
 
 type UserSettingsActions = {
   setAnimate: (value: boolean) => void;
   setShowEmptyBars: (fn: (prev: boolean) => boolean) => void;
+  setShowUsd: (value: boolean) => void;
   userAgent: string;
   toggleAnimate: () => void;
   getShowEmptyBars: () => boolean;
+  getShowUsd: () => boolean;
 };
 
 export type UserSettingsStore = UserSettingsState & UserSettingsActions;
@@ -23,6 +26,7 @@ const saveSettings = (state: UserSettingsState) => {
 const defaultValues: UserSettingsState = {
   animate: true,
   showEmptyBars: true,
+  showUsd: false,
 };
 
 const readSettings = (): UserSettingsState => readLocalStorageCache("settings") ?? defaultValues;
@@ -31,6 +35,13 @@ const createUserSettingsStore = (userAgent: string) =>
   createStore<UserSettingsStore>()((set, get) => ({
     ...readSettings(),
     userAgent,
+    getShowUsd: () => get().showUsd,
+    setShowUsd: (value) =>
+      set((state) => {
+        const newState = { ...state, showUsd: value };
+        saveSettings(newState);
+        return newState;
+      }),
     getShowEmptyBars: () => get().showEmptyBars,
     setShowEmptyBars: (fn: (prev: boolean) => boolean) =>
       set((state) => {

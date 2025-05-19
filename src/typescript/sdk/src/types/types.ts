@@ -1,12 +1,7 @@
 import type { AccountAddress, TypeTag } from "@aptos-labs/ts-sdk";
 import { hexToBytes } from "@noble/hashes/utils";
 
-import {
-  type ArenaPeriod,
-  type EMOJICOIN_DOT_FUN_MODULE_NAME,
-  rawTriggerToEnum,
-  type Trigger,
-} from "../const";
+import { type ArenaPeriod, rawTriggerToEnum, type Trigger } from "../const";
 import type { SymbolEmoji } from "../emoji_data";
 import type { AccountAddressString } from "../emojicoin_dot_fun/types";
 import type { STRUCT_STRINGS } from "../utils";
@@ -754,7 +749,7 @@ export const toEmojicoinDotFunRewards = (
   octasRewardAmount: BigInt(data.octas_reward_amount),
 });
 
-export type AnyContractType =
+export type AnyMoveStructType =
   | Types["ExtendRef"]
   | Types["SequenceInfo"]
   | Types["TVLtoLPCoinRatio"]
@@ -787,26 +782,6 @@ export type AnyEmojicoinEvent =
   | Types["StateEvent"]
   | Types["GlobalStateEvent"]
   | Types["LiquidityEvent"];
-
-/**
- * Event types that can all be part of a single market and placed into a typed homogenous structure.
- * @see HomogenousContractEvents in sdk/src/emojicoin_dot_fun/events.ts
- */
-export type AnyHomogenousEvent =
-  | Types["SwapEvent"]
-  | Types["ChatEvent"]
-  | Types["PeriodicStateEvent"]
-  | Types["StateEvent"]
-  | Types["LiquidityEvent"];
-
-export type AnyEmojicoinEventName =
-  | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Swap`
-  | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Chat`
-  | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::MarketRegistration`
-  | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::PeriodicState`
-  | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::State`
-  | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::GlobalState`
-  | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Liquidity`;
 
 export function isSwapEvent(e: AnyEmojicoinEvent): e is Types["SwapEvent"] {
   return e.guid.startsWith("Swap");

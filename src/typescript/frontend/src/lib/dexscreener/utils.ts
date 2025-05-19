@@ -29,7 +29,8 @@ export function symbolEmojisToPairId(symbolEmojis: Array<SymbolEmoji>): string {
 }
 
 export function toDexscreenerSwapEvent(
-  event: ReturnType<typeof toSwapEventModel>
+  event: ReturnType<typeof toSwapEventModel>,
+  ops = { geckoTerminal: false }
 ): SwapEvent & BlockInfo {
   // Base / quote is emojicoin / APT.
   // Thus asset0 / asset1 is always base volume / quote volume.
@@ -65,7 +66,9 @@ export function toDexscreenerSwapEvent(
     eventIndex: Number(event.blockAndEvent.eventIndex),
 
     maker: event.swap.swapper,
-    pairId: symbolEmojisToPairId(event.market.symbolEmojis),
+    pairId: ops.geckoTerminal
+      ? event.market.marketAddress
+      : symbolEmojisToPairId(event.market.symbolEmojis),
 
     ...assetInOut,
     priceNative,
@@ -74,7 +77,8 @@ export function toDexscreenerSwapEvent(
 }
 
 export function toDexscreenerJoinExitEvent(
-  event: ReturnType<typeof toLiquidityEventModel>
+  event: ReturnType<typeof toLiquidityEventModel>,
+  ops = { geckoTerminal: false }
 ): JoinExitEvent & BlockInfo {
   const { base, quote } = calculateRealReserves(event.state);
   const reserves = {
@@ -97,7 +101,9 @@ export function toDexscreenerJoinExitEvent(
     eventIndex: Number(event.blockAndEvent.eventIndex),
 
     maker: event.liquidity.provider,
-    pairId: symbolEmojisToPairId(event.market.symbolEmojis),
+    pairId: ops.geckoTerminal
+      ? event.market.marketAddress
+      : symbolEmojisToPairId(event.market.symbolEmojis),
 
     amount0: toCoinDecimalString(event.liquidity.baseAmount, DECIMALS),
     amount1: toCoinDecimalString(event.liquidity.quoteAmount, DECIMALS),

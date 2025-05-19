@@ -26,7 +26,7 @@ and `ZWJ sequences` work.
 ### Move `const` hex strings output
 
 The generated `move_consts.txt` file contains the text we copy over to a Move
-contract to populate the contract with all viable emoji hex strings.
+module to populate the module code with all viable emoji hex strings.
 
 [unicode emoji data files]: https://unicode.org/Public/emoji/latest/
 [unicode emoji index]: https://unicode.org/emoji/charts/index.html
