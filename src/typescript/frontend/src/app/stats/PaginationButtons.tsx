@@ -2,7 +2,7 @@ import type { StatsColumn } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
 import React from "react";
 import { ROUTES } from "router/routes";
-import { ClassNameValue } from "tailwind-merge";
+import type { ClassNameValue } from "tailwind-merge";
 import { addSearchParams } from "utils/url-utils";
 
 interface PaginationProps {

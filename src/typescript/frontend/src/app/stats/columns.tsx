@@ -4,10 +4,10 @@ import { Emoji } from "utils/emoji";
 
 import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { ColoredPriceDisplay } from "@/components/misc/ColoredPriceDisplay";
+import { PriceDelta } from "@/components/price-feed/inner";
 import type { EcTableColumn } from "@/components/ui/table/ecTable";
 import type { PartialPriceFeedModel } from "@/sdk/index";
 import { calculateCirculatingSupply, q64ToBig, SortMarketsBy, toNominal } from "@/sdk/index";
-import { PriceDelta } from "@/components/price-feed/inner";
 
 const bigNumberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 const fmt = (n: bigint) => bigNumberFormatter.format(toNominal(n));
