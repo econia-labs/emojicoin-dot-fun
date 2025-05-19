@@ -56,7 +56,7 @@ export const statsHeaderColumns: EcTableColumn<PartialPriceFeedModel>[] = [
         <PriceDelta delta={item.deltaPercentage} />
       </>
     ) : (
-      "--"
+      "-"
     )
   ),
   createColumn(columnSortStrings[SortMarketsBy.Price], (item) => (
