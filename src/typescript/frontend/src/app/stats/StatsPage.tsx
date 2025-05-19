@@ -16,45 +16,45 @@ const toOrderByString = (orderBy: OrderBy): OrderByStrings =>
   orderBy === ORDER_BY.ASC ? "asc" : "desc";
 
 export default function StatsPageComponent({
-  params,
+  page,
+  sortBy,
+  orderBy,
   data,
-}: {
-  params: StatsSchemaOutput;
+}: StatsSchemaOutput & {
   data: PartialPriceFeedModel[];
 }) {
   const router = useRouter();
 
   return (
-    <EcTable
-      className="m-auto overflow-auto h-[70dvh]"
-      textFormat="body-sm"
-      emptyText="No markets exist for this column data."
-      columns={statsHeaderColumns}
-      getKey={(item) =>
-        [params.orderBy, params.page, params.sortBy, item.market.marketID].join("-")
-      }
-      items={data}
-      serverSideOrderHandler={(columnString: string, direction: OrderByStrings) => {
-        const { sortBy } = params;
-        const currentSortByString = columnSortStrings[sortBy];
-        // If it's a new column, reset the order to "desc" and use the new column.
-        // If it's the same column, flip the orderBy to the opposite order.
-        // In both cases, set it to page 1.
-        const newParams =
-          currentSortByString !== columnString
-            ? {
-                sortBy: columnSortStringsReverseMapping[columnString],
-                orderBy: toOrderByString(ORDER_BY.DESC),
-                page: 1,
-              }
-            : {
-                sortBy: sortBy,
-                orderBy: direction,
-                page: 1,
-              };
-        const url = addSearchParams(ROUTES.stats, newParams);
-        router.push(url);
-      }}
-    />
+    <>
+      <EcTable
+        className="m-auto overflow-auto h-[70dvh] w-[90dvw] max-w-[1440px]"
+        textFormat="body-sm"
+        emptyText="No markets exist for this column data."
+        columns={statsHeaderColumns}
+        getKey={(item) => [orderBy, page, sortBy, item.market.marketID].join("-")}
+        items={data}
+        serverSideOrderHandler={(columnString: string, direction: OrderByStrings) => {
+          const currentSortByString = columnSortStrings[sortBy];
+          // If it's a new column, reset the order to "desc" and use the new column.
+          // If it's the same column, flip the orderBy to the opposite order.
+          // In both cases, set it to page 1.
+          const newParams =
+            currentSortByString !== columnString
+              ? {
+                  sortBy: columnSortStringsReverseMapping[columnString],
+                  orderBy: toOrderByString(ORDER_BY.DESC),
+                  page: 1,
+                }
+              : {
+                  sortBy: sortBy,
+                  orderBy: direction,
+                  page: 1,
+                };
+          const url = addSearchParams(ROUTES.stats, newParams);
+          router.push(url);
+        }}
+      />
+    </>
   );
 }

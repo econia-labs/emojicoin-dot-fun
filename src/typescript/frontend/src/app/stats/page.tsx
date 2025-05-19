@@ -4,12 +4,13 @@
 
 import fetchCachedPaginatedMarketStats from "app/api/stats/query";
 import type { StatsSchemaInput } from "app/api/stats/schema";
-import { createStatsSchema } from "app/api/stats/schema";
+import { createStatsSchema, getMaxStatsPageNumber } from "app/api/stats/schema";
 import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 
 import type { PartialPriceFeedModel } from "@/sdk/index";
 import { toPartialPriceFeed } from "@/sdk/index";
 
+import { StatsButtonsBlock } from "./PaginationButtons";
 import StatsPageComponent from "./StatsPage";
 
 export const revalidate = 0;
@@ -23,23 +24,41 @@ export interface StatsPageParams {
 const getDefaultParams = (numMarkets: number) => createStatsSchema(numMarkets).parse({});
 
 export default async function Stats({ searchParams }: StatsPageParams) {
-  const { finalParams, data } = await fetchCachedNumMarketsFromAptosNode()
+  const { maxPageNumber, page, sortBy, orderBy, data } = await fetchCachedNumMarketsFromAptosNode()
     .then(async (numMarkets) => {
       const { data: validatedParams, success } =
         createStatsSchema(numMarkets).safeParse(searchParams);
       const finalParams = success ? validatedParams : getDefaultParams(numMarkets);
       return fetchCachedPaginatedMarketStats(finalParams).then((data) => ({
-        finalParams,
+        maxPageNumber: getMaxStatsPageNumber(numMarkets),
         data: data.map(toPartialPriceFeed),
+        ...finalParams,
       }));
     })
     .catch((e) => {
       console.error(e);
       return {
-        finalParams: getDefaultParams(1),
+        maxPageNumber: 1,
         data: [] as PartialPriceFeedModel[],
+        ...getDefaultParams(1),
       };
     });
 
-  return <StatsPageComponent params={finalParams} data={data} />;
+  return (
+    <>
+      <StatsButtonsBlock
+        numPages={maxPageNumber}
+        page={page}
+        sortBy={sortBy}
+        desc={!orderBy.ascending}
+      />
+      <StatsPageComponent page={page} sortBy={sortBy} orderBy={orderBy} data={data} />;
+      <StatsButtonsBlock
+        numPages={maxPageNumber}
+        page={page}
+        sortBy={sortBy}
+        desc={!orderBy.ascending}
+      />
+    </>
+  );
 }

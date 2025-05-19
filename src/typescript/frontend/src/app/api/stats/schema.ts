@@ -18,6 +18,9 @@ export type StatsSchemaOutput = z.infer<ReturnType<typeof createStatsSchema>>;
 
 export const STATS_MARKETS_PER_PAGE = 100;
 
+export const getMaxStatsPageNumber = (totalNumberOfMarkets: number) =>
+  Math.ceil(totalNumberOfMarkets / STATS_MARKETS_PER_PAGE);
+
 /**
  * Create the schema dynamically, based on the input max number of pages.
  *
@@ -27,7 +30,7 @@ export const STATS_MARKETS_PER_PAGE = 100;
  * Without this, a user could poison/bloat the cache by passing extremely large page numbers.
  */
 export const createStatsSchema = (totalNumberOfMarkets: number) => {
-  const maxPageNumber = Math.ceil(totalNumberOfMarkets / STATS_MARKETS_PER_PAGE);
+  const maxPageNumber = getMaxStatsPageNumber(totalNumberOfMarkets);
 
   return z.object({
     page: PageSchema.refine((val) => val <= maxPageNumber, {

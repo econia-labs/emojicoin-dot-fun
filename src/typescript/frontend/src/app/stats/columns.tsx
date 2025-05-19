@@ -6,12 +6,7 @@ import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { ColoredPriceDisplay } from "@/components/misc/ColoredPriceDisplay";
 import type { EcTableColumn } from "@/components/ui/table/ecTable";
 import type { PartialPriceFeedModel } from "@/sdk/index";
-import {
-  calculateCirculatingSupply,
-  calculateCurvePrice,
-  SortMarketsBy,
-  toNominal,
-} from "@/sdk/index";
+import { calculateCirculatingSupply, q64ToBig, SortMarketsBy, toNominal } from "@/sdk/index";
 
 const bigNumberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 const fmt = (n: bigint) => bigNumberFormatter.format(toNominal(n));
@@ -59,7 +54,7 @@ export const statsHeaderColumns: EcTableColumn<PartialPriceFeedModel>[] = [
   ),
   createColumn(columnSortStrings[SortMarketsBy.Price], (item) => (
     <ExplorerLink className="hover:underline" value={item.transaction.version} type="txn">
-      <ColoredPriceDisplay price={calculateCurvePrice(item.state).toNumber()} />
+      <ColoredPriceDisplay price={q64ToBig(item.lastSwap.avgExecutionPriceQ64).toNumber()} />
     </ExplorerLink>
   )),
   createColumn(columnSortStrings[SortMarketsBy.AllTimeVolume], (item) =>
@@ -74,10 +69,12 @@ export const statsHeaderColumns: EcTableColumn<PartialPriceFeedModel>[] = [
   ),
   createColumn("circ. supply", (item) => fmt(calculateCirculatingSupply(item.state))),
   createColumn("curve progress", (item) => (
-    <MiniBondingCurveProgress
-      symbol={item.market.symbolData.symbol}
-      clammVirtualReservesQuote={item.state.clammVirtualReserves.quote}
-    />
+    <div className="m-auto pl-10 flex w-full">
+      <MiniBondingCurveProgress
+        symbol={item.market.symbolData.symbol}
+        clammVirtualReservesQuote={item.state.clammVirtualReserves.quote}
+      />
+    </div>
   )),
   createColumn("market ID", (item) => item.market.marketID.toString()),
 ];
