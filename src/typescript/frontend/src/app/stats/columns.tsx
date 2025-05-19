@@ -1,5 +1,5 @@
 import type { StatsSchemaOutput } from "app/api/stats/schema";
-import { MiniBondingCurveProgress } from "app/stats-old/MiniBondingCurveProgress";
+import { MiniBondingCurveProgress } from "app/stats/MiniBondingCurveProgress";
 import { Emoji } from "utils/emoji";
 
 import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
@@ -7,6 +7,7 @@ import { ColoredPriceDisplay } from "@/components/misc/ColoredPriceDisplay";
 import type { EcTableColumn } from "@/components/ui/table/ecTable";
 import type { PartialPriceFeedModel } from "@/sdk/index";
 import { calculateCirculatingSupply, q64ToBig, SortMarketsBy, toNominal } from "@/sdk/index";
+import { PriceDelta } from "@/components/price-feed/inner";
 
 const bigNumberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 const fmt = (n: bigint) => bigNumberFormatter.format(toNominal(n));
@@ -50,7 +51,13 @@ function createColumn<T>(header: string, renderCell: EcTableColumn<T>["renderCel
 export const statsHeaderColumns: EcTableColumn<PartialPriceFeedModel>[] = [
   createColumn("symbol", (item) => <Emoji emojis={item.market.symbolData.symbol} />),
   createColumn(columnSortStrings.delta, (item) =>
-    typeof item.deltaPercentage === "number" ? item.deltaPercentage : "--"
+    typeof item.deltaPercentage === "number" ? (
+      <>
+        <PriceDelta delta={item.deltaPercentage} />
+      </>
+    ) : (
+      "--"
+    )
   ),
   createColumn(columnSortStrings[SortMarketsBy.Price], (item) => (
     <ExplorerLink className="hover:underline" value={item.transaction.version} type="txn">
