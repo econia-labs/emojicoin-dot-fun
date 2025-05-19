@@ -51,6 +51,7 @@ export default async function Stats({ searchParams }: StatsPageParams) {
         page={page}
         sortBy={sortBy}
         desc={!orderBy.ascending}
+        className="p-2 pb-4"
       />
       <StatsPageComponent page={page} sortBy={sortBy} orderBy={orderBy} data={data} />;
       <StatsButtonsBlock
@@ -58,6 +59,7 @@ export default async function Stats({ searchParams }: StatsPageParams) {
         page={page}
         sortBy={sortBy}
         desc={!orderBy.ascending}
+        className="pb-2"
       />
     </>
   );

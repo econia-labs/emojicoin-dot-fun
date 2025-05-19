@@ -2,6 +2,7 @@ import type { StatsColumn } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
 import React from "react";
 import { ROUTES } from "router/routes";
+import { ClassNameValue } from "tailwind-merge";
 import { addSearchParams } from "utils/url-utils";
 
 interface PaginationProps {
@@ -43,11 +44,18 @@ export const StatsButtonsBlock = ({
   page,
   sortBy,
   desc,
+  className = "",
 }: PaginationProps & {
   numPages: number;
+  className?: ClassNameValue;
 }) => {
   return (
-    <div className="flex flex-row justify-center gap-3 md:gap-4 med-pixel-text text-dark-gray">
+    <div
+      className={cn(
+        "flex flex-row justify-center gap-3 md:gap-4 med-pixel-text text-dark-gray",
+        className
+      )}
+    >
       <PaginationLinkWithBraces
         ariaLabel={"go to the first page"}
         page={0}
