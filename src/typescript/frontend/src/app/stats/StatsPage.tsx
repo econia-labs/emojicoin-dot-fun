@@ -29,12 +29,12 @@ export default function StatsPageComponent({
   return (
     <>
       <div className="flex relative">
-      <div className="absolute top-0 left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
-      <div className="absolute top-[38px] left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
-      <div className="absolute bottom-0 left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
+        <div className="absolute top-0 left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
+        <div className="absolute top-[38px] left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
+        <div className="absolute bottom-0 left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
         <EcTable
           className={cn(
-            "m-auto overflow-auto h-[80dvh] w-[90dvw] max-w-[1440px] border border-dark-gray border-solid border-collapse"
+            "m-auto overflow-auto h-[80dvh] w-[90dvw] max-w-[1440px]"
           )}
           textFormat="body-sm"
           emptyText="No markets exist for this column data."
