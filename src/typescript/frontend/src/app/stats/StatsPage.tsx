@@ -1,6 +1,7 @@
 "use client";
 
 import type { StatsSchemaOutput } from "app/api/stats/schema";
+import { cn } from "lib/utils/class-name";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import { addSearchParams } from "utils/url-utils";
@@ -27,34 +28,41 @@ export default function StatsPageComponent({
 
   return (
     <>
-      <EcTable
-        className="m-auto overflow-auto h-[70dvh] w-[90dvw] max-w-[1440px]"
-        textFormat="body-sm"
-        emptyText="No markets exist for this column data."
-        columns={statsHeaderColumns}
-        getKey={(item) => [orderBy, page, sortBy, item.market.marketID].join("-")}
-        items={data}
-        serverSideOrderHandler={(columnString: string, direction: OrderByStrings) => {
-          const currentSortByString = columnSortStrings[sortBy];
-          // If it's a new column, reset the order to "desc" and use the new column.
-          // If it's the same column, flip the orderBy to the opposite order.
-          // In both cases, set it to page 1.
-          const newParams =
-            currentSortByString !== columnString
-              ? {
-                  sortBy: columnSortStringsReverseMapping[columnString],
-                  orderBy: toOrderByString(ORDER_BY.DESC),
-                  page: 1,
-                }
-              : {
-                  sortBy: sortBy,
-                  orderBy: direction,
-                  page: 1,
-                };
-          const url = addSearchParams(ROUTES.stats, newParams);
-          router.push(url);
-        }}
-      />
+      <div className="flex relative">
+      <div className="absolute top-0 left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
+      <div className="absolute top-[38px] left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
+      <div className="absolute bottom-0 left-0 border-t border-dark-gray border-solid border-collapse px-[100dvw] -z-10" />
+        <EcTable
+          className={cn(
+            "m-auto overflow-auto h-[80dvh] w-[90dvw] max-w-[1440px] border border-dark-gray border-solid border-collapse"
+          )}
+          textFormat="body-sm"
+          emptyText="No markets exist for this column data."
+          columns={statsHeaderColumns}
+          getKey={(item) => [orderBy, page, sortBy, item.market.marketID].join("-")}
+          items={data}
+          serverSideOrderHandler={(columnString: string, direction: OrderByStrings) => {
+            const currentSortByString = columnSortStrings[sortBy];
+            // If it's a new column, reset the order to "desc" and use the new column.
+            // If it's the same column, flip the orderBy to the opposite order.
+            // In both cases, set it to page 1.
+            const newParams =
+              currentSortByString !== columnString
+                ? {
+                    sortBy: columnSortStringsReverseMapping[columnString],
+                    orderBy: toOrderByString(ORDER_BY.DESC),
+                    page: 1,
+                  }
+                : {
+                    sortBy: sortBy,
+                    orderBy: direction,
+                    page: 1,
+                  };
+            const url = addSearchParams(ROUTES.stats, newParams);
+            router.push(url);
+          }}
+        />
+      </div>
     </>
   );
 }
