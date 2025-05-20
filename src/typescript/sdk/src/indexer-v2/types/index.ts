@@ -944,10 +944,11 @@ export const toPriceFeedData = (data: DatabaseJsonType["price_feed"]) => ({
 });
 
 export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
-  return ({
-  ...toMarketStateModel(data),
-  ...toPriceFeedData(data),
-})};
+  return {
+    ...toMarketStateModel(data),
+    ...toPriceFeedData(data),
+  };
+};
 
 export type PartialPriceFeedJson =
   | DatabaseJsonType["price_feed"]
