@@ -52,6 +52,13 @@ export default async function Stats({ searchParams }: StatsPageParams) {
 
   return (
     <>
+      <StatsButtonsBlock
+        numPages={maxPageNumber}
+        page={page}
+        sortBy={sortBy}
+        desc={!orderBy.ascending}
+        className="pb-2"
+      />
       <StatsPageComponent page={page} sortBy={sortBy} orderBy={orderBy} data={data} />
       <StatsButtonsBlock
         numPages={maxPageNumber}

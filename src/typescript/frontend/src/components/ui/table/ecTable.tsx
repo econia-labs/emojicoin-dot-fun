@@ -150,7 +150,6 @@ export const EcTable = <T,>({
   isLoading,
   emptyText,
 }: TableProps<T>) => {
-  // const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const containerRef = useCallback((node: HTMLElement | null) => {
     if (node) {

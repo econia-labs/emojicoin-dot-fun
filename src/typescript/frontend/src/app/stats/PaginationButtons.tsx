@@ -1,5 +1,6 @@
 import type { StatsColumn } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
+import Link from "next/link";
 import React from "react";
 import { ROUTES } from "router/routes";
 import type { ClassNameValue } from "tailwind-merge";
@@ -28,11 +29,11 @@ const PaginationLinkWithBraces = ({
   });
 
   return (
-    <a href={url} className={cn("group cursor-pointer", styles)} aria-label={ariaLabel}>
+    <Link href={url} className={cn("group cursor-pointer", styles)} aria-label={ariaLabel}>
       <span className={groupHover}>{"{"}</span>
       {children}
       <span className={groupHover}>{"}"}</span>
-    </a>
+    </Link>
   );
 };
 
