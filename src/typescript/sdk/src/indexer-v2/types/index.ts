@@ -938,15 +938,16 @@ export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: An
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
 export const toPriceFeedData = (data: DatabaseJsonType["price_feed"]) => ({
-  openPrice: q64ToBig(data.open_price_q64).toNumber(),
-  closePrice: q64ToBig(data.close_price_q64).toNumber(),
-  deltaPercentage: Big(data.delta_percentage).toNumber(),
+  openPrice: q64ToBig(data.open_price_q64 ?? 0).toNumber(),
+  closePrice: q64ToBig(data.close_price_q64 ?? 0).toNumber(),
+  deltaPercentage: Big(data.delta_percentage ?? 0).toNumber(),
 });
 
-export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
+export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
+  return ({
   ...toMarketStateModel(data),
   ...toPriceFeedData(data),
-});
+})};
 
 export type PartialPriceFeedJson =
   | DatabaseJsonType["price_feed"]
