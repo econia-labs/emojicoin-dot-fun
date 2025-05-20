@@ -1,10 +1,7 @@
 "use client";
 
 import type { StatsSchemaOutput } from "app/api/stats/schema";
-import { useMotionValueEvent, useScroll } from "framer-motion";
-import { cn } from "lib/utils/class-name";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 import { ROUTES } from "router/routes";
 import { addSearchParams } from "utils/url-utils";
 
