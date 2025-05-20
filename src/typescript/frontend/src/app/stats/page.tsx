@@ -58,7 +58,7 @@ export default async function Stats({ searchParams }: StatsPageParams) {
         page={page}
         sortBy={sortBy}
         desc={!orderBy.ascending}
-        className="mt-2 pb-2"
+        className="mt-3 pb-2"
       />
     </>
   );
