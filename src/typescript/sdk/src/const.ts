@@ -57,7 +57,17 @@ if (!APTOS_NETWORK) {
   throw new Error(`Invalid network: ${network}`);
 }
 
-const clientKeys: Record<Network, string | undefined> = {
+/**
+ * Devnet is not included because it increments every time devnet is redeployed/recreated.
+ * @see {@link https://aptos.dev/en/network/nodes/networks}
+ */
+export const CHAIN_IDS = {
+  [Network.LOCAL]: 4,
+  [Network.TESTNET]: 2,
+  [Network.MAINNET]: 1,
+} as const;
+
+export const clientKeys: Record<Network, string | undefined> = {
   [Network.LOCAL]: undefined,
   [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
   [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,

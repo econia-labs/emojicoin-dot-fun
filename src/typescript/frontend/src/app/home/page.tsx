@@ -1,7 +1,7 @@
 import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { getAptPrice } from "lib/queries/get-apt-price";
-import { getCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 import { fetchCachedPriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
@@ -49,7 +49,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       searchEmojis,
       pageSize: MARKETS_PER_PAGE,
     });
-    numMarketsPromise = getCachedNumMarketsFromAptosNode();
+    numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
   }
 
   const aptPricePromise = getAptPrice();

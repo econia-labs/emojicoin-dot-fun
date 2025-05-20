@@ -1,12 +1,15 @@
+import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import { getAptPrice } from "lib/queries/get-apt-price";
-import type { NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { stringifyJSON } from "utils";
+import { parseSearchParams } from "utils/url-utils";
 
 import { APTOS_COIN_TYPE_STRING } from "@/sdk/const";
 import { postgrest } from "@/sdk/indexer-v2/queries/client";
 import { TableName } from "@/sdk/indexer-v2/types";
 import { toNominal, toNominalPrice } from "@/sdk/utils";
 
+import { GetTickersSchema } from "./schema";
 import { estimateLiquidityInUSD } from "./utils";
 
 // Since this is a public endpoint, set revalidate to 1 to ensure it can't spam the indexer.
@@ -32,17 +35,9 @@ export const revalidate = 1;
  * "liquidity_in_usd": "100",
  * ```
  */
-export async function GET(request: NextRequest) {
+export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
   const searchParams = request.nextUrl.searchParams;
-
-  const { skip, limit } = {
-    skip: Number(searchParams.get("skip") ?? 0),
-    limit: Number(searchParams.get("limit") ?? 100),
-  };
-
-  if (limit > 500) return new Response("Max limit is 500.", { status: 400 });
-  if (limit < 1) return new Response("Min limit is 1.", { status: 400 });
-  if (skip < 0) return new Response("Min skip is 0.", { status: 400 });
+  const { limit, skip } = GetTickersSchema.parse(parseSearchParams(searchParams));
 
   const markets = await postgrest
     .from(TableName.MarketState)
@@ -65,5 +60,5 @@ export async function GET(request: NextRequest) {
     liquidity_in_usd: aptPrice !== undefined ? estimateLiquidityInUSD(e, aptPrice) : undefined,
   }));
 
-  return new Response(stringifyJSON(data), { headers: { "Content-type": "application/json" } });
-}
+  return new NextResponse(stringifyJSON(data), { headers: { "Content-type": "application/json" } });
+});

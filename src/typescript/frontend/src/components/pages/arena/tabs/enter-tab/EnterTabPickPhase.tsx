@@ -12,7 +12,7 @@ export default function EnterTabPickPhase() {
   const error = useArenaPhaseStore((s) => s.error);
 
   return (
-    <div className="relative grid gap-[3em] place-items-center h-[100%] w-[100%]">
+    <div className="relative flex flex-col grow gap-[3em] justify-center place-items-center w-[100%]">
       {error && (
         <BlurModal close={() => setError(false)}>
           <div className="flex flex-col gap-[3em] max-w-[58ch]">

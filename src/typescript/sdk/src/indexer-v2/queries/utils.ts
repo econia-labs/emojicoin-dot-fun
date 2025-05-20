@@ -100,6 +100,7 @@ export const waitForEmojicoinIndexer = async (
         if (latestVersion >= BigInt(minimumVersion)) {
           resolve();
         } else if (i > maxTries) {
+          console.trace(`Waiting for ${minimumVersion}, got to ${latestVersion} before failing.`);
           reject(new Error("Timeout waiting for processed version."));
         } else {
           setTimeout(() => {

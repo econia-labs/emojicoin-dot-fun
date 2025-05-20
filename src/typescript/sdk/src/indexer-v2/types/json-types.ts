@@ -566,6 +566,7 @@ export type DatabaseJsonType = {
     DatabaseJsonType["market_state"] & {
       open_price_q64: Uint64String;
       close_price_q64: Uint64String;
+      delta_percentage: number; // A decimal number with max 16 digit precision.
     }
   >;
   [TableName.Candlesticks]: CandlestickData;

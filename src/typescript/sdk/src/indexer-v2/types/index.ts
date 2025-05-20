@@ -937,17 +937,40 @@ export const toArenaCandlestickModel = (data: DatabaseJsonType["arena_candlestic
 export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
   q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
-export const toPriceFeedData = (
-  data: Pick<DatabaseJsonType["price_feed"], "open_price_q64" | "close_price_q64">
-) => ({
-  openPrice: q64ToBig(data.open_price_q64).toNumber(),
-  closePrice: q64ToBig(data.close_price_q64).toNumber(),
-  deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
+export const toPriceFeedData = (data: DatabaseJsonType["price_feed"]) => ({
+  openPrice: q64ToBig(data.open_price_q64 ?? 0).toNumber(),
+  closePrice: q64ToBig(data.close_price_q64 ?? 0).toNumber(),
+  deltaPercentage: Big(data.delta_percentage ?? 0).toNumber(),
 });
 
-export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => ({
+export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
+  return {
+    ...toMarketStateModel(data),
+    ...toPriceFeedData(data),
+  };
+};
+
+export type PartialPriceFeedJson =
+  | DatabaseJsonType["price_feed"]
+  | (Omit<
+      DatabaseJsonType["price_feed"],
+      "open_price_q64" | "close_price_q64" | "delta_percentage"
+    > & {
+      open_price_q64: null;
+      close_price_q64: null;
+      delta_percentage: null;
+    });
+
+export type PartialPriceFeedModel = ReturnType<typeof toPartialPriceFeed>;
+export const toPartialPriceFeed = (data: PartialPriceFeedJson) => ({
   ...toMarketStateModel(data),
-  ...toPriceFeedData(data),
+  ...(data.open_price_q64 === null
+    ? {
+        openPrice: null,
+        closePrice: null,
+        deltaPercentage: null,
+      }
+    : toPriceFeedData(data)),
 });
 
 export const toCandlestickModel = (data: DatabaseJsonType["candlesticks"]) => ({

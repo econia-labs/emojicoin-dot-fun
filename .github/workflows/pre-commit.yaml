@@ -10,6 +10,7 @@ env:
   TS_DIR: 'src/typescript'
 jobs:
   pre-commit:
+    environment: 'github-actions'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
