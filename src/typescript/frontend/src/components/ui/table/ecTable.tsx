@@ -55,13 +55,13 @@ export interface EcTableColumn<T> {
  * @template T - The type of data items in the table
  */
 export interface TableProps<T> {
-  /** Array of data items to display in the table */
+  /** Array of data items to display in the table. */
   items: T[];
-  /** Array of column configurations */
+  /** Array of column configurations. */
   columns: EcTableColumn<T>[];
   /** Height of each row in pixels. Defaults to 33. */
   rowHeight?: number;
-  /** Optional CSS class name for the table container */
+  /** Optional CSS class name for the table container. */
   className?: string;
   /**
    * Function to generate a unique key for each row.
