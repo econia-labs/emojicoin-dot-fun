@@ -1,11 +1,9 @@
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
-import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { parseSearchParams } from "utils/url-utils";
 
-import fetchCachedPaginatedMarketStats from "./query";
-import { createStatsSchema } from "./schema";
+import fetchCachedFullMarketStatsQuery from "./full-query";
 
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
@@ -18,15 +16,6 @@ export const revalidate = 0;
 export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const params = parseSearchParams(searchParams);
-  return await fetchCachedNumMarketsFromAptosNode()
-    .then(async (numMarkets) => {
-      const statsParams = createStatsSchema(numMarkets).parse(params);
-      return fetchCachedPaginatedMarketStats(statsParams).then((res) =>
-        NextResponse.json(res, { status: 200 })
-      );
-    })
-    .catch((e) => {
-      console.error(e);
-      return new NextResponse((e as Error).message, { status: 400 });
-    });
+  const { data } = await fetchCachedFullMarketStatsQuery(params);
+  return NextResponse.json(data, { status: 200 });
 });
