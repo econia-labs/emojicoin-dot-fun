@@ -24,12 +24,12 @@ export default async function fetchCachedFullMarketStatsQuery(
   data: PartialPriceFeedJson[];
 }> {
   return await fetchCachedNumMarketsFromAptosNode()
-    .then(async (numMarkets) => {
+    .then(async (totalNumMarkets) => {
       const { data: validatedParams, success } =
-        createStatsSchema(numMarkets).safeParse(searchParams);
-      const finalParams = success ? validatedParams : getDefaultParams(numMarkets);
+        createStatsSchema(totalNumMarkets).safeParse(searchParams);
+      const finalParams = success ? validatedParams : getDefaultParams(totalNumMarkets);
       return fetchCachedPaginatedMarketStats(finalParams).then((data) => ({
-        maxPageNumber: getMaxStatsPageNumber(numMarkets),
+        maxPageNumber: getMaxStatsPageNumber(totalNumMarkets),
         data,
         ...finalParams,
       }));
