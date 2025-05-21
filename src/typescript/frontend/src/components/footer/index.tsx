@@ -11,6 +11,9 @@ import { Container, Flex, FlexGap } from "@/containers";
 
 import { SocialLinks } from "./components/social-links";
 import { StyledClickItem, StyledContainer, StyledSocialWrapper } from "./styled";
+import { EXTERNAL_LINKS } from "router/external-links";
+import { EXTERNAL_LINK_PROPS } from "../link";
+import MenuItem from "../header/components/menu-item";
 
 const Footer: React.FC = () => {
   return (
@@ -23,6 +26,9 @@ const Footer: React.FC = () => {
             </StyledClickItem>
 
             <FlexGap gap="12px">
+              <Link href={EXTERNAL_LINKS.docs} {...EXTERNAL_LINK_PROPS}>
+                <MenuItem title={"docs"} />
+              </Link>
               <SocialLinks />
             </FlexGap>
           </StyledSocialWrapper>

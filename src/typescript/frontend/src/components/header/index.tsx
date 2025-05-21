@@ -93,10 +93,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
                     href={path}
                     target={path.startsWith("https://") ? "_blank" : undefined}
                   >
-                    <MenuItem
-                      title={title}
-                      pill={title === "arena" ? <Badge color="econiaBlue">NEW</Badge> : undefined}
-                    />
+                    <MenuItem title={title} />
                   </Link>
                 );
               })}
