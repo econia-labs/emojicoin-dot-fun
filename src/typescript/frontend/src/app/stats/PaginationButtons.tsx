@@ -1,7 +1,11 @@
+"use client";
+
 import type { StatsColumn } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/navigation";
+import type { TransitionStartFunction} from "react";
+import React, { useCallback, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import type { ClassNameValue } from "tailwind-merge";
 import { addSearchParams } from "utils/url-utils";
@@ -20,16 +24,38 @@ const PaginationLinkWithBraces = ({
   sortBy,
   desc,
   ariaLabel,
+  startTransition,
   children,
-}: PaginationProps & { ariaLabel: string } & React.PropsWithChildren) => {
-  const url = addSearchParams(ROUTES.stats, {
-    page,
-    sortBy,
-    orderBy: desc ? "desc" : "asc",
-  });
+}: PaginationProps & {
+  ariaLabel: string;
+  startTransition: TransitionStartFunction;
+} & React.PropsWithChildren) => {
+  const router = useRouter();
+  const url = useMemo(
+    () =>
+      addSearchParams(ROUTES.stats, {
+        page,
+        sortBy,
+        orderBy: desc ? "desc" : "asc",
+      }),
+    [page, sortBy, desc]
+  );
+
+  const handleTransition = useCallback(
+    () =>
+      startTransition(() => {
+        router.push(url);
+      }),
+    [startTransition, router, url]
+  );
 
   return (
-    <Link href={url} className={cn("group cursor-pointer", styles)} aria-label={ariaLabel}>
+    <Link
+      href={url}
+      className={cn("group cursor-pointer", styles)}
+      aria-label={ariaLabel}
+      onClick={handleTransition}
+    >
       <span className={groupHover}>{"{"}</span>
       {children}
       <span className={groupHover}>{"}"}</span>
@@ -45,9 +71,11 @@ export const StatsButtonsBlock = ({
   page,
   sortBy,
   desc,
+  startTransition,
   className = "",
 }: PaginationProps & {
   numPages: number;
+  startTransition: TransitionStartFunction;
   className?: ClassNameValue;
 }) => {
   return (
@@ -62,6 +90,7 @@ export const StatsButtonsBlock = ({
         page={1}
         sortBy={sortBy}
         desc={desc}
+        startTransition={startTransition}
       >
         <span className={groupHover}>{"<<"}</span>
       </PaginationLinkWithBraces>
@@ -71,6 +100,7 @@ export const StatsButtonsBlock = ({
         page={page > 0 ? page - 1 : numPages}
         sortBy={sortBy}
         desc={desc}
+        startTransition={startTransition}
       >
         <span className={groupHover}>{"<"}</span>
       </PaginationLinkWithBraces>
@@ -84,6 +114,7 @@ export const StatsButtonsBlock = ({
         page={page < numPages ? page + 1 : 0}
         sortBy={sortBy}
         desc={desc}
+        startTransition={startTransition}
       >
         <span className={groupHover}>{">"}</span>
       </PaginationLinkWithBraces>
@@ -93,6 +124,7 @@ export const StatsButtonsBlock = ({
         page={numPages}
         sortBy={sortBy}
         desc={desc}
+        startTransition={startTransition}
       >
         <span className={groupHover}>{">>"}</span>
       </PaginationLinkWithBraces>
