@@ -1,6 +1,6 @@
 import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 
-import type { PartialPriceFeedJson } from "@/sdk/index";
+import type { DatabaseJsonType } from "@/sdk/index";
 
 import type { StatsSchemaInput, StatsSchemaOutput } from "./schema";
 import { createStatsSchema, getMaxStatsPageNumber } from "./schema";
@@ -11,7 +11,7 @@ const getDefaultParams = (numMarkets: number) => createStatsSchema(numMarkets).p
 /**
  * The full query for the stats page fetches, including the precursory number of markets query
  * to pass to the search params validation function.
- * 
+ *
  * It performs error handling and search params validation with default fallbacks in case of errors.
  */
 export default async function fetchCachedFullMarketStatsQuery(
@@ -21,7 +21,7 @@ export default async function fetchCachedFullMarketStatsQuery(
   sortBy: StatsSchemaOutput["sortBy"];
   orderBy: StatsSchemaOutput["orderBy"];
   maxPageNumber: number;
-  data: PartialPriceFeedJson[];
+  data: DatabaseJsonType["price_feed_with_nulls"][];
 }> {
   return await fetchCachedNumMarketsFromAptosNode()
     .then(async (totalNumMarkets) => {
@@ -38,7 +38,7 @@ export default async function fetchCachedFullMarketStatsQuery(
       console.error(e);
       return {
         maxPageNumber: 1,
-        data: [] as PartialPriceFeedJson[],
+        data: [] as DatabaseJsonType["price_feed_with_nulls"][],
         ...getDefaultParams(1),
       };
     });

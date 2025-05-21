@@ -4,13 +4,13 @@
 
 import fetchCachedFullMarketStatsQuery from "app/api/stats/full-query";
 import { getMaxStatsPageNumber, type StatsSchemaInput } from "app/api/stats/schema";
+import { unstable_cache } from "next/cache";
 
-import { TableName, toPartialPriceFeed } from "@/sdk/index";
+import { TableName, toPriceFeedWithNulls } from "@/sdk/index";
 import { postgrest } from "@/sdk/indexer-v2";
 
 import { StatsButtonsBlock } from "./PaginationButtons";
 import StatsPageComponent from "./StatsPage";
-import { unstable_cache } from "next/cache";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
@@ -41,7 +41,7 @@ export default async function Stats({ searchParams }: StatsPageParams) {
   const params = searchParams ?? {};
   const res = await fetchCachedFullMarketStatsQuery(params).then(({ data, ...rest }) => ({
     ...rest,
-    data: data.map(toPartialPriceFeed),
+    data: data.map(toPriceFeedWithNulls),
   }));
   const { maxPageNumber: maxPageNumberFromRes, page, sortBy, orderBy, data } = res;
 
