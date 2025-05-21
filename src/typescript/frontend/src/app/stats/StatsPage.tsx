@@ -82,6 +82,7 @@ export default function StatsPageComponent({
           items={data}
           serverSideOrderHandler={handleNavigation}
           isLoading={isLoading}
+          defaultSortColumn={columnSortStrings[sortBy]}
         />
       </div>
       <StatsButtonsBlock
