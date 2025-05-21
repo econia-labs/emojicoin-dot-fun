@@ -3,7 +3,6 @@ import {
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { Badge } from "components/Badge";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { EXTERNAL_LINK_PROPS, Link } from "components/link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -12,6 +11,7 @@ import { AnimatePresence, useAnimationControls } from "framer-motion";
 import { Copy, LogOut, User, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { EXTERNAL_LINKS } from "router/external-links";
 import { ROUTES } from "router/routes";
 
 import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
@@ -22,7 +22,6 @@ import AnimatedDropdownItem from "./components/animated-dropdown-item";
 import { MobileSocialLinks } from "./components/mobile-social-links";
 import { MobileMenuWrapper, StyledMotion } from "./styled";
 import type { MobileMenuProps } from "./types";
-import { EXTERNAL_LINKS } from "router/external-links";
 
 const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch] text-ec-blue";
 
@@ -98,7 +97,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
   const linksWithDocs = useMemo(
     () => [...linksForCurrentPage, { title: "docs", path: EXTERNAL_LINKS.docs }],
-    linksForCurrentPage
+    [linksForCurrentPage]
   );
 
   return (
