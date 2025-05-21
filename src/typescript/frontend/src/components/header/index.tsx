@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "components/Badge";
 import Button from "components/button";
 import MenuItem from "components/header/components/menu-item";
 import { MobileMenu } from "components/header/components/mobile-menu";
@@ -15,6 +14,7 @@ import { ROUTES } from "router/routes";
 
 import { Container, Flex, FlexGap } from "@/containers";
 
+import { EXTERNAL_LINK_PROPS } from "../link/const";
 import CloseIcon from "../svg/icons/Close";
 import LogoIcon from "../svg/icons/LogoIcon";
 import { slideTopVariants } from "./animations";
@@ -91,7 +91,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
                   <Link
                     key={title}
                     href={path}
-                    target={path.startsWith("https://") ? "_blank" : undefined}
+                    {...(path.startsWith("https://") ? EXTERNAL_LINK_PROPS : {})}
                   >
                     <MenuItem title={title} />
                   </Link>

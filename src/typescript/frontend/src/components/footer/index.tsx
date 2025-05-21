@@ -5,15 +5,15 @@ import Text from "components/text";
 import { LINKS } from "lib/env";
 import Link from "next/link";
 import React from "react";
+import { EXTERNAL_LINKS } from "router/external-links";
 import { ROUTES } from "router/routes";
 
 import { Container, Flex, FlexGap } from "@/containers";
 
+import MenuItem from "../header/components/menu-item";
+import { EXTERNAL_LINK_PROPS } from "../link";
 import { SocialLinks } from "./components/social-links";
 import { StyledClickItem, StyledContainer, StyledSocialWrapper } from "./styled";
-import { EXTERNAL_LINKS } from "router/external-links";
-import { EXTERNAL_LINK_PROPS } from "../link";
-import MenuItem from "../header/components/menu-item";
 
 const Footer: React.FC = () => {
   return (
