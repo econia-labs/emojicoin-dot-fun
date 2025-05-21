@@ -197,7 +197,7 @@ export const EcTable = <T,>({
       {(items.length === 0 || isLoading) && (
         <div
           className={cn(
-            "absolute top-0 left-1 bottom-1 right-1 bg-black bg-opacity-30 z-10 flex justify-center text-light-gray items-center pixel-heading-4",
+            "fixed top-0 left-1 bottom-1 right-1 bg-black bg-opacity-30 z-10 flex justify-center text-light-gray items-center pixel-heading-4",
             isLoading && "bg-opacity-80"
           )}
         >
