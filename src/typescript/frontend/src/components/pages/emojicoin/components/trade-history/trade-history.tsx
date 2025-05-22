@@ -51,8 +51,8 @@ export const TradeHistory = (props: TradeHistoryProps) => {
   const columns: EcTableColumn<(typeof sortedSwaps)[number]>[] = useMemo(
     () => [
       {
-        text: "Rank",
         id: "rank",
+        headerContent: "Rank",
         width: 50,
         renderCell: (item) => (
           <Popup
@@ -72,28 +72,28 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         ),
       },
       {
-        text: "APT",
         id: "apt",
+        headerContent: "APT",
         width: 70,
         renderCell: (item) => <AptCell value={toNominal(item.apt)} />,
       },
       {
-        text: <Emoji emojis={props.data.symbol} />,
         id: "amount",
+        headerContent: <Emoji emojis={props.data.symbol} />,
         width: 100,
         renderCell: (item) => (
           <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
         ),
       },
       {
-        text: "Time",
         id: "time",
+        headerContent: "Time",
         width: 120,
         renderCell: (item) => <TimeCell date={item.date} />,
       },
       {
-        text: "Price",
         id: "price",
+        headerContent: "Price",
         width: 80,
         renderCell: (item) => (
           <ColoredPriceDisplay
@@ -106,8 +106,8 @@ export const TradeHistory = (props: TradeHistoryProps) => {
         ),
       },
       {
-        text: "Sender",
         id: "sender",
+        headerContent: "Sender",
         width: 120,
         renderCell: (item) => <WalletAddressCell address={item.sender} />,
       },
