@@ -30,10 +30,13 @@ const fetchCachedNumMarketsWithDailyActivity = unstable_cache(
   async () =>
     postgrest
       .from(TableName.PriceFeed)
-      .select("*", { count: "exact" })
+      .select(undefined, { count: "exact" })
       .then((res) => res.count ?? 0),
   ["cached-num-markets-with-daily-activity"],
-  { revalidate: 30 }
+  {
+    revalidate: 30,
+    tags: ["cached-num-markets-with-daily-activity"],
+  }
 );
 
 export default async function Stats({ searchParams }: StatsPageParams) {

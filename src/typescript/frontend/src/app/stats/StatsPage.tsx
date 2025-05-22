@@ -3,8 +3,10 @@
 import type { StatsSchemaOutput } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
 import { useRouter } from "next/navigation";
+import path from "path";
 import { useCallback, useTransition } from "react";
 import { ROUTES } from "router/routes";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 import { addSearchParams } from "utils/url-utils";
 
 import { EcTable } from "@/components/ui/table/ecTable";
@@ -83,6 +85,11 @@ export default function StatsPageComponent({
           serverSideOrderHandler={handleNavigation}
           isLoading={isLoading}
           defaultSortColumn={columnSortStrings[sortBy]}
+          onClick={(item) => {
+            const namePath = emojiNamesToPath(item.market.emojis.map(({ name }) => name));
+            const url = path.join(ROUTES.market, namePath);
+            router.push(url);
+          }}
         />
       </div>
       <StatsButtonsBlock
