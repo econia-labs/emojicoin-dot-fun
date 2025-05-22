@@ -55,13 +55,13 @@ export interface EcTableColumn<T> {
  * @template T - The type of data items in the table
  */
 export interface TableProps<T> {
-  /** Array of data items to display in the table */
+  /** Array of data items to display in the table. */
   items: T[];
-  /** Array of column configurations */
+  /** Array of column configurations. */
   columns: EcTableColumn<T>[];
   /** Height of each row in pixels. Defaults to 33. */
   rowHeight?: number;
-  /** Optional CSS class name for the table container */
+  /** Optional CSS class name for the table container. */
   className?: string;
   /**
    * Function to generate a unique key for each row.
@@ -150,7 +150,6 @@ export const EcTable = <T,>({
   isLoading,
   emptyText,
 }: TableProps<T>) => {
-  // const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const containerRef = useCallback((node: HTMLElement | null) => {
     if (node) {
@@ -198,7 +197,7 @@ export const EcTable = <T,>({
       {(items.length === 0 || isLoading) && (
         <div
           className={cn(
-            "absolute top-0 left-1 bottom-1 right-1 bg-black bg-opacity-30 z-10 flex justify-center text-light-gray items-center pixel-heading-4",
+            "fixed top-0 left-1 bottom-1 right-1 bg-black bg-opacity-30 z-10 flex justify-center text-light-gray items-center pixel-heading-4",
             isLoading && "bg-opacity-80"
           )}
         >
