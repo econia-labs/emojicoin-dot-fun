@@ -69,8 +69,8 @@ function createColumn<T>({
 export const statsHeaderColumns: EcTableColumn<PriceFeedWithNullsModel>[] = [
   createColumn({
     label: "symbol",
-    // The same as above in `createColumn`, but ensure no padding left. Can't use not first chidl
-    // because of the convoluted component tree with `EcTable`.
+    // The same as above in `createColumn`, but ensure no padding left. Can't use
+    // `not:first-child` because of the convoluted component tree with `EcTable`.
     node: <span className={cn(noWrap, "pl-0")}>{"symbol"}</span>,
     cell: (item) => <Emoji emojis={item.market.symbolData.symbol} />,
   }),
