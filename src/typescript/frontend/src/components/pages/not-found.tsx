@@ -2,19 +2,11 @@
 
 import { Text } from "components";
 import Button from "components/button";
-import { Page } from "components/layout/components/page";
 import { translationFunction } from "context/language-context";
 import { useRouter } from "next/navigation";
 import React from "react";
-import styled from "styled-components";
 
-const StyledNotFoundPage = styled(Page)`
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-`;
+import { Page } from "../layout/components/page";
 
 const NotFoundComponent: React.FC = () => {
   const { t } = translationFunction();
@@ -25,7 +17,7 @@ const NotFoundComponent: React.FC = () => {
   };
 
   return (
-    <StyledNotFoundPage>
+    <Page className="flex min-h-[100dvh] flex-col items-center justify-center px-4 md:px-6 mx-auto max-w-max">
       <Text textScale="pixelDisplay1" textTransform="uppercase">
         {t("Not found Page")} 404
       </Text>
@@ -33,7 +25,7 @@ const NotFoundComponent: React.FC = () => {
       <Button onClick={onClickHandler} scale="lg">
         {t("Go to home page")}
       </Button>
-    </StyledNotFoundPage>
+    </Page>
   );
 };
 

@@ -3,20 +3,10 @@
 import type { PoolsData } from "app/pools/page";
 import SearchBar from "components/inputs/search-bar";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
-import {
-  StyledHeader,
-  StyledHeaderInner,
-  StyledInner,
-  StyledPoolsPage,
-  StyledSubHeader,
-  StyledWrapper,
-} from "components/pages/pools/styled";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { useMatchBreakpoints } from "hooks";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { FlexGap } from "@/containers";
 import { useAccountAddress } from "@/hooks/use-account-address";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@/sdk/emoji_data";
 import type { SortMarketsBy } from "@/sdk/index";
@@ -60,45 +50,28 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
     initialData
   );
 
-  const { isMobile } = useMatchBreakpoints();
-
   return (
-    <StyledPoolsPage>
-      <StyledHeader>
-        <StyledHeaderInner>
-          <FlexGap
-            justifyContent={{ _: "unset", tablet: "space-between" }}
-            width="100%"
-            maxWidth={{ _: "800px", laptopL: "57%" }}
-            alignItems="center"
-            gap="13px"
-          >
-            {!isMobile ? <SearchBar /> : null}
+    <div className="flex flex-col justify-center items-center mt-[15px] border-y border-solid border-dark-gray">
+      <div className="w-full px-8 border-b border-solid border-dark-gray">
+        <div className="flex-col-reverse md:flex-row justify-between flex px-3 w-full border-x border-solid border-dark-gray *:grow *:basis-0">
+          <SearchBar />
+          <div className="md:hidden -ml-3 w-[calc(100%+24px)] border-t border-solid border-dark-gray" />
+          <TableHeaderSwitcher
+            title1="Pools"
+            title2="My pools"
+            onSelect={(title) => {
+              if (title === "Pools" && pools !== "all") {
+                setPools("all");
+              } else if (title === "My pools" && pools !== "mypools") {
+                setPools("mypools");
+              }
+            }}
+          />
+        </div>
+      </div>
 
-            <TableHeaderSwitcher
-              title1="Pools"
-              title2="My pools"
-              onSelect={(title) => {
-                if (title === "Pools" && pools !== "all") {
-                  setPools("all");
-                } else if (title === "My pools" && pools !== "mypools") {
-                  setPools("mypools");
-                }
-              }}
-            />
-          </FlexGap>
-        </StyledHeaderInner>
-      </StyledHeader>
-      {isMobile ? (
-        <StyledSubHeader>
-          <StyledHeaderInner>
-            <SearchBar />
-          </StyledHeaderInner>
-        </StyledSubHeader>
-      ) : null}
-
-      <StyledWrapper>
-        <StyledInner width={{ _: "100%", laptopL: "57%" }}>
+      <div className="flex flex-col xl:flex-row px-8">
+        <div className="flex relative w-full border-x border-solid border-dark-gray xl:w-[57%]">
           <PoolsTable
             index={selectedIndex}
             data={markets}
@@ -121,13 +94,13 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
               }
             }}
           />
-        </StyledInner>
-
-        <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
+        </div>
+        <div className="xl:hidden -ml-8 w-[calc(100%+64px)] border-t border-solid border-dark-gray" />
+        <div className="flex grow relative w-full xl:w-[43%] border-x border-solid border-dark-gray">
           <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
-        </StyledInner>
-      </StyledWrapper>
-    </StyledPoolsPage>
+        </div>
+      </div>
+    </div>
   );
 };
 

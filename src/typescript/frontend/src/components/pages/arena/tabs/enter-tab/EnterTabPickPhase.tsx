@@ -1,6 +1,8 @@
 import Button from "components/button";
 import React from "react";
 
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
+
 import { useArenaPhaseStore } from "../../phase/store";
 import { EmojiTitle } from "../../utils";
 import BlurModal from "../enter-tab/BlurModal";
@@ -11,8 +13,13 @@ export default function EnterTabPickPhase() {
   const setError = useArenaPhaseStore((s) => s.setError);
   const error = useArenaPhaseStore((s) => s.error);
 
+  const { md } = useTailwindBreakpoints();
+
   return (
-    <div className="relative flex flex-col grow gap-[3em] justify-center place-items-center w-[100%]">
+    <div
+      className="relative flex flex-col grow gap-[3em] justify-center place-items-center w-[100%]"
+      style={{ containerType: "size" }}
+    >
       {error && (
         <BlurModal close={() => setError(false)}>
           <div className="flex flex-col gap-[3em] max-w-[58ch]">
@@ -30,6 +37,7 @@ export default function EnterTabPickPhase() {
       <div className="w-[100%]">
         <div className="font-forma text-xl uppercase text-white text-center">Pick your side</div>
         <EmojiTitle
+          fontSizeMultiplier={md ? 1.5 : 4}
           onClicks={{
             emoji0: () => {
               setMarket(0);

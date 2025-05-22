@@ -1,7 +1,5 @@
 "use client";
 
-import "./module.css";
-
 import type { HomePageProps } from "app/home/HomePage";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore } from "context/event-store-context";

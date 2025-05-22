@@ -8,8 +8,8 @@ import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import ChartContainer from "@/components/charts/ChartContainer";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 
 import RewardsRemainingBox from "./RewardsRemainingBox";
 import { MobileNavigation, TabContainer } from "./tabs";
@@ -57,7 +57,7 @@ const Mobile = React.memo((props: ArenaProps) => {
     <>
       <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
         <Box className="grid place-items-center gap-[1em] py-[1em]">
-          <EmojiTitle />
+          <EmojiTitle fontSizeMultiplier={2.5} />
           <div className="text-4xl">
             <Countdown
               startTime={arenaInfo.startTime}
@@ -84,7 +84,7 @@ const Mobile = React.memo((props: ArenaProps) => {
 Mobile.displayName = "Mobile";
 
 export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
-  const { isMobile } = useMatchBreakpoints();
+  const { md } = useTailwindBreakpoints();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const loadVaultBalanceFromServer = useEventStore((s) => s.loadVaultBalanceFromServer);
@@ -97,14 +97,14 @@ export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
     loadVaultBalanceFromServer(props.vaultBalance);
   }, [loadArenaInfoFromServer, loadMarketStateFromServer, loadVaultBalanceFromServer, props]);
 
-  return isMobile ? (
-    <Mobile
+  return md ? (
+    <Desktop
       arenaInfo={arenaInfo ?? props.arenaInfo}
       market0={market0 ?? props.market0}
       market1={market1 ?? props.market1}
     />
   ) : (
-    <Desktop
+    <Mobile
       arenaInfo={arenaInfo ?? props.arenaInfo}
       market0={market0 ?? props.market0}
       market1={market1 ?? props.market1}

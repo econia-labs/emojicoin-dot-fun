@@ -3,7 +3,6 @@
 import { Text } from "components";
 import Carousel from "components/carousel";
 import { useEventStore } from "context/event-store-context";
-import { useMatchBreakpoints } from "hooks";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { GlobeIcon } from "lucide-react";
 import Link from "next/link";
@@ -14,6 +13,7 @@ import { darkColors } from "theme";
 import type { SubscribableBrokerEvents } from "@/broker/types";
 import { Box } from "@/containers";
 import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 import { marketToLatestBars } from "@/store/event/candlestick-bars";
 
 import DesktopGrid from "./components/desktop-grid";
@@ -24,7 +24,7 @@ import type { EmojicoinProps } from "./types";
 const EVENT_TYPES: SubscribableBrokerEvents[] = ["Chat", "PeriodicState", "Swap"];
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
-  const { isTablet, isMobile } = useMatchBreakpoints();
+  const { lg } = useTailwindBreakpoints();
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const loadEventsFromServer = useEventStore((s) => s.loadEventsFromServer);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
@@ -61,7 +61,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
         </Carousel>
       )}
       <MainInfo data={props.data} />
-      {isTablet || isMobile ? <MobileGrid data={props.data} /> : <DesktopGrid data={props.data} />}
+      {lg ? <DesktopGrid data={props.data} /> : <MobileGrid data={props.data} />}
     </Box>
   );
 };

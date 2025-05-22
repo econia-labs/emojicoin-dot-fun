@@ -8,31 +8,24 @@ import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
-import { cn } from "lib/utils/class-name";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
+import { Separator } from "@/components/Separator";
 import useEvent from "@/hooks/use-event";
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
-import { EMOJI_GRID_ITEM_WIDTH } from "../const";
+import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import { ClientGrid } from "./ClientGrid";
 import { ButtonsBlock } from "./components/buttons-block";
 import SortAndAnimate from "./components/SortAndAnimate";
-import styles from "./ExtendedGridLines.module.css";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import {
-  GRID_PADDING,
-  InnerGridContainer,
-  OuterContainer,
-  OutermostContainer,
-  StyledGrid,
-} from "./styled";
 
 interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
@@ -47,6 +40,8 @@ const EmojiTable = (props: EmojiTableProps) => {
     const searchBytes = props.searchBytes ?? "";
     return { markets, page, sort, pages, searchBytes };
   }, [props]);
+
+  const { md } = useTailwindBreakpoints();
 
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
@@ -106,12 +101,19 @@ const EmojiTable = (props: EmojiTableProps) => {
         onChange={handlePageChange}
         numPages={pages}
       />
-      <OutermostContainer>
-        <OuterContainer>
-          <InnerGridContainer>
+      <div className="flex border-t border-solid border-dark-gray">
+        <div className="flex justify-center w-full">
+          <div
+            className="flex flex-col items-center w-full justify-center"
+            style={{ maxWidth: MAX_WIDTH + "px" }}
+          >
             <motion.div
               key={rowLength}
               id="emoji-grid-header"
+              className="flex w-full flex-col md:flex-row justify-between items-center px-3 border-b md:border-b-0 border-x border-solid border-dark-gray md:justify-start"
+              style={{
+                width: md ? rowLength * EMOJI_GRID_ITEM_WIDTH : undefined,
+              }}
               exit={{
                 opacity: 0,
                 transition: {
@@ -120,21 +122,13 @@ const EmojiTable = (props: EmojiTableProps) => {
                 },
               }}
             >
-              {/* Search wrapper */}
-              <div
-                className={cn(
-                  styles["extended-grid-lines"],
-                  "py-0 px-[10px] border-none ml-0 mr-0 w-[75%] md:w-full justify-center after:left-0",
-                  "md:border-l md:border-solid md:border-l-dark-gray md:justify-start"
-                )}
-              >
-                <SearchBar />
-              </div>
+              <SearchBar />
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
               />
             </motion.div>
+            <Separator className="hidden md:block" />
             {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
                 This provides a smooth transition from grids of varying row lengths. */}
             {markets.length > 0 ? (
@@ -148,8 +142,8 @@ const EmojiTable = (props: EmojiTableProps) => {
                       // We set these so the grid layout doesn't snap when the number of items per row changes.
                       // This actually seems to work better than the css media queries, although I've left them in module.css
                       // in case we want to use them for other things.
-                      maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
-                      minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
+                      maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH,
+                      minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH,
                     }}
                     exit={{
                       opacity: 0,
@@ -159,13 +153,18 @@ const EmojiTable = (props: EmojiTableProps) => {
                       },
                     }}
                   >
-                    <StyledGrid>
+                    <div
+                      className="grid relative justify-center w-full gap-0"
+                      style={{
+                        gridTemplateColumns: `repeat(auto-fill, ${EMOJI_GRID_ITEM_WIDTH}px)`,
+                      }}
+                    >
                       {shouldAnimateGrid ? (
                         <LiveClientGrid markets={markets} sortBy={sort} />
                       ) : (
                         <ClientGrid markets={markets} page={page} sortBy={sort} />
                       )}
-                    </StyledGrid>
+                    </div>
                   </motion.div>
                 </AnimatePresence>
                 <ButtonsBlock
@@ -184,9 +183,9 @@ const EmojiTable = (props: EmojiTableProps) => {
                 </Link>
               </div>
             )}
-          </InnerGridContainer>
-        </OuterContainer>
-      </OutermostContainer>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
