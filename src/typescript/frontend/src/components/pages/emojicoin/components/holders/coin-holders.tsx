@@ -40,7 +40,7 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
     () => [
       {
         id: "rank",
-        text: "Rank",
+        headerContent: "Rank",
         width: 100,
         cellClassName: "pl-10",
         sortCallback: (holder) => holder.amount,
@@ -48,19 +48,19 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
       },
       {
         id: "value",
-        text: "APT",
+        headerContent: "APT",
         width: 80,
         renderCell: (holder) => <AptCell value={holder.value} decimals={2} style="fixed" />,
       },
       {
         id: "balance",
-        text: emojicoin,
+        headerContent: emojicoin,
         width: 120,
         renderCell: (holder) => <FormattedNumber value={holder.amount} style={"fixed"} />,
       },
       {
         id: "supply-percentage",
-        text: "Supply %",
+        headerContent: "Supply %",
         width: 120,
         renderCell: (holder) => (
           <FormattedNumber value={holder.supplyPercentage} style={"fixed"} suffix="%" />
@@ -68,7 +68,7 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
       },
       {
         id: "usd-value",
-        text: "USD",
+        headerContent: "USD",
         width: 100,
         renderCell: (holder) => (
           <FormattedNumber value={holder.usdValue} style={"fixed"} prefix="$" />
@@ -76,7 +76,7 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
       },
       {
         id: "address",
-        text: "Holder",
+        headerContent: "Holder",
         width: 160,
         renderCell: (holder) => <WalletAddressCell address={holder.owner_address} />,
       },
