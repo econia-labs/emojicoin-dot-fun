@@ -30,5 +30,8 @@ export const getAptPrice = unstable_cache(
         return undefined;
       }),
   ["apt-price"],
-  { revalidate: 10, tags: ["apt-price"] } // Ten seconds.
+  {
+    revalidate: 10,
+    tags: ["apt-price"],
+  }
 );

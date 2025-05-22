@@ -143,7 +143,10 @@ const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["candlestic
 export const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
   getLatestProcessedEmojicoinTimestamp,
   ["processor-timestamp"],
-  { revalidate: 5, tags: ["latest-processed-timestamp-candlesticks"] }
+  {
+    revalidate: 5,
+    tags: ["latest-processed-timestamp-candlesticks"],
+  }
 );
 
 export const getCandlesticksRoute = async (args: CandlesticksSearchParams) => {
