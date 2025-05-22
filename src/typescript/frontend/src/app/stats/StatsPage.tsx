@@ -8,7 +8,7 @@ import { addSearchParams } from "utils/url-utils";
 import { EcTable } from "@/components/ui/table/ecTable";
 import type { OrderBy, OrderByStrings } from "@/sdk/indexer-v2/const";
 import { ORDER_BY } from "@/sdk/indexer-v2/const";
-import type { PartialPriceFeedModel } from "@/sdk/indexer-v2/types";
+import type { PriceFeedWithNullsModel } from "@/sdk/indexer-v2/types";
 
 import statsHeaderColumns, { columnSortStrings, columnSortStringsReverseMapping } from "./columns";
 
@@ -21,7 +21,7 @@ export default function StatsPageComponent({
   orderBy,
   data,
 }: StatsSchemaOutput & {
-  data: PartialPriceFeedModel[];
+  data: PriceFeedWithNullsModel[];
 }) {
   const router = useRouter();
 

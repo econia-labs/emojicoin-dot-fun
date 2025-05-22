@@ -6,7 +6,7 @@ import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { ColoredPriceDisplay } from "@/components/misc/ColoredPriceDisplay";
 import { PriceDelta } from "@/components/price-feed/inner";
 import type { EcTableColumn } from "@/components/ui/table/ecTable";
-import type { PartialPriceFeedModel } from "@/sdk/index";
+import type { PriceFeedWithNullsModel } from "@/sdk/index";
 import { calculateCirculatingSupply, q64ToBig, SortMarketsBy, toNominal } from "@/sdk/index";
 
 const bigNumberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
@@ -48,7 +48,7 @@ function createColumn<T>(header: string, renderCell: EcTableColumn<T>["renderCel
   };
 }
 
-export const statsHeaderColumns: EcTableColumn<PartialPriceFeedModel>[] = [
+export const statsHeaderColumns: EcTableColumn<PriceFeedWithNullsModel>[] = [
   createColumn("symbol", (item) => <Emoji emojis={item.market.symbolData.symbol} />),
   createColumn(columnSortStrings.delta, (item) =>
     typeof item.deltaPercentage === "number" ? (
