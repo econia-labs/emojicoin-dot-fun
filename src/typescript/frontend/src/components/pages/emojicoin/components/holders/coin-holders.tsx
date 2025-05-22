@@ -43,7 +43,7 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
         headerContent: "Rank",
         width: 100,
         cellClassName: "pl-10",
-        sortCallback: (holder) => holder.amount,
+        sortFn: (holder) => holder.amount,
         renderCell: (holder) => holder.rank,
       },
       {
