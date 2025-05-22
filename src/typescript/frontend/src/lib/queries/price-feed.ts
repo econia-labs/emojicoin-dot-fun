@@ -16,6 +16,9 @@ const fetchPriceFeed = () =>
 
 export const fetchCachedPriceFeed = unstable_cache(
   fetchPriceFeed,
-  ["price-feed-with-market-data"],
-  { revalidate: 10 }
+  ["price-feed-with-market-data-home-page"],
+  {
+    revalidate: 10,
+    tags: ["price-feed-with-market-data-home-page"],
+  }
 );
