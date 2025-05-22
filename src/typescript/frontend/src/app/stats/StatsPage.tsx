@@ -14,6 +14,8 @@ import type { PriceFeedWithNullsModel } from "@/sdk/indexer-v2/types";
 
 import statsHeaderColumns, { columnSortStrings, columnSortStringsReverseMapping } from "./columns";
 import { StatsButtonsBlock } from "./PaginationButtons";
+import path from "path";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 
 const toOrderByString = (orderBy: OrderBy): OrderByStrings =>
   orderBy === ORDER_BY.ASC ? "asc" : "desc";
@@ -83,6 +85,11 @@ export default function StatsPageComponent({
           serverSideOrderHandler={handleNavigation}
           isLoading={isLoading}
           defaultSortColumn={columnSortStrings[sortBy]}
+          onClick={(item) => {
+            const namePath = emojiNamesToPath(item.market.emojis.map(({ name }) => name));
+            const url = path.join(ROUTES.market, namePath);
+            router.push(url);
+          }}
         />
       </div>
       <StatsButtonsBlock
