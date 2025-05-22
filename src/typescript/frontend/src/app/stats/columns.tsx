@@ -60,9 +60,11 @@ export const statsHeaderColumns: EcTableColumn<PriceFeedWithNullsModel>[] = [
     )
   ),
   createColumn(columnSortStrings[SortMarketsBy.Price], (item) => (
-    <ExplorerLink className="hover:underline" value={item.transaction.version} type="txn">
-      <ColoredPriceDisplay price={q64ToBig(item.lastSwap.avgExecutionPriceQ64).toNumber()} />
-    </ExplorerLink>
+    <div onClick={(e) => e.stopPropagation()}>
+      <ExplorerLink className="hover:underline" value={item.transaction.version} type="txn">
+        <ColoredPriceDisplay price={q64ToBig(item.lastSwap.avgExecutionPriceQ64).toNumber()} />
+      </ExplorerLink>
+    </div>
   )),
   createColumn(columnSortStrings[SortMarketsBy.AllTimeVolume], (item) =>
     fmt(item.state.cumulativeStats.quoteVolume)
@@ -76,7 +78,7 @@ export const statsHeaderColumns: EcTableColumn<PriceFeedWithNullsModel>[] = [
   ),
   createColumn("circ. supply", (item) => fmt(calculateCirculatingSupply(item.state))),
   createColumn("curve progress", (item) => (
-    <div className="m-auto pl-10 flex w-full">
+    <div onClick={(e) => e.stopPropagation()} className="m-auto pl-10 flex w-full">
       <MiniBondingCurveProgress
         symbol={item.market.symbolData.symbol}
         clammVirtualReservesQuote={item.state.clammVirtualReserves.quote}
