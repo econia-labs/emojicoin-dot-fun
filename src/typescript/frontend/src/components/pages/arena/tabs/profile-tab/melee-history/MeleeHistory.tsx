@@ -142,7 +142,7 @@ export const MeleeHistory = ({
             </>
           )}
           {/* The rest of the rows; i.e., the historical positions. */}
-          {[...history].map((m, i) => (
+          {history.map((m, i) => (
             <HistoricalRow
               key={`history-table-row-${i}`}
               row={m}
