@@ -116,6 +116,7 @@ const getCachedMarketRegistrationMs = unstable_cache(
   ["market-registrations"],
   {
     revalidate: HISTORICAL_CACHE_DURATION,
+    tags: ["market-registrations"],
   }
 );
 
@@ -126,6 +127,7 @@ const getCachedMarketRegistrationMs = unstable_cache(
  */
 const getHistoricCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks-historic"], {
   revalidate: HISTORICAL_CACHE_DURATION,
+  tags: ["base-candlesticks-historic"],
 });
 
 /**
@@ -135,12 +137,16 @@ const getHistoricCachedCandlesticks = unstable_cache(getCandlesticks, ["candlest
  */
 const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks"], {
   revalidate: NORMAL_CACHE_DURATION,
+  tags: ["base-candlesticks"],
 });
 
 export const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
   getLatestProcessedEmojicoinTimestamp,
   ["processor-timestamp"],
-  { revalidate: 5 }
+  {
+    revalidate: 5,
+    tags: ["latest-processed-timestamp-candlesticks"],
+  }
 );
 
 export const getCandlesticksRoute = async (args: CandlesticksSearchParams) => {

@@ -25,4 +25,5 @@ async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
  */
 export const fetchCachedTopHolders = unstable_cache(fetchTopHoldersInternal, ["fetch-holders"], {
   revalidate: 10,
+  tags: ["fetch-top-holders"],
 });
