@@ -7,6 +7,7 @@ import {
   bigintColumns,
   floatColumns,
   integerColumns,
+  nullableColumns,
   timestampColumns,
 } from "./types/postgres-numeric-types";
 
@@ -69,6 +70,10 @@ const converter = new Map<AnyColumnName, (value: any) => any>([
 export const parseJSONWithBigInts = <T>(msg: string): T => {
   return JSON_BIGINT.parse(msg, (key, value) => {
     try {
+      // Early return on expected nullable columns.
+      if (value === null && nullableColumns.has(key as AnyColumnName)) {
+        return null;
+      }
       const fn = converter.get(key as AnyColumnName) ?? parseDefault;
       // Curry the retrieved parsing function to add a fallback parsing function.
       const fnWithFallback = tryWithFallbackParse(fn);
