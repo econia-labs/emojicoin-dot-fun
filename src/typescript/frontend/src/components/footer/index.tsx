@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
             </StyledClickItem>
 
             <FlexGap gap="12px">
-              <Link href={EXTERNAL_LINKS.docs} {...EXTERNAL_LINK_PROPS}>
+              <Link className="mt-[2px]" href={EXTERNAL_LINKS.docs} {...EXTERNAL_LINK_PROPS}>
                 <MenuItem title={"docs"} />
               </Link>
               <SocialLinks />
