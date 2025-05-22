@@ -40,6 +40,7 @@ const fetchCachedPaginatedMarketStats = unstable_cache(
   ["stats-markets"],
   {
     revalidate: 10,
+    tags: ["stats-markets"],
   }
 );
 

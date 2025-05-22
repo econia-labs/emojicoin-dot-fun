@@ -19,6 +19,7 @@ const fetchOnChainMarketView = async (marketAddress: `0x${string}`) => {
 
 const cachedOnChainMarketView = unstable_cache(fetchOnChainMarketView, ["fetch-market-view"], {
   revalidate: 10,
+  tags: ["fetch-market-view"],
 });
 
 export const wrappedCachedOnChainMarketView = async (marketAddress: `0x${string}`) => {

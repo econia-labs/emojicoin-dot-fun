@@ -94,11 +94,13 @@ const getHistoricCachedCandlesticks = unstable_cache(
   ["arena-candlesticks-historic"],
   {
     revalidate: HISTORICAL_CACHE_DURATION,
+    tags: ["arena-candlesticks-historic"],
   }
 );
 
 const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["arena-candlesticks"], {
   revalidate: NORMAL_CACHE_DURATION,
+  tags: ["arena-candlesticks"],
 });
 
 /**
