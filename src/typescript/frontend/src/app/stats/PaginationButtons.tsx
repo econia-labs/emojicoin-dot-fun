@@ -58,7 +58,7 @@ export const StatsButtonsBlock = ({
     >
       <PaginationLinkWithBraces
         ariaLabel={"go to the first page"}
-        page={0}
+        page={1}
         sortBy={sortBy}
         desc={desc}
       >

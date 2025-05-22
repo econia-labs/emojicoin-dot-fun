@@ -950,19 +950,8 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
   };
 };
 
-export type PartialPriceFeedJson =
-  | DatabaseJsonType["price_feed"]
-  | (Omit<
-      DatabaseJsonType["price_feed"],
-      "open_price_q64" | "close_price_q64" | "delta_percentage"
-    > & {
-      open_price_q64: null;
-      close_price_q64: null;
-      delta_percentage: null;
-    });
-
-export type PartialPriceFeedModel = ReturnType<typeof toPartialPriceFeed>;
-export const toPartialPriceFeed = (data: PartialPriceFeedJson) => ({
+export type PriceFeedWithNullsModel = ReturnType<typeof toPriceFeedWithNulls>;
+export const toPriceFeedWithNulls = (data: DatabaseJsonType["price_feed_with_nulls"]) => ({
   ...toMarketStateModel(data),
   ...(data.open_price_q64 === null
     ? {

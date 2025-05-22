@@ -2,13 +2,12 @@
 // The data caching is done in the API route, not in the
 // react rendered server component.
 
-import fetchCachedPaginatedMarketStats from "app/api/stats/query";
-import type { StatsSchemaInput } from "app/api/stats/schema";
-import { createStatsSchema, getMaxStatsPageNumber } from "app/api/stats/schema";
-import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import fetchCachedFullMarketStatsQuery from "app/api/stats/full-query";
+import { getMaxStatsPageNumber, type StatsSchemaInput } from "app/api/stats/schema";
+import { unstable_cache } from "next/cache";
 
-import type { PartialPriceFeedModel } from "@/sdk/index";
-import { toPartialPriceFeed } from "@/sdk/index";
+import { TableName, toPriceFeedWithNulls } from "@/sdk/index";
+import { postgrest } from "@/sdk/indexer-v2";
 
 import { StatsButtonsBlock } from "./PaginationButtons";
 import StatsPageComponent from "./StatsPage";
@@ -21,28 +20,35 @@ export interface StatsPageParams {
   searchParams?: StatsSchemaInput;
 }
 
-const getDefaultParams = (numMarkets: number) => createStatsSchema(numMarkets).parse({});
+/**
+ * The number of markets that show up in the price delta percentage query is different than the total
+ * number of markets. It's not necessary to know this in the `/api/stats` route, but it's relevant
+ * for the frontend because of the pagination buttons block.
+ * Swap out the max page number with the number of markets returned in the price feed query.
+ * Since this can be run infrequently and it's an extra call, cache this value for longer.
+ */
+const fetchCachedNumMarketsWithDailyActivity = unstable_cache(
+  async () =>
+    postgrest
+      .from(TableName.PriceFeed)
+      .select("*", { count: "exact" })
+      .then((res) => res.count ?? 0),
+  ["cached-num-markets-with-daily-activity"],
+  { revalidate: 30 }
+);
 
 export default async function Stats({ searchParams }: StatsPageParams) {
-  const { maxPageNumber, page, sortBy, orderBy, data } = await fetchCachedNumMarketsFromAptosNode()
-    .then(async (numMarkets) => {
-      const { data: validatedParams, success } =
-        createStatsSchema(numMarkets).safeParse(searchParams);
-      const finalParams = success ? validatedParams : getDefaultParams(numMarkets);
-      return fetchCachedPaginatedMarketStats(finalParams).then((data) => ({
-        maxPageNumber: getMaxStatsPageNumber(numMarkets),
-        data: data.map(toPartialPriceFeed),
-        ...finalParams,
-      }));
-    })
-    .catch((e) => {
-      console.error(e);
-      return {
-        maxPageNumber: 1,
-        data: [] as PartialPriceFeedModel[],
-        ...getDefaultParams(1),
-      };
-    });
+  const params = searchParams ?? {};
+  const res = await fetchCachedFullMarketStatsQuery(params).then(({ data, ...rest }) => ({
+    ...rest,
+    data: data.map(toPriceFeedWithNulls),
+  }));
+  const { maxPageNumber: maxPageNumberFromRes, page, sortBy, orderBy, data } = res;
+
+  const maxPageNumber =
+    sortBy === "delta"
+      ? await fetchCachedNumMarketsWithDailyActivity().then(getMaxStatsPageNumber)
+      : maxPageNumberFromRes;
 
   return (
     <>
