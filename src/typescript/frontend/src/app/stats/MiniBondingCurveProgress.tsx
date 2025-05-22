@@ -1,17 +1,25 @@
 import { Progress } from "components/ui/Progress";
+import { ROUTES } from "router/routes";
 
-import type { StateEventData } from "@/sdk/indexer-v2/types";
+import Arrow from "@/components/svg/icons/Arrow";
 import { getBondingCurveProgress } from "@/sdk/utils";
 
-export const MiniBondingCurveProgress = ({ state }: { state: StateEventData }) => {
-  const progress = getBondingCurveProgress(state.clammVirtualReserves.quote);
-  return (
-    <Progress
-      className={
-        "h-[7px] w-full" + `${progress === 100 ? " hue-rotate-[225deg] brightness-[0.25]" : ""}`
-      }
-      value={progress}
-      max={100}
-    />
+export const MiniBondingCurveProgress = ({
+  symbol,
+  clammVirtualReservesQuote,
+}: {
+  symbol: string;
+  clammVirtualReservesQuote: bigint;
+}) => {
+  const progress = getBondingCurveProgress(clammVirtualReservesQuote);
+  return progress < 100 ? (
+    <Progress className={"h-[7px] w-full"} value={progress} max={100} />
+  ) : (
+    <a className="hover:underline" href={`${ROUTES.pools}?pool=${symbol}`}>
+      <div className="flex flex-row justify-center gap-2">
+        {"pool"}
+        <Arrow color="econiaBlue" height={11} width={11} />
+      </div>
+    </a>
   );
 };

@@ -15,6 +15,6 @@ src/cloud-formation @alnoki
 src/docker          @xbtmatt
 src/move            @alnoki
 src/python          @xbtmatt
-src/rust            @CRBl69
+src/rust            @xbtmatt
 src/sh              @alnoki
 src/typescript      @xbtmatt

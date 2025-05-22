@@ -1,4 +1,3 @@
-# check-workflow: exempt
 # yamllint disable rule:key-ordering
 ---
 name: 'pnpm install'

@@ -1,13 +1,15 @@
 import "server-only";
 
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-
 import { RegistryView } from "../../../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
 import { toRegistryView } from "../../../types";
 import { getAptosClient } from "../../../utils/aptos-client";
 import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
 import { DatabaseTypeConverter } from "../../types";
-import { DEFAULT_SORT_BY, type MarketStateQueryArgs } from "../../types/common";
+import {
+  DEFAULT_SORT_BY,
+  type MarketStateQueryArgs,
+  type PriceFeedQueryArgs,
+} from "../../types/common";
 import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { sortByWithFallback } from "../query-params";
@@ -24,21 +26,10 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   inBondingCurve,
   count,
   /* eslint-disable @typescript-eslint/no-explicit-any */
-}: MarketStateQueryArgs & { tableName: T }): PostgrestFilterBuilder<
-  any,
-  any,
-  any[],
-  TableName,
-  T
-> => {
-  let query: any = postgrest.from(tableName);
-  /* eslint-enable @typescript-eslint/no-explicit-any */
-
-  if (count === true) {
-    query = query.select("*", { count: "exact" });
-  } else {
-    query = query.select("*");
-  }
+}: MarketStateQueryArgs & { tableName: T }) => {
+  const tableBuilder = postgrest.from(tableName);
+  let query =
+    count === true ? tableBuilder.select("*", { count: "exact" }) : tableBuilder.select("*");
 
   query = query
     .order(sortByWithFallback(sortBy), orderBy)
@@ -52,22 +43,31 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.eq("in_bonding_curve", inBondingCurve);
   }
 
-  return query;
+  return query.returns<DatabaseJsonType["market_state"][]>();
 };
 
 const selectMarketStates = (args: MarketStateQueryArgs) =>
   selectMarketHelper({ ...args, tableName: TableName.MarketState });
 
-const selectMarketsFromPriceFeed = ({ ...args }: MarketStateQueryArgs) =>
-  selectMarketHelper({
-    ...args,
-    tableName: TableName.PriceFeed,
-  });
+const selectMarketsFromPriceFeed = ({
+  page = 1,
+  pageSize,
+  orderBy,
+  sortBy,
+}: PriceFeedQueryArgs) => {
+  return postgrest
+    .from(TableName.PriceFeed)
+    .select("*")
+    .order(sortBy === "delta" ? "delta_percentage" : sortByWithFallback(sortBy), orderBy)
+    .range((page - 1) * pageSize, page * pageSize - 1);
+};
 
 export const fetchMarkets = queryHelper(
   selectMarketStates,
   DatabaseTypeConverter[TableName.MarketState]
 );
+
+export const fetchMarketsJson = queryHelper(selectMarketStates);
 
 export const fetchMarketsWithCount = queryHelperWithCount(
   selectMarketStates,

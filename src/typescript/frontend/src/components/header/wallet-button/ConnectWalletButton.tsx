@@ -59,7 +59,7 @@ const ButtonWithConnectWalletFallback = ({
   }, [connected, addressName, t, geoblocked]);
 
   const width = useMemo(() => {
-    return `${text.length + 1}ch`;
+    return `${text.length}ch`;
   }, [text]);
 
   const { ref, replay } = useScramble({
@@ -87,7 +87,7 @@ const ButtonWithConnectWalletFallback = ({
     (!connected || !children || geoblocked) && !forceDisplayChildren ? (
       <Button
         className={
-          className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
+          className + (mobile ? " px-[9px] border-dashed py-1.5 border-b border-b-ec-blue" : "")
         }
         disabled={geoblocked}
         onClick={(e) => {
@@ -107,10 +107,10 @@ const ButtonWithConnectWalletFallback = ({
               connected={connected}
               mobile={mobile}
             />
-            <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
+            <div className={!mobile ? "" : "text-ec-blue text-[32px] leading-[40px]"}>
               <div
                 className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
-                style={{ minWidth: width }}
+                style={mobile ? {} : { minWidth: width }}
                 ref={ref}
               />
             </div>
@@ -121,7 +121,7 @@ const ButtonWithConnectWalletFallback = ({
               mobile={mobile}
             />
           </div>
-          {arrow && <Arrow width={18} className="fill-black" />}
+          {arrow && <Arrow width={18} color="econiaBlue" />}
         </div>
       </Button>
     ) : (

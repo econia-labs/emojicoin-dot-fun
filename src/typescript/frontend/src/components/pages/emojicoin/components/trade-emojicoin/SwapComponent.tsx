@@ -5,7 +5,6 @@ import { FormattedNumber } from "components/FormattedNumber";
 import { InputNumeric } from "components/inputs";
 import { Column, Row } from "components/layout/components/FlexContainers";
 import type { SwapComponentProps } from "components/pages/emojicoin/types";
-import { getTooltipStyles } from "components/selects/theme";
 import { TradeOptions } from "components/selects/trade-options";
 import { useEventStore } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
@@ -16,13 +15,12 @@ import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
 import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
-import darkTheme from "theme/dark";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { getMaxSlippageSettings } from "utils/slippage";
 
+import Popup from "@/components/popup";
 import { Flex, FlexGap } from "@/containers";
-import { useTooltip } from "@/hooks/index";
 import { toEmojicoinTypes } from "@/sdk/markets/utils";
 
 import FlipInputsArrow from "./FlipInputsArrow";
@@ -124,13 +122,12 @@ export default function SwapComponent({
   }, [netProceeds, isSell, error]);
 
   const sufficientBalance = useMemo(() => {
-    if (!account || (isSell && !emojicoinBalance) || (!isSell && !aptBalance)) return false;
-    if (account) {
-      if (isSell) {
-        return emojicoinBalance >= inputAmount;
-      }
-      return aptBalance >= inputAmount;
+    if (!account) return false;
+    if ((isSell && !emojicoinBalance) || (!isSell && !aptBalance)) return false;
+    if (isSell) {
+      return emojicoinBalance >= inputAmount;
     }
+    return aptBalance >= inputAmount;
   }, [account, aptBalance, emojicoinBalance, isSell, inputAmount]);
 
   const balanceLabel = useMemo(() => {
@@ -153,18 +150,6 @@ export default function SwapComponent({
     );
   }, [t, account, isSell, aptBalance, emojicoinBalance, sufficientBalance]);
 
-  const { targetRef, tooltip: gearTooltip } = useTooltip(
-    <TradeOptions
-      onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
-    />,
-    {
-      placement: "bottom",
-      customStyles: getTooltipStyles(darkTheme),
-      trigger: "click",
-      tooltipOffset: [100, 10],
-    }
-  );
-
   return (
     <Column className="relative w-full max-w-[414px] justify-center">
       <Flex
@@ -173,10 +158,20 @@ export default function SwapComponent({
         alignItems="center"
         className="mb-[.4em]"
       >
-        <div ref={targetRef}>
-          <Emoji className="cursor-pointer" emojis={emoji("gear")} />
-        </div>
-        {gearTooltip}
+        <Popup
+          popover
+          content={
+            <TradeOptions
+              onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
+            />
+          }
+          className="!py-0 translate-x-[89px] mt-[1px]"
+          arrowClassName="translate-x-[90px]"
+        >
+          <div>
+            <Emoji className="cursor-pointer" emojis={emoji("gear")} />
+          </div>
+        </Popup>
         <FlexGap flexDirection="row" gap="5px">
           {isSell ? (
             <>

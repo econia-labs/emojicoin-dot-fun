@@ -6,7 +6,6 @@ import type { ButtonProps } from "./types";
 
 const StyledButton = styled.button<ButtonProps>`
   background-color: ${({ theme }) => theme.colors.transparent};
-  border-radius: ${({ theme }) => theme.radii.semiMedium};
   font-weight: ${({ theme }) => theme.fontWeight.regular};
   font-family: ${({ theme }) => theme.fonts.pixelar};
   text-transform: uppercase;
@@ -18,7 +17,6 @@ const StyledButton = styled.button<ButtonProps>`
   outline: 0;
   transition: all 0.3s ease;
   width: fit-content;
-  border: 0;
 
   ${variant({
     prop: "scale",

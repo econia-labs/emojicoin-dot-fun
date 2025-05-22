@@ -1,5 +1,6 @@
 import type { Aptos } from "@aptos-labs/ts-sdk";
 import type { AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useQuery } from "@tanstack/react-query";
 import Big from "big.js";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -26,7 +27,7 @@ export const DEFAULT_SWAP_GAS_COST = 52500n;
 
 const getGas = async (args: Args) => {
   if (args.account && typeof args.swapper !== "undefined") {
-    const publicKey = tryEd25519PublicKey(args.account);
+    const publicKey = tryEd25519PublicKey(args.account.publicKey);
     if (publicKey) {
       const res = await Swap.simulate({
         aptosConfig: args.aptos.config,
@@ -67,7 +68,8 @@ export const useGetGasWithDefault = (args: {
   isSell: boolean;
   numSwaps: number;
 }) => {
-  const { aptos, account } = useAptos();
+  const { account } = useWallet();
+  const { aptos } = useAptos();
   const { inputAmount, swapper, minOutputAmount } = useMemo(() => {
     const bigInput = Big(args.inputAmount.toString());
     const inputAmount = BigInt(bigInput.toString());
@@ -75,9 +77,9 @@ export const useGetGasWithDefault = (args: {
       invalid: inputAmount === 0n,
       inputAmount,
       minOutputAmount: 1n,
-      swapper: account?.address ? (account.address as `0x${string}`) : undefined,
+      swapper: account ? account.address.toString() : undefined,
     };
-  }, [args.inputAmount, account?.address]);
+  }, [args.inputAmount, account]);
 
   const gas = useGetGas({
     aptos,

@@ -95,6 +95,7 @@ module.exports = {
       "light-gray": "#717386",
       "medium-gray": "#4F5160",
       "dark-gray": "#33343D",
+      "darker-gray": "#111214",
       black: "#000000",
       blue: "#64A7FF",
       green: "#2FA90F",
