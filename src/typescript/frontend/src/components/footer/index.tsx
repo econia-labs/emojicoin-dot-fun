@@ -33,7 +33,7 @@ const Footer: React.FC = () => {
           </div>
 
           <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
-            <p className="uppercase font-bold py-4 md:py-6 text-[8px] md:text-[15px] font-forma line-he leading-[20px]">
+            <p className="uppercase font-bold py-4 md:py-6 text-[8px] md:text-[15px] font-forma leading-[20px]">
               TERMS OF USE
             </p>
           </Link>
