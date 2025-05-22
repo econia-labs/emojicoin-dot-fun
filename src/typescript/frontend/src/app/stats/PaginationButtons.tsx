@@ -4,7 +4,7 @@ import type { StatsColumn } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { TransitionStartFunction} from "react";
+import type { TransitionStartFunction } from "react";
 import React, { useCallback, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import type { ClassNameValue } from "tailwind-merge";
