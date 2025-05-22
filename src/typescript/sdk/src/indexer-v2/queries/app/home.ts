@@ -27,9 +27,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   count,
   /* eslint-disable @typescript-eslint/no-explicit-any */
 }: MarketStateQueryArgs & { tableName: T }) => {
-  const tableBuilder = postgrest.from(tableName);
-  let query =
-    count === true ? tableBuilder.select("*", { count: "exact" }) : tableBuilder.select("*");
+  let query = postgrest.from(tableName).select("*", count ? { count: "exact" } : undefined);
 
   query = query
     .order(sortByWithFallback(sortBy), orderBy)

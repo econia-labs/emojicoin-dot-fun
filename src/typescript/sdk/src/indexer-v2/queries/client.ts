@@ -38,6 +38,14 @@ const fetchPatch: typeof fetch = async (input, init) => {
     }
   }
 
+  if (response.status === 404) {
+    console.warn("Got a 404 response.");
+    console.warn({
+      url: response.url,
+      data: stringified,
+    });
+  }
+
   return new Response(stringified, response);
 };
 
