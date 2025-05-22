@@ -3,8 +3,10 @@
 import type { StatsSchemaOutput } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
 import { useRouter } from "next/navigation";
+import path from "path";
 import { useCallback, useTransition } from "react";
 import { ROUTES } from "router/routes";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 import { addSearchParams } from "utils/url-utils";
 
 import { EcTable } from "@/components/ui/table/ecTable";
@@ -14,8 +16,6 @@ import type { PriceFeedWithNullsModel } from "@/sdk/indexer-v2/types";
 
 import statsHeaderColumns, { columnSortStrings, columnSortStringsReverseMapping } from "./columns";
 import { StatsButtonsBlock } from "./PaginationButtons";
-import path from "path";
-import { emojiNamesToPath } from "utils/pathname-helpers";
 
 const toOrderByString = (orderBy: OrderBy): OrderByStrings =>
   orderBy === ORDER_BY.ASC ? "asc" : "desc";
