@@ -7,7 +7,10 @@ import { parseSearchParams } from "utils/url-utils";
 import { getPoolData } from "./getPoolDataQuery";
 import { GetPoolsSchema } from "./schema";
 
-const getCachedPoolData = unstable_cache(getPoolData, ["pool-data"], { revalidate: 5 });
+const getCachedPoolData = unstable_cache(getPoolData, ["pool-data"], {
+  revalidate: 5,
+  tags: ["pool-data"],
+});
 
 export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
