@@ -9,7 +9,6 @@ import { unstable_cache } from "next/cache";
 import { TableName, toPriceFeedWithNulls } from "@/sdk/index";
 import { postgrest } from "@/sdk/indexer-v2";
 
-import { StatsButtonsBlock } from "./PaginationButtons";
 import StatsPageComponent from "./StatsPage";
 
 export const revalidate = 0;
@@ -51,22 +50,12 @@ export default async function Stats({ searchParams }: StatsPageParams) {
       : maxPageNumberFromRes;
 
   return (
-    <>
-      <StatsButtonsBlock
-        numPages={maxPageNumber}
-        page={page}
-        sortBy={sortBy}
-        desc={!orderBy.ascending}
-        className="p-2 pb-4"
-      />
-      <StatsPageComponent page={page} sortBy={sortBy} orderBy={orderBy} data={data} />;
-      <StatsButtonsBlock
-        numPages={maxPageNumber}
-        page={page}
-        sortBy={sortBy}
-        desc={!orderBy.ascending}
-        className="pb-2"
-      />
-    </>
+    <StatsPageComponent
+      maxPageNumber={maxPageNumber}
+      page={page}
+      sortBy={sortBy}
+      orderBy={orderBy}
+      data={data}
+    />
   );
 }
