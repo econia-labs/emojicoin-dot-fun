@@ -16,8 +16,8 @@ import { Table, TableHeader, TableRow } from "./table";
 export interface EcTableColumn<T> {
   /** Unique identifier for the column */
   id: string;
-  /** Display text for the column header */
-  text: string | ReactNode;
+  /** Content for the column header */
+  headerContent: string | ReactNode;
   /** Optional width of the column in pixels */
   width?: number;
   /** Optional CSS class name for both header and body cells */
@@ -223,7 +223,7 @@ export const EcTable = <T,>({
                 width={column.width}
                 setSort={column.sortFn || column.isServerSideSortable ? setSortHandler : undefined}
                 className={cn(column.className, column.headClassName)}
-                text={column.text}
+                text={column.headerContent}
               />
             ))}
           </TableRow>
