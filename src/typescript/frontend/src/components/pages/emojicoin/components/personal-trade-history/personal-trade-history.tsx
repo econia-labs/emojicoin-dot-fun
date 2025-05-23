@@ -28,7 +28,7 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
     () => [
       {
         id: "change",
-        text: <Emoji emojis={props.data.symbol} />,
+        headerContent: <Emoji emojis={props.data.symbol} />,
         width: 100,
         renderCell: (item) => (
           <FormattedNumber
@@ -40,14 +40,14 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
         ),
       },
       {
-        text: "Time",
         id: "time",
+        headerContent: "Time",
         width: 120,
         renderCell: (item) => <TimeCell date={new Date(Number(item.transaction.time / 1000n))} />,
       },
       {
-        text: "Price",
         id: "price",
+        headerContent: "Price",
         width: 100,
         renderCell: (item) => (
           <ColoredPriceDisplay
@@ -60,8 +60,8 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
         ),
       },
       {
-        text: "APT",
         id: "apt",
+        headerContent: "APT",
         width: 100,
         renderCell: (item) => <AptCell value={toNominal(item.swap.quoteVolume)} />,
       },
