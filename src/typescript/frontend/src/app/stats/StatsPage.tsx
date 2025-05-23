@@ -72,10 +72,15 @@ export default function StatsPageComponent({
       <div className="relative w-screen">
         <div className="absolute top-0 left-[-100vw] w-[300vw] h-px bg-dark-gray z-50 pointer-events-none" />
         <div className="absolute bottom-0 left-[-100vw] w-[300vw] h-px bg-dark-gray z-50 pointer-events-none" />
-        <div className="absolute top-[37px] left-[-100vw] w-[300vw] h-px bg-dark-gray z-50 pointer-events-none" />
+        <div className="absolute top-[37px] left-[-100vw] w-[300vw] h-px bg-dark-gray -z-1 pointer-events-none" />
         <EcTable
           className={cn(
-            "flex relative h-[80dvh] overflow-x-hidden m-auto w-[90dvw] max-w-[1600px]"
+            "flex relative h-[80dvh] m-auto w-[90dvw] max-w-[1600px]",
+            "border-l border-r border-dark-gray border-solid border-collapse",
+            // Remove all the extra borders lining up random sides of the table.
+            "[&>table>tbody>tr:first-child>td]:border-t-0",
+            "[&>table]:border-l-0 [&>table]:border-t-0",
+            "[&>table>tbody>tr>td]:!border-l-0"
           )}
           textFormat="body-sm"
           emptyText="No more markets to display!"
