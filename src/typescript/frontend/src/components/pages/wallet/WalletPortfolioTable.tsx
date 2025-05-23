@@ -7,34 +7,34 @@ import {
 import { PortfolioRow } from "./PortfolioRow";
 
 const COLUMNS: EcTableColumn<FullCoinData>[] = [
-  { id: "emoji", text: "Emoji", width: 80 },
+  { id: "emoji", headerContent: "Emoji", width: 80 },
   {
     id: "percentage",
-    text: "percent",
+    headerContent: "percent",
     width: 105,
     sortFn: (coin) => coin.percentage,
   },
   {
     id: "amount",
-    text: "Amount",
+    headerContent: "Amount",
     width: 130,
     sortFn: (coin) => coin.amount,
   },
   {
     id: "marketCap",
-    text: "Market cap",
+    headerContent: "Market cap",
     width: 145,
     sortFn: (coin) => coin.marketCap,
   },
   {
     id: "usdValue",
-    text: "USD Value",
+    headerContent: "USD Value",
     width: 130,
     sortFn: (coin) => coin.ownedValue,
   },
   {
     id: "ownedValue",
-    text: "Value",
+    headerContent: "Value",
     width: 110,
     sortFn: (coin) => coin.ownedValue,
   },

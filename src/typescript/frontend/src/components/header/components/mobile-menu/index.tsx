@@ -3,7 +3,6 @@ import {
   isAptosConnectWallet,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { Badge } from "components/Badge";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { EXTERNAL_LINK_PROPS, Link } from "components/link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -11,7 +10,8 @@ import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { AnimatePresence, useAnimationControls } from "framer-motion";
 import { Copy, LogOut, User, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { EXTERNAL_LINKS } from "router/external-links";
 import { ROUTES } from "router/routes";
 
 import useIsUserGeoblocked from "@/hooks/use-is-user-geoblocked";
@@ -95,6 +95,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   };
   const geoblocked = useIsUserGeoblocked();
 
+  const linksWithDocs = useMemo(
+    () => [...linksForCurrentPage, { title: "docs", path: EXTERNAL_LINKS.docs }],
+    [linksForCurrentPage]
+  );
+
   return (
     <StyledMotion initial="hidden" animate={isOpen ? "visible" : "hidden"} variants={slideVariants}>
       <MobileMenuWrapper>
@@ -150,27 +155,16 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
               </>
             )}
           </AnimatePresence>
-          {linksForCurrentPage.map(({ title, path }, i) => {
+          {linksWithDocs.map(({ title, path }, i) => {
             return (
               <Link
                 key={title}
                 href={path}
-                target={path.startsWith("https://") ? "_blank" : undefined}
                 onClick={handleCloseMobileMenu}
                 width="100%"
+                {...(path.startsWith("https://") ? EXTERNAL_LINK_PROPS : {})}
               >
-                <MobileMenuItem
-                  title={title}
-                  noBorder={i === linksForCurrentPage.length - 1}
-                  pill={
-                    title === "arena"
-                      ? {
-                          className: "flex flex-row items-center gap-[.5em]",
-                          pill: <Badge color="econiaBlue">NEW</Badge>,
-                        }
-                      : undefined
-                  }
-                />
+                <MobileMenuItem title={title} noBorder={i === linksWithDocs.length - 1} />
               </Link>
             );
           })}

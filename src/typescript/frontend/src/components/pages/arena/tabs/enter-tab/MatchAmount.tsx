@@ -56,15 +56,18 @@ export function MatchAmount({
   );
 }
 
+const DURATION_PERCENTAGE_DECIMALS = 3;
+
 const DEFAULT_AMOUNT = {
   matchAmount: 0n,
   formattedAmount: 0n,
+  durationPercentage: (0).toFixed(DURATION_PERCENTAGE_DECIMALS),
 };
 
 /**
  * Calculates the match amount based on the input and available rewards, updating on an interval.
  */
-function useLiveMatchAmount(
+export function useLiveMatchAmount(
   rewardsRemaining: bigint,
   arenaInfo: ArenaInfoModel | undefined,
   position: CurrentUserPosition | null,
@@ -102,6 +105,7 @@ function useLiveMatchAmount(
       return {
         matchAmount: finalMatchAmount,
         formattedAmount,
+        durationPercentage: durationPercentage.toNumber().toFixed(DURATION_PERCENTAGE_DECIMALS),
       };
     } catch (_) {
       return DEFAULT_AMOUNT;
