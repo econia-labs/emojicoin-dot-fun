@@ -9,9 +9,9 @@ export type HomePageSearchParams = {
   page: string | undefined;
   sort: SortByPageQueryParams | undefined;
   order: OrderByStrings | undefined;
-  bonding: boolean | undefined;
+  bonding: string | undefined;
   q: string | undefined;
-  isFilterFavorites: string | undefined;
+  favorites: string | undefined;
 };
 
 export const constructURLForHomePage = ({

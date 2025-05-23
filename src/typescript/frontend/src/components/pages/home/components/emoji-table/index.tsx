@@ -121,7 +121,7 @@ const EmojiTable = (props: EmojiTableProps) => {
     toggleStateRef.current = newVal;
     startTransition(() => {
       const curr = toggleStateRef.current;
-      updateSearchParam({ isFilterFavorites: curr ? "true" : "false" });
+      updateSearchParam({ favorites: curr ? "true" : "false" });
       clientCookies.saveSetting("homePageFilterFavorites", curr);
     });
   };
