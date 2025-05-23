@@ -2,6 +2,13 @@ import { LINKS } from "lib/env";
 
 import { EXTERNAL_LINK_PROPS } from "@/components/link";
 
+export const GET_MATCHED_EXPLANATION_STRINGS = [
+  "Getting matched is a reward mechanism that matches a portion of your APT deposit with additional APT from the rewards pool.",
+  "The earlier you get matched during a melee, the higher percentage match you receive.",
+  "When matched, your position remains in the melee until it ends, unless you 'tap out' by returning the matched APT.",
+  "This feature rewards early participants and encourages commitment for the full melee duration.",
+];
+
 const INFO = [
   {
     title: "What is the emojicoin arena?",
@@ -16,17 +23,16 @@ const INFO = [
   {
     title: "Why trade in the arena?",
     paragraph:
-      "emojicoin arena answers the age-old question: what are we trading today? In other words, emojicoin arena concentrates activity around a single trading pair each day, allowing the best traders to compete purely on trading strategies without any confusing guesswork. Trading in the arena offers three key benefits: 1) lower fees compared to regular swaps, 2) rewards through a 'lock in' feature where your deposits can be matched with additional APT, and 3) performance tracking to see your profits and losses.",
+      "emojicoin arena answers the age-old question: what are we trading today? In other words, emojicoin arena concentrates activity around a single trading pair each day, allowing the best traders to compete purely on trading strategies without any confusing guesswork. Trading in the arena offers three key benefits: 1) lower fees compared to regular swaps, 2) rewards through a 'get matched' feature where your deposits can be matched with additional APT, and 3) performance tracking to see your profits and losses.",
   },
   {
     title: "How do I 'win' in the arena?",
     paragraph:
-      "Success in emojicoin arena comes from strategic trading between the two emojicoins featured in a melee. By entering early, locking in for matched rewards, and skillfully timing your swaps between the two emojicoins, you can maximize your returns. Your goal is to simply end with more value than you started with, either by holding the emojicoins you believe will increase in value or by actively trading between them to capture price movements.",
+      "Success in emojicoin arena comes from strategic trading between the two emojicoins featured in a melee. By entering early, receiving rewards from getting matched, and skillfully timing your swaps between the two emojicoins, you can maximize your returns. Your goal is to simply end with more value than you started with, either by holding the emojicoins you believe will increase in value or by actively trading between them to capture price movements.",
   },
   {
-    title: "What is 'locking in' and why should I do it?",
-    paragraph:
-      "Locking in is a reward mechanism that matches a portion of your APT deposit with additional APT from the rewards pool. The earlier you lock in during a melee, the higher percentage match you receive. When locked in, your position remains in the melee until it ends, unless you 'tap out' by returning the matched APT. This feature rewards early participants and encourages commitment for the full melee duration.",
+    title: "What is 'getting matched' and why should I do it?",
+    paragraph: GET_MATCHED_EXPLANATION_STRINGS.join(" "),
   },
   {
     title: "How does trading work in a melee?",
@@ -36,7 +42,7 @@ const INFO = [
   {
     title: "How do I exit a melee?",
     paragraph:
-      "You can exit an active melee at any time if you haven't locked in. If you've locked in, you can only exit when the melee ends or by 'tapping out' (returning your matched APT). For melees that have already ended, go to your Profile tab and click the exit button next to the relevant melee.",
+      "You can exit an active melee at any time if you haven't been matched. If you've been matched, you can only exit when the melee ends or by 'tapping out' (returning your matched APT). For melees that have already ended, go to your Profile tab and click the exit button next to the relevant melee.",
   },
   {
     title: "How are emojicoins selected for a melee?",
