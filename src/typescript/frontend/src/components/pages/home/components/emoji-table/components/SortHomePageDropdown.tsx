@@ -70,9 +70,8 @@ export default function SortHomePageDropdown({
       >
         <DropdownArrow className="fill-ec-blue" visibility="visible" />
         {sortOptionsEntries.map(([choice, title], i) => (
-          <>
+          <div key={`sort-home-dropdown-${choice}`}>
             <ScrambledDropdownItem
-              key={`sort-home-dropdown-${choice}`}
               onSelect={() => {
                 onSortChange(choice as HomePageSortOptions);
               }}
@@ -83,7 +82,7 @@ export default function SortHomePageDropdown({
             {i < sortOptionsEntries.length - 1 && (
               <div className="border-b-2 border-dashed border-b-black" />
             )}
-          </>
+          </div>
         ))}
       </DropdownContent>
     </DropdownMenu>

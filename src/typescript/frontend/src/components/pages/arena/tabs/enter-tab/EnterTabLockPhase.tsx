@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 
 import Button from "@/components/button";
 import ButtonWithConnectWalletFallback from "@/components/header/wallet-button/ConnectWalletButton";
+import Info from "@/components/info";
 import Popup from "@/components/popup";
 import { Switcher } from "@/components/switcher";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
@@ -14,6 +15,7 @@ import useRewardsRemaining from "@/hooks/use-rewards-remaining";
 import { getEvents, type MarketStateModel } from "@/sdk/index";
 
 import { useArenaPhaseStore } from "../../phase/store";
+import { GET_MATCHED_EXPLANATION_STRINGS } from "../InfoTab";
 import { FormattedNominalNumber } from "../utils";
 import { MatchAmount } from "./MatchAmount";
 
@@ -55,7 +57,16 @@ export default function EnterTabLockPhase({
     <div className="flex flex-col grow items-center">
       <div className="flex flex-col grow justify-center">
         <div className="flex justify-between w-[300px]">
-          <div className="font-forma text-2xl uppercase text-white text-center">Lock in</div>
+          <div className="flex gap-[6px] items-center font-forma text-xl uppercase text-white text-center">
+            Get matched
+            <Info imageClassName="!mb-[1px]">
+              <div className="flex flex-col gap-1">
+                {GET_MATCHED_EXPLANATION_STRINGS.map((content, i) => {
+                  return <div key={`${content.substring(10)}-${i}`}>{content}</div>;
+                })}
+              </div>
+            </Info>
+          </div>
           <div className="flex gap-[1em] items-center">
             <div className="uppercase text-light-gray text-xl">
               {mustLockIn ? (
