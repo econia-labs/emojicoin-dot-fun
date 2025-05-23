@@ -3,22 +3,18 @@ import { motion } from "framer-motion";
 
 import { useMatchBreakpoints } from "@/hooks/index";
 import useRewardsRemaining from "@/hooks/use-rewards-remaining";
-import { ONE_APT_BIGINT } from "@/sdk/index";
 
 import { useLiveMatchAmount } from "../../arena/tabs/enter-tab/MatchAmount";
 
-export default function LockInEarlyMessage() {
+export default function GetMatchedEarlyMessage() {
   const { isMobile } = useMatchBreakpoints();
   const rewardsRemaining = useRewardsRemaining();
   const arenaInfo = useEventStore((s) => s.arenaInfoFromServer);
   const { durationPercentage } = useLiveMatchAmount(
     rewardsRemaining,
     arenaInfo,
-    null, // position can be `null` since it just affects the lower bound of the eligible match amount.
-    // Ensure the simulated input amount is exactly the amount it would take to reach the max matched amount.
-    // This ensures that the displayed match amount is the total max possible.
-    // arenaInfo ? arenaInfo.maxMatchAmount / arenaInfo.maxMatchPercentage : 0n
-    ONE_APT_BIGINT
+    null, // Doesn't affect duration percentage.
+    0n // Doesn't affect duration percentage.
   );
 
   return (

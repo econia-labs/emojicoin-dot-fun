@@ -42,7 +42,7 @@ const INFO = [
   {
     title: "How do I exit a melee?",
     paragraph:
-      "You can exit an active melee at any time if you haven't gotten matched. If you've gotten matched, you can only exit when the melee ends or by 'tapping out' (returning your matched APT). For melees that have already ended, go to your Profile tab and click the exit button next to the relevant melee.",
+      "You can exit an active melee at any time if you haven't been matched. If you've been matched, you can only exit when the melee ends or by 'tapping out' (returning your matched APT). For melees that have already ended, go to your Profile tab and click the exit button next to the relevant melee.",
   },
   {
     title: "How are emojicoins selected for a melee?",

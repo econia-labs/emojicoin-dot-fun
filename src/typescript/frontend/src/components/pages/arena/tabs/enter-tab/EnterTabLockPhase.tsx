@@ -33,7 +33,7 @@ export default function EnterTabLockPhase({
   const setError = useArenaPhaseStore((s) => s.setError);
   const rewardsRemaining = useRewardsRemaining();
   const arenaInfo = useEventStore((s) => s.arenaInfoFromServer);
-  // Lock in by default if there are rewards remaining.
+  // Lock in ("get matched") by default if there are rewards remaining.
   const [innerLock, setInnerLock] = useState<boolean>(position?.lockedIn || !!rewardsRemaining);
 
   const { mustLockIn, lockedIn } = useMemo(() => {

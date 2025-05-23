@@ -17,7 +17,7 @@ import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { getEmojisInString } from "@/sdk/emoji_data";
 import { toTotalAptLocked } from "@/sdk/indexer-v2/types";
 
-import LockInEarlyMessage from "../LockInEarlyMessage";
+import GetMatchedEarlyMessage from "../GetMatchedEarlyMessage";
 
 type ArenaCardProps = {
   meleeData: NonNullable<HomePageProps["meleeData"]>;
@@ -97,7 +97,7 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
         }}
       >
         <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena}>
-          {isMobile && <LockInEarlyMessage />}
+          {isMobile && <GetMatchedEarlyMessage />}
           {arenaVs}
           {!isMobile && (
             <Button scale="xl" className="mx-auto">
@@ -106,7 +106,7 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
           )}
         </Link>
         <div className={`flex flex-col gap-[2em] max-w-full ${isMobile ? "items-center" : ""}`}>
-          {!isMobile && <LockInEarlyMessage />}
+          {!isMobile && <GetMatchedEarlyMessage />}
           <Countdown duration={duration} startTime={startTime} />
 
           <div className="flex flex-col gap-[.4em] arena-market-data-text">
