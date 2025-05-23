@@ -12,7 +12,7 @@ import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useTransition } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
@@ -55,6 +55,12 @@ const EmojiTable = (props: EmojiTableProps) => {
   const emojis = useEmojiPicker((s) => s.emojis);
 
   const updateSearchParam = useUpdateSearchParam();
+  // Use the prop value by default, but instantly set the new state
+  // on the beginning of the transition when the toggle is switched.
+  // This ref tracks the *optimistic* toggle value; that is, the value
+  // that is expected but not asynchronously confirmed with cookies yet.
+  const [isLoading, startTransition] = useTransition();
+  const toggleStateRef = useRef(props.isFavoriteFilterEnabled);
 
   useEffect(() => {
     loadMarketStateFromServer(markets);
@@ -103,10 +109,21 @@ const EmojiTable = (props: EmojiTableProps) => {
   const rowLength = useGridRowLength();
 
   // We update the URL and also save the setting in cookies for next time /home page is loaded.
-  // The logic could probably be made more generic and reused to also save bump order preference in cookies in a separate PR.
   const setIsFilterFavorites = (newVal: boolean) => {
-    updateSearchParam({ isFilterFavorites: newVal ? "true" : "false" });
-    clientCookies.saveSetting("homePageFilterFavorites", newVal);
+    // Note the usage of the ref here facilitates snappy transitions through the usage of
+    // `startTransition` with `isLoading` and the final/ultimate ref value. This avoids
+    // inadvertently capturing the stale value in a callback and using it; that is,
+    // if a user toggles the switch multiple times, the ref is always immediately set,
+    // and at the end of the transition, the ref is retrieved/used again, rather than
+    // the value originally passed into the function.
+    // This also works visually by using the ref value as the switch/toggle value
+    // when `isLoading` is true.
+    toggleStateRef.current = newVal;
+    startTransition(() => {
+      const curr = toggleStateRef.current;
+      updateSearchParam({ isFilterFavorites: curr ? "true" : "false" });
+      clientCookies.saveSetting("homePageFilterFavorites", curr);
+    });
   };
 
   return (
@@ -144,7 +161,9 @@ const EmojiTable = (props: EmojiTableProps) => {
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
-                isFilterFavorites={props.isFavoriteFilterEnabled}
+                isFilterFavorites={
+                  isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
+                }
                 setIsFilterFavorites={setIsFilterFavorites}
               />
             </motion.div>

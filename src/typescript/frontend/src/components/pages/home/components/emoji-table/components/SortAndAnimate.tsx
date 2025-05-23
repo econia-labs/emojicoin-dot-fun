@@ -71,7 +71,7 @@ export default function SortAndAnimate({
 
                 <Switcher
                   disabled={favoritesDisabled}
-                  checked={isFilterFavorites || false}
+                  checked={!favoritesDisabled && isFilterFavorites}
                   onChange={() => setIsFilterFavorites(!isFilterFavorites)}
                   scale={isLaptopL ? "md" : "sm"}
                 />

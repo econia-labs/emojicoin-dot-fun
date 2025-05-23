@@ -6,13 +6,13 @@ import { cn } from "lib/utils/class-name";
 import { Heart } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import type { SymbolEmoji } from "@/sdk/index";
+import type { SymbolEmojiData } from "@/sdk/emoji_data/types";
 
 import Popup from "../popup";
 
 interface Props {
   marketAddress?: `0x${string}`;
-  emojis?: SymbolEmoji[];
+  emojis?: SymbolEmojiData[];
   className?: string;
 }
 
@@ -23,8 +23,8 @@ interface Props {
  * @component
  * @param {Object} props - Component props
  * @param {string} [props.marketAddress] - The address of the market to favorite/unfavorite
- * @param {SymbolEmoji[]} [props.emojis] - Array of emojis that can be used to derive a market address
- *                                    (used if marketAddress is not provided)
+ * @param {SymbolEmojiData[]} [props.emojis] - Array of emojis that can be used to derive a market address
+ *                                             (used if marketAddress is not provided)
  * @param {string} [props.className] - CSS class name to apply to the heart icon
  *
  * @returns A heart icon button that toggles favorite status, or a spinner when loading
@@ -38,12 +38,7 @@ export const FavoriteButton = ({ emojis, className }: Props) => {
     checkIsFavorite,
   } = useGetFavoriteMarkets();
 
-  const isFavorite = useMemo(() => {
-    if (emojis) {
-      return checkIsFavorite(emojis);
-    }
-    return false;
-  }, [checkIsFavorite, emojis]);
+  const isFavorite = useMemo(() => checkIsFavorite(emojis), [checkIsFavorite, emojis]);
 
   const toggleFavorite = useFavoriteTransactionBuilder(emojis || [], !isFavorite);
 
