@@ -7,14 +7,19 @@ import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { HistoricalEscrow } from "@/sdk/index";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
+import { PriceDelta } from "@/components/price-feed/inner";
 
 export type ArenaProps = {
   arenaInfo: ArenaInfoModel;
   market0: MarketStateModel;
   market1: MarketStateModel;
+  market0Delta: number;
+  market1Delta: number;
 };
 
-export type ArenaPropsWithVaultBalance = ArenaProps & { vaultBalance: bigint };
+export type ArenaPropsWithVaultBalance = ArenaProps & {
+  vaultBalance: bigint;
+};
 
 export const Box = ({
   className,
@@ -35,11 +40,15 @@ const getFontMultiplier = (emojis: number) => {
 
 export const EmojiTitle = ({
   onClicks,
+  market0Delta,
+  market1Delta,
 }: {
   onClicks?: {
     emoji0: () => void;
     emoji1: () => void;
   };
+  market0Delta: number;
+  market1Delta: number;
 }) => {
   const { isMobile, isTablet, isLaptop } = useMatchBreakpoints();
   const { market0, market1 } = useCurrentMeleeInfo();
@@ -69,11 +78,17 @@ export const EmojiTitle = ({
         gridTemplateColumns: "1fr auto 1fr",
       }}
     >
-      <GlowingEmoji onClick={onClicks?.emoji0} emojis={emojis0.join("")} />
+      <div className="flex flex-row gap-2">
+        <GlowingEmoji onClick={onClicks?.emoji0} emojis={emojis0.join("")} />
+        <PriceDelta delta={market0Delta} />
+      </div>
       <span style={{ fontSize: baseFontSize * 1.2 + "px" }} className="text-light-gray">
         vs
       </span>{" "}
-      <GlowingEmoji onClick={onClicks?.emoji1} emojis={emojis1.join("")} />
+      <div className="flex flex-row gap-2">
+        <GlowingEmoji onClick={onClicks?.emoji1} emojis={emojis1.join("")} />
+        <PriceDelta delta={market1Delta} />
+      </div>
     </div>
   );
 };

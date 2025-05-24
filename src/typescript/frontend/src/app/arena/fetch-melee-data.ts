@@ -5,6 +5,9 @@ import { parseJSON, stringifyJSON } from "utils";
 
 import { fetchSpecificMarkets, fetchVaultBalance, toArenaInfoModel } from "@/sdk/indexer-v2";
 
+import fetchCachedExchangeRatesAtMeleeStart from "./fetch-melee-start-open-price";
+import calculateExchangeRateDelta from "./calculate-exchange-rate-delta";
+
 const logAndDefault = (e: unknown) => {
   console.error(e);
   return {
@@ -12,10 +15,12 @@ const logAndDefault = (e: unknown) => {
     market0: null,
     market1: null,
     rewardsRemaining: null,
+    market0Delta: null,
+    market1Delta: null,
   } as const;
 };
 
-type MeleeData = Awaited<ReturnType<typeof fetchMeleeData>>;
+export type MeleeData = Awaited<ReturnType<typeof fetchMeleeData>>;
 const fetchMeleeData = async () => {
   try {
     const vaultBalancePromise = fetchVaultBalance();
@@ -26,6 +31,21 @@ const fetchMeleeData = async () => {
     if (!arenaInfo) {
       throw new Error("Couldn't fetch arena info");
     }
+
+    const exchangeRatesAtMeleeStartPromise = fetchCachedExchangeRatesAtMeleeStart({
+      market0Address: arenaInfo.emojicoin0MarketAddress,
+      market1Address: arenaInfo.emojicoin1MarketAddress,
+      version: arenaInfo.version.toString(),
+    }).catch((e) => {
+      console.error(
+        `Couldn't fetch exchange rates at melee start for melee ID: ${arenaInfo.meleeID}`
+      );
+      console.error(e);
+      return {
+        market0ExchangeRate: null,
+        market1ExchangeRate: null,
+      };
+    });
 
     const { market0, market1 } = await fetchSpecificMarkets([
       arenaInfo.emojicoin0Symbols,
@@ -39,12 +59,21 @@ const fetchMeleeData = async () => {
       throw new Error("Couldn't fetch arena markets.");
     }
 
-    const vaultBalance = await vaultBalancePromise;
+    const [vaultBalance, meleeStartExchangeRates] = await Promise.all([
+      vaultBalancePromise,
+      exchangeRatesAtMeleeStartPromise,
+    ]);
+
+    const { market0ExchangeRate: mkt0Rate, market1ExchangeRate: mkt1Rate } =
+      meleeStartExchangeRates;
+
     return {
       arenaInfo,
       market0,
       market1,
       rewardsRemaining: vaultBalance ? vaultBalance.arenaVaultBalanceUpdate.newBalance : 0n,
+      market0Delta: mkt0Rate ? calculateExchangeRateDelta(mkt0Rate, market0) : null,
+      market1Delta: mkt1Rate ? calculateExchangeRateDelta(mkt1Rate, market1) : null,
     };
   } catch (e) {
     return logAndDefault(e);
