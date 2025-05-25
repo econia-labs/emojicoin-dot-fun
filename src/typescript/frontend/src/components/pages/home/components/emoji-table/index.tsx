@@ -110,7 +110,7 @@ const EmojiTable = (props: EmojiTableProps) => {
             <motion.div
               key={rowLength}
               id="emoji-grid-header"
-              className="flex w-full flex-col md:flex-row justify-between items-center px-3 border-b md:border-b-0 border-x border-solid border-dark-gray md:justify-start"
+              className="flex w-full max-w-[500px] md:max-w-full flex-col md:flex-row justify-between items-center px-3 md:border-x border-solid border-dark-gray md:justify-start"
               style={{
                 width: md ? rowLength * EMOJI_GRID_ITEM_WIDTH : undefined,
               }}
@@ -128,7 +128,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                 onSortChange={handleSortChange}
               />
             </motion.div>
-            <Separator className="hidden md:block" />
+            <Separator />
             {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
                 This provides a smooth transition from grids of varying row lengths. */}
             {markets.length > 0 ? (

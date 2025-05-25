@@ -57,7 +57,7 @@ const Mobile = React.memo((props: ArenaProps) => {
     <>
       <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
         <Box className="grid place-items-center gap-[1em] py-[1em]">
-          <EmojiTitle fontSizeMultiplier={2.5} />
+          <EmojiTitle />
           <div className="text-4xl">
             <Countdown
               startTime={arenaInfo.startTime}

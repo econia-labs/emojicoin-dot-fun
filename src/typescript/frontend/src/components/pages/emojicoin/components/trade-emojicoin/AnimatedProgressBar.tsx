@@ -65,13 +65,11 @@ export const AnimatedProgressBar = (props: GridProps) => {
     <motion.div className="flex w-full rounded-sm h-[100%] !p-0">
       <motion.div
         style={{ filter: "brightness(1) drop-shadow(0 1px 2px #fff0)" }}
-        className="w-100% md:w-auto p-[0.7em] relative flex my-auto px-[21px] opacity-[0.9]"
+        className="w-100% md:w-auto p-[0.7em] relative flex my-auto px-3 opacity-[0.9]"
         animate={flickerControls}
       >
-        <p className="pixel-heading-4 md:pixel-heading-3 uppercase text-light-gray">
-          Bonding progress:&nbsp;
-        </p>
-        <p className="pixel-heading-4 md:pixel-heading-3 uppercase">{`${progress.toFixed(1)}%`}</p>
+        <p className="pixel-heading-4 uppercase text-light-gray">Bonding progress:&nbsp;</p>
+        <p className="pixel-heading-4 uppercase">{`${progress.toFixed(1)}%`}</p>
       </motion.div>
       <motion.div
         className="absolute drop-shadow-voltage bottom-0 bg-blue h-[1px]"

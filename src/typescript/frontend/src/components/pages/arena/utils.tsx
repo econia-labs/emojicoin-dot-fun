@@ -1,10 +1,10 @@
 import type { ClassValue } from "clsx";
 import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
-import { cn } from "lib/utils/class-name";
 import React, { useMemo } from "react";
 import { GlowingEmoji } from "utils/emoji";
 
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 import type { HistoricalEscrow } from "@/sdk/index";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 
@@ -30,48 +30,47 @@ export const Box = ({
 );
 
 const getFontMultiplier = (emojis: number) => {
-  return 1 - (emojis * 6) / 60;
+  return 1 - (emojis * 5) / 6 / 10;
 };
 
 export const EmojiTitle = ({
   onClicks,
-  fontSizeMultiplier = 1,
 }: {
   onClicks?: {
     emoji0: () => void;
     emoji1: () => void;
   };
-  fontSizeMultiplier?: number;
 }) => {
+  const { sm, md, lg, xl } = useTailwindBreakpoints();
   const { market0, market1 } = useCurrentMeleeInfo();
 
-  const { emojis0, emojis1, fontSize } = useMemo(() => {
+  const { emojis0, emojis1, baseFontSize } = useMemo(() => {
     const emojis0 = market0?.market.symbolEmojis ?? [];
     const emojis1 = market1?.market.symbolEmojis ?? [];
-
-    const fontSize =
-      4 * getFontMultiplier(Math.max(emojis0.length, emojis1.length)) * fontSizeMultiplier;
     return {
       emojis0,
       emojis1,
-      fontSize,
+      // Formula to get a good font size for the amount of emojis to display.
+      // Works great for up to 6 emojis (not tested for more, but might work as well).
+      baseFontSize:
+        72 *
+        (sm ? 0.75 : md ? 0.6 : lg || xl ? 0.69 : 1) *
+        getFontMultiplier(emojis0.length + emojis1.length),
     };
-  }, [fontSizeMultiplier, market0?.market.symbolEmojis, market1?.market.symbolEmojis]);
+  }, [market0?.market.symbolEmojis, market1?.market.symbolEmojis, sm, md, lg, xl]);
 
   return (
     <div
-      className={cn("grid place-items-center uppercase w-[100%] h-full")}
+      className="grid place-items-center uppercase w-[100%]"
       style={{
+        fontSize: baseFontSize + "px",
         gridTemplateColumns: "1fr auto 1fr",
-        fontSize: fontSize + "vw",
       }}
     >
-      <GlowingEmoji
-        className="md:text-inherit"
-        onClick={onClicks?.emoji0}
-        emojis={emojis0.join("")}
-      />
-      <span className="text-light-gray text-[4vw]">vs</span>{" "}
+      <GlowingEmoji onClick={onClicks?.emoji0} emojis={emojis0.join("")} />
+      <span style={{ fontSize: baseFontSize * 1.2 + "px" }} className="text-light-gray">
+        vs
+      </span>{" "}
       <GlowingEmoji onClick={onClicks?.emoji1} emojis={emojis1.join("")} />
     </div>
   );

@@ -16,7 +16,7 @@ export type ProfileTabProps = {
   arenaInfo: ArenaInfoModel;
 };
 
-const headerFlexColClass = "md:h-full flex flex-col justify-evenly";
+const headerFlexColClass = "md:h-full flex flex-col justify-start";
 const headerTitleClass = "text-light-gray text-xl uppercase text-nowrap";
 const headerValueClass = "text-white text-3xl font-forma uppercase";
 const MeleeStatsHyphens = () => <div className={headerValueClass}>{"--"}</div>;
