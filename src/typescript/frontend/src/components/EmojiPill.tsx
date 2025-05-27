@@ -18,13 +18,10 @@ export const EmojiPill = ({
   return (
     <Popup content={description}>
       <div
-        className={
-          "px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full " +
-          "border-dark-gray h-[1.5rem] w-fit cursor-pointer hover:bg-neutral-800"
-        }
+        className="flex justify-center items-center w-10 h-6 border border-dark-gray border-solid rounded-xl"
         onClick={onClick}
       >
-        <Emoji className="mt-[.11rem]" emojis={emoji(emojiName)} />
+        <Emoji emojis={emoji(emojiName)} />
       </div>
     </Popup>
   );
