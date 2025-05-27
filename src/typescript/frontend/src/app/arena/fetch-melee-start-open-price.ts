@@ -39,7 +39,7 @@ async function fetchExchangeRatesAtMeleeStart({
  * Fetch the exchange rates of the two emojicoins in the melee at the exact version the melee began.
  */
 const fetchCachedExchangeRatesAtMeleeStart = unstable_cache(fetchExchangeRatesAtMeleeStart, [], {
-  // Revalidate every 10 minutes to avoid potential 404s returning indefinitely.
+  // Revalidate every 10 minutes to avoid permanently caching a response as a 404 response.
   revalidate: 600,
   tags: ["fetch-exchange-rates-at-melee-start"],
 });
