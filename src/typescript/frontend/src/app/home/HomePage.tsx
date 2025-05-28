@@ -6,8 +6,9 @@ import TextCarousel from "components/text-carousel/TextCarousel";
 import FEATURE_FLAGS from "lib/feature-flags";
 import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
+import type { ArenaProps } from "@/components/pages/arena/utils";
 import { SubscribeToHomePageEvents } from "@/components/pages/home/components/SubscribeToHomePageEvents";
-import type { ArenaInfoModel, DatabaseModels, MarketStateModel } from "@/sdk/indexer-v2/types";
+import type { DatabaseModels } from "@/sdk/indexer-v2/types";
 
 export interface HomePageProps {
   markets: Array<DatabaseModels["market_state"]>;
@@ -17,11 +18,7 @@ export interface HomePageProps {
   searchBytes?: string;
   children?: React.ReactNode;
   priceFeed: DatabaseModels["price_feed"][];
-  meleeData: {
-    arenaInfo: ArenaInfoModel;
-    market0: MarketStateModel;
-    market1: MarketStateModel;
-  } | null;
+  meleeData: ArenaProps | null;
 }
 
 export default async function HomePageComponent({

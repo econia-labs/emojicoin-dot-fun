@@ -31,7 +31,13 @@ const Desktop = React.memo((props: ArenaProps) => {
       <Box className="grid place-items-center">
         <EmojiTitle market0Delta={props.market0Delta} market1Delta={props.market1Delta} />
       </Box>
-      <Box className="col-span-2 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
+      <Box
+        className={cn(
+          "col-span-2 text-4xl",
+          "[@media(min-width:860px)_and_(max-width:1024px)]:text-5xl lg:text-6xl xl:text-7xl",
+          "grid place-items-center"
+        )}
+      >
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
       <RewardsRemainingBox />
