@@ -24,7 +24,15 @@ const selectMelee = () =>
     .select("*")
     .order("melee_id", ORDER_BY.DESC)
     .limit(1)
-    .single();
+    .single<DatabaseJsonType["arena_melee_events"]>();
+
+const selectMeleeByMeleeID = ({ meleeID }: { meleeID: AnyNumberString }) =>
+  postgrest
+    .from(TableName.ArenaMeleeEvents)
+    .select("*")
+    .eq("melee_id", meleeID)
+    .limit(1)
+    .single<DatabaseJsonType["arena_melee_events"]>();
 
 // prettier-ignore
 const selectArenaInfoByMeleeID = ({ meleeID }: {meleeID: AnyNumberString}) =>
@@ -108,7 +116,8 @@ const selectArenaCandlesticksSince = ({
   return query;
 };
 
-export const fetchMelee = queryHelperSingle(selectMelee, toArenaMeleeModel);
+export const fetchLatestMeleeEvent = queryHelperSingle(selectMelee, toArenaMeleeModel);
+export const fetchMeleeEventByMeleeIDJson = queryHelperSingle(selectMeleeByMeleeID);
 export const fetchArenaInfo = queryHelperSingle(selectArenaInfo, toArenaInfoModel);
 export const fetchArenaInfoByMeleeID = queryHelperSingle(
   selectArenaInfoByMeleeID,

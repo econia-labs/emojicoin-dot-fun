@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { GlowingEmoji } from "utils/emoji";
 
+import ArenaMarketsPriceDeltaPopover from "@/components/pages/arena/ArenaMarketsPriceDeltaPopover";
 import { FlexGap } from "@/containers";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
@@ -27,6 +28,8 @@ const meleeDataToArenaCardProps = ({
   arenaInfo,
   market0,
   market1,
+  market0Delta,
+  market1Delta,
 }: ArenaCardProps["meleeData"]) => ({
   market0Symbol: market0.market.symbolEmojis.join(""),
   market1Symbol: market1.market.symbolEmojis.join(""),
@@ -44,6 +47,8 @@ const meleeDataToArenaCardProps = ({
   }),
   startTime: arenaInfo.startTime,
   duration: arenaInfo.duration / 1000n / 1000n,
+  market0Delta,
+  market1Delta,
 });
 
 export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
@@ -58,10 +63,13 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
     aptLocked,
     startTime,
     duration,
+    market0Delta,
+    market1Delta,
   } = useMemo(() => {
     const { meleeInfo: arenaInfo, market0, market1 } = currentMeleeInfo;
+    const { market0Delta, market1Delta } = meleeData;
     return arenaInfo && market0 && market1
-      ? meleeDataToArenaCardProps({ arenaInfo, market0, market1 })
+      ? meleeDataToArenaCardProps({ arenaInfo, market0, market1, market0Delta, market1Delta })
       : meleeDataToArenaCardProps(meleeData);
   }, [currentMeleeInfo, meleeData]);
 
@@ -75,13 +83,19 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
       <div
         className={`relative grid items-center place-items-center symbol-${getEmojisInString(market0Symbol).length}`}
       >
-        <GlowingEmoji className="flex flex-row text-nowrap" emojis={market0Symbol} />
+        <div className="m-auto">
+          <GlowingEmoji className="flex flex-row text-nowrap" emojis={market0Symbol} />
+        </div>
+        <ArenaMarketsPriceDeltaPopover delta={market0Delta} />
       </div>
       <span className="vs text-light-gray uppercase m-auto text-[.8em]">vs</span>
       <div
         className={`relative grid items-center place-items-center symbol-${getEmojisInString(market1Symbol).length}`}
       >
-        <GlowingEmoji className="flex flex-row text-nowrap" emojis={market1Symbol} />
+        <div className="m-auto">
+          <GlowingEmoji className="flex flex-row text-nowrap" emojis={market1Symbol} />
+        </div>
+        <ArenaMarketsPriceDeltaPopover delta={market1Delta} />
       </div>
     </div>
   );
