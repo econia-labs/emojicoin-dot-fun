@@ -11,6 +11,8 @@ import type { DatabaseStructType } from "./indexer-v2/types/json-types";
 import type { Types } from "./types";
 import type { CoinTypeString } from "./utils";
 import type { ValueOf } from "./utils/utility-types";
+import { z } from "zod";
+import { PositiveIntegerSchema } from "./utils/validation/integer";
 
 export const VERCEL = process.env.VERCEL === "1";
 let vercelTargetEnv: "production" | "preview" | "development" | "release-preview";
@@ -83,6 +85,9 @@ const serverKeys: Record<Network, string | undefined> = {
   [Network.MAINNET]: process.env.SERVER_MAINNET_APTOS_API_KEY,
 };
 
+// Select the API key from all env var API keys. This means we don't have to change the env
+// var for API keys when changing environments- we just need to provide them all every time, which
+// is much simpler.
 const clientApiKey = clientKeys[APTOS_NETWORK];
 const serverApiKey = serverKeys[APTOS_NETWORK];
 
@@ -90,9 +95,6 @@ const serverApiKey = serverKeys[APTOS_NETWORK];
 // is in a client-side context, and it should use the API key for client-side queries.
 export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
 
-// Select the API key from the list of env API keys. This means we don't have to change the env
-// var for API keys when changing environments- we just need to provide them all every time, which
-// is much simpler.
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const ARENA_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_ARENA_MODULE_ADDRESS))();
@@ -100,7 +102,9 @@ export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 export const INTEGRATOR_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS))();
-export const INTEGRATOR_FEE_RATE_BPS = Number(process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS);
+export const INTEGRATOR_FEE_RATE_BPS = PositiveIntegerSchema.parse(
+  process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
+);
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
 export const APTOS_COIN_TYPE_STRING = parseTypeTag(APTOS_COIN).toString() as CoinTypeString;

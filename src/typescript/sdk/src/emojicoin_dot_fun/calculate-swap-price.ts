@@ -1,10 +1,9 @@
-import Big from "big.js";
+import Big, { roundDown } from "big.js";
 
 import {
   BASE_VIRTUAL_FLOOR,
   BASIS_POINTS_PER_UNIT,
   EMOJICOIN_REMAINDER,
-  INTEGRATOR_FEE_RATE_BPS,
   POOL_FEE_RATE_BPS,
   QUOTE_REAL_CEILING,
   QUOTE_VIRTUAL_CEILING,
@@ -38,6 +37,7 @@ export type SwapNetProceedsArgs = {
   isSell: boolean;
   inputAmount: AnyNumberString;
   userEmojicoinBalance: AnyNumberString;
+  feeRateBPs: number;
 };
 
 export const getBPsFee = (principal: Big, feeRateBPs: AnyNumberString) =>
@@ -78,6 +78,7 @@ const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
     startsInBondingCurve,
     userEmojicoinBalance,
     isSell,
+    feeRateBPs,
   } = args;
   const inputAmount = Big(BigInt(args.inputAmount).toString());
   const balanceBefore = Big(BigInt(userEmojicoinBalance).toString());
@@ -105,7 +106,7 @@ const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
       });
       poolFee = getBPsFee(ammQuoteOutput, POOL_FEE_RATE_BPS);
     }
-    integratorFee = getBPsFee(ammQuoteOutput, INTEGRATOR_FEE_RATE_BPS);
+    integratorFee = getBPsFee(ammQuoteOutput, feeRateBPs);
     baseVolume = inputAmount; /* eslint-disable-line */
     quoteVolume = ammQuoteOutput.minus(poolFee).minus(integratorFee);
     const netProceeds = quoteVolume;
@@ -114,10 +115,10 @@ const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
     }
     // Unused, but kept here to preserve the Move code flow.
     const _balanceAfter = balanceBefore.minus(inputAmount);
-    return netProceeds;
+    return { netProceeds, integratorFee, poolFee, baseVolume, quoteVolume };
   } else {
     // -------------------------- Buying --------------------------
-    integratorFee = getBPsFee(inputAmount, INTEGRATOR_FEE_RATE_BPS);
+    integratorFee = getBPsFee(inputAmount, feeRateBPs);
     quoteVolume = inputAmount.minus(integratorFee);
     if (startsInBondingCurve) {
       const maxQuoteVolumeInClamm = Big(
@@ -164,19 +165,36 @@ const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
     const netProceeds = baseVolume;
     // Unused, but kept here to preserve the Move code flow.
     const _balanceAfter = balanceBefore.plus(netProceeds);
-    return netProceeds;
+    return { netProceeds, integratorFee, poolFee, baseVolume, quoteVolume };
   }
 };
 
 type NetProceedsReturnTypes =
   | {
       netProceeds: bigint;
+      integratorFee: bigint;
+      poolFee: bigint;
+      baseVolume: bigint;
+      quoteVolume: bigint;
       error: null;
     }
   | {
       netProceeds: 0n;
+      integratorFee: 0n;
+      poolFee: 0n;
+      baseVolume: 0n;
+      quoteVolume: 0n;
       error: CustomCalculatedSwapError;
     };
+
+/**
+ * Round a decimalized number down to zero decimal places like an unsigned integer will in Move.
+ * @param b the Big input
+ * @returns a bigint
+ */
+function roundDownToBigInt(b: Big): bigint {
+  return BigInt(b.round(0, Big.roundDown).toString());
+}
 
 /**
  * The wrapper function for calculating the swap proceeds. This function rounds
@@ -186,32 +204,34 @@ type NetProceedsReturnTypes =
  * @returns the total net proceeds- denominated in quote or volume based on `isSell`.
  * @returns 0 if the calculation results in an error.
  */
-export const calculateSwapNetProceeds = (args: {
-  clammVirtualReserves: Types["Reserves"];
-  cpammRealReserves: Types["Reserves"];
-  startsInBondingCurve: boolean;
-  isSell: boolean;
-  inputAmount: AnyNumberString;
-  userEmojicoinBalance: AnyNumberString;
-}): NetProceedsReturnTypes => {
+export const calculateSwapNetProceeds = (args: SwapNetProceedsArgs): NetProceedsReturnTypes => {
   try {
     const res = calculateExactSwapNetProceeds(args);
-    // Round down to zero decimal places like an unsigned integer will in Move.
-    const netProceeds = BigInt(res.round(0, Big.roundDown).toString());
     return {
-      netProceeds,
+      netProceeds: roundDownToBigInt(res.netProceeds),
+      integratorFee: roundDownToBigInt(res.integratorFee),
+      poolFee: roundDownToBigInt(res.poolFee),
+      baseVolume: roundDownToBigInt(res.baseVolume),
+      quoteVolume: roundDownToBigInt(res.quoteVolume),
       error: null,
     };
   } catch (e) {
+    const DEFAULTS = {
+      netProceeds: 0n,
+      integratorFee: 0n,
+      poolFee: 0n,
+      baseVolume: 0n,
+      quoteVolume: 0n,
+    } as const;
     if (e instanceof CustomCalculatedSwapError) {
       return {
-        netProceeds: 0n,
+        ...DEFAULTS,
         error: e,
       };
     }
     console.warn(`Unexpected error when calculating swap ${e}`);
     return {
-      netProceeds: 0n,
+      ...DEFAULTS,
       error: null,
     };
   }

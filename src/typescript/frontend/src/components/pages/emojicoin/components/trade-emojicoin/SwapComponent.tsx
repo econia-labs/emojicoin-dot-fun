@@ -11,7 +11,7 @@ import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-get-swap-gas";
-import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
+import { calculateSwapPriceFromMarketState } from "lib/utils/calculate-swap-price";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
 import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
@@ -94,7 +94,7 @@ export default function SwapComponent({
 
   const gasCost = useGetGasWithDefault({ marketAddress, inputAmount, isSell, numSwaps });
 
-  const { netProceeds, error } = useCalculateSwapPrice({
+  const { netProceeds, error } = calculateSwapPriceFromMarketState({
     latestMarketState,
     isSell,
     inputAmount,
