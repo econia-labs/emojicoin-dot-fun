@@ -101,8 +101,6 @@ export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
     () => props.arenaInfo.meleeID !== arenaInfo?.meleeID,
     [props.arenaInfo.meleeID, arenaInfo?.meleeID]
   );
-  
-  console.log(props.market0Delta, props.market1Delta)
 
   return isMobile ? (
     <Mobile

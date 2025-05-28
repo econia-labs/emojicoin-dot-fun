@@ -3,11 +3,11 @@ import type { CurrentUserPosition } from "lib/hooks/positions/use-current-positi
 import React, { useMemo } from "react";
 import { GlowingEmoji } from "utils/emoji";
 
+import { PriceDelta } from "@/components/price-feed/inner";
 import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { HistoricalEscrow } from "@/sdk/index";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
-import { PriceDelta } from "@/components/price-feed/inner";
 
 export type ArenaProps = {
   arenaInfo: ArenaInfoModel;

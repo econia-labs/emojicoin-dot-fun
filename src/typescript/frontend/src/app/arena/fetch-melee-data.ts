@@ -5,8 +5,8 @@ import { parseJSON, stringifyJSON } from "utils";
 
 import { fetchSpecificMarkets, fetchVaultBalance, toArenaInfoModel } from "@/sdk/indexer-v2";
 
-import fetchCachedExchangeRatesAtMeleeStart from "./fetch-melee-start-open-price";
 import calculateExchangeRateDelta from "./calculate-exchange-rate-delta";
+import fetchCachedExchangeRatesAtMeleeStart from "./fetch-melee-start-open-price";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
@@ -33,9 +33,9 @@ const fetchMeleeData = async () => {
     }
 
     const exchangeRatesAtMeleeStartPromise = fetchCachedExchangeRatesAtMeleeStart({
+      meleeID: arenaInfo.meleeID.toString(),
       market0Address: arenaInfo.emojicoin0MarketAddress,
       market1Address: arenaInfo.emojicoin1MarketAddress,
-      version: arenaInfo.version.toString(),
     }).catch((e) => {
       console.error(
         `Couldn't fetch exchange rates at melee start for melee ID: ${arenaInfo.meleeID}`

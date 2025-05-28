@@ -67,7 +67,8 @@ export default function EnterTabLockPhase({
               </div>
             </Info>
           </div>
-``          <div className="flex gap-[1em] items-center">
+          ``{" "}
+          <div className="flex gap-[1em] items-center">
             <div className="uppercase text-light-gray text-xl">
               {mustLockIn ? (
                 <Popup

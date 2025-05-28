@@ -1,6 +1,8 @@
-import { MarketStateModel, q64ToBig } from "@/sdk/index";
-import { ArenaJsonTypes } from "@/sdk/types/arena-json-types";
 import Big from "big.js";
+
+import type { MarketStateModel } from "@/sdk/index";
+import { q64ToBig } from "@/sdk/index";
+import type { ArenaJsonTypes } from "@/sdk/types/arena-json-types";
 
 /**
  * Calculates the exchange rate data based on the rates at the start of the melee and the
@@ -12,6 +14,6 @@ export default function calculateExchangeRateDelta(
 ) {
   const startRatio = Big(start.quote).div(start.base);
   const currentRatio = q64ToBig(current.lastSwap.avgExecutionPriceQ64);
-  const deltaPercentage = startRatio.div(currentRatio).mul(100).sub(100).toNumber();
+  const deltaPercentage = currentRatio.div(startRatio).mul(100).sub(100).toNumber();
   return deltaPercentage;
 }
