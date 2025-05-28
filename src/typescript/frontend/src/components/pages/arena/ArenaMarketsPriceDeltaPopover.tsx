@@ -1,8 +1,8 @@
 import Popup from "@/components/popup";
 import { PriceDelta } from "@/components/price-feed/inner";
 
-const ArenaMarketsPriceDeltaPopover = ({ delta }: { delta: number | null }) =>
-  delta !== null && (
+const ArenaMarketsPriceDeltaPopover = ({ delta }: { delta?: number | null }) =>
+  typeof delta === "number" && (
     <Popup content={<span>The change in price since the start of the melee</span>}>
       {/* Needs the wrapper div or the popup/popover won't work. */}
       <div className="flex">

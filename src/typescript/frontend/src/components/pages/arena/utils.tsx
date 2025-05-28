@@ -41,15 +41,15 @@ const getFontMultiplier = (emojis: number) => {
 
 export const EmojiTitle = ({
   onClicks,
-  market0Delta,
-  market1Delta,
+  market0Delta = null,
+  market1Delta = null,
 }: {
   onClicks?: {
     emoji0: () => void;
     emoji1: () => void;
   };
-  market0Delta: number | null;
-  market1Delta: number | null;
+  market0Delta?: number | null;
+  market1Delta?: number | null;
 }) => {
   const { isMobile, isTablet, isLaptop } = useMatchBreakpoints();
   const { market0, market1 } = useCurrentMeleeInfo();
