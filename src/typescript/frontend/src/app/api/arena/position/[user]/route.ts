@@ -1,5 +1,5 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { fetchCachedMeleeData } from "app/home/fetch-melee-data";
+import { fetchCachedMeleeData } from "app/arena/fetch-melee-data";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { waitForVersionCached } from "lib/queries/latest-emojicoin-version";
 import { type NextRequest, NextResponse } from "next/server";

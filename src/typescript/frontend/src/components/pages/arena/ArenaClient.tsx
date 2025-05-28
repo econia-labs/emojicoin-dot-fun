@@ -4,7 +4,7 @@ import type { ClassValue } from "clsx";
 import { Countdown } from "components/Countdown";
 import { useEventStore } from "context/event-store-context/hooks";
 import { cn } from "lib/utils/class-name";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 
 import ChartContainer from "@/components/charts/ChartContainer";
@@ -29,9 +29,15 @@ const Desktop = React.memo((props: ArenaProps) => {
       }}
     >
       <Box className="grid place-items-center">
-        <EmojiTitle />
+        <EmojiTitle market0Delta={props.market0Delta} market1Delta={props.market1Delta} />
       </Box>
-      <Box className="col-span-2 text-5xl lg:text-6xl xl:text-7xl grid place-items-center">
+      <Box
+        className={cn(
+          "col-span-2 text-4xl",
+          "[@media(min-width:860px)_and_(max-width:1024px)]:text-5xl lg:text-6xl xl:text-7xl",
+          "grid place-items-center"
+        )}
+      >
         <Countdown startTime={arenaInfo.startTime} duration={arenaInfo.duration / 1000n / 1000n} />
       </Box>
       <RewardsRemainingBox />
@@ -57,7 +63,7 @@ const Mobile = React.memo((props: ArenaProps) => {
     <>
       <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
         <Box className="grid place-items-center gap-[1em] py-[1em]">
-          <EmojiTitle />
+          <EmojiTitle market0Delta={props.market0Delta} market1Delta={props.market1Delta} />
           <div className="text-4xl">
             <Countdown
               startTime={arenaInfo.startTime}
@@ -97,17 +103,30 @@ export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
     loadVaultBalanceFromServer(props.vaultBalance);
   }, [loadArenaInfoFromServer, loadMarketStateFromServer, loadVaultBalanceFromServer, props]);
 
+  const outdatedMeleeInfo = useMemo(
+    () => props.arenaInfo.meleeID !== arenaInfo?.meleeID,
+    [props.arenaInfo.meleeID, arenaInfo?.meleeID]
+  );
+
   return isMobile ? (
     <Mobile
       arenaInfo={arenaInfo ?? props.arenaInfo}
       market0={market0 ?? props.market0}
       market1={market1 ?? props.market1}
+      // If the props melee info is outdated, the melee has changed while the application was open.
+      // Thus, the two markets' changes in price will be 0%, so just manually pass 0, otherwise, use the data
+      // fetched from the fullnode in the props data.
+      market0Delta={outdatedMeleeInfo ? 0 : props.market0Delta}
+      market1Delta={outdatedMeleeInfo ? 0 : props.market1Delta}
     />
   ) : (
     <Desktop
       arenaInfo={arenaInfo ?? props.arenaInfo}
       market0={market0 ?? props.market0}
       market1={market1 ?? props.market1}
+      // See the explanation above in <Mobile /> props for the two delta fields below.
+      market0Delta={outdatedMeleeInfo ? 0 : props.market0Delta}
+      market1Delta={outdatedMeleeInfo ? 0 : props.market1Delta}
     />
   );
 };

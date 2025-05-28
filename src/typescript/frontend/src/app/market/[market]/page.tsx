@@ -7,7 +7,7 @@ import { getAptPrice } from "lib/queries/get-apt-price";
 import type { Metadata } from "next";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 
-import { fetchMelee } from "@/queries/arena";
+import { fetchLatestMeleeEvent } from "@/queries/arena";
 import { fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
@@ -95,7 +95,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       getAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
       fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
       FEATURE_FLAGS.Arena
-        ? fetchMelee({})
+        ? fetchLatestMeleeEvent({})
             .then((res) => (res ? res.melee : null))
             .catch(() => logAndReturnValue("arena melee data", null))
         : null,
