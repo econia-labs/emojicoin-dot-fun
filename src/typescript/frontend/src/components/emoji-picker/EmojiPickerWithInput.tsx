@@ -290,7 +290,7 @@ const EmojiPickerWithInput = ({
         <div
           className="fixed bg-transparent right-0"
           style={{
-            zIndex: 100,
+            zIndex: 101,
             ...(mode === "chat" ? { top: 0 } : { bottom: 0 }),
           }}
           ref={containerRef}
