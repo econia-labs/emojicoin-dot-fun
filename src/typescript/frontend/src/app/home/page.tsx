@@ -10,7 +10,7 @@ import { fetchMarkets, fetchMarketsWithCount } from "@/queries/home";
 import { symbolBytesToEmojis } from "@/sdk/emoji_data";
 import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
 
-import { fetchCachedMeleeData } from "./fetch-melee-data";
+import { fetchCachedMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
 
 export const revalidate = 2;
