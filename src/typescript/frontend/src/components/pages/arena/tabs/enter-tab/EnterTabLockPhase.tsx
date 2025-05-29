@@ -59,7 +59,7 @@ export default function EnterTabLockPhase({
         <div className="flex justify-between w-[300px]">
           <div className="flex gap-[6px] items-center font-forma text-xl uppercase text-white text-center">
             Get matched
-            <Info imageClassName="!mb-[1px]">
+            <Info infoIconClassName="!mb-[1px]">
               <div className="flex flex-col gap-1">
                 {GET_MATCHED_EXPLANATION_STRINGS.map((content, i) => {
                   return <div key={`${content.substring(10)}-${i}`}>{content}</div>;
@@ -67,7 +67,6 @@ export default function EnterTabLockPhase({
               </div>
             </Info>
           </div>
-          ``{" "}
           <div className="flex gap-[1em] items-center">
             <div className="uppercase text-light-gray text-xl">
               {mustLockIn ? (
