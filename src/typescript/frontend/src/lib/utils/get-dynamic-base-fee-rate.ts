@@ -6,12 +6,14 @@ type FeeRateCalculationArgs = {
   inBondingCurve: boolean;
 };
 
-// Throw an error at build time if any of the assumptions in the function are incorrect.
-if (INTEGRATOR_FEE_RATE_BPS < POOL_FEE_RATE_BPS) {
-  throw new Error(
-    "Expected the integrator fee rate BPs to be greater than or equal to the pool fee rate BPs."
-  );
-}
+const checkIntegratorFeeRate = () => {
+  // Throw an error at build time if any of the assumptions in the function are incorrect.
+  if (INTEGRATOR_FEE_RATE_BPS < POOL_FEE_RATE_BPS) {
+    throw new Error(
+      "Expected the integrator fee rate BPs to be greater than or equal to the pool fee rate BPs."
+    );
+  }
+};
 
 /**
  * To ensure the fee rate is always a static constant, use the flat fee rate from the integrator
@@ -25,7 +27,8 @@ if (INTEGRATOR_FEE_RATE_BPS < POOL_FEE_RATE_BPS) {
  * @returns the base fee rate in BPs to pass to functions that take an `integrator_fee_rate_bps` arg
  */
 export default function getDynamicBaseFeeRateBPs({ inBondingCurve }: FeeRateCalculationArgs) {
+  checkIntegratorFeeRate();
   // If the market is in the bonding curve, there's no pool fee, so just return the base fee rate.
   if (inBondingCurve) return INTEGRATOR_FEE_RATE_BPS;
-  return POOL_FEE_RATE_BPS - INTEGRATOR_FEE_RATE_BPS;
+  return INTEGRATOR_FEE_RATE_BPS - POOL_FEE_RATE_BPS;
 }
