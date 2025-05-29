@@ -159,7 +159,7 @@ const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
         isSell,
         reserves: cpammRealReserves,
       });
-      const poolFee = getBPsFee(cpammBaseOutput, POOL_FEE_RATE_BPS);
+      poolFee = getBPsFee(cpammBaseOutput, POOL_FEE_RATE_BPS);
       baseVolume = cpammBaseOutput.minus(poolFee);
     }
     const netProceeds = baseVolume;
