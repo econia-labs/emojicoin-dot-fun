@@ -1,3 +1,5 @@
+// cspell:word goldens
+
 import Big from "big.js";
 import { INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import getDynamicBaseFeeRateBPs from "lib/utils/get-dynamic-base-fee-rate";
