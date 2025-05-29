@@ -2,7 +2,7 @@ import type { Network } from "@aptos-labs/ts-sdk";
 import { parse } from "semver";
 
 import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
-import { INTEGRATOR_FEE_RATE_BPS } from "@/sdk/index";
+import { PositiveIntegerSchema } from "@/sdk/utils/validation/integer";
 
 import packageInfo from "../../package.json";
 
@@ -62,13 +62,19 @@ if (process.env.NEXT_PUBLIC_CDN_URL) {
 
 const VERSION = parse(packageInfo.version);
 
+// Must be duplicated from the sdk/src/const.ts file because the SDK exports functions not available
+// in the edge runtime in middleware.
+const INTEGRATOR_FEE_RATE_BPS = PositiveIntegerSchema.parse(
+  process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
+);
+
 export {
   APTOS_NETWORK,
   BROKER_URL,
   CDN_URL,
   DISCORD_METADATA_REQUEST_CHANNEL,
   INTEGRATOR_ADDRESS,
-  INTEGRATOR_FEE_RATE_BPS, // Aliased from the SDK.
+  INTEGRATOR_FEE_RATE_BPS,
   IS_ALLOWLIST_ENABLED,
   VERSION,
 };
