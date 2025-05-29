@@ -7,11 +7,13 @@ import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-ex
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
+import Info from "@/components/info";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
 import { useHistoricalEscrow } from "@/store/arena/escrow/hooks";
 
+import ArenaExitInfo from "../../enter-tab/summary/ArenaExitInfo";
 import { CurrentMeleeBreakdown, HistoricMeleeBreakdown } from "../melee-breakdown/MeleeBreakdown";
 import type { ProfileTabProps } from "../ProfileTab";
 import styles from "./History.module.css";
@@ -58,13 +60,16 @@ const HistoricalRow = ({
         <td>
           {escrow?.open ? (
             <ButtonWithConnectWalletFallback>
-              <Button
-                onClick={() => {
-                  submit(exitTransactionBuilder);
-                }}
-              >
-                Exit
-              </Button>
+              <div className="flex flex-row">
+                <Button
+                  onClick={() => {
+                    submit(exitTransactionBuilder);
+                  }}
+                >
+                  Exit
+                </Button>
+                <ArenaExitInfo infoClassName="ml-1 my-auto" />
+              </div>
             </ButtonWithConnectWalletFallback>
           ) : (
             ""
