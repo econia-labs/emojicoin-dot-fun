@@ -29,6 +29,7 @@ export const SwapButton = ({
   disabled,
   symbol,
   minOutputAmount,
+  inBondingCurve,
 }: {
   inputAmount: bigint | number | string;
   isSell: boolean;
@@ -37,6 +38,7 @@ export const SwapButton = ({
   disabled?: boolean;
   symbol: string;
   minOutputAmount: bigint | number | string;
+  inBondingCurve: boolean;
 }) => {
   const { t } = translationFunction();
   const { submit } = useAptos();
@@ -47,7 +49,8 @@ export const SwapButton = ({
     marketAddress,
     inputAmount,
     isSell,
-    minOutputAmount
+    minOutputAmount,
+    inBondingCurve
   );
 
   const handleClick = useCallback(async () => {
