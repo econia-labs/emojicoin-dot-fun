@@ -21,7 +21,7 @@ import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
   {
     id: "emoji",
-    text: "Emoji",
+    headerContent: "Emoji",
     cellClassName: "pl-6",
     renderCell: (item) => (
       <a
@@ -34,7 +34,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
     ),
   },
   {
-    text: "Time",
+    headerContent: "Time",
     id: "time",
     width: 120,
     isServerSideSortable: true,
@@ -54,7 +54,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
     ),
   },
   {
-    text: "Price",
+    headerContent: "Price",
     id: "price",
     width: 120,
     renderCell: (item) => (
@@ -68,14 +68,14 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
     ),
   },
   {
-    text: "APT",
+    headerContent: "APT",
     id: "apt",
     width: 100,
     renderCell: (item) => <AptCell value={toNominal(item.swap.quoteVolume)} />,
   },
   {
     id: "change",
-    text: "Change",
+    headerContent: "Change",
     width: 120,
     renderCell: (item) => (
       <FormattedNumber

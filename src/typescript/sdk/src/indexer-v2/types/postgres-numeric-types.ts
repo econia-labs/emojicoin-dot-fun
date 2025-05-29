@@ -165,3 +165,12 @@ export const timestampColumns: Set<AnyColumnName> = new Set([
   "start_time",
   "transaction_timestamp",
 ]);
+
+export const nullableColumns: Set<AnyColumnName> = new Set([
+  // Note this value is non-nullable in later versions of the indexer SDK- although it's not
+  // integrated yet in this codebase yet.
+  "entry_function",
+  "open_price_q64",
+  "close_price_q64",
+  "delta_percentage",
+]);

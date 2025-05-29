@@ -36,21 +36,6 @@ export const fetchSpecificMarketsUnsafe = async (symbols: SymbolEmoji[][]) =>
     .returns<DatabaseJsonType["market_state"][]>()
     .then((res) => res.data ?? ([] as DatabaseJsonType["market_state"][]));
 
-/**
- * The same exact thing as {@link fetchSpecificMarkets} except for the `price_feed` table instead of
- * the `market_state` table.
- *
- * This function assumes that the input has been validated such that the number of symbols passed as
- * inputs will never exceed {@link MAX_SYMBOLS_PER_FETCH}.
- */
-export const fetchSpecificMarketsPriceFeedUnsafe = async (symbols: SymbolEmoji[][]) =>
-  await postgrest
-    .from(TableName.PriceFeed)
-    .select("*")
-    .or(joinEqClauses(symbols))
-    .returns<DatabaseJsonType["price_feed"][]>()
-    .then((res) => res.data ?? ([] as DatabaseJsonType["price_feed"][]));
-
 const MAX_SYMBOLS_PER_FETCH = 100;
 
 /* eslint-disable import/no-unused-modules */

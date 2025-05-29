@@ -15,8 +15,9 @@ export const BrowserNotSupported = () => {
     <div
       className={cn(
         "absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center",
-        "font-roboto-mono text-lg font-light leading-6 text-neutral-500 opacity-0 delay-[2000]"
+        "font-roboto-mono text-lg font-light leading-6 text-neutral-500 opacity-0"
       )}
+      style={{ animationDelay: "2000ms" }}
     >
       <div>
         {showErrorMessage ? (

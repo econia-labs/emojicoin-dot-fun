@@ -27,9 +27,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   count,
   /* eslint-disable @typescript-eslint/no-explicit-any */
 }: MarketStateQueryArgs & { tableName: T }) => {
-  const tableBuilder = postgrest.from(tableName);
-  let query =
-    count === true ? tableBuilder.select("*", { count: "exact" }) : tableBuilder.select("*");
+  let query = postgrest.from(tableName).select("*", count ? { count: "exact" } : undefined);
 
   query = query
     .order(sortByWithFallback(sortBy), orderBy)
@@ -57,6 +55,19 @@ const selectMarketsFromPriceFeed = ({
 }: PriceFeedQueryArgs) => {
   return postgrest
     .from(TableName.PriceFeed)
+    .select("*")
+    .order(sortBy === "delta" ? "delta_percentage" : sortByWithFallback(sortBy), orderBy)
+    .range((page - 1) * pageSize, page * pageSize - 1);
+};
+
+const selectMarketsFromPriceFeedWithNulls = ({
+  page = 1,
+  pageSize,
+  orderBy,
+  sortBy,
+}: PriceFeedQueryArgs) => {
+  return postgrest
+    .from(TableName.PriceFeedWithNulls)
     .select("*")
     .order(sortBy === "delta" ? "delta_percentage" : sortByWithFallback(sortBy), orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
@@ -138,4 +149,13 @@ export const fetchNumRegisteredMarkets = async () => {
 export const fetchPriceFeedWithMarketState = queryHelper(
   selectMarketsFromPriceFeed,
   (v): DatabaseJsonType["price_feed"] => v
+);
+
+/**
+ * Same query as above, except returns null values for price delta related columns for markets
+ * with no volume in the last 24 hours.
+ */
+export const fetchPriceFeedWithMarketStateAndNulls = queryHelper(
+  selectMarketsFromPriceFeedWithNulls,
+  (v): DatabaseJsonType["price_feed_with_nulls"] => v
 );

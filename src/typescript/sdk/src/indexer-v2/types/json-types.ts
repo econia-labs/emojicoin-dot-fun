@@ -467,6 +467,7 @@ export enum TableName {
   MarketState = "market_state",
   ProcessorStatus = "processor_status",
   PriceFeed = "price_feed",
+  PriceFeedWithNulls = "price_feed_with_nulls",
   Candlesticks = "candlesticks",
   ArenaMeleeEvents = "arena_melee_events",
   ArenaEnterEvents = "arena_enter_events",
@@ -569,6 +570,16 @@ export type DatabaseJsonType = {
       delta_percentage: number; // A decimal number with max 16 digit precision.
     }
   >;
+  [TableName.PriceFeedWithNulls]: Flatten<
+    | DatabaseJsonType["price_feed"]
+    // The three columns are either all null or all non-null. They're `null` if a market has no
+    // volume in the past 24 hours.
+    | (DatabaseJsonType["market_state"] & {
+        open_price_q64: null;
+        close_price_q64: null;
+        delta_percentage: null;
+      })
+  >;
   [TableName.Candlesticks]: CandlestickData;
   [TableName.ArenaMeleeEvents]: Flatten<TransactionMetadata & ArenaMeleeEventData>;
   [TableName.ArenaEnterEvents]: Flatten<TransactionMetadata & ArenaEnterEventData>;
@@ -637,6 +648,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistoryWithArenaInfo] &
+  DatabaseJsonType[TableName.PriceFeedWithNulls] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.AggregateMarketState];
 
