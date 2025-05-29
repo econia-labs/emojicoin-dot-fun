@@ -11,7 +11,7 @@ import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-get-swap-gas";
-import { calculateSwapPriceFromMarketState } from "lib/utils/calculate-swap-price";
+import { calculateSwapPriceFromMarketState } from "lib/utils/calculate-swap-price-from-market-state";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
 import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
@@ -293,6 +293,7 @@ export default function SwapComponent({
           disabled={!sufficientBalance && !isLoading && !!account}
           symbol={emojicoin}
           minOutputAmount={minOutputAmount}
+          inBondingCurve={latestMarketState?.inBondingCurve ?? false}
         />
       </Row>
     </Column>

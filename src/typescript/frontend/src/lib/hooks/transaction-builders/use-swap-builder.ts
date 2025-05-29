@@ -1,4 +1,5 @@
-import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
+import { INTEGRATOR_ADDRESS } from "lib/env";
+import getDynamicBaseFeeRateBPs from "lib/utils/get-dynamic-base-fee-rate";
 import { useMemo } from "react";
 
 import { useAccountAddress } from "@/hooks/use-account-address";
@@ -16,7 +17,8 @@ export const useSwapTransactionBuilder = (
   marketAddress: `0x${string}`,
   inputAmount: AnyNumberString,
   isSell: boolean,
-  minOutputAmount: AnyNumberString
+  minOutputAmount: AnyNumberString,
+  inBondingCurve: boolean
 ) => {
   const accountAddress = useAccountAddress();
   const memoizedArgs = useMemo(() => {
@@ -29,11 +31,11 @@ export const useSwapTransactionBuilder = (
       inputAmount: BigInt(inputAmount),
       isSell,
       integrator: INTEGRATOR_ADDRESS,
-      integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
+      integratorFeeRateBPs: getDynamicBaseFeeRateBPs({ inBondingCurve }),
       typeTags: toEmojicoinTypesForEntry(marketAddress),
       minOutputAmount: BigInt(minOutputAmount),
     };
-  }, [accountAddress, marketAddress, inputAmount, isSell, minOutputAmount]);
+  }, [accountAddress, marketAddress, inputAmount, isSell, minOutputAmount, inBondingCurve]);
 
   return useTransactionBuilder(memoizedArgs, Swap);
 };
