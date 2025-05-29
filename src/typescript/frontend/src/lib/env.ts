@@ -2,6 +2,7 @@ import type { Network } from "@aptos-labs/ts-sdk";
 import { parse } from "semver";
 
 import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
+import { PositiveIntegerSchema } from "@/sdk/utils/validation/integer";
 
 import packageInfo from "../../package.json";
 
@@ -21,7 +22,6 @@ if (!["local", "devnet", "testnet", "mainnet", "custom"].includes(APTOS_NETWORK)
 }
 
 let INTEGRATOR_ADDRESS: AccountAddressString;
-let INTEGRATOR_FEE_RATE_BPS: number;
 let BROKER_URL: string;
 let CDN_URL: string;
 const DISCORD_METADATA_REQUEST_CHANNEL: string | undefined =
@@ -40,12 +40,6 @@ if (process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS) {
   throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_ADDRESS is undefined.");
 }
 
-if (process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS) {
-  INTEGRATOR_FEE_RATE_BPS = Number(process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS);
-} else {
-  throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS is undefined.");
-}
-
 if (process.env.NEXT_PUBLIC_BROKER_URL) {
   BROKER_URL = process.env.NEXT_PUBLIC_BROKER_URL;
 } else {
@@ -56,7 +50,10 @@ if (process.env.NEXT_PUBLIC_CDN_URL) {
   CDN_URL = process.env.NEXT_PUBLIC_CDN_URL;
 } else {
   // The CDN_URL can be blank if it's a local development environment. Also must not be in Vercel.
-  if (process.env.NODE_ENV === "development" && !process.env.VERCEL) {
+  if (
+    (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") &&
+    !process.env.VERCEL
+  ) {
     CDN_URL = "";
   } else {
     throw new Error("Environment variable NEXT_PUBLIC_CDN_URL is undefined.");
@@ -64,6 +61,12 @@ if (process.env.NEXT_PUBLIC_CDN_URL) {
 }
 
 const VERSION = parse(packageInfo.version);
+
+// Must be duplicated from the sdk/src/const.ts file because the SDK exports functions not available
+// in the edge runtime in middleware.
+const INTEGRATOR_FEE_RATE_BPS = PositiveIntegerSchema.parse(
+  process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
+);
 
 export {
   APTOS_NETWORK,
