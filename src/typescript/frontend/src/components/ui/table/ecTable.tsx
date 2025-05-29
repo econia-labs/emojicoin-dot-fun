@@ -188,17 +188,12 @@ export const EcTable = <T,>({
   }, [rowHeight, containerHeight]);
 
   return (
-    <div
-      ref={containerRef}
-      className={cn("relative flex w-full", className)}
-      // Prevents scrollbar from appearing when there are empty rows
-      style={{ overflowY: items.length < minRows ? "hidden" : "auto" }}
-    >
+    <div ref={containerRef} className={cn("relative flex w-full", className)}>
       {(items.length === 0 || isLoading) && (
         <div
           className={cn(
-            "fixed top-0 left-1 bottom-1 right-1 bg-black bg-opacity-30 z-10 flex justify-center text-light-gray items-center pixel-heading-4",
-            isLoading && "bg-opacity-80"
+            "absolute inset-0 z-10 flex justify-center items-center text-light-gray bg-black pixel-heading-4",
+            isLoading ? "bg-opacity-80" : "bg-opacity-30"
           )}
         >
           <div>
@@ -210,38 +205,48 @@ export const EcTable = <T,>({
           </div>
         </div>
       )}
-      <Table className={cn("border-solid border-l border-r border-dark-gray")}>
-        <TableHeader>
-          <TableRow isHeader>
-            {columns.map((column, i) => (
-              <EcTableHead
-                index={i}
-                columnsCount={columns.length}
-                key={column.id}
-                id={column.id}
-                sort={sort}
-                width={column.width}
-                setSort={column.sortFn || column.isServerSideSortable ? setSortHandler : undefined}
-                className={cn(column.className, column.headClassName)}
-                text={column.headerContent}
-              />
-            ))}
-          </TableRow>
-        </TableHeader>
-        <EcTableBody
-          className={textFormat}
-          onClick={onClick}
-          rowHeight={rowHeight}
-          minRows={minRows}
-          items={sorted}
-          columns={columns}
-          renderRow={renderRow}
-          getKey={getKey}
-          pagination={pagination}
-          isLoading={isLoading}
-          emptyText={emptyText}
-        />
-      </Table>
+      {/* Wrap the table to separate the scrollbar from the content, making the content scrollable while allowing the
+      parent div above to fill the entire table area rather than just the visible table area. */}
+      <div
+        className={cn("w-full")}
+        // Prevents scrollbar from appearing when there are empty rows
+        style={{ overflowY: items.length < minRows ? "hidden" : "auto" }}
+      >
+        <Table className={cn("border-solid border-l border-r border-dark-gray")}>
+          <TableHeader>
+            <TableRow isHeader>
+              {columns.map((column, i) => (
+                <EcTableHead
+                  index={i}
+                  columnsCount={columns.length}
+                  key={column.id}
+                  id={column.id}
+                  sort={sort}
+                  width={column.width}
+                  setSort={
+                    column.sortFn || column.isServerSideSortable ? setSortHandler : undefined
+                  }
+                  className={cn(column.className, column.headClassName)}
+                  text={column.headerContent}
+                />
+              ))}
+            </TableRow>
+          </TableHeader>
+          <EcTableBody
+            className={textFormat}
+            onClick={onClick}
+            rowHeight={rowHeight}
+            minRows={minRows}
+            items={sorted}
+            columns={columns}
+            renderRow={renderRow}
+            getKey={getKey}
+            pagination={pagination}
+            isLoading={isLoading}
+            emptyText={emptyText}
+          />
+        </Table>
+      </div>
     </div>
   );
 };
