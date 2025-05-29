@@ -11,7 +11,6 @@ import type { DatabaseStructType } from "./indexer-v2/types/json-types";
 import type { Types } from "./types";
 import type { CoinTypeString } from "./utils";
 import type { ValueOf } from "./utils/utility-types";
-import { z } from "zod";
 import { PositiveIntegerSchema } from "./utils/validation/integer";
 
 export const VERCEL = process.env.VERCEL === "1";
