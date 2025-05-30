@@ -32,17 +32,6 @@ import { UserSettingsProvider } from "./event-store-context/StateStoreContextPro
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
 
-/**
- * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
- */
-fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then((res) =>
-  res
-    .json()
-    .then((data) => data as EmojiMartData)
-    .then(completePickerData)
-    .then((data) => init({ set: "native", data }))
-);
-
 enableMapSet();
 
 const queryClient = new QueryClient();
@@ -55,6 +44,17 @@ const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsW
 
   useEffect(() => {
     setIsMounted(true);
+    /**
+     * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
+     * This must be in a client component lest the nextjs server cache the entirety of the CDN response.
+     */
+    fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then((res) =>
+      res
+        .json()
+        .then((data) => data as EmojiMartData)
+        .then(completePickerData)
+        .then((data) => init({ set: "native", data }))
+    );
   }, []);
 
   return (

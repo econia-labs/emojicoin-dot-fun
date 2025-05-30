@@ -26,13 +26,14 @@ export default async function Home({ searchParams }: HomePageParams) {
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
   // We first check user settings in cookies to check the filter status.
-  const { accountAddress, homePageFilterFavorites } = serverCookies.getSettings();
+  const { accountAddress, homePageFilterFavorites: favoritesSettingFromCookies } =
+    serverCookies.getSettings();
   // Then we check if the filter is present in the URL in case it was changed during this session.
-  const isFilterFavorites = searchParams?.isFilterFavorites === "true";
+  const favoritesSettingFromSearchParams = searchParams?.favorites === "true";
 
   // Don't filter favorites if there is a search query.
   const favorites =
-    !q && accountAddress && (homePageFilterFavorites || isFilterFavorites)
+    !q && accountAddress && (favoritesSettingFromCookies || favoritesSettingFromSearchParams)
       ? await getFavorites(accountAddress)
       : [];
 
