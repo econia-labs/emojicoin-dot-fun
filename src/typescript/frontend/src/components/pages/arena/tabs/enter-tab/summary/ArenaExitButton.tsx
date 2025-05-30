@@ -23,12 +23,14 @@ export default function ArenaExitButton({
   });
 
   return (
-    <StyledButton onClick={onClick} onMouseOver={replay} onFocus={replay}>
-      <div className="relative flex gap-2 justify-between">
-        <div className="absolute -bottom-5 w-full flex items-center justify-center gap-1">
-          <span className="text-light-gray whitespace-nowrap text-sm">{"Does this sell?"}</span>
-          <ArenaExitInfo summaryPage={summaryPage} />
-        </div>
+    <div className="relative flex gap-2 justify-between">
+      <div className="absolute -bottom-5 w-full flex items-center justify-center gap-1">
+        <span className="uppercase font-pixelar text-light-gray whitespace-nowrap text-sm">
+          {"Does this sell?"}
+        </span>
+        <ArenaExitInfo summaryPage={summaryPage} />
+      </div>
+      <StyledButton onClick={onClick} onMouseOver={replay} onFocus={replay}>
         <span className={textClassName}> {"{ "} </span>
         <div className="flex flex-row">
           <span
@@ -41,7 +43,7 @@ export default function ArenaExitButton({
           />
         </div>
         <span className={textClassName}> {" }"} </span>
-      </div>
-    </StyledButton>
+      </StyledButton>
+    </div>
   );
 }
