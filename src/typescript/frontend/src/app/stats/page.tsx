@@ -3,7 +3,7 @@
 // react rendered server component.
 
 import fetchCachedFullMarketStatsQuery from "app/api/stats/full-query";
-import type { StatsSchemaInput } from "app/api/stats/schema";
+import { STATS_MARKETS_PER_PAGE, type StatsSchemaInput } from "app/api/stats/schema";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 import { unstable_cache } from "next/cache";
 
@@ -28,7 +28,7 @@ export interface StatsPageParams {
  * Since this can be run infrequently and it's an extra call, cache this value for longer.
  */
 const fetchCachedNumMarketsWithDailyActivity = unstable_cache(
-  async () =>
+  async (): Promise<number> =>
     postgrest
       .from(TableName.PriceFeed)
       .select(undefined, { count: "exact" })
@@ -50,7 +50,9 @@ export default async function Stats({ searchParams }: StatsPageParams) {
 
   const maxPageNumber =
     sortBy === "delta"
-      ? await fetchCachedNumMarketsWithDailyActivity().then(getMaxPageNumber)
+      ? await fetchCachedNumMarketsWithDailyActivity().then((num) =>
+          getMaxPageNumber(num, STATS_MARKETS_PER_PAGE)
+        )
       : maxPageNumberFromRes;
 
   return (
