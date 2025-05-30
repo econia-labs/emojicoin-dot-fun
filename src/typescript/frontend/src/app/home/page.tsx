@@ -19,32 +19,35 @@ import HomePageComponent from "./HomePage";
 import { cachedHomePageMarketStateQuery } from "./queries";
 
 export default async function Home({ searchParams }: HomePageParams) {
-  // cookies() can only be used in this file, otherwise the build command fails, even when using "server-only".
-  // Note that all fetch requests below the `cookies()` function call is considered dynamic and is thus not cached
-  // by default. Thus all fetches below this that should be cached must be cached with `unstable_cache`.
-  const serverCookies = new CookieUserSettingsManager(cookies());
-
   const { page, sortBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
-  // We first check user settings in cookies to check the filter status.
-  const { accountAddress, homePageFilterFavorites: favoritesSettingFromCookies } =
-    serverCookies.getSettings();
-  // Then we check if the filter is present in the URL in case it was changed during this session.
-  const favoritesSettingFromSearchParams = searchParams?.favorites === "true";
-
-  // Don't filter favorites if there is a search query.
-  const favorites =
-    !q && accountAddress && (favoritesSettingFromCookies || favoritesSettingFromSearchParams)
-      ? await getFavorites(accountAddress)
-      : [];
-
+  // General market data queries
+  // ---------------------------------------
   const priceFeedPromise = fetchCachedPriceFeed()
     .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
     });
+  const numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
+  const aptPricePromise = getAptPrice();
+  const meleeDataPromise = FEATURE_FLAGS.Arena
+    ? fetchCachedMeleeData()
+        .then((res) => (res.arenaInfo ? res : null))
+        .catch(() => null)
+    : null;
+
+  // Favorites
+  // ---------------------------------------
+  // cookies() can only be used in this file, otherwise the build command fails, even when using "server-only".
+  const serverCookies = new CookieUserSettingsManager(cookies());
+  // First check user settings in cookies to check the filter status.
+  const { accountAddress, homePageFilterFavorites: favoritesSettingFromCookies } =
+    serverCookies.getSettings();
+  // Fetch favorites, and ignore the favorites preference if there is a search query.
+  const favorites =
+    !q && accountAddress && favoritesSettingFromCookies ? await getFavorites(accountAddress) : [];
 
   // Cache the market states query if there are no params that make the query too unique to be cached effectively.
   // Note that the order is always descending on the home page.
@@ -65,16 +68,6 @@ export default async function Home({ searchParams }: HomePageParams) {
         pageSize: MARKETS_PER_PAGE,
       });
 
-  const numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
-
-  const aptPricePromise = getAptPrice();
-
-  const meleeDataPromise = FEATURE_FLAGS.Arena
-    ? fetchCachedMeleeData()
-        .then((res) => (res.arenaInfo ? res : null))
-        .catch(() => null)
-    : null;
-
   const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
     priceFeedPromise.catch(() => []),
     marketsPromise.catch(() => []),
@@ -93,7 +86,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         searchBytes={q}
         priceFeed={priceFeedData}
         meleeData={meleeData}
-        isFavoriteFilterEnabled={favorites.length > 0}
+        isFavoriteFilterEnabled={!!favoritesSettingFromCookies}
       />
     </AptPriceContextProvider>
   );

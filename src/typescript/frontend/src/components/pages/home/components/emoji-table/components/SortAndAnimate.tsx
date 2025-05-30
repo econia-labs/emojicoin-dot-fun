@@ -18,6 +18,7 @@ import SortHomePageDropdown from "./SortHomePageDropdown";
 interface Props extends SortHomePageDropdownProps {
   isFilterFavorites: boolean;
   setIsFilterFavorites: (value: boolean) => void;
+  disableFavoritesToggle: boolean;
 }
 
 export default function SortAndAnimate({
@@ -25,6 +26,7 @@ export default function SortAndAnimate({
   onSortChange,
   isFilterFavorites,
   setIsFilterFavorites,
+  disableFavoritesToggle,
 }: Props) {
   const animate = useUserSettings((s) => s.animate);
   const toggleAnimate = useUserSettings((s) => s.toggleAnimate);
@@ -59,9 +61,11 @@ export default function SortAndAnimate({
           {account?.address && FEATURE_FLAGS.Favorites && (
             <Popup
               content={
-                favoritesDisabled
-                  ? "Add an Emojicoin to your favorites to use this filter"
-                  : "Filter your favorite Emojicoins"
+                disableFavoritesToggle
+                  ? "Loading..."
+                  : favoritesDisabled
+                    ? "Add an Emojicoin to your favorites to use this filter"
+                    : "Filter your favorite Emojicoins"
               }
             >
               <FlexGap gap="12px" className={"med-pixel-text"}>
@@ -70,7 +74,7 @@ export default function SortAndAnimate({
                 </Text>
 
                 <Switcher
-                  disabled={favoritesDisabled}
+                  disabled={disableFavoritesToggle || favoritesDisabled}
                   checked={!favoritesDisabled && isFilterFavorites}
                   onChange={() => setIsFilterFavorites(!isFilterFavorites)}
                   scale={isLaptopL ? "md" : "sm"}
