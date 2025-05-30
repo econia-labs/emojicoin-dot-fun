@@ -5,10 +5,10 @@ import React from "react";
 import info from "../../../public/images/infoicon.svg";
 
 const Info: React.FC<
-  React.PropsWithChildren<{ popupClassName?: string; imageClassName?: string }>
-> = ({ imageClassName, children, popupClassName }) => (
+  React.PropsWithChildren<{ popupClassName?: string; infoIconClassName?: string }>
+> = ({ infoIconClassName, children, popupClassName }) => (
   <Popup className={`max-w-[300px] ${popupClassName}`} content={children}>
-    <Image src={info} alt="info" className={imageClassName} />
+    <Image src={info} alt="info" className={infoIconClassName} />
   </Popup>
 );
 
