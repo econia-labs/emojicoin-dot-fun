@@ -10,6 +10,7 @@ import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-cli
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
+import getMaxPageNumber from "lib/utils/get-max-page-number";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useTransition } from "react";
@@ -19,6 +20,7 @@ import { Emoji } from "utils/emoji";
 import useEvent from "@/hooks/use-event";
 import { useUpdateSearchParam } from "@/hooks/use-update-search-params";
 import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { MAX_NUM_FAVORITES } from "@/sdk/index";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import { EMOJI_GRID_ITEM_WIDTH } from "../const";
@@ -45,7 +47,9 @@ const EmojiTable = (props: EmojiTableProps) => {
   const { markets, page, sort, pages, searchBytes } = useMemo(() => {
     const { markets, page, sortBy: sort } = props;
     const numMarkets = Math.max(props.numMarkets, 1);
-    const pages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
+    const pages = props.isFavoriteFilterEnabled
+      ? getMaxPageNumber(MAX_NUM_FAVORITES, MARKETS_PER_PAGE)
+      : getMaxPageNumber(numMarkets, MARKETS_PER_PAGE);
     const searchBytes = props.searchBytes ?? "";
     return { markets, page, sort, pages, searchBytes };
   }, [props]);

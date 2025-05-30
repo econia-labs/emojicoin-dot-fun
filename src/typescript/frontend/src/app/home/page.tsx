@@ -48,11 +48,13 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   // Cache the market states query if there are no params that make the query too unique to be cached effectively.
   // Note that the order is always descending on the home page.
-  const isCacheable = !searchEmojis?.length && !favorites.length;
+  const filterByFavorites = favorites.length;
+  const isCacheable = !searchEmojis?.length && !filterByFavorites;
   const marketsPromise = isCacheable
     ? cachedHomePageMarketStateQuery({ page, sortBy }).then((res) => res.map(toMarketStateModel))
     : fetchMarkets({
-        page,
+        // The page is always 1 if filtering by favorites.
+        page: filterByFavorites ? 1 : page,
         sortBy,
         // The home page always sorts by queries in descending order.
         orderBy: ORDER_BY.DESC,

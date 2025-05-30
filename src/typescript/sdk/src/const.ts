@@ -151,6 +151,8 @@ export const MARKET_REGISTRATION_DEPOSIT = 1n * ONE_APT_BIGINT;
 export const MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST = ONE_APT * 0.005;
 export const MARKET_REGISTRATION_GAS_ESTIMATION_FIRST = ONE_APT * 0.6;
 export const BASIS_POINTS_PER_UNIT = 10_000n;
+// Taken from the `emojicoin_dot_fun_favorites.move` module.
+export const MAX_NUM_FAVORITES = 25;
 
 // Arena constants.
 export const ARENA_CONSTANTS = {
