@@ -114,6 +114,7 @@ export default function Summary({
         <ArenaExitButton
           text={lockedTernary(position, "Tap out", "Exit")}
           onClick={lockedTernary(position, () => setIsTappingOut(true), onTapOut)}
+          summaryPage
         />
       </div>
     </div>

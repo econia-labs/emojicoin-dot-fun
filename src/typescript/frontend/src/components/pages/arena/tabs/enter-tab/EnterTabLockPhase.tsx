@@ -14,6 +14,7 @@ import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import useRewardsRemaining from "@/hooks/use-rewards-remaining";
 import { getEvents, type MarketStateModel } from "@/sdk/index";
 
+import MATCH_AMOUNT_TEXT from "../../match-amount-text";
 import { useArenaPhaseStore } from "../../phase/store";
 import { GET_MATCHED_EXPLANATION_STRINGS } from "../InfoTab";
 import { FormattedNominalNumber } from "../utils";
@@ -100,7 +101,16 @@ export default function EnterTabLockPhase({
             <FormattedNominalNumber value={amount} suffix=" APT" />
           </div>
           <div className="flex uppercase justify-between text-2xl text-light-gray py-[0.8em] mx-[0.8em] border-dashed border-b-[1px] border-light-gray ">
-            <div>Match amount</div>
+            <div className="flex flex-row gap-1">
+              {"Match amount"}
+              <Info>
+                <div className="flex flex-col gap-2">
+                  {MATCH_AMOUNT_TEXT.map((text, i) => (
+                    <span key={`${(text.substring(5), i)}`}>{text}</span>
+                  ))}
+                </div>
+              </Info>
+            </div>
             <MatchAmount
               lockedIn={lockedIn}
               mustLockIn={mustLockIn}

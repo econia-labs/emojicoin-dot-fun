@@ -7,7 +7,6 @@ import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-ex
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
-import Info from "@/components/info";
 import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
 import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
