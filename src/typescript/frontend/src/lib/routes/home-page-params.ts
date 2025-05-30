@@ -20,12 +20,7 @@ export const handleEmptySearchBytes = (searchBytes?: string | null) => {
 };
 
 export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams | undefined) => {
-  const {
-    page: pageInput,
-    sort,
-    bonding: inBondingCurve,
-    q: searchBytes,
-  } = searchParams ?? {};
+  const { page: pageInput, sort, bonding: inBondingCurve, q: searchBytes } = searchParams ?? {};
 
   // Ensure the filter is a home-page-only filter.
   const sortBy = toMarketDataSortByHomePage(sort);
