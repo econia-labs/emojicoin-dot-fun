@@ -165,9 +165,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
-                isFilterFavorites={
-                  isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
-                }
+                isFilterFavorites={props.isFavoriteFilterEnabled}
                 setIsFilterFavorites={setIsFilterFavorites}
               />
             </motion.div>
