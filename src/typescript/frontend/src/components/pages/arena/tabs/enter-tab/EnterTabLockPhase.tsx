@@ -14,6 +14,7 @@ import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import useRewardsRemaining from "@/hooks/use-rewards-remaining";
 import { getEvents, type MarketStateModel } from "@/sdk/index";
 
+import MATCH_AMOUNT_TEXT from "../../match-amount-text";
 import { useArenaPhaseStore } from "../../phase/store";
 import { GET_MATCHED_EXPLANATION_STRINGS } from "../InfoTab";
 import { FormattedNominalNumber } from "../utils";
@@ -59,7 +60,7 @@ export default function EnterTabLockPhase({
         <div className="flex justify-between w-[300px]">
           <div className="flex gap-[6px] items-center font-forma text-xl uppercase text-white text-center">
             Get matched
-            <Info imageClassName="!mb-[1px]">
+            <Info infoIconClassName="!mb-[1px]">
               <div className="flex flex-col gap-1">
                 {GET_MATCHED_EXPLANATION_STRINGS.map((content, i) => {
                   return <div key={`${content.substring(10)}-${i}`}>{content}</div>;
@@ -67,7 +68,6 @@ export default function EnterTabLockPhase({
               </div>
             </Info>
           </div>
-          ``{" "}
           <div className="flex gap-[1em] items-center">
             <div className="uppercase text-light-gray text-xl">
               {mustLockIn ? (
@@ -101,7 +101,16 @@ export default function EnterTabLockPhase({
             <FormattedNominalNumber value={amount} suffix=" APT" />
           </div>
           <div className="flex uppercase justify-between text-2xl text-light-gray py-[0.8em] mx-[0.8em] border-dashed border-b-[1px] border-light-gray ">
-            <div>Match amount</div>
+            <div className="flex flex-row gap-1">
+              {"Match amount"}
+              <Info>
+                <div className="flex flex-col gap-2">
+                  {MATCH_AMOUNT_TEXT.map((text, i) => (
+                    <span key={`${(text.substring(5), i)}`}>{text}</span>
+                  ))}
+                </div>
+              </Info>
+            </div>
             <MatchAmount
               lockedIn={lockedIn}
               mustLockIn={mustLockIn}
