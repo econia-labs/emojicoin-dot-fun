@@ -9,12 +9,14 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import { cookies } from "next/headers";
 
-import { fetchMarkets, fetchMarketsWithCount } from "@/queries/home";
+import { fetchMarkets } from "@/queries/home";
 import { symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
 import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
 
 import { fetchCachedMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
+import { cachedHomePageMarketStateQuery } from "./queries";
 
 export const revalidate = 2;
 
@@ -22,7 +24,7 @@ export default async function Home({ searchParams }: HomePageParams) {
   // cookies() can only be used here. The build command fails if this is in a different file, even when using "server-only".
   const serverCookies = new CookieUserSettingsManager(cookies());
 
-  const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
+  const { page, sortBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
   // We first check user settings in cookies to check the filter status.
@@ -44,37 +46,24 @@ export default async function Home({ searchParams }: HomePageParams) {
       return [] as DatabaseModels["price_feed"][];
     });
 
-  let marketsPromise: ReturnType<typeof fetchMarkets>;
+  // Cache the market states query if there are no params that make the query too unique to be cached effectively.
+  // Note that the order is always descending on the home page.
+  const isCacheable = !searchEmojis?.length && !favorites.length;
+  const marketsPromise = isCacheable
+    ? cachedHomePageMarketStateQuery({ page, sortBy }).then((res) => res.map(toMarketStateModel))
+    : fetchMarkets({
+        page,
+        sortBy,
+        // The home page always sorts by queries in descending order.
+        orderBy: ORDER_BY.DESC,
+        searchEmojis,
+        selectEmojis: favorites.map((emojiBytes) =>
+          symbolBytesToEmojis(emojiBytes).emojis.map((e) => e.emoji)
+        ),
+        pageSize: MARKETS_PER_PAGE,
+      });
 
-  let numMarketsPromise: Promise<number>;
-
-  if (searchEmojis?.length) {
-    const promise = fetchMarketsWithCount({
-      page,
-      sortBy,
-      orderBy,
-      searchEmojis,
-      pageSize: MARKETS_PER_PAGE,
-      selectEmojis: favorites.map((emojiBytes) =>
-        symbolBytesToEmojis(emojiBytes).emojis.map((e) => e.emoji)
-      ),
-      count: true,
-    });
-    marketsPromise = promise.then((r) => r.rows);
-    numMarketsPromise = promise.then((r) => r.count!);
-  } else {
-    marketsPromise = fetchMarkets({
-      page,
-      sortBy,
-      orderBy,
-      searchEmojis,
-      selectEmojis: favorites.map((emojiBytes) =>
-        symbolBytesToEmojis(emojiBytes).emojis.map((e) => e.emoji)
-      ),
-      pageSize: MARKETS_PER_PAGE,
-    });
-    numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
-  }
+  const numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
 
   const aptPricePromise = getAptPrice();
 

@@ -3,7 +3,7 @@
 // react rendered server component.
 
 import fetchCachedFullMarketStatsQuery from "app/api/stats/full-query";
-import { getMaxStatsPageNumber, type StatsSchemaInput } from "app/api/stats/schema";
+import { getMaxPageNumber, type StatsSchemaInput } from "app/api/stats/schema";
 import { unstable_cache } from "next/cache";
 
 import { TableName, toPriceFeedWithNulls } from "@/sdk/index";
@@ -49,7 +49,7 @@ export default async function Stats({ searchParams }: StatsPageParams) {
 
   const maxPageNumber =
     sortBy === "delta"
-      ? await fetchCachedNumMarketsWithDailyActivity().then(getMaxStatsPageNumber)
+      ? await fetchCachedNumMarketsWithDailyActivity().then(getMaxPageNumber)
       : maxPageNumberFromRes;
 
   return (

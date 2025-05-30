@@ -3,7 +3,7 @@ import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 import type { DatabaseJsonType } from "@/sdk/index";
 
 import type { StatsSchemaInput, StatsSchemaOutput } from "./schema";
-import { createStatsSchema, getMaxStatsPageNumber } from "./schema";
+import { createStatsSchema, getMaxPageNumber } from "./schema";
 import fetchCachedPaginatedMarketStats from "./stats-query";
 
 const getDefaultParams = (numMarkets: number) => createStatsSchema(numMarkets).parse({});
@@ -29,7 +29,7 @@ export default async function fetchCachedFullMarketStatsQuery(
         createStatsSchema(totalNumMarkets).safeParse(searchParams);
       const finalParams = success ? validatedParams : getDefaultParams(totalNumMarkets);
       return fetchCachedPaginatedMarketStats(finalParams).then((data) => ({
-        maxPageNumber: getMaxStatsPageNumber(totalNumMarkets),
+        maxPageNumber: getMaxPageNumber(totalNumMarkets),
         data,
         ...finalParams,
       }));

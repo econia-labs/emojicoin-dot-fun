@@ -1,7 +1,6 @@
 import type { HomePageSearchParams } from "lib/queries/sorting/query-params";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 
-import { toOrderBy } from "@/sdk/indexer-v2/const";
 import { Schemas } from "@/sdk/utils";
 
 export interface HomePageParams {
@@ -24,7 +23,6 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
   const {
     page: pageInput,
     sort,
-    order = "desc",
     bonding: inBondingCurve,
     q: searchBytes,
   } = searchParams ?? {};
@@ -32,13 +30,11 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
   // Ensure the filter is a home-page-only filter.
   const sortBy = toMarketDataSortByHomePage(sort);
   const page = safeParsePageWithDefault(pageInput);
-  const orderBy = toOrderBy(order);
   const q = handleEmptySearchBytes(searchBytes);
 
   return {
     page,
     sortBy,
-    orderBy,
     inBondingCurve,
     q,
   };
