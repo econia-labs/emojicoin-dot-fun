@@ -3,7 +3,8 @@
 // react rendered server component.
 
 import fetchCachedFullMarketStatsQuery from "app/api/stats/full-query";
-import { getMaxPageNumber, type StatsSchemaInput } from "app/api/stats/schema";
+import type { StatsSchemaInput } from "app/api/stats/schema";
+import getMaxPageNumber from "lib/utils/get-max-page-number";
 import { unstable_cache } from "next/cache";
 
 import { TableName, toPriceFeedWithNulls } from "@/sdk/index";

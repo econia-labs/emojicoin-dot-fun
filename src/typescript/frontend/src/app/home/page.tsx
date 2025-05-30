@@ -18,10 +18,10 @@ import { fetchCachedMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
 import { cachedHomePageMarketStateQuery } from "./queries";
 
-export const revalidate = 2;
-
 export default async function Home({ searchParams }: HomePageParams) {
-  // cookies() can only be used here. The build command fails if this is in a different file, even when using "server-only".
+  // cookies() can only be used in this file, otherwise the build command fails, even when using "server-only".
+  // Note that all fetch requests below the `cookies()` function call is considered dynamic and is thus not cached
+  // by default. Thus all fetches below this that should be cached must be cached with `unstable_cache`.
   const serverCookies = new CookieUserSettingsManager(cookies());
 
   const { page, sortBy, q } = toHomePageParamsWithDefault(searchParams);
