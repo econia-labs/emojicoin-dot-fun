@@ -1,10 +1,11 @@
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { PaginationSchema } from "lib/api/schemas/api-pagination";
 import { z } from "zod";
 
 import { Schemas } from "@/sdk/utils";
 
 export const GetTradesSchema = PaginationSchema.extend({
-  sender: Schemas.AccountAddress.optional(),
+  sender: Schemas.AccountAddress.transform((val) => AccountAddress.from(val)).optional(),
   marketID: z
     .union([
       z.coerce.number(),

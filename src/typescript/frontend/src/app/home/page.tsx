@@ -1,64 +1,72 @@
 import { AptPriceContextProvider } from "context/AptPrice";
+import { CookieUserSettingsManager } from "lib/cookie-user-settings/cookie-user-settings-common";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { getAptPrice } from "lib/queries/get-apt-price";
+import { getFavorites } from "lib/queries/get-favorite-markets";
 import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 import { fetchCachedPriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
+import { cookies } from "next/headers";
 
-import { fetchMarkets, fetchMarketsWithCount } from "@/queries/home";
+import { fetchMarkets } from "@/queries/home";
 import { symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
 import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
 
 import { fetchCachedMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
-
-export const revalidate = 2;
+import { cachedHomePageMarketStateQuery } from "./queries";
 
 export default async function Home({ searchParams }: HomePageParams) {
-  const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
+  const { page, sortBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
+  // General market data queries
+  // ---------------------------------------
   const priceFeedPromise = fetchCachedPriceFeed()
     .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
     });
-
-  let marketsPromise: ReturnType<typeof fetchMarkets>;
-
-  let numMarketsPromise: Promise<number>;
-
-  if (searchEmojis?.length) {
-    const promise = fetchMarketsWithCount({
-      page,
-      sortBy,
-      orderBy,
-      searchEmojis,
-      pageSize: MARKETS_PER_PAGE,
-      count: true,
-    });
-    marketsPromise = promise.then((r) => r.rows);
-    numMarketsPromise = promise.then((r) => r.count!);
-  } else {
-    marketsPromise = fetchMarkets({
-      page,
-      sortBy,
-      orderBy,
-      searchEmojis,
-      pageSize: MARKETS_PER_PAGE,
-    });
-    numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
-  }
-
+  const numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
   const aptPricePromise = getAptPrice();
-
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchCachedMeleeData()
         .then((res) => (res.arenaInfo ? res : null))
         .catch(() => null)
     : null;
+
+  // Favorites
+  // ---------------------------------------
+  // cookies() can only be used in this file, otherwise the build command fails, even when using "server-only".
+  const serverCookies = new CookieUserSettingsManager(cookies());
+  // First check user settings in cookies to check the filter status.
+  const { accountAddress, homePageFilterFavorites: favoritesSettingFromCookies } =
+    serverCookies.getSettings();
+  // Fetch favorites, and ignore the favorites preference if there is a search query.
+  const favorites =
+    !q && accountAddress && favoritesSettingFromCookies ? await getFavorites(accountAddress) : [];
+
+  // Cache the market states query if there are no params that make the query too unique to be cached effectively.
+  // Note that the order is always descending on the home page.
+  const filterByFavorites = favorites.length;
+  const isCacheable = !searchEmojis?.length && !filterByFavorites;
+  const marketsPromise = isCacheable
+    ? cachedHomePageMarketStateQuery({ page, sortBy }).then((res) => res.map(toMarketStateModel))
+    : fetchMarkets({
+        // The page is always 1 if filtering by favorites.
+        page: filterByFavorites ? 1 : page,
+        sortBy,
+        // The home page always sorts by queries in descending order.
+        orderBy: ORDER_BY.DESC,
+        searchEmojis,
+        selectEmojis: favorites.map((emojiBytes) =>
+          symbolBytesToEmojis(emojiBytes).emojis.map((e) => e.emoji)
+        ),
+        pageSize: MARKETS_PER_PAGE,
+      });
 
   const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
     priceFeedPromise.catch(() => []),
@@ -78,6 +86,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         searchBytes={q}
         priceFeed={priceFeedData}
         meleeData={meleeData}
+        isFavoriteFilterEnabled={!!favoritesSettingFromCookies && favorites.length > 0}
       />
     </AptPriceContextProvider>
   );

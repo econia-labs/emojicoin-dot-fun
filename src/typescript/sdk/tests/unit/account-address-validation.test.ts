@@ -1,6 +1,8 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 
-import { AccountAddressSchema } from "../../src/utils/validation/account-address";
+import { Schemas } from "../../src";
+
+const AccountAddressSchema = Schemas.AccountAddress.transform((val) => AccountAddress.from(val));
 
 describe("AccountAddressSchema", () => {
   it("should parse valid special addresses in short form", () => {

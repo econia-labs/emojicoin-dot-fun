@@ -1,3 +1,4 @@
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { OrderBySchema, PageSchema } from "lib/api/schemas/api-pagination";
 import { z } from "zod";
 
@@ -9,5 +10,5 @@ export const GetPoolsSchema = z.object({
   sortBy: z.nativeEnum(SortMarketsBy).default(SortMarketsBy.Apr),
   orderBy: OrderBySchema,
   searchBytes: Schemas.SymbolEmojis.optional(),
-  account: Schemas.AccountAddress.optional(),
+  account: Schemas.AccountAddress.transform((val) => AccountAddress.from(val)).optional(),
 });

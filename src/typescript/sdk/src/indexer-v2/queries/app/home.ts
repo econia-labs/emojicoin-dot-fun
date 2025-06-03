@@ -12,6 +12,7 @@ import {
 } from "../../types/common";
 import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
+import { joinEqClauses } from "../misc";
 import { sortByWithFallback } from "../query-params";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
 
@@ -22,6 +23,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
   searchEmojis,
+  selectEmojis,
   sortBy = DEFAULT_SORT_BY,
   inBondingCurve,
   count,
@@ -33,8 +35,12 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     .order(sortByWithFallback(sortBy), orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  if (searchEmojis && searchEmojis.length) {
+  if (searchEmojis?.length) {
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
+  }
+
+  if (selectEmojis?.length) {
+    query = query.or(joinEqClauses(selectEmojis));
   }
 
   if (typeof inBondingCurve === "boolean") {
