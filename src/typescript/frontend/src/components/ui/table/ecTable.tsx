@@ -77,7 +77,7 @@ export interface TableProps<T> {
    */
   renderRow?: (item: T, i: number) => React.ReactNode;
   /** Optional click handler for row items */
-  onClick?: (item: T) => void;
+  onClick?: (item: T, i: number) => void;
   /** Text size class for the table. Defaults to "body-md". */
   textFormat?: "body-md" | "body-sm" | string;
   /** Column ID to sort by default */
