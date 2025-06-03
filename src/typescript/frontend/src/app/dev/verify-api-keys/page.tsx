@@ -49,7 +49,8 @@ const VerifyApiKeys = async () => {
     throw new Error(`Couldn't fetch ${accountAddress}'s balance on the server. ${msg}`);
   }
 
-  const res = await fetchMarketsWithCount({});
+  // Only the `error` field is necessary to ensure the API keys are valid, so use a limit of 1.
+  const res = await fetchMarketsWithCount({ pageSize: 1 });
   if (res.error) {
     const msg = "\n\tLikely an invalid indexer API key.";
     throw new Error(`Couldn't fetch the price feed on the server. ${msg}`);

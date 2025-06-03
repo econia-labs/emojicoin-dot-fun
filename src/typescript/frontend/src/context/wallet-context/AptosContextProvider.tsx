@@ -10,12 +10,14 @@ import {
 } from "components/wallet/toasts";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { useEventStore } from "context/event-store-context";
+import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-client";
 import { useAccountSequenceNumber } from "lib/hooks/use-account-sequence-number";
 import {
   createContext,
   type PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -74,6 +76,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
     account: walletAccount,
+    isLoading,
     network,
     submitTransaction,
     signTransaction,
@@ -115,6 +118,15 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   }, [network]);
 
   const { markSequenceNumberStale } = useAccountSequenceNumber(aptos, account?.address);
+
+  useEffect(() => {
+    if (isLoading) return;
+    const savedAddress = clientCookies.getSetting("accountAddress");
+    if (savedAddress !== account?.address) {
+      clientCookies.saveSetting("accountAddress", account?.address);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.address]);
 
   const aptHelper = useLatestBalance(account?.address, APTOS_COIN_TYPE_STRING);
   const emojicoinHelper = useLatestBalance(account?.address, emojicoin);
