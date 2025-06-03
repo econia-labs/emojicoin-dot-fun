@@ -11,13 +11,10 @@ export const StyledTHFilters = styled.div`
   align-items: center;
   width: 100%;
   justify-content: space-between;
+  gap: 12px;
 
   ${base.mediaQueries.tablet} {
     width: unset;
-  }
-  @media screen and (max-width: ${breakpointsArray[3]}) {
-    justify-content: space-between;
-    padding: 10px;
   }
 `;
 

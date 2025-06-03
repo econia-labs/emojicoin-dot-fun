@@ -1,4 +1,5 @@
 import { OrderBySchema, PageSchema } from "lib/api/schemas/api-pagination";
+import getMaxPageNumber from "lib/utils/get-max-page-number";
 import { z } from "zod";
 
 import { SortMarketsBy } from "@/sdk/index";
@@ -18,12 +19,6 @@ export type StatsSchemaOutput = z.infer<ReturnType<typeof createStatsSchema>>;
 
 export const STATS_MARKETS_PER_PAGE = 100;
 
-export const getMaxStatsPageNumber = (totalNumberOfMarkets: number) => {
-  const numPages = Math.ceil(totalNumberOfMarkets / STATS_MARKETS_PER_PAGE);
-  // There's always at least one page.
-  return Math.max(1, numPages);
-};
-
 /**
  * Create the schema dynamically, based on the input max number of pages.
  *
@@ -33,7 +28,7 @@ export const getMaxStatsPageNumber = (totalNumberOfMarkets: number) => {
  * Without this, a user could poison/bloat the cache by passing extremely large page numbers.
  */
 export const createStatsSchema = (totalNumberOfMarkets: number) => {
-  const maxPageNumber = getMaxStatsPageNumber(totalNumberOfMarkets);
+  const maxPageNumber = getMaxPageNumber(totalNumberOfMarkets, STATS_MARKETS_PER_PAGE);
 
   return z.object({
     page: PageSchema.refine((val) => val <= maxPageNumber, {

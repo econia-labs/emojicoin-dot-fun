@@ -6,10 +6,12 @@ import Text from "components/text";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { motion, type MotionProps, useAnimationControls } from "framer-motion";
+import FEATURE_FLAGS from "lib/feature-flags";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Emoji } from "utils/emoji";
 
+import { FavoriteButton } from "@/components/favorite-button/favorite-button";
 import { Column, Flex } from "@/containers";
 import { useUsdMarketCap } from "@/hooks/use-usd-market-cap";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
@@ -46,6 +48,7 @@ const TableCard = ({
 }: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
   const isMounted = useRef(true);
+
   const controls = useAnimationControls();
   const animationsOn = useUserSettings((s) => s.animate);
 
@@ -251,6 +254,13 @@ const TableCard = ({
                   <FormattedNumber value={secondaryMetric} scramble nominalize suffix=" APT" />
                 </motion.div>
               </Column>
+              {FEATURE_FLAGS.Favorites && (
+                <Column>
+                  <div className="flex justify-end items-end grow relative w-[25px] h-[25px]">
+                    <FavoriteButton emojis={emojis} className="absolute bottom-0 right-0" />
+                  </div>
+                </Column>
+              )}
             </Flex>
           </motion.div>
         </motion.div>
