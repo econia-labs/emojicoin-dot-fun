@@ -1,5 +1,3 @@
-import { toAccountAddressString } from "@/sdk/index";
-import { AccountAddress } from "@aptos-labs/ts-sdk";
 import type { CookieStore } from "lib/cookie-user-settings/cookie-user-settings-common";
 import { CookieUserSettingsManager } from "lib/cookie-user-settings/cookie-user-settings-common";
 import type { UserSettings, UserSettingsWithVersion } from "lib/cookie-user-settings/types";
@@ -10,9 +8,22 @@ import {
   COOKIE_USER_SETTINGS_NAME,
 } from "lib/cookie-user-settings/types";
 
+import { toAccountAddressString } from "@/sdk/index";
+
 // Valid Aptos account addresses for testing
 const ACCOUNT_ADDRESS_1 = "0x000000000000000000000000000000000000000000000000000000000000000A";
 const ACCOUNT_ADDRESS_2 = "0x000000000000000000000000000000000000000000000000000000000000000B";
+
+function standardizeAddressInSettings<
+  T extends { accountAddress?: `0x${string}` | null | undefined },
+>(input: T): T {
+  if (!("accountAddress" in input)) return input;
+  const { accountAddress: addr } = input;
+  return {
+    ...input,
+    accountAddress: addr ? toAccountAddressString(addr) : addr,
+  };
+}
 
 describe("CookieUserSettingsManager", () => {
   // Mock implementation of CookieStore
@@ -111,10 +122,7 @@ describe("CookieUserSettingsManager", () => {
       const settings = manager.getSettings();
 
       // Should return the valid settings
-      expect(settings).toEqual({
-        ...validSettings,
-        accountAddress: toAccountAddressString(ACCOUNT_ADDRESS_1),
-      });
+      expect(settings).toEqual(standardizeAddressInSettings(validSettings));
     });
   });
 
@@ -134,7 +142,7 @@ describe("CookieUserSettingsManager", () => {
       const accountAddress = manager.getSetting("accountAddress");
       const homePageFilterFavorites = manager.getSetting("homePageFilterFavorites");
 
-      // Should return the correct values
+      // Should return the correct values, with a standardized account address.
       expect(accountAddress).toBe(toAccountAddressString(ACCOUNT_ADDRESS_1));
       expect(homePageFilterFavorites).toBe(true);
     });
@@ -181,7 +189,6 @@ describe("CookieUserSettingsManager", () => {
       // Expected settings to be saved (with version)
       const expectedSavedSettings: UserSettingsWithVersion = {
         ...settingsToSave,
-        accountAddress: toAccountAddressString(ACCOUNT_ADDRESS_1),
         version: COOKIE_USER_SETTINGS_CURRENT_VERSION,
       };
 
@@ -203,7 +210,7 @@ describe("CookieUserSettingsManager", () => {
 
       // Verify the JSON content by parsing it back to an object
       const actualJSON = mockCookieStore.set.mock.calls[0][1];
-      expect(JSON.parse(actualJSON)).toEqual(expectedSavedSettings);
+      expect(JSON.parse(actualJSON)).toEqual(standardizeAddressInSettings(expectedSavedSettings));
     });
 
     it("should merge with default settings to ensure all keys are present", () => {
@@ -232,7 +239,7 @@ describe("CookieUserSettingsManager", () => {
 
       // Verify the JSON content by parsing it back to an object
       const actualJSON = mockCookieStore.set.mock.calls[0][1];
-      expect(JSON.parse(actualJSON)).toEqual(expectedSavedSettings);
+      expect(JSON.parse(actualJSON)).toEqual(standardizeAddressInSettings(expectedSavedSettings));
     });
 
     it("should throw error when validation fails", () => {
@@ -303,7 +310,7 @@ describe("CookieUserSettingsManager", () => {
 
       // Verify the JSON content by parsing it back to an object
       const actualJSON = mockCookieStore.set.mock.calls[0][1];
-      expect(JSON.parse(actualJSON)).toEqual(expectedSettings);
+      expect(JSON.parse(actualJSON)).toEqual(standardizeAddressInSettings(expectedSettings));
     });
 
     it("should create settings with defaults when cookie doesn't exist", () => {
@@ -316,7 +323,7 @@ describe("CookieUserSettingsManager", () => {
       // Expected settings
       const expectedSettings: UserSettingsWithVersion = {
         ...COOKIE_USER_SETTINGS_DEFAULT_STATE,
-        accountAddress: toAccountAddressString(ACCOUNT_ADDRESS_1),
+        accountAddress: ACCOUNT_ADDRESS_1,
         version: COOKIE_USER_SETTINGS_CURRENT_VERSION,
       };
 
@@ -329,7 +336,7 @@ describe("CookieUserSettingsManager", () => {
 
       // Verify the JSON content by parsing it back to an object
       const actualJSON = mockCookieStore.set.mock.calls[0][1];
-      expect(JSON.parse(actualJSON)).toEqual(expectedSettings);
+      expect(JSON.parse(actualJSON)).toEqual(standardizeAddressInSettings(expectedSettings));
     });
   });
 
