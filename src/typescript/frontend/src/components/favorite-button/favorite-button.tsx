@@ -45,8 +45,6 @@ export const FavoriteButton = ({ emojis, className }: Props) => {
   const handleClick = () => {
     setIsLoading(true);
     submit(toggleFavorite)
-      // TODO: Remove this refetch by tracking state locally in zustand.
-      // cpsell to trigger cspell and block this PR until this is addressed!
       .then(() => refetch())
       .finally(() => setIsLoading(false));
   };
