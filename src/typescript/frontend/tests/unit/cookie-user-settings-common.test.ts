@@ -1,3 +1,5 @@
+import { toAccountAddressString } from "@/sdk/index";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 import type { CookieStore } from "lib/cookie-user-settings/cookie-user-settings-common";
 import { CookieUserSettingsManager } from "lib/cookie-user-settings/cookie-user-settings-common";
 import type { UserSettings, UserSettingsWithVersion } from "lib/cookie-user-settings/types";
@@ -109,7 +111,10 @@ describe("CookieUserSettingsManager", () => {
       const settings = manager.getSettings();
 
       // Should return the valid settings
-      expect(settings).toEqual(validSettings);
+      expect(settings).toEqual({
+        ...validSettings,
+        accountAddress: toAccountAddressString(ACCOUNT_ADDRESS_1),
+      });
     });
   });
 
@@ -130,7 +135,7 @@ describe("CookieUserSettingsManager", () => {
       const homePageFilterFavorites = manager.getSetting("homePageFilterFavorites");
 
       // Should return the correct values
-      expect(accountAddress).toBe(ACCOUNT_ADDRESS_1);
+      expect(accountAddress).toBe(toAccountAddressString(ACCOUNT_ADDRESS_1));
       expect(homePageFilterFavorites).toBe(true);
     });
 
@@ -176,6 +181,7 @@ describe("CookieUserSettingsManager", () => {
       // Expected settings to be saved (with version)
       const expectedSavedSettings: UserSettingsWithVersion = {
         ...settingsToSave,
+        accountAddress: toAccountAddressString(ACCOUNT_ADDRESS_1),
         version: COOKIE_USER_SETTINGS_CURRENT_VERSION,
       };
 
@@ -310,7 +316,7 @@ describe("CookieUserSettingsManager", () => {
       // Expected settings
       const expectedSettings: UserSettingsWithVersion = {
         ...COOKIE_USER_SETTINGS_DEFAULT_STATE,
-        accountAddress: ACCOUNT_ADDRESS_1,
+        accountAddress: toAccountAddressString(ACCOUNT_ADDRESS_1),
         version: COOKIE_USER_SETTINGS_CURRENT_VERSION,
       };
 
