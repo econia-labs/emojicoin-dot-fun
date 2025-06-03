@@ -10,6 +10,7 @@ import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-cli
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
+import getMaxPageNumber from "lib/utils/get-max-page-number";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useTransition } from "react";
@@ -17,8 +18,8 @@ import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
 import useEvent from "@/hooks/use-event";
-import { useUpdateSearchParam } from "@/hooks/use-update-search-params";
 import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
+import { MAX_NUM_FAVORITES } from "@/sdk/index";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import { EMOJI_GRID_ITEM_WIDTH } from "../const";
@@ -45,7 +46,9 @@ const EmojiTable = (props: EmojiTableProps) => {
   const { markets, page, sort, pages, searchBytes } = useMemo(() => {
     const { markets, page, sortBy: sort } = props;
     const numMarkets = Math.max(props.numMarkets, 1);
-    const pages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
+    const pages = props.isFavoriteFilterEnabled
+      ? getMaxPageNumber(MAX_NUM_FAVORITES, MARKETS_PER_PAGE)
+      : getMaxPageNumber(numMarkets, MARKETS_PER_PAGE);
     const searchBytes = props.searchBytes ?? "";
     return { markets, page, sort, pages, searchBytes };
   }, [props]);
@@ -54,7 +57,6 @@ const EmojiTable = (props: EmojiTableProps) => {
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
   const emojis = useEmojiPicker((s) => s.emojis);
 
-  const updateSearchParam = useUpdateSearchParam();
   // Use the prop value by default, but instantly set the new state
   // on the beginning of the transition when the toggle is switched.
   // This ref tracks the *optimistic* toggle value; that is, the value
@@ -108,7 +110,7 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const rowLength = useGridRowLength();
 
-  // We update the URL and also save the setting in cookies for next time /home page is loaded.
+  // Update cookies and refresh the page.
   const setIsFilterFavorites = (newVal: boolean) => {
     // Note the usage of the ref here facilitates snappy transitions through the usage of
     // `startTransition` with `isLoading` and the final/ultimate ref value. This avoids
@@ -121,8 +123,10 @@ const EmojiTable = (props: EmojiTableProps) => {
     toggleStateRef.current = newVal;
     startTransition(() => {
       const curr = toggleStateRef.current;
-      updateSearchParam({ favorites: curr ? "true" : "false" });
       clientCookies.saveSetting("homePageFilterFavorites", curr);
+      // A refresh of sorts. `router.refresh()` will invalidate the RSC cache and we don't really need that since it's
+      // so expensive. Simply push the same URL and the page updates properly.
+      pushURL();
     });
   };
 
@@ -165,6 +169,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                   isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
                 }
                 setIsFilterFavorites={setIsFilterFavorites}
+                disableFavoritesToggle={isLoading}
               />
             </motion.div>
             {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
@@ -194,7 +199,9 @@ const EmojiTable = (props: EmojiTableProps) => {
                     <StyledGrid>
                       {shouldAnimateGrid ? (
                         <LiveClientGrid
-                          isFavoriteFilterEnabled={props.isFavoriteFilterEnabled}
+                          isFavoriteFilterEnabled={
+                            isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
+                          }
                           markets={markets}
                           sortBy={sort}
                           page={page}
