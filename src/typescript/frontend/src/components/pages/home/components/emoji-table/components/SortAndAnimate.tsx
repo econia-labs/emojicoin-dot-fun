@@ -35,9 +35,13 @@ export default function SortAndAnimate({
   const favoritesDisabled = !favorites || favorites.size === 0;
 
   return (
-    <div className={"flex w-full justify-between md:justify-end py-2 items-center"}>
+    <div
+      className={
+        "flex w-full flex-col sm:flex-row justify-between md:justify-end py-2 items-center gap-3"
+      }
+    >
       <SortHomePageDropdown sortMarketsBy={sortMarketsBy} onSortChange={onSortChange} />
-      <div className="flex flex-row gap-3">
+      <div className="flex gap-3">
         {account?.address && FEATURE_FLAGS.Favorites && (
           <Popup
             content={
@@ -48,7 +52,7 @@ export default function SortAndAnimate({
                   : "Filter your favorite Emojicoins"
             }
           >
-            <div className="flex flex-row gap-3 items-center">
+            <div className="flex gap-3 items-center">
               <span className="med-pixel-text text-light-gray uppercase">{t("Favorites:")}</span>
               <Switch
                 disabled={disableFavoritesToggle || favoritesDisabled}

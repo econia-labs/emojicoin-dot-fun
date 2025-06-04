@@ -154,7 +154,9 @@ const EmojiTable = (props: EmojiTableProps) => {
                 },
               }}
             >
-              <SearchBar />
+              <div className="max-w-[350px] md:max-w-[450px]">
+                <SearchBar />
+              </div>
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
