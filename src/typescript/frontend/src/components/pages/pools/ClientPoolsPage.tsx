@@ -10,6 +10,7 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
 import { FormattedNumber } from "@/components/FormattedNumber";
+import SearchBar from "@/components/inputs/search-bar";
 import { EcTable, type EcTableColumn } from "@/components/ui/table/ecTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 import { useAccountAddress } from "@/hooks/use-account-address";
@@ -99,7 +100,7 @@ const COLUMNS: EcTableColumn<PoolsData>[] = [
   },
 ] as const;
 
-const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
+const ClientPoolsPage = () => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortMarketsBy>(SortMarketsBy.Apr);
@@ -129,43 +130,54 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
     sortBy,
     orderBy,
     searchBytes: realEmojis?.length ? encodeEmojis(realEmojis) : undefined,
+    limit: 20,
   });
 
   const allMarkets = query.data?.pages.flatMap((page) => page) ?? [];
 
   return (
     <>
-      <div className="flex w-full px-8 flex-col lg:flex-row">
-        <Tabs
-          className="w-full lg:flex-[0_0_50%]"
-          value={tab}
-          onValueChange={(v) => setTab(v as "pools" | "myPools")}
-        >
-          <TabsList>
-            <TabsTrigger value="pools" endSlot={<Emoji emojis={emoji("water wave")} />}>
-              Pools
-            </TabsTrigger>
-            <TabsTrigger value="myPools" endSlot={<Emoji emojis={emoji("person raising hand")} />}>
-              My Pools
-            </TabsTrigger>
-          </TabsList>
-          <div className={"flex w-full overflow-auto h-[60dvh]"}>
-            <EcTable
-              columns={COLUMNS}
-              items={allMarkets}
-              getKey={(i) => i.market.marketID.toString()}
-              onClick={(_, i) => setSelectedIndex(i)}
-              pagination={query}
-              serverSideOrderHandler={(col, dir) => {
-                setSortBy(col as SortMarketsBy);
-                setOrderBy(dir);
-              }}
+      <div className="flex flex-col items-center">
+        <div className="flex w-full px-8 flex-col xl:flex-row max-w-[1392px]">
+          <Tabs
+            className="w-full xl:flex-[0_0_50%]"
+            value={tab}
+            onValueChange={(v) => setTab(v as "pools" | "myPools")}
+          >
+            <TabsList className="justify-between">
+              <div className="flex items-center gap-2">
+                <TabsTrigger value="pools" endSlot={<Emoji emojis={emoji("water wave")} />}>
+                  Pools
+                </TabsTrigger>
+                <TabsTrigger
+                  value="myPools"
+                  endSlot={<Emoji emojis={emoji("person raising hand")} />}
+                >
+                  My Pools
+                </TabsTrigger>
+              </div>
+              <SearchBar />
+            </TabsList>
+            <div className={"flex w-full overflow-auto h-[60dvh]"}>
+              <EcTable
+                columns={COLUMNS}
+                items={allMarkets}
+                getKey={(i) => i.market.marketID.toString()}
+                onClick={(_, i) => setSelectedIndex(i)}
+                pagination={query}
+                serverSideOrderHandler={(col, dir) => {
+                  setSortBy(col as SortMarketsBy);
+                  setOrderBy(dir);
+                }}
+              />
+            </div>
+            <div className="xl:hidden w-[200vw] border-t border-solid border-dark-gray -mx-[50%]" />
+          </Tabs>
+          <div className="relative xl:flex-1 flex min-h-[600px] justify-center items-center xl:mt-[52px] xl:border-t border-x border-solid border-dark-gray">
+            <Liquidity
+              market={selectedIndex !== undefined ? allMarkets[selectedIndex] : undefined}
             />
           </div>
-          <div className="lg:hidden w-[200vw] border-t border-solid border-dark-gray -mx-[50%]" />
-        </Tabs>
-        <div className="relative lg:flex-1 flex min-h-[600px] justify-center items-center lg:mt-[52px] lg:border-t border-x border-solid border-dark-gray">
-          <Liquidity market={selectedIndex !== undefined ? allMarkets[selectedIndex] : undefined} />
         </div>
       </div>
       <div className="w-[200vw] border-t border-solid border-dark-gray -mx-[50%]" />

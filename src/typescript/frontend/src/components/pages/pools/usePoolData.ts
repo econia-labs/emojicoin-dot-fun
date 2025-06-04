@@ -21,7 +21,8 @@ export const usePoolData = (args: z.input<typeof GetPoolsSchema>) => {
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPageResponse, allPageResponses) =>
-      lastPageResponse?.length === LIMIT ? allPageResponses.length + 1 : undefined,
+      lastPageResponse?.length === (args.limit || LIMIT) ? allPageResponses.length + 1 : undefined,
+    staleTime: 10000, // 10 seconds
   });
 
   return query;

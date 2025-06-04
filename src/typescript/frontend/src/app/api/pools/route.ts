@@ -15,12 +15,19 @@ const getCachedPoolData = unstable_cache(getPoolData, ["pool-data"], {
 export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const params = parseSearchParams(searchParams);
-  const { page, sortBy, account, orderBy, searchBytes } = GetPoolsSchema.parse(params);
+  const { page, sortBy, account, orderBy, searchBytes, limit } = GetPoolsSchema.parse(params);
 
   let res: Awaited<ReturnType<typeof getPoolData>> = "[]";
 
   try {
-    res = await getCachedPoolData(page, sortBy, orderBy, searchBytes, account);
+    res = await getCachedPoolData({
+      page,
+      sortBy,
+      orderBy,
+      limit,
+      searchEmojis: searchBytes,
+      provider: account,
+    });
   } catch (e) {
     console.error(e);
   }
