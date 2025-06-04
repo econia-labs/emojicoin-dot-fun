@@ -89,7 +89,7 @@ const DesktopGrid = (props: GridProps) => {
 
         <StyledContentColumn>
           <StyledBlock width="57%">
-            <Tabs onValueChange={(v) => updateSearchParam({ "desktop-tab": v })} value={tab}>
+            <Tabs onValueChange={(v) => updateSearchParam({ tab: v })} value={tab}>
               <TabsList>
                 {tabs.map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} endSlot={<Emoji emojis={tab.emoji} />}>
