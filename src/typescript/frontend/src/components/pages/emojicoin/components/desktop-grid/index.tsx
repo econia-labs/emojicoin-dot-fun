@@ -2,7 +2,7 @@ import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
 import { useUpdateSearchParam } from "lib/hooks/use-update-search-params";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
@@ -52,9 +52,14 @@ const tabs = [
 const DesktopGrid = (props: GridProps) => {
   const searchParams = useSearchParams();
   const updateSearchParam = useUpdateSearchParam({ shallow: true });
-  // Different key from MobileGrid to prevent issues when switching from desktop
-  // to mobile and vice versa, since some tabs don't exist on desktop
-  const tab = searchParams.get("desktop-tab") ?? tabs[0].id;
+  const tab = useMemo(() => {
+    const tabInParams = (searchParams.get("tab") ?? "Not a tab!") as (typeof tabs)[number]["id"];
+    const allTabIDs = new Set(tabs.map(({ id }) => id));
+    if (!allTabIDs.has(tabInParams)) {
+      return tabs[0].id;
+    }
+    return tabInParams;
+  }, [searchParams]);
 
   return (
     <StyledContentWrapper>
