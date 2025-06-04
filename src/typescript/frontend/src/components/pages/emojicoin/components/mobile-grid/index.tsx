@@ -97,7 +97,7 @@ const MobileGrid = (props: GridProps) => {
       </StyledMobileContentBlock>
 
       <StyledMobileContentBlock>
-        <Tabs value={tab} onValueChange={(v) => updateSearchParam({ "mobile-tab": v })}>
+        <Tabs value={tab} onValueChange={(v) => updateSearchParam({ "tab": v })}>
           <TabsList>
             {tabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.id} endSlot={<Emoji emojis={tab.emoji} />}>
