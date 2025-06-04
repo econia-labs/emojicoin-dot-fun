@@ -29,6 +29,7 @@ import { ClientGrid } from "./ClientGrid";
 import { ButtonsBlock } from "./components/buttons-block";
 import SortAndAnimate from "./components/SortAndAnimate";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import { cn } from "lib/utils/class-name";
 
 interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
@@ -142,7 +143,15 @@ const EmojiTable = (props: EmojiTableProps) => {
             <motion.div
               key={rowLength}
               id="emoji-grid-header"
-              className="flex w-full max-w-[500px] md:max-w-full flex-col md:flex-row justify-between items-center px-3 md:border-x border-solid border-dark-gray md:justify-start"
+              // Note the custom media query here. 860px is used because it's almost exactly the breakpoint for when
+              // the grid goes from 2 markets per row to 3. Using `md` here means there's too much room for two lines
+              // for the search bar + filter/toggle switches, but using `lg` means there's a point (at 860px) when
+              // there is not enough horizontal space. Hence the specific one-off media query used below.
+              className={cn(
+                "flex w-full max-w-[500px] flex-col",
+                "justify-between items-center px-3 border-solid border-dark-gray",
+                "min-[860px]:border-x min-[860px]:max-w-full min-[860px]:flex-row min-[860px]:justify-start"
+              )}
               style={{
                 width: md ? rowLength * EMOJI_GRID_ITEM_WIDTH : undefined,
               }}
@@ -154,7 +163,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                 },
               }}
             >
-              <div className="max-w-[350px] md:max-w-[450px]">
+              <div className="max-w-[350px] min-[860px]:max-w-[200px]">
                 <SearchBar />
               </div>
               <SortAndAnimate

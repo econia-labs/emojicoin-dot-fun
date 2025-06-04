@@ -37,7 +37,7 @@ export default function SortAndAnimate({
   return (
     <div
       className={
-        "flex w-full flex-col sm:flex-row justify-between md:justify-end py-2 items-center gap-3"
+        "flex w-full flex-col md:flex-row justify-between md:justify-end py-2 items-center gap-3"
       }
     >
       <SortHomePageDropdown sortMarketsBy={sortMarketsBy} onSortChange={onSortChange} />
