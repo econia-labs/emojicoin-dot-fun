@@ -14,7 +14,7 @@ export const Badge = ({
         borderRadius: "8px",
         color: darkColors[color],
       }}
-      className="pixel-heading-4 px-[.4rem] h-min"
+      className="h-min px-[.4rem] pixel-heading-4"
     >
       {children}
     </div>

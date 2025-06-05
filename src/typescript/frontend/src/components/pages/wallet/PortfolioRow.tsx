@@ -34,10 +34,10 @@ export const PortfolioRow = ({ coinData, index, totalValue }: Props) => {
             href={`${ROUTES.pools}?pool=${coinData.symbol}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <Emoji className={`text-[1.2em] text-nowrap`} emojis={coinData.symbol} />
+            <Emoji className={`text-nowrap text-[1.2em]`} emojis={coinData.symbol} />
           </a>
         ) : (
-          <Emoji className={`text-[1.2em] text-nowrap`} emojis={coinData.symbol} />
+          <Emoji className={`text-nowrap text-[1.2em]`} emojis={coinData.symbol} />
         )}
       </TableCell>
       <TableCell className="text-end">
@@ -66,11 +66,11 @@ export const PortfolioRow = ({ coinData, index, totalValue }: Props) => {
         </span>
       </TableCell>
       <TableCell className="text-right">
-        <span className="flex items-center justify-end gap-1 mr-[1.75em]">
+        <span className="mr-[1.75em] flex items-center justify-end gap-1">
           <FormattedNumber value={usdOwnedValue} style={"fixed"} prefix="$" />
         </span>
       </TableCell>
-      <TableCell className="text-right px-6">
+      <TableCell className="px-6 text-right">
         <span className="flex items-center justify-end gap-1">
           <AptCell value={coinData.ownedValue} />
         </span>

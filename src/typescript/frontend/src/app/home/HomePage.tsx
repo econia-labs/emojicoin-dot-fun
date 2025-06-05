@@ -35,9 +35,9 @@ export default async function HomePageComponent({
 }: HomePageProps) {
   return (
     <div className="relative">
-      <div className="flex-col mb-[31px]">
+      <div className="mb-[31px] flex-col">
         {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
-        <div className="flex justify-center items-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full">
+        <div className="mobile-lg:px-[24px] mx-auto flex w-full max-w-full items-center justify-center px-[16px]">
           {FEATURE_FLAGS.Arena && meleeData ? (
             <ArenaCard meleeData={meleeData} />
           ) : (

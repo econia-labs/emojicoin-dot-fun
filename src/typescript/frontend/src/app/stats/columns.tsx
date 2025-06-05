@@ -118,7 +118,7 @@ export const statsHeaderColumns: EcTableColumn<PriceFeedWithNullsModel>[] = [
   createColumn({
     label: "curve progress",
     cell: (item) => (
-      <div onClick={(e) => e.stopPropagation()} className="m-auto pl-10 flex w-full">
+      <div onClick={(e) => e.stopPropagation()} className="m-auto flex w-full pl-10">
         <MiniBondingCurveProgress
           symbol={item.market.symbolData.symbol}
           clammVirtualReservesQuote={item.state.clammVirtualReserves.quote}

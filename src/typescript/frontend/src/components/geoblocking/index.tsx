@@ -12,7 +12,7 @@ export const GeoblockedBanner = () => {
     geoblocked && (
       <div className="w-full bg-pink">
         <Carousel>
-          <div className="flex items-center justify-center min-w-[fit-content] gap-[16px]">
+          <div className="flex min-w-[fit-content] items-center justify-center gap-[16px]">
             <Text
               className="h-[2.6rem] whitespace-nowrap uppercase"
               lineHeight="2.6rem"

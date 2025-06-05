@@ -192,7 +192,7 @@ export const EcTable = <T,>({
       {(items.length === 0 || isLoading) && (
         <div
           className={cn(
-            "absolute inset-0 z-10 flex justify-center items-center text-light-gray bg-black pixel-heading-4",
+            "absolute inset-0 z-10 flex items-center justify-center bg-black text-light-gray pixel-heading-4",
             isLoading ? "bg-opacity-80" : "bg-opacity-30"
           )}
         >
@@ -212,7 +212,7 @@ export const EcTable = <T,>({
         // Prevents scrollbar from appearing when there are empty rows
         style={{ overflowY: items.length < minRows ? "hidden" : "auto" }}
       >
-        <Table className={cn("border-solid border-l border-r border-dark-gray")}>
+        <Table className={cn("border-l border-r border-solid border-dark-gray")}>
           <TableHeader>
             <TableRow isHeader>
               {columns.map((column, i) => (

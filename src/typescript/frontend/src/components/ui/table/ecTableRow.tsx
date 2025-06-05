@@ -26,7 +26,7 @@ export const EcTableRow = <T,>({
       index={index}
       height={height}
       onClick={() => onClick?.(item)}
-      className="cursor-pointer group"
+      className="group cursor-pointer"
       animateInsertion={animateInsertion}
     >
       {columns.map((col, cellIndex) => (

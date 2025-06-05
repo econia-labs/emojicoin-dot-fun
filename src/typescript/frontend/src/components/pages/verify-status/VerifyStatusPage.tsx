@@ -46,18 +46,18 @@ const ClientVerifyPage = ({
   return (
     <>
       <div
-        className="absolute top-0 left-0 w-[100dvw] h-[100dvh] bg-black z-50 overflow-hidden grid"
+        className="absolute left-0 top-0 z-50 grid h-[100dvh] w-[100dvw] overflow-hidden bg-black"
         style={{
           gridTemplateRows: "19fr 1fr",
         }}
       >
-        <div className="flex items-center justify-center w-full h-full">
-          <div className="flex flex-col justify-begin uppercase text-ec-blue gap-4 text-2xl">
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="justify-begin flex flex-col gap-4 text-2xl uppercase text-ec-blue">
             {connected && (
               <motion.div
                 animate={{ x: 0, y: -60 }}
                 initial={{ x: 2000, y: -60 }}
-                className="absolute flex flex-row px-2.5 hover:cursor-pointer min-w-[12ch] top-[50%]"
+                className="absolute top-[50%] flex min-w-[12ch] flex-row px-2.5 hover:cursor-pointer"
                 onClick={() => {
                   disconnect();
                 }}
@@ -71,7 +71,7 @@ const ClientVerifyPage = ({
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback forceAllowConnect={true}>
-              <div className="flex flex-col uppercase mt-[30ch] gap-1">
+              <div className="mt-[30ch] flex flex-col gap-1 uppercase">
                 <div>
                   Wallet address:{" "}
                   <span className="text-warning">

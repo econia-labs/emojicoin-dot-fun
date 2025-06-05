@@ -23,7 +23,7 @@ const Popup = ({
   popover?: boolean;
 }>) => {
   const tooltipContent = (
-    <div className={`text-black pixel-heading-4 font-pixelar ${uppercase ? "uppercase" : ""}`}>
+    <div className={`font-pixelar text-black pixel-heading-4 ${uppercase ? "uppercase" : ""}`}>
       {content}
     </div>
   );

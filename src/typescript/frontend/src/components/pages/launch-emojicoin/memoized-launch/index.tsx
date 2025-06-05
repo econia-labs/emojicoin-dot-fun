@@ -83,13 +83,13 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
       {!loading ? (
         <motion.div
           key={"register-market-input"}
-          className="flex flex-col w-full"
+          className="flex w-full flex-col"
           exit={{
             opacity: 0,
           }}
         >
-          <div className="flex relative mb-1">
-            <div className="flex flex-col grow relative w-full">
+          <div className="relative mb-1 flex">
+            <div className="relative flex w-full grow flex-col">
               <EmojiPickerWithInput
                 handleClick={handleClick}
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
@@ -109,7 +109,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           />
           <div className="flex">
             <div className={labelClassName}>{t("Emojicoin Name:")}</div>
-            <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">
+            <div className="ml-[0.5ch] font-forma uppercase text-white body-sm ellipses md:body-lg">
               {emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)?.name).join(", ")}
             </div>
           </div>
@@ -118,16 +118,16 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
             <div className={labelClassName}>{t("Emojicoin Symbol:")}</div>
             <Emoji
               className={
-                "body-sm md:body-lg uppercase whitespace-normal text-ellipsis text-white font-forma " +
-                "ml-[0.5ch] leading-6 "
+                "text-ellipsis whitespace-normal font-forma uppercase text-white body-sm md:body-lg " +
+                "ml-[0.5ch] leading-6"
               }
               emojis={emojis.join("")}
             />
           </div>
-          <div className="flex flex-col justify-center m-auto pt-2 pixel-heading-4 uppercase">
+          <div className="m-auto flex flex-col justify-center pt-2 uppercase pixel-heading-4">
             <div className="flex flex-col text-dark-gray">
               <div className="flex flex-row justify-between">
-                <div className="flex flex-row items-center justify-left mr-[4ch]">
+                <div className="justify-left mr-[4ch] flex flex-row items-center">
                   <span>{t("Cost to deploy")}</span>
                   <div className="mx-[5px]">
                     <Info infoIconClassName={"w-[13px] mt-[1px]"}>{`
@@ -145,8 +145,8 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
               <div className="flex flex-row justify-between">
                 <div className="flex flex-row">
                   <span>{t("Your balance")}</span>
-                  <div className={"flex flex-row absolute mt-[2px]"}>
-                    <span className="opacity-0 select-none">{t("Your balance")}</span>
+                  <div className={"absolute mt-[2px] flex flex-row"}>
+                    <span className="select-none opacity-0">{t("Your balance")}</span>
                     <Emoji
                       className="ml-[3px] text-[12px]"
                       emojis={sufficientBalance ? emoji("check mark button") : emoji("cross mark")}
@@ -167,7 +167,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
                 </div>
               </div>
               <div className="flex flex-row justify-between">
-                <div className="flex flex-row items-center justify-left mr-[4ch]">
+                <div className="justify-left mr-[4ch] flex flex-row items-center">
                   <span>{t("Grace period")}</span>
                   <div className="mx-[5px]">
                     <Info infoIconClassName={"w-[13px] mt-[1px]"}>
@@ -182,7 +182,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
             </div>
           </div>
           <motion.div
-            className={"flex flex-col justify-center m-auto mt-[1ch]"}
+            className={"m-auto mt-[1ch] flex flex-col justify-center"}
             initial={{ opacity: 0.4 }}
             animate={{
               opacity: emojis.length === 0 || numBytes > 10 ? 0.4 : 1,
@@ -205,9 +205,9 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
         <motion.div
           key={"status-indicator"}
           animate={{ opacity: 1 }}
-          className="absolute flex flex-col justify-center items-center w-full h-full gap-6"
+          className="absolute flex h-full w-full flex-col items-center justify-center gap-6"
         >
-          <span ref={ref} className="pixel-heading-3 text-ec-blue uppercase">
+          <span ref={ref} className="uppercase text-ec-blue pixel-heading-3">
             Building your emojicoin...
           </span>
         </motion.div>

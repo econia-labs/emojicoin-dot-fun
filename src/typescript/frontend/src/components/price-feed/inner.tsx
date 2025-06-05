@@ -35,10 +35,10 @@ const Item = ({ emoji, delta }: { emoji: string; delta: number }) => {
   return (
     <Link
       href={`/market/${emoji}`}
-      className={`font-pixelar whitespace-nowrap border-[1px] border-solid ${delta >= 0 ? "border-green" : "border-pink"} rounded-full px-3 py-[2px] select-none mr-[22px]`}
+      className={`whitespace-nowrap border-[1px] border-solid font-pixelar ${delta >= 0 ? "border-green" : "border-pink"} mr-[22px] select-none rounded-full px-3 py-[2px]`}
       draggable={false}
     >
-      <Emoji className="text-xl mr-[9px]" emojis={emoji} />
+      <Emoji className="mr-[9px] text-xl" emojis={emoji} />
       <PriceDelta className="text-2xl" delta={delta} />
     </Link>
   );
@@ -53,7 +53,7 @@ export const PriceFeedInner = ({ data }: { data: DatabaseModels["price_feed"][] 
   });
 
   return (
-    <div className="w-full z-[10] relative">
+    <div className="relative z-[10] w-full">
       <Carousel>
         {data!.map((itemData, i) => (
           <Item

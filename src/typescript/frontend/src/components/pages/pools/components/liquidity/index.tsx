@@ -40,8 +40,8 @@ const InnerWrapper = ({
   <div
     id={id}
     className={
-      `flex justify-between px-[18px] py-[7px] items-center ` +
-      `h-[55px] md:items-stretch ` +
+      `flex items-center justify-between px-[18px] py-[7px] ` +
+      `h-[55px] md:items-stretch` +
       className
     }
   >
@@ -270,7 +270,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
   );
 
   return (
-    <div className="flex w-full justify-center py-16 px-4 md:px-8">
+    <div className="flex w-full justify-center px-4 py-16 md:px-8">
       <Column width="100%" maxWidth="414px" justifyContent="center">
         <Flex width="100%" justifyContent="space-between" alignItems="center" mb="10px">
           <Flex flexDirection="row">
@@ -282,7 +282,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
                 <Arrows color="econiaBlue" />
               </button>
 
-              <p className="uppercase heading-2 md:heading-1 w-min md:w-auto">
+              <p className="w-min uppercase heading-2 md:w-auto md:heading-1">
                 {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
               </p>
 
@@ -353,7 +353,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </StyledAddLiquidityWrapper>
         )}
 
-        <div className="flex relative w-full justify-center mb-4 md:mb-9">
+        <div className="relative mb-4 flex w-full justify-center md:mb-9">
           <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
@@ -368,13 +368,13 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </ButtonWithConnectWalletFallback>
         </div>
 
-        <p className="uppercase heading-2 md:heading-1 mb-4">{t("Reserves")}</p>
+        <p className="mb-4 uppercase heading-2 md:heading-1">{t("Reserves")}</p>
 
         <StyledAddLiquidityWrapper>
-          <Flex className="items-center justify-between py-2.5 px-2 md:py-4 md:px-6">
+          <Flex className="items-center justify-between px-2 py-2.5 md:px-6 md:py-4">
             <AptosInputLabel />
 
-            <p className="body-sm md:body-lg uppercase">
+            <p className="uppercase body-sm md:body-lg">
               {market ? (
                 <FormattedNumber
                   className="pixel-heading-4"
@@ -388,10 +388,10 @@ const Liquidity = ({ market }: LiquidityProps) => {
             </p>
           </Flex>
 
-          <div className="flex items-center justify-between pt-0 px-3 pb-2.5 md:px-6 md:pb-4">
+          <div className="flex items-center justify-between px-3 pb-2.5 pt-0 md:px-6 md:pb-4">
             <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
 
-            <p className="body-sm md:body-lg uppercase">
+            <p className="uppercase body-sm md:body-lg">
               {market ? (
                 <FormattedNumber
                   className="pixel-heading-4"

@@ -21,24 +21,24 @@ export default function TapOutModal({
     : undefined;
 
   return (
-    <div className="flex flex-col items-center grow relative gap-4 px-4">
+    <div className="relative flex grow flex-col items-center gap-4 px-4">
       <CloseIcon
         onClick={() => setIsTappingOut(false)}
-        className="absolute right-[.5em] top-[.5em] p-[.5em] h-[2.5em] w-[2.5em] cursor-pointer"
+        className="absolute right-[.5em] top-[.5em] h-[2.5em] w-[2.5em] cursor-pointer p-[.5em]"
         color="econiaBlue"
       />
-      <div className="flex flex-col gap-[1.3em] justify-center uppercase max-w-[58ch] grow">
-        <div className="text-4xl text-white text-center">Are you sure you want to tap out?</div>
+      <div className="flex max-w-[58ch] grow flex-col justify-center gap-[1.3em] uppercase">
+        <div className="text-center text-4xl text-white">Are you sure you want to tap out?</div>
         <div className="flex flex-col gap-[1.5em]">
-          <div className="font-forma text-light-gray leading-6">
+          <div className="font-forma leading-6 text-light-gray">
             You have been matched a total of{" "}
             <span className="text-warning">{(matchNumberText ?? "?") + " APT"}</span> since your
             first deposit to an empty escrow.{" "}
-            <span className="text-lighter-gray font-bold">
+            <span className="font-bold text-lighter-gray">
               To exit before the melee is over, you must return the matched amount.
             </span>
           </div>
-          <div className="font-forma text-light-gray leading-6">
+          <div className="font-forma leading-6 text-light-gray">
             If you don&apos;t want to pay the tap out penalty, wait to exit until the melee has
             ended and then you&apos;ll be able to keep all matched deposits.
           </div>

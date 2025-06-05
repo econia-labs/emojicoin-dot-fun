@@ -82,7 +82,7 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
             </StyledClickItem>
           </Link>
 
-          <div className="hidden lg:flex mr-[50px] gap-[24px] items-center">
+          <div className="mr-[50px] hidden items-center gap-[24px] lg:flex">
             {NAVIGATE_LINKS.map(({ title, path }) => {
               return (
                 <Link

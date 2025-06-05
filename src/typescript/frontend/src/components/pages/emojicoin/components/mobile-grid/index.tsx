@@ -43,7 +43,7 @@ const tabs = [
     component: (props: GridProps) => (
       <div className="flex flex-col items-center">
         <LiquidityButton data={props.data} />
-        <div className="flex items-center justify-center pt-10 py-8 w-full bg-black">
+        <div className="flex w-full items-center justify-center bg-black py-8 pt-10">
           <SwapComponent
             emojicoin={props.data.symbol}
             marketAddress={props.data.marketAddress}
@@ -91,7 +91,7 @@ const MobileGrid = (props: GridProps) => {
       <StyledMobileContentBlock>
         <StyledMobileContentInner className={CHART_HEIGHT}>
           <Suspense fallback={<Loading />}>
-            <ChartContainer symbol={props.data.symbol} className="relative w-full h-[420px]" />
+            <ChartContainer symbol={props.data.symbol} className="relative h-[420px] w-full" />
           </Suspense>
         </StyledMobileContentInner>
       </StyledMobileContentBlock>

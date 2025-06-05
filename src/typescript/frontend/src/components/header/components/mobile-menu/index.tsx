@@ -103,7 +103,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   return (
     <StyledMotion initial="hidden" animate={isOpen ? "visible" : "hidden"} variants={slideVariants}>
       <MobileMenuWrapper>
-        <div className="flex flex-col w-full">
+        <div className="flex w-full flex-col">
           {!geoblocked && (
             <ButtonWithConnectWalletFallback
               className={"w-full"}
@@ -170,7 +170,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           })}
         </div>
 
-        <div className="flex fixed bottom-[60px] justify-center w-full">
+        <div className="fixed bottom-[60px] flex w-full justify-center">
           <MobileSocialLinks />
         </div>
       </MobileMenuWrapper>

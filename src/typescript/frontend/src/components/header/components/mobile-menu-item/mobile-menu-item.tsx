@@ -28,8 +28,8 @@ const MobileMenuItem: React.FC<Props> = ({ noBorder, icon, title, onClick = () =
   return (
     <div
       className={cn(
-        "cursor-pointer px-3 w-full flex justify-between py-1.5",
-        !noBorder && "border-b border-b-ec-blue border-dashed"
+        "flex w-full cursor-pointer justify-between px-3 py-1.5",
+        !noBorder && "border-b border-dashed border-b-ec-blue"
       )}
       onMouseOver={replay}
       onClick={onClick}

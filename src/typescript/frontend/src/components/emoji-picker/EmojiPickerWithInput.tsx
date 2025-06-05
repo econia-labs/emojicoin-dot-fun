@@ -30,7 +30,7 @@ const ChatInputBox = ({ children }: { children: React.ReactNode }) => {
         {children}
       </ButtonWithConnectWalletFallback>
       {!connected && (
-        <div className="flex justify-center absolute w-full opacity-20 z-[-1]">{children}</div>
+        <div className="absolute z-[-1] flex w-full justify-center opacity-20">{children}</div>
       )}
     </>
   );
@@ -183,7 +183,7 @@ const EmojiPickerWithInput = ({
   const close = (
     <motion.div whileTap={{ scale: 0.85 }} className={closeIconClassName} onClick={clear}>
       <ClosePixelated
-        className={`w-[15px] h-[16px] ${mode !== "search" ? "text-white" : "text-light-gray"}`}
+        className={`h-[16px] w-[15px] ${mode !== "search" ? "text-white" : "text-light-gray"}`}
       />
     </motion.div>
   );
@@ -203,12 +203,12 @@ const EmojiPickerWithInput = ({
     >
       <ConditionalWrapper mode={mode}>
         <InputGroup isShowError={false} {...inputGroupProps}>
-          <div className="flex-row relative items-center justify-center">
+          <div className="relative flex-row items-center justify-center">
             <div className="relative h-[45px]">
               <div
                 className={
-                  "flex flex-row absolute items-center justify-between h-full w-full " +
-                  "border-0 border-t-[1px] border-solid border-dark-gray " +
+                  "absolute flex h-full w-full flex-row items-center justify-between " +
+                  "border-0 border-t-[1px] border-solid border-dark-gray" +
                   inputClassName
                 }
               >
@@ -216,7 +216,7 @@ const EmojiPickerWithInput = ({
                 <Textarea
                   id="emoji-picker-text-area"
                   className={cn(
-                    `relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`,
+                    `relative scroll-auto px-[4px] !pt-[16px] ${mode === "search" ? "home-textarea" : ""}`,
                     emojiFontClassName
                   )}
                   ref={onRefChange}
@@ -256,13 +256,13 @@ const EmojiPickerWithInput = ({
                 {mode === "search" && close}
                 {mode === "chat" ? (
                   <>
-                    <MarketValidityIndicator className="flex flex-row min-w-fit justify-end px-[1ch]" />
+                    <MarketValidityIndicator className="flex min-w-fit flex-row justify-end px-[1ch]" />
                     <motion.div
                       whileTap={{ scale: 0.85 }}
                       onClick={() => {
                         handleSubmission(emojis.join(""));
                       }}
-                      className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
+                      className="relative mb-[1px] flex h-full pl-[1ch] pr-[2ch] hover:cursor-pointer"
                       style={{
                         cursor:
                           emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS
@@ -273,7 +273,7 @@ const EmojiPickerWithInput = ({
                       }}
                       ref={sendButtonRef}
                     >
-                      <Arrow className="!w-[21px] !h-[21px]" color="white" />
+                      <Arrow className="!h-[21px] !w-[21px]" color="white" />
                     </motion.div>
                   </>
                 ) : null}
@@ -288,7 +288,7 @@ const EmojiPickerWithInput = ({
         lifecycle anyway, so it should be fine as is. */}
       {createPortal(
         <div
-          className="fixed bg-transparent right-0"
+          className="fixed right-0 bg-transparent"
           style={{
             zIndex: 101,
             ...(mode === "chat" ? { top: 0 } : { bottom: 0 }),

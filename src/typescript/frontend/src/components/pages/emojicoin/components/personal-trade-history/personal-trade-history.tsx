@@ -71,7 +71,7 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
 
   return (
     <EcTable
-      className="m-auto overflow-auto h-[330px]"
+      className="m-auto h-[330px] overflow-auto"
       onClick={(item) =>
         window.open(
           toExplorerLink({
