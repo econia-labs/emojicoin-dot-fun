@@ -62,24 +62,24 @@ const WalletDropdownMenu = () => {
 
   return (
     <div
-      className="relative flex flex-col gap-4 items-center"
+      className="relative flex flex-col items-center gap-4"
       style={{ width: WIDTH, maxWidth: WIDTH, minWidth: WIDTH }}
     >
       <DropdownMenu>
         <DropdownTrigger asChild className="focus:outline-none">
           <button className="" onMouseOver={() => handleReplay(enabled, replay)}>
-            <div className="flex flex-row text-ec-blue text-2xl">
+            <div className="flex flex-row text-2xl text-ec-blue">
               <Emoji
-                className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
+                className="mt-1.5 flex animate-flicker text-base drop-shadow-voltage"
                 emojis={emoji("high voltage")}
               />
               <p
-                className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                className="text-overflow-ellipsis overflow-hidden whitespace-nowrap"
                 style={{ width, maxWidth: width }}
                 ref={ref}
               />
               <Emoji
-                className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
+                className="mt-1.5 flex animate-flicker text-base drop-shadow-voltage"
                 emojis={emoji("high voltage")}
               />
             </div>
@@ -88,7 +88,7 @@ const WalletDropdownMenu = () => {
         <DropdownContent
           sideOffset={4}
           className={
-            "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer rounded-[3px] min-w-[155px] pl-[2px]"
+            "flex min-w-[155px] cursor-pointer flex-col rounded-[3px] bg-ec-blue pl-[2px] text-xl uppercase text-black"
           }
           style={{
             zIndex: zIndices.tooltip,

@@ -156,7 +156,7 @@ const TableCard = ({
               }
             : undefined
       }
-      className="grid-emoji-card group cursor-pointer border-solid bg-black border border-dark-gray hover:z-10 hover:border-ec-blue"
+      className="grid-emoji-card group cursor-pointer border border-solid border-dark-gray bg-black hover:z-10 hover:border-ec-blue"
       variants={tableCardVariants}
       animate={variant}
       custom={{ curr, prev, layoutDelay }}
@@ -185,22 +185,22 @@ const TableCard = ({
       <EmojiMarketPageLink emojis={emojis}>
         <motion.div animate={controls} variants={animationsOn ? glowVariants : {}}>
           <motion.div
-            className="flex flex-col relative grid-emoji-card w-full h-full py-[10px] px-[19px] overflow-hidden"
+            className="grid-emoji-card relative flex h-full w-full flex-col overflow-hidden px-[19px] py-[10px]"
             whileHover="hover"
             animate={controls}
             variants={animationsOn ? borderVariants : onlyHoverVariant}
           >
             <Flex justifyContent="space-between" mb="7px">
-              <span className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px]">
+              <span className="p-[1px] text-dark-gray pixel-heading-2 group-hover:text-ec-blue">
                 {displayIndex < 10 ? `0${displayIndex}` : displayIndex}
               </span>
 
-              <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
+              <Arrow className="w-[21px] !fill-current text-dark-gray transition-all group-hover:text-ec-blue" />
             </Flex>
 
             <Emoji
               // Font size and line height are taken from `pixel-heading-1` and `pixel-heading-1b`.
-              className={`${emojis.length <= 2 ? "text-[64px]" : "text-[52px]"} leading-[48px] text-center mb-[22px] text-nowrap`}
+              className={`${emojis.length <= 2 ? "text-[64px]" : "text-[52px]"} mb-[22px] text-nowrap text-center leading-[48px]`}
               emojis={emojis}
             />
             <Text
@@ -217,8 +217,8 @@ const TableCard = ({
               <Column width="50%">
                 <div
                   className={
-                    "body-sm font-forma text-light-gray " +
-                    "group-hover:text-ec-blue uppercase p-[1px] transition-all"
+                    "font-forma text-light-gray body-sm " +
+                    "p-[1px] uppercase transition-all group-hover:text-ec-blue"
                   }
                 >
                   {t("Market Cap")}
@@ -226,7 +226,7 @@ const TableCard = ({
                 <motion.div
                   animate={controls}
                   variants={animationsOn ? textVariants : {}}
-                  className="body-sm uppercase font-forma"
+                  className="font-forma uppercase body-sm"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                 >
                   {usdMarketCap === undefined ? (
@@ -239,8 +239,8 @@ const TableCard = ({
               <Column width="50%">
                 <div
                   className={
-                    "body-sm font-forma text-light-gray " +
-                    "group-hover:text-ec-blue uppercase p-[1px] transition-all"
+                    "font-forma text-light-gray body-sm " +
+                    "p-[1px] uppercase transition-all group-hover:text-ec-blue"
                   }
                 >
                   {t(secondaryLabel)}
@@ -248,7 +248,7 @@ const TableCard = ({
                 <motion.div
                   animate={controls}
                   variants={animationsOn ? textVariants : {}}
-                  className="body-sm uppercase font-forma"
+                  className="font-forma uppercase body-sm"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                 >
                   <FormattedNumber value={secondaryMetric} scramble nominalize suffix=" APT" />
@@ -256,7 +256,7 @@ const TableCard = ({
               </Column>
               {FEATURE_FLAGS.Favorites && (
                 <Column>
-                  <div className="flex justify-end items-end grow relative w-[25px] h-[25px]">
+                  <div className="relative flex h-[25px] w-[25px] grow items-end justify-end">
                     <FavoriteButton emojis={emojis} className="absolute bottom-0 right-0" />
                   </div>
                 </Column>

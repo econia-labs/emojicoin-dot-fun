@@ -65,14 +65,14 @@ const BondingProgress = ({ data }: MainInfoProps) => {
         Who knew CSS could be this hard...
       */}
       <ProgressBar length={7} position={position} />
-      <div className="absolute bottom-[-1em] my-[-.2em] right-0 flex justify-end mr-[1em]">
-        <div className={statsTextClasses + " text-dark-gray font-pixelar text-[1em]"}>
+      <div className="absolute bottom-[-1em] right-0 my-[-.2em] mr-[1em] flex justify-end">
+        <div className={statsTextClasses + " font-pixelar text-[1em] text-dark-gray"}>
           {t("Bonding progress:")}
         </div>
         <FormattedNumber
           value={bondingProgress}
           className={
-            statsTextClasses + " text-dark-gray font-pixelar text-[1em] text-end min-w-[3.3em]"
+            statsTextClasses + " min-w-[3.3em] text-end font-pixelar text-[1em] text-dark-gray"
           }
           suffix="%"
           scramble

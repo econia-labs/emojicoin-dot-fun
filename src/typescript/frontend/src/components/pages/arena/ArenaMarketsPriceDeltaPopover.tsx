@@ -6,7 +6,7 @@ const ArenaMarketsPriceDeltaPopover = ({ delta }: { delta?: number | null }) =>
     <Popup content={<span>The change in price since the start of the melee</span>}>
       {/* Needs the wrapper div or the popup/popover won't work. */}
       <div className="flex">
-        <PriceDelta className="text-xl lg:text-2xl xl:text-3xl px-2 m-auto" delta={delta} />
+        <PriceDelta className="m-auto px-2 text-xl lg:text-2xl xl:text-3xl" delta={delta} />
       </div>
     </Popup>
   );

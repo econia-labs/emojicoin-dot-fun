@@ -47,7 +47,7 @@ const FormEntry = ({
   className?: string;
   disabled?: boolean;
 }) => (
-  <div className={`mx-auto relative`}>
+  <div className={`relative mx-auto`}>
     <div className="max-w-[300px] text-white">{name}</div>
     <input
       tabIndex={1}
@@ -165,7 +165,7 @@ const MetadataPage = () => {
   );
 
   return (
-    <div className="w-[100%] h-[100%] flex flex-col gap-[10px] text-xl place-content-center">
+    <div className="flex h-[100%] w-[100%] flex-col place-content-center gap-[10px] text-xl">
       <FormEntry
         name="Market address"
         value={marketAddress}
@@ -216,7 +216,7 @@ const MetadataPage = () => {
         buttonText="+"
       ></FormEntry>
       <div>{/* For spacing. */}</div>
-      <div className="mx-auto w-[300px] grid grid-cols-2 grid-rows-2 gap-[10px]">
+      <div className="mx-auto grid w-[300px] grid-cols-2 grid-rows-2 gap-[10px]">
         <button
           tabIndex={3}
           className={`${BUTTON_CLASS_NAME}`}

@@ -63,7 +63,7 @@ export default function EnterTabSummary({
   }, [account, swapTransactionBuilder, swap, submit]);
 
   return (
-    <div className="flex flex-col grow pt-[2em] pb-[3em]">
+    <div className="flex grow flex-col pb-[3em] pt-[2em]">
       {isTappingOut && (
         <TapOutModal position={position} onTapOut={onTapOut} setIsTappingOut={setIsTappingOut} />
       )}

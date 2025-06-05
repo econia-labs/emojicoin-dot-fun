@@ -62,17 +62,17 @@ export const AnimatedProgressBar = (props: GridProps) => {
   }, [progress, progressBarControls, flickerControls]);
 
   return (
-    <motion.div className="flex w-full rounded-sm h-[100%] !p-0">
+    <motion.div className="flex h-[100%] w-full rounded-sm !p-0">
       <motion.div
         style={{ filter: "brightness(1) drop-shadow(0 1px 2px #fff0)" }}
-        className="w-100% md:w-auto p-[0.7em] relative flex my-auto px-3 opacity-[0.9]"
+        className="w-100% relative my-auto flex p-[0.7em] px-3 opacity-[0.9] md:w-auto"
         animate={flickerControls}
       >
-        <p className="pixel-heading-4 uppercase text-light-gray">Bonding progress:&nbsp;</p>
-        <p className="pixel-heading-4 uppercase">{`${progress.toFixed(1)}%`}</p>
+        <p className="uppercase text-light-gray pixel-heading-4">Bonding progress:&nbsp;</p>
+        <p className="uppercase pixel-heading-4">{`${progress.toFixed(1)}%`}</p>
       </motion.div>
       <motion.div
-        className="absolute drop-shadow-voltage bottom-0 bg-blue h-[1px]"
+        className="absolute bottom-0 h-[1px] bg-blue drop-shadow-voltage"
         style={{ width: "0%", filter: "brightness(1) hue-rotate(0deg)" }}
         animate={progressBarControls}
       ></motion.div>
@@ -84,7 +84,7 @@ export const AnimatedProgressBar = (props: GridProps) => {
         <motion.svg
           width="20"
           height="20"
-          className="absolute bottom-0 overflow-visible z-1 ml-[100%] opacity-100 w-0"
+          className="z-1 absolute bottom-0 ml-[100%] w-0 overflow-visible opacity-100"
           style={{ filter: "brightness(1) hue-rotate(0deg)" }}
           animate={progressBarControls}
         >

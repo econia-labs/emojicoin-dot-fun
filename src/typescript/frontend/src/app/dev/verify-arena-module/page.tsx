@@ -24,7 +24,7 @@ const VerifyArenaModule = async () => {
   }
 
   return (
-    <div className="bg-black w-full h-full m-auto pixel-heading-2">
+    <div className="m-auto h-full w-full bg-black pixel-heading-2">
       {FEATURE_FLAGS.Arena ? "LGTM" : "Arena isn't enabled!"}
     </div>
   );
