@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-client";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
+import { cn } from "lib/utils/class-name";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,7 +30,6 @@ import { ClientGrid } from "./ClientGrid";
 import { ButtonsBlock } from "./components/buttons-block";
 import SortAndAnimate from "./components/SortAndAnimate";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import { cn } from "lib/utils/class-name";
 
 interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
