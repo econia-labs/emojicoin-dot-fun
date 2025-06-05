@@ -18,7 +18,7 @@ const AnimatedDropdownItem = ({
     <>
       <div className="relative">
         <motion.div
-          className="overflow-hidden flex items-center"
+          className="flex items-center overflow-hidden"
           animate={controls}
           initial={{ height: 0 }}
           exit={{ height: 0 }}

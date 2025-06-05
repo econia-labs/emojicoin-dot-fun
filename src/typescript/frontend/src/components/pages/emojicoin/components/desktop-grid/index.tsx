@@ -65,12 +65,12 @@ const DesktopGrid = (props: GridProps) => {
     <StyledContentWrapper>
       <StyledContentInner>
         <StyledContentColumn>
-          <StyledBlock width="57%" className="bg-black z-10">
+          <StyledBlock width="57%" className="z-10 bg-black">
             <StyledBlockWrapper>
               <Suspense fallback={<Loading numEmojis={20} />}>
                 <ChartContainer
                   symbol={props.data.symbolData.symbol}
-                  className="relative w-full h-[420px]"
+                  className="relative h-[420px] w-full"
                 />
               </Suspense>
             </StyledBlockWrapper>

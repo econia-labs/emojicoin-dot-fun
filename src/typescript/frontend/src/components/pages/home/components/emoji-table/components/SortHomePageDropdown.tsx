@@ -44,9 +44,9 @@ export default function SortHomePageDropdown({
   return (
     <DropdownMenu>
       <DropdownTrigger asChild className="focus:outline-none">
-        <button className="flex w-[unset] xl:w-[300px] mr-[20px]">
+        <button className="mr-[20px] flex w-[unset] xl:w-[300px]">
           <div
-            className="flex flex-row uppercase med-pixel-text gap-2 whitespace-nowrap"
+            className="med-pixel-text flex flex-row gap-2 whitespace-nowrap uppercase"
             onMouseOver={() => {
               if (scrambleEnabled) replay();
             }}
@@ -66,8 +66,8 @@ export default function SortHomePageDropdown({
       <DropdownContent
         sideOffset={4}
         className={cn(
-          "flex flex-col bg-ec-blue text-black med-pixel-text uppercase cursor-pointer z-[50]",
-          "rounded-[3px] w-52 xl:w-64"
+          "med-pixel-text z-[50] flex cursor-pointer flex-col bg-ec-blue uppercase text-black",
+          "w-52 rounded-[3px] xl:w-64"
         )}
         align="center"
         side="bottom"

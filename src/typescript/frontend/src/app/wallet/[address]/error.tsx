@@ -5,8 +5,8 @@ import { Emoji } from "utils/emoji";
 
 export default function UserNotFound() {
   return (
-    <div className="flex flex-col justify-center align-middle h-full">
-      <div className="text-warning flex flex-row text-[64px] leading-[64px] !font-forma-bold m-auto gap-2">
+    <div className="flex h-full flex-col justify-center align-middle">
+      <div className="m-auto flex flex-row gap-2 !font-forma-bold text-[64px] leading-[64px] text-warning">
         {"We couldn't find that user."}
         <Emoji emojis={emoji("sad but relieved face")} />
       </div>

@@ -18,8 +18,8 @@ const Footer: React.FC = () => {
   return (
     <Container className="w-full">
       <Flex justifyContent="center">
-        <div className="flex w-full flex-col items-center justify-between max-w-[1108px]">
-          <div className="flex py-6 md:py-12 w-full items-center justify-between border-b border-solid border-dark-gray">
+        <div className="flex w-full max-w-[1108px] flex-col items-center justify-between">
+          <div className="flex w-full items-center justify-between border-b border-solid border-dark-gray py-6 md:py-12">
             <StyledClickItem>
               <LogoIcon width="170px" cursor="pointer" versionBadge={true} />
             </StyledClickItem>
@@ -33,7 +33,7 @@ const Footer: React.FC = () => {
           </div>
 
           <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
-            <p className="uppercase font-bold py-4 md:py-6 text-[8px] md:text-[15px] font-forma leading-[20px]">
+            <p className="py-4 font-forma text-[8px] font-bold uppercase leading-[20px] md:py-6 md:text-[15px]">
               TERMS OF USE
             </p>
           </Link>

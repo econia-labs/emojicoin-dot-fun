@@ -6,7 +6,7 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
   ({ className, ...props }, ref) => (
     <table
       ref={ref}
-      className={cn("w-full caption-bottom text-sm border-separate bg-black", className)}
+      className={cn("w-full caption-bottom border-separate bg-black text-sm", className)}
       {...props}
     />
   )
@@ -20,7 +20,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "text-ec-blue body-lg bg-black uppercase text-center sticky top-0 z-10",
+      "sticky top-0 z-10 bg-black text-center uppercase text-ec-blue body-lg",
 
       className
     )}
@@ -36,7 +36,7 @@ const TableBody = React.forwardRef<
   <tbody
     ref={ref}
     className={cn(
-      "table-body [&>tr:last-child>td]:border-b [&>tr:last-child>td]:border-b-dark-gray [&>tr:hover+tr>td]:border-t-ec-blue",
+      "table-body [&>tr:hover+tr>td]:border-t-ec-blue [&>tr:last-child>td]:border-b [&>tr:last-child>td]:border-b-dark-gray",
       className
     )}
     {...props}
@@ -59,7 +59,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-8 py-2 align-middle tracking-wide font-forma [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border-y border-solid border-dark-gray bg-darker-gray",
+      "h-8 border-y border-solid border-dark-gray bg-darker-gray py-2 align-middle font-forma tracking-wide [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props}
@@ -74,7 +74,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "text-light-gray align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border-solid border-t border-dark-gray group-hover:border-ec-blue first:border-l last:border-r first:border-l-black last:border-r-black",
+      "border-t border-solid border-dark-gray align-middle text-light-gray first:border-l first:border-l-black last:border-r last:border-r-black group-hover:border-ec-blue [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props}
@@ -148,7 +148,7 @@ const TableRow = React.forwardRef<
         style={{ height, ...props.style }}
         className={cn(
           "relative w-full",
-          !isHeader && !noHover ? "transition-colors border-2 hover:z-2 group" : "",
+          !isHeader && !noHover ? "hover:z-2 group border-2 transition-colors" : "",
           className
         )}
         {...props}

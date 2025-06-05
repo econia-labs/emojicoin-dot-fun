@@ -19,8 +19,8 @@ const Tabs = React.forwardRef<
     className={cn(
       // Apply styles targeting descendant active tabs and direct child tab panels
       activeBg === "black"
-        ? "[&_[role=tab][data-state=active]]:bg-black [&>[role=tabpanel][data-state=active]]:bg-black"
-        : "[&_[role=tab][data-state=active]]:bg-darker-gray [&>[role=tabpanel][data-state=active]]:bg-darker-gray",
+        ? "[&>[role=tabpanel][data-state=active]]:bg-black [&_[role=tab][data-state=active]]:bg-black"
+        : "[&>[role=tabpanel][data-state=active]]:bg-darker-gray [&_[role=tab][data-state=active]]:bg-darker-gray",
       className
     )}
     {...props}
@@ -36,7 +36,7 @@ const TabsList = React.forwardRef<
     <TabsPrimitive.List
       ref={ref}
       className={cn(
-        "min-w-full border-b border-solid border-dark-gray inline-flex items-end space-x-2 px-2 pt-2 pb-0 relative",
+        "relative inline-flex min-w-full items-end space-x-2 border-b border-solid border-dark-gray px-2 pb-0 pt-2",
         className
       )}
       {...props}
@@ -55,11 +55,11 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex whitespace-nowrap items-center -mb-[1px] relative rounded-t-xl px-4 py-2 !text-[1.2rem] pixel-heading-3b",
+      "relative -mb-[1px] flex items-center whitespace-nowrap rounded-t-xl px-4 py-2 !text-[1.2rem] pixel-heading-3b",
       "uppercase transition-all",
       "border border-transparent data-[state=active]:border-dark-gray data-[state=active]:border-b-transparent",
       "text-light-gray data-[state=active]:text-white",
-      "data-[state=active]:shadow-md data-[state=active]:z-20",
+      "data-[state=active]:z-20 data-[state=active]:shadow-md",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       className

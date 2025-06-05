@@ -37,7 +37,7 @@ export default function SortAndAnimate({
   return (
     <div
       className={
-        "flex w-full flex-col md:flex-row justify-between md:justify-end py-2 items-center gap-3"
+        "flex w-full flex-col items-center justify-between gap-3 py-2 md:flex-row md:justify-end"
       }
     >
       <SortHomePageDropdown sortMarketsBy={sortMarketsBy} onSortChange={onSortChange} />
@@ -52,8 +52,8 @@ export default function SortAndAnimate({
                   : "Filter your favorite Emojicoins"
             }
           >
-            <div className="flex gap-3 items-center">
-              <span className="med-pixel-text text-light-gray uppercase">{t("Favorites:")}</span>
+            <div className="flex items-center gap-3">
+              <span className="med-pixel-text uppercase text-light-gray">{t("Favorites:")}</span>
               <Switch
                 disabled={disableFavoritesToggle || favoritesDisabled}
                 checked={!favoritesDisabled && isFilterFavorites}
@@ -63,8 +63,8 @@ export default function SortAndAnimate({
           </Popup>
         )}
 
-        <div className="flex flex-row gap-3 items-center">
-          <span className=" med-pixel-text text-light-gray uppercase">{t("Animate: ")}</span>
+        <div className="flex flex-row items-center gap-3">
+          <span className="med-pixel-text uppercase text-light-gray">{t("Animate: ")}</span>
           <Switch checked={animate} onCheckedChange={toggleAnimate} />
         </div>
       </div>

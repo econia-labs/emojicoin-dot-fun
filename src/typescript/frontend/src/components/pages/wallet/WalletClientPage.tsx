@@ -40,13 +40,13 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
 
   return (
     <div className="max-w-[100vw] px-2 md:min-w-[80vw]">
-      <span className="pixel-heading-2 px-4 md:px-0 flex flex-wrap gap-x-2 mb-4">
+      <span className="mb-4 flex flex-wrap gap-x-2 px-4 pixel-heading-2 md:px-0">
         Portfolio of{" "}
         <ExplorerLink className="text-ec-blue hover:underline" type="account" value={address}>
           {formatDisplayName(resolvedName, { noTruncateANSName: true })}
         </ExplorerLink>
       </span>
-      <div className="flex justify-between w-full mb-4 flex-wrap gap-x-2 px-4 md:px-0">
+      <div className="mb-4 flex w-full flex-wrap justify-between gap-x-2 px-4 md:px-0">
         <span className="pixel-heading-3b">
           {"Total value: "}
           {isLoading ? (
@@ -54,7 +54,7 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
           ) : (
             <>
               <FormattedNumber scramble value={totalValue} style="sliding-precision" />
-              <AptosIconBlack className="icon-inline ml-[2px]" />
+              <AptosIconBlack className="ml-[2px] icon-inline" />
             </>
           )}
         </span>
@@ -71,7 +71,7 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
             Trade History
           </TabsTrigger>
           {tab === "trade-history" && (
-            <div className="flex grow justify-end min-w-[150px]">
+            <div className="flex min-w-[150px] grow justify-end">
               <SearchBar className="ml-auto" />
             </div>
           )}

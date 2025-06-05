@@ -29,7 +29,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
         className="w-full"
         href={`${ROUTES.market}/${emojiNamesToPath(item.market.emojis.map((em) => em.name))}`}
       >
-        <Emoji className={`text-[1.2em] text-nowrap`} emojis={item.market.emojis} />
+        <Emoji className={`text-nowrap text-[1.2em]`} emojis={item.market.emojis} />
       </a>
     ),
   },
@@ -108,7 +108,7 @@ export const WalletTransactionTable = ({
   return (
     <>
       <EcTable
-        className={"flex w-full overflow-auto h-[60dvh]"}
+        className={"flex h-[60dvh] w-full overflow-auto"}
         getKey={(item) => item.guid}
         columns={COLUMNS}
         onClick={(item) => {

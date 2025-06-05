@@ -44,7 +44,7 @@ export const MeleeBreakdownInner = ({
 
   return (
     <div
-      className="h-[100%] w-[100%] grid gap-[1em] relative"
+      className="relative grid h-[100%] w-[100%] gap-[1em]"
       style={{
         gridTemplateRows: historyHidden ? "1fr 1fr" : "1fr 0.6fr 0.6fr",
         gridTemplateColumns: historyHidden ? "repeat(4, 1fr)" : "1fr 1fr",
@@ -53,15 +53,15 @@ export const MeleeBreakdownInner = ({
       }}
     >
       <div
-        className={`col-start-1 col-end-3 ${historyHidden ? "row-start-1" : ""} ${historyHidden ? "row-end-3" : ""} h-[100%] w-[100%] grid place-items-center`}
+        className={`col-start-1 col-end-3 ${historyHidden ? "row-start-1" : ""} ${historyHidden ? "row-end-3" : ""} grid h-[100%] w-[100%] place-items-center`}
       >
         <div className="flex flex-col gap-[1em]">
-          <div className="uppercase text-light-gray text-3xl text-center">{"Summary"}</div>
-          <div className="text-5xl text-center">
+          <div className="text-center text-3xl uppercase text-light-gray">{"Summary"}</div>
+          <div className="text-center text-5xl">
             <Emoji emojis={lastHeld} />
           </div>
           <ExplorerLink value={lastVersion} type={"version"} className="hover:underline">
-            <div className="text-[1em] text-center uppercase text-ec-blue">{`Melee #${meleeID}`}</div>
+            <div className="text-center text-[1em] uppercase text-ec-blue">{`Melee #${meleeID}`}</div>
           </ExplorerLink>
         </div>
       </div>
@@ -100,7 +100,7 @@ export const MeleeBreakdownInner = ({
         />
       </div>
       <div
-        className="md:hidden absolute right-0 top-0 uppercase text-xl text-light-gray cursor-pointer"
+        className="absolute right-0 top-0 cursor-pointer text-xl uppercase text-light-gray md:hidden"
         onClick={close}
       >
         {"<< Hide"}
@@ -198,7 +198,7 @@ export const MeleeBreakdown = ({
     return isLoading ? (
       <Loading />
     ) : (
-      <div className="grid place-items-center h-[100%] w-[100%]">
+      <div className="grid h-[100%] w-[100%] place-items-center">
         <Button scale="lg" onClick={goToEnter}>
           {"Enter now"}
         </Button>
