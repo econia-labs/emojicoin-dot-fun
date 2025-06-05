@@ -53,7 +53,7 @@ const tailwindConfig = {
   theme: {
     extend: {
       maxWidth: {
-        max: "1362px",
+        max: "1440px",
       },
       typography: {},
       fontFamily: {
