@@ -18,22 +18,22 @@ export const CongratulationsToast = ({
   const amountString = toDisplayCoinDecimals({ num: amount, decimals: 2 });
   return (
     <div className="flex flex-col text-center">
-      <Emoji className="p-[20px] text-7xl" emojis={emoji("party popper")} />
+      <Emoji className="text-7xl p-[20px]" emojis={emoji("party popper")} />
       <div className="flex flex-col text-center">
         <span className="font-pixelar text-5xl uppercase">Congratulations!</span>
         <span className="font-forma text-2xl uppercase text-ec-blue">
           <span>{`You won ${amountString} APT.`}</span>
         </span>
-        <div className="mb-[15px] flex w-[100%] flex-row justify-center">
-          <span className="text-l uppercase text-dark-gray">View the transaction&nbsp;</span>
+        <div className="w-[100%] flex flex-row justify-center mb-[15px]">
+          <span className="text-dark-gray text-l uppercase">View the transaction&nbsp;</span>
           <ExplorerLink
             network={network?.name ?? APTOS_NETWORK}
             value={transactionHash}
             type="transaction"
           >
-            <span className="text-l uppercase text-dark-gray underline">here</span>
+            <span className="text-dark-gray text-l uppercase underline">here</span>
           </ExplorerLink>
-          <span className="text-l uppercase text-dark-gray">.</span>
+          <span className="text-dark-gray text-l uppercase">.</span>
         </div>
       </div>
     </div>

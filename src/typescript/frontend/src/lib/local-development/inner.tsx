@@ -124,10 +124,10 @@ const InnerDisplayDebugData = () => {
 
   return (
     <>
-      <div className="fixed bottom-0 right-0 flex bg-black p-2 text-xl text-green">
+      <div className="fixed flex bottom-0 right-0 p-2 bg-black text-green text-xl">
         <div className="m-auto">{registeredMarkets.size} mkts</div>
       </div>
-      <div className="fixed left-0 top-0 z-[101] flex flex-col gap-1 bg-black">
+      <div className="flex flex-col gap-1 fixed top-0 left-0 z-[101] bg-black">
         {showDebugger ? (
           <X onClick={() => setShowDebugger((v) => !v)} className={iconClassName} />
         ) : (

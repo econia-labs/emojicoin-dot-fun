@@ -150,9 +150,9 @@ export default function EmojiPicker(
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div {...propsRest} className="relative rounded-xl bg-black shadow-econia">
+      <div {...propsRest} className="relative bg-black rounded-xl shadow-econia">
         <div
-          className="z-5 relative right-0 h-[29px] w-[100%] bg-ec-blue"
+          className="right-0 relative h-[29px] w-[100%] bg-ec-blue z-5"
           style={{
             touchAction: "none",
             borderTopLeftRadius: "8px",
@@ -162,7 +162,7 @@ export default function EmojiPicker(
         ></div>
 
         <div
-          className="relative z-10 rounded-xl border-[1px] border-t-0 border-solid border-ec-blue bg-black"
+          className="relative z-10 bg-black rounded-xl border-ec-blue border-solid border-[1px] border-t-0"
           style={{ marginTop: "-10px" }}
         >
           <Picker
@@ -197,7 +197,7 @@ export default function EmojiPicker(
         </div>
 
         <RoundButton
-          className="absolute left-[5px] top-[4px] z-20 bg-red"
+          className="absolute top-[4px] left-[5px] z-20 bg-red"
           onClick={() => {
             setPickerInvisible(true);
           }}

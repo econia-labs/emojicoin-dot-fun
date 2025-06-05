@@ -65,8 +65,8 @@ export const TradeHistory = (props: TradeHistoryProps) => {
             }
             uppercase={false}
           >
-            <div className="relative flex h-full">
-              <Emoji className="m-auto text-light-gray" emojis={item.rankIcon} />
+            <div className="flex h-full relative">
+              <Emoji className="text-light-gray m-auto" emojis={item.rankIcon} />
             </div>
           </Popup>
         ),
@@ -117,7 +117,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
 
   return (
     <EcTable
-      className="m-auto h-[330px] overflow-auto"
+      className="m-auto overflow-auto h-[330px]"
       onClick={(item) =>
         window.open(
           toExplorerLink({

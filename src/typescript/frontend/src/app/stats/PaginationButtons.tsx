@@ -81,7 +81,7 @@ export const StatsButtonsBlock = ({
   return (
     <div
       className={cn(
-        "med-pixel-text flex flex-row justify-center gap-3 text-dark-gray md:gap-4",
+        "flex flex-row justify-center gap-3 md:gap-4 med-pixel-text text-dark-gray",
         className
       )}
     >

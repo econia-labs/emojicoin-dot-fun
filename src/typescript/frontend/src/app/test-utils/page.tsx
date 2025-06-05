@@ -11,7 +11,7 @@ export default function TestUtilsPage() {
   return (
     <>
       {APTOS_NETWORK !== Network.MAINNET && (
-        <div className="flex h-full w-full flex-col">
+        <div className="w-full h-full flex flex-col">
           {APTOS_NETWORK === Network.LOCAL && FEATURE_FLAGS.Arena && (
             <SetMeleeDurationForm className="" />
           )}

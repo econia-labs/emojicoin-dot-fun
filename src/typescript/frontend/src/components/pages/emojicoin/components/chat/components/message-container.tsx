@@ -56,14 +56,14 @@ const MessageContainer = ({
       <motion.div className={cn("flex w-full", alignLeft ? "justify-start" : "justify-end")} layout>
         <motion.div
           className={cn(
-            "mb-3 flex h-fit max-w-[160px] flex-col md:max-w-[317px]",
+            "flex flex-col mb-3 max-w-[160px] md:max-w-[317px] h-fit",
             alignLeft ? "items-start" : "items-end"
           )}
           layout
         >
           <div
             className={cn(
-              "relative mx-2 mb-3 flex w-fit border-2 border-solid border-white p-1.5 radii-xs",
+              "flex relative p-1.5 mx-2 mb-3 radii-xs border-2 border-solid border-white w-fit",
               alignLeft ? "bg-ec-blue" : "bg-blue"
             )}
             style={{
@@ -72,13 +72,13 @@ const MessageContainer = ({
             }}
           >
             <Emoji
-              className="p-[0.25ch] pt-[1ch] text-xl tracking-widest"
+              className="pt-[1ch] p-[0.25ch] text-xl tracking-widest"
               style={{ wordBreak: "break-word" }}
               emojis={message.text}
             />
             <div
               className={cn(
-                "absolute top-1/2 -z-10 h-2.5 w-2.5 -translate-y-[40%] rotate-45 bg-white",
+                "absolute h-2.5 w-2.5 -z-10 top-1/2 -translate-y-[40%] rotate-45 bg-white",
                 alignLeft ? "-left-1" : "-right-1"
               )}
             />
@@ -89,11 +89,11 @@ const MessageContainer = ({
               {...EXTERNAL_LINK_PROPS}
               href={toExplorerLink({ value: message.version, linkType: "version" })}
             >
-              <span className="uppercase text-light-gray pixel-heading-4 hover:underline">
+              <span className="pixel-heading-4 text-light-gray uppercase hover:underline">
                 {displayName}
               </span>
             </a>
-            <Emoji className="uppercase text-light-gray pixel-heading-4" emojis={message.label} />
+            <Emoji className="pixel-heading-4 text-light-gray uppercase" emojis={message.label} />
           </FlexGap>
         </motion.div>
       </motion.div>

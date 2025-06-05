@@ -40,7 +40,7 @@ const ProgressBar = ({ length, position }: { length: number; position: number })
         }}
       >
         <div
-          className="relative grid w-[100%]"
+          className="grid relative w-[100%]"
           style={{ gridTemplateColumns: `repeat(${length}, 1fr)` }}
         >
           <EmojiAsImage
@@ -53,7 +53,7 @@ const ProgressBar = ({ length, position }: { length: number; position: number })
             return (
               <BondingCurveArrow
                 key={`progress-bar-element-${i}`}
-                className="h-[100%] w-[100%]"
+                className="w-[100%] h-[100%]"
                 color={i < position ? "econiaBlue" : "darkGray"}
               />
             );

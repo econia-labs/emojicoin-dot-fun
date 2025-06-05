@@ -28,14 +28,14 @@ import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
 import { SwapButton } from "./SwapButton";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
-  <div className="relative flex flex-col gap-[19px]">{children}</div>
+  <div className="flex flex-col relative gap-[19px]">{children}</div>
 );
 
 const InnerWrapper = ({ children }: PropsWithChildren) => (
   <div
     className={
       `flex justify-between border border-solid border-dark-gray ` +
-      `h-[55px] items-center px-[18px] py-[7px] radii-xs md:items-stretch`
+      `radii-xs px-[18px] py-[7px] items-center h-[55px] md:items-stretch`
     }
   >
     {children}
@@ -165,7 +165,7 @@ export default function SwapComponent({
               onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
             />
           }
-          className="mt-[1px] translate-x-[89px] !py-0"
+          className="!py-0 translate-x-[89px] mt-[1px]"
           arrowClassName="translate-x-[90px]"
         >
           <div>
@@ -251,7 +251,7 @@ export default function SwapComponent({
             <div className="h-[22px] w-full">
               <div
                 onClick={() => setIsSell((v) => !v)}
-                className={inputAndOutputStyles + " ml-[1px] mt-[8px] cursor-pointer"}
+                className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
                 style={{ opacity: isLoading ? 0.6 : 1 }}
               >
                 {/* Scrambled swap result output below. */}
@@ -282,7 +282,7 @@ export default function SwapComponent({
         </div>
       </div>
 
-      <Row className="mt-[14px] justify-center">
+      <Row className="justify-center mt-[14px]">
         <SwapButton
           inputAmount={inputAmount}
           marketAddress={marketAddress}

@@ -127,11 +127,11 @@ const ClientLaunchEmojicoinPage = () => {
   }, [status]);
 
   return (
-    <div className="flex grow flex-col">
+    <div className="flex flex-col grow">
       <TextCarousel />
 
-      <div className="flex h-full items-center justify-center px-6">
-        <div className="relative flex w-full max-w-[414px] flex-col">
+      <div className="flex justify-center items-center h-full px-6">
+        <div className="relative flex flex-col w-full max-w-[414px]">
           <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
         </div>
       </div>

@@ -60,7 +60,7 @@ export const TabContainer = (props: ArenaProps) => {
         activeBg="black"
         value={selectedTab}
         onValueChange={(tab) => setSelectedTab(tab as TabName)}
-        className="flex h-full w-full flex-col"
+        className="h-full flex flex-col w-full"
       >
         <TabsList>
           {tabs.map((tab) => (
@@ -73,7 +73,7 @@ export const TabContainer = (props: ArenaProps) => {
           <TabsContent
             key={tab.name}
             value={tab.name}
-            className="flex-col overflow-auto data-[state=active]:flex data-[state=active]:grow"
+            className="data-[state=active]:flex data-[state=active]:grow flex-col overflow-auto"
           >
             {tab.component}
           </TabsContent>
@@ -93,7 +93,7 @@ const NavigationItem = ({
   onClick?: () => void;
 }) => {
   return (
-    <div onClick={onClick} className="flex cursor-pointer flex-col place-items-center">
+    <div onClick={onClick} className="flex flex-col place-items-center cursor-pointer">
       <Emoji emojis={emoji} />
       <div className="uppercase tracking-widest text-light-gray">{text}</div>
     </div>
@@ -114,7 +114,7 @@ export const MobileNavigation = (props: ArenaProps) => {
     <>
       {!tab && (
         <div
-          className="fixed bottom-0 h-[4em] w-full border-t-[1px] border-solid border-dark-gray bg-black"
+          className="fixed bottom-0 w-full border-solid border-t-[1px] border-dark-gray h-[4em] bg-black"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr 1fr",
@@ -135,22 +135,22 @@ export const MobileNavigation = (props: ArenaProps) => {
         createPortal(
           <div className="relative z-[100]">
             {/* Backdrop, to hide the app behind the tab overlay */}
-            <div className="fixed inset-0 z-[49] bg-black" />
+            <div className="fixed inset-0 bg-black z-[49]" />
 
             {/* Scrollable container */}
             <div className="fixed inset-0 z-[50] overflow-y-auto">
               <div
-                className="grid min-h-[100dvh]"
+                className="min-h-[100dvh] grid"
                 style={{
                   gridTemplateRows: "auto 1fr",
                 }}
               >
                 <div className="flex flex-row">
-                  <div className="relative mt-[.5em] flex w-[100%] flex-row">
-                    <div className="w-[1em] border-b-[2px] border-solid border-dark-gray"></div>
+                  <div className="relative flex flex-row mt-[.5em] w-[100%]">
+                    <div className="w-[1em] border-solid border-b-[2px] border-dark-gray"></div>
                     <div className="flex flex-col">
                       <div
-                        className="flex cursor-pointer select-none flex-row gap-[.2em] rounded-t-[6px] border-x-[2px] border-t-[2px] border-solid border-x-dark-gray border-t-dark-gray uppercase text-white pixel-heading-3"
+                        className="flex flex-row gap-[.2em] uppercase pixel-heading-3 border-solid cursor-pointer select-none rounded-t-[6px] border-t-dark-gray border-x-dark-gray border-x-[2px] border-t-[2px] text-white"
                         style={
                           tab.name !== selectedTab
                             ? {
@@ -171,11 +171,11 @@ export const MobileNavigation = (props: ArenaProps) => {
                         />
                       </div>
                       <div className="flex flex-row justify-between">
-                        <div className="h-[2px] w-[2px] bg-dark-gray"></div>
-                        <div className="h-[2px] w-[2px] bg-dark-gray"></div>
+                        <div className="w-[2px] bg-dark-gray h-[2px]"></div>
+                        <div className="w-[2px] bg-dark-gray h-[2px]"></div>
                       </div>
                     </div>
-                    <div className="h-[100%] w-[100%] border-b-[2px] border-solid border-dark-gray"></div>
+                    <div className="w-[100%] h-[100%] border-solid border-b-[2px] border-dark-gray"></div>
                   </div>
                 </div>
                 {tab.component}

@@ -60,14 +60,14 @@ export const checkNetworkAndToast = (
         <div>
           <div className="inline">
             {"Your wallet network is set to "}
-            <p className="inline font-forma font-bold text-orange-500 drop-shadow-text">
+            <p className="font-forma inline font-bold text-orange-500 drop-shadow-text">
               {network.name}
             </p>
             {" but this"}
           </div>
           <div className="inline">
             {" dapp is using the "}{" "}
-            <p className="inline font-forma font-bold text-orange-500 drop-shadow-text">
+            <p className="font-forma inline font-bold text-orange-500 drop-shadow-text">
               {APTOS_NETWORK}
             </p>
             {" network."}
@@ -90,7 +90,7 @@ export const parseAPIErrorAndToast = (network: NetworkInfo, error: AptosApiError
         <div className="flex flex-col">
           <div className="inline">
             {"Your account doesn't exist on the "}
-            <p className="inline font-forma font-bold text-orange-500 drop-shadow-text">
+            <p className="font-forma inline font-bold text-orange-500 drop-shadow-text">
               {network.name}
             </p>
             {" network. Have you created an account?"}
@@ -115,7 +115,7 @@ export const successfulTransactionToast = (
         <div className="inline">
           {"Transaction confirmed! "}
           <ExplorerLink
-            className="inline font-forma font-bold text-orange-500 drop-shadow-text"
+            className="font-forma inline font-bold text-orange-500 drop-shadow-text"
             network={network.name}
             value={response.hash}
             type="transaction"
@@ -140,13 +140,13 @@ export const crankedArenaMeleeToast = (response: UserTransactionResponse, networ
     );
   const tryingToEnter = response.payload.function.endsWith(`::${ARENA_MODULE_NAME}::enter`);
   const message = (
-    <div className="!letter-spacing-[1em] flex flex-col gap-[1em]">
-      <div className="text-center text-xl text-white">You just cranked the melee!</div>
-      <div className="font-forma text-[1em] leading-6 text-lighter-gray">
+    <div className="flex flex-col gap-[1em] !letter-spacing-[1em]">
+      <div className="text-xl text-white text-center">You just cranked the melee!</div>
+      <div className="text-[1em] font-forma text-lighter-gray leading-6">
         In order for the next melee to start, a user has to crank the package. You happened to be
         the first one to crank the melee!
       </div>
-      <div className="font-forma text-[1em] leading-6 text-lighter-gray">
+      <div className="text-[1em] font-forma text-lighter-gray leading-6">
         {tryingToEnter ? (
           <>
             <span>
@@ -164,7 +164,7 @@ export const crankedArenaMeleeToast = (response: UserTransactionResponse, networ
       <div className="inline text-lighter-gray">
         {"View the transaction here: "}
         <ExplorerLink
-          className="inline font-forma font-bold text-orange-500 drop-shadow-text"
+          className="font-forma inline font-bold text-orange-500 drop-shadow-text"
           network={network.name}
           value={response.hash}
           type="transaction"

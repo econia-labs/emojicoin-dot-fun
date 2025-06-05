@@ -61,19 +61,19 @@ const ClientVerifyPage = () => {
   return (
     <>
       <div
-        className="absolute left-0 top-0 z-50 grid h-[100dvh] w-[100dvw] overflow-hidden bg-black"
+        className="absolute top-0 left-0 w-[100dvw] h-[100dvh] bg-black z-50 overflow-hidden grid"
         style={{
           gridTemplateRows: "19fr 1fr",
         }}
       >
-        <div className="flex h-full w-full items-center justify-center">
-          <div className="justify-begin flex flex-col gap-4 text-2xl uppercase text-ec-blue">
+        <div className="flex items-center justify-center w-full h-full">
+          <div className="flex flex-col justify-begin uppercase text-ec-blue gap-4 text-2xl">
             {connected && verified === false && (
               <motion.div
                 onMouseEnter={replayBack}
                 animate={{ x: 0, y: -60 }}
                 initial={{ x: 2000, y: -60 }}
-                className="absolute top-[50%] flex min-w-[12ch] flex-row px-2.5 hover:cursor-pointer"
+                className="absolute flex flex-row px-2.5 hover:cursor-pointer min-w-[12ch] top-[50%]"
                 onClick={() => {
                   setVerified(null);
                   disconnect();
@@ -88,7 +88,7 @@ const ClientVerifyPage = () => {
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback>
-              <div className="mt-[8ch] flex flex-row uppercase">
+              <div className="flex flex-row uppercase mt-[8ch]">
                 <span className="px-2.5">{"{"}</span>
                 <span ref={ref} onMouseEnter={replay} />
                 <span className="px-2.5">{"}"}</span>
@@ -98,7 +98,7 @@ const ClientVerifyPage = () => {
         </div>
         <Flex justifyContent="center" className="w-[100dvw]">
           <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
-            <p className="py-4 text-[8px] font-bold uppercase display-6 md:py-6 md:text-[15px]">
+            <p className="display-6 font-bold text-[8px] md:text-[15px] py-4 md:py-6 uppercase">
               TERMS OF USE
             </p>
           </Link>

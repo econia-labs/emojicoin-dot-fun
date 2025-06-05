@@ -10,7 +10,7 @@ const StyledToaster = () => {
       autoClose={7100}
       closeOnClick
       closeButton={(close) => (
-        <div className="absolute right-[16px] top-[16px]" onClick={close.closeToast}>
+        <div className="absolute top-[16px] right-[16px]" onClick={close.closeToast}>
           <CloseIcon width="16px" />
         </div>
       )}
