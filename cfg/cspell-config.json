@@ -28,6 +28,7 @@
     "../src/typescript/frontend/src/lib/utils/emojiColors/symbol-emojis/apple-symbol-emoji-colors.ts",
     "../src/typescript/frontend/src/lib/utils/emojiColors/symbol-emojis/noto-symbol-emoji-colors.ts",
     "../src/typescript/sdk/tests/**/*.json",
+    "../src/typescript/frontend/.prettierrc.json",
     "./cspell-config.json"
   ],
   "overrides": [
