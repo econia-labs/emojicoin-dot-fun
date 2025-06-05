@@ -12,7 +12,6 @@ const StyledButton = styled.button<ButtonProps>`
   position: relative;
   align-items: center;
   cursor: pointer;
-  display: inline-flex;
   justify-content: center;
   outline: 0;
   transition: all 0.3s ease;

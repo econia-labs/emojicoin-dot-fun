@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { useWindowSize } from "react-use";
 
 import { EMOJI_GRID_ITEM_WIDTH } from "../../const";
-import { GRID_PADDING } from "../styled";
 
+const GRID_PADDING = 40;
 const MAX_ELEMENTS_PER_LINE = 7;
 
 export const useGridRowLength = () => {

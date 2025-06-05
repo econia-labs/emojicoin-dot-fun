@@ -1,7 +1,5 @@
 "use client";
 
-import "./module.css";
-
 import type { HomePageProps } from "app/home/HomePage";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
