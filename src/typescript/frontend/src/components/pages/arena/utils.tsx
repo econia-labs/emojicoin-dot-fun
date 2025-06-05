@@ -3,8 +3,8 @@ import type { CurrentUserPosition } from "lib/hooks/positions/use-current-positi
 import React, { useMemo } from "react";
 import { GlowingEmoji } from "utils/emoji";
 
-import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 import type { HistoricalEscrow } from "@/sdk/index";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 
@@ -51,7 +51,7 @@ export const EmojiTitle = ({
   market0Delta?: number | null;
   market1Delta?: number | null;
 }) => {
-  const { isMobile, isTablet, isLaptop } = useMatchBreakpoints();
+  const { sm, md, lg, xl } = useTailwindBreakpoints();
   const { market0, market1 } = useCurrentMeleeInfo();
 
   const { emojis0, emojis1, baseFontSize } = useMemo(() => {
@@ -64,12 +64,10 @@ export const EmojiTitle = ({
       // Works great for up to 6 emojis (not tested for more, but might work as well).
       baseFontSize:
         72 *
-        (isMobile ? 0.75 : 1) *
-        (isTablet ? 0.6 : 1) *
-        (isLaptop ? 0.69 : 1) *
+        (sm ? 0.75 : md ? 0.6 : lg || xl ? 0.69 : 1) *
         getFontMultiplier(emojis0.length + emojis1.length),
     };
-  }, [market0, market1, isLaptop, isMobile, isTablet]);
+  }, [market0?.market.symbolEmojis, market1?.market.symbolEmojis, sm, md, lg, xl]);
 
   return (
     <div
