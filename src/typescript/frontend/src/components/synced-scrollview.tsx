@@ -159,12 +159,12 @@ const SyncedScrollView: React.FC<{ className?: string; children: React.ReactNode
     <div className={cn("w-full", className)}>
       {/* Top Scrollbar - only shown when content overflows */}
       {hasOverflow && (
-        <div ref={topRef} className="h-3 touch-pan-x overflow-x-auto overflow-y-hidden">
+        <div ref={topRef} className="overflow-x-auto overflow-y-hidden h-3 touch-pan-x">
           <div ref={topInnerRef} className="h-[1px]" />
         </div>
       )}
 
-      <div ref={contentRef} className="scrollbar-hide overflow-auto">
+      <div ref={contentRef} className="overflow-auto scrollbar-hide">
         <div ref={contentInnerRef} className="whitespace-nowrap">
           {children}
         </div>

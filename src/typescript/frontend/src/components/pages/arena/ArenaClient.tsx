@@ -22,7 +22,7 @@ const Desktop = React.memo((props: ArenaProps) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <div
-      className="grid h-[90%] w-full gap-[2em] p-[2em]"
+      className="grid h-[90%] w-full p-[2em] gap-[2em]"
       style={{
         gridTemplateRows: "1fr minmax(0, 3.5fr)",
         gridTemplateColumns: "1fr 0.65fr 0.85fr 1fr",
@@ -34,7 +34,7 @@ const Desktop = React.memo((props: ArenaProps) => {
       <Box
         className={cn(
           "col-span-2 text-4xl",
-          "lg:text-6xl xl:text-7xl [@media(min-width:860px)_and_(max-width:1024px)]:text-5xl",
+          "[@media(min-width:860px)_and_(max-width:1024px)]:text-5xl lg:text-6xl xl:text-7xl",
           "grid place-items-center"
         )}
       >
@@ -45,7 +45,7 @@ const Desktop = React.memo((props: ArenaProps) => {
         <ChartContainer
           symbol={market0.market.symbolData.symbol}
           secondarySymbol={market1.market.symbolData.symbol}
-          className="h-full w-full"
+          className="w-full h-full"
         />
       </Box>
       <Box className="col-start-3 col-end-5 min-h-[440px]">
@@ -61,7 +61,7 @@ const Mobile = React.memo((props: ArenaProps) => {
   const { arenaInfo, market0, market1 } = props;
   return (
     <>
-      <div className="flex h-[100%] w-[100%] flex-col gap-[1em] p-[1em]">
+      <div className="flex flex-col gap-[1em] h-[100%] w-[100%] p-[1em]">
         <Box className="grid place-items-center gap-[1em] py-[1em]">
           <EmojiTitle market0Delta={props.market0Delta} market1Delta={props.market1Delta} />
           <div className="text-4xl">
@@ -77,7 +77,7 @@ const Mobile = React.memo((props: ArenaProps) => {
             <ChartContainer
               symbol={market0.market.symbolData.symbol}
               secondarySymbol={market1.market.symbolData.symbol}
-              className="h-full w-full"
+              className="w-full h-full"
             />
           </Box>
         </Box>

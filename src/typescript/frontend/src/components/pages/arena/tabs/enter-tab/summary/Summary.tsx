@@ -15,7 +15,7 @@ import { FormattedNominalNumber } from "../../utils";
 import ArenaExitButton from "./ArenaExitButton";
 import { AptDisplay, EscrowAptValue } from "./utils";
 
-const SmallHyphens = () => <span className="mr-1 text-lg text-light-gray">--</span>;
+const SmallHyphens = () => <span className="text-light-gray text-lg mr-1">--</span>;
 
 export default function Summary({
   position,
@@ -35,14 +35,14 @@ export default function Summary({
   const { pnl } = useTradingStats();
 
   return (
-    <div className="flex grow flex-col items-center justify-center">
-      <div className="flex grow flex-col items-center justify-center gap-[1em]">
+    <div className="flex flex-col justify-center grow items-center">
+      <div className="flex flex-col justify-center gap-[1em] grow items-center">
         {/* The glowing emoji header */}
-        <GlowingEmoji className="mt-[2em] text-7xl" emojis={position.currentSymbol} />
+        <GlowingEmoji className="text-7xl mt-[2em]" emojis={position.currentSymbol} />
 
         {/* Line 1 – Current Value display */}
-        <div className="flex flex-col items-center gap-[0.3em]">
-          <div className="text-2xl uppercase tracking-widest text-light-gray">Position value</div>
+        <div className="flex flex-col gap-[0.3em] items-center">
+          <div className="text-light-gray uppercase text-2xl tracking-widest">Position value</div>
           <EscrowAptValue
             position={position}
             market0={market0}
@@ -55,7 +55,7 @@ export default function Summary({
         <div className="grid grid-cols-3 gap-[2em] p-4">
           {/* 1. Deposited */}
           <div className="flex flex-col items-start">
-            <div className="flex flex-row text-2xl uppercase tracking-wider text-light-gray">
+            <div className="flex flex-row text-light-gray uppercase text-2xl tracking-wider">
               <span>Deposits</span>
               {position.lockedIn && (
                 <Popup
@@ -76,7 +76,7 @@ export default function Summary({
 
           {/* 2. PNL */}
           <div className="flex flex-col items-center">
-            <div className="text-2xl uppercase tracking-wider text-light-gray">PNL</div>
+            <div className="text-light-gray uppercase text-2xl tracking-wider">PNL</div>
             {isLoading || pnl === undefined ? (
               <SmallHyphens />
             ) : (
@@ -90,10 +90,10 @@ export default function Summary({
 
           {/* 3. Matched */}
           <div className="flex flex-col items-end">
-            <div className="text-2xl uppercase tracking-wider text-light-gray">Matched</div>
+            <div className="text-light-gray uppercase text-2xl tracking-wider">Matched</div>
             {position.matchAmount ? (
               <FormattedNominalNumber
-                className="mr-1 font-forma text-lg text-white"
+                className="font-forma text-white text-lg mr-1"
                 value={position.matchAmount}
                 prefix="+"
                 suffix=" APT"
@@ -104,7 +104,7 @@ export default function Summary({
           </div>
         </div>
       </div>
-      <div className="flex w-[100%] justify-evenly">
+      <div className="flex justify-evenly w-[100%]">
         <Button scale="lg" onClick={topOff}>
           Top off
         </Button>

@@ -31,8 +31,8 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: { onMaxSlippageUpdate?: ()
   };
 
   return (
-    <div className="grid max-h-[300px] grid-rows-[auto_1px_auto] items-center overflow-auto border-r-4 bg-ec-blue">
-      <div className="flex flex-row justify-between p-3 text-2xl text-black">
+    <div className="grid grid-rows-[auto_1px_auto] items-center max-h-[300px] border-r-4 overflow-auto bg-ec-blue">
+      <div className="flex flex-row justify-between text-2xl text-black p-3">
         <span>Max Slippage</span>
         <span>{Number(maxSlippage) / 100}%</span>
       </div>
@@ -44,7 +44,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: { onMaxSlippageUpdate?: ()
             defaultValue="auto"
             value={maxSlippageMode}
             onValueChange={handleModeChange}
-            className="m-auto flex flex-row justify-between gap-4"
+            className="flex flex-row justify-between m-auto gap-4"
             aria-label="Slippage settings"
           >
             <ToggleGroupItem
@@ -64,7 +64,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: { onMaxSlippageUpdate?: ()
           </ToggleGroup>
           <div
             className={cn(
-              "flex items-center rounded border border-solid border-black !leading-4",
+              "flex items-center border border-black border-solid rounded !leading-4",
               maxSlippageMode === "custom" ? "opacity-100" : "opacity-30",
               "text-2xl"
             )}

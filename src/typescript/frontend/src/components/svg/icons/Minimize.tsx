@@ -4,7 +4,7 @@ const Minimize: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, .
   return (
     <div
       {...props}
-      className={`h-[12px] w-[12px] rounded-full bg-amber-500 ${className}`}
+      className={`rounded-full bg-amber-500 w-[12px] h-[12px] ${className}`}
       style={{
         boxShadow: "rgba(0, 0, 0, 0.42) 0px 0px 2px 1px inset",
       }}

@@ -73,14 +73,14 @@ export default function CultClientPage() {
             defaultPosition: { x: width / 2, y: height / 2 },
           }}
           type="info"
-          className="max-w-[700px] -translate-x-1/2 -translate-y-1/2 !font-pixelar text-[27px] !lowercase text-black [&>*]:!pl-2 [&>div>button]:lowercase"
+          className="text-black max-w-[700px] -translate-x-1/2 -translate-y-1/2 [&>*]:!pl-2 !font-pixelar !lowercase [&>div>button]:lowercase text-[27px]"
           titleBarOptions={<TitleBar.Close onClick={() => setModalContent(undefined)} />}
           buttons={modalContent.buttons || []}
         />
       )}
       <Clippy monologue={clippyMonologue} />
 
-      <div className="gap4 align-start grid grow grid-cols-1 gap-12 self-center p-2 sm:grid-cols-4 sm:self-start md:p-20">
+      <div className="grid self-center sm:self-start grid-cols-1 sm:grid-cols-4 gap4 grow p-2 md:p-20 align-start gap-12">
         <div className="flex flex-col gap-12">
           <WinDesktopItem
             icon={WinIcons.MY_COMPUTER}
@@ -104,7 +104,7 @@ export default function CultClientPage() {
         </div>
         <div
           ref={(ref) => setContainerRef(ref || undefined)}
-          className={`relative flex flex-col gap-12 sm:col-span-3`}
+          className={`flex flex-col sm:col-span-3 relative gap-12`}
           style={{ minHeight }}
         >
           {communityProjects.map((proj, i) => (

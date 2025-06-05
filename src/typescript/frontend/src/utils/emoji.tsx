@@ -106,7 +106,7 @@ export const GlowingEmoji = ({
       {onClick && (
         <div
           className={cn(
-            "pointer-events-none absolute z-[-1] opacity-0 blur-lg transition-[transform,opacity] duration-75 group-hover:scale-[2.2] group-hover:opacity-100 group-hover:saturate-[5]",
+            "absolute z-[-1] blur-lg group-hover:saturate-[5] group-hover:scale-[2.2] transition-[transform,opacity] duration-75 pointer-events-none opacity-0 group-hover:opacity-100",
             !isSingleEmoji && "tracking-[-25px]"
           )}
         >

@@ -26,7 +26,7 @@ const DESCRIPTIONS = [
 
 const AnimatedSVG = ({ animateKey, slide }: { animateKey: number; slide: number }) => {
   return (
-    <div className="flex min-h-[148px] w-full">
+    <div className="flex w-full min-h-[148px]">
       <div className="m-auto">
         {slide === 1 ? (
           <DottedLink key={`dotted-link::${animateKey}`} />
@@ -78,30 +78,30 @@ const LearnMoreSlideshow = ({
   }, [slide, setSlide, onLeftArrow, onRightArrow]);
 
   return slide >= 1 ? (
-    <div className="text-md relative flex min-h-[420px] w-full flex-col justify-between font-pixelar uppercase text-black">
+    <div className="flex flex-col relative text-black font-pixelar text-md uppercase w-full min-h-[420px] justify-between">
       {/* About Aptos Connect */}
-      <div className="mt-[2.75ch] flex w-full text-xl">
+      <div className="flex w-full text-xl mt-[2.75ch]">
         <span className="m-auto">About aptos connect</span>
       </div>
 
       {/* Inner content (SVGs + text) */}
-      <div className="flex w-full flex-col gap-6">
+      <div className="flex flex-col w-full gap-6">
         <AnimatedSVG animateKey={nonce} slide={slide} />
         <div className="flex flex-col gap-1">
           <div className="m-auto text-3xl">{HEADERS.at(slide - 1)}</div>
-          <div className="text-md m-auto px-10">{DESCRIPTIONS.at(slide - 1)}</div>
+          <div className="m-auto text-md px-10">{DESCRIPTIONS.at(slide - 1)}</div>
         </div>
       </div>
 
       {/* Back      ___ ___ ___      Next */}
-      <div className="flex w-full flex-row justify-between">
+      <div className="flex flex-row w-full justify-between">
         <div className="flex flex-row gap-1 p-5 text-xl hover:scale-110" onClick={decrement}>
           <span>{"{"}</span>
           <div className="hover:cursor-pointer">Back</div>
           <span>{"}"}</span>
         </div>
         <div className="flex flex-row">
-          <div className="m-auto flex flex-row gap-2 py-2">
+          <div className="flex flex-row gap-2 py-2 m-auto">
             {[1, 2, 3].map((i) => (
               <div
                 onClick={() =>
@@ -119,7 +119,7 @@ const LearnMoreSlideshow = ({
                 className="flex h-6 w-6 hover:cursor-pointer"
               >
                 <div
-                  className="m-auto h-[2px] w-[3ch] bg-black"
+                  className="m-auto bg-black h-[2px] w-[3ch]"
                   style={{ opacity: i == slide ? 1 : 0.25 }}
                 />
               </div>

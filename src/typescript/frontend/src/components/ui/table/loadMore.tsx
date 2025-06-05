@@ -31,7 +31,7 @@ export const LoadMore: FC<Props> = ({ query, className, endOfListText }) => {
   }, [inView, query, wasOutOfView]);
 
   return (
-    <div ref={ref} className={cn("flex w-full items-center justify-center", className)}>
+    <div ref={ref} className={cn("flex justify-center items-center w-full", className)}>
       {query?.hasNextPage ? (
         /* Normally this button will never be visible. It is there as a fallback in case react-intersection-observer fails to detect the end of the table, or if the get request fails */
         <Button

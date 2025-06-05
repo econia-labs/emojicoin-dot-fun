@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </Providers>
         </StyledComponentsRegistry>
         {/* Load the font regardless of the user agent string so that there's no flashing. */}
-        <div className={notoColorEmoji.className + " absolute left-0 top-0 hidden"}>{"👽"}</div>
+        <div className={notoColorEmoji.className + " absolute top-0 left-0 hidden"}>{"👽"}</div>
       </body>
     </html>
   );

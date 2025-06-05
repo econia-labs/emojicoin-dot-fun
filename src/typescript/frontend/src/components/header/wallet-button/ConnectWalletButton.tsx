@@ -87,7 +87,7 @@ const ButtonWithConnectWalletFallback = ({
     (!connected || !children || geoblocked) && !forceDisplayChildren ? (
       <Button
         className={
-          className + (mobile ? " border-b border-dashed border-b-ec-blue px-[9px] py-1.5" : "")
+          className + (mobile ? " px-[9px] border-dashed py-1.5 border-b border-b-ec-blue" : "")
         }
         disabled={geoblocked}
         onClick={(e) => {
@@ -98,7 +98,7 @@ const ButtonWithConnectWalletFallback = ({
         onMouseOver={handleReplay}
       >
         <div
-          className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} justify-between text-2xl`}
+          className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} text-2xl justify-between`}
         >
           <div className="flex flex-row">
             <OuterConnectText
@@ -107,9 +107,9 @@ const ButtonWithConnectWalletFallback = ({
               connected={connected}
               mobile={mobile}
             />
-            <div className={!mobile ? "" : "text-[32px] leading-[40px] text-ec-blue"}>
+            <div className={!mobile ? "" : "text-ec-blue text-[32px] leading-[40px]"}>
               <div
-                className="text-overflow-ellipsis overflow-hidden whitespace-nowrap"
+                className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
                 style={mobile ? {} : { minWidth: width }}
                 ref={ref}
               />

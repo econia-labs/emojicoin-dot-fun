@@ -52,12 +52,12 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   );
 
   return (
-    <div className="mt-[15px] flex flex-col items-center justify-center border-y border-solid border-dark-gray">
-      <div className="mx-auto w-full max-w-max">
+    <div className="flex flex-col justify-center items-center mt-[15px] border-y border-solid border-dark-gray">
+      <div className="w-full max-w-max mx-auto">
         <div className="w-full px-8">
-          <div className="flex w-full flex-col-reverse justify-between border-x border-solid border-dark-gray px-3 *:grow *:basis-0 md:flex-row">
+          <div className="flex-col-reverse md:flex-row justify-between flex px-3 w-full border-x border-solid border-dark-gray *:grow *:basis-0">
             <SearchBar />
-            <div className="-ml-3 w-[calc(100%+24px)] border-t border-solid border-dark-gray md:hidden" />
+            <div className="md:hidden -ml-3 w-[calc(100%+24px)] border-t border-solid border-dark-gray" />
             <TableHeaderSwitcher
               title1="Pools"
               title2="My pools"
@@ -73,8 +73,8 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
           <Separator />
         </div>
 
-        <div className="flex flex-col px-8 xl:flex-row">
-          <div className="relative flex w-full border-x border-solid border-dark-gray xl:w-[57%]">
+        <div className="flex flex-col xl:flex-row px-8">
+          <div className="flex relative w-full border-x border-solid border-dark-gray xl:w-[57%]">
             <PoolsTable
               index={selectedIndex}
               data={markets}
@@ -98,8 +98,8 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
               }}
             />
           </div>
-          <div className="-ml-8 w-[calc(100%+64px)] border-t border-solid border-dark-gray xl:hidden" />
-          <div className="relative flex w-full grow border-x border-solid border-dark-gray xl:w-[43%]">
+          <div className="xl:hidden -ml-8 w-[calc(100%+64px)] border-t border-solid border-dark-gray" />
+          <div className="flex grow relative w-full xl:w-[43%] border-x border-solid border-dark-gray">
             <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
           </div>
         </div>

@@ -23,7 +23,7 @@ interface Props {
 export const WinDesktopItem: FC<Props> = ({ icon, label, onClick }) => {
   return (
     <div
-      className="flex w-[150px] cursor-pointer flex-col items-center gap-3"
+      className="flex flex-col gap-3 cursor-pointer items-center w-[150px]"
       onClick={() => onClick()}
     >
       <Image unoptimized width={64} height={64} src={icon} alt="desktop icon" />
@@ -46,7 +46,7 @@ export const CommunityCreationWinDesktopItem: FC<Props & { pos: { x: number; y: 
         <WinDesktopItem {...rest} />
       </div>
       <div
-        className={"absolute hidden sm:block"}
+        className={"hidden sm:block absolute"}
         style={{
           left: pos.x,
           top: pos.y,

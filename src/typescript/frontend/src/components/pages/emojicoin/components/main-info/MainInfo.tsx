@@ -173,7 +173,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
         <>
           <FormattedNumber value={value} nominalize scramble />
           &nbsp;
-          <AptosIconBlack className={"mb-[0.3ch] icon-inline"} />
+          <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
         </>
       );
     }
@@ -181,12 +181,12 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
   return (
     <div
-      className="mt-[10px] flex justify-center"
+      className="flex justify-center mt-[10px]"
       style={{
         borderTop: `1px solid ${darkTheme.colors.darkGray}`,
       }}
     >
-      <div className="mx-[2vw] flex w-full max-w-max flex-col gap-4 px-0 py-10 lg:grid lg:grid-cols-[25fr_35fr_40fr] lg:gap-8 lg:py-5">
+      <div className="flex flex-col lg:grid gap-4 lg:gap-8 lg:grid-cols-[25fr_35fr_40fr] lg:py-5 py-10 px-0 w-full mx-[2vw] max-w-max">
         <div className={`relative grid place-items-center text-center ${borderStyle}`}>
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />
@@ -202,7 +202,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>
               {"APT "}
-              <AptosIconBlack className="mx-1 -translate-y-[1px] icon-inline" />
+              <AptosIconBlack className="icon-inline mx-1 -translate-y-[1px]" />
               {" / USD $:"}
             </div>
             <div className={statsTextClasses + " text-white"}>{switcher}</div>
@@ -210,7 +210,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              <div className="flex flex-row items-center justify-center">
+              <div className="flex flex-row justify-center items-center">
                 {aptOrUsd(marketCap, usdMarketCap)}
               </div>
             </div>
@@ -219,7 +219,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("24 hour vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              <div className="flex flex-row items-center justify-center">
+              <div className="flex flex-row justify-center items-center">
                 {aptOrUsd(dailyVolume, usdDailyVolume)}
               </div>
             </div>
@@ -228,7 +228,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("All-time vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              <div className="flex flex-row items-center justify-center">
+              <div className="flex flex-row justify-center items-center">
                 {aptOrUsd(allTimeVolume, usdAllTimeVolume)}
               </div>
             </div>
