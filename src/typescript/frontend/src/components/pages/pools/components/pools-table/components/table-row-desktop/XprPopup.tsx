@@ -11,19 +11,19 @@ export const XprPopup = ({
 }): ReactNode => (
   <>
     <div>
-      <div className="flex justify-between gap-[0.2rem]">
+      <div className="flex gap-[0.2rem] justify-between">
         <span>DPR:</span>
         {dpr}
       </div>
     </div>
     <div>
-      <div className="flex justify-between gap-[0.2rem]">
+      <div className="flex gap-[0.2rem] justify-between">
         <span>WPR:</span>
         {wpr}
       </div>
     </div>
     <div>
-      <div className="flex justify-between gap-[0.2rem]">
+      <div className="flex gap-[0.2rem] justify-between">
         <span>APR:</span>
         {apr}
       </div>

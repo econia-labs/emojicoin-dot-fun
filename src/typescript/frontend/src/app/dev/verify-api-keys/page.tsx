@@ -74,7 +74,7 @@ const VerifyApiKeys = async () => {
     throw new Error(`CDN_URL isn't properly set: ${CDN_URL}`);
   }
 
-  return <div className="m-auto h-full w-full bg-black pixel-heading-2">LGTM</div>;
+  return <div className="bg-black w-full h-full m-auto pixel-heading-2">LGTM</div>;
 };
 
 export default VerifyApiKeys;

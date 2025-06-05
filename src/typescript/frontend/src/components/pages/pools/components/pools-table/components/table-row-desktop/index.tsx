@@ -46,15 +46,15 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
 
   return (
     <Tr hover selected={selected} onClick={onClick}>
-      <Td className="w-1/4 px-3 py-2 md:w-[11.5%]">
+      <Td className="py-2 px-3 w-1/4 md:w-[11.5%]">
         <Popup content="go to market">
           <Link href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}>
             <Flex justifyContent="space-between" className="cursor-pointer">
-              <div className="font-sm font-pixelar text-ec-blue">{"{"}</div>
-              <p className="uppercase text-light-gray body-sm ellipses">
+              <div className="font-pixelar font-sm text-ec-blue">{"{"}</div>
+              <p className="body-sm text-light-gray uppercase ellipses">
                 <Emoji emojis={item.market.emojis} />
               </p>
-              <div className="font-sm font-pixelar text-ec-blue">{"}"}</div>
+              <div className="font-pixelar font-sm text-ec-blue">{"}"}</div>
             </Flex>
           </Link>
         </Popup>
@@ -68,7 +68,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
       </Td>
 
       <Td
-        className={cn(tdClassName, "hidden w-[18%] md:table-cell")}
+        className={cn(tdClassName, "hidden md:table-cell w-[18%]")}
         title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
       >
         <FormattedNumber value={item.dailyVolume} suffix=" APT" nominalize />

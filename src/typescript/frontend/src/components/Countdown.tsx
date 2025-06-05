@@ -23,7 +23,7 @@ export const Countdown = ({ startTime, duration }: { startTime: Date; duration: 
   }, [remaining]);
 
   return (
-    <div className="pixel-clock flex w-min flex-row text-light-gray">
+    <div className="text-light-gray flex flex-row pixel-clock w-min">
       <span className={countdownStyles}>{hours.split("")[0]} </span>
       <span className={countdownStyles}>{hours.split("")[1]} </span>
       <span className="my-auto w-[1ch] text-center">:</span>

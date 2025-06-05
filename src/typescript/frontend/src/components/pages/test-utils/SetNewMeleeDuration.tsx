@@ -44,10 +44,10 @@ export const SetMeleeDurationForm = ({ className }: React.HTMLAttributes<HTMLDiv
 
   return (
     <div
-      className={cn("m-auto flex w-full max-w-48 flex-col gap-1 space-x-2 font-forma", className)}
+      className={cn("flex flex-col w-full max-w-48 m-auto space-x-2 gap-1 font-forma", className)}
     >
       <div className="grid w-full max-w-sm items-center gap-1.5">
-        <Label className="font-forma text-white" htmlFor="duration">
+        <Label className="text-white font-forma" htmlFor="duration">
           {"Duration (minutes)"}
         </Label>
         <Input

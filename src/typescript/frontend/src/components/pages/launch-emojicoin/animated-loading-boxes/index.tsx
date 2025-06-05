@@ -74,7 +74,7 @@ export const AnimatedLoadingBoxes = ({
       emptyArray.map((_, i) => (
         <span
           key={color ? `color-${i}` : `gray-${i}`}
-          className={`m-auto${color ? "item-1" : ""}`}
+          className={`m-auto${color ? " item-1" : ""}`}
           style={
             color
               ? {
@@ -92,11 +92,11 @@ export const AnimatedLoadingBoxes = ({
   );
 
   return (
-    <div className="relative flex h-fit w-fit flex-row pixel-heading-4" ref={scope}>
+    <div className="flex flex-row relative h-fit w-fit pixel-heading-4 " ref={scope}>
       <div className="flex flex-col gap-1">
-        <div className={cn("relative flex select-none flex-row", emojiFontClassName)}>
+        <div className={cn("relative flex flex-row select-none", emojiFontClassName)}>
           {getSquares(true)}
-          <div className="absolute left-0 top-[50%] z-[-1] flex translate-y-[-50%] flex-row gap-0">
+          <div className="absolute top-[50%] translate-y-[-50%] left-0 gap-0 flex flex-row z-[-1]">
             {getSquares(false)}
           </div>
         </div>

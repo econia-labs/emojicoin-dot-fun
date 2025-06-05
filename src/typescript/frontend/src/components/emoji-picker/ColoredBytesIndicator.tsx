@@ -30,8 +30,8 @@ export const MarketValidityIndicator = ({
   }, [length]);
 
   return (
-    <div className="mb-[0.5ch] flex flex-row justify-between">
-      <div className={"flex uppercase pixel-heading-4 " + className}>
+    <div className="flex flex-row justify-between mb-[0.5ch]">
+      <div className={"flex pixel-heading-4 uppercase " + className}>
         <motion.span
           key={nonce}
           animate={{
@@ -43,7 +43,7 @@ export const MarketValidityIndicator = ({
         >
           {length}
         </motion.span>
-        <span className="-rotate-[30deg] select-none text-white">{"/"}</span>
+        <span className="text-white -rotate-[30deg] select-none">{"/"}</span>
         <span className="text-white">{`${threshold}${mode === "register" ? " bytes" : ""}`}</span>
       </div>
       {mode === "register" && (

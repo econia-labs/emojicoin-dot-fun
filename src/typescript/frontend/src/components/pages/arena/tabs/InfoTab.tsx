@@ -68,7 +68,7 @@ const INFO = [
 export default function InfoTab() {
   return (
     <div className="grow">
-      <div className="m-auto flex max-w-[80ch] flex-col p-[1em]">
+      <div className="p-[1em] flex flex-col max-w-[80ch] m-auto">
         {INFO.map((i, index) => (
           <div key={`info-p-${index}`} className="flex flex-col gap-[1em]">
             <div className="text-3xl uppercase text-white">{i.title}</div>

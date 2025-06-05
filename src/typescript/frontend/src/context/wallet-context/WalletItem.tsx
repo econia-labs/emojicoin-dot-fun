@@ -107,7 +107,7 @@ export const WalletItem = ({
 
   const inner = (
     <>
-      <div className="flex h-[28px] w-[28px] rounded-[4px] text-black">
+      <div className="flex text-black rounded-[4px] w-[28px] h-[28px]">
         {WALLET_ICON[wallet.name.toLowerCase()]}
       </div>
       <div className={WalletNameClassName}>
@@ -124,16 +124,16 @@ export const WalletItem = ({
         {wallet.name === current?.name ? (
           <>
             <Emoji
-              className="absolute bottom-[-2px] right-[5px] mr-[1ch] inline-flex animate-flicker drop-shadow-text group-hover:hidden"
+              className="absolute bottom-[-2px] right-[5px] mr-[1ch] inline-flex group-hover:hidden animate-flicker drop-shadow-text"
               emojis={emoji("high voltage")}
             />
             <Emoji
-              className="absolute bottom-[-2px] right-[6px] mr-[1ch] hidden scale-[0.75] group-hover:inline-flex"
+              className="absolute bottom-[-2px] right-[6px] mr-[1ch] hidden group-hover:inline-flex scale-[0.75]"
               emojis={emoji("cross mark")}
             />
           </>
         ) : (
-          <Arrow width={16} height={19} className="mr-[1ch] fill-black" />
+          <Arrow width={16} height={19} className="fill-black mr-[1ch]" />
         )}
       </div>
     </>

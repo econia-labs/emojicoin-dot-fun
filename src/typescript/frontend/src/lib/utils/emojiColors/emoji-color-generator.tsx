@@ -80,7 +80,7 @@ export const EmojiColorGenerator = () => {
       <select
         value={fontFamily}
         onChange={(e) => setFontFamily(e.target.value as "native" | "noto")}
-        className="h-[30px] w-[200px] rounded border border-white bg-black"
+        className="w-[200px] bg-black border border-white rounded h-[30px]"
       >
         <option value="native">Native</option>
         <option value={"noto"}>Noto</option>
@@ -89,11 +89,11 @@ export const EmojiColorGenerator = () => {
         <div className="flex flex-col items-center gap-y-4">
           <h1 className="pixel-heading-3">Emoji color checker</h1>
           <SearchBar />
-          <div className="flex min-h-[100px] flex-row items-center gap-2">
+          <div className="flex flex-row items-center gap-2 min-h-[100px]">
             {colors.map((col, i) => {
               return (
                 <div key={i}>
-                  <div className="h-[50px] w-[50px]" style={{ backgroundColor: col.hexString }} />
+                  <div className="w-[50px] h-[50px]" style={{ backgroundColor: col.hexString }} />
                   <span>{col.hexString}</span>
                 </div>
               );
@@ -107,7 +107,7 @@ export const EmojiColorGenerator = () => {
           <select
             value={emojiType}
             onChange={(e) => setEmojiType(e.target.value as "symbol" | "chat")}
-            className="h-[30px] w-[200px] rounded border border-white bg-black"
+            className="bg-black border border-white rounded h-[30px] w-[200px]"
           >
             <option value="symbol">Symbol Emojis</option>
             <option value="chat">Chat Emojis</option>
@@ -139,11 +139,11 @@ export const EmojiColorGenerator = () => {
             {generatedColors &&
               Array.from(generatedColors.entries()).map(([emoji, hexString]) => {
                 return (
-                  <div className="flex h-[50px] w-[100px] flex-row items-center gap-2" key={emoji}>
+                  <div className="flex flex-row items-center gap-2 h-[50px] w-[100px]" key={emoji}>
                     <div className={fontFamily === "noto" ? notoColorEmoji.className : undefined}>
                       {emoji}
                     </div>
-                    <div className="h-[20px] w-[20px]" style={{ backgroundColor: hexString }} />
+                    <div className="w-[20px] h-[20px]" style={{ backgroundColor: hexString }} />
                     <span>{hexString}</span>
                   </div>
                 );
@@ -153,7 +153,7 @@ export const EmojiColorGenerator = () => {
         <div className="flex flex-row flex-wrap items-center gap-2">
           <div className="flex flex-col items-center gap-y-4">
             <h1 className="pixel-heading-3">Emoji gradients</h1>
-            <div className="flex min-h-[270px] flex-row items-center gap-2">
+            <div className="flex flex-row items-center gap-2 min-h-[270px]">
               <div
                 className="flex min-h-[270px] w-[200px]"
                 style={{

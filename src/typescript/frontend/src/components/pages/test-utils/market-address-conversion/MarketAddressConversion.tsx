@@ -33,7 +33,7 @@ export const MarketAddressConversionForm = () => {
   }, []);
 
   return (
-    <div className="relative m-auto flex w-fit flex-col gap-10 font-forma text-sm text-white">
+    <div className="flex flex-col relative m-auto w-fit gap-10 text-white text-sm font-forma">
       <div className="flex flex-col gap-1">
         <Label htmlFor="address-input">{"check if registered market"}</Label>
         <Input
@@ -42,9 +42,9 @@ export const MarketAddressConversionForm = () => {
           onChange={handleAddressChange}
           className={addressTextClass}
         />
-        <div className="flex h-[2em] w-[18ch] border border-solid border-light-gray text-[1em]">
+        <div className="flex h-[2em] text-[1em] w-[18ch] border border-solid border-light-gray">
           {fetchedSymbol && (
-            <a href={`${ROUTES.market}/${fetchedSymbol}`} className="ml-1 mt-[1px] p-[2px]">
+            <a href={`${ROUTES.market}/${fetchedSymbol}`} className="p-[2px] mt-[1px] ml-1">
               <Emoji emojis={fetchedSymbol} />
             </a>
           )}

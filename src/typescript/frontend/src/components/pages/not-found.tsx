@@ -17,7 +17,7 @@ const NotFoundComponent: React.FC = () => {
   };
 
   return (
-    <Page className="mx-auto flex min-h-[100dvh] max-w-max flex-col items-center justify-center px-4 md:px-6">
+    <Page className="flex min-h-[100dvh] flex-col items-center justify-center px-4 md:px-6 mx-auto max-w-max">
       <Text textScale="pixelDisplay1" textTransform="uppercase">
         {t("Not found Page")} 404
       </Text>
