@@ -29,7 +29,7 @@ export const Box = ({
   className?: ClassValue;
 } & React.PropsWithChildren) => (
   <div
-    className={`rounded-[3px] border-[1px] border-solid border-dark-gray bg-black/75 ${className}`}
+    className={`border-solid border-[1px] border-dark-gray rounded-[3px] bg-black/75 ${className}`}
   >
     {children}
   </div>
@@ -71,7 +71,7 @@ export const EmojiTitle = ({
 
   return (
     <div
-      className="grid w-[100%] place-items-center uppercase"
+      className="grid place-items-center uppercase w-[100%]"
       style={{
         fontSize: baseFontSize + "px",
         gridTemplateColumns: "1fr auto 1fr",

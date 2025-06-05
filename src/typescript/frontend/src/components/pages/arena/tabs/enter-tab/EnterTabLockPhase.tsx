@@ -55,10 +55,10 @@ export default function EnterTabLockPhase({
   );
 
   return (
-    <div className="flex grow flex-col items-center">
-      <div className="flex grow flex-col justify-center">
-        <div className="flex w-[300px] justify-between">
-          <div className="flex items-center gap-[6px] text-center font-forma text-xl uppercase text-white">
+    <div className="flex flex-col grow items-center">
+      <div className="flex flex-col grow justify-center">
+        <div className="flex justify-between w-[300px]">
+          <div className="flex gap-[6px] items-center font-forma text-xl uppercase text-white text-center">
             Get matched
             <Info infoIconClassName="!mb-[1px]">
               <div className="flex flex-col gap-1">
@@ -68,8 +68,8 @@ export default function EnterTabLockPhase({
               </div>
             </Info>
           </div>
-          <div className="flex items-center gap-[1em]">
-            <div className="text-xl uppercase text-light-gray">
+          <div className="flex gap-[1em] items-center">
+            <div className="uppercase text-light-gray text-xl">
               {mustLockIn ? (
                 <Popup
                   content={
@@ -95,12 +95,12 @@ export default function EnterTabLockPhase({
             )}
           </div>
         </div>
-        <div className="w-[100%] max-w-[350px]">
-          <div className="flex justify-between rounded-[3px] bg-ec-blue p-[0.8em] text-2xl uppercase text-black">
+        <div className="max-w-[350px] w-[100%]">
+          <div className="flex justify-between p-[0.8em] rounded-[3px] bg-ec-blue text-2xl text-black uppercase">
             <div>Deposit amount</div>
             <FormattedNominalNumber value={amount} suffix=" APT" />
           </div>
-          <div className="mx-[0.8em] flex justify-between border-b-[1px] border-dashed border-light-gray py-[0.8em] text-2xl uppercase text-light-gray">
+          <div className="flex uppercase justify-between text-2xl text-light-gray py-[0.8em] mx-[0.8em] border-dashed border-b-[1px] border-light-gray ">
             <div className="flex flex-row gap-1">
               {"Match amount"}
               <Info>

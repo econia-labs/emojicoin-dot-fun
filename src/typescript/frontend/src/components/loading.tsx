@@ -53,12 +53,12 @@ export const Loading = ({
 
   return (
     <>
-      <div className="relative m-auto flex h-full w-full">
-        <div className="m-auto flex max-w-[420px] flex-col items-center justify-center gap-10 align-middle">
+      <div className="flex relative w-full h-full m-auto">
+        <div className="flex flex-col m-auto gap-10 max-w-[420px] justify-center items-center align-middle">
           <Emoji
             className={cn(
               centered,
-              "mt-[.3rem] text-center !text-5xl pixel-display-2 md:pixel-display-2"
+              "text-center mt-[.3rem] pixel-display-2 md:pixel-display-2 !text-5xl"
             )}
             title={emojiName}
             emojis={emoji}

@@ -37,14 +37,14 @@ export const BaseModal: React.FC<
               {showBackButton ? (
                 <DialogTitle as="div">
                   <div
-                    className="group absolute left-0 top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center"
+                    className="absolute group left-0 top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center"
                     onClick={() => (onBack ? onBack() : null)}
                   >
-                    <div className="m-auto flex rotate-180">
+                    <div className="flex m-auto rotate-180">
                       <Arrow
                         width={17}
                         height={18}
-                        className="fill-black transition-all group-hover:h-[19px] group-hover:w-[18px]"
+                        className="transition-all group-hover:w-[18px] group-hover:h-[19px] fill-black"
                       />
                     </div>
                   </div>
@@ -53,10 +53,10 @@ export const BaseModal: React.FC<
               {showCloseButton ? (
                 <DialogTitle as="div">
                   <div
-                    className="group absolute right-0 top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center justify-center"
+                    className="absolute group right-0 top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center justify-center"
                     onClick={onClose}
                   >
-                    <ClosePixelated className="h-[16px] w-[15px] text-black transition-all group-hover:h-[19px] group-hover:w-[18px]" />
+                    <ClosePixelated className="w-[15px] h-[16px] transition-all group-hover:w-[18px] group-hover:h-[19px] text-black" />
                   </div>
                 </DialogTitle>
               ) : null}

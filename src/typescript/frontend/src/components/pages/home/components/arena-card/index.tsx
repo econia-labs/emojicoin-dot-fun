@@ -79,16 +79,16 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
       }}
     >
       <div
-        className={`relative grid place-items-center items-center symbol-${getEmojisInString(market0Symbol).length}`}
+        className={`relative grid items-center place-items-center symbol-${getEmojisInString(market0Symbol).length}`}
       >
         <div className="m-auto">
           <GlowingEmoji className="flex flex-row text-nowrap" emojis={market0Symbol} />
         </div>
         <ArenaMarketsPriceDeltaPopover delta={market0Delta} />
       </div>
-      <span className="vs m-auto text-[.8em] uppercase text-light-gray">vs</span>
+      <span className="vs text-light-gray uppercase m-auto text-[.8em]">vs</span>
       <div
-        className={`relative grid place-items-center items-center symbol-${getEmojisInString(market1Symbol).length}`}
+        className={`relative grid items-center place-items-center symbol-${getEmojisInString(market1Symbol).length}`}
       >
         <div className="m-auto">
           <GlowingEmoji className="flex flex-row text-nowrap" emojis={market1Symbol} />
@@ -99,25 +99,25 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
   );
 
   return (
-    <div className="my-[20px] flex w-full max-w-full flex-col md:my-[70px]">
-      <div className="grid w-full max-w-full grid-cols-[1fr] grid-rows-[1fr_1fr] gap-[2em] md:grid-cols-[1fr_1fr] md:grid-rows-[1fr]">
-        <Link className="flex w-[100%] flex-col gap-[3em] place-self-center" href={ROUTES.arena}>
-          <GetMatchedEarlyMessage className="inline text-center md:hidden" />
+    <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
+      <div className="grid grid-rows-[1fr_1fr] md:grid-rows-[1fr] grid-cols-[1fr] md:grid-cols-[1fr_1fr] w-full max-w-full gap-[2em]">
+        <Link className="place-self-center flex flex-col gap-[3em] w-[100%]" href={ROUTES.arena}>
+          <GetMatchedEarlyMessage className="inline md:hidden text-center" />
           {arenaVs}
-          <div className="hidden items-center justify-center md:flex">
+          <div className="hidden md:flex justify-center items-center">
             <Button scale="xl" className="mx-auto">
               Enter now
             </Button>
           </div>
         </Link>
-        <div className={`flex max-w-full flex-col items-center gap-[2em] md:items-stretch`}>
-          <GetMatchedEarlyMessage className="hidden text-start md:inline" />
+        <div className={`flex flex-col gap-[2em] max-w-full items-center md:items-stretch`}>
+          <GetMatchedEarlyMessage className="hidden md:inline text-start" />
           <Countdown duration={duration} startTime={startTime} />
 
-          <div className="arena-market-data-text flex flex-col gap-[.4em]">
+          <div className="flex flex-col gap-[.4em] arena-market-data-text">
             <FlexGap gap="8px">
-              <div className="font-forma uppercase text-medium-gray">Rewards remaining:</div>
-              <div className="font-forma uppercase text-white">
+              <div className="font-forma text-medium-gray uppercase">Rewards remaining:</div>
+              <div className="font-forma text-white uppercase">
                 <div className="flex flex-row items-center justify-center">
                   <FormattedNumber value={rewardsRemaining} suffix=" APT" nominalize scramble />
                 </div>
@@ -126,9 +126,9 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
 
             <FlexGap gap="8px">
               <div className="uppercase">
-                <div className="font-forma uppercase text-medium-gray">Melee volume:</div>
+                <div className="font-forma text-medium-gray uppercase">Melee volume:</div>
               </div>
-              <div className="font-forma uppercase text-white">
+              <div className="font-forma text-white uppercase">
                 <div className="flex flex-row items-center justify-center">
                   <FormattedNumber value={meleeVolume} suffix=" APT" scramble nominalize />
                 </div>
@@ -136,8 +136,8 @@ export const ArenaCard = ({ meleeData }: ArenaCardProps) => {
             </FlexGap>
 
             <FlexGap gap="8px">
-              <div className="font-forma uppercase text-medium-gray">APT locked:</div>
-              <div className="font-forma uppercase text-white">
+              <div className="font-forma text-medium-gray uppercase">APT locked:</div>
+              <div className="font-forma text-white uppercase">
                 <div className="flex flex-row items-center justify-center">
                   <FormattedNumber value={aptLocked} suffix=" APT" scramble nominalize />
                 </div>

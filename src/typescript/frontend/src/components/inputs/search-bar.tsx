@@ -17,9 +17,9 @@ const SearchBar = ({ className }: { className?: string }) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
   return (
-    <div className={cn("m-0 flex w-full items-center p-0 md:w-auto", className)}>
-      <div className="my-1.5 flex h-8 w-full items-center border border-solid border-dark-gray px-2 radii-lg md:w-auto">
-        <div className="w-full px-1">
+    <div className={cn("flex m-0 p-0 items-center w-full md:w-auto", className)}>
+      <div className="w-full md:w-auto flex h-8 my-1.5 radii-lg px-2 items-center border-dark-gray border border-solid">
+        <div className="px-1 w-full">
           <InputGroup
             variant="fantom"
             isShowError={false}

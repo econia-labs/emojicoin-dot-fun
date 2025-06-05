@@ -13,8 +13,8 @@ export const ArenaLoading = ({ text = "Loading" }: { text?: string }) => {
     return () => clearInterval(interval);
   }, []);
   return (
-    <div className="flex h-[100%] w-[100%] flex-col items-center justify-center">
-      <div className="flex w-[200px] flex-col items-center gap-4">
+    <div className="w-[100%] h-[100%] flex flex-col items-center justify-center">
+      <div className="w-[200px] flex flex-col items-center gap-4">
         <div className="flex flex-row">
           <EmojiAsImage
             className="translate-x-4"

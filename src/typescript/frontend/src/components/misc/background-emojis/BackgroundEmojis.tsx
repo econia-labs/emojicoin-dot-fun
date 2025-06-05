@@ -22,7 +22,7 @@ function OneRandomEmoji({ emoji }: { emoji: string }) {
   );
   return (
     <div
-      className="flex h-min w-min select-none flex-col place-items-center text-8xl transition-all"
+      className="flex flex-col w-min h-min text-8xl place-items-center select-none transition-all"
       style={style}
     >
       <Emoji emojis={emoji} />
@@ -62,9 +62,9 @@ export function BackgroundEmojis() {
   }, [width, height]);
 
   return (
-    <div className="absolute left-0 top-0 z-[-1] h-[100%] w-[100vw] overflow-hidden">
+    <div className="z-[-1] absolute top-0 left-0 h-[100%] w-[100vw] overflow-hidden">
       <div
-        className="absolute left-0 top-0 grid h-[300%] w-[100%] will-change-transform"
+        className="absolute top-0 left-0 h-[300%] w-[100%] grid will-change-transform"
         style={{
           gridTemplateRows: `repeat(${rows}, 1fr)`,
           gridTemplateColumns: `repeat(${cols}, 1fr)`,

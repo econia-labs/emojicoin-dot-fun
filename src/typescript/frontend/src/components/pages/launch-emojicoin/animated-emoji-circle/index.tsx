@@ -18,7 +18,7 @@ export const AnimatedEmojiCircle = ({
 
   return (
     <motion.div
-      className={className ?? "" + " relative mt-[100px] select-none pixel-heading-4"}
+      className={className ?? "" + " pixel-heading-4 relative select-none mt-[100px]"}
       initial={{
         transform: "rotate(0deg)",
       }}
@@ -31,7 +31,7 @@ export const AnimatedEmojiCircle = ({
       {emojis.map((emoji, i) => (
         <div key={`emoji-row-${i}`} className="relative">
           <div
-            className="absolute left-0 top-0 z-[-1] h-[150px] w-[20px]"
+            className="z-[-1] absolute top-0 left-0 w-[20px] h-[150px]"
             style={{
               transform: `translateX(-50%) translateY(-50%) rotate(${degrees * i}deg)`,
             }}

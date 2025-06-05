@@ -40,7 +40,7 @@ export default function ScrambledDropdownItem({
           if (enabled) replay();
         }}
       >
-        <motion.div whileTap={{ scale: 0.95 }} className="flex flex-row items-center gap-2 p-2">
+        <motion.div whileTap={{ scale: 0.95 }} className="flex flex-row gap-2 items-center p-2">
           {icon}
           <span ref={ref}>{scrambleText}</span>
           {children}

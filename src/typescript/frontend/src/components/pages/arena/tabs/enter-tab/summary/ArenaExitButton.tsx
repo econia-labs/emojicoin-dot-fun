@@ -23,9 +23,9 @@ export default function ArenaExitButton({
   });
 
   return (
-    <div className="relative flex justify-between gap-2">
-      <div className="absolute -bottom-5 flex w-full items-center justify-center gap-1">
-        <span className="whitespace-nowrap font-pixelar text-sm uppercase text-light-gray">
+    <div className="relative flex gap-2 justify-between">
+      <div className="absolute -bottom-5 w-full flex items-center justify-center gap-1">
+        <span className="uppercase font-pixelar text-light-gray whitespace-nowrap text-sm">
           {"Does this sell?"}
         </span>
         <ArenaExitInfo summaryPage={summaryPage} />

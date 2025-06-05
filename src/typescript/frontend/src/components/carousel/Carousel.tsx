@@ -26,7 +26,7 @@ export const Carousel = ({ children, gap = 0 }: React.PropsWithChildren<{ gap?: 
 
   return (
     <div className="w-full">
-      <div className="w-full flex-row overflow-hidden">
+      <div className="overflow-hidden w-full flex-row">
         <div className="flex">
           <div
             className={`flex ${styles.hoverPause} animate-carousel`}
