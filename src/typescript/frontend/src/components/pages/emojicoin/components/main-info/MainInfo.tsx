@@ -186,7 +186,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
         borderTop: `1px solid ${darkTheme.colors.darkGray}`,
       }}
     >
-      <div className="flex flex-col lg:grid gap-4 lg:gap-8 lg:grid-cols-[25fr_35fr_40fr] lg:py-5 py-10 px-0 w-full mx-[2vw] max-w-max">
+      <div className="flex flex-col lg:grid gap-4 lg:gap-8 lg:grid-cols-[25fr_35fr_40fr] lg:py-5 py-10 px-0 w-full mx-[2vw] max-w-[1362px]">
         <div className={`relative grid place-items-center text-center ${borderStyle}`}>
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />

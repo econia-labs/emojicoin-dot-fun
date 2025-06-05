@@ -53,7 +53,7 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
 
   return (
     <div className="flex flex-col justify-center items-center mt-[15px] border-y border-solid border-dark-gray">
-      <div className="w-full max-w-max mx-auto">
+      <div className="w-full max-w-max mx-auto xl:px-2">
         <div className="w-full px-8">
           <div className="flex-col-reverse md:flex-row justify-between flex px-3 w-full border-x border-solid border-dark-gray *:grow *:basis-0">
             <SearchBar />
