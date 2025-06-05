@@ -12,6 +12,7 @@ import { useTradingStats } from "@/hooks/use-trading-stats";
 
 import { lockedTernary } from "../../../utils";
 import { FormattedNominalNumber } from "../../utils";
+import ArenaExitButton from "./ArenaExitButton";
 import { AptDisplay, EscrowAptValue } from "./utils";
 
 const SmallHyphens = () => <span className="text-light-gray text-lg mr-1">--</span>;
@@ -110,14 +111,11 @@ export default function Summary({
         <Button scale="lg" onClick={() => setIsSwapping(true)}>
           Swap
         </Button>
-        <Button
-          scale="lg"
-          onClick={() => {
-            lockedTernary(position, () => setIsTappingOut(true), onTapOut)();
-          }}
-        >
-          {lockedTernary(position, "Tap out", "Exit")}
-        </Button>
+        <ArenaExitButton
+          text={lockedTernary(position, "Tap out", "Exit")}
+          onClick={lockedTernary(position, () => setIsTappingOut(true), onTapOut)}
+          summaryPage
+        />
       </div>
     </div>
   );

@@ -75,6 +75,7 @@ describe("tests the swap functionality", () => {
       isSell,
       inputAmount,
       userEmojicoinBalance: inputAmount,
+      feeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     });
     expect(viewSimulationOutput.netProceeds).toEqual(netProceeds);
   });
@@ -116,6 +117,7 @@ describe("tests the swap functionality", () => {
       isSell: false,
       inputAmount,
       userEmojicoinBalance: inputAmount,
+      feeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     });
     expect(viewSimulationOutput.netProceeds).toEqual(netProceeds);
   });
@@ -157,6 +159,7 @@ describe("tests the swap functionality", () => {
       isSell: false,
       inputAmount,
       userEmojicoinBalance: inputAmount,
+      feeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     });
     expect(viewSimulationOutput.netProceeds).toEqual(netProceeds);
   });
@@ -209,6 +212,7 @@ describe("tests the swap functionality", () => {
       isSell: true,
       inputAmount,
       userEmojicoinBalance: inputAmount,
+      feeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     });
     expect(viewSimulationOutput.netProceeds).toEqual(netProceeds);
   });
@@ -267,6 +271,7 @@ describe("tests the swap functionality", () => {
       isSell: true,
       inputAmount: balance,
       userEmojicoinBalance: balance,
+      feeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     });
     expect(viewSimulationOutput.netProceeds).toEqual(netProceeds);
   });
