@@ -19,11 +19,11 @@ export default function GetMatchedEarlyMessage({ className }: { className?: Clas
 
   return (
     <>
-      <span className={cn("arena-pixel-heading-text text-white uppercase", className)}>
+      <span className={cn("arena-pixel-heading-text uppercase text-white", className)}>
         <span>Get matched up to </span>
         <motion.span
           key={`live-match-amount-home-${durationPercentage}`}
-          className="text-ec-blue inline-block"
+          className="inline-block text-ec-blue"
           animate={{ scale: [1.15, 1], filter: ["brightness(1.15)", "brightness(1)"] }}
         >
           {durationPercentage}%

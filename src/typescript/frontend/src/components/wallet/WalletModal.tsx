@@ -52,7 +52,7 @@ const FirstSlide = ({
   return slide.idx === 0 ? (
     <div className="px-[46px] py-[25.5px]" {...props}>
       {/* Favicon + Log in or sign up with ... */}
-      <div className="flex flex-col text-center font-pixelar text-xl text-black uppercase">
+      <div className="flex flex-col text-center font-pixelar text-xl uppercase text-black">
         <EmojicoinLogo width={40} height={40} className="m-auto mb-2" />
         <span>Log in or sign up</span>
         <span>With social + Aptos Connect</span>
@@ -72,12 +72,12 @@ const FirstSlide = ({
       </div>
 
       {/* Learn more */}
-      <div className="flex flex-row py-3 text-md text-dark-gray uppercase">
-        <div className="flex flex-row m-auto">
+      <div className="text-md flex flex-row py-3 uppercase text-dark-gray">
+        <div className="m-auto flex flex-row">
           <span>Learn more about&nbsp;</span>
-          <div className="text-black flex flex-row hover:cursor-pointer" onClick={increment}>
+          <div className="flex flex-row text-black hover:cursor-pointer" onClick={increment}>
             <span>Aptos Connect</span>
-            <Arrow width={10} className="ml-[0.5ch] mb-[0.5px]" />
+            <Arrow width={10} className="mb-[0.5px] ml-[0.5ch]" />
           </div>
         </div>
       </div>
@@ -90,10 +90,10 @@ const FirstSlide = ({
           <AptosPrivacyPolicy.Link className="text-black underline underline-offset-4" />
           <span className="text-dark-gray">.</span>
         </p>
-        <AptosPrivacyPolicy.PoweredBy className="flex gap-1.5 items-center text-xs leading-5 text-dark-gray" />
+        <AptosPrivacyPolicy.PoweredBy className="flex items-center gap-1.5 text-xs leading-5 text-dark-gray" />
       </AptosPrivacyPolicy>
 
-      <div className="flex items-center gap-4 py-4 uppercase mb-[1.5ch]">
+      <div className="mb-[1.5ch] flex items-center gap-4 py-4 uppercase">
         <div className="h-[1px] w-full bg-black text-black" />
         <span className="text-black">Or</span>
         <div className="h-[1px] w-full bg-black" />

@@ -135,9 +135,9 @@ const EmojiTable = (props: EmojiTableProps) => {
         numPages={pages}
       />
       <div className="flex border-t border-solid border-dark-gray">
-        <div className="flex justify-center w-full">
+        <div className="flex w-full justify-center">
           <div
-            className="flex flex-col items-center w-full justify-center"
+            className="flex w-full flex-col items-center justify-center"
             style={{ maxWidth: MAX_WIDTH + "px" }}
           >
             <motion.div
@@ -149,8 +149,8 @@ const EmojiTable = (props: EmojiTableProps) => {
               // there is not enough horizontal space. Hence the specific one-off media query used below.
               className={cn(
                 "flex w-full max-w-[500px] flex-col",
-                "justify-between items-center px-3 border-solid border-dark-gray",
-                "min-[860px]:border-x min-[860px]:max-w-full min-[860px]:flex-row min-[860px]:justify-start"
+                "items-center justify-between border-solid border-dark-gray px-3",
+                "min-[860px]:max-w-full min-[860px]:flex-row min-[860px]:justify-start min-[860px]:border-x"
               )}
               style={{
                 width: md ? rowLength * EMOJI_GRID_ITEM_WIDTH : undefined,
@@ -183,7 +183,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <>
                 <AnimatePresence mode="wait">
                   <motion.div
-                    className="relative w-full h-full"
+                    className="relative h-full w-full"
                     id="emoji-grid"
                     key={rowLength}
                     style={{
@@ -202,7 +202,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                     }}
                   >
                     <div
-                      className="grid relative justify-center w-full gap-0"
+                      className="relative grid w-full justify-center gap-0"
                       style={{
                         gridTemplateColumns: `repeat(auto-fill, ${EMOJI_GRID_ITEM_WIDTH}px)`,
                       }}

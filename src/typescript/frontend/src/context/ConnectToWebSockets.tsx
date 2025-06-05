@@ -12,14 +12,14 @@ export const ConnectToWebSockets = () => {
   return (
     <>
       {process.env.NODE_ENV === "development" && (
-        <div className="relative w-full h-full">
-          <div className="absolute top-4 right-4 z-[100] flex flex-col">
+        <div className="relative h-full w-full">
+          <div className="absolute right-4 top-4 z-[100] flex flex-col">
             <Emoji
               className="m-auto"
               emojis={connected ? emoji("green circle") : emoji("black circle")}
             />
             <motion.div
-              className="m-auto text-white font-pixelar uppercase text-2xl"
+              className="m-auto font-pixelar text-2xl uppercase text-white"
               key={received}
               animate={{ scale: 1, filter: `drop-shadow(0 0 4px ${hexToRgba("#FFFFFFFA")})` }}
               style={{ scale: 1.2, filter: `drop-shadow(0 0 0px ${hexToRgba("#FFFFFF00")})` }}

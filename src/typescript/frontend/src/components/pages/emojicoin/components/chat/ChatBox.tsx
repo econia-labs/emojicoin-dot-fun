@@ -52,7 +52,7 @@ const ChatBox = (props: ChatProps) => {
   const { sendChatMessage } = useChatBox(props.data.marketAddress);
 
   return (
-    <Column className="relative w-full min-h-[328px] grow bg-black border-t border-t-dark-gray border-solid z-20">
+    <Column className="relative z-20 min-h-[328px] w-full grow border-t border-solid border-t-dark-gray bg-black">
       {chatsQuery.isLoading ? (
         <Loading />
       ) : (
@@ -65,7 +65,7 @@ const ChatBox = (props: ChatProps) => {
         >
           <motion.div
             layoutScroll
-            className="flex flex-col-reverse w-full justify-center px-[21px] py-0 border-r border-solid border-r-dark-gray"
+            className="flex w-full flex-col-reverse justify-center border-r border-solid border-r-dark-gray px-[21px] py-0"
           >
             {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
               <MessageContainer
@@ -78,7 +78,7 @@ const ChatBox = (props: ChatProps) => {
             ))}
             <LoadMore
               query={chatsQuery}
-              className="mt-2 mb-4"
+              className="mb-4 mt-2"
               endOfListText="This is the beginning of the chat"
             />
           </motion.div>

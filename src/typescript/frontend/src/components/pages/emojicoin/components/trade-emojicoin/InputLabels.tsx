@@ -3,8 +3,8 @@ import { Emoji } from "utils/emoji";
 import AptosIconBlack from "@/icons/AptosBlack";
 
 export const AptosInputLabel = () => (
-  <div className="pixel-heading-4 md:pixel-heading-3 text-light-gray">
-    <AptosIconBlack className="mt-[5px] mr-[3px] h-[27px] w-[27px]" />
+  <div className="text-light-gray pixel-heading-4 md:pixel-heading-3">
+    <AptosIconBlack className="mr-[3px] mt-[5px] h-[27px] w-[27px]" />
   </div>
 );
 

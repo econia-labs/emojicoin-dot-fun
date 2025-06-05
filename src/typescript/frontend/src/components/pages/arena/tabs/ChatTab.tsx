@@ -70,8 +70,8 @@ export default function ChatTab({ market0, market1 }: Props) {
   }, []);
 
   return (
-    <div className="flex flex-col max-h-[calc(100vh-60px)] md:max-h-none h-auto md:h-[100%] overflow-hidden">
-      <motion.div layoutScroll className="flex flex-col-reverse grow px-[21px] py-0 overflow-auto">
+    <div className="flex h-auto max-h-[calc(100vh-60px)] flex-col overflow-hidden md:h-[100%] md:max-h-none">
+      <motion.div layoutScroll className="flex grow flex-col-reverse overflow-auto px-[21px] py-0">
         {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
           <MessageContainer
             message={message}
@@ -83,13 +83,13 @@ export default function ChatTab({ market0, market1 }: Props) {
         ))}
         <LoadMore
           query={chats}
-          className="mt-2 mb-4"
+          className="mb-4 mt-2"
           endOfListText="This is the beginning of the chat"
         />
       </motion.div>
 
       {!side ? (
-        <div className="flex pixel-heading-3b justify-center items-center mb-4">
+        <div className="mb-4 flex items-center justify-center pixel-heading-3b">
           {"You must enter a position first"}
         </div>
       ) : (

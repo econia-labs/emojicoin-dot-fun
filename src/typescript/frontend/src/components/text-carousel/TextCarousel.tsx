@@ -4,8 +4,8 @@ import Planet from "@/icons/Planet";
 
 const Item = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex items-center justify-center h-[40px] min-w-[fit-content] gap-[16px] mr-[16px]">
-      <span className={`pixel-heading-3 uppercase text-ec-blue whitespace-nowrap`}>{children}</span>
+    <div className="mr-[16px] flex h-[40px] min-w-[fit-content] items-center justify-center gap-[16px]">
+      <span className={`whitespace-nowrap uppercase text-ec-blue pixel-heading-3`}>{children}</span>
       <Planet />
     </div>
   );

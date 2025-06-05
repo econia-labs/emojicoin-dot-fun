@@ -109,10 +109,10 @@ export const MeleeHistory = ({
 
   return (
     <div className={cn("h-[100%] overflow-auto", className)}>
-      <div className="flex justify-between px-[1em] h-[3em] items-center border-dark-gray border-b-[1px] border-solid">
-        <div className="uppercase text-md font-forma">{"History"}</div>
+      <div className="flex h-[3em] items-center justify-between border-b-[1px] border-solid border-dark-gray px-[1em]">
+        <div className="text-md font-forma uppercase">{"History"}</div>
         <div
-          className="hidden md:block uppercase text-xl text-light-gray cursor-pointer"
+          className="hidden cursor-pointer text-xl uppercase text-light-gray md:block"
           onClick={() => setHistoryHidden(true)}
         >
           &lt;&lt; Hide

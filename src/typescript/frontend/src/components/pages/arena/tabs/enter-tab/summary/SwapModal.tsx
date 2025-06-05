@@ -27,20 +27,20 @@ export default function SwapModal({
   const { market0, market1, symbol0, symbol1 } = useCurrentMeleeInfo();
 
   return (
-    <div className="flex flex-col justify-around items-center grow relative">
+    <div className="relative flex grow flex-col items-center justify-around">
       <CloseIcon
         onClick={() => setIsSwapping(false)}
-        className="absolute right-[.5em] top-[.5em] p-[.5em] h-[2.5em] w-[2.5em] cursor-pointer"
+        className="absolute right-[.5em] top-[.5em] h-[2.5em] w-[2.5em] cursor-pointer p-[.5em]"
         color="econiaBlue"
       />
-      <div className="flex flex-col items-center justify-center gap-8 grow">
+      <div className="flex grow flex-col items-center justify-center gap-8">
         {symbol0 && symbol1 ? (
           <GlowingEmoji className="text-6xl" emojis={marketTernary(position, symbol1, symbol0)} />
         ) : (
           <AnimatedLoadingBoxesWithFallback fallback={<></>} numSquares={4} />
         )}
-        <div className="flex flex-col justify-between items-center gap-[.5em]">
-          <div className="text-light-gray uppercase text-2xl tracking-widest">Swap holdings</div>
+        <div className="flex flex-col items-center justify-between gap-[.5em]">
+          <div className="text-2xl uppercase tracking-widest text-light-gray">Swap holdings</div>
           <EscrowAptValue
             position={position}
             market0={market0}
