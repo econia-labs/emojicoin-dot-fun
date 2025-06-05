@@ -8,8 +8,8 @@ import React, { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 
 import ChartContainer from "@/components/charts/ChartContainer";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 
 import RewardsRemainingBox from "./RewardsRemainingBox";
 import { MobileNavigation, TabContainer } from "./tabs";
@@ -90,7 +90,7 @@ const Mobile = React.memo((props: ArenaProps) => {
 Mobile.displayName = "Mobile";
 
 export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
-  const { isMobile } = useMatchBreakpoints();
+  const { md } = useTailwindBreakpoints();
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const loadVaultBalanceFromServer = useEventStore((s) => s.loadVaultBalanceFromServer);
@@ -108,8 +108,8 @@ export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
     [props.arenaInfo.meleeID, arenaInfo?.meleeID]
   );
 
-  return isMobile ? (
-    <Mobile
+  return md ? (
+    <Desktop
       arenaInfo={arenaInfo ?? props.arenaInfo}
       market0={market0 ?? props.market0}
       market1={market1 ?? props.market1}
@@ -120,11 +120,11 @@ export const ArenaClient = (props: ArenaPropsWithVaultBalance) => {
       market1Delta={outdatedMeleeInfo ? 0 : props.market1Delta}
     />
   ) : (
-    <Desktop
+    <Mobile
       arenaInfo={arenaInfo ?? props.arenaInfo}
       market0={market0 ?? props.market0}
       market1={market1 ?? props.market1}
-      // See the explanation above in <Mobile /> props for the two delta fields below.
+      // See the explanation above in <Desktop /> props for the two delta fields below.
       market0Delta={outdatedMeleeInfo ? 0 : props.market0Delta}
       market1Delta={outdatedMeleeInfo ? 0 : props.market1Delta}
     />

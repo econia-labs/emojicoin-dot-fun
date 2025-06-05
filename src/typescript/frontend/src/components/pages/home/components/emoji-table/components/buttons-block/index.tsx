@@ -1,8 +1,8 @@
 import { Arrow } from "components/svg";
+import { cn } from "lib/utils/class-name";
 import React from "react";
 
 import { FlexGap } from "@/containers";
-import { useMatchBreakpoints } from "@/hooks/index";
 
 import { StyledBtn } from "./styled";
 
@@ -18,10 +18,8 @@ const ButtonText = ({ text }: { text: number | string }) => (
 );
 
 export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBlockProps) => {
-  const { isMobile } = useMatchBreakpoints();
-  const gap = isMobile ? "12px" : "17px";
   return (
-    <FlexGap className={className} gap={gap} justifyContent="center">
+    <div className={cn("flex gap-3 md:gap-4 justify-center", className)}>
       {/* First */}
       <StyledBtn onClick={() => onChange(1)}>
         <ButtonText text={"{"} />
@@ -69,6 +67,6 @@ export const ButtonsBlock = ({ value, numPages, onChange, className }: ButtonsBl
         <ButtonText text={">>"} />
         <ButtonText text={"}"} />
       </StyledBtn>
-    </FlexGap>
+    </div>
   );
 };

@@ -80,7 +80,7 @@ export default function CultClientPage() {
       )}
       <Clippy monologue={clippyMonologue} />
 
-      <div className="grid mobile-sm:self-center mobile-lg:self-start mobile-sm:grid-cols-1 mobile-lg:grid-cols-4 gap4 grow mobile-sm:p-2 sm:p-10 md:p-20 align-start gap-12">
+      <div className="grid self-center sm:self-start grid-cols-1 sm:grid-cols-4 gap4 grow p-2 md:p-20 align-start gap-12">
         <div className="flex flex-col gap-12">
           <WinDesktopItem
             icon={WinIcons.MY_COMPUTER}
@@ -104,7 +104,7 @@ export default function CultClientPage() {
         </div>
         <div
           ref={(ref) => setContainerRef(ref || undefined)}
-          className={`flex flex-col mobile-lg:col-span-3 relative gap-12`}
+          className={`flex flex-col sm:col-span-3 relative gap-12`}
           style={{ minHeight }}
         >
           {communityProjects.map((proj, i) => (

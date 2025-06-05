@@ -1,5 +1,4 @@
 import Button from "components/button";
-import React from "react";
 
 import { useArenaPhaseStore } from "../../phase/store";
 import { EmojiTitle } from "../../utils";

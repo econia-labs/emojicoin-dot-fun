@@ -2,7 +2,6 @@
 
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import Text from "components/text";
 import { motion } from "framer-motion";
 import { LINKS } from "lib/env";
 import Link from "next/link";
@@ -99,15 +98,9 @@ const ClientVerifyPage = () => {
         </div>
         <Flex justifyContent="center" className="w-[100dvw]">
           <Link href={LINKS?.tos ?? ROUTES["not-found"]}>
-            <Text
-              textScale="display6"
-              $fontWeight="bold"
-              fontSize={{ _: "8px", tablet: "15px" }}
-              textTransform="uppercase"
-              py={{ _: "16px", tablet: "24px" }}
-            >
+            <p className="display-6 font-bold text-[8px] md:text-[15px] py-4 md:py-6 uppercase">
               TERMS OF USE
-            </Text>
+            </p>
           </Link>
         </Flex>
       </div>

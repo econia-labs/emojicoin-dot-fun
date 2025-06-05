@@ -10,7 +10,6 @@ import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "@/components/FormattedNumber";
 import Info from "@/components/info";
 import { Loading } from "@/components/loading";
-import { useMatchBreakpoints } from "@/hooks/index";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
 
@@ -39,7 +38,6 @@ export const MeleeBreakdownInner = ({
   historyHidden: boolean;
   close: () => void;
 }) => {
-  const { isMobile } = useMatchBreakpoints();
   const smallCellClass = "flex flex-col gap-[.2em]";
   const smallCellTextClass = "uppercase text-light-gray text-1xl";
   const smallCellValueClass = "text-white font-forma text-2xl";
@@ -101,14 +99,12 @@ export const MeleeBreakdownInner = ({
           suffix="%"
         />
       </div>
-      {isMobile && (
-        <div
-          className="absolute right-0 top-0 uppercase text-xl text-light-gray cursor-pointer"
-          onClick={close}
-        >
-          {"<< Hide"}
-        </div>
-      )}
+      <div
+        className="md:hidden absolute right-0 top-0 uppercase text-xl text-light-gray cursor-pointer"
+        onClick={close}
+      >
+        {"<< Hide"}
+      </div>
     </div>
   );
 };
