@@ -44,6 +44,7 @@
     "clsx": "^2.1.1",
     "emoji-mart": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.7.0.tgz",
     "framer-motion": "^11.18.2",
+    "html-to-image": "^1.11.13",
     "immer": "^10.1.1",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",

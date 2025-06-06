@@ -1,11 +1,13 @@
 import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { cn } from "lib/utils/class-name";
-import { Lock } from "lucide-react";
+import { Lock, Share } from "lucide-react";
+import { useState } from "react";
 import { GlowingEmoji } from "utils/emoji";
 
 import Button from "@/components/button";
 import { FormattedNumber } from "@/components/FormattedNumber";
+import { PnlModal } from "@/components/pnl-modal/pnl-modal";
 import Popup from "@/components/popup";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { useTradingStats } from "@/hooks/use-trading-stats";
@@ -32,10 +34,21 @@ export default function Summary({
 }) {
   const { market0, market1 } = useCurrentMeleeInfo();
   const { isLoading } = useCurrentPosition();
-  const { pnl } = useTradingStats();
+  const { pnl, locked } = useTradingStats();
+  const [isPnlModalOpen, setIsPnlModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col justify-center grow items-center">
+      {isPnlModalOpen && pnl && (
+        <PnlModal
+          onClose={() => setIsPnlModalOpen(false)}
+          pnl={pnl}
+          market={position.currentSymbol}
+          deposits={position.deposits}
+          lockedValue={position.lockedIn ? locked : undefined}
+        />
+      )}
+
       <div className="flex flex-col justify-center gap-[1em] grow items-center">
         {/* The glowing emoji header */}
         <GlowingEmoji className="text-7xl mt-[2em]" emojis={position.currentSymbol} />
@@ -80,11 +93,20 @@ export default function Summary({
             {isLoading || pnl === undefined ? (
               <SmallHyphens />
             ) : (
-              <FormattedNumber
-                className={cn(pnl >= 0 ? "!text-green" : "!text-pink", "font-forma text-lg")}
-                value={pnl}
-                suffix="%"
-              />
+              <div className="flex gap-2 items-center">
+                <FormattedNumber
+                  className={cn(pnl >= 0 ? "!text-green" : "!text-pink", "font-forma text-lg")}
+                  value={pnl}
+                  suffix="%"
+                />
+                <Popup content={"Share your PNL with the world!"}>
+                  <Share
+                    className="text-ec-blue cursor-pointer"
+                    size={16}
+                    onClick={() => setIsPnlModalOpen(true)}
+                  />
+                </Popup>
+              </div>
             )}
           </div>
 
