@@ -10,13 +10,11 @@ import { BaseModal } from "../modal/BaseModal";
 import { AptDisplay } from "../pages/arena/tabs/enter-tab/summary/utils";
 import { FormattedNominalNumber } from "../pages/arena/tabs/utils";
 import LogoIcon from "../svg/icons/LogoIcon";
+import { useTradingStats } from "@/hooks/use-trading-stats";
+import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 
 interface Props {
   market: string;
-  pnl: number;
-  deposits: bigint;
-  endHolding?: bigint;
-  lockedValue?: bigint;
   onClose: () => void;
 }
 
@@ -40,9 +38,10 @@ const generateFullSizeImage = async (element: HTMLDivElement): Promise<string> =
   }
 };
 
-export const PnlModal = ({ market, pnl, deposits, endHolding, lockedValue, onClose }: Props) => {
+export const PnlModal = ({ market, onClose }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
-  const aptProfit = (endHolding || BigInt(0)) - (deposits || BigInt(0));
+  const { pnl, locked, profits, deposits } = useTradingStats();
+  const finalProfit = (profits ?? 0n) - (deposits ?? 0n);
 
   const { width } = useWindowSize();
   const scale = useMemo(() => {
@@ -70,7 +69,7 @@ export const PnlModal = ({ market, pnl, deposits, endHolding, lockedValue, onClo
     <BaseModal isOpen={true} onClose={onClose}>
       <div
         ref={ref}
-        className="flex flex-col justify-between items-start border-solid border-2 border-dark-gray p-8 pb-8"
+        className="flex flex-col justify-between items-start border-solid border-2 border-darker-gray p-8 pb-8"
         style={{
           width: WIDTH,
           height: WIDTH / ASPECT_RATIO,
@@ -87,7 +86,7 @@ export const PnlModal = ({ market, pnl, deposits, endHolding, lockedValue, onClo
               <FormattedNumber
                 className={cn(
                   pnl >= 0 ? "!text-green" : "!text-pink",
-                  "text-[3.5rem] font-forma font-extrabold tracking-wide"
+                  "text-[2.5rem] md:text-[3rem] font-forma font-extrabold tracking-wide"
                 )}
                 value={pnl}
                 prefix={pnl >= 0 ? "+" : ""}
@@ -96,8 +95,8 @@ export const PnlModal = ({ market, pnl, deposits, endHolding, lockedValue, onClo
             )}
           </div>
           <div className="text-3xl font-forma text-light-gray">
-            ({aptProfit >= 0 ? "+" : ""}
-            <FormattedNominalNumber value={aptProfit} suffix=" APT" />)
+            ({finalProfit >= 0 ? "+" : ""}
+            <FormattedNominalNumber value={finalProfit} suffix=" APT" />)
           </div>
         </div>
         <div className="flex gap-6">
@@ -107,12 +106,8 @@ export const PnlModal = ({ market, pnl, deposits, endHolding, lockedValue, onClo
               value: deposits,
             },
             {
-              label: "End Holdings",
-              value: endHolding,
-            },
-            {
               label: "Locked Value",
-              value: lockedValue,
+              value: locked,
             },
           ].map(
             (item) =>

@@ -16,6 +16,7 @@ import { lockedTernary } from "../../../utils";
 import { FormattedNominalNumber } from "../../utils";
 import ArenaExitButton from "./ArenaExitButton";
 import { AptDisplay, EscrowAptValue } from "./utils";
+import SharePopup from "../../profile-tab/melee-breakdown/SharePopup";
 
 const SmallHyphens = () => <span className="text-light-gray text-lg mr-1">--</span>;
 
@@ -34,19 +35,13 @@ export default function Summary({
 }) {
   const { market0, market1 } = useCurrentMeleeInfo();
   const { isLoading } = useCurrentPosition();
-  const { pnl, locked } = useTradingStats();
+  const { pnl } = useTradingStats();
   const [isPnlModalOpen, setIsPnlModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col justify-center grow items-center">
       {isPnlModalOpen && pnl && (
-        <PnlModal
-          onClose={() => setIsPnlModalOpen(false)}
-          pnl={pnl}
-          market={position.currentSymbol}
-          deposits={position.deposits}
-          lockedValue={position.lockedIn ? locked : undefined}
-        />
+        <PnlModal onClose={() => setIsPnlModalOpen(false)} market={position.currentSymbol} />
       )}
 
       <div className="flex flex-col justify-center gap-[1em] grow items-center">
@@ -99,13 +94,7 @@ export default function Summary({
                   value={pnl}
                   suffix="%"
                 />
-                <Popup content={"Share your PNL with the world!"}>
-                  <Share
-                    className="text-ec-blue cursor-pointer"
-                    size={16}
-                    onClick={() => setIsPnlModalOpen(true)}
-                  />
-                </Popup>
+                <SharePopup setIsPnlModalOpen={setIsPnlModalOpen} />
               </div>
             )}
           </div>

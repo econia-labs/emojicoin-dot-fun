@@ -19,6 +19,7 @@ import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
 import { useTradingStats } from "../../../../../../hooks/use-trading-stats";
 import { FormattedNominalNumber } from "../../utils";
 import type { ProfileTabProps } from "../ProfileTab";
+import SharePopup from "./SharePopup";
 
 export const MeleeBreakdownInner = ({
   meleeID,
@@ -57,15 +58,7 @@ export const MeleeBreakdownInner = ({
         padding: historyHidden ? "2em 2em" : "0 2em",
       }}
     >
-      {isPnlModalOpen && (
-        <PnlModal
-          market={lastHeld}
-          deposits={deposit}
-          endHolding={endHolding}
-          onClose={() => setIsPnlModalOpen(false)}
-          pnl={pnl}
-        />
-      )}
+      {isPnlModalOpen && <PnlModal market={lastHeld} onClose={() => setIsPnlModalOpen(false)} />}
       <div
         className={`col-start-1 col-end-3 ${historyHidden ? "row-start-1" : ""} ${historyHidden ? "row-end-3" : ""} h-[100%] w-[100%] grid place-items-center`}
       >
@@ -113,16 +106,7 @@ export const MeleeBreakdownInner = ({
             value={pnl}
             suffix="%"
           />
-          <Popup content={"Share your PNL with the world!"}>
-            <Share
-              className="text-ec-blue cursor-pointer"
-              size={16}
-              onClick={(e) => {
-                e.preventDefault();
-                setIsPnlModalOpen(true);
-              }}
-            />
-          </Popup>
+          <SharePopup setIsPnlModalOpen={setIsPnlModalOpen} />
         </div>
       </div>
       <div
