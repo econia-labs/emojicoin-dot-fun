@@ -6,7 +6,7 @@ import { FormattedNumber } from "@/components/FormattedNumber";
 import Popup from "@/components/popup";
 import Text from "@/components/text";
 
-import { XprPopup } from "./pools-table/components/table-row-desktop/XprPopup";
+import { XprPopup } from "./xprPopup";
 
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
