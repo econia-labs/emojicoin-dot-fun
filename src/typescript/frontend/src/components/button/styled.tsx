@@ -16,7 +16,6 @@ const StyledButton = styled.button<ButtonProps>`
   outline: 0;
   transition: all 0.3s ease;
   width: fit-content;
-  display: inline-flex;
 
   ${variant({
     prop: "scale",

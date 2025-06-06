@@ -51,7 +51,8 @@ const Button = <E extends React.ElementType = "button">({
 
   return (
     <StyledButton
-      className={cn(className)}
+      // Use `display: inline-flex` by default, but allow overriding so it's possible to hide with `hidden`.
+      className={cn("inline-flex", className)}
       {...internalProps}
       {...rest}
       variant={variant}
