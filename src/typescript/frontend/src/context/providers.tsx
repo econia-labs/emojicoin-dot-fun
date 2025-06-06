@@ -22,7 +22,7 @@ import Header from "@/components/header";
 import { HeaderSpacer } from "@/components/header-spacer";
 import Loader from "@/components/loader";
 import type { EmojiMartData } from "@/components/pages/emoji-picker/types";
-import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
+import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 import { clientKeys } from "@/sdk/const";
 
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
@@ -32,29 +32,29 @@ import { UserSettingsProvider } from "./event-store-context/StateStoreContextPro
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
 
-/**
- * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
- */
-fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then((res) =>
-  res
-    .json()
-    .then((data) => data as EmojiMartData)
-    .then(completePickerData)
-    .then((data) => init({ set: "native", data }))
-);
-
 enableMapSet();
 
 const queryClient = new QueryClient();
 
 const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsWithChildren) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isDesktop } = useMatchBreakpoints();
-  const isMobileMenuOpen = isOpen && !isDesktop;
+  const { lg } = useTailwindBreakpoints();
+  const isMobileMenuOpen = isOpen && !lg;
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    /**
+     * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
+     * This must be in a client component lest the nextjs server cache the entirety of the CDN response.
+     */
+    fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then((res) =>
+      res
+        .json()
+        .then((data) => data as EmojiMartData)
+        .then(completePickerData)
+        .then((data) => init({ set: "native", data }))
+    );
   }, []);
 
   return (

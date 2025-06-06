@@ -1,9 +1,13 @@
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { cn } from "lib/utils/class-name";
 import { useState } from "react";
 import { useScramble } from "use-scramble";
 
-import { DropdownArrow, DropdownContent, DropdownTrigger } from "@/components/dropdown-menu";
+import {
+  DropdownArrow,
+  DropdownContent,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@/components/dropdown-menu";
 import ScrambledDropdownItem from "@/components/dropdown-menu/ScrambledDropdownItem";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 

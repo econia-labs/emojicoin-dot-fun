@@ -84,6 +84,8 @@ export const Tr = styled.tr<TrProps>`
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
   display: flex;
   width: 100%;
+  height: 34px;
+
   ${getStylesOnSelected}
 
   &:hover {
@@ -112,9 +114,6 @@ export const EmptyTr = styled.tr<TrProps>`
 `;
 
 export const Td = styled.td<TdProps>`
-  display: inline-block;
-  color: ${({ theme }) => theme.colors.lightGray};
-  padding: 7px;
   vertical-align: middle;
   position: relative;
 

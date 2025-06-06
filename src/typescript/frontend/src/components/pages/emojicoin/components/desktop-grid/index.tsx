@@ -1,6 +1,8 @@
 import ChartContainer from "components/charts/ChartContainer";
 import Loading from "components/loading";
-import React, { Suspense } from "react";
+import { useUpdateSearchParam } from "lib/hooks/use-update-search-params";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
@@ -22,17 +24,20 @@ import {
 
 const tabs = [
   {
-    name: "Trade History",
+    label: "Trade History",
+    id: "trade-history",
     emoji: emoji("money-mouth face"),
     component: (props: GridProps) => <TradeHistory data={props.data} />,
   },
   {
-    name: "My Trade History",
+    label: "My Trade History",
+    id: "my-trade-history",
     emoji: emoji("person raising hand"),
     component: (props: GridProps) => <PersonalTradeHistory data={props.data} />,
   },
   {
-    name: "Top Holders",
+    label: "Top Holders",
+    id: "top-holders",
     emoji: emoji("1st place medal"),
     component: (props: GridProps) => (
       <CoinHolders
@@ -45,6 +50,17 @@ const tabs = [
 ] as const;
 
 const DesktopGrid = (props: GridProps) => {
+  const searchParams = useSearchParams();
+  const updateSearchParam = useUpdateSearchParam({ shallow: true });
+  const tab = useMemo(() => {
+    const tabInParams = (searchParams.get("tab") ?? "Not a tab!") as (typeof tabs)[number]["id"];
+    const allTabIDs = new Set(tabs.map(({ id }) => id));
+    if (!allTabIDs.has(tabInParams)) {
+      return tabs[0].id;
+    }
+    return tabInParams;
+  }, [searchParams]);
+
   return (
     <StyledContentWrapper>
       <StyledContentInner>
@@ -73,20 +89,16 @@ const DesktopGrid = (props: GridProps) => {
 
         <StyledContentColumn>
           <StyledBlock width="57%">
-            <Tabs defaultValue={tabs[0].name}>
+            <Tabs onValueChange={(v) => updateSearchParam({ tab: v })} value={tab}>
               <TabsList>
                 {tabs.map((tab) => (
-                  <TabsTrigger
-                    key={tab.name}
-                    value={tab.name}
-                    endSlot={<Emoji emojis={tab.emoji} />}
-                  >
-                    {tab.name}
+                  <TabsTrigger key={tab.id} value={tab.id} endSlot={<Emoji emojis={tab.emoji} />}>
+                    {tab.label}
                   </TabsTrigger>
                 ))}
               </TabsList>
               {tabs.map((tab) => (
-                <TabsContent key={tab.name} value={tab.name}>
+                <TabsContent key={tab.id} value={tab.id}>
                   {tab.component(props)}
                 </TabsContent>
               ))}

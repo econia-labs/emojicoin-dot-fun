@@ -16,6 +16,7 @@ import { Copy, LogOut, User, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ROUTES } from "router/routes";
+import { zIndices } from "theme/base";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
@@ -87,9 +88,11 @@ const WalletDropdownMenu = () => {
         <DropdownContent
           sideOffset={4}
           className={
-            "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer z-[101] " +
-            "rounded-[3px] min-w-[155px] pl-[2px]"
+            "flex flex-col bg-ec-blue text-black text-xl uppercase cursor-pointer rounded-[3px] min-w-[155px] pl-[2px]"
           }
+          style={{
+            zIndex: zIndices.tooltip,
+          }}
           align="center"
           side="bottom"
         >

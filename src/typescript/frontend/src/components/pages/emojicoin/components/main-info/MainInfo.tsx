@@ -8,23 +8,24 @@ import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { motion } from "framer-motion";
 import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
+import FEATURE_FLAGS from "lib/feature-flags";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import darkTheme from "theme/dark";
 import { Emoji } from "utils/emoji";
 
-import { useMatchBreakpoints } from "@/hooks/index";
+import { FavoriteButton } from "@/components/favorite-button/favorite-button";
+import { Switch } from "@/components/ui/Switch";
 import { useUsdMarketCap, useUSDValue } from "@/hooks/use-usd-market-cap";
 import TelegramOutlineIcon from "@/icons/TelegramOutlineIcon";
 import { MarketProperties } from "@/move-modules";
 import { isMarketStateModel } from "@/sdk/indexer-v2/types";
 
-import { Switcher } from "../../../../switcher";
 import type { MainInfoProps } from "../../types";
 import BondingProgress from "./BondingProgress";
 
-const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
+const statsTextClasses = "flex items-center uppercase ellipses font-forma text-[24px]";
 
 const LinkButton = ({
   name,
@@ -101,8 +102,6 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const usdDailyVolume = useUSDValue(dailyVolume);
   const usdAllTimeVolume = useUSDValue(allTimeVolume);
 
-  const { isMobile, isTablet } = useMatchBreakpoints();
-
   const explorerLink = toExplorerLink({
     linkType: "coin",
     value: `${data.marketView.metadata.marketAddress}::coin_factory::Emojicoin`,
@@ -154,10 +153,10 @@ const MainInfo = ({ data }: MainInfoProps) => {
   );
 
   const switcher = (
-    <Switcher
+    <Switch
       disabled={usdMarketCap === undefined}
-      checked={showUsd}
-      onChange={() => setShowUsd(!showUsd)}
+      checked={usdMarketCap === undefined ? false : showUsd}
+      onCheckedChange={(checked) => setShowUsd(checked)}
     />
   );
 
@@ -187,38 +186,23 @@ const MainInfo = ({ data }: MainInfoProps) => {
         borderTop: `1px solid ${darkTheme.colors.darkGray}`,
       }}
     >
-      <div
-        className="mx-[2vw]"
-        style={
-          isMobile || isTablet
-            ? {
-                display: "flex",
-                gap: "1em",
-                flexDirection: "column",
-                width: "100%",
-                padding: "40px 0px",
-              }
-            : {
-                display: "grid",
-                gridTemplateColumns: "25fr 35fr 40fr",
-                gap: "32px",
-                width: "100%",
-                maxWidth: "1362px",
-                padding: "20px 0",
-              }
-        }
-      >
-        <div className={`grid place-items-center text-center ${borderStyle}`}>
+      <div className="flex flex-col lg:grid gap-4 lg:gap-8 lg:grid-cols-[25fr_35fr_40fr] lg:py-5 py-10 px-0 w-full mx-[2vw] max-w-[1362px]">
+        <div className={`relative grid place-items-center text-center ${borderStyle}`}>
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />
           </Link>
+          {FEATURE_FLAGS.Favorites && (
+            <div className="absolute bottom-4 right-4">
+              <FavoriteButton emojis={data.emojis} marketAddress={data.marketAddress} />
+            </div>
+          )}
         </div>
 
         <div className={`flex flex-col justify-between ${borderStyle}`}>
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>
               {"APT "}
-              <AptosIconBlack className={"icon-inline mb-[0.0ch]"} />
+              <AptosIconBlack className="icon-inline mx-1 -translate-y-[1px]" />
               {" / USD $:"}
             </div>
             <div className={statsTextClasses + " text-white"}>{switcher}</div>
