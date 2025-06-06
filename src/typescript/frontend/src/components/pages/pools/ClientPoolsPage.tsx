@@ -5,7 +5,7 @@ import { Liquidity } from "components/pages/pools/components";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
@@ -133,7 +133,10 @@ const ClientPoolsPage = () => {
     limit: 20,
   });
 
-  const allMarkets = query.data?.pages.flatMap((page) => page) ?? [];
+  const allMarkets = useMemo(
+    () => query.data?.pages.flatMap((page) => page) ?? [],
+    [query.data?.pages]
+  );
 
   return (
     <>
