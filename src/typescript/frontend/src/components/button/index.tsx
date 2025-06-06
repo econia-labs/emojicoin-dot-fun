@@ -51,7 +51,7 @@ const Button = <E extends React.ElementType = "button">({
 
   return (
     <StyledButton
-      className={cn("inline-flex", className)}
+      className={cn(className)}
       {...internalProps}
       {...rest}
       variant={variant}
