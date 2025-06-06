@@ -35,7 +35,7 @@ const COLUMNS: EcTableColumn<PoolsData>[] = [
   {
     id: SortMarketsBy.AllTimeVolume,
     headerContent: "All-time Volume",
-    width: 150,
+    width: 170,
     className: "text-left",
     headClassName: "text-left",
     cellClassName: "text-left",
@@ -91,7 +91,7 @@ const COLUMNS: EcTableColumn<PoolsData>[] = [
         DPR
       </div>
     ),
-    width: 100,
+    width: 150,
     className: "text-right",
     headClassName: "text-right",
     cellClassName: "text-right",
@@ -146,7 +146,7 @@ const ClientPoolsPage = () => {
           >
             <TabsList className="justify-between">
               <div className="flex items-center gap-2">
-                <TabsTrigger value="pools" endSlot={<Emoji emojis={emoji("water wave")} />}>
+                <TabsTrigger value="pools" endSlot={<Emoji emojis={emoji("man swimming")} />}>
                   Pools
                 </TabsTrigger>
                 <TabsTrigger
@@ -156,10 +156,12 @@ const ClientPoolsPage = () => {
                   My Pools
                 </TabsTrigger>
               </div>
-              <SearchBar />
+              <SearchBar className="max-w-[300px]" />
             </TabsList>
             <div className={"flex w-full overflow-auto h-[60dvh]"}>
               <EcTable
+                isLoading={query.isLoading}
+                variant="select"
                 columns={COLUMNS}
                 items={allMarkets}
                 getKey={(i) => i.market.marketID.toString()}

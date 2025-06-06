@@ -106,6 +106,8 @@ export interface TableProps<T> {
     /** Whether data is currently being fetched */
     isFetching: boolean;
   };
+  /** The variant of the table. Defaults to "default". "select" variant allows row selection. */
+  variant?: "default" | "select";
 }
 
 /**
@@ -149,8 +151,11 @@ export const EcTable = <T,>({
   serverSideOrderHandler,
   isLoading,
   emptyText,
+  variant = "default",
 }: TableProps<T>) => {
   const [containerHeight, setContainerHeight] = useState<number>(0);
+  const [selectedRowKey, setSelectedRowKey] = useState<string | null>(null);
+
   const containerRef = useCallback((node: HTMLElement | null) => {
     if (node) {
       setContainerHeight(node.clientHeight);
@@ -186,6 +191,19 @@ export const EcTable = <T,>({
     }
     return 0;
   }, [rowHeight, containerHeight]);
+
+  const handleRowClick = useCallback(
+    (item: T, index: number) => {
+      if (variant === "select") {
+        const rowKey = getKey(item);
+        setSelectedRowKey(rowKey);
+      }
+      if (onClick) {
+        onClick(item, index);
+      }
+    },
+    [variant, getKey, onClick]
+  );
 
   return (
     <div ref={containerRef} className={cn("relative flex w-full", className)}>
@@ -234,7 +252,7 @@ export const EcTable = <T,>({
           </TableHeader>
           <EcTableBody
             className={textFormat}
-            onClick={onClick}
+            onClick={handleRowClick}
             rowHeight={rowHeight}
             minRows={minRows}
             items={sorted}
@@ -244,6 +262,7 @@ export const EcTable = <T,>({
             pagination={pagination}
             isLoading={isLoading}
             emptyText={emptyText}
+            selectedRowKey={selectedRowKey}
           />
         </Table>
       </div>

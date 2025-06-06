@@ -6,26 +6,32 @@ import { TableCell, TableRow } from "./table";
 interface Props<T> {
   index: number;
   onClick?: (item: T, i: number) => void;
+  // Same as key, obtained from getKey. But key is a reserved prop in React, so we need to use a different name.
+  id: string;
   animateInsertion?: boolean;
   height?: number;
   item: T;
   columns: EcTableColumn<T>[];
+  selectedRowKey?: string | null;
 }
 
 export const EcTableRow = <T,>({
   animateInsertion,
   index,
+  id,
   onClick,
   height,
   item,
   columns,
+  selectedRowKey,
 }: Props<T>) => {
   return (
     <TableRow
       index={index}
       height={height}
       onClick={() => onClick?.(item, index)}
-      className="cursor-pointer group"
+      aria-selected={selectedRowKey === id}
+      className={cn("group cursor-pointer", selectedRowKey === id && "bg-ec-blue *:text-black")}
       animateInsertion={animateInsertion}
     >
       {columns.map((col, cellIndex) => (

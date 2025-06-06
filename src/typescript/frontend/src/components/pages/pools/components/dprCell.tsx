@@ -4,7 +4,6 @@ import { Emoji } from "utils/emoji";
 
 import { FormattedNumber } from "@/components/FormattedNumber";
 import Popup from "@/components/popup";
-import Text from "@/components/text";
 
 import { XprPopup } from "./xprPopup";
 
@@ -46,9 +45,7 @@ export const DprCell = ({ dailyTvlPerLPCoinGrowth }: { dailyTvlPerLPCoinGrowth: 
         )
       }
     >
-      <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
-        {dpr}
-      </Text>
+      <div className="body-sm uppercase">{dpr}</div>
     </Popup>
   );
 };
