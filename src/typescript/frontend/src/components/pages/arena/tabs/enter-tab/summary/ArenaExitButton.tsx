@@ -30,7 +30,12 @@ export default function ArenaExitButton({
         </span>
         <ArenaExitInfo summaryPage={summaryPage} />
       </div>
-      <StyledButton className="inline-flex gap-1" onClick={onClick} onMouseOver={replay} onFocus={replay}>
+      <StyledButton
+        className="inline-flex gap-1"
+        onClick={onClick}
+        onMouseOver={replay}
+        onFocus={replay}
+      >
         <span className={textClassName}> {"{"} </span>
         <div className="flex flex-row">
           <span
