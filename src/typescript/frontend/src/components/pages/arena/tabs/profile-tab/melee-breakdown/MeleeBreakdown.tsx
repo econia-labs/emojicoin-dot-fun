@@ -3,8 +3,7 @@ import Button from "components/button";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { cn } from "lib/utils/class-name";
-import { Share } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
 import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
@@ -12,9 +11,9 @@ import { FormattedNumber } from "@/components/FormattedNumber";
 import Info from "@/components/info";
 import { Loading } from "@/components/loading";
 import { PnlModal } from "@/components/pnl-modal/pnl-modal";
-import Popup from "@/components/popup";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
+import usePnlModalStore from "@/store/pnl-modal/store";
 
 import { useTradingStats } from "../../../../../../hooks/use-trading-stats";
 import { FormattedNominalNumber } from "../../utils";
@@ -31,6 +30,7 @@ export const MeleeBreakdownInner = ({
   lastHeld,
   historyHidden,
   close,
+  lockedValue,
 }: {
   meleeID: bigint;
   lastVersion: bigint;
@@ -41,9 +41,10 @@ export const MeleeBreakdownInner = ({
   lastHeld: string;
   historyHidden: boolean;
   close: () => void;
+  // If the position is current, use the `lockedValue` instead of `endHolding` for the pnl modal.
+  lockedValue?: bigint;
 }) => {
-  const [isPnlModalOpen, setIsPnlModalOpen] = useState(false);
-
+  const isPnlModalOpen = usePnlModalStore((s) => s.open);
   const smallCellClass = "flex flex-col gap-[.2em]";
   const smallCellTextClass = "uppercase text-light-gray text-1xl";
   const smallCellValueClass = "text-white font-forma text-2xl";
@@ -58,7 +59,15 @@ export const MeleeBreakdownInner = ({
         padding: historyHidden ? "2em 2em" : "0 2em",
       }}
     >
-      {isPnlModalOpen && <PnlModal market={lastHeld} onClose={() => setIsPnlModalOpen(false)} />}
+      {isPnlModalOpen && (
+        <PnlModal
+          market={lastHeld}
+          deposits={deposit}
+          endHolding={endHolding}
+          pnl={pnl}
+          lockedValue={lockedValue}
+        />
+      )}
       <div
         className={`col-start-1 col-end-3 ${historyHidden ? "row-start-1" : ""} ${historyHidden ? "row-end-3" : ""} h-[100%] w-[100%] grid place-items-center`}
       >
@@ -106,7 +115,7 @@ export const MeleeBreakdownInner = ({
             value={pnl}
             suffix="%"
           />
-          <SharePopup setIsPnlModalOpen={setIsPnlModalOpen} />
+          <SharePopup />
         </div>
       </div>
       <div
@@ -127,7 +136,7 @@ export function CurrentMeleeBreakdown({
   close: () => void;
 }) {
   const { position } = useCurrentPosition();
-  const { pnl } = useTradingStats();
+  const { pnl, locked } = useTradingStats();
   const { market0, market1 } = useCurrentMeleeInfo();
   const marketLastHeld = useMemo(() => {
     if (!position || !market0 || !market1) return undefined;
@@ -149,6 +158,7 @@ export function CurrentMeleeBreakdown({
         pnl={pnl}
         lastHeld={marketLastHeld}
         close={close}
+        lockedValue={locked}
       />
     )
   );

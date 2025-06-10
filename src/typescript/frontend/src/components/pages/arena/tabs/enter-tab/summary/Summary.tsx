@@ -1,8 +1,7 @@
 import type { CurrentUserPosition } from "lib/hooks/positions/use-current-position";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { cn } from "lib/utils/class-name";
-import { Lock, Share } from "lucide-react";
-import { useState } from "react";
+import { Lock } from "lucide-react";
 import { GlowingEmoji } from "utils/emoji";
 
 import Button from "@/components/button";
@@ -11,12 +10,13 @@ import { PnlModal } from "@/components/pnl-modal/pnl-modal";
 import Popup from "@/components/popup";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { useTradingStats } from "@/hooks/use-trading-stats";
+import usePnlModalStore from "@/store/pnl-modal/store";
 
 import { lockedTernary } from "../../../utils";
+import SharePopup from "../../profile-tab/melee-breakdown/SharePopup";
 import { FormattedNominalNumber } from "../../utils";
 import ArenaExitButton from "./ArenaExitButton";
 import { AptDisplay, EscrowAptValue } from "./utils";
-import SharePopup from "../../profile-tab/melee-breakdown/SharePopup";
 
 const SmallHyphens = () => <span className="text-light-gray text-lg mr-1">--</span>;
 
@@ -35,13 +35,18 @@ export default function Summary({
 }) {
   const { market0, market1 } = useCurrentMeleeInfo();
   const { isLoading } = useCurrentPosition();
-  const { pnl } = useTradingStats();
-  const [isPnlModalOpen, setIsPnlModalOpen] = useState(false);
+  const { pnl, locked, deposits } = useTradingStats();
+  const isPnlModalOpen = usePnlModalStore((s) => s.open);
 
   return (
     <div className="flex flex-col justify-center grow items-center">
       {isPnlModalOpen && pnl && (
-        <PnlModal onClose={() => setIsPnlModalOpen(false)} market={position.currentSymbol} />
+        <PnlModal
+          market={position.currentSymbol}
+          pnl={pnl}
+          deposits={deposits}
+          lockedValue={locked}
+        />
       )}
 
       <div className="flex flex-col justify-center gap-[1em] grow items-center">
@@ -94,7 +99,7 @@ export default function Summary({
                   value={pnl}
                   suffix="%"
                 />
-                <SharePopup setIsPnlModalOpen={setIsPnlModalOpen} />
+                <SharePopup className="-mt-[1px]" />
               </div>
             )}
           </div>
