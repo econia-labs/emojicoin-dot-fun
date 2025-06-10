@@ -30,8 +30,13 @@ export default function ArenaExitButton({
         </span>
         <ArenaExitInfo summaryPage={summaryPage} />
       </div>
-      <StyledButton onClick={onClick} onMouseOver={replay} onFocus={replay}>
-        <span className={textClassName}> {"{ "} </span>
+      <StyledButton
+        className="inline-flex gap-1"
+        onClick={onClick}
+        onMouseOver={replay}
+        onFocus={replay}
+      >
+        <span className={textClassName}> {"{"} </span>
         <div className="flex flex-row">
           <span
             className={textClassName}
@@ -42,7 +47,7 @@ export default function ArenaExitButton({
             }}
           />
         </div>
-        <span className={textClassName}> {" }"} </span>
+        <span className={textClassName}> {"}"} </span>
       </StyledButton>
     </div>
   );
