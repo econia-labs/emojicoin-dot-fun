@@ -1,7 +1,7 @@
 import { toBlob, toJpeg } from "html-to-image";
 import { cn } from "lib/utils/class-name";
-import NextImage from "next/image";
 import type { StaticImageData } from "next/image";
+import NextImage from "next/image";
 import { useMemo, useRef } from "react";
 import { useWindowSize } from "react-use";
 import { GlowingEmoji } from "utils/emoji";
