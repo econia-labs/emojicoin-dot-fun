@@ -16,8 +16,8 @@ import useRewardsRemaining from "@/hooks/use-rewards-remaining";
 import { getEvents, type MarketStateModel } from "@/sdk/index";
 
 import MATCH_AMOUNT_TEXT from "../../match-amount-text";
-import { GET_MATCHED_EXPLANATION_STRINGS } from "../InfoTab";
 import { globalArenaPhaseStore, useArenaPhaseStore } from "../../phase/store";
+import { GET_MATCHED_EXPLANATION_STRINGS } from "../InfoTab";
 import { FormattedNominalNumber } from "../utils";
 import { MatchAmount } from "./MatchAmount";
 

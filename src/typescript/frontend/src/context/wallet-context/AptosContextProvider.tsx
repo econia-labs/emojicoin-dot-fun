@@ -1,6 +1,6 @@
 import type { Aptos, PublicKey, UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import type { AptosSignAndSubmitTransactionOutput } from "@aptos-labs/wallet-adapter-react";
 import { AptosApiError, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { AptosSignAndSubmitTransactionOutput } from "@aptos-labs/wallet-adapter-react";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   checkNetworkAndToast,

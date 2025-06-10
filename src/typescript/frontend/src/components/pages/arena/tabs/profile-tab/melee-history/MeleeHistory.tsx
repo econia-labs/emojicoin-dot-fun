@@ -4,8 +4,8 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
 import { useExitTransactionBuilder } from "lib/hooks/transaction-builders/use-exit-builder";
-import { cn } from "lib/utils/class-name";
 import { useArenaSubmissionSnapshot } from "lib/hooks/use-arena-submission-snapshot";
+import { cn } from "lib/utils/class-name";
 import { useMemo } from "react";
 import { Emoji } from "utils/emoji";
 
@@ -13,8 +13,8 @@ import type { SymbolEmoji } from "@/sdk/index";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/indexer-v2/types";
 import { useHistoricalEscrow } from "@/store/arena/escrow/hooks";
 
-import ArenaExitInfo from "../../enter-tab/summary/ArenaExitInfo";
 import { globalArenaPhaseStore } from "../../../phase/store";
+import ArenaExitInfo from "../../enter-tab/summary/ArenaExitInfo";
 import { CurrentMeleeBreakdown, HistoricMeleeBreakdown } from "../melee-breakdown/MeleeBreakdown";
 import type { ProfileTabProps } from "../ProfileTab";
 import styles from "./History.module.css";
