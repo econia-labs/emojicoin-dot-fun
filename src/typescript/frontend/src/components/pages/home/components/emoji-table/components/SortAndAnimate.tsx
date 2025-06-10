@@ -1,42 +1,73 @@
 import { useUserSettings } from "context/event-store-context";
-import { cn } from "lib/utils/class-name";
+import { translationFunction } from "context/language-context";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { useGetFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
 
-import { Switcher } from "@/components/switcher";
-import useMatchBreakpoints from "@/hooks/use-match-breakpoints/use-match-breakpoints";
+import Popup from "@/components/popup";
+import { Switch } from "@/components/ui/Switch";
 
-import styles from "../ExtendedGridLines.module.css";
 import type { SortHomePageDropdownProps } from "./SortHomePageDropdown";
 import SortHomePageDropdown from "./SortHomePageDropdown";
 
-export default function SortAndAnimate({ sortMarketsBy, onSortChange }: SortHomePageDropdownProps) {
+interface Props extends SortHomePageDropdownProps {
+  isFilterFavorites: boolean;
+  setIsFilterFavorites: (value: boolean) => void;
+  disableFavoritesToggle: boolean;
+}
+
+export default function SortAndAnimate({
+  sortMarketsBy,
+  onSortChange,
+  isFilterFavorites,
+  setIsFilterFavorites,
+  disableFavoritesToggle,
+}: Props) {
   const animate = useUserSettings((s) => s.animate);
   const toggleAnimate = useUserSettings((s) => s.toggleAnimate);
-  const { isLaptopL } = useMatchBreakpoints();
+  const { t } = translationFunction();
+
+  const { account } = useAptos();
+  const {
+    favoritesQuery: { data: favorites },
+  } = useGetFavoriteMarkets();
+
+  const favoritesDisabled = !favorites || favorites.size === 0;
 
   return (
-    <>
-      {/* Outer wrapper. */}
-      <div
-        className={cn(
-          styles["extended-grid-lines"],
-          "w-full border-none ml-0 mr-0 pr-0 after:right-0",
-          "justify-end pr-5 md:border-r md:border-solid md:border-r-dark-gray"
+    <div
+      className={
+        "flex w-full flex-col md:flex-row justify-between md:justify-end py-2 items-center gap-3"
+      }
+    >
+      <SortHomePageDropdown sortMarketsBy={sortMarketsBy} onSortChange={onSortChange} />
+      <div className="flex gap-3">
+        {account?.address && FEATURE_FLAGS.Favorites && (
+          <Popup
+            content={
+              disableFavoritesToggle
+                ? "Loading..."
+                : favoritesDisabled
+                  ? "Add an Emojicoin to your favorites to use this filter"
+                  : "Filter your favorite Emojicoins"
+            }
+          >
+            <div className="flex gap-3 items-center">
+              <span className="med-pixel-text text-light-gray uppercase">{t("Favorites:")}</span>
+              <Switch
+                disabled={disableFavoritesToggle || favoritesDisabled}
+                checked={!favoritesDisabled && isFilterFavorites}
+                onCheckedChange={() => setIsFilterFavorites(!isFilterFavorites)}
+              />
+            </div>
+          </Popup>
         )}
-      >
-        {/* Inner wrapper. */}
-        <div
-          className={cn(
-            "flex items-center w-full justify-around md:justify-between p-[10px]",
-            "md:p-0 md:w-[unset]"
-          )}
-        >
-          <SortHomePageDropdown sortMarketsBy={sortMarketsBy} onSortChange={onSortChange} />
-          <div className="flex flex-row gap-3">
-            <span className=" med-pixel-text text-light-gray uppercase">Animate: </span>
-            <Switcher checked={animate} onChange={toggleAnimate} scale={isLaptopL ? "md" : "sm"} />
-          </div>
+
+        <div className="flex flex-row gap-3 items-center">
+          <span className=" med-pixel-text text-light-gray uppercase">{t("Animate: ")}</span>
+          <Switch checked={animate} onCheckedChange={toggleAnimate} />
         </div>
       </div>
-    </>
+    </div>
   );
 }

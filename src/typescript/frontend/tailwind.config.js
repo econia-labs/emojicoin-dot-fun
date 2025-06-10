@@ -2,7 +2,7 @@
 /** @type {import('tailwindcss').Config} */
 import colors from "tailwindcss/colors";
 import { fontFamily } from "tailwindcss/defaultTheme";
-delete colors.lightBlue;
+
 delete colors.warmGray;
 delete colors.lightBlue;
 delete colors.trueGray;
@@ -48,10 +48,13 @@ const shadCnTheme = {
   },
 };
 
-module.exports = {
+const tailwindConfig = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      maxWidth: {
+        max: "1440px",
+      },
       typography: {},
       fontFamily: {
         pixelar: ["var(--font-pixelar)", ...fontFamily.sans],
@@ -59,13 +62,32 @@ module.exports = {
         "forma-bold": ["var(--font-formaM)", ...fontFamily.sans],
         "forma-thin": ["var(--font-formaDR)", ...fontFamily.sans],
       },
+      /**
+       * Breakpoint configuration for responsive design using TailwindCSS.
+       *
+       * TailwindCSS follows a mobile-first approach, meaning styles are first defined
+       * for the smallest viewport (0px and up) and then progressively enhanced for
+       * larger screens using these breakpoints.
+       *
+       * For example, if you write:
+       * - `text-sm md:text-base`: text will be small on mobile (0px+) and base size on tablet (768px+)
+       *
+       * The breakpoints defined here represent the minimum width at which these styles take effect:
+       * - Default (0px+): Base styles, no prefix needed
+       * - sm (425px+): Mobile styles with 'sm:' prefix
+       * - md (768px+): Tablet styles with 'md:' prefix
+       * - lg (1024px+): Laptop styles with 'lg:' prefix
+       * - xl (1440px+): Large laptop styles with 'xl:' prefix
+       *
+       * @example
+       * <div class="w-full md:w-1/2 lg:w-1/3">
+       *   Full width on mobile, half width on tablet, one-third on laptop
+       * </div>
+       */
       screens: {
-        "mobile-sm": "0px",
-        "mobile-md": "375px",
-        "mobile-lg": "425px",
-        sm: "640.1px",
-        md: "768.1px", // tablet
-        lg: "1024.1px", // laptop
+        sm: "425px", // mobile
+        md: "768px", // tablet
+        lg: "1024px", // laptop
         xl: "1440px", // laptop L
       },
       boxShadow: {
@@ -275,3 +297,5 @@ module.exports = {
     require("tailwindcss-animate"),
   ],
 };
+
+export default tailwindConfig;

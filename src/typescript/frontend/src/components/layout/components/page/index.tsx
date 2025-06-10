@@ -1,15 +1,13 @@
 "use client";
 
+import type { PropsWithChildren } from "react";
 import React from "react";
 
 import { Container } from "@/containers";
 
-import type { PageProps } from "../types";
-
-export const Page: React.FC<PageProps> = ({ children, ...props }) => {
-  return (
-    <>
-      <Container {...props}>{children}</Container>
-    </>
-  );
+export const Page: React.FC<PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>> = ({
+  children,
+  ...props
+}) => {
+  return <Container {...props}>{children}</Container>;
 };

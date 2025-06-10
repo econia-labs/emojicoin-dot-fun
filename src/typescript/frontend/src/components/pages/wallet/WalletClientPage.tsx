@@ -6,8 +6,8 @@ import SearchBar from "components/inputs/search-bar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs/tabs";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useUserEmojicoinBalances } from "lib/hooks/queries/use-fetch-owner-emojicoin-balances";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useUpdateSearchParam } from "lib/hooks/use-update-search-params";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffectOnce } from "react-use";
 import { ROUTES } from "router/routes";
 import { emoji } from "utils";
@@ -22,10 +22,12 @@ import { WalletTransactionTable } from "./WalletTransactionTable";
 
 export const WalletClientPage = ({ address, name }: { address: string; name?: ValidAptosName }) => {
   const resolvedName = name ?? address;
+  const searchParams = useSearchParams();
   const { ownedCoins, totalValue, isLoading } = useUserEmojicoinBalances(address);
-  const [tab, setTab] = useState<string>("portfolio");
   const emojis = useEmojiPicker((s) => s.emojis);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
+  const updateSearchParam = useUpdateSearchParam({ shallow: true });
+  const tab = searchParams.get("tab") ?? "portfolio";
 
   // Replace the address in the router URL if the name is defined.
   const router = useRouter();
@@ -37,14 +39,14 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
   });
 
   return (
-    <div className="max-w-[100vw] px-2 sm:min-w-[80vw] md:min-w-[800px]">
-      <span className="pixel-heading-2 mobile-sm:px-4 sm:px-0 flex flex-wrap gap-x-2 mb-4">
+    <div className="max-w-[100vw] px-2 md:min-w-[80vw]">
+      <span className="pixel-heading-2 px-4 md:px-0 flex flex-wrap gap-x-2 mb-4">
         Portfolio of{" "}
         <ExplorerLink className="text-ec-blue hover:underline" type="account" value={address}>
           {formatDisplayName(resolvedName, { noTruncateANSName: true })}
         </ExplorerLink>
       </span>
-      <div className="flex justify-between w-full mb-4 flex-wrap gap-x-2 mobile-sm:px-4 sm:px-0">
+      <div className="flex justify-between w-full mb-4 flex-wrap gap-x-2 px-4 md:px-0">
         <span className="pixel-heading-3b">
           {"Total value: "}
           {isLoading ? (
@@ -60,7 +62,7 @@ export const WalletClientPage = ({ address, name }: { address: string; name?: Va
           Unique owned: {isLoading ? "?" : ownedCoins.length}
         </span>
       </div>
-      <Tabs value={tab} onValueChange={(v) => setTab(v)}>
+      <Tabs value={tab} onValueChange={(v) => updateSearchParam({ tab: v })}>
         <TabsList>
           <TabsTrigger value="portfolio" endSlot={<Emoji emojis={emoji("money bag")} />}>
             Portfolio
