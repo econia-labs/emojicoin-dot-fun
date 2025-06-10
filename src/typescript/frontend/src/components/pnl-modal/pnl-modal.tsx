@@ -52,7 +52,7 @@ const ensureImageLoaded = async (element: HTMLDivElement) => {
   // Retry up to 3 times if blob is too small due to the image not properly loading.
   // `ensureImageLoaded` should work, theoretically, but it doesn't always do the trick.
   // Sometimes it does though, so that in combination with 3 attempts and sleeping in between
-  // make things much more reliable.
+  // makes the background image loading much more reliable.
   let i = 0;
   while (!blob || (blob.size < IMAGE_SIZE_ON_DISK && i < 3)) {
     if (i > 0) await sleep(25);
