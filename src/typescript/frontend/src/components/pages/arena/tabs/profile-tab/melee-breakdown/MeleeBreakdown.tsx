@@ -10,12 +10,15 @@ import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "@/components/FormattedNumber";
 import Info from "@/components/info";
 import { Loading } from "@/components/loading";
+import { PnlModal } from "@/components/pnl-modal/pnl-modal";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
+import usePnlModalStore from "@/store/pnl-modal/store";
 
 import { useTradingStats } from "../../../../../../hooks/use-trading-stats";
 import { FormattedNominalNumber } from "../../utils";
 import type { ProfileTabProps } from "../ProfileTab";
+import SharePopup from "./SharePopup";
 
 export const MeleeBreakdownInner = ({
   meleeID,
@@ -27,6 +30,7 @@ export const MeleeBreakdownInner = ({
   lastHeld,
   historyHidden,
   close,
+  lockedValue,
 }: {
   meleeID: bigint;
   lastVersion: bigint;
@@ -37,7 +41,10 @@ export const MeleeBreakdownInner = ({
   lastHeld: string;
   historyHidden: boolean;
   close: () => void;
+  // If the position is current, use the `lockedValue` instead of `endHolding` for the pnl modal.
+  lockedValue?: bigint;
 }) => {
+  const isPnlModalOpen = usePnlModalStore((s) => s.open);
   const smallCellClass = "flex flex-col gap-[.2em]";
   const smallCellTextClass = "uppercase text-light-gray text-1xl";
   const smallCellValueClass = "text-white font-forma text-2xl";
@@ -52,6 +59,15 @@ export const MeleeBreakdownInner = ({
         padding: historyHidden ? "2em 2em" : "0 2em",
       }}
     >
+      {isPnlModalOpen && (
+        <PnlModal
+          market={lastHeld}
+          deposits={deposit}
+          endHolding={endHolding}
+          pnl={pnl}
+          lockedValue={lockedValue}
+        />
+      )}
       <div
         className={`col-start-1 col-end-3 ${historyHidden ? "row-start-1" : ""} ${historyHidden ? "row-end-3" : ""} h-[100%] w-[100%] grid place-items-center`}
       >
@@ -93,11 +109,14 @@ export const MeleeBreakdownInner = ({
       </div>
       <div className={smallCellClass}>
         <div className={smallCellTextClass}>{"Pnl"}</div>
-        <FormattedNumber
-          className={smallCellValueClass + " " + ((pnl ?? 0) >= 0 ? "!text-green" : "!text-pink")}
-          value={pnl}
-          suffix="%"
-        />
+        <div className="flex gap-2 items-center">
+          <FormattedNumber
+            className={cn(pnl >= 0 ? "!text-green" : "!text-pink", "font-forma text-2xl")}
+            value={pnl}
+            suffix="%"
+          />
+          <SharePopup />
+        </div>
       </div>
       <div
         className="md:hidden absolute right-0 top-0 uppercase text-xl text-light-gray cursor-pointer"
@@ -117,7 +136,7 @@ export function CurrentMeleeBreakdown({
   close: () => void;
 }) {
   const { position } = useCurrentPosition();
-  const { pnl } = useTradingStats();
+  const { pnl, locked } = useTradingStats();
   const { market0, market1 } = useCurrentMeleeInfo();
   const marketLastHeld = useMemo(() => {
     if (!position || !market0 || !market1) return undefined;
@@ -139,6 +158,7 @@ export function CurrentMeleeBreakdown({
         pnl={pnl}
         lastHeld={marketLastHeld}
         close={close}
+        lockedValue={locked}
       />
     )
   );
@@ -165,6 +185,7 @@ export function HistoricMeleeBreakdown({
     .div(melee.losses.toString())
     .sub(100)
     .toNumber();
+
   return (
     <MeleeBreakdownInner
       meleeID={melee.meleeID}
