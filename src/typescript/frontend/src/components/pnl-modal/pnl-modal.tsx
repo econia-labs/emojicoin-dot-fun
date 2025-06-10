@@ -1,20 +1,20 @@
-import { toBlob, toJpeg, toPng } from "html-to-image";
+import { toBlob, toJpeg } from "html-to-image";
 import { cn } from "lib/utils/class-name";
+import NextImage from "next/image";
 import { useMemo, useRef } from "react";
 import { useWindowSize } from "react-use";
 import { GlowingEmoji } from "utils/emoji";
 
+import { sleep } from "@/sdk/index";
 import usePnlModalStore from "@/store/pnl-modal/store";
 
+import pnlBackground from "../../../public/images/pnl.jpeg";
 import Button from "../button";
 import { FormattedNumber } from "../FormattedNumber";
 import { BaseModal } from "../modal/BaseModal";
 import { AptDisplay } from "../pages/arena/tabs/enter-tab/summary/utils";
 import { FormattedNominalNumber } from "../pages/arena/tabs/utils";
 import LogoIcon from "../svg/icons/LogoIcon";
-import pnlBackground from "../../../public/images/pnl.jpeg";
-import NextImage from "next/image";
-import { sleep } from "@/sdk/index";
 
 interface Props {
   market: string;
