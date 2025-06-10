@@ -1,6 +1,7 @@
 import { toBlob, toJpeg } from "html-to-image";
 import { cn } from "lib/utils/class-name";
 import NextImage from "next/image";
+import type { StaticImageData } from "next/image";
 import { useMemo, useRef } from "react";
 import { useWindowSize } from "react-use";
 import { GlowingEmoji } from "utils/emoji";
@@ -8,13 +9,16 @@ import { GlowingEmoji } from "utils/emoji";
 import { sleep } from "@/sdk/index";
 import usePnlModalStore from "@/store/pnl-modal/store";
 
-import pnlBackground from "../../../public/images/pnl.jpeg";
+import bg from "../../../public/images/pnl.jpeg";
 import Button from "../button";
 import { FormattedNumber } from "../FormattedNumber";
 import { BaseModal } from "../modal/BaseModal";
 import { AptDisplay } from "../pages/arena/tabs/enter-tab/summary/utils";
 import { FormattedNominalNumber } from "../pages/arena/tabs/utils";
 import LogoIcon from "../svg/icons/LogoIcon";
+
+// Coerce the types so the `.d.ts` files play nicely with `pnpm run check:ci`.
+const pnlBackground = bg as unknown as StaticImageData;
 
 interface Props {
   market: string;
@@ -52,7 +56,7 @@ const ensureImageLoaded = async (element: HTMLDivElement) => {
   // Retry up to 3 times if blob is too small due to the image not properly loading.
   // `ensureImageLoaded` should work, theoretically, but it doesn't always do the trick.
   // Sometimes it does though, so that in combination with 3 attempts and sleeping in between
-  // makes the background image loading much more reliable.
+  // make things much more reliable.
   let i = 0;
   while (!blob || (blob.size < IMAGE_SIZE_ON_DISK && i < 3)) {
     if (i > 0) await sleep(25);
