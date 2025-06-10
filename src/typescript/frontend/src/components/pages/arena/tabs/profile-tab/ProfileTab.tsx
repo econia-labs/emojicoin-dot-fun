@@ -1,13 +1,17 @@
 import { FormattedNumber } from "components/FormattedNumber";
 import { useCurrentPosition } from "lib/hooks/positions/use-current-position";
 import { useHistoricalPositions } from "lib/hooks/positions/use-historical-positions";
+import { cn } from "lib/utils/class-name";
 import { useMemo, useState } from "react";
 
+import { PnlModal } from "@/components/pnl-modal/pnl-modal";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
+import usePnlModalStore from "@/store/pnl-modal/store";
 
 import { useTradingStats } from "../../../../../hooks/use-trading-stats";
 import { AnimatedLoadingBoxesWithFallback, FormattedNominalNumber } from "../utils";
 import { MeleeBreakdown } from "./melee-breakdown/MeleeBreakdown";
+import SharePopup from "./melee-breakdown/SharePopup";
 import { MeleeHistory } from "./melee-history/MeleeHistory";
 
 export type ProfileTabProps = {
@@ -22,13 +26,22 @@ const headerValueClass = "text-white text-3xl font-forma uppercase";
 const MeleeStatsHyphens = () => <div className={headerValueClass}>{"--"}</div>;
 
 const CurrentMeleeStats = () => {
-  const { isLoading } = useCurrentPosition();
+  const { position, isLoading } = useCurrentPosition();
   const { deposits, locked, pnl, pnlOctas } = useTradingStats();
+  const isPnlModalOpen = usePnlModalStore((s) => s.open);
 
   return (
     <div
       className={`border-b row-[1] col-[1/3] border-solid border-dark-gray text-ec-blue flex flex-wrap md:flex-nowrap p-[2em] gap-[2em]`}
     >
+      {isPnlModalOpen && position && pnl && (
+        <PnlModal
+          market={position.currentSymbol}
+          pnl={pnl}
+          deposits={deposits}
+          lockedValue={locked}
+        />
+      )}
       <div className={headerFlexColClass}>
         <div className={headerTitleClass}>{"Current deposits"}</div>
         {isLoading ? (
@@ -50,7 +63,10 @@ const CurrentMeleeStats = () => {
         )}
       </div>
       <div className={headerFlexColClass}>
-        <div className={headerTitleClass}>{"Pnl"}</div>
+        <div className={cn(headerTitleClass, "flex flex-row gap-1")}>
+          {"Pnl"}
+          <SharePopup className="my-auto scale-75" />
+        </div>
         {isLoading ? (
           <AnimatedLoadingBoxesWithFallback numSquares={4} fallback={<MeleeStatsHyphens />} />
         ) : pnl !== undefined && pnlOctas !== undefined ? (
