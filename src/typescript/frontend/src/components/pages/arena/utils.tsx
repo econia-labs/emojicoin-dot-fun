@@ -53,7 +53,6 @@ export const EmojiTitle = ({
 }) => {
   const { sm, md, lg, xl } = useTailwindBreakpoints();
   const { market0, market1 } = useCurrentMeleeInfo();
-
   const { emojis0, emojis1, baseFontSize } = useMemo(() => {
     const emojis0 = market0?.market.symbolEmojis ?? [];
     const emojis1 = market1?.market.symbolEmojis ?? [];
