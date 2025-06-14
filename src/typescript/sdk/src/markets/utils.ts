@@ -8,8 +8,10 @@ import {
   Hex,
   type HexInput,
   type InputGenerateTransactionOptions,
+  pairedFaMetadataAddress,
   parseTypeTag,
-  type TypeTag,
+  StructTag,
+  TypeTag,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
@@ -36,7 +38,9 @@ import {
   EmojicoinDotFun,
   getMarketAddress,
   MarketView,
+  PrimaryStoreAddress,
   REGISTRY_ADDRESS,
+  type TypeTagInput,
 } from "../emojicoin_dot_fun";
 import type { Flatten } from "../types";
 import type { JsonTypes } from "../types/json-types";
@@ -48,11 +52,11 @@ import {
   toRegistryResource,
 } from "../types/types";
 import { getAptosClient } from "../utils/aptos-client";
-import { toConfig } from "../utils/aptos-utils";
+import { getPrimaryFungibleStoreAddress, toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import { getResourceFromWriteSet } from "../utils/get-resource-from-writeset";
-import { STRUCT_STRINGS, TYPE_TAGS } from "../utils/type-tags";
-import type { AtLeastOne } from "../utils/utility-types";
+import { ensureTypeTagStruct, STRUCT_STRINGS, TYPE_TAGS } from "../utils/type-tags";
+import type { AtLeastOne, StrictXOR, XOR } from "../utils/utility-types";
 
 export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
@@ -77,6 +81,49 @@ export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
 export function toEmojicoinTypesForEntry(marketAddress: AccountAddressInput) {
   const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
   return [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
+}
+
+export function toEmojicoinPairedFAMetadataAddresses(marketAddress: AccountAddressInput) {
+  const { emojicoin, emojicoinLP } = toEmojicoinTypes(marketAddress);
+  if (!emojicoin.isStruct() || !emojicoinLP.isStruct()) {
+    throw new Error("Emojicoin and emojicoinLP should always be struct tags.");
+  }
+  return {
+    faEmojicoin: pairedFaMetadataAddress(emojicoin.toString()),
+    faEmojicoinLP: pairedFaMetadataAddress(emojicoinLP.toString()),
+  };
+}
+
+export function toEmojicoinPrimaryFungibleStores({
+  marketAddress,
+  ownerAddress,
+}: {
+  marketAddress: AccountAddressInput;
+  ownerAddress: AccountAddressInput;
+}) {
+  const { faEmojicoin, faEmojicoinLP } = toEmojicoinPairedFAMetadataAddresses(marketAddress);
+  return {
+    primaryStoreEmojicoin: getPrimaryFungibleStoreAddress({
+      ownerAddress,
+      metadataAddress: faEmojicoin,
+    }),
+    primaryStoreEmojicoinLP: getPrimaryFungibleStoreAddress({
+      ownerAddress,
+      metadataAddress: faEmojicoinLP,
+    }),
+  };
+}
+
+export async function fetchPrimaryStore({
+  user,
+  coinType,
+  metadataAddress,
+}: {
+  user: AccountAddressInput;
+} & XOR<{ coinType: TypeTagInput }, { metadataAddress: AccountAddressInput }>) {
+  const metadata =
+    metadataAddress ?? pairedFaMetadataAddress(ensureTypeTagStruct(coinType).toString());
+  return await PrimaryStoreAddress.view({ aptos: getAptosClient(), owner: user, metadata });
 }
 
 /**

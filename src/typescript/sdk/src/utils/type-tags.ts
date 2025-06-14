@@ -164,3 +164,9 @@ export const removeLeadingZerosFromStructString = (
 
   return `${shortenedAddress}::${moduleName.identifier}::${name.identifier}`;
 };
+
+export const ensureTypeTagStruct = (type: TypeTagInput): TypeTagStruct => {
+  const tag = parseTypeTag(type.toString());
+  if (!tag.isStruct()) throw new Error(`Expected a type tag struct, got: ${tag.toString()}`);
+  return tag;
+};

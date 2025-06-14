@@ -18,12 +18,20 @@ import {
 } from "@aptos-labs/ts-sdk";
 
 import { getAptosClient } from "../../utils/aptos-client";
-import type { TypeTagInput, Uint64String } from "..";
+import {
+  type AccountAddressString,
+  type MoveObject,
+  OBJECT_CORE_TYPE_TAG,
+  type ObjectAddress,
+  type TypeTagInput,
+  type Uint64String,
+} from "..";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
+import { toAccountAddressString } from "../../utils";
 
 export type MintPayloadMoveArguments = {
   dstAddr: AccountAddress;
@@ -414,5 +422,58 @@ export class Balance extends ViewFunctionPayloadBuilder<[Uint64String]> {
   }): Promise<Uint64String> {
     const [res] = await new Balance(args).view(args);
     return res;
+  }
+}
+
+export type PrimaryStoreAddressPayloadMoveArguments = {
+  owner: AccountAddress;
+  metadata: MoveObject;
+};
+
+/**
+ *```
+ *  #[view]
+ *  public fun primary_store_address<T: key>(
+ *     owner: address,
+ *     metadata: Object<T>,
+ *  ): address
+ *```
+ **/
+
+export class PrimaryStoreAddress extends ViewFunctionPayloadBuilder<[AccountAddressString]> {
+  public readonly moduleAddress = AccountAddress.ONE;
+
+  public readonly moduleName = "primary_fungible_store";
+
+  public readonly functionName = "primary_store_address";
+
+  public readonly args: PrimaryStoreAddressPayloadMoveArguments;
+
+  // typeTags: [TypeTagInput]; // [T: key], just use `0x1::object::ObjectCore`.
+  // The only reason to use anything else for the generic `Object<T>` type is to ensure `T`
+  // exists, but that's not the point of this view function.
+  public readonly typeTags: [TypeTag] = [OBJECT_CORE_TYPE_TAG];
+
+  constructor(args: {
+    owner: AccountAddressInput; // address
+    metadata: ObjectAddress; // Object<T>
+  }) {
+    super();
+    const { owner, metadata } = args;
+
+    this.args = {
+      owner: AccountAddress.from(owner),
+      metadata: AccountAddress.from(metadata),
+    };
+  }
+
+  static async view(args: {
+    aptos: Aptos | AptosConfig;
+    owner: AccountAddressInput; // address
+    metadata: ObjectAddress; // Object<T>
+    options?: LedgerVersionArg;
+  }): Promise<AccountAddressString> {
+    const [res] = await new PrimaryStoreAddress(args).view(args);
+    return toAccountAddressString(res);
   }
 }

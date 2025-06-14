@@ -17,14 +17,12 @@ describe("tests a simple faucet fund account request", () => {
     const previousBalance = await aptos.getAccountAPTAmount({
       accountAddress: account.accountAddress,
     });
-
     const fundResponse = await aptos.fundAccount({
       accountAddress: account.accountAddress,
       amount: ONE_APT,
     });
     const balance = await aptos.getAccountAPTAmount({
       accountAddress: account.accountAddress,
-      minimumLedgerVersion: Number(fundResponse.version) + 1,
     });
 
     expect(balance).toBe(ONE_APT * 2);

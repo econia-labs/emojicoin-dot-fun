@@ -68,7 +68,6 @@ describe("tests the swap functionality", () => {
     const realBalance = BigInt(
       await aptos.getAccountAPTAmount({
         accountAddress: registrant.accountAddress,
-        minimumLedgerVersion: Number(registerMarketResponse.version),
       })
     );
 
