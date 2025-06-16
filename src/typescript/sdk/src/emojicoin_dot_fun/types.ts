@@ -6,7 +6,7 @@ import type {
   TypeTag,
 } from "@aptos-labs/ts-sdk";
 
-import { ensureTypeTagStruct } from "../utils";
+import { ensureTypeTagStruct } from "../utils/type-tags";
 
 export type Option<T> = {
   vec: [T] | [];
@@ -54,5 +54,3 @@ export type AccountAuthenticatorWithData = {
   accountAddress: AccountAddress;
   accountAuthenticator: AccountAuthenticator;
 };
-
-export const OBJECT_CORE_TYPE_TAG = ensureTypeTagStruct("0x1::object::ObjectCore");

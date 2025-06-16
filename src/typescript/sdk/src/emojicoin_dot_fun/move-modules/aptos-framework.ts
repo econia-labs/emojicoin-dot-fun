@@ -17,21 +17,21 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
+import { toAccountAddressString } from "../../utils/account-address";
 import { getAptosClient } from "../../utils/aptos-client";
-import {
-  type AccountAddressString,
-  type MoveObject,
-  OBJECT_CORE_TYPE_TAG,
-  type ObjectAddress,
-  type TypeTagInput,
-  type Uint64String,
+import { OBJECT_CORE_TYPE_TAG } from "../../utils/type-tags";
+import type {
+  AccountAddressString,
+  MoveObject,
+  ObjectAddress,
+  TypeTagInput,
+  Uint64String,
 } from "..";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../payload-builders";
-import { toAccountAddressString } from "../../utils";
 
 export type MintPayloadMoveArguments = {
   dstAddr: AccountAddress;

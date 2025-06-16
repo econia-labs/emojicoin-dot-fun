@@ -1,19 +1,15 @@
-import {
-  type Account,
-  AccountAddress,
-  type AccountAddressInput,
-  type AnyNumber,
-  type Aptos,
-  type AptosConfig,
-  Hex,
-  type HexInput,
-  type InputGenerateTransactionOptions,
-  pairedFaMetadataAddress,
-  parseTypeTag,
-  StructTag,
+import type {
+  Account,
+  AccountAddressInput,
+  AnyNumber,
+  Aptos,
+  AptosConfig,
+  HexInput,
+  InputGenerateTransactionOptions,
   TypeTag,
-  type UserTransactionResponse,
+  UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
+import { AccountAddress, Hex, pairedFaMetadataAddress, parseTypeTag } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 
 import {
@@ -34,14 +30,9 @@ import {
   type SymbolEmoji,
   type SymbolEmojiData,
 } from "../emoji_data";
-import {
-  EmojicoinDotFun,
-  getMarketAddress,
-  MarketView,
-  PrimaryStoreAddress,
-  REGISTRY_ADDRESS,
-  type TypeTagInput,
-} from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, MarketView, PrimaryStoreAddress } from "../emojicoin_dot_fun";
+import type { TypeTagInput } from "../emojicoin_dot_fun/types";
+import { getMarketAddress, REGISTRY_ADDRESS } from "../emojicoin_dot_fun/utils";
 import type { Flatten } from "../types";
 import type { JsonTypes } from "../types/json-types";
 import type { AnyNumberString, Types } from "../types/types";
@@ -56,7 +47,7 @@ import { getPrimaryFungibleStoreAddress, toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import { getResourceFromWriteSet } from "../utils/get-resource-from-writeset";
 import { ensureTypeTagStruct, STRUCT_STRINGS, TYPE_TAGS } from "../utils/type-tags";
-import type { AtLeastOne, StrictXOR, XOR } from "../utils/utility-types";
+import type { AtLeastOne, XOR } from "../utils/utility-types";
 
 export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;

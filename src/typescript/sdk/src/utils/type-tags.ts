@@ -170,3 +170,5 @@ export const ensureTypeTagStruct = (type: TypeTagInput): TypeTagStruct => {
   if (!tag.isStruct()) throw new Error(`Expected a type tag struct, got: ${tag.toString()}`);
   return tag;
 };
+
+export const OBJECT_CORE_TYPE_TAG = ensureTypeTagStruct("0x1::object::ObjectCore");

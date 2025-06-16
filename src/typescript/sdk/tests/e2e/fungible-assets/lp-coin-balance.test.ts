@@ -7,17 +7,16 @@
 // - FA metadata address
 // - FA primary store address
 
-import { Account } from "@aptos-labs/ts-sdk";
-import { SymbolEmoji } from "../../../src";
+import type { Account } from "@aptos-labs/ts-sdk";
+
+import type { SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {
-  fetchMarkets,
-  fetchMarketState,
   fetchMarketStateByAddress,
   waitForEmojicoinIndexer,
 } from "../../../src/indexer-v2";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
-import { getFundedAccount, getFundedAccounts } from "../../utils/test-accounts";
+import { getFundedAccount } from "../../utils/test-accounts";
 
 jest.setTimeout(60000);
 
