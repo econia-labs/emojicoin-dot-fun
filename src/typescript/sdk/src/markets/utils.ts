@@ -30,7 +30,12 @@ import {
   type SymbolEmoji,
   type SymbolEmojiData,
 } from "../emoji_data";
-import { EmojicoinDotFun, MarketView, PrimaryStoreAddress } from "../emojicoin_dot_fun";
+import {
+  EmojicoinDotFun,
+  MarketView,
+  PrimaryStoreAddress,
+  StoreMetadata,
+} from "../emojicoin_dot_fun";
 import type { TypeTagInput } from "../emojicoin_dot_fun/types";
 import { getMarketAddress, REGISTRY_ADDRESS } from "../emojicoin_dot_fun/utils";
 import type { Flatten } from "../types";
@@ -49,11 +54,11 @@ import { getResourceFromWriteSet } from "../utils/get-resource-from-writeset";
 import { ensureTypeTagStruct, STRUCT_STRINGS, TYPE_TAGS } from "../utils/type-tags";
 import type { AtLeastOne, XOR } from "../utils/utility-types";
 
-export function toEmojicoinTypes(inputAddress: AccountAddressInput): {
+export function toEmojicoinTypes(marketAddressInput: AccountAddressInput): {
   emojicoin: TypeTag;
   emojicoinLP: TypeTag;
 } {
-  const marketAddress = AccountAddress.from(inputAddress);
+  const marketAddress = AccountAddress.from(marketAddressInput);
   const prefix = `${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}`;
 
   return {
@@ -103,6 +108,13 @@ export function toEmojicoinPrimaryFungibleStores({
       metadataAddress: faEmojicoinLP,
     }),
   };
+}
+
+/**
+ * This isn't for deriving the metadata address; it's for ensuring that it exists on-chain.
+ */
+export async function fetchFungibleAssetMetadata(storeObjectAddress: AccountAddressInput) {
+  return await StoreMetadata.view({ aptos: getAptosClient(), store: storeObjectAddress });
 }
 
 export async function fetchPrimaryStore({

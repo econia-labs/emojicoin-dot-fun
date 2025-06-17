@@ -162,7 +162,7 @@ export const removeLeadingZerosFromStructString = (
   const { address, moduleName, name } = typeTag.value;
   const shortenedAddress = removeLeadingZeros(address.toString());
 
-  return `${shortenedAddress}::${moduleName.identifier}::${name.identifier}`;
+  return `${shortenedAddress}::${moduleName.identifier}::${name.identifier}` as const;
 };
 
 export const ensureTypeTagStruct = (type: TypeTagInput): TypeTagStruct => {
