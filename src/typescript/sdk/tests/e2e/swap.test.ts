@@ -11,7 +11,7 @@ import {
 } from "../../src/markets/utils";
 import {
   getAptBalanceFromChanges,
-  getCoinBalanceFromChanges,
+  getBalanceFromWriteSetChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
 import { getPublishHelpers } from "../utils";
@@ -86,7 +86,7 @@ describe("tests the swap functionality", () => {
     const gasUsed = BigInt(swapResponse.gas_used) * BigInt(swapResponse.gas_unit_price);
 
     const newAptBalance = getAptBalanceFromChanges(swapResponse, registrant.accountAddress)!;
-    const emojicoinBalance = getCoinBalanceFromChanges({
+    const emojicoinBalance = getBalanceFromWriteSetChanges({
       response: swapResponse,
       userAddress: registrant.accountAddress,
       coinType: pooEmojicoin,
@@ -108,7 +108,7 @@ describe("tests the swap functionality", () => {
 
   it("successfully swap sells", async () => {
     const emojicoinBalanceBefore =
-      getCoinBalanceFromChanges({
+      getBalanceFromWriteSetChanges({
         response: registerMarketResponse,
         userAddress: registrant.accountAddress,
         coinType: pooEmojicoin,
@@ -122,7 +122,7 @@ describe("tests the swap functionality", () => {
     });
 
     expect(buySwapResponse.success).toBe(true);
-    const newEmojicoinBalance = getCoinBalanceFromChanges({
+    const newEmojicoinBalance = getBalanceFromWriteSetChanges({
       response: buySwapResponse,
       userAddress: registrant.accountAddress,
       coinType: pooEmojicoin,
@@ -138,7 +138,7 @@ describe("tests the swap functionality", () => {
 
     expect(sellSwapResponse.success).toBe(true);
     const finalAptBalance = getAptBalanceFromChanges(sellSwapResponse, registrant.accountAddress)!;
-    const finalEmojicoinBalance = getCoinBalanceFromChanges({
+    const finalEmojicoinBalance = getBalanceFromWriteSetChanges({
       response: sellSwapResponse,
       userAddress: registrant.accountAddress,
       coinType: pooEmojicoin,

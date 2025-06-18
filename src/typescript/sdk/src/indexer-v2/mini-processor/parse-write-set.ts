@@ -7,7 +7,7 @@ import {
   getEmojicoinMarketAddressAndTypeTags,
   getMarketResourceFromWriteSet,
 } from "../../markets/utils";
-import { getCoinBalanceFromChanges } from "../../utils/parse-changes-for-balances";
+import { getBalanceFromWriteSetChanges } from "../../utils/parse-changes-for-balances";
 
 export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransactionResponse) => {
   const events = getEvents(response);
@@ -63,5 +63,5 @@ export const getLPCoinBalanceFromWriteSet = ({
     symbolBytes,
   });
 
-  return getCoinBalanceFromChanges({ response, userAddress, coinType: emojicoinLP }) ?? 0n;
+  return getBalanceFromWriteSetChanges({ response, userAddress, coinType: emojicoinLP }) ?? 0n;
 };

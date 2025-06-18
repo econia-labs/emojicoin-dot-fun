@@ -6,8 +6,6 @@ import type {
   TypeTag,
 } from "@aptos-labs/ts-sdk";
 
-import { ensureTypeTagStruct } from "../utils/type-tags";
-
 export type Option<T> = {
   vec: [T] | [];
 };

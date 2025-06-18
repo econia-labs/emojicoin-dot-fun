@@ -18,7 +18,7 @@ import {
   ONE_APT,
 } from "../../src/const";
 import { calculateSwapNetProceeds, getMarketAddress } from "../../src/emojicoin_dot_fun";
-import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
+import { getBalanceFromWriteSetChanges } from "../../src/utils/parse-changes-for-balances";
 import { getPublishHelpers } from "../utils/helpers";
 import { getFundedAccounts } from "../utils/test-accounts";
 import { getExactTransitionInputAmount } from "./helpers/misc";
@@ -250,7 +250,7 @@ describe("tests the swap functionality", () => {
     });
     expect(transferRes.success).toBe(true);
 
-    const balance = getCoinBalanceFromChanges({
+    const balance = getBalanceFromWriteSetChanges({
       response: transferRes,
       userAddress: secondSwapper.accountAddress,
       coinType: emojicoinType,

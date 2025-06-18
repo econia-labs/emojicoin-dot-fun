@@ -19,7 +19,7 @@ import {
 
 import { toAccountAddressString } from "../../utils/account-address";
 import { getAptosClient } from "../../utils/aptos-client";
-import { OBJECT_CORE_TYPE_TAG } from "../../utils/type-tags";
+import { OBJECT_CORE_TYPE_TAG_STRUCT } from "../../utils/type-tags";
 import type {
   AccountAddressString,
   MoveObject,
@@ -453,7 +453,7 @@ export class PrimaryStoreAddress extends ViewFunctionPayloadBuilder<[AccountAddr
   // typeTags: [TypeTagInput]; // [T: key], just use `0x1::object::ObjectCore`.
   // The only reason to use anything else for the generic `Object<T>` type is to ensure `T`
   // exists, but that's not the point of this view function.
-  public readonly typeTags: [TypeTag] = [OBJECT_CORE_TYPE_TAG];
+  public readonly typeTags: [TypeTag] = [OBJECT_CORE_TYPE_TAG_STRUCT];
 
   constructor(args: {
     owner: AccountAddressInput; // address
@@ -681,7 +681,7 @@ export class StoreMetadata extends ViewFunctionPayloadBuilder<[ObjectAddressStru
   public readonly args: StoreMetadataPayloadMoveArguments;
 
   // Same explanation as the `typeTags` in `PrimaryStoreAddress` above.
-  public readonly typeTags: [TypeTag] = [OBJECT_CORE_TYPE_TAG];
+  public readonly typeTags: [TypeTag] = [OBJECT_CORE_TYPE_TAG_STRUCT];
 
   constructor(args: {
     store: ObjectAddress; // Object<T>

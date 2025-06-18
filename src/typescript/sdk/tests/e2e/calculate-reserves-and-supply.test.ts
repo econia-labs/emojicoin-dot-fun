@@ -14,7 +14,7 @@ import { EMOJICOIN_REMAINDER, EMOJICOIN_SUPPLY, ONE_APT_BIGINT } from "../../src
 import { getMarketAddress } from "../../src/emojicoin_dot_fun";
 import type { SwapEventModel } from "../../src/indexer-v2/types";
 import { isInBondingCurve } from "../../src/utils/bonding-curve";
-import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
+import { getBalanceFromWriteSetChanges } from "../../src/utils/parse-changes-for-balances";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../utils/helpers";
 import { getFundedAccounts } from "../utils/test-accounts";
 
@@ -53,7 +53,7 @@ describe("tests the calculation functions for circulating supply and real reserv
         const circulatingSupplyFromTxnResponse = calculateCirculatingSupply(swap.model.state);
         expect(circulatingSupplyFromFetch).toBeDefined();
         expect(circulatingSupplyFromFetch).toEqual(circulatingSupplyFromTxnResponse);
-        const balance = getCoinBalanceFromChanges({ response, userAddress, coinType });
+        const balance = getBalanceFromWriteSetChanges({ response, userAddress, coinType });
         expect(balance).toBeDefined();
         return {
           supplyAfterBuy: circulatingSupplyFromFetch!,
@@ -69,7 +69,7 @@ describe("tests the calculation functions for circulating supply and real reserv
       const circulatingSupplyFromTxnResponse = calculateCirculatingSupply(swap.model.state);
       expect(circulatingSupplyFromFetch).toBeDefined();
       expect(circulatingSupplyFromFetch).toEqual(circulatingSupplyFromTxnResponse);
-      const newBalance = getCoinBalanceFromChanges({
+      const newBalance = getBalanceFromWriteSetChanges({
         response,
         userAddress: swapper.accountAddress,
         coinType,
@@ -123,7 +123,7 @@ describe("tests the calculation functions for circulating supply and real reserv
             // The quote reserves are equal to the amount of APT the user just exchanged for base.
             expect(quote).toEqual(EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT);
             expect(isInBondingCurve(swap.model.state)).toBe(false);
-            const userBalance = getCoinBalanceFromChanges({ response, userAddress, coinType })!;
+            const userBalance = getBalanceFromWriteSetChanges({ response, userAddress, coinType })!;
             expect(userBalance).toBeDefined();
             expect(userBalance).toEqual(swap.model.swap.netProceeds);
             expect(EMOJICOIN_SUPPLY).toEqual(base + userBalance);
@@ -166,7 +166,7 @@ describe("tests the calculation functions for circulating supply and real reserv
         expect(realReservesFromFetch).toBeDefined();
         expect(realReservesFromFetch).toEqual(realReservesFromTxnResponse);
         const { base, quote } = realReservesFromFetch!;
-        const balance = getCoinBalanceFromChanges({ response, userAddress, coinType })!;
+        const balance = getBalanceFromWriteSetChanges({ response, userAddress, coinType })!;
         expect(balance).toBeDefined();
         // The base reserves are just the total emojicoin supply minus what the user just received.
         expect(base).toEqual(EMOJICOIN_SUPPLY - balance);
@@ -218,7 +218,7 @@ describe("tests the calculation functions for circulating supply and real reserv
       const realReserves = calculateRealReserves(swap.state);
       const circulatingSupply = calculateCirculatingSupply(swap.state);
       expect(realReserves.base).toEqual(EMOJICOIN_SUPPLY - circulatingSupply);
-      const userBalance = getCoinBalanceFromChanges({ response, userAddress, coinType });
+      const userBalance = getBalanceFromWriteSetChanges({ response, userAddress, coinType });
       expect(userBalance).toEqual(circulatingSupply);
     };
 
