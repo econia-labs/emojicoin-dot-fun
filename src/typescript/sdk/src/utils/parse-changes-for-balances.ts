@@ -37,7 +37,7 @@ export const toCoinTypeString = (type: TypeTagInput) =>
 export const toCoinStoreString = (type: TypeTagInput) =>
   `0x1::coin::CoinStore<${toCoinTypeString(type)}>` as CoinStoreString;
 
-const isACoinStoreWriteResource = (
+export const isACoinStoreWriteResource = (
   change: WriteSetChangeWriteResource
 ): change is JsonTypes["CoinStoreWriteSetChange"] => {
   const resourceType = parseTypeTag(change.data.type);
@@ -47,11 +47,11 @@ const isACoinStoreWriteResource = (
   );
 };
 
-const isAPrimaryStoreWriteResource = (
+export const isAPrimaryStoreWriteResource = (
   change: WriteSetChangeWriteResource
 ): change is JsonTypes["FungibleStoreWriteSetChange"] => {
   const resourceType = parseTypeTag(change.data.type).toString();
-  return resourceType !== FUNGIBLE_STORE_TYPE_TAG_STRUCT.toString();
+  return resourceType === FUNGIBLE_STORE_TYPE_TAG_STRUCT.toString();
 };
 
 const maybeGetUserCoinStore = ({
@@ -132,7 +132,7 @@ export const getBalanceFromWriteSetChanges = ({
   return coinStore?.coin.value;
 };
 
-export const parseWriteSetForAPTBalance = (
+export const getAptBalanceFromWriteSetChanges = (
   response: UserTransactionResponse,
   userAddress: AccountAddressInput
 ) =>

@@ -52,15 +52,6 @@ describe("tests to derive emojicoin fungible asset primary store and metadata ad
     );
     expect(metadataFromLeading.toString()).toEqual(expected.toString());
     expect(metadata.toString()).toEqual(expected.toString());
-
-    console.warn({
-      ownerAddress: "0x0834d715bdc485e371fd2e9fdb185dde0b801e924d327297cacd1972a7dee083",
-      metadataAddress: metadata,
-      primaryStoreAddress: getPrimaryFungibleStoreAddress({
-        ownerAddress: "0x0834d715bdc485e371fd2e9fdb185dde0b801e924d327297cacd1972a7dee083",
-        metadataAddress: metadata,
-      }).toString(),
-    });
   });
 
   it("derives the primary fungible store address correctly for an address WITH a leading zero", () => {

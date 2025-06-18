@@ -10,7 +10,7 @@ import {
   isRegistrationGracePeriodOver,
 } from "../../src/markets/utils";
 import {
-  getAptBalanceFromChanges,
+  getAptBalanceFromWriteSetChanges,
   getBalanceFromWriteSetChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
@@ -60,7 +60,7 @@ describe("tests the swap functionality", () => {
   });
 
   it("successfully swap buys, checks APT balance", async () => {
-    const aptBalanceBefore = getAptBalanceFromChanges(
+    const aptBalanceBefore = getAptBalanceFromWriteSetChanges(
       registerMarketResponse,
       registrant.accountAddress
     )!;
@@ -85,7 +85,7 @@ describe("tests the swap functionality", () => {
     expect(success).toBe(true);
     const gasUsed = BigInt(swapResponse.gas_used) * BigInt(swapResponse.gas_unit_price);
 
-    const newAptBalance = getAptBalanceFromChanges(swapResponse, registrant.accountAddress)!;
+    const newAptBalance = getAptBalanceFromWriteSetChanges(swapResponse, registrant.accountAddress)!;
     const emojicoinBalance = getBalanceFromWriteSetChanges({
       response: swapResponse,
       userAddress: registrant.accountAddress,
@@ -137,7 +137,7 @@ describe("tests the swap functionality", () => {
     });
 
     expect(sellSwapResponse.success).toBe(true);
-    const finalAptBalance = getAptBalanceFromChanges(sellSwapResponse, registrant.accountAddress)!;
+    const finalAptBalance = getAptBalanceFromWriteSetChanges(sellSwapResponse, registrant.accountAddress)!;
     const finalEmojicoinBalance = getBalanceFromWriteSetChanges({
       response: sellSwapResponse,
       userAddress: registrant.accountAddress,
