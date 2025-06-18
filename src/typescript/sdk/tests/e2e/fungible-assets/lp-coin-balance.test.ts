@@ -176,33 +176,33 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
     }
   }
 
-    it("provide liquidity", async () => {
-      const testIdx = 0;
-      const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
-      const res = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
-      await waitForEmojicoinIndexer(res.response.version);
+  it("provide liquidity", async () => {
+    const testIdx = 0;
+    const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
+    const res = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
+    await waitForEmojicoinIndexer(res.response.version);
 
-      const { liquidity } = res.liquidity.model;
-      expect(liquidity.quoteAmount).toEqual(ONE_APT_BIGINT);
-      expect(liquidity.lpCoinAmount).not.toEqual(liquidity.quoteAmount); // Avoid false positives.
+    const { liquidity } = res.liquidity.model;
+    expect(liquidity.quoteAmount).toEqual(ONE_APT_BIGINT);
+    expect(liquidity.lpCoinAmount).not.toEqual(liquidity.quoteAmount); // Avoid false positives.
 
-      // The user has no previous LP coin, so the change in the emitted event is their new balance.
-      await fetchAndCheckLPBalance(registrant, symbol, liquidity.lpCoinAmount, res.response);
-    });
+    // The user has no previous LP coin, so the change in the emitted event is their new balance.
+    await fetchAndCheckLPBalance(registrant, symbol, liquidity.lpCoinAmount, res.response);
+  });
 
-    it("remove liquidity", async () => {
-      const testIdx = 1;
-      const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
-      const provideRes = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
-      const { liquidity } = provideRes.liquidity.model;
-      const lpAmountToRemove = liquidity.lpCoinAmount / 3n;
-      const lpBalanceRemaining = liquidity.lpCoinAmount - lpAmountToRemove;
-      expect(lpAmountToRemove + lpBalanceRemaining).toEqual(liquidity.lpCoinAmount);
-      const removeRes = await emojicoin.liquidity.remove(registrant, symbol, lpAmountToRemove);
+  it("remove liquidity", async () => {
+    const testIdx = 1;
+    const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
+    const provideRes = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
+    const { liquidity } = provideRes.liquidity.model;
+    const lpAmountToRemove = liquidity.lpCoinAmount / 3n;
+    const lpBalanceRemaining = liquidity.lpCoinAmount - lpAmountToRemove;
+    expect(lpAmountToRemove + lpBalanceRemaining).toEqual(liquidity.lpCoinAmount);
+    const removeRes = await emojicoin.liquidity.remove(registrant, symbol, lpAmountToRemove);
 
-      expect(removeRes.liquidity.model.liquidity.lpCoinAmount).toEqual(lpAmountToRemove);
-      await fetchAndCheckLPBalance(registrant, symbol, lpBalanceRemaining, removeRes.response);
-    });
+    expect(removeRes.liquidity.model.liquidity.lpCoinAmount).toEqual(lpAmountToRemove);
+    await fetchAndCheckLPBalance(registrant, symbol, lpBalanceRemaining, removeRes.response);
+  });
 
   it("properly records the final lp coin balance, not the delta", async () => {
     // Register like the simple provide liquidity event test above.

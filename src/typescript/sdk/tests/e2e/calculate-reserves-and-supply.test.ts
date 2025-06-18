@@ -123,7 +123,11 @@ describe("tests the calculation functions for circulating supply and real reserv
             // The quote reserves are equal to the amount of APT the user just exchanged for base.
             expect(quote).toEqual(EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT);
             expect(isInBondingCurve(swap.model.state)).toBe(false);
-            const userBalance = getBalanceFromWriteSetChanges({ response, ownerAddress, coinType })!;
+            const userBalance = getBalanceFromWriteSetChanges({
+              response,
+              ownerAddress,
+              coinType,
+            })!;
             expect(userBalance).toBeDefined();
             expect(userBalance).toEqual(swap.model.swap.netProceeds);
             expect(EMOJICOIN_SUPPLY).toEqual(base + userBalance);

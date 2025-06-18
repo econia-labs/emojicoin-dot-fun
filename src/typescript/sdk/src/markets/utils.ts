@@ -97,7 +97,8 @@ export function toEmojicoinPrimaryFungibleStores({
   marketAddress: AccountAddressInput;
   ownerAddress: AccountAddressInput;
 }) {
-  const { faEmojicoinMetadata, faEmojicoinLPMetadata } = toEmojicoinPairedFAMetadataAddresses(marketAddress);
+  const { faEmojicoinMetadata, faEmojicoinLPMetadata } =
+    toEmojicoinPairedFAMetadataAddresses(marketAddress);
   return {
     primaryStoreEmojicoin: getPrimaryFungibleStoreAddress({
       ownerAddress,

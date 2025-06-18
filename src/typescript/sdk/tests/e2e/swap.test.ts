@@ -85,7 +85,10 @@ describe("tests the swap functionality", () => {
     expect(success).toBe(true);
     const gasUsed = BigInt(swapResponse.gas_used) * BigInt(swapResponse.gas_unit_price);
 
-    const newAptBalance = getAptBalanceFromWriteSetChanges(swapResponse, registrant.accountAddress)!;
+    const newAptBalance = getAptBalanceFromWriteSetChanges(
+      swapResponse,
+      registrant.accountAddress
+    )!;
     const emojicoinBalance = getBalanceFromWriteSetChanges({
       response: swapResponse,
       ownerAddress: registrant.accountAddress,
@@ -137,7 +140,10 @@ describe("tests the swap functionality", () => {
     });
 
     expect(sellSwapResponse.success).toBe(true);
-    const finalAptBalance = getAptBalanceFromWriteSetChanges(sellSwapResponse, registrant.accountAddress)!;
+    const finalAptBalance = getAptBalanceFromWriteSetChanges(
+      sellSwapResponse,
+      registrant.accountAddress
+    )!;
     const finalEmojicoinBalance = getBalanceFromWriteSetChanges({
       response: sellSwapResponse,
       ownerAddress: registrant.accountAddress,
