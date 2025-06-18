@@ -1,6 +1,7 @@
+// cspell:word kolorist
 // cspell:word funder
 
-import type { AccountAddressInput } from "@aptos-labs/ts-sdk";
+import type { AccountAddressInput, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   Account,
   AccountAddress,
@@ -9,21 +10,28 @@ import {
   PrivateKey,
   PrivateKeyVariants,
 } from "@aptos-labs/ts-sdk";
+import { lightBlue, yellow } from "kolorist";
 
-import type { AnyNumberString, SymbolEmoji } from "../../../src";
+import type { SymbolEmoji } from "../../../src";
 import {
   APTOS_COIN_TYPE_STRING,
   ensureTypeTagStruct,
   fetchFungibleAssetMetadata,
   fetchPrimaryStore,
+  findMap,
+  getBalanceFromWriteSetChanges,
   getMarketAddress,
   getPrimaryFungibleStoreAddress,
+  isWriteSetChangeWriteResource,
   maxBigInt,
+  maybeGetMatchingPrimaryStore,
+  maybeGetUserCoinStore,
   MigrateToFungibleStore,
   ONE_APT,
   ONE_APT_BIGINT,
   toAccountAddress,
   toEmojicoinPairedFAMetadataAddresses,
+  toEmojicoinPrimaryFungibleStores,
   toEmojicoinTypes,
   TransferCoins,
   zip,
@@ -36,7 +44,6 @@ import { getFundedAccount, getFundedAccounts } from "../../utils/test-accounts";
 jest.setTimeout(60000);
 
 describe("tests to ensure the emojicoin indexer properly records emojicoin lp coin balances", () => {
-  // For the first couple basic tests.
   const registrants = getFundedAccounts("088", "089", "090", "091", "092", "093");
   const funderForRandomDerivedAccount = getFundedAccount("094");
   const marketSymbols: SymbolEmoji[][] = [["🧝"], ["🧝🏿"], ["🧝🏻"], ["🧝🏽"], ["🧝🏾"], ["🧝🏼"]];
@@ -60,14 +67,13 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
 
   const getLPMetadataAddress = (marketSymbol: SymbolEmoji[]) => {
     const { marketAddress } = emojicoin.utils.getEmojicoinInfo(marketSymbol);
-    const { faEmojicoinLP } = toEmojicoinPairedFAMetadataAddresses(marketAddress);
-    return faEmojicoinLP;
+    const { faEmojicoinLPMetadata } = toEmojicoinPairedFAMetadataAddresses(marketAddress);
+    return faEmojicoinLPMetadata;
   };
 
   const fetchLPCoinBalanceFromGraphQLIndexer = async (
     accountOrAddress: Account | AccountAddressInput,
-    marketSymbol: SymbolEmoji[],
-    waitForVersion: AnyNumberString
+    marketSymbol: SymbolEmoji[]
   ) => {
     const { marketAddress } = emojicoin.utils.getEmojicoinInfo(marketSymbol);
     const { emojicoinLP } = toEmojicoinTypes(marketAddress);
@@ -77,7 +83,6 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
       .getAccountCoinAmount({
         accountAddress: toAccountAddress(accountOrAddress),
         coinType,
-        minimumLedgerVersion: BigInt(waitForVersion),
       })
       .then(BigInt);
   };
@@ -92,16 +97,20 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
     return true;
   });
 
-  const fetchAndCheckExpectedBalances = async (
+  const fetchAndCheckLPBalance = async (
     accountOrAddress: Account | AccountAddressInput,
     marketSymbol: SymbolEmoji[],
     expectedBalance: bigint | "only_check_indexers",
-    waitForVersion: AnyNumberString
+    response: UserTransactionResponse
   ) => {
+    await waitForEmojicoinIndexer(response.version);
+
     const accountAddress = toAccountAddress(accountOrAddress);
     const pools = await fetchUserLiquidityPools({ provider: accountAddress });
     expect(pools).toHaveLength(1);
     const [poolIndexerData] = pools;
+
+    expect(poolIndexerData.transaction.version).toEqual(BigInt(response.version));
 
     if (expectedBalance !== "only_check_indexers") {
       expect(poolIndexerData.lpCoinBalance).toEqual(expectedBalance);
@@ -110,45 +119,90 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
     // Double check against the GraphQL indexer as a sanity check.
     const lpBalanceFromGraphQL = await fetchLPCoinBalanceFromGraphQLIndexer(
       accountAddress,
-      marketSymbol,
-      waitForVersion
+      marketSymbol
     );
     expect(lpBalanceFromGraphQL).toEqual(poolIndexerData.lpCoinBalance);
+
+    // As a sanity check, also parse/check the balances in the write sets.
+    parseAndCheckLPBalanceFromWriteSets(
+      accountAddress,
+      marketSymbol,
+      poolIndexerData.lpCoinBalance,
+      response
+    );
   };
 
-  it("works with a provide liquidity event", async () => {
-    const testIdx = 0;
-    const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
-    const res = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
-    await waitForEmojicoinIndexer(res.response.version);
+  function parseAndCheckLPBalanceFromWriteSets(
+    accountOrAddress: Account | AccountAddressInput,
+    marketSymbol: SymbolEmoji[],
+    expectedBalance: bigint,
+    response: UserTransactionResponse
+  ) {
+    const ownerAddress = toAccountAddress(accountOrAddress);
+    const marketAddress = getMarketAddress(marketSymbol);
+    const { emojicoinLP } = toEmojicoinTypes(marketAddress);
+    const coinType = emojicoinLP;
 
-    const { liquidity } = res.liquidity.model;
-    expect(liquidity.quoteAmount).toEqual(ONE_APT_BIGINT);
-    expect(liquidity.lpCoinAmount).not.toEqual(liquidity.quoteAmount); // Avoid false positives.
+    // Ensure the main coin parsing utility function works.
+    const parsedBalance = getBalanceFromWriteSetChanges({ response, coinType, ownerAddress });
+    expect(parsedBalance).toBeDefined();
+    expect(parsedBalance).toEqual(expectedBalance);
 
-    // The LP coin balance prior should be zero, so the amount emitted in the event should
-    // be the new balance.
-    const lpBalanceDelta = liquidity.lpCoinAmount;
-    await fetchAndCheckExpectedBalances(registrant, symbol, lpBalanceDelta, res.response.version);
-  });
-
-  it("works with a remove liquidity event", async () => {
-    const testIdx = 1;
-    const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
-    const res = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
-    const { liquidity } = res.liquidity.model;
-    const lpAmountToRemove = liquidity.lpCoinAmount / 3n;
-    const lpBalanceRemaining = liquidity.lpCoinAmount - lpAmountToRemove;
-    expect(lpAmountToRemove + lpBalanceRemaining).toEqual(liquidity.lpCoinAmount);
-    const removeRes = await emojicoin.liquidity.remove(registrant, symbol, lpAmountToRemove);
-    expect(removeRes.liquidity.model.liquidity.lpCoinAmount).toEqual(lpAmountToRemove);
-    await fetchAndCheckExpectedBalances(
-      registrant,
-      symbol,
-      lpBalanceRemaining,
-      res.response.version
+    // Then, manually find the stores, and ensure the expected one has the balance.
+    // That is, ensure that the balance parser found the balance with the expected store type.
+    // Note that this is mostly copied from the balance getter function.
+    const writeResources = response.changes.filter(isWriteSetChangeWriteResource);
+    const { faEmojicoinLPMetadata: metadataAddress } =
+      toEmojicoinPairedFAMetadataAddresses(marketAddress);
+    const { primaryStoreEmojicoinLP: primaryStoreAddress } = toEmojicoinPrimaryFungibleStores({
+      marketAddress,
+      ownerAddress,
+    });
+    const primaryStore = findMap(writeResources, (change) =>
+      maybeGetMatchingPrimaryStore({ change, metadataAddress, primaryStoreAddress })
     );
-  });
+    const coinStore = findMap(writeResources, (change) =>
+      maybeGetUserCoinStore({ change, ownerAddress, coinType })
+    );
+
+    // By default, the primary store will be used, unless an old version of the Aptos CLI is used.
+    // When this is the case, it's prudent to log it to the console to indicate that the store that
+    // was found was a coin store, not a primary store.
+    if (coinStore) {
+      console.warn(lightBlue("[INFO]:"), yellow("Found user's balance in a coin store!"));
+      expect(primaryStore).toBeUndefined();
+    } else {
+      expect(coinStore).toBeUndefined();
+    }
+  }
+
+    it("provide liquidity", async () => {
+      const testIdx = 0;
+      const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
+      const res = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
+      await waitForEmojicoinIndexer(res.response.version);
+
+      const { liquidity } = res.liquidity.model;
+      expect(liquidity.quoteAmount).toEqual(ONE_APT_BIGINT);
+      expect(liquidity.lpCoinAmount).not.toEqual(liquidity.quoteAmount); // Avoid false positives.
+
+      // The user has no previous LP coin, so the change in the emitted event is their new balance.
+      await fetchAndCheckLPBalance(registrant, symbol, liquidity.lpCoinAmount, res.response);
+    });
+
+    it("remove liquidity", async () => {
+      const testIdx = 1;
+      const [registrant, symbol] = [registrants[testIdx], marketSymbols[testIdx]];
+      const provideRes = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT);
+      const { liquidity } = provideRes.liquidity.model;
+      const lpAmountToRemove = liquidity.lpCoinAmount / 3n;
+      const lpBalanceRemaining = liquidity.lpCoinAmount - lpAmountToRemove;
+      expect(lpAmountToRemove + lpBalanceRemaining).toEqual(liquidity.lpCoinAmount);
+      const removeRes = await emojicoin.liquidity.remove(registrant, symbol, lpAmountToRemove);
+
+      expect(removeRes.liquidity.model.liquidity.lpCoinAmount).toEqual(lpAmountToRemove);
+      await fetchAndCheckLPBalance(registrant, symbol, lpBalanceRemaining, removeRes.response);
+    });
 
   it("properly records the final lp coin balance, not the delta", async () => {
     // Register like the simple provide liquidity event test above.
@@ -170,7 +224,7 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
     expect(transferAmount + lpBalanceAfterTransfer).toEqual(liquidity.lpCoinAmount);
 
     // Now transfer the LP coin.
-    const transferRes = await aptos.fungibleAsset
+    await aptos.fungibleAsset
       .transferFungibleAsset({
         sender: registrant,
         fungibleAssetMetadataAddress: getLPMetadataAddress(symbol),
@@ -186,35 +240,14 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
         return res;
       });
 
-    console.dir(transferRes, { depth: null });
-
-    console.warn("balance here:", lpBalanceAfterTransfer);
-    console.warn(
-      "balance from graphql:",
-      await fetchLPCoinBalanceFromGraphQLIndexer(registrant, symbol, transferRes.version)
-    );
-
     // Now provide more liquidity to get more LP coin.
-    const provide2 = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT / 10);
+    const provide2 = await emojicoin.liquidity.provide(registrant, symbol, ONE_APT / 5);
     const additionalAmount = provide2.liquidity.model.liquidity.lpCoinAmount;
     expect(additionalAmount).not.toEqual(transferAmount); // Avoid false positives.
 
-    console.warn("balance here:", lpBalanceAfterTransfer + additionalAmount);
-    console.warn(
-      "balance from graphql:",
-      await fetchLPCoinBalanceFromGraphQLIndexer(registrant, symbol, provide2.response.version)
-    );
-
     const expectedFinalBalance = lpBalanceAfterTransfer + additionalAmount;
-    await fetchAndCheckExpectedBalances(
-      registrant,
-      symbol,
-      expectedFinalBalance,
-      provide2.response.version
-    );
+    await fetchAndCheckLPBalance(registrant, symbol, expectedFinalBalance, provide2.response);
   });
-
-  it("works with a market address that has a leading zero", () => {});
 
   it("gets the primary store correctly, verified by fetching on-chain", async () => {
     const testIdx = 3;
@@ -248,7 +281,7 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
       marketAddress: "0x0321cb335a38022848c39372c7b3894e41c39c57aac613ac240824081a644630",
       // Note that the `emojicoinLP` coin store was used here, not the `emojicoin` store.
       metadataAddress: "0x01e8cdb38d8ddd7263aa019daa1ed57f591a5afa81d80b7764865c1b035b433c",
-      userAddress: "0x029665e58596cb0b1e7e1efb033d4371505aa26ee3a47c21ae4462098207d6c0",
+      ownerAddress: "0x029665e58596cb0b1e7e1efb033d4371505aa26ee3a47c21ae4462098207d6c0",
       primaryStore: "0x0be8f6131ed4c8b8417eee3b5cf3f87012649b626451f01dd3d6c377a33753ea",
     } as const;
 
@@ -263,7 +296,7 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
     const { emojicoinLP } = toEmojicoinTypes(expected.marketAddress);
     const coinType = ensureTypeTagStruct(emojicoinLP).toString();
 
-    expect(user.accountAddress.toStringLong()).toEqual(expected.userAddress);
+    expect(user.accountAddress.toStringLong()).toEqual(expected.ownerAddress);
     expect(getMarketAddress(symbol).toStringLong()).toEqual(expected.marketAddress);
     expect(pairedFaMetadataAddress(coinType).toStringLong()).toEqual(expected.metadataAddress);
     expect(
@@ -287,6 +320,7 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
     });
 
     const version = await buyPastBondingCurveAndCheck(user, symbol);
+
     await waitForEmojicoinIndexer(version);
 
     await MigrateToFungibleStore.submit({
@@ -308,11 +342,6 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
     const res = await emojicoin.liquidity.provide(user, symbol, ONE_APT / 10);
     await waitForEmojicoinIndexer(res.response.version);
 
-    await fetchAndCheckExpectedBalances(
-      user.accountAddress,
-      symbol,
-      "only_check_indexers",
-      res.response.version
-    );
+    await fetchAndCheckLPBalance(user.accountAddress, symbol, "only_check_indexers", res.response);
   });
 });
