@@ -85,8 +85,8 @@ export function toEmojicoinPairedFAMetadataAddresses(marketAddress: AccountAddre
     throw new Error("Emojicoin and emojicoinLP should always be struct tags.");
   }
   return {
-    faEmojicoin: pairedFaMetadataAddress(emojicoin.toString()),
-    faEmojicoinLP: pairedFaMetadataAddress(emojicoinLP.toString()),
+    faEmojicoinMetadata: pairedFaMetadataAddress(emojicoin.toString()),
+    faEmojicoinLPMetadata: pairedFaMetadataAddress(emojicoinLP.toString()),
   };
 }
 
@@ -97,15 +97,15 @@ export function toEmojicoinPrimaryFungibleStores({
   marketAddress: AccountAddressInput;
   ownerAddress: AccountAddressInput;
 }) {
-  const { faEmojicoin, faEmojicoinLP } = toEmojicoinPairedFAMetadataAddresses(marketAddress);
+  const { faEmojicoinMetadata, faEmojicoinLPMetadata } = toEmojicoinPairedFAMetadataAddresses(marketAddress);
   return {
     primaryStoreEmojicoin: getPrimaryFungibleStoreAddress({
       ownerAddress,
-      metadataAddress: faEmojicoin,
+      metadataAddress: faEmojicoinMetadata,
     }),
     primaryStoreEmojicoinLP: getPrimaryFungibleStoreAddress({
       ownerAddress,
-      metadataAddress: faEmojicoinLP,
+      metadataAddress: faEmojicoinLPMetadata,
     }),
   };
 }

@@ -129,12 +129,12 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
         expect(normalizedVariance.lte(1 - accuracy)).toBe(true);
         const apt = getBalanceFromWriteSetChanges({
           response,
-          userAddress: registrant.accountAddress,
+          ownerAddress: registrant.accountAddress,
           coinType: APTOS_COIN_TYPE_STRING,
         })!;
         const emoji = getBalanceFromWriteSetChanges({
           response,
-          userAddress: registrant.accountAddress,
+          ownerAddress: registrant.accountAddress,
           coinType: coinTypes.emojicoin,
         })!;
         expect(apt).toBeDefined();

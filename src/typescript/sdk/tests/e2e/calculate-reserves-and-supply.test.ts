@@ -41,7 +41,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     const buyAmount = ONE_APT_BIGINT;
     const coinAddress = getMarketAddress(symbolEmojis);
     const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
-    const userAddress = swapper.accountAddress;
+    const ownerAddress = swapper.accountAddress;
 
     const { supplyAfterBuy, userBalance } = await emojicoin
       .buy(swapper, symbolEmojis, buyAmount)
@@ -53,7 +53,7 @@ describe("tests the calculation functions for circulating supply and real reserv
         const circulatingSupplyFromTxnResponse = calculateCirculatingSupply(swap.model.state);
         expect(circulatingSupplyFromFetch).toBeDefined();
         expect(circulatingSupplyFromFetch).toEqual(circulatingSupplyFromTxnResponse);
-        const balance = getBalanceFromWriteSetChanges({ response, userAddress, coinType });
+        const balance = getBalanceFromWriteSetChanges({ response, ownerAddress, coinType });
         expect(balance).toBeDefined();
         return {
           supplyAfterBuy: circulatingSupplyFromFetch!,
@@ -71,7 +71,7 @@ describe("tests the calculation functions for circulating supply and real reserv
       expect(circulatingSupplyFromFetch).toEqual(circulatingSupplyFromTxnResponse);
       const newBalance = getBalanceFromWriteSetChanges({
         response,
-        userAddress: swapper.accountAddress,
+        ownerAddress: swapper.accountAddress,
         coinType,
       });
       // The user possesses all of the circulating supply.
@@ -108,7 +108,7 @@ describe("tests the calculation functions for circulating supply and real reserv
 
     const buyAmountQuote = EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT;
     const sellAmountEmojicoin = ONE_APT_BIGINT * 2n;
-    const userAddress = swapper.accountAddress;
+    const ownerAddress = swapper.accountAddress;
     const coinAddress = getMarketAddress(symbolEmojis);
     const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
 
@@ -123,7 +123,7 @@ describe("tests the calculation functions for circulating supply and real reserv
             // The quote reserves are equal to the amount of APT the user just exchanged for base.
             expect(quote).toEqual(EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT);
             expect(isInBondingCurve(swap.model.state)).toBe(false);
-            const userBalance = getBalanceFromWriteSetChanges({ response, userAddress, coinType })!;
+            const userBalance = getBalanceFromWriteSetChanges({ response, ownerAddress, coinType })!;
             expect(userBalance).toBeDefined();
             expect(userBalance).toEqual(swap.model.swap.netProceeds);
             expect(EMOJICOIN_SUPPLY).toEqual(base + userBalance);
@@ -153,7 +153,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     const idx = 3;
     const [swapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
     const buyAmount = ONE_APT_BIGINT;
-    const userAddress = swapper.accountAddress;
+    const ownerAddress = swapper.accountAddress;
     const coinAddress = getMarketAddress(symbolEmojis);
     const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
 
@@ -166,7 +166,7 @@ describe("tests the calculation functions for circulating supply and real reserv
         expect(realReservesFromFetch).toBeDefined();
         expect(realReservesFromFetch).toEqual(realReservesFromTxnResponse);
         const { base, quote } = realReservesFromFetch!;
-        const balance = getBalanceFromWriteSetChanges({ response, userAddress, coinType })!;
+        const balance = getBalanceFromWriteSetChanges({ response, ownerAddress, coinType })!;
         expect(balance).toBeDefined();
         // The base reserves are just the total emojicoin supply minus what the user just received.
         expect(base).toEqual(EMOJICOIN_SUPPLY - balance);
@@ -209,7 +209,7 @@ describe("tests the calculation functions for circulating supply and real reserv
   }) => {
     const [swapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
 
-    const userAddress = swapper.accountAddress;
+    const ownerAddress = swapper.accountAddress;
     const coinAddress = getMarketAddress(symbolEmojis);
     const { emojicoin: coinType } = toEmojicoinTypes(coinAddress);
 
@@ -218,7 +218,7 @@ describe("tests the calculation functions for circulating supply and real reserv
       const realReserves = calculateRealReserves(swap.state);
       const circulatingSupply = calculateCirculatingSupply(swap.state);
       expect(realReserves.base).toEqual(EMOJICOIN_SUPPLY - circulatingSupply);
-      const userBalance = getBalanceFromWriteSetChanges({ response, userAddress, coinType });
+      const userBalance = getBalanceFromWriteSetChanges({ response, ownerAddress, coinType });
       expect(userBalance).toEqual(circulatingSupply);
     };
 

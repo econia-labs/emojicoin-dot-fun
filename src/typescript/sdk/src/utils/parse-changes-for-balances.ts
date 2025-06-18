@@ -54,17 +54,17 @@ export const isAPrimaryStoreWriteResource = (
   return resourceType === FUNGIBLE_STORE_TYPE_TAG_STRUCT.toString();
 };
 
-const maybeGetUserCoinStore = ({
+export const maybeGetUserCoinStore = ({
   change,
-  userAddress,
+  ownerAddress,
   coinType,
 }: {
   change: WriteSetChangeWriteResource;
-  userAddress: AccountAddressInput;
+  ownerAddress: AccountAddressInput;
   coinType: CoinTypeString | TypeTag;
 }) => {
   const { address } = change;
-  if (!AccountAddress.from(userAddress).equals(AccountAddress.from(address))) return undefined;
+  if (!AccountAddress.from(ownerAddress).equals(AccountAddress.from(address))) return undefined;
 
   // Ensure the coin type matches and normalize the type tags, otherwise leading zeros can cause a
   // false negative comparison result.
@@ -81,7 +81,7 @@ const maybeGetUserCoinStore = ({
 // To find a user's primary store, two conditions need to be true:
 // 1. The top-level `address` in the write resource change needs to match the primary fungible store.
 // 2. The inner metadata address needs to match the expected fungible asset's metadata.
-const maybeGetMatchingPrimaryStore = ({
+export const maybeGetMatchingPrimaryStore = ({
   change,
   metadataAddress,
   primaryStoreAddress,
@@ -102,11 +102,11 @@ const maybeGetMatchingPrimaryStore = ({
 
 export const getBalanceFromWriteSetChanges = ({
   response,
-  userAddress,
+  ownerAddress,
   coinType,
 }: {
   response: UserTransactionResponse;
-  userAddress: AccountAddressInput;
+  ownerAddress: AccountAddressInput;
   coinType: CoinTypeString | TypeTag;
 }) => {
   const { changes } = response;
@@ -114,7 +114,7 @@ export const getBalanceFromWriteSetChanges = ({
   const coinTypeStruct = ensureTypeTagStruct(coinType).toString();
   const metadataAddress = pairedFaMetadataAddress(coinTypeStruct);
   const primaryStoreAddress = getPrimaryFungibleStoreAddress({
-    ownerAddress: userAddress,
+    ownerAddress,
     metadataAddress,
   });
 
@@ -126,7 +126,7 @@ export const getBalanceFromWriteSetChanges = ({
 
   // Try again, but look for the coin store instead.
   const coinStore = findMap(writeResources, (change) =>
-    maybeGetUserCoinStore({ change, userAddress, coinType })
+    maybeGetUserCoinStore({ change, ownerAddress, coinType })
   );
 
   return coinStore?.coin.value;
@@ -134,10 +134,10 @@ export const getBalanceFromWriteSetChanges = ({
 
 export const getAptBalanceFromWriteSetChanges = (
   response: UserTransactionResponse,
-  userAddress: AccountAddressInput
+  ownerAddress: AccountAddressInput
 ) =>
   getBalanceFromWriteSetChanges({
     response,
-    userAddress,
+    ownerAddress,
     coinType: APTOS_COIN_TYPE_STRING,
   });

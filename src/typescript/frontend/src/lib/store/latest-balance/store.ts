@@ -68,7 +68,7 @@ export const globalLatestBalanceStore = createStore<LatestBalanceStore>()(
 
           const newBalance = getBalanceFromWriteSetChanges({
             response: txn,
-            userAddress: addr,
+            ownerAddress: addr,
             coinType,
           });
 

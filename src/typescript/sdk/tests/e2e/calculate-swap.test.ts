@@ -252,7 +252,7 @@ describe("tests the swap functionality", () => {
 
     const balance = getBalanceFromWriteSetChanges({
       response: transferRes,
-      userAddress: secondSwapper.accountAddress,
+      ownerAddress: secondSwapper.accountAddress,
       coinType: emojicoinType,
     })!;
     expect(balance).toBeDefined();
