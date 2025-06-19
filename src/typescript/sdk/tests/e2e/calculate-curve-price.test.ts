@@ -4,7 +4,7 @@ import Big from "big.js";
 import {
   APTOS_COIN_TYPE_STRING,
   calculateCurvePrice,
-  getCoinBalanceFromChanges,
+  getBalanceFromWriteSetChanges,
   getMarketAddress,
   getMarketResource,
   maxBigInt,
@@ -127,14 +127,14 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
         const normalizedVariance = PreciseBig(1).minus(variance).abs();
         // NOTE: larger trades will result in a larger variance and may fail.
         expect(normalizedVariance.lte(1 - accuracy)).toBe(true);
-        const apt = getCoinBalanceFromChanges({
+        const apt = getBalanceFromWriteSetChanges({
           response,
-          userAddress: registrant.accountAddress,
+          ownerAddress: registrant.accountAddress,
           coinType: APTOS_COIN_TYPE_STRING,
         })!;
-        const emoji = getCoinBalanceFromChanges({
+        const emoji = getBalanceFromWriteSetChanges({
           response,
-          userAddress: registrant.accountAddress,
+          ownerAddress: registrant.accountAddress,
           coinType: coinTypes.emojicoin,
         })!;
         expect(apt).toBeDefined();

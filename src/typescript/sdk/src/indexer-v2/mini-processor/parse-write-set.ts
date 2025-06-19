@@ -1,13 +1,8 @@
-import type { AccountAddressInput, HexInput, UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 import { Period, rawPeriodToEnum } from "../../const";
 import { getEvents } from "../../emojicoin_dot_fun/utils";
-import {
-  calculateTvlGrowth,
-  getEmojicoinMarketAddressAndTypeTags,
-  getMarketResourceFromWriteSet,
-} from "../../markets/utils";
-import { getCoinBalanceFromChanges } from "../../utils/parse-changes-for-balances";
+import { calculateTvlGrowth, getMarketResourceFromWriteSet } from "../../markets/utils";
 
 export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransactionResponse) => {
   const events = getEvents(response);
@@ -48,20 +43,4 @@ export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransact
     volumeIn1MStateTracker,
     baseVolumeIn1MStateTracker,
   };
-};
-
-export const getLPCoinBalanceFromWriteSet = ({
-  response,
-  symbolBytes,
-  userAddress,
-}: {
-  response: UserTransactionResponse;
-  symbolBytes: HexInput;
-  userAddress: AccountAddressInput;
-}) => {
-  const { emojicoinLP } = getEmojicoinMarketAddressAndTypeTags({
-    symbolBytes,
-  });
-
-  return getCoinBalanceFromChanges({ response, userAddress, coinType: emojicoinLP }) ?? 0n;
 };

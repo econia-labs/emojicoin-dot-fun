@@ -29,3 +29,28 @@ export function createNamedObjectAddress(args: {
 
   return AccountAddress.from(sha3_256(preImage));
 }
+
+export function createUserDerivedObjectAddress({
+  source,
+  deriveFrom,
+}: {
+  source: AccountAddressInput;
+  deriveFrom: AccountAddressInput;
+}) {
+  const preImage = new Uint8Array([
+    ...AccountAddress.from(source).bcsToBytes(),
+    ...AccountAddress.from(deriveFrom).bcsToBytes(),
+    DeriveScheme.DeriveObjectAddressFromObject,
+  ]);
+  return AccountAddress.from(sha3_256(preImage));
+}
+
+export function getPrimaryFungibleStoreAddress({
+  ownerAddress,
+  metadataAddress,
+}: {
+  ownerAddress: AccountAddressInput;
+  metadataAddress: AccountAddressInput;
+}) {
+  return createUserDerivedObjectAddress({ source: ownerAddress, deriveFrom: metadataAddress });
+}
