@@ -411,7 +411,7 @@ describe("general arena tests", () => {
       { ...dbExitEvent.exit, aptProceeds: 0n },
       { ...viewExitEvent, aptProceeds: 0n, duringMelee: false }
     );
-  });
+  }, Number(LONGER_MELEE_DURATION) * 3);
 
   describe("ensures leaderboard history is working", () => {
     const emojicoin = new EmojicoinClient();
