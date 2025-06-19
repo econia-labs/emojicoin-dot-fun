@@ -144,7 +144,7 @@ const ClientPoolsPage = () => {
         <Separator className="absolute" />
         <div className="flex w-full px-8 flex-col xl:flex-row max-w-[1392px] border-r border-solid border-dark-gray">
           <Tabs
-            className="w-full xl:flex-[0_0_50%]"
+            className="w-full xl:flex-[0_0_58%] border-l border-solid border-dark-gray"
             value={tab}
             onValueChange={(v) => setTab(v as "pools" | "myPools")}
           >
@@ -163,12 +163,13 @@ const ClientPoolsPage = () => {
               <SearchBar className="max-w-[300px]" />
             </TabsList>
             <Separator className="absolute" />
-            <div className={"flex w-full overflow-auto h-[60dvh]"}>
+            <div className={"flex w-full overflow-auto h-[40dvh] xl:h-[70dvh]"}>
               <EcTable
                 isLoading={query.isLoading}
                 variant="select"
                 columns={COLUMNS}
                 items={allMarkets}
+                className="[&_td]:text-xs"
                 getKey={(i) => i.market.marketID.toString()}
                 onClick={(_, i) => setSelectedIndex(i)}
                 pagination={query}
