@@ -213,7 +213,7 @@ const withVersionAndEventIndex = (data: {
  *
  * Only succeeds if every character in a string is a number 0-9.
  *
- * Accepts leading zeroes.
+ * Accepts leading zeros.
  */
 const isValidBigIntString = (str: string) => /^\d+$/.test(str);
 

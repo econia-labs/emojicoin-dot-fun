@@ -17,8 +17,17 @@ import {
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 
+import { toAccountAddressString } from "../../utils/account-address";
 import { getAptosClient } from "../../utils/aptos-client";
-import type { TypeTagInput, Uint64String } from "..";
+import { OBJECT_CORE_TYPE_TAG_STRUCT } from "../../utils/type-tags";
+import type {
+  AccountAddressString,
+  MoveObject,
+  ObjectAddress,
+  ObjectAddressStruct,
+  TypeTagInput,
+  Uint64String,
+} from "..";
 import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
@@ -413,6 +422,284 @@ export class Balance extends ViewFunctionPayloadBuilder<[Uint64String]> {
     options?: LedgerVersionArg;
   }): Promise<Uint64String> {
     const [res] = await new Balance(args).view(args);
+    return res;
+  }
+}
+
+export type PrimaryStoreAddressPayloadMoveArguments = {
+  owner: AccountAddress;
+  metadata: MoveObject;
+};
+
+/**
+ *```
+ *  #[view]
+ *  public fun primary_store_address<T: key>(
+ *     owner: address,
+ *     metadata: Object<T>,
+ *  ): address
+ *```
+ **/
+
+export class PrimaryStoreAddress extends ViewFunctionPayloadBuilder<[AccountAddressString]> {
+  public readonly moduleAddress = AccountAddress.ONE;
+
+  public readonly moduleName = "primary_fungible_store";
+
+  public readonly functionName = "primary_store_address";
+
+  public readonly args: PrimaryStoreAddressPayloadMoveArguments;
+
+  // typeTags: [TypeTagInput]; // [T: key], just use `0x1::object::ObjectCore`.
+  // The only reason to use anything else for the generic `Object<T>` type is to ensure `T`
+  // exists, but that's not the point of this view function.
+  public readonly typeTags: [TypeTag] = [OBJECT_CORE_TYPE_TAG_STRUCT];
+
+  constructor(args: {
+    owner: AccountAddressInput; // address
+    metadata: ObjectAddress; // Object<T>
+  }) {
+    super();
+    const { owner, metadata } = args;
+
+    this.args = {
+      owner: AccountAddress.from(owner),
+      metadata: AccountAddress.from(metadata),
+    };
+  }
+
+  static async view(args: {
+    aptos: Aptos | AptosConfig;
+    owner: AccountAddressInput; // address
+    metadata: ObjectAddress; // Object<T>
+    options?: LedgerVersionArg;
+  }): Promise<AccountAddressString> {
+    const [res] = await new PrimaryStoreAddress(args).view(args);
+    return toAccountAddressString(res);
+  }
+}
+
+export type MigrateCoinStoreToFungibleStorePayloadMoveArguments = {
+  accounts: MoveVector<AccountAddress>;
+};
+
+/**
+ *```
+ *  public entry fun migrate_coin_store_to_fungible_store<CoinType>(
+ *     accounts: vector<address>,
+ *  )
+ *```
+ **/
+
+export class MigrateCoinStoreToFungibleStore extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = AccountAddress.ONE;
+
+  public readonly moduleName = "coin";
+
+  public readonly functionName = "migrate_coin_store_to_fungible_store";
+
+  public readonly args: MigrateCoinStoreToFungibleStorePayloadMoveArguments;
+
+  public readonly typeTags: [TypeTag]; // [CoinType]
+
+  public readonly primarySender: AccountAddress;
+
+  public readonly secondarySenders: [] = [];
+
+  public readonly feePayer?: AccountAddress;
+
+  private constructor(args: {
+    primarySender: AccountAddressInput; // Not an entry function argument, but required to submit.
+    accounts: Array<AccountAddressInput>; // vector<address>
+    typeTags: [TypeTagInput]; // [CoinType]
+    feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
+  }) {
+    super();
+    const { primarySender, accounts, typeTags, feePayer } = args;
+    this.primarySender = AccountAddress.from(primarySender);
+    this.args = {
+      accounts: new MoveVector(accounts.map((argA) => AccountAddress.from(argA))),
+    };
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
+    ) as [TypeTag];
+    this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
+  }
+
+  static async builder(args: {
+    aptosConfig: AptosConfig;
+    primarySender: AccountAddressInput; // sender for the payload, not used in the entry function as an argument
+    accounts: Array<AccountAddressInput>; // vector<address>
+    typeTags: [TypeTagInput]; // [CoinType],
+    feePayer?: AccountAddressInput;
+    options?: InputGenerateTransactionOptions;
+  }): Promise<EntryFunctionTransactionBuilder> {
+    const { aptosConfig, options, feePayer } = args;
+    const payloadBuilder = new this(args);
+    const rawTransactionInput = await buildTransaction({
+      aptosConfig,
+      sender: payloadBuilder.primarySender,
+      payload: payloadBuilder.createPayload(),
+      options,
+      feePayerAddress: feePayer,
+    });
+    const aptos = getAptosClient(aptosConfig);
+    return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
+  }
+
+  static async submit(args: {
+    aptosConfig: AptosConfig;
+    primarySender: Account; // Sender for the payload, not used in the entry function as an argument.
+    accounts: Array<AccountAddressInput>; // vector<address>
+    typeTags: [TypeTagInput]; // [CoinType]
+    feePayer?: Account;
+    options?: InputGenerateTransactionOptions;
+    waitForTransactionOptions?: WaitForTransactionOptions;
+  }): Promise<UserTransactionResponse> {
+    const { primarySender: primarySigner, waitForTransactionOptions, feePayer } = args;
+
+    const transactionBuilder = await MigrateCoinStoreToFungibleStore.builder({
+      ...args,
+      feePayer: feePayer ? feePayer.accountAddress : undefined,
+      primarySender: primarySigner.accountAddress,
+    });
+    const response = await transactionBuilder.submit({
+      primarySigner,
+      feePayer,
+      options: waitForTransactionOptions,
+    });
+    return response;
+  }
+}
+
+/**
+ *```
+ *  public entry fun migrate_to_fungible_store<CoinType>()
+ *     account: &signer,
+ *```
+ **/
+
+export class MigrateToFungibleStore extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = AccountAddress.ONE;
+
+  public readonly moduleName = "coin";
+
+  public readonly functionName = "migrate_to_fungible_store";
+
+  public readonly args: Record<string, never>;
+
+  public readonly typeTags: [TypeTag]; // [CoinType]
+
+  public readonly primarySender: AccountAddress;
+
+  public readonly secondarySenders: [] = [];
+
+  public readonly feePayer?: AccountAddress;
+
+  private constructor(args: {
+    account: AccountAddressInput; // &signer
+    typeTags: [TypeTagInput]; // [CoinType]
+    feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
+  }) {
+    super();
+    const { account, typeTags, feePayer } = args;
+    this.primarySender = AccountAddress.from(account);
+
+    this.args = {};
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
+    ) as [TypeTag];
+    this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
+  }
+
+  static async builder(args: {
+    aptosConfig: AptosConfig;
+    account: AccountAddressInput; // &signer
+    typeTags: [TypeTagInput]; // [CoinType],
+    feePayer?: AccountAddressInput;
+    options?: InputGenerateTransactionOptions;
+  }): Promise<EntryFunctionTransactionBuilder> {
+    const { aptosConfig, options, feePayer } = args;
+    const payloadBuilder = new this(args);
+    const rawTransactionInput = await buildTransaction({
+      aptosConfig,
+      sender: payloadBuilder.primarySender,
+      payload: payloadBuilder.createPayload(),
+      options,
+      feePayerAddress: feePayer,
+    });
+    const aptos = getAptosClient(aptosConfig);
+    return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
+  }
+
+  static async submit(args: {
+    aptosConfig: AptosConfig;
+    account: Account; // &signer
+    typeTags: [TypeTagInput]; // [CoinType]
+    feePayer?: Account;
+    options?: InputGenerateTransactionOptions;
+    waitForTransactionOptions?: WaitForTransactionOptions;
+  }): Promise<UserTransactionResponse> {
+    const { account: primarySigner, waitForTransactionOptions, feePayer } = args;
+
+    const transactionBuilder = await MigrateToFungibleStore.builder({
+      ...args,
+      feePayer: feePayer ? feePayer.accountAddress : undefined,
+      account: primarySigner.accountAddress,
+    });
+    const response = await transactionBuilder.submit({
+      primarySigner,
+      feePayer,
+      options: waitForTransactionOptions,
+    });
+    return response;
+  }
+}
+
+export type StoreMetadataPayloadMoveArguments = {
+  store: MoveObject;
+};
+
+/**
+ *```
+ *  #[view]
+ *  public fun store_metadata<T: key>(
+ *     store: Object<T>,
+ *  ): Object<aptos_framework::fungible_asset::Metadata>
+ *
+ * NOTE: This uses `0x1::object::ObjectCore` as the type tag generic.
+ *```
+ **/
+
+export class StoreMetadata extends ViewFunctionPayloadBuilder<[ObjectAddressStruct]> {
+  public readonly moduleAddress = AccountAddress.ONE;
+
+  public readonly moduleName = "fungible_asset";
+
+  public readonly functionName = "store_metadata";
+
+  public readonly args: StoreMetadataPayloadMoveArguments;
+
+  // Same explanation as the `typeTags` in `PrimaryStoreAddress` above.
+  public readonly typeTags: [TypeTag] = [OBJECT_CORE_TYPE_TAG_STRUCT];
+
+  constructor(args: {
+    store: ObjectAddress; // Object<T>
+  }) {
+    super();
+    const { store } = args;
+
+    this.args = {
+      store: AccountAddress.from(store),
+    };
+  }
+
+  static async view(args: {
+    aptos: Aptos | AptosConfig;
+    store: ObjectAddress; // Object<T>
+    options?: LedgerVersionArg;
+  }): Promise<ObjectAddressStruct> {
+    const [res] = await new StoreMetadata(args).view(args);
     return res;
   }
 }

@@ -2,7 +2,7 @@ import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-import { getCoinBalanceFromChanges } from "@/sdk/utils/parse-changes-for-balances";
+import { getBalanceFromWriteSetChanges } from "@/sdk/utils/parse-changes-for-balances";
 import type { CoinTypeString } from "@/sdk/utils/type-tags";
 
 type LatestBalance = {
@@ -66,9 +66,9 @@ export const globalLatestBalanceStore = createStore<LatestBalanceStore>()(
 
           if (newVersion <= currVersion) continue;
 
-          const newBalance = getCoinBalanceFromChanges({
+          const newBalance = getBalanceFromWriteSetChanges({
             response: txn,
-            userAddress: addr,
+            ownerAddress: addr,
             coinType,
           });
 

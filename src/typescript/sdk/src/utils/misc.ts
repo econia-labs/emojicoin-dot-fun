@@ -283,6 +283,17 @@ export function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 /**
+ * Utility function equivalent to rust's `find_map`.
+ */
+export function findMap<T, U>(items: T[], f: (item: T) => U | undefined): U | undefined {
+  for (const item of items) {
+    const res = f(item);
+    if (res !== undefined) return res;
+  }
+  return undefined;
+}
+
+/**
  * Extracts elements from an array based on a type predicate and a type guard filter function.
  *
  * This function mutates the original array, removing elements that match

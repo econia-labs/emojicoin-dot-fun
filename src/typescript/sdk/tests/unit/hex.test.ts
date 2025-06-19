@@ -137,7 +137,7 @@ describe("hex utility functions", () => {
     });
   });
 
-  it("should remove leading zeroes from AccountAddresses", () => {
+  it("should remove leading zeros from AccountAddresses", () => {
     const givenAndExpected = [
       [AccountAddress.from("0x0"), "0x0"],
       [AccountAddress.from("0x1"), "0x1"],
@@ -165,7 +165,7 @@ describe("hex utility functions", () => {
     });
   });
 
-  it("should remove leading zeroes from a coin type tag", () => {
+  it("should remove leading zeros from a coin type tag", () => {
     const assetType1: StructTagString =
       "0x0225708cc6557dcea948575ad85e8849322f7c13ad176f80c51514f36a34a9a0::coin_factory::Emojicoin";
     const assetType2: StructTagString =
@@ -182,7 +182,7 @@ describe("hex utility functions", () => {
     expect(removeLeadingZerosFromStructString(assetType4)).toEqual(APTOS_COIN_TYPE_STRING);
   });
 
-  it("should remove leading zeroes from an emojicoin type tag with leading zeros", () => {
+  it("should remove leading zeros from an emojicoin type tag with leading zeros", () => {
     // Since the factory address can change, just find an address with leading zeros randomly.
     // There's a 1/16 chance it will start with a leading zero.
     let base: TypeTagStruct;
