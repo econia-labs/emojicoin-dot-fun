@@ -130,7 +130,6 @@ const ClientPoolsPage = () => {
     sortBy,
     orderBy,
     searchBytes: realEmojis?.length ? encodeEmojis(realEmojis) : undefined,
-    limit: 20,
   });
 
   const allMarkets = useMemo(

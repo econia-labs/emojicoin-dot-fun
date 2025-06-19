@@ -10,7 +10,7 @@ export async function getPoolData({
   page,
   sortBy,
   orderBy,
-  limit,
+  limit = LIMIT,
   searchEmojis,
   provider,
 }: {
@@ -28,7 +28,7 @@ export async function getPoolData({
         sortBy,
         provider,
         searchEmojis,
-        pageSize: limit || LIMIT,
+        pageSize: limit,
       })
     : fetchMarkets({
         page,
@@ -36,7 +36,7 @@ export async function getPoolData({
         orderBy: orderBy,
         sortBy,
         searchEmojis,
-        pageSize: limit || LIMIT,
+        pageSize: limit,
       });
 
   return stringifyJSON(await res);
