@@ -118,300 +118,304 @@ describe("general arena tests", () => {
     5 * 60 * 1000
   );
 
-  it("ensures an arena correctly unfolds and the processor data is accurate", async () => {
-    const melee1 = await fetchArenaMeleeView(1n).then(fetchMeleeEmojiData);
+  it(
+    "ensures an arena correctly unfolds and the processor data is accurate",
+    async () => {
+      const melee1 = await fetchArenaMeleeView(1n).then(fetchMeleeEmojiData);
 
-    // ---------------------------------------------------------------------------------------------
-    // verifies that the arena module is already published on-chain
-    // ---------------------------------------------------------------------------------------------
-    const res = await aptos.getAccountModule({
-      accountAddress: ARENA_MODULE_ADDRESS,
-      moduleName: EmojicoinArena.Enter.prototype.moduleName ?? "emojicoin_arena",
-    });
-    expect(res.bytecode).toBeTruthy();
+      // ---------------------------------------------------------------------------------------------
+      // verifies that the arena module is already published on-chain
+      // ---------------------------------------------------------------------------------------------
+      const res = await aptos.getAccountModule({
+        accountAddress: ARENA_MODULE_ADDRESS,
+        moduleName: EmojicoinArena.Enter.prototype.moduleName ?? "emojicoin_arena",
+      });
+      expect(res.bytecode).toBeTruthy();
 
-    // ---------------------------------------------------------------------------------------------
-    // verifies arena data is correctly inserted into the processor
-    // ---------------------------------------------------------------------------------------------
-    const arenaInfo0 = await fetchArenaInfo();
-    expect(arenaInfo0).toBeTruthy();
-    expect(arenaInfo0?.meleeID).toEqual(melee1.view.meleeID);
-    expect(arenaInfo0?.duration).toEqual(melee1.view.duration);
-    expect(arenaInfo0?.startTime).toEqual(melee1.view.startTime);
-    expect(arenaInfo0?.volume).toEqual(0n);
-    expect(arenaInfo0?.emojicoin0Locked).toEqual(0n);
-    expect(arenaInfo0?.emojicoin1Locked).toEqual(0n);
-    expect(arenaInfo0?.maxMatchAmount).toEqual(melee1.view.maxMatchAmount);
-    expect(arenaInfo0?.maxMatchPercentage).toEqual(melee1.view.maxMatchPercentage);
-    expect(arenaInfo0?.rewardsRemaining).toEqual(melee1.view.availableRewards);
-    expect(arenaInfo0?.emojicoin0Symbols).toEqual(melee1.market0.symbolEmojis);
-    expect(arenaInfo0?.emojicoin1Symbols).toEqual(melee1.market1.symbolEmojis);
-    expect(arenaInfo0?.emojicoin0MarketID).toEqual(melee1.market0.marketID);
-    expect(arenaInfo0?.emojicoin1MarketID).toEqual(melee1.market1.marketID);
-    expect(arenaInfo0?.emojicoin0MarketAddress).toEqual(melee1.market0.marketAddress);
-    expect(arenaInfo0?.emojicoin1MarketAddress).toEqual(melee1.market1.marketAddress);
+      // ---------------------------------------------------------------------------------------------
+      // verifies arena data is correctly inserted into the processor
+      // ---------------------------------------------------------------------------------------------
+      const arenaInfo0 = await fetchArenaInfo();
+      expect(arenaInfo0).toBeTruthy();
+      expect(arenaInfo0?.meleeID).toEqual(melee1.view.meleeID);
+      expect(arenaInfo0?.duration).toEqual(melee1.view.duration);
+      expect(arenaInfo0?.startTime).toEqual(melee1.view.startTime);
+      expect(arenaInfo0?.volume).toEqual(0n);
+      expect(arenaInfo0?.emojicoin0Locked).toEqual(0n);
+      expect(arenaInfo0?.emojicoin1Locked).toEqual(0n);
+      expect(arenaInfo0?.maxMatchAmount).toEqual(melee1.view.maxMatchAmount);
+      expect(arenaInfo0?.maxMatchPercentage).toEqual(melee1.view.maxMatchPercentage);
+      expect(arenaInfo0?.rewardsRemaining).toEqual(melee1.view.availableRewards);
+      expect(arenaInfo0?.emojicoin0Symbols).toEqual(melee1.market0.symbolEmojis);
+      expect(arenaInfo0?.emojicoin1Symbols).toEqual(melee1.market1.symbolEmojis);
+      expect(arenaInfo0?.emojicoin0MarketID).toEqual(melee1.market0.marketID);
+      expect(arenaInfo0?.emojicoin1MarketID).toEqual(melee1.market1.marketID);
+      expect(arenaInfo0?.emojicoin0MarketAddress).toEqual(melee1.market0.marketAddress);
+      expect(arenaInfo0?.emojicoin1MarketAddress).toEqual(melee1.market1.marketAddress);
 
-    // ---------------------------------------------------------------------------------------------
-    // verifies an arena ends with no activity and nothing bad happens
-    // ---------------------------------------------------------------------------------------------
-    const publisher = getPublisher();
+      // ---------------------------------------------------------------------------------------------
+      // verifies an arena ends with no activity and nothing bad happens
+      // ---------------------------------------------------------------------------------------------
+      const publisher = getPublisher();
 
-    await emojicoin.arena.setNextMeleeDuration(publisher, LONGER_MELEE_DURATION);
+      await emojicoin.arena.setNextMeleeDuration(publisher, LONGER_MELEE_DURATION);
 
-    await waitUntilCurrentMeleeEnds();
+      await waitUntilCurrentMeleeEnds();
 
-    const swaps0 = await fetchSwapEvents({ marketID: melee1.market0.marketID });
-    const swaps1 = await fetchSwapEvents({ marketID: melee1.market1.marketID });
+      const swaps0 = await fetchSwapEvents({ marketID: melee1.market0.marketID });
+      const swaps1 = await fetchSwapEvents({ marketID: melee1.market1.marketID });
 
-    expect(swaps0).toHaveLength(0);
-    expect(swaps1).toHaveLength(0);
+      expect(swaps0).toHaveLength(0);
+      expect(swaps1).toHaveLength(0);
 
-    const account = getFundedAccount("007");
-    const enterResponse2 = await emojicoin.arena.enter(
-      account,
-      1n * 10n ** 8n,
-      false,
-      melee1.market0.symbolEmojis,
-      melee1.market1.symbolEmojis,
-      "symbol0"
-    );
+      const account = getFundedAccount("007");
+      const enterResponse2 = await emojicoin.arena.enter(
+        account,
+        1n * 10n ** 8n,
+        false,
+        melee1.market0.symbolEmojis,
+        melee1.market1.symbolEmojis,
+        "symbol0"
+      );
 
-    // Expect that the current melee has ended.
-    expect(enterResponse2.models.arenaMeleeEvents).toHaveLength(1);
-    expect(enterResponse2.models.arenaMeleeEvents[0].melee.meleeID).toEqual(2n);
+      // Expect that the current melee has ended.
+      expect(enterResponse2.models.arenaMeleeEvents).toHaveLength(1);
+      expect(enterResponse2.models.arenaMeleeEvents[0].melee.meleeID).toEqual(2n);
 
-    await waitForProcessor(enterResponse2);
+      await waitForProcessor(enterResponse2);
 
-    await emojicoin.buy(publisher, melee1.market0.symbolEmojis, 1n);
-    await emojicoin.buy(publisher, melee1.market1.symbolEmojis, 1n);
+      await emojicoin.buy(publisher, melee1.market0.symbolEmojis, 1n);
+      await emojicoin.buy(publisher, melee1.market1.symbolEmojis, 1n);
 
-    const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee1.view.meleeID.toString())
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+      const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
+        .from(TableName.ArenaLeaderboardHistory)
+        .select("*")
+        .eq("melee_id", melee1.view.meleeID.toString())
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
 
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(0);
+      expect(leaderboard).not.toBeNull();
+      expect(leaderboard).toHaveLength(0);
 
-    // ---------------------------------------------------------------------------------------------
-    // verifies an arena has already started with a specific duration
-    // ---------------------------------------------------------------------------------------------
-    const melee2 = await fetchArenaMeleeView(2n).then(fetchMeleeEmojiData);
-    expect(melee2.view.duration).toEqual(LONGER_MELEE_DURATION);
+      // ---------------------------------------------------------------------------------------------
+      // verifies an arena has already started with a specific duration
+      // ---------------------------------------------------------------------------------------------
+      const melee2 = await fetchArenaMeleeView(2n).then(fetchMeleeEmojiData);
+      expect(melee2.view.duration).toEqual(LONGER_MELEE_DURATION);
 
-    // ---------------------------------------------------------------------------------------------
-    // verifies an arena has started in the last 6 seconds
-    // ---------------------------------------------------------------------------------------------
-    const sixSeconds = 6 * 1000;
-    const now = new Date().getTime();
-    const sixSecondsAgo = now - sixSeconds;
-    expect(melee2.view.startTime.getTime()).toBeGreaterThan(sixSecondsAgo);
+      // ---------------------------------------------------------------------------------------------
+      // verifies an arena has started in the last 6 seconds
+      // ---------------------------------------------------------------------------------------------
+      const sixSeconds = 6 * 1000;
+      const now = new Date().getTime();
+      const sixSecondsAgo = now - sixSeconds;
+      expect(melee2.view.startTime.getTime()).toBeGreaterThan(sixSecondsAgo);
 
-    // ---------------------------------------------------------------------------------------------
-    // verifies enter+swap+exit procedure
-    // ---------------------------------------------------------------------------------------------
-    const enterResponse3 = await emojicoin.arena.enter(
-      account,
-      1n * 10n ** 8n,
-      false,
-      melee2.market0.symbolEmojis,
-      melee2.market1.symbolEmojis,
-      "symbol0"
-    );
+      // ---------------------------------------------------------------------------------------------
+      // verifies enter+swap+exit procedure
+      // ---------------------------------------------------------------------------------------------
+      const enterResponse3 = await emojicoin.arena.enter(
+        account,
+        1n * 10n ** 8n,
+        false,
+        melee2.market0.symbolEmojis,
+        melee2.market1.symbolEmojis,
+        "symbol0"
+      );
 
-    expect(enterResponse3.events.arenaEnterEvents).toHaveLength(1);
+      expect(enterResponse3.events.arenaEnterEvents).toHaveLength(1);
 
-    const viewEnterEvent = enterResponse3.events.arenaEnterEvents[0];
-    expect(viewEnterEvent.meleeID).toBe(2n);
+      const viewEnterEvent = enterResponse3.events.arenaEnterEvents[0];
+      expect(viewEnterEvent.meleeID).toBe(2n);
 
-    await waitForProcessor(enterResponse3);
+      await waitForProcessor(enterResponse3);
 
-    const arenaEnters: ArenaEnterModel[] | null = await postgrest
-      .from(TableName.ArenaEnterEvents)
-      .select("*")
-      .eq("melee_id", melee2.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaEnterModel)));
-    let arenaPositions: ArenaPositionModel[] | null = await postgrest
-      .from(TableName.ArenaPosition)
-      .select("*")
-      .eq("melee_id", melee2.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    const arenaInfo2 = await fetchArenaInfo();
+      const arenaEnters: ArenaEnterModel[] | null = await postgrest
+        .from(TableName.ArenaEnterEvents)
+        .select("*")
+        .eq("melee_id", melee2.view.meleeID)
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaEnterModel)));
+      let arenaPositions: ArenaPositionModel[] | null = await postgrest
+        .from(TableName.ArenaPosition)
+        .select("*")
+        .eq("melee_id", melee2.view.meleeID)
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
+      const arenaInfo2 = await fetchArenaInfo();
 
-    expect(arenaEnters).not.toBeNull();
-    expect(arenaEnters).toHaveLength(1);
+      expect(arenaEnters).not.toBeNull();
+      expect(arenaEnters).toHaveLength(1);
 
-    expect(arenaPositions).not.toBeNull();
-    expect(arenaPositions).toHaveLength(1);
+      expect(arenaPositions).not.toBeNull();
+      expect(arenaPositions).toHaveLength(1);
 
-    expect(arenaInfo2).not.toBeNull();
+      expect(arenaInfo2).not.toBeNull();
 
-    const dbEnterEvent = arenaEnters![0];
-    let position = arenaPositions![0];
+      const dbEnterEvent = arenaEnters![0];
+      let position = arenaPositions![0];
 
-    expectObjectEqualityExceptEventIndexAndVersion(dbEnterEvent.enter, viewEnterEvent);
+      expectObjectEqualityExceptEventIndexAndVersion(dbEnterEvent.enter, viewEnterEvent);
 
-    expect(position.user).toEqual(viewEnterEvent.user);
-    expect(position.meleeID).toEqual(viewEnterEvent.meleeID);
-    expect(position.open).toEqual(true);
-    expect(position.deposits).toEqual(viewEnterEvent.inputAmount);
-    expect(position.withdrawals).toEqual(0n);
-    expect(position.emojicoin0Balance).toEqual(viewEnterEvent.emojicoin0Proceeds);
-    expect(position.emojicoin1Balance).toEqual(viewEnterEvent.emojicoin1Proceeds);
+      expect(position.user).toEqual(viewEnterEvent.user);
+      expect(position.meleeID).toEqual(viewEnterEvent.meleeID);
+      expect(position.open).toEqual(true);
+      expect(position.deposits).toEqual(viewEnterEvent.inputAmount);
+      expect(position.withdrawals).toEqual(0n);
+      expect(position.emojicoin0Balance).toEqual(viewEnterEvent.emojicoin0Proceeds);
+      expect(position.emojicoin1Balance).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
-    expect(arenaInfo2?.volume).toEqual(viewEnterEvent.quoteVolume);
-    expect(arenaInfo2?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
-    expect(arenaInfo2?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
+      expect(arenaInfo2?.volume).toEqual(viewEnterEvent.quoteVolume);
+      expect(arenaInfo2?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
+      expect(arenaInfo2?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
-    const swapResponse = await emojicoin.arena.swap(
-      account,
-      melee2.market0.symbolEmojis,
-      melee2.market1.symbolEmojis
-    );
+      const swapResponse = await emojicoin.arena.swap(
+        account,
+        melee2.market0.symbolEmojis,
+        melee2.market1.symbolEmojis
+      );
 
-    expect(swapResponse.events.arenaSwapEvents).toHaveLength(1);
-    expect(swapResponse.events.swapEvents).toHaveLength(2);
+      expect(swapResponse.events.arenaSwapEvents).toHaveLength(1);
+      expect(swapResponse.events.swapEvents).toHaveLength(2);
 
-    const viewArenaSwapEvent = swapResponse.events.arenaSwapEvents[0];
+      const viewArenaSwapEvent = swapResponse.events.arenaSwapEvents[0];
 
-    await waitForProcessor(swapResponse);
+      await waitForProcessor(swapResponse);
 
-    const arenaSwaps: ArenaSwapModel[] | null = await postgrest
-      .from(TableName.ArenaSwapEvents)
-      .select("*")
-      .eq("melee_id", melee2.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaSwapModel)));
-    arenaPositions = await postgrest
-      .from(TableName.ArenaPosition)
-      .select("*")
-      .eq("melee_id", melee2.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    const arenaInfo3 = await fetchArenaInfo();
+      const arenaSwaps: ArenaSwapModel[] | null = await postgrest
+        .from(TableName.ArenaSwapEvents)
+        .select("*")
+        .eq("melee_id", melee2.view.meleeID)
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaSwapModel)));
+      arenaPositions = await postgrest
+        .from(TableName.ArenaPosition)
+        .select("*")
+        .eq("melee_id", melee2.view.meleeID)
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
+      const arenaInfo3 = await fetchArenaInfo();
 
-    expect(arenaSwaps).not.toBeNull();
-    expect(arenaSwaps).toHaveLength(1);
+      expect(arenaSwaps).not.toBeNull();
+      expect(arenaSwaps).toHaveLength(1);
 
-    expect(arenaPositions).not.toBeNull();
-    expect(arenaPositions).toHaveLength(1);
+      expect(arenaPositions).not.toBeNull();
+      expect(arenaPositions).toHaveLength(1);
 
-    expect(arenaInfo3).not.toBeNull();
+      expect(arenaInfo3).not.toBeNull();
 
-    const dbSwapEvent = arenaSwaps![0];
-    position = arenaPositions![0];
+      const dbSwapEvent = arenaSwaps![0];
+      position = arenaPositions![0];
 
-    expectObjectEqualityExceptEventIndexAndVersion(dbSwapEvent.swap, viewArenaSwapEvent);
+      expectObjectEqualityExceptEventIndexAndVersion(dbSwapEvent.swap, viewArenaSwapEvent);
 
-    expect(position.user).toEqual(viewArenaSwapEvent.user);
-    expect(position.meleeID).toEqual(viewArenaSwapEvent.meleeID);
-    expect(position.open).toEqual(true);
-    expect(position.deposits).toEqual(viewEnterEvent.inputAmount);
-    expect(position.withdrawals).toEqual(0n);
-    expect(position.emojicoin0Balance).toEqual(viewArenaSwapEvent.emojicoin0Proceeds);
-    expect(position.emojicoin1Balance).toEqual(viewArenaSwapEvent.emojicoin1Proceeds);
+      expect(position.user).toEqual(viewArenaSwapEvent.user);
+      expect(position.meleeID).toEqual(viewArenaSwapEvent.meleeID);
+      expect(position.open).toEqual(true);
+      expect(position.deposits).toEqual(viewEnterEvent.inputAmount);
+      expect(position.withdrawals).toEqual(0n);
+      expect(position.emojicoin0Balance).toEqual(viewArenaSwapEvent.emojicoin0Proceeds);
+      expect(position.emojicoin1Balance).toEqual(viewArenaSwapEvent.emojicoin1Proceeds);
 
-    const exitResponse1 = await emojicoin.arena.exit(
-      account,
-      melee2.market0.symbolEmojis,
-      melee2.market1.symbolEmojis
-    );
+      const exitResponse1 = await emojicoin.arena.exit(
+        account,
+        melee2.market0.symbolEmojis,
+        melee2.market1.symbolEmojis
+      );
 
-    expect(exitResponse1.events.arenaExitEvents).toHaveLength(1);
+      expect(exitResponse1.events.arenaExitEvents).toHaveLength(1);
 
-    let viewExitEvent = exitResponse1.events.arenaExitEvents[0];
+      let viewExitEvent = exitResponse1.events.arenaExitEvents[0];
 
-    await waitForProcessor(exitResponse1);
+      await waitForProcessor(exitResponse1);
 
-    let arenaExits: ArenaExitModel[] | null = await postgrest
-      .from(TableName.ArenaExitEvents)
-      .select("*")
-      .eq("melee_id", melee2.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaExitModel)));
-    arenaPositions = await postgrest
-      .from(TableName.ArenaPosition)
-      .select("*")
-      .eq("melee_id", melee2.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    const arenaInfo4 = await fetchArenaInfo();
+      let arenaExits: ArenaExitModel[] | null = await postgrest
+        .from(TableName.ArenaExitEvents)
+        .select("*")
+        .eq("melee_id", melee2.view.meleeID)
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaExitModel)));
+      arenaPositions = await postgrest
+        .from(TableName.ArenaPosition)
+        .select("*")
+        .eq("melee_id", melee2.view.meleeID)
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
+      const arenaInfo4 = await fetchArenaInfo();
 
-    expect(arenaExits).not.toBeNull();
-    expect(arenaExits).toHaveLength(1);
+      expect(arenaExits).not.toBeNull();
+      expect(arenaExits).toHaveLength(1);
 
-    expect(arenaPositions).not.toBeNull();
-    expect(arenaPositions).toHaveLength(1);
+      expect(arenaPositions).not.toBeNull();
+      expect(arenaPositions).toHaveLength(1);
 
-    expect(arenaInfo4).not.toBeNull();
+      expect(arenaInfo4).not.toBeNull();
 
-    let dbExitEvent = arenaExits![0];
-    position = arenaPositions![0];
+      let dbExitEvent = arenaExits![0];
+      position = arenaPositions![0];
 
-    expectObjectEqualityExceptEventIndexAndVersion(dbExitEvent.exit, {
-      ...viewExitEvent,
-      duringMelee: true,
-    });
+      expectObjectEqualityExceptEventIndexAndVersion(dbExitEvent.exit, {
+        ...viewExitEvent,
+        duringMelee: true,
+      });
 
-    expect(position.user).toEqual(viewExitEvent.user);
-    expect(position.meleeID).toEqual(viewExitEvent.meleeID);
-    expect(position.open).toEqual(false);
-    expect(position.deposits).toEqual(viewEnterEvent.inputAmount);
-    const withdrawalsApt =
-      (viewExitEvent.emojicoin0Proceeds * viewExitEvent.emojicoin0ExchangeRateQuote) /
-        viewExitEvent.emojicoin0ExchangeRateBase +
-      (viewExitEvent.emojicoin1Proceeds * viewExitEvent.emojicoin1ExchangeRateQuote) /
-        viewExitEvent.emojicoin1ExchangeRateBase;
-    // Rounding differences can happen between the rust calculations and the TS calculations.
-    // We check for 99.99% precision.
-    expect(position.withdrawals).toBeGreaterThanOrEqual((withdrawalsApt * 9999n) / 10000n);
-    expect(position.withdrawals).toBeLessThanOrEqual((withdrawalsApt * 10001n) / 10000n);
-    expect(position.emojicoin0Balance).toEqual(0n);
-    expect(position.emojicoin1Balance).toEqual(0n);
+      expect(position.user).toEqual(viewExitEvent.user);
+      expect(position.meleeID).toEqual(viewExitEvent.meleeID);
+      expect(position.open).toEqual(false);
+      expect(position.deposits).toEqual(viewEnterEvent.inputAmount);
+      const withdrawalsApt =
+        (viewExitEvent.emojicoin0Proceeds * viewExitEvent.emojicoin0ExchangeRateQuote) /
+          viewExitEvent.emojicoin0ExchangeRateBase +
+        (viewExitEvent.emojicoin1Proceeds * viewExitEvent.emojicoin1ExchangeRateQuote) /
+          viewExitEvent.emojicoin1ExchangeRateBase;
+      // Rounding differences can happen between the rust calculations and the TS calculations.
+      // We check for 99.99% precision.
+      expect(position.withdrawals).toBeGreaterThanOrEqual((withdrawalsApt * 9999n) / 10000n);
+      expect(position.withdrawals).toBeLessThanOrEqual((withdrawalsApt * 10001n) / 10000n);
+      expect(position.emojicoin0Balance).toEqual(0n);
+      expect(position.emojicoin1Balance).toEqual(0n);
 
-    await emojicoin.arena.enter(
-      account,
-      1n * 10n ** 8n,
-      false,
-      melee2.market0.symbolEmojis,
-      melee2.market1.symbolEmojis,
-      "symbol0"
-    );
+      await emojicoin.arena.enter(
+        account,
+        1n * 10n ** 8n,
+        false,
+        melee2.market0.symbolEmojis,
+        melee2.market1.symbolEmojis,
+        "symbol0"
+      );
 
-    await waitUntilCurrentMeleeEnds();
+      await waitUntilCurrentMeleeEnds();
 
-    const exitResponse2 = await emojicoin.arena.exit(
-      account,
-      melee2.market0.symbolEmojis,
-      melee2.market1.symbolEmojis
-    );
-    await waitForProcessor(exitResponse2);
-    viewExitEvent = exitResponse2.events.arenaExitEvents[0];
+      const exitResponse2 = await emojicoin.arena.exit(
+        account,
+        melee2.market0.symbolEmojis,
+        melee2.market1.symbolEmojis
+      );
+      await waitForProcessor(exitResponse2);
+      viewExitEvent = exitResponse2.events.arenaExitEvents[0];
 
-    arenaExits = await postgrest
-      .from(TableName.ArenaExitEvents)
-      .select("*")
-      .eq("melee_id", melee2.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaExitModel)));
+      arenaExits = await postgrest
+        .from(TableName.ArenaExitEvents)
+        .select("*")
+        .eq("melee_id", melee2.view.meleeID)
+        .then((r) => r.data)
+        .then((r) => (r === null ? null : r.map(toArenaExitModel)));
 
-    dbExitEvent = arenaExits![1];
+      dbExitEvent = arenaExits![1];
 
-    expect(Number(dbExitEvent.exit.aptProceeds) / 10 ** 8).toBeCloseTo(
-      Number(viewExitEvent.aptProceeds) / 10 ** 8,
-      5
-    );
+      expect(Number(dbExitEvent.exit.aptProceeds) / 10 ** 8).toBeCloseTo(
+        Number(viewExitEvent.aptProceeds) / 10 ** 8,
+        5
+      );
 
-    // Compare proceeds separately as they can differ from the event and db by 1 due to rounding differences
-    expectObjectEqualityExceptEventIndexAndVersion(
-      { ...dbExitEvent.exit, aptProceeds: 0n },
-      { ...viewExitEvent, aptProceeds: 0n, duringMelee: false }
-    );
-  }, Number(LONGER_MELEE_DURATION) * 3);
+      // Compare proceeds separately as they can differ from the event and db by 1 due to rounding differences
+      expectObjectEqualityExceptEventIndexAndVersion(
+        { ...dbExitEvent.exit, aptProceeds: 0n },
+        { ...viewExitEvent, aptProceeds: 0n, duringMelee: false }
+      );
+    },
+    Number(LONGER_MELEE_DURATION) * 3
+  );
 
   describe("ensures leaderboard history is working", () => {
     const emojicoin = new EmojicoinClient();
