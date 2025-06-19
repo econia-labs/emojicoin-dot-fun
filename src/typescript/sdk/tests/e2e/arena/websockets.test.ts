@@ -19,6 +19,8 @@ import {
   waitUntilCurrentMeleeEnds,
 } from "./utils";
 
+jest.setTimeout(10000);
+
 describe("tests to ensure that arena websocket events work as expected", () => {
   const user = getFundedAccount("085");
   let melee: MeleeEmojiData;

@@ -63,7 +63,8 @@ export const waitUntilCurrentMeleeEnds = async () => {
     if (end - now <= 0) {
       resolve(null);
     }
-    const delay = Math.max(end - now + 1000, 0);
+    // + 3000ms to account for time drift between the js client and the blockchain time.
+    const delay = Math.max(end - now + 3000, 0);
     setTimeout(() => resolve(null), delay);
   });
 

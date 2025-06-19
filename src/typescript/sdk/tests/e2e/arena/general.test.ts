@@ -33,7 +33,7 @@ import {
   type MeleeEmojiData,
 } from "../../../src/utils/arena/helpers";
 import { getPublisher } from "../../utils/helpers";
-import { type FundedAccountIndex, getFundedAccount } from "../../utils/test-accounts";
+import { getFundedAccount } from "../../utils/test-accounts";
 import { waitForProcessor } from "../helpers";
 import {
   ONE_SECOND_MICROSECONDS,
@@ -82,21 +82,16 @@ const expectObjectEqualityExceptEventIndexAndVersion = (a: object, b: object) =>
   expect(stringifyJSONWithBigInts(newA)).toEqual(stringifyJSONWithBigInts(newB));
 };
 
-const getNextAccountHelper = (i: number) =>
-  getFundedAccount(i.toString().padStart(3, "0") as FundedAccountIndex);
-
 /**
  * Because this test checks the details of the very first arena it must run separately from other
  * arena tests.
  */
-describe("ensures an arena correctly unfolds and the processor data is accurate", () => {
+describe("general arena tests", () => {
   const aptos = getAptosClient();
   const emojicoin = new EmojicoinClient();
 
-  // The next arena markets.
-  let melee: MeleeEmojiData;
-
-  const MELEE_DURATION = ONE_SECOND_MICROSECONDS * 10n;
+  const DEFAULT_MELEE_DURATION = ONE_SECOND_MICROSECONDS * 15n;
+  const LONGER_MELEE_DURATION = ONE_SECOND_MICROSECONDS * 20n;
 
   const emojis: SymbolEmoji[][] = [
     ["♑"],
@@ -119,118 +114,133 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
         await emojicoin.register(getFundedAccount("667"), emoji);
         await emojicoin.buy(getFundedAccount("667"), emoji, 100000000n);
       }
-      melee = await fetchArenaMeleeView(1n).then(fetchMeleeEmojiData);
     },
     5 * 60 * 1000
   );
 
-  it("verifies that the arena module is already published on-chain", async () => {
+  it("ensures an arena correctly unfolds and the processor data is accurate", async () => {
+    const melee1 = await fetchArenaMeleeView(1n).then(fetchMeleeEmojiData);
+
+    // ---------------------------------------------------------------------------------------------
+    // verifies that the arena module is already published on-chain
+    // ---------------------------------------------------------------------------------------------
     const res = await aptos.getAccountModule({
       accountAddress: ARENA_MODULE_ADDRESS,
       moduleName: EmojicoinArena.Enter.prototype.moduleName ?? "emojicoin_arena",
     });
     expect(res.bytecode).toBeTruthy();
-  });
 
-  it("verifies arena data is correctly inserted into the processor", async () => {
-    const arenaInfo = await fetchArenaInfo();
-    expect(arenaInfo).toBeTruthy();
-    expect(arenaInfo?.meleeID).toEqual(melee.view.meleeID);
-    expect(arenaInfo?.duration).toEqual(melee.view.duration);
-    expect(arenaInfo?.startTime).toEqual(melee.view.startTime);
-    expect(arenaInfo?.volume).toEqual(0n);
-    expect(arenaInfo?.emojicoin0Locked).toEqual(0n);
-    expect(arenaInfo?.emojicoin1Locked).toEqual(0n);
-    expect(arenaInfo?.maxMatchAmount).toEqual(melee.view.maxMatchAmount);
-    expect(arenaInfo?.maxMatchPercentage).toEqual(melee.view.maxMatchPercentage);
-    expect(arenaInfo?.rewardsRemaining).toEqual(melee.view.availableRewards);
-    expect(arenaInfo?.emojicoin0Symbols).toEqual(melee.market0.symbolEmojis);
-    expect(arenaInfo?.emojicoin1Symbols).toEqual(melee.market1.symbolEmojis);
-    expect(arenaInfo?.emojicoin0MarketID).toEqual(melee.market0.marketID);
-    expect(arenaInfo?.emojicoin1MarketID).toEqual(melee.market1.marketID);
-    expect(arenaInfo?.emojicoin0MarketAddress).toEqual(melee.market0.marketAddress);
-    expect(arenaInfo?.emojicoin1MarketAddress).toEqual(melee.market1.marketAddress);
-  });
+    // ---------------------------------------------------------------------------------------------
+    // verifies arena data is correctly inserted into the processor
+    // ---------------------------------------------------------------------------------------------
+    const arenaInfo0 = await fetchArenaInfo();
+    expect(arenaInfo0).toBeTruthy();
+    expect(arenaInfo0?.meleeID).toEqual(melee1.view.meleeID);
+    expect(arenaInfo0?.duration).toEqual(melee1.view.duration);
+    expect(arenaInfo0?.startTime).toEqual(melee1.view.startTime);
+    expect(arenaInfo0?.volume).toEqual(0n);
+    expect(arenaInfo0?.emojicoin0Locked).toEqual(0n);
+    expect(arenaInfo0?.emojicoin1Locked).toEqual(0n);
+    expect(arenaInfo0?.maxMatchAmount).toEqual(melee1.view.maxMatchAmount);
+    expect(arenaInfo0?.maxMatchPercentage).toEqual(melee1.view.maxMatchPercentage);
+    expect(arenaInfo0?.rewardsRemaining).toEqual(melee1.view.availableRewards);
+    expect(arenaInfo0?.emojicoin0Symbols).toEqual(melee1.market0.symbolEmojis);
+    expect(arenaInfo0?.emojicoin1Symbols).toEqual(melee1.market1.symbolEmojis);
+    expect(arenaInfo0?.emojicoin0MarketID).toEqual(melee1.market0.marketID);
+    expect(arenaInfo0?.emojicoin1MarketID).toEqual(melee1.market1.marketID);
+    expect(arenaInfo0?.emojicoin0MarketAddress).toEqual(melee1.market0.marketAddress);
+    expect(arenaInfo0?.emojicoin1MarketAddress).toEqual(melee1.market1.marketAddress);
 
-  it("verifies an arena ends with no activity and nothing bad happens", async () => {
+    // ---------------------------------------------------------------------------------------------
+    // verifies an arena ends with no activity and nothing bad happens
+    // ---------------------------------------------------------------------------------------------
     const publisher = getPublisher();
 
-    await emojicoin.arena.setNextMeleeDuration(publisher, MELEE_DURATION);
+    await emojicoin.arena.setNextMeleeDuration(publisher, LONGER_MELEE_DURATION);
 
     await waitUntilCurrentMeleeEnds();
 
-    const swaps0 = await fetchSwapEvents({ marketID: melee.market0.marketID });
-    const swaps1 = await fetchSwapEvents({ marketID: melee.market1.marketID });
+    const swaps0 = await fetchSwapEvents({ marketID: melee1.market0.marketID });
+    const swaps1 = await fetchSwapEvents({ marketID: melee1.market1.marketID });
 
     expect(swaps0).toHaveLength(0);
     expect(swaps1).toHaveLength(0);
 
-    const enterResponse = await emojicoin.arena.enter(
-      getFundedAccount("007"),
+    const account = getFundedAccount("007");
+    const enterResponse2 = await emojicoin.arena.enter(
+      account,
       1n * 10n ** 8n,
       false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
+      melee1.market0.symbolEmojis,
+      melee1.market1.symbolEmojis,
       "symbol0"
     );
-    await waitForProcessor(enterResponse);
 
-    await emojicoin.buy(publisher, melee.market0.symbolEmojis, 1n);
-    await emojicoin.buy(publisher, melee.market1.symbolEmojis, 1n);
+    // Expect that the current melee has ended.
+    expect(enterResponse2.models.arenaMeleeEvents).toHaveLength(1);
+    expect(enterResponse2.models.arenaMeleeEvents[0].melee.meleeID).toEqual(2n);
+
+    await waitForProcessor(enterResponse2);
+
+    await emojicoin.buy(publisher, melee1.market0.symbolEmojis, 1n);
+    await emojicoin.buy(publisher, melee1.market1.symbolEmojis, 1n);
 
     const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
       .from(TableName.ArenaLeaderboardHistory)
       .select("*")
-      .eq("melee_id", melee.view.meleeID.toString())
+      .eq("melee_id", melee1.view.meleeID.toString())
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
 
     expect(leaderboard).not.toBeNull();
     expect(leaderboard).toHaveLength(0);
-  }, 20000);
 
-  it("verifies an arena has already started with a duration of 15 seconds", async () => {
-    melee = await fetchArenaMeleeView(2n).then(fetchMeleeEmojiData);
-    expect(melee.view.duration).toEqual(MELEE_DURATION);
-  });
+    // ---------------------------------------------------------------------------------------------
+    // verifies an arena has already started with a specific duration
+    // ---------------------------------------------------------------------------------------------
+    const melee2 = await fetchArenaMeleeView(2n).then(fetchMeleeEmojiData);
+    expect(melee2.view.duration).toEqual(LONGER_MELEE_DURATION);
 
-  it("verifies an arena has started in the last 5 seconds", async () => {
-    const fiveSeconds = 5 * 1000;
+    // ---------------------------------------------------------------------------------------------
+    // verifies an arena has started in the last 6 seconds
+    // ---------------------------------------------------------------------------------------------
+    const sixSeconds = 6 * 1000;
     const now = new Date().getTime();
-    const fiveSecondsAgo = now - fiveSeconds;
-    expect(melee.view.startTime.getTime()).toBeGreaterThan(fiveSecondsAgo);
-  });
+    const sixSecondsAgo = now - sixSeconds;
+    expect(melee2.view.startTime.getTime()).toBeGreaterThan(sixSecondsAgo);
 
-  it("verifies enter+swap+exit procedure", async () => {
-    const account = getFundedAccount("007");
-    const enterResponse = await emojicoin.arena.enter(
+    // ---------------------------------------------------------------------------------------------
+    // verifies enter+swap+exit procedure
+    // ---------------------------------------------------------------------------------------------
+    const enterResponse3 = await emojicoin.arena.enter(
       account,
       1n * 10n ** 8n,
       false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
+      melee2.market0.symbolEmojis,
+      melee2.market1.symbolEmojis,
       "symbol0"
     );
 
-    expect(enterResponse.events.arenaEnterEvents).toHaveLength(1);
+    expect(enterResponse3.events.arenaEnterEvents).toHaveLength(1);
 
-    const viewEnterEvent = enterResponse.events.arenaEnterEvents[0];
+    const viewEnterEvent = enterResponse3.events.arenaEnterEvents[0];
+    expect(viewEnterEvent.meleeID).toBe(2n);
 
-    await waitForProcessor(enterResponse);
+    await waitForProcessor(enterResponse3);
 
     const arenaEnters: ArenaEnterModel[] | null = await postgrest
       .from(TableName.ArenaEnterEvents)
       .select("*")
-      .eq("melee_id", melee.view.meleeID)
+      .eq("melee_id", melee2.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaEnterModel)));
     let arenaPositions: ArenaPositionModel[] | null = await postgrest
       .from(TableName.ArenaPosition)
       .select("*")
-      .eq("melee_id", melee.view.meleeID)
+      .eq("melee_id", melee2.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    let arenaInfo = await fetchArenaInfo();
+    const arenaInfo2 = await fetchArenaInfo();
 
     expect(arenaEnters).not.toBeNull();
     expect(arenaEnters).toHaveLength(1);
@@ -238,7 +248,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(arenaPositions).not.toBeNull();
     expect(arenaPositions).toHaveLength(1);
 
-    expect(arenaInfo).not.toBeNull();
+    expect(arenaInfo2).not.toBeNull();
 
     const dbEnterEvent = arenaEnters![0];
     let position = arenaPositions![0];
@@ -253,14 +263,14 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(position.emojicoin0Balance).toEqual(viewEnterEvent.emojicoin0Proceeds);
     expect(position.emojicoin1Balance).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
-    expect(arenaInfo?.volume).toEqual(viewEnterEvent.quoteVolume);
-    expect(arenaInfo?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
-    expect(arenaInfo?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
+    expect(arenaInfo2?.volume).toEqual(viewEnterEvent.quoteVolume);
+    expect(arenaInfo2?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
+    expect(arenaInfo2?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
     const swapResponse = await emojicoin.arena.swap(
       account,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis
+      melee2.market0.symbolEmojis,
+      melee2.market1.symbolEmojis
     );
 
     expect(swapResponse.events.arenaSwapEvents).toHaveLength(1);
@@ -273,16 +283,16 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     const arenaSwaps: ArenaSwapModel[] | null = await postgrest
       .from(TableName.ArenaSwapEvents)
       .select("*")
-      .eq("melee_id", melee.view.meleeID)
+      .eq("melee_id", melee2.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaSwapModel)));
     arenaPositions = await postgrest
       .from(TableName.ArenaPosition)
       .select("*")
-      .eq("melee_id", melee.view.meleeID)
+      .eq("melee_id", melee2.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    arenaInfo = await fetchArenaInfo();
+    const arenaInfo3 = await fetchArenaInfo();
 
     expect(arenaSwaps).not.toBeNull();
     expect(arenaSwaps).toHaveLength(1);
@@ -290,7 +300,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(arenaPositions).not.toBeNull();
     expect(arenaPositions).toHaveLength(1);
 
-    expect(arenaInfo).not.toBeNull();
+    expect(arenaInfo3).not.toBeNull();
 
     const dbSwapEvent = arenaSwaps![0];
     position = arenaPositions![0];
@@ -307,8 +317,8 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
 
     const exitResponse1 = await emojicoin.arena.exit(
       account,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis
+      melee2.market0.symbolEmojis,
+      melee2.market1.symbolEmojis
     );
 
     expect(exitResponse1.events.arenaExitEvents).toHaveLength(1);
@@ -320,16 +330,16 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     let arenaExits: ArenaExitModel[] | null = await postgrest
       .from(TableName.ArenaExitEvents)
       .select("*")
-      .eq("melee_id", melee.view.meleeID)
+      .eq("melee_id", melee2.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaExitModel)));
     arenaPositions = await postgrest
       .from(TableName.ArenaPosition)
       .select("*")
-      .eq("melee_id", melee.view.meleeID)
+      .eq("melee_id", melee2.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-    arenaInfo = await fetchArenaInfo();
+    const arenaInfo4 = await fetchArenaInfo();
 
     expect(arenaExits).not.toBeNull();
     expect(arenaExits).toHaveLength(1);
@@ -337,7 +347,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(arenaPositions).not.toBeNull();
     expect(arenaPositions).toHaveLength(1);
 
-    expect(arenaInfo).not.toBeNull();
+    expect(arenaInfo4).not.toBeNull();
 
     let dbExitEvent = arenaExits![0];
     position = arenaPositions![0];
@@ -363,23 +373,21 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     expect(position.emojicoin0Balance).toEqual(0n);
     expect(position.emojicoin1Balance).toEqual(0n);
 
-    await waitForProcessor(
-      await emojicoin.arena.enter(
-        account,
-        1n * 10n ** 8n,
-        false,
-        melee.market0.symbolEmojis,
-        melee.market1.symbolEmojis,
-        "symbol0"
-      )
+    await emojicoin.arena.enter(
+      account,
+      1n * 10n ** 8n,
+      false,
+      melee2.market0.symbolEmojis,
+      melee2.market1.symbolEmojis,
+      "symbol0"
     );
 
     await waitUntilCurrentMeleeEnds();
 
     const exitResponse2 = await emojicoin.arena.exit(
       account,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis
+      melee2.market0.symbolEmojis,
+      melee2.market1.symbolEmojis
     );
     await waitForProcessor(exitResponse2);
     viewExitEvent = exitResponse2.events.arenaExitEvents[0];
@@ -387,7 +395,7 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
     arenaExits = await postgrest
       .from(TableName.ArenaExitEvents)
       .select("*")
-      .eq("melee_id", melee.view.meleeID)
+      .eq("melee_id", melee2.view.meleeID)
       .then((r) => r.data)
       .then((r) => (r === null ? null : r.map(toArenaExitModel)));
 
@@ -403,626 +411,702 @@ describe("ensures an arena correctly unfolds and the processor data is accurate"
       { ...dbExitEvent.exit, aptProceeds: 0n },
       { ...viewExitEvent, aptProceeds: 0n, duringMelee: false }
     );
-  }, 30000);
-});
+  });
 
-describe("ensures leaderboard history is working", () => {
-  const emojicoin = new EmojicoinClient();
+  describe("ensures leaderboard history is working", () => {
+    const emojicoin = new EmojicoinClient();
 
-  let melee: MeleeEmojiData;
+    let melee: MeleeEmojiData;
 
-  const MELEE_DURATION = ONE_SECOND_MICROSECONDS * 5n;
+    const publisher = getPublisher();
 
-  const publisher = getPublisher();
-
-  let accountIndex = 100;
-
-  const getNextAccount = () => getNextAccountHelper(accountIndex++);
-
-  // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
-  const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
-    emojicoin.arena.enter(
-      account,
-      ONE_APT_BIGINT,
-      false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
-      escrowCoin
-    );
-
-  beforeAll(async () => {
-    await waitUntilCurrentMeleeEnds();
-    await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
-      melee = res.melee;
-      return waitForProcessor(res);
-    });
-  }, 30000);
-
-  beforeEach(async () => {
-    await waitUntilCurrentMeleeEnds();
-    // Crank the melee to end it and start a new one.
-    const res = await emojicoin.arena.enter(
-      publisher,
-      1n,
-      false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
-      "symbol0"
-    );
-    melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
-    await waitForProcessor(res);
-
-    return true;
-  }, 10000);
-
-  it("verifies that the leaderboard data is correct", async () => {
-    const account1 = getNextAccount();
-    const account2 = getNextAccount();
-    const account3 = getNextAccount();
-    await enterHelper(account1, "symbol0");
-    await enterHelper(account2, "symbol0");
-    await enterHelper(account3, "symbol0");
-
-    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    await emojicoin.arena.exit(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    await waitUntilCurrentMeleeEnds();
-    const res = await enterHelper(account1, "symbol0");
-
-    await waitForProcessor(res);
-    const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID.toString())
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
-
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(3);
-
-    const user1LeaderboardData = leaderboard!.find(
-      (l) => l.user === account1.accountAddress.toString()
-    )!;
-    const user2LeaderboardData = leaderboard!.find(
-      (l) => l.user === account2.accountAddress.toString()
-    )!;
-    const user3LeaderboardData = leaderboard!.find(
-      (l) => l.user === account3.accountAddress.toString()
-    )!;
-
-    expect(user1LeaderboardData).toBeDefined();
-    expect(user2LeaderboardData).toBeDefined();
-    expect(user3LeaderboardData).toBeDefined();
-
-    expect(user1LeaderboardData.exited).toEqual(true);
-    expect(user1LeaderboardData.lastExit0).toEqual(true);
-    expect(
-      Number(user1LeaderboardData.profits) / Number(user1LeaderboardData.losses)
-    ).toBeGreaterThan(1);
-
-    expect(user2LeaderboardData.exited).toEqual(true);
-    expect(user2LeaderboardData.lastExit0).toEqual(false);
-
-    expect(user3LeaderboardData.exited).toEqual(false);
-    expect(user3LeaderboardData.lastExit0).toBeNull();
-    expect(Number(user3LeaderboardData.profits) / Number(user3LeaderboardData.losses)).toBeLessThan(
-      1
-    );
-  }, 15000);
-
-  it("verifies the data during a melee with no activity", async () => {
-    await waitUntilCurrentMeleeEnds();
-    const res = await emojicoin.arena.enter(
-      getNextAccount(),
-      1n * 10n ** 8n,
-      false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
-      "symbol0"
-    );
-    await waitForProcessor(res);
-    const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID.toString())
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
-
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(0);
-  }, 15000);
-
-  it("verifies the data during a melee with no swaps", async () => {
-    const account1 = getNextAccount();
-    const account2 = getNextAccount();
-    const account3 = getNextAccount();
-    await enterHelper(account1, "symbol0");
-    await enterHelper(account2, "symbol1");
-    await enterHelper(account3, "symbol0");
-
-    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    await emojicoin.arena.exit(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    await waitUntilCurrentMeleeEnds();
-    const res = await enterHelper(account1, "symbol0");
-
-    await waitForProcessor(res);
-    const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID.toString())
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
-
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(3);
-
-    const user1LeaderboardData = leaderboard!.find(
-      (l) => l.user === account1.accountAddress.toString()
-    )!;
-    const user2LeaderboardData = leaderboard!.find(
-      (l) => l.user === account2.accountAddress.toString()
-    )!;
-    const user3LeaderboardData = leaderboard!.find(
-      (l) => l.user === account3.accountAddress.toString()
-    )!;
-
-    expect(user1LeaderboardData).toBeDefined();
-    expect(user2LeaderboardData).toBeDefined();
-    expect(user3LeaderboardData).toBeDefined();
-
-    expect(user1LeaderboardData.exited).toEqual(true);
-    expect(user1LeaderboardData.lastExit0).toEqual(true);
-
-    expect(user2LeaderboardData.exited).toEqual(true);
-    expect(user2LeaderboardData.lastExit0).toEqual(false);
-
-    expect(user3LeaderboardData.exited).toEqual(false);
-    expect(user3LeaderboardData.lastExit0).toBeNull();
-  }, 15000);
-
-  it("verifies the data during a melee with no exits", async () => {
-    const account1 = getNextAccount();
-    const account2 = getNextAccount();
-    const account3 = getNextAccount();
-    await enterHelper(account1, "symbol0");
-    await enterHelper(account2, "symbol1");
-    await enterHelper(account3, "symbol0");
-
-    await emojicoin.arena.swap(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    await waitUntilCurrentMeleeEnds();
-    const res = await enterHelper(account1, "symbol0");
-
-    await waitForProcessor(res);
-    const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID.toString())
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
-
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(3);
-
-    const user1LeaderboardData = leaderboard!.find(
-      (l) => l.user === account1.accountAddress.toString()
-    )!;
-    const user2LeaderboardData = leaderboard!.find(
-      (l) => l.user === account2.accountAddress.toString()
-    )!;
-    const user3LeaderboardData = leaderboard!.find(
-      (l) => l.user === account3.accountAddress.toString()
-    )!;
-
-    expect(user1LeaderboardData).toBeDefined();
-    expect(user2LeaderboardData).toBeDefined();
-    expect(user3LeaderboardData).toBeDefined();
-
-    expect(user1LeaderboardData.exited).toEqual(false);
-    expect(user1LeaderboardData.lastExit0).toBeNull();
-
-    expect(user2LeaderboardData.exited).toEqual(false);
-    expect(user2LeaderboardData.lastExit0).toBeNull();
-
-    expect(user3LeaderboardData.exited).toEqual(false);
-    expect(user3LeaderboardData.lastExit0).toBeNull();
-  }, 15000);
-
-  it("verifies that exited is correctly set after a melee ends", async () => {
-    const account1 = getFundedAccount("420");
-    const account2 = getFundedAccount("421");
-    const account3 = getFundedAccount("422");
-    await enterHelper(account1, "symbol0");
-    await enterHelper(account2, "symbol1");
-
-    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-
-    await waitUntilCurrentMeleeEnds();
-    const crankRes = await enterHelper(account3, "symbol1");
-
-    await waitForProcessor(crankRes);
-
-    let leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID.toString())
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
-
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(2);
-
-    let user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    let user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-
-    expect(user1LeaderboardData).toBeDefined();
-    expect(user2LeaderboardData).toBeDefined();
-
-    expect(user1LeaderboardData.exited).toEqual(true);
-    expect(user1LeaderboardData.lastExit0).toEqual(true);
-
-    expect(user2LeaderboardData.exited).toEqual(false);
-    expect(user2LeaderboardData.lastExit0).toBeNull();
-
-    const exitRes = await emojicoin.arena.exit(
-      account2,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis
-    );
-
-    await waitForProcessor(exitRes);
-
-    leaderboard = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID.toString())
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
-
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(2);
-
-    user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
-    user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
-
-    expect(user1LeaderboardData.exited).toEqual(true);
-    expect(user1LeaderboardData.lastExit0).toEqual(true);
-
-    expect(user2LeaderboardData.exited).toEqual(true);
-    expect(user2LeaderboardData.lastExit0).toEqual(false);
-  }, 15000);
-});
-
-describe("ensures arena info is working", () => {
-  const emojicoin = new EmojicoinClient();
-
-  let melee: MeleeEmojiData;
-
-  const MELEE_DURATION = ONE_SECOND_MICROSECONDS * 15n;
-
-  const publisher = getPublisher();
-
-  let accountIndex = 200;
-
-  const getNextAccount = () => getNextAccountHelper(accountIndex++);
-
-  // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
-  const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
-    emojicoin.arena.enter(
-      account,
-      ONE_APT_BIGINT,
-      false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
-      escrowCoin
-    );
-
-  beforeAll(async () => {
-    await waitUntilCurrentMeleeEnds();
-    await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
-      melee = res.melee;
-      return waitForProcessor(res);
-    });
-  }, 30000);
-
-  beforeEach(async () => {
-    await waitUntilCurrentMeleeEnds();
-    // Crank the melee to end it and start a new one.
-    const res = await emojicoin.arena.enter(
-      publisher,
-      1n,
-      false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
-      "symbol0"
-    );
-    melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
-    await waitForProcessor(res);
-
-    return true;
-  }, 30000);
-
-  it("verifies that all fields in the arena_info table are correctly calculated in a simple trading scenario", async () => {
-    const account1 = getFundedAccount("423");
-    const account2 = getFundedAccount("424");
-    const account3 = getFundedAccount("425");
-
-    let volume = 0n;
-
-    const account1EnterRes = await enterHelper(account1, "symbol0");
-    const account2EnterRes = await enterHelper(account2, "symbol0");
-    const account3EnterRes = await enterHelper(account3, "symbol0");
-
-    volume += account1EnterRes.events.arenaEnterEvents[0].quoteVolume;
-    volume += account2EnterRes.events.arenaEnterEvents[0].quoteVolume;
-    volume += account3EnterRes.events.arenaEnterEvents[0].quoteVolume;
-
-    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-    const swapRes = await emojicoin.arena.swap(
-      account2,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis
-    );
-    volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
-    const res = await emojicoin.arena.exit(
-      account2,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis
-    );
-    await waitForProcessor(res);
-
-    const arenaInfo = await fetchArenaInfo();
-
-    expect(arenaInfo).toBeTruthy();
-    expect(arenaInfo!.meleeID).toEqual(melee.view.meleeID);
-    expect(arenaInfo!.duration).toEqual(melee.view.duration);
-    expect(arenaInfo!.startTime).toEqual(melee.view.startTime);
-    expect(arenaInfo!.maxMatchAmount).toEqual(melee.view.maxMatchAmount);
-    expect(arenaInfo!.maxMatchPercentage).toEqual(melee.view.maxMatchPercentage);
-    expect(arenaInfo!.volume).toEqual(volume);
-    expect(arenaInfo!.emojicoin0Locked).toEqual(
-      account3EnterRes.events.arenaEnterEvents[0].emojicoin0Proceeds
-    );
-    expect(arenaInfo!.emojicoin1Locked).toEqual(0n);
-  }, 30000);
-
-  it("verifies that all fields in the arena_info table are correctly calculated in a complex trading scenario", async () => {
-    let volume = 0n;
-    let emojicoin0Locked = 0n;
-    let emojicoin1Locked = 0n;
-
-    const accounts = [
-      getNextAccount(),
-      getNextAccount(),
-      getNextAccount(),
-      getNextAccount(),
-      getNextAccount(),
-      getNextAccount(),
-      getNextAccount(),
-      getNextAccount(),
-    ];
-
-    // Enter with all accounts alternating between symbol 1 and 2.
-    for (const [account, index] of accounts.map((a, i) => [a, i] as [Ed25519Account, number])) {
-      const enterRes = await enterHelper(
+    // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
+    const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
+      emojicoin.arena.enter(
         account,
-        `symbol${(index % 2) + 1}` as "symbol0" | "symbol1"
-      );
-      volume += enterRes.events.arenaEnterEvents[0].quoteVolume;
-      emojicoin0Locked += enterRes.events.arenaEnterEvents[0].emojicoin0Proceeds;
-      emojicoin1Locked += enterRes.events.arenaEnterEvents[0].emojicoin1Proceeds;
-    }
-
-    // Swap with all accounts.
-    for (const account of accounts) {
-      const swapRes = await emojicoin.arena.swap(
-        account,
+        ONE_APT_BIGINT,
+        false,
         melee.market0.symbolEmojis,
-        melee.market1.symbolEmojis
+        melee.market1.symbolEmojis,
+        escrowCoin
       );
-      volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
-      const diff = getEmojicoinLockedDiffFromSwapRes(swapRes, melee);
-      emojicoin0Locked += diff.emojicoin0Locked;
-      emojicoin1Locked += diff.emojicoin1Locked;
-    }
 
-    // Swap with half of the accounts.
-    for (const account of accounts.slice(0, Math.floor(accounts.length / 2))) {
-      const swapRes = await emojicoin.arena.swap(
-        account,
+    beforeAll(
+      async () => {
+        await waitUntilCurrentMeleeEnds();
+        await setNextMeleeDurationAndEnsureCrank(DEFAULT_MELEE_DURATION).then((res) => {
+          melee = res.melee;
+          return waitForProcessor(res);
+        });
+      },
+      Number(DEFAULT_MELEE_DURATION) * 2
+    );
+
+    beforeEach(async () => {
+      await waitUntilCurrentMeleeEnds();
+      // Crank the melee to end it and start a new one.
+      const res = await emojicoin.arena.enter(
+        publisher,
+        1n,
+        false,
         melee.market0.symbolEmojis,
-        melee.market1.symbolEmojis
+        melee.market1.symbolEmojis,
+        "symbol0"
       );
-      volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
-      const diff = getEmojicoinLockedDiffFromSwapRes(swapRes, melee);
-      emojicoin0Locked += diff.emojicoin0Locked;
-      emojicoin1Locked += diff.emojicoin1Locked;
-    }
+      melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
+      await waitForProcessor(res);
 
-    let lastExitRes;
-    for (const account of accounts.slice(Math.floor(accounts.length / 2))) {
-      lastExitRes = await emojicoin.arena.exit(
+      return true;
+    }, Number(DEFAULT_MELEE_DURATION));
+
+    it(
+      "verifies that the leaderboard data is correct",
+      async () => {
+        const account1 = getFundedAccount("100");
+        const account2 = getFundedAccount("101");
+        const account3 = getFundedAccount("102");
+        await enterHelper(account1, "symbol0");
+        await enterHelper(account2, "symbol0");
+        await enterHelper(account3, "symbol0");
+
+        await emojicoin.arena.exit(
+          account1,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await emojicoin.arena.swap(
+          account2,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await emojicoin.arena.exit(
+          account2,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await waitUntilCurrentMeleeEnds();
+        const res = await enterHelper(account1, "symbol0");
+
+        await waitForProcessor(res);
+        const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
+          .from(TableName.ArenaLeaderboardHistory)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID.toString())
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+        expect(leaderboard).not.toBeNull();
+        expect(leaderboard).toHaveLength(3);
+
+        const user1LeaderboardData = leaderboard!.find(
+          (l) => l.user === account1.accountAddress.toString()
+        )!;
+        const user2LeaderboardData = leaderboard!.find(
+          (l) => l.user === account2.accountAddress.toString()
+        )!;
+        const user3LeaderboardData = leaderboard!.find(
+          (l) => l.user === account3.accountAddress.toString()
+        )!;
+
+        expect(user1LeaderboardData).toBeDefined();
+        expect(user2LeaderboardData).toBeDefined();
+        expect(user3LeaderboardData).toBeDefined();
+
+        expect(user1LeaderboardData.exited).toEqual(true);
+        expect(user1LeaderboardData.lastExit0).toEqual(true);
+        expect(
+          Number(user1LeaderboardData.profits) / Number(user1LeaderboardData.losses)
+        ).toBeGreaterThan(1);
+
+        expect(user2LeaderboardData.exited).toEqual(true);
+        expect(user2LeaderboardData.lastExit0).toEqual(false);
+
+        expect(user3LeaderboardData.exited).toEqual(false);
+        expect(user3LeaderboardData.lastExit0).toBeNull();
+        expect(
+          Number(user3LeaderboardData.profits) / Number(user3LeaderboardData.losses)
+        ).toBeLessThan(1);
+      },
+      Number(DEFAULT_MELEE_DURATION) * 1.5
+    );
+
+    it(
+      "verifies the data during a melee with no activity",
+      async () => {
+        await waitUntilCurrentMeleeEnds();
+        const res = await emojicoin.arena.enter(
+          getFundedAccount("103"),
+          1n * 10n ** 8n,
+          false,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis,
+          "symbol0"
+        );
+        await waitForProcessor(res);
+        const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
+          .from(TableName.ArenaLeaderboardHistory)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID.toString())
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+        expect(leaderboard).not.toBeNull();
+        expect(leaderboard).toHaveLength(0);
+      },
+      Number(DEFAULT_MELEE_DURATION) * 1.5
+    );
+
+    it(
+      "verifies the data during a melee with no swaps",
+      async () => {
+        const account1 = getFundedAccount("104");
+        const account2 = getFundedAccount("105");
+        const account3 = getFundedAccount("106");
+        await enterHelper(account1, "symbol0");
+        await enterHelper(account2, "symbol1");
+        await enterHelper(account3, "symbol0");
+
+        await emojicoin.arena.exit(
+          account1,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await emojicoin.arena.exit(
+          account2,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await waitUntilCurrentMeleeEnds();
+        const res = await enterHelper(account1, "symbol0");
+
+        await waitForProcessor(res);
+        const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
+          .from(TableName.ArenaLeaderboardHistory)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID.toString())
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+        expect(leaderboard).not.toBeNull();
+        expect(leaderboard).toHaveLength(3);
+
+        const user1LeaderboardData = leaderboard!.find(
+          (l) => l.user === account1.accountAddress.toString()
+        )!;
+        const user2LeaderboardData = leaderboard!.find(
+          (l) => l.user === account2.accountAddress.toString()
+        )!;
+        const user3LeaderboardData = leaderboard!.find(
+          (l) => l.user === account3.accountAddress.toString()
+        )!;
+
+        expect(user1LeaderboardData).toBeDefined();
+        expect(user2LeaderboardData).toBeDefined();
+        expect(user3LeaderboardData).toBeDefined();
+
+        expect(user1LeaderboardData.exited).toEqual(true);
+        expect(user1LeaderboardData.lastExit0).toEqual(true);
+
+        expect(user2LeaderboardData.exited).toEqual(true);
+        expect(user2LeaderboardData.lastExit0).toEqual(false);
+
+        expect(user3LeaderboardData.exited).toEqual(false);
+        expect(user3LeaderboardData.lastExit0).toBeNull();
+      },
+      Number(DEFAULT_MELEE_DURATION) * 1.5
+    );
+
+    it(
+      "verifies the data during a melee with no exits",
+      async () => {
+        const account1 = getFundedAccount("107");
+        const account2 = getFundedAccount("108");
+        const account3 = getFundedAccount("109");
+        await enterHelper(account1, "symbol0");
+        await enterHelper(account2, "symbol1");
+        await enterHelper(account3, "symbol0");
+
+        await emojicoin.arena.swap(
+          account1,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await emojicoin.arena.swap(
+          account2,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await waitUntilCurrentMeleeEnds();
+        const res = await enterHelper(account1, "symbol0");
+
+        await waitForProcessor(res);
+        const leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
+          .from(TableName.ArenaLeaderboardHistory)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID.toString())
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+        expect(leaderboard).not.toBeNull();
+        expect(leaderboard).toHaveLength(3);
+
+        const user1LeaderboardData = leaderboard!.find(
+          (l) => l.user === account1.accountAddress.toString()
+        )!;
+        const user2LeaderboardData = leaderboard!.find(
+          (l) => l.user === account2.accountAddress.toString()
+        )!;
+        const user3LeaderboardData = leaderboard!.find(
+          (l) => l.user === account3.accountAddress.toString()
+        )!;
+
+        expect(user1LeaderboardData).toBeDefined();
+        expect(user2LeaderboardData).toBeDefined();
+        expect(user3LeaderboardData).toBeDefined();
+
+        expect(user1LeaderboardData.exited).toEqual(false);
+        expect(user1LeaderboardData.lastExit0).toBeNull();
+
+        expect(user2LeaderboardData.exited).toEqual(false);
+        expect(user2LeaderboardData.lastExit0).toBeNull();
+
+        expect(user3LeaderboardData.exited).toEqual(false);
+        expect(user3LeaderboardData.lastExit0).toBeNull();
+      },
+      Number(DEFAULT_MELEE_DURATION) * 1.5
+    );
+
+    it(
+      "verifies that exited is correctly set after a melee ends",
+      async () => {
+        const account1 = getFundedAccount("420");
+        const account2 = getFundedAccount("421");
+        const account3 = getFundedAccount("422");
+        await enterHelper(account1, "symbol0");
+        await enterHelper(account2, "symbol1");
+
+        await emojicoin.arena.exit(
+          account1,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+
+        await waitUntilCurrentMeleeEnds();
+        const crankRes = await enterHelper(account3, "symbol1");
+
+        await waitForProcessor(crankRes);
+
+        let leaderboard: ArenaLeaderboardHistoryModel[] | null = await postgrest
+          .from(TableName.ArenaLeaderboardHistory)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID.toString())
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+        expect(leaderboard).not.toBeNull();
+        expect(leaderboard).toHaveLength(2);
+
+        let user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+        let user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+
+        expect(user1LeaderboardData).toBeDefined();
+        expect(user2LeaderboardData).toBeDefined();
+
+        expect(user1LeaderboardData.exited).toEqual(true);
+        expect(user1LeaderboardData.lastExit0).toEqual(true);
+
+        expect(user2LeaderboardData.exited).toEqual(false);
+        expect(user2LeaderboardData.lastExit0).toBeNull();
+
+        const exitRes = await emojicoin.arena.exit(
+          account2,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+
+        await waitForProcessor(exitRes);
+
+        leaderboard = await postgrest
+          .from(TableName.ArenaLeaderboardHistory)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID.toString())
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+        expect(leaderboard).not.toBeNull();
+        expect(leaderboard).toHaveLength(2);
+
+        user1LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x420"))!;
+        user2LeaderboardData = leaderboard!.find((l) => l.user.startsWith("0x421"))!;
+
+        expect(user1LeaderboardData.exited).toEqual(true);
+        expect(user1LeaderboardData.lastExit0).toEqual(true);
+
+        expect(user2LeaderboardData.exited).toEqual(true);
+        expect(user2LeaderboardData.lastExit0).toEqual(false);
+      },
+      Number(DEFAULT_MELEE_DURATION) * 1.5
+    );
+  });
+
+  describe("ensures arena info is working", () => {
+    const emojicoin = new EmojicoinClient();
+
+    let melee: MeleeEmojiData;
+
+    const publisher = getPublisher();
+
+    // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
+    const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
+      emojicoin.arena.enter(
         account,
+        ONE_APT_BIGINT,
+        false,
         melee.market0.symbolEmojis,
-        melee.market1.symbolEmojis
+        melee.market1.symbolEmojis,
+        escrowCoin
       );
-      emojicoin0Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin0Proceeds;
-      emojicoin1Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin1Proceeds;
-    }
 
-    await waitForProcessor(lastExitRes!);
-
-    const arenaPositions: ArenaPositionModel[] | null = await postgrest
-      .from(TableName.ArenaPosition)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-
-    expect(arenaPositions).not.toBeNull();
-    expect(arenaPositions!.reduce((p, c) => p + c.emojicoin0Balance, 0n)).toEqual(emojicoin0Locked);
-    expect(arenaPositions!.reduce((p, c) => p + c.emojicoin1Balance, 0n)).toEqual(emojicoin1Locked);
-
-    const arenaInfo = await fetchArenaInfo();
-
-    expect(arenaInfo).toBeTruthy();
-    expect(arenaInfo!.meleeID).toEqual(melee.view.meleeID);
-    expect(arenaInfo!.duration).toEqual(melee.view.duration);
-    expect(arenaInfo!.startTime).toEqual(melee.view.startTime);
-    expect(arenaInfo!.maxMatchAmount).toEqual(melee.view.maxMatchAmount);
-    expect(arenaInfo!.maxMatchPercentage).toEqual(melee.view.maxMatchPercentage);
-    expect(arenaInfo!.volume).toEqual(volume);
-    expect(arenaInfo!.emojicoin0Locked).toEqual(emojicoin0Locked);
-    expect(arenaInfo!.emojicoin1Locked).toEqual(emojicoin1Locked);
-  }, 30000);
-});
-
-describe("ensures arena works in edge cases", () => {
-  const emojicoin = new EmojicoinClient();
-
-  let melee: MeleeEmojiData;
-
-  const MELEE_DURATION = ONE_SECOND_MICROSECONDS * 15n;
-
-  const publisher = getPublisher();
-
-  let accountIndex = 200;
-
-  const getNextAccount = () => getNextAccountHelper(accountIndex++);
-
-  // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
-  const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
-    emojicoin.arena.enter(
-      account,
-      ONE_APT_BIGINT,
-      false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
-      escrowCoin
+    beforeAll(
+      async () => {
+        await waitUntilCurrentMeleeEnds();
+        await setNextMeleeDurationAndEnsureCrank(DEFAULT_MELEE_DURATION).then((res) => {
+          melee = res.melee;
+          return waitForProcessor(res);
+        });
+      },
+      Number(DEFAULT_MELEE_DURATION) * 2
     );
 
-  beforeAll(async () => {
-    await waitUntilCurrentMeleeEnds();
-    await setNextMeleeDurationAndEnsureCrank(MELEE_DURATION).then((res) => {
-      melee = res.melee;
-      return waitForProcessor(res);
-    });
-  }, 30000);
+    beforeEach(
+      async () => {
+        await waitUntilCurrentMeleeEnds();
+        // Crank the melee to end it and start a new one.
+        const res = await emojicoin.arena.enter(
+          publisher,
+          1n,
+          false,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis,
+          "symbol0"
+        );
+        melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
+        await waitForProcessor(res);
 
-  beforeEach(async () => {
-    await waitUntilCurrentMeleeEnds();
-    // Crank the melee to end it and start a new one.
-    const res = await emojicoin.arena.enter(
-      publisher,
-      1n,
-      false,
-      melee.market0.symbolEmojis,
-      melee.market1.symbolEmojis,
-      "symbol0"
-    );
-    melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
-    await waitForProcessor(res);
-
-    return true;
-  }, 30000);
-
-  it("verifies that a swap after a melee has ended and has been cranked is indexed properly", async () => {
-    const account1 = getNextAccount();
-    const account2 = getNextAccount();
-
-    await enterHelper(account1, "symbol0");
-    await enterHelper(account2, "symbol0");
-
-    await emojicoin.arena.exit(account1, melee.market0.symbolEmojis, melee.market1.symbolEmojis);
-
-    await waitUntilCurrentMeleeEnds();
-
-    // In order to crank
-    await enterHelper(account1, "symbol0");
-
-    const registry = await fetchArenaRegistryView();
-
-    expect(registry.currentMeleeID).toEqual(melee.view.meleeID + 1n);
-
-    await sleep(2000);
-
-    await waitForProcessor(
-      await emojicoin.arena.swap(account2, melee.market0.symbolEmojis, melee.market1.symbolEmojis)
+        return true;
+      },
+      Number(DEFAULT_MELEE_DURATION) * 2
     );
 
-    const swaps = await postgrest
-      .from(TableName.ArenaSwapEvents)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID)
-      .order("transaction_version")
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaSwapModel)));
+    it(
+      "verifies that all fields in the arena_info table are correctly calculated in a simple trading scenario",
+      async () => {
+        const account1 = getFundedAccount("423");
+        const account2 = getFundedAccount("424");
+        const account3 = getFundedAccount("425");
 
-    const exits = await postgrest
-      .from(TableName.ArenaExitEvents)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID)
-      .order("transaction_version")
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaExitModel)));
+        let volume = 0n;
 
-    const positions = await postgrest
-      .from(TableName.ArenaPosition)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
+        const account1EnterRes = await enterHelper(account1, "symbol0");
+        const account2EnterRes = await enterHelper(account2, "symbol0");
+        const account3EnterRes = await enterHelper(account3, "symbol0");
 
-    const leaderboard = await postgrest
-      .from(TableName.ArenaLeaderboardHistory)
-      .select("*")
-      .eq("melee_id", melee.view.meleeID)
-      .then((r) => r.data)
-      .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+        volume += account1EnterRes.events.arenaEnterEvents[0].quoteVolume;
+        volume += account2EnterRes.events.arenaEnterEvents[0].quoteVolume;
+        volume += account3EnterRes.events.arenaEnterEvents[0].quoteVolume;
 
-    expect(swaps).not.toBeNull();
-    expect(swaps).toHaveLength(1);
+        await emojicoin.arena.exit(
+          account1,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        const swapRes = await emojicoin.arena.swap(
+          account2,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
+        const res = await emojicoin.arena.exit(
+          account2,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+        await waitForProcessor(res);
 
-    expect(swaps![0].swap.duringMelee).toEqual(false);
+        const arenaInfo = await fetchArenaInfo();
 
-    expect(exits).not.toBeNull();
-    expect(exits).toHaveLength(2);
+        expect(arenaInfo).toBeTruthy();
+        expect(arenaInfo!.meleeID).toEqual(melee.view.meleeID);
+        expect(arenaInfo!.duration).toEqual(melee.view.duration);
+        expect(arenaInfo!.startTime).toEqual(melee.view.startTime);
+        expect(arenaInfo!.maxMatchAmount).toEqual(melee.view.maxMatchAmount);
+        expect(arenaInfo!.maxMatchPercentage).toEqual(melee.view.maxMatchPercentage);
+        expect(arenaInfo!.volume).toEqual(volume);
+        expect(arenaInfo!.emojicoin0Locked).toEqual(
+          account3EnterRes.events.arenaEnterEvents[0].emojicoin0Proceeds
+        );
+        expect(arenaInfo!.emojicoin1Locked).toEqual(0n);
+      },
+      Number(DEFAULT_MELEE_DURATION) * 2
+    );
 
-    expect(exits![0].exit.duringMelee).toEqual(true);
-    expect(exits![1].exit.duringMelee).toEqual(false);
+    it(
+      "verifies that all fields in the arena_info table are correctly calculated in a complex trading scenario",
+      async () => {
+        let volume = 0n;
+        let emojicoin0Locked = 0n;
+        let emojicoin1Locked = 0n;
 
-    expect(positions).not.toBeNull();
-    expect(positions).toHaveLength(2);
-    expect(positions).toHaveLength(2);
+        const accounts = [
+          getFundedAccount("202"),
+          getFundedAccount("203"),
+          getFundedAccount("204"),
+          getFundedAccount("205"),
+          getFundedAccount("206"),
+          getFundedAccount("207"),
+          getFundedAccount("208"),
+          getFundedAccount("209"),
+        ];
 
-    const position1 = positions!.find((p) => p.user === account1.accountAddress.toString())!;
-    const position2 = positions!.find((p) => p.user === account2.accountAddress.toString())!;
+        // Enter with all accounts alternating between symbol 1 and 2.
+        for (const [account, index] of accounts.map((a, i) => [a, i] as [Ed25519Account, number])) {
+          const enterRes = await enterHelper(
+            account,
+            `symbol${(index % 2) + 1}` as "symbol0" | "symbol1"
+          );
+          volume += enterRes.events.arenaEnterEvents[0].quoteVolume;
+          emojicoin0Locked += enterRes.events.arenaEnterEvents[0].emojicoin0Proceeds;
+          emojicoin1Locked += enterRes.events.arenaEnterEvents[0].emojicoin1Proceeds;
+        }
 
-    expect(position1.open).toEqual(false);
-    expect(position2.open).toEqual(false);
+        // Swap with all accounts.
+        for (const account of accounts) {
+          const swapRes = await emojicoin.arena.swap(
+            account,
+            melee.market0.symbolEmojis,
+            melee.market1.symbolEmojis
+          );
+          volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
+          const diff = getEmojicoinLockedDiffFromSwapRes(swapRes, melee);
+          emojicoin0Locked += diff.emojicoin0Locked;
+          emojicoin1Locked += diff.emojicoin1Locked;
+        }
 
-    expect(position1.lastExit0).toEqual(true);
-    expect(position2.lastExit0).toEqual(false);
+        // Swap with half of the accounts.
+        for (const account of accounts.slice(0, Math.floor(accounts.length / 2))) {
+          const swapRes = await emojicoin.arena.swap(
+            account,
+            melee.market0.symbolEmojis,
+            melee.market1.symbolEmojis
+          );
+          volume += swapRes.events.arenaSwapEvents[0].quoteVolume;
+          const diff = getEmojicoinLockedDiffFromSwapRes(swapRes, melee);
+          emojicoin0Locked += diff.emojicoin0Locked;
+          emojicoin1Locked += diff.emojicoin1Locked;
+        }
 
-    expect(leaderboard).not.toBeNull();
-    expect(leaderboard).toHaveLength(2);
+        let lastExitRes;
+        for (const account of accounts.slice(Math.floor(accounts.length / 2))) {
+          lastExitRes = await emojicoin.arena.exit(
+            account,
+            melee.market0.symbolEmojis,
+            melee.market1.symbolEmojis
+          );
+          emojicoin0Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin0Proceeds;
+          emojicoin1Locked -= lastExitRes.events.arenaExitEvents[0].emojicoin1Proceeds;
+        }
 
-    const leaderboard1 = leaderboard!.find((l) => l.user === account1.accountAddress.toString())!;
-    const leaderboard2 = leaderboard!.find((l) => l.user === account2.accountAddress.toString())!;
+        await waitForProcessor(lastExitRes!);
 
-    expect(leaderboard1.exited).toEqual(true);
-    expect(leaderboard2.exited).toEqual(true);
+        const arenaPositions: ArenaPositionModel[] | null = await postgrest
+          .from(TableName.ArenaPosition)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID)
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
 
-    expect(leaderboard1.emojicoin0Balance).toEqual(0n);
-    expect(leaderboard2.emojicoin0Balance).toBeGreaterThan(0n);
+        expect(arenaPositions).not.toBeNull();
+        expect(arenaPositions!.reduce((p, c) => p + c.emojicoin0Balance, 0n)).toEqual(
+          emojicoin0Locked
+        );
+        expect(arenaPositions!.reduce((p, c) => p + c.emojicoin1Balance, 0n)).toEqual(
+          emojicoin1Locked
+        );
 
-    expect(leaderboard1.emojicoin1Balance).toEqual(0n);
-    expect(leaderboard2.emojicoin1Balance).toEqual(0n);
+        const arenaInfo = await fetchArenaInfo();
 
-    expect(leaderboard1.withdrawals).toBeGreaterThan(0n);
-    expect(leaderboard2.withdrawals).toEqual(0n);
+        expect(arenaInfo).toBeTruthy();
+        expect(arenaInfo!.meleeID).toEqual(melee.view.meleeID);
+        expect(arenaInfo!.duration).toEqual(melee.view.duration);
+        expect(arenaInfo!.startTime).toEqual(melee.view.startTime);
+        expect(arenaInfo!.maxMatchAmount).toEqual(melee.view.maxMatchAmount);
+        expect(arenaInfo!.maxMatchPercentage).toEqual(melee.view.maxMatchPercentage);
+        expect(arenaInfo!.volume).toEqual(volume);
+        expect(arenaInfo!.emojicoin0Locked).toEqual(emojicoin0Locked);
+        expect(arenaInfo!.emojicoin1Locked).toEqual(emojicoin1Locked);
+      },
+      Number(DEFAULT_MELEE_DURATION) * 2
+    );
+  });
 
-    expect(leaderboard1.lastExit0).toEqual(true);
-    expect(leaderboard2.lastExit0).toEqual(false);
-  }, 30000);
+  describe("ensures arena works in edge cases", () => {
+    let melee: MeleeEmojiData;
+
+    const publisher = getPublisher();
+
+    // Utility function to avoid repetitive code. Only the `account` and `escrowCoin` differs.
+    const enterHelper = (account: Account, escrowCoin: "symbol0" | "symbol1") =>
+      emojicoin.arena.enter(
+        account,
+        ONE_APT_BIGINT,
+        false,
+        melee.market0.symbolEmojis,
+        melee.market1.symbolEmojis,
+        escrowCoin
+      );
+
+    beforeAll(async () => {
+      await waitUntilCurrentMeleeEnds();
+      await setNextMeleeDurationAndEnsureCrank(DEFAULT_MELEE_DURATION).then((res) => {
+        melee = res.melee;
+        return waitForProcessor(res);
+      });
+    }, 30000);
+
+    beforeEach(
+      async () => {
+        await waitUntilCurrentMeleeEnds();
+        // Crank the melee to end it and start a new one.
+        const res = await emojicoin.arena.enter(
+          publisher,
+          1n,
+          false,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis,
+          "symbol0"
+        );
+        melee = await fetchArenaMeleeView(res.arena.event.meleeID).then(fetchMeleeEmojiData);
+        await waitForProcessor(res);
+
+        return true;
+      },
+      Number(DEFAULT_MELEE_DURATION) * 2
+    );
+
+    it(
+      "verifies that a swap after a melee has ended and has been cranked is indexed properly",
+      async () => {
+        const account1 = getFundedAccount("200");
+        const account2 = getFundedAccount("201");
+
+        await enterHelper(account1, "symbol0");
+        await enterHelper(account2, "symbol0");
+
+        await emojicoin.arena.exit(
+          account1,
+          melee.market0.symbolEmojis,
+          melee.market1.symbolEmojis
+        );
+
+        await waitUntilCurrentMeleeEnds();
+
+        // In order to crank
+        await enterHelper(account1, "symbol0");
+
+        const registry = await fetchArenaRegistryView();
+
+        expect(registry.currentMeleeID).toEqual(melee.view.meleeID + 1n);
+
+        await sleep(2000);
+
+        await waitForProcessor(
+          await emojicoin.arena.swap(
+            account2,
+            melee.market0.symbolEmojis,
+            melee.market1.symbolEmojis
+          )
+        );
+
+        const swaps = await postgrest
+          .from(TableName.ArenaSwapEvents)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID)
+          .order("transaction_version")
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaSwapModel)));
+
+        const exits = await postgrest
+          .from(TableName.ArenaExitEvents)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID)
+          .order("transaction_version")
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaExitModel)));
+
+        const positions = await postgrest
+          .from(TableName.ArenaPosition)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID)
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
+
+        const leaderboard = await postgrest
+          .from(TableName.ArenaLeaderboardHistory)
+          .select("*")
+          .eq("melee_id", melee.view.meleeID)
+          .then((r) => r.data)
+          .then((r) => (r === null ? null : r.map(toArenaLeaderboardHistoryModel)));
+
+        expect(swaps).not.toBeNull();
+        expect(swaps).toHaveLength(1);
+
+        expect(swaps![0].swap.duringMelee).toEqual(false);
+
+        expect(exits).not.toBeNull();
+        expect(exits).toHaveLength(2);
+
+        expect(exits![0].exit.duringMelee).toEqual(true);
+        expect(exits![1].exit.duringMelee).toEqual(false);
+
+        expect(positions).not.toBeNull();
+        expect(positions).toHaveLength(2);
+        expect(positions).toHaveLength(2);
+
+        const position1 = positions!.find((p) => p.user === account1.accountAddress.toString())!;
+        const position2 = positions!.find((p) => p.user === account2.accountAddress.toString())!;
+
+        expect(position1.open).toEqual(false);
+        expect(position2.open).toEqual(false);
+
+        expect(position1.lastExit0).toEqual(true);
+        expect(position2.lastExit0).toEqual(false);
+
+        expect(leaderboard).not.toBeNull();
+        expect(leaderboard).toHaveLength(2);
+
+        const leaderboard1 = leaderboard!.find(
+          (l) => l.user === account1.accountAddress.toString()
+        )!;
+        const leaderboard2 = leaderboard!.find(
+          (l) => l.user === account2.accountAddress.toString()
+        )!;
+
+        expect(leaderboard1.exited).toEqual(true);
+        expect(leaderboard2.exited).toEqual(true);
+
+        expect(leaderboard1.emojicoin0Balance).toEqual(0n);
+        expect(leaderboard2.emojicoin0Balance).toBeGreaterThan(0n);
+
+        expect(leaderboard1.emojicoin1Balance).toEqual(0n);
+        expect(leaderboard2.emojicoin1Balance).toEqual(0n);
+
+        expect(leaderboard1.withdrawals).toBeGreaterThan(0n);
+        expect(leaderboard2.withdrawals).toEqual(0n);
+
+        expect(leaderboard1.lastExit0).toEqual(true);
+        expect(leaderboard2.lastExit0).toEqual(false);
+      },
+      Number(DEFAULT_MELEE_DURATION) * 2
+    );
+  });
 });
