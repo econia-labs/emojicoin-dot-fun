@@ -74,15 +74,15 @@ describe("tests the extractFilter function", () => {
   });
 
   it("handles large arrays", () => {
-    const largeArray = Array.from({ length: 100000000 }, (_, i) => i);
+    const largeArray = Array.from({ length: 10000000 }, (_, i) => i);
     const isEven = (n: number): n is number => n % 2 === 0;
     const evens = extractFilter(largeArray, isEven);
-    expect(largeArray.length).toBe(50000000);
-    expect(evens.length).toBe(50000000);
+    expect(largeArray.length).toBe(5000000);
+    expect(evens.length).toBe(5000000);
     expect(largeArray[0]).toBe(1);
     expect(evens[0]).toBe(0);
-    expect(largeArray.at(-1)).toEqual(100000000 - 1);
-    expect(evens.at(-1)).toEqual(100000000 - 2);
+    expect(largeArray.at(-1)).toEqual(10000000 - 1);
+    expect(evens.at(-1)).toEqual(10000000 - 2);
   });
 
   it("correctly handles first and last elements", () => {

@@ -10,8 +10,8 @@ import {
   isRegistrationGracePeriodOver,
 } from "../../src/markets/utils";
 import {
-  getAptBalanceFromChanges,
-  getCoinBalanceFromChanges,
+  getAptBalanceFromWriteSetChanges,
+  getBalanceFromWriteSetChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
 import { getPublishHelpers } from "../utils";
@@ -60,7 +60,7 @@ describe("tests the swap functionality", () => {
   });
 
   it("successfully swap buys, checks APT balance", async () => {
-    const aptBalanceBefore = getAptBalanceFromChanges(
+    const aptBalanceBefore = getAptBalanceFromWriteSetChanges(
       registerMarketResponse,
       registrant.accountAddress
     )!;
@@ -68,7 +68,6 @@ describe("tests the swap functionality", () => {
     const realBalance = BigInt(
       await aptos.getAccountAPTAmount({
         accountAddress: registrant.accountAddress,
-        minimumLedgerVersion: Number(registerMarketResponse.version),
       })
     );
 
@@ -86,10 +85,13 @@ describe("tests the swap functionality", () => {
     expect(success).toBe(true);
     const gasUsed = BigInt(swapResponse.gas_used) * BigInt(swapResponse.gas_unit_price);
 
-    const newAptBalance = getAptBalanceFromChanges(swapResponse, registrant.accountAddress)!;
-    const emojicoinBalance = getCoinBalanceFromChanges({
+    const newAptBalance = getAptBalanceFromWriteSetChanges(
+      swapResponse,
+      registrant.accountAddress
+    )!;
+    const emojicoinBalance = getBalanceFromWriteSetChanges({
       response: swapResponse,
-      userAddress: registrant.accountAddress,
+      ownerAddress: registrant.accountAddress,
       coinType: pooEmojicoin,
     })!;
 
@@ -109,9 +111,9 @@ describe("tests the swap functionality", () => {
 
   it("successfully swap sells", async () => {
     const emojicoinBalanceBefore =
-      getCoinBalanceFromChanges({
+      getBalanceFromWriteSetChanges({
         response: registerMarketResponse,
-        userAddress: registrant.accountAddress,
+        ownerAddress: registrant.accountAddress,
         coinType: pooEmojicoin,
       }) ?? 0n;
     const inputAmount = 10000n;
@@ -123,9 +125,9 @@ describe("tests the swap functionality", () => {
     });
 
     expect(buySwapResponse.success).toBe(true);
-    const newEmojicoinBalance = getCoinBalanceFromChanges({
+    const newEmojicoinBalance = getBalanceFromWriteSetChanges({
       response: buySwapResponse,
-      userAddress: registrant.accountAddress,
+      ownerAddress: registrant.accountAddress,
       coinType: pooEmojicoin,
     })!;
     expect(newEmojicoinBalance).toBeGreaterThan(emojicoinBalanceBefore);
@@ -138,10 +140,13 @@ describe("tests the swap functionality", () => {
     });
 
     expect(sellSwapResponse.success).toBe(true);
-    const finalAptBalance = getAptBalanceFromChanges(sellSwapResponse, registrant.accountAddress)!;
-    const finalEmojicoinBalance = getCoinBalanceFromChanges({
+    const finalAptBalance = getAptBalanceFromWriteSetChanges(
+      sellSwapResponse,
+      registrant.accountAddress
+    )!;
+    const finalEmojicoinBalance = getBalanceFromWriteSetChanges({
       response: sellSwapResponse,
-      userAddress: registrant.accountAddress,
+      ownerAddress: registrant.accountAddress,
       coinType: pooEmojicoin,
     })!;
 

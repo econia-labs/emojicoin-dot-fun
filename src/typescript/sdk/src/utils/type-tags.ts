@@ -162,5 +162,26 @@ export const removeLeadingZerosFromStructString = (
   const { address, moduleName, name } = typeTag.value;
   const shortenedAddress = removeLeadingZeros(address.toString());
 
-  return `${shortenedAddress}::${moduleName.identifier}::${name.identifier}`;
+  return `${shortenedAddress}::${moduleName.identifier}::${name.identifier}` as const;
+};
+
+export const ensureTypeTagStruct = (type: TypeTagInput): TypeTagStruct => {
+  const tag = parseTypeTag(type.toString());
+  if (!tag.isStruct()) throw new Error(`Expected a type tag struct, got: ${tag.toString()}`);
+  return tag;
+};
+
+export const OBJECT_CORE_TYPE_TAG_STRUCT = ensureTypeTagStruct("0x1::object::ObjectCore");
+
+export const FUNGIBLE_STORE_TYPE_TAG_STRUCT = ensureTypeTagStruct(
+  "0x1::fungible_asset::FungibleStore"
+);
+
+export const COIN_STORE_TYPE_TAG_STRUCT = ensureTypeTagStruct("0x1::coin::CoinStore");
+
+// Gets the outer type from a type tag; that is, removes the generics.
+export const getOuterTypeFromTypeTag = (typeTag: TypeTagStruct) => {
+  const v = typeTag.value;
+  const res = `${v.address}::${v.moduleName.identifier}::${v.name.identifier}`;
+  return res as `0x${string}::${string}::${string}`;
 };

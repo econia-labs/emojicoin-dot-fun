@@ -45,14 +45,8 @@ export const getExactTransitionInputAmount = (
   return BigInt(rounded.toString());
 };
 
-const PROCESSING_WAIT_TIME = 2 * 1000;
-
 export const waitForProcessor = <
   T extends { version: AnyNumberString } | { response: UserTransactionResponse },
 >(
   res: T
-) =>
-  waitForEmojicoinIndexer(
-    "version" in res ? res.version : res.response.version,
-    PROCESSING_WAIT_TIME
-  );
+) => waitForEmojicoinIndexer("version" in res ? res.version : res.response.version);
