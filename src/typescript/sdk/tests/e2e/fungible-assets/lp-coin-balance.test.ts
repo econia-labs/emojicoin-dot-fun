@@ -1,7 +1,6 @@
 // cspell:word kolorist
 // cspell:word funder
 
-
 import type { AccountAddressInput, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   Account,
