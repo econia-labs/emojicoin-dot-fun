@@ -40,6 +40,7 @@ import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { fetchUserLiquidityPools, waitForEmojicoinIndexer } from "../../../src/indexer-v2";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
 import { getFundedAccount, getFundedAccounts } from "../../utils/test-accounts";
+import { transferableAbortSignal } from "node:util";
 
 jest.setTimeout(60000);
 
@@ -321,6 +322,9 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
 
     const version = await buyPastBondingCurveAndCheck(user, symbol);
 
+    // Make sure the user actually has some emojicoinLP.
+    await emojicoin.liquidity.provide(user, symbol, 1000n);
+
     await waitForEmojicoinIndexer(version);
 
     await MigrateToFungibleStore.submit({
@@ -338,6 +342,8 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
 
     // ---------------------------------------------------------------------------------------------
     // Then, provide liquidity and check the balance again.
+    // Note that nothing this is all redundant when the CLI is running a node that already has the
+    // fungible asset migration feature enabled by default.
     // ---------------------------------------------------------------------------------------------
     const res = await emojicoin.liquidity.provide(user, symbol, ONE_APT / 10);
     await waitForEmojicoinIndexer(res.response.version);
