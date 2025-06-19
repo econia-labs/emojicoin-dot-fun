@@ -199,17 +199,16 @@ describe("general arena tests", () => {
 
       // ---------------------------------------------------------------------------------------------
       // verifies an arena has already started with a specific duration
+      // and that it started no more than 5 seconds ago
       // ---------------------------------------------------------------------------------------------
-      const melee2 = await fetchArenaMeleeView(2n).then(fetchMeleeEmojiData);
-      expect(melee2.view.duration).toEqual(LONGER_MELEE_DURATION);
-
-      // ---------------------------------------------------------------------------------------------
-      // verifies an arena has started in the last 6 seconds
-      // ---------------------------------------------------------------------------------------------
-      const sixSeconds = 6 * 1000;
+      const meleeView = await fetchArenaMeleeView(2n);
+      expect(meleeView.duration).toEqual(LONGER_MELEE_DURATION);
+      const fiveSeconds = 5 * 1000;
       const now = new Date().getTime();
-      const sixSecondsAgo = now - sixSeconds;
-      expect(melee2.view.startTime.getTime()).toBeGreaterThan(sixSecondsAgo);
+      const fiveSecondsAgo = now - fiveSeconds;
+      expect(meleeView.startTime.getTime()).toBeGreaterThan(fiveSecondsAgo);
+
+      const melee2 = await fetchMeleeEmojiData(meleeView);
 
       // ---------------------------------------------------------------------------------------------
       // verifies enter+swap+exit procedure
