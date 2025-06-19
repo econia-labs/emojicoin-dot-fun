@@ -1,7 +1,7 @@
 import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
 import { cn } from "lib/utils/class-name";
 import _ from "lodash";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
 import type { OrderByStrings } from "@/sdk/indexer-v2/const";
 
@@ -153,6 +153,19 @@ export const EcTable = <T,>({
   emptyText,
   variant = "default",
 }: TableProps<T>) => {
+  // The purpose of this is to avoid flickering the table during a loading state.
+  // When loading a new page, react-query will return an empty array for items.
+  // So we keep a reference to the previous items and only update the items when loading is done.
+  // This prevents some flickering issues due to table re-rendering a resizing.
+  const itemsRef = useRef<T[]>([]);
+  const memoizedItems = useMemo(() => {
+    if (isLoading) {
+      return itemsRef.current;
+    }
+    itemsRef.current = items;
+    return items;
+  }, [items, isLoading]);
+
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [selectedRowKey, setSelectedRowKey] = useState<string | null>(null);
 
@@ -170,11 +183,11 @@ export const EcTable = <T,>({
   const sorted = useMemo(() => {
     //Ignore client side sorting if orderByHandler is provided
     if (serverSideOrderHandler) {
-      return items;
+      return memoizedItems;
     }
     const sortFn = _.find(columns, { id: sort.column })?.sortFn;
-    return _.orderBy(items, sortFn, sort.direction);
-  }, [serverSideOrderHandler, columns, sort.column, sort.direction, items]);
+    return _.orderBy(memoizedItems, sortFn, sort.direction);
+  }, [serverSideOrderHandler, columns, sort.column, sort.direction, memoizedItems]);
 
   const setSortHandler = (sort: { column: string; direction: OrderByStrings }) => {
     const columnData = columns.find((column) => column.id === sort.column);
@@ -207,7 +220,8 @@ export const EcTable = <T,>({
 
   return (
     <div ref={containerRef} className={cn("relative flex w-full", className)}>
-      {(items.length === 0 || isLoading) && (
+      {/* We only show this kind of loading on first load. Otherwise it creates columns shifting issues because of the scrollbar */}
+      {(sorted.length === 0 || isLoading) && (
         <div
           className={cn(
             "absolute inset-0 z-10 flex justify-center items-center text-light-gray bg-black pixel-heading-4",
@@ -217,7 +231,7 @@ export const EcTable = <T,>({
           <div>
             {isLoading ? (
               <AnimatedLoadingBoxes numSquares={11} />
-            ) : items.length === 0 ? (
+            ) : sorted.length === 0 ? (
               <span>{emptyText || "Empty"}</span>
             ) : null}
           </div>
@@ -228,7 +242,7 @@ export const EcTable = <T,>({
       <div
         className={cn("w-full")}
         // Prevents scrollbar from appearing when there are empty rows
-        style={{ overflowY: items.length < minRows ? "hidden" : "auto" }}
+        style={{ overflowY: sorted.length < minRows ? "hidden" : "auto" }}
       >
         <Table className={cn("border-solid border-l border-r border-dark-gray")}>
           <TableHeader>

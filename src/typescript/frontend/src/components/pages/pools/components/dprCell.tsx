@@ -45,7 +45,7 @@ export const DprCell = ({ dailyTvlPerLPCoinGrowth }: { dailyTvlPerLPCoinGrowth: 
         )
       }
     >
-      <div className="body-sm uppercase">{dpr}</div>
+      {dpr}
     </Popup>
   );
 };

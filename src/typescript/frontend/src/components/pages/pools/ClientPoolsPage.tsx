@@ -11,6 +11,7 @@ import { Emoji } from "utils/emoji";
 
 import { FormattedNumber } from "@/components/FormattedNumber";
 import SearchBar from "@/components/inputs/search-bar";
+import { Separator } from "@/components/Separator";
 import { EcTable, type EcTableColumn } from "@/components/ui/table/ecTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 import { useAccountAddress } from "@/hooks/use-account-address";
@@ -139,14 +140,15 @@ const ClientPoolsPage = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center">
-        <div className="flex w-full px-8 flex-col xl:flex-row max-w-[1392px]">
+      <div className="flex flex-col items-center relative">
+        <Separator className="absolute" />
+        <div className="flex w-full px-8 flex-col xl:flex-row max-w-[1392px] border-r border-solid border-dark-gray">
           <Tabs
             className="w-full xl:flex-[0_0_50%]"
             value={tab}
             onValueChange={(v) => setTab(v as "pools" | "myPools")}
           >
-            <TabsList className="justify-between">
+            <TabsList className="justify-between pt-0">
               <div className="flex items-center gap-2">
                 <TabsTrigger value="pools" endSlot={<Emoji emojis={emoji("man swimming")} />}>
                   Pools
@@ -160,6 +162,7 @@ const ClientPoolsPage = () => {
               </div>
               <SearchBar className="max-w-[300px]" />
             </TabsList>
+            <Separator className="absolute" />
             <div className={"flex w-full overflow-auto h-[60dvh]"}>
               <EcTable
                 isLoading={query.isLoading}
@@ -175,16 +178,16 @@ const ClientPoolsPage = () => {
                 }}
               />
             </div>
-            <div className="xl:hidden w-[200vw] border-t border-solid border-dark-gray -mx-[50%]" />
+            <Separator className="xl:hidden" />
           </Tabs>
-          <div className="relative xl:flex-1 flex min-h-[600px] justify-center items-center xl:mt-[52px] xl:border-t border-x border-solid border-dark-gray">
+          <div className="relative xl:flex-1 flex min-h-[600px] justify-center items-center border-l border-solid border-dark-gray">
             <Liquidity
               market={selectedIndex !== undefined ? allMarkets[selectedIndex] : undefined}
             />
           </div>
         </div>
       </div>
-      <div className="w-[200vw] border-t border-solid border-dark-gray -mx-[50%]" />
+      <Separator />
     </>
   );
 };
