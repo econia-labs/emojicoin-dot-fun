@@ -401,7 +401,7 @@ export const toSequenceNumberOptions = (
     ? {
         options: {
           accountSequenceNumber: i,
-          expireTimestamp: Date.now() / 1000 + secondsUntilExpiration,
+          expireTimestamp: Math.floor(Date.now() / 1000) + secondsUntilExpiration,
         },
       }
     : {
