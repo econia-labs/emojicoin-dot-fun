@@ -42,17 +42,20 @@ describe("queries price_feed and returns accurate price feed data", () => {
       [["🧘🏾"], 1000n, -0.25],
       [["🧘🏿"], 500n, 0.25],
     ];
+    const secondsUntilExpire = 60;
+    const toSeqNumberOptions = (n: number) => toSequenceNumberOptions(n, secondsUntilExpire);
+
     const results = await Promise.all(
       emojisAndInputAmounts.map(([emojis, buyAmount, percentOfOutput], i) =>
-        emojicoin.register(acc, emojis, toSequenceNumberOptions(i * 3 + 0)).then(() =>
+        emojicoin.register(acc, emojis, toSeqNumberOptions(i * 3 + 0)).then(() =>
           emojicoin
-            .buy(acc, emojis, buyAmount, toSequenceNumberOptions(i * 3 + 1))
+            .buy(acc, emojis, buyAmount, toSeqNumberOptions(i * 3 + 1))
             .then(({ swap: openSwap }) =>
               (percentOfOutput > 0 ? emojicoin.buy : emojicoin.sell)(
                 acc,
                 emojis,
                 percentageOfInputToBigInt(openSwap.model.swap.netProceeds, percentOfOutput),
-                toSequenceNumberOptions(i * 3 + 2)
+                toSeqNumberOptions(i * 3 + 2)
               ).then(({ swap: closeSwap }) => ({
                 openSwap,
                 closeSwap,
