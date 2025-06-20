@@ -394,9 +394,18 @@ export const waitFor = async (args: {
  * @see InputGenerateTransactionOptions
  */
 export const toSequenceNumberOptions = (
-  i: number
-): { options: InputGenerateTransactionOptions } => ({
-  options: {
-    accountSequenceNumber: i,
-  },
-});
+  i: number,
+  secondsUntilExpiration?: number
+): { options: InputGenerateTransactionOptions } =>
+  secondsUntilExpiration
+    ? {
+        options: {
+          accountSequenceNumber: i,
+          expireTimestamp: Math.floor(Date.now() / 1000) + secondsUntilExpiration,
+        },
+      }
+    : {
+        options: {
+          accountSequenceNumber: i,
+        },
+      };

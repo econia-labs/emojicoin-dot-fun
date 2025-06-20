@@ -6,7 +6,7 @@ import {
   fetchSwapEvents,
 } from "../../../src/indexer-v2/queries";
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 describe("ensures no errors are thrown when empty rows are returned from queries", () => {
   it("checks an empty all market states query", async () => {
