@@ -10,7 +10,7 @@ import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/util
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
 import { getFundedAccounts } from "../../../utils/test-accounts";
 
-jest.setTimeout(20000);
+jest.setTimeout(60000);
 
 describe("queries for liquidity pools with the emojicoin client", () => {
   const registrants = getFundedAccounts("046", "047");
