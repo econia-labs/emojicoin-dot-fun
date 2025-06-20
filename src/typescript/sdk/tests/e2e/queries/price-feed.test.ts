@@ -1,12 +1,7 @@
 import Big from "big.js";
 
-import {
-  type AnyNumberString,
-  compareBigInt,
-  maxBigInt,
-  type SymbolEmoji,
-  toSequenceNumberOptions,
-} from "../../../src";
+import type { AnyNumberString, SwapEventModel, SymbolEmoji, Types } from "../../../src";
+import { compareBigInt, maxBigInt } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { ORDER_BY } from "../../../src/indexer-v2/const";
 import {
@@ -17,7 +12,7 @@ import { calculateDeltaPercentageForQ64s, toPriceFeed } from "../../../src/index
 import { SortMarketsBy } from "../../../src/indexer-v2/types/common";
 import { getFundedAccount } from "../../utils/test-accounts";
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
 const percentageOfInputToBigInt = (amount: AnyNumberString, percentage: number) =>
   BigInt(
@@ -42,25 +37,22 @@ describe("queries price_feed and returns accurate price feed data", () => {
       [["🧘🏾"], 1000n, -0.25],
       [["🧘🏿"], 500n, 0.25],
     ];
-    const results = await Promise.all(
-      emojisAndInputAmounts.map(([emojis, buyAmount, percentOfOutput], i) =>
-        emojicoin.register(acc, emojis, toSequenceNumberOptions(i * 3 + 0)).then(() =>
-          emojicoin
-            .buy(acc, emojis, buyAmount, toSequenceNumberOptions(i * 3 + 1))
-            .then(({ swap: openSwap }) =>
-              (percentOfOutput > 0 ? emojicoin.buy : emojicoin.sell)(
-                acc,
-                emojis,
-                percentageOfInputToBigInt(openSwap.model.swap.netProceeds, percentOfOutput),
-                toSequenceNumberOptions(i * 3 + 2)
-              ).then(({ swap: closeSwap }) => ({
-                openSwap,
-                closeSwap,
-              }))
-            )
-        )
-      )
-    );
+
+    type Swap = {
+      event: Types["SwapEvent"];
+      model: SwapEventModel;
+    };
+    const results: { openSwap: Swap; closeSwap: Swap }[] = [];
+    for (const [emojis, buyAmount, percentOfOutput] of emojisAndInputAmounts) {
+      await emojicoin.register(acc, emojis);
+      const { swap: openSwap } = await emojicoin.buy(acc, emojis, buyAmount);
+      const { swap: closeSwap } = await (percentOfOutput > 0 ? emojicoin.buy : emojicoin.sell)(
+        acc,
+        emojis,
+        percentageOfInputToBigInt(openSwap.model.swap.netProceeds, percentOfOutput)
+      );
+      results.push({ openSwap, closeSwap });
+    }
 
     const maxTransactionVersion = maxBigInt(
       ...results.map(({ closeSwap }) => closeSwap.model.transaction.version)

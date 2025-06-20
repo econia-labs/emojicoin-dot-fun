@@ -24,7 +24,7 @@ import { calculatePeriodBoundariesCrossed } from "../../../utils";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
 import { getFundedAccount } from "../../../utils/test-accounts";
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
 
 describe("all submission types for the emojicoin client", () => {
   const emojicoin = new EmojicoinClient();

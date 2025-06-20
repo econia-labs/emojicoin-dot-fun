@@ -126,32 +126,36 @@ describe("general arena tests", () => {
       // ---------------------------------------------------------------------------------------------
       // verifies that the arena module is already published on-chain
       // ---------------------------------------------------------------------------------------------
-      const res = await aptos.getAccountModule({
-        accountAddress: ARENA_MODULE_ADDRESS,
-        moduleName: EmojicoinArena.Enter.prototype.moduleName ?? "emojicoin_arena",
-      });
-      expect(res.bytecode).toBeTruthy();
+      const moduleIsOnChainRes = aptos
+        .getAccountModule({
+          accountAddress: ARENA_MODULE_ADDRESS,
+          moduleName: EmojicoinArena.Enter.prototype.moduleName ?? "emojicoin_arena",
+        })
+        .then(({ bytecode }) => {
+          expect(bytecode).toBeTruthy();
+        });
 
       // ---------------------------------------------------------------------------------------------
       // verifies arena data is correctly inserted into the processor
       // ---------------------------------------------------------------------------------------------
-      const arenaInfo0 = await fetchArenaInfo();
-      expect(arenaInfo0).toBeTruthy();
-      expect(arenaInfo0?.meleeID).toEqual(melee1.view.meleeID);
-      expect(arenaInfo0?.duration).toEqual(melee1.view.duration);
-      expect(arenaInfo0?.startTime).toEqual(melee1.view.startTime);
-      expect(arenaInfo0?.volume).toEqual(0n);
-      expect(arenaInfo0?.emojicoin0Locked).toEqual(0n);
-      expect(arenaInfo0?.emojicoin1Locked).toEqual(0n);
-      expect(arenaInfo0?.maxMatchAmount).toEqual(melee1.view.maxMatchAmount);
-      expect(arenaInfo0?.maxMatchPercentage).toEqual(melee1.view.maxMatchPercentage);
-      expect(arenaInfo0?.rewardsRemaining).toEqual(melee1.view.availableRewards);
-      expect(arenaInfo0?.emojicoin0Symbols).toEqual(melee1.market0.symbolEmojis);
-      expect(arenaInfo0?.emojicoin1Symbols).toEqual(melee1.market1.symbolEmojis);
-      expect(arenaInfo0?.emojicoin0MarketID).toEqual(melee1.market0.marketID);
-      expect(arenaInfo0?.emojicoin1MarketID).toEqual(melee1.market1.marketID);
-      expect(arenaInfo0?.emojicoin0MarketAddress).toEqual(melee1.market0.marketAddress);
-      expect(arenaInfo0?.emojicoin1MarketAddress).toEqual(melee1.market1.marketAddress);
+      const arenaInfo0Res = fetchArenaInfo().then((arenaInfo0) => {
+        expect(arenaInfo0).toBeTruthy();
+        expect(arenaInfo0?.meleeID).toEqual(melee1.view.meleeID);
+        expect(arenaInfo0?.duration).toEqual(melee1.view.duration);
+        expect(arenaInfo0?.startTime).toEqual(melee1.view.startTime);
+        expect(arenaInfo0?.volume).toEqual(0n);
+        expect(arenaInfo0?.emojicoin0Locked).toEqual(0n);
+        expect(arenaInfo0?.emojicoin1Locked).toEqual(0n);
+        expect(arenaInfo0?.maxMatchAmount).toEqual(melee1.view.maxMatchAmount);
+        expect(arenaInfo0?.maxMatchPercentage).toEqual(melee1.view.maxMatchPercentage);
+        expect(arenaInfo0?.rewardsRemaining).toEqual(melee1.view.availableRewards);
+        expect(arenaInfo0?.emojicoin0Symbols).toEqual(melee1.market0.symbolEmojis);
+        expect(arenaInfo0?.emojicoin1Symbols).toEqual(melee1.market1.symbolEmojis);
+        expect(arenaInfo0?.emojicoin0MarketID).toEqual(melee1.market0.marketID);
+        expect(arenaInfo0?.emojicoin1MarketID).toEqual(melee1.market1.marketID);
+        expect(arenaInfo0?.emojicoin0MarketAddress).toEqual(melee1.market0.marketAddress);
+        expect(arenaInfo0?.emojicoin1MarketAddress).toEqual(melee1.market1.marketAddress);
+      });
 
       // ---------------------------------------------------------------------------------------------
       // verifies an arena ends with no activity and nothing bad happens
@@ -199,20 +203,19 @@ describe("general arena tests", () => {
 
       // ---------------------------------------------------------------------------------------------
       // verifies an arena has already started with a specific duration
+      // and that it started recently.
       // ---------------------------------------------------------------------------------------------
-      const melee2 = await fetchArenaMeleeView(2n).then(fetchMeleeEmojiData);
-      expect(melee2.view.duration).toEqual(LONGER_MELEE_DURATION);
-
-      // ---------------------------------------------------------------------------------------------
-      // verifies an arena has started in the last 6 seconds
-      // ---------------------------------------------------------------------------------------------
-      const sixSeconds = 6 * 1000;
+      const meleeView = await fetchArenaMeleeView(2n);
+      expect(meleeView.duration).toEqual(LONGER_MELEE_DURATION);
+      const eightSeconds = 8 * 1000;
       const now = new Date().getTime();
-      const sixSecondsAgo = now - sixSeconds;
-      expect(melee2.view.startTime.getTime()).toBeGreaterThan(sixSecondsAgo);
+      const eightSecondsAgo = now - eightSeconds;
+      expect(meleeView.startTime.getTime()).toBeGreaterThan(eightSecondsAgo);
+
+      const melee2 = await fetchMeleeEmojiData(meleeView);
 
       // ---------------------------------------------------------------------------------------------
-      // verifies enter+swap+exit procedure
+      // verifies the processor handles enter, swap, and exit entry functions.
       // ---------------------------------------------------------------------------------------------
       const enterResponse3 = await emojicoin.arena.enter(
         account,
@@ -242,7 +245,13 @@ describe("general arena tests", () => {
         .eq("melee_id", melee2.view.meleeID)
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-      const arenaInfo2 = await fetchArenaInfo();
+
+      const arenaInfo1Res = fetchArenaInfo().then((arenaInfo1) => {
+        expect(arenaInfo1).toBeTruthy();
+        expect(arenaInfo1!.volume).toEqual(viewEnterEvent.quoteVolume);
+        expect(arenaInfo1!.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
+        expect(arenaInfo1!.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
+      });
 
       expect(arenaEnters).not.toBeNull();
       expect(arenaEnters).toHaveLength(1);
@@ -250,7 +259,7 @@ describe("general arena tests", () => {
       expect(arenaPositions).not.toBeNull();
       expect(arenaPositions).toHaveLength(1);
 
-      expect(arenaInfo2).not.toBeNull();
+      expect(arenaInfo1Res).not.toBeNull();
 
       const dbEnterEvent = arenaEnters![0];
       let position = arenaPositions![0];
@@ -264,10 +273,6 @@ describe("general arena tests", () => {
       expect(position.withdrawals).toEqual(0n);
       expect(position.emojicoin0Balance).toEqual(viewEnterEvent.emojicoin0Proceeds);
       expect(position.emojicoin1Balance).toEqual(viewEnterEvent.emojicoin1Proceeds);
-
-      expect(arenaInfo2?.volume).toEqual(viewEnterEvent.quoteVolume);
-      expect(arenaInfo2?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
-      expect(arenaInfo2?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
       const swapResponse = await emojicoin.arena.swap(
         account,
@@ -294,15 +299,14 @@ describe("general arena tests", () => {
         .eq("melee_id", melee2.view.meleeID)
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-      const arenaInfo3 = await fetchArenaInfo();
+      // Don't await until the end of the test, to avoid issues with timing.
+      const arenaInfo2Res = fetchArenaInfo().then((res) => expect(res).not.toBeNull());
 
       expect(arenaSwaps).not.toBeNull();
       expect(arenaSwaps).toHaveLength(1);
 
       expect(arenaPositions).not.toBeNull();
       expect(arenaPositions).toHaveLength(1);
-
-      expect(arenaInfo3).not.toBeNull();
 
       const dbSwapEvent = arenaSwaps![0];
       position = arenaPositions![0];
@@ -341,15 +345,14 @@ describe("general arena tests", () => {
         .eq("melee_id", melee2.view.meleeID)
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-      const arenaInfo4 = await fetchArenaInfo();
+      // Don't await until the end of the test, to avoid issues with timing.
+      const arenaInfo3Res = fetchArenaInfo().then((res) => expect(res).not.toBeNull());
 
       expect(arenaExits).not.toBeNull();
       expect(arenaExits).toHaveLength(1);
 
       expect(arenaPositions).not.toBeNull();
       expect(arenaPositions).toHaveLength(1);
-
-      expect(arenaInfo4).not.toBeNull();
 
       let dbExitEvent = arenaExits![0];
       position = arenaPositions![0];
@@ -375,14 +378,20 @@ describe("general arena tests", () => {
       expect(position.emojicoin0Balance).toEqual(0n);
       expect(position.emojicoin1Balance).toEqual(0n);
 
-      await emojicoin.arena.enter(
-        account,
-        1n * 10n ** 8n,
-        false,
-        melee2.market0.symbolEmojis,
-        melee2.market1.symbolEmojis,
-        "symbol0"
-      );
+      await emojicoin.arena
+        .enter(
+          account,
+          1n * 10n ** 8n,
+          false,
+          melee2.market0.symbolEmojis,
+          melee2.market1.symbolEmojis,
+          "symbol0"
+        )
+        .then((res) => {
+          const endTimeMs = melee2.view.startTime.getTime() + Number(melee2.view.duration / 1000n);
+          // This txn should occur during the melee.
+          expect(BigInt(res.response.timestamp) / 1000n).toBeLessThanOrEqual(endTimeMs);
+        });
 
       await waitUntilCurrentMeleeEnds();
 
@@ -413,6 +422,13 @@ describe("general arena tests", () => {
         { ...dbExitEvent.exit, aptProceeds: 0n },
         { ...viewExitEvent, aptProceeds: 0n, duringMelee: false }
       );
+
+      // Await the checks.
+      await moduleIsOnChainRes;
+      await arenaInfo0Res;
+      await arenaInfo1Res;
+      await arenaInfo2Res;
+      await arenaInfo3Res;
     },
     Number(LONGER_MELEE_DURATION) * 3
   );

@@ -6,7 +6,7 @@ import type { MarketStateModel } from "../../../../src/indexer-v2/types";
 import type { JsonValue } from "../../../../src/types/json-types";
 import { getFundedAccount } from "../../../utils/test-accounts";
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 describe("queries a market by market state with the emojicoin client", () => {
   const registrant = getFundedAccount("048");

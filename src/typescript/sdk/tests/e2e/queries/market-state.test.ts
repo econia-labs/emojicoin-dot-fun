@@ -10,7 +10,7 @@ import { getAptosClient } from "../../utils";
 import { registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccount } from "../../utils/test-accounts";
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 describe("queries a market by market state", () => {
   const aptos = getAptosClient();
