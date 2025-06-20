@@ -42,7 +42,7 @@ describe("queries price_feed and returns accurate price feed data", () => {
       [["🧘🏾"], 1000n, -0.25],
       [["🧘🏿"], 500n, 0.25],
     ];
-    const secondsUntilExpire = 60;
+    const secondsUntilExpire = 30;
     const toSeqNumberOptions = (n: number) => toSequenceNumberOptions(n, secondsUntilExpire);
 
     const results = await Promise.all(
