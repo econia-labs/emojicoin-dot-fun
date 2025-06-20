@@ -42,7 +42,7 @@ describe("escrow resource parser tests", () => {
     });
   });
 
-  it("finds an escrow resource in a transaction response and converts it correctly (coin store)", () => {
+  it("finds an escrow resource in a transaction response and converts it correctly (coin stores)", () => {
     expect(isUserTransactionResponse(EscrowTxnResponseCoinStores)).toBe(true);
     const response = EscrowTxnResponseCoinStores;
     const escrows = findEscrowsInTxn(response);
@@ -71,7 +71,7 @@ describe("escrow resource parser tests", () => {
     });
   });
 
-  it("finds an escrow resource in a transaction response and converts it correctly (coin store)", () => {
+  it("finds an escrow resource in a transaction response and converts it correctly (fungible assets)", () => {
     expect(isUserTransactionResponse(EscrowTxnResponseFungibleAssets)).toBe(true);
     const response = EscrowTxnResponseFungibleAssets;
     const escrows = findEscrowsInTxn(response);
