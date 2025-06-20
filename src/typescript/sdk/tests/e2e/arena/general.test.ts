@@ -241,7 +241,7 @@ describe("general arena tests", () => {
         .eq("melee_id", melee2.view.meleeID)
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-      const arenaInfo2 = await fetchArenaInfo();
+      const arenaInfo1 = await fetchArenaInfo();
 
       expect(arenaEnters).not.toBeNull();
       expect(arenaEnters).toHaveLength(1);
@@ -249,7 +249,7 @@ describe("general arena tests", () => {
       expect(arenaPositions).not.toBeNull();
       expect(arenaPositions).toHaveLength(1);
 
-      expect(arenaInfo2).not.toBeNull();
+      expect(arenaInfo1).not.toBeNull();
 
       const dbEnterEvent = arenaEnters![0];
       let position = arenaPositions![0];
@@ -264,9 +264,9 @@ describe("general arena tests", () => {
       expect(position.emojicoin0Balance).toEqual(viewEnterEvent.emojicoin0Proceeds);
       expect(position.emojicoin1Balance).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
-      expect(arenaInfo2?.volume).toEqual(viewEnterEvent.quoteVolume);
-      expect(arenaInfo2?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
-      expect(arenaInfo2?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
+      expect(arenaInfo1?.volume).toEqual(viewEnterEvent.quoteVolume);
+      expect(arenaInfo1?.emojicoin0Locked).toEqual(viewEnterEvent.emojicoin0Proceeds);
+      expect(arenaInfo1?.emojicoin1Locked).toEqual(viewEnterEvent.emojicoin1Proceeds);
 
       const swapResponse = await emojicoin.arena.swap(
         account,
@@ -293,15 +293,14 @@ describe("general arena tests", () => {
         .eq("melee_id", melee2.view.meleeID)
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-      const arenaInfo3 = await fetchArenaInfo();
+      // Don't await until the end of the test, to avoid issues with timing.
+      const arenaInfo2Res = fetchArenaInfo().then((res) => expect(res).not.toBeNull());
 
       expect(arenaSwaps).not.toBeNull();
       expect(arenaSwaps).toHaveLength(1);
 
       expect(arenaPositions).not.toBeNull();
       expect(arenaPositions).toHaveLength(1);
-
-      expect(arenaInfo3).not.toBeNull();
 
       const dbSwapEvent = arenaSwaps![0];
       position = arenaPositions![0];
@@ -340,15 +339,14 @@ describe("general arena tests", () => {
         .eq("melee_id", melee2.view.meleeID)
         .then((r) => r.data)
         .then((r) => (r === null ? null : r.map(toArenaPositionModel)));
-      const arenaInfo4 = await fetchArenaInfo();
+      // Don't await until the end of the test, to avoid issues with timing.
+      const arenaInfo3Res = fetchArenaInfo().then((res) => expect(res).not.toBeNull());
 
       expect(arenaExits).not.toBeNull();
       expect(arenaExits).toHaveLength(1);
 
       expect(arenaPositions).not.toBeNull();
       expect(arenaPositions).toHaveLength(1);
-
-      expect(arenaInfo4).not.toBeNull();
 
       let dbExitEvent = arenaExits![0];
       position = arenaPositions![0];
@@ -374,14 +372,20 @@ describe("general arena tests", () => {
       expect(position.emojicoin0Balance).toEqual(0n);
       expect(position.emojicoin1Balance).toEqual(0n);
 
-      await emojicoin.arena.enter(
-        account,
-        1n * 10n ** 8n,
-        false,
-        melee2.market0.symbolEmojis,
-        melee2.market1.symbolEmojis,
-        "symbol0"
-      );
+      await emojicoin.arena
+        .enter(
+          account,
+          1n * 10n ** 8n,
+          false,
+          melee2.market0.symbolEmojis,
+          melee2.market1.symbolEmojis,
+          "symbol0"
+        )
+        .then((res) => {
+          const endTimeMs = melee2.view.startTime.getTime() + Number(melee2.view.duration / 1000n);
+          // This txn should occur during the melee.
+          expect(BigInt(res.response.timestamp) / 1000n).toBeLessThanOrEqual(endTimeMs);
+        });
 
       await waitUntilCurrentMeleeEnds();
 
@@ -412,6 +416,10 @@ describe("general arena tests", () => {
         { ...dbExitEvent.exit, aptProceeds: 0n },
         { ...viewExitEvent, aptProceeds: 0n, duringMelee: false }
       );
+
+      // Await the checks that the arena info fetches weren't null.
+      await arenaInfo2Res;
+      await arenaInfo3Res;
     },
     Number(LONGER_MELEE_DURATION) * 3
   );
