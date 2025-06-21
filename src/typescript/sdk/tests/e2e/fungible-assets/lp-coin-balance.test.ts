@@ -1,5 +1,6 @@
 // cspell:word kolorist
 // cspell:word funder
+// cspell:word localnet
 
 import type { AccountAddressInput, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
@@ -277,6 +278,7 @@ describe("tests to ensure the emojicoin indexer properly records emojicoin lp co
 
   it("properly gets all balances in the long happy path for all addresses having leading zeros", async () => {
     const symbol: SymbolEmoji[] = ["👫🏻"];
+    // Note that the market address was derived on localnet with the 0xf00d publisher.
     const expected = {
       marketAddress: "0x0321cb335a38022848c39372c7b3894e41c39c57aac613ac240824081a644630",
       // Note that the `emojicoinLP` coin store was used here, not the `emojicoin` store.

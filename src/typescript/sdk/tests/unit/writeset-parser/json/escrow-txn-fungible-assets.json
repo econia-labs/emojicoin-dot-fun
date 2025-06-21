@@ -1,0 +1,1695 @@
+{
+  "version": "176",
+  "hash": "0x2aac6976e33c7f66f5b83c3ad4f7d8d6c6d089c95a82e3ca4a6b659efd0e362b",
+  "state_change_hash": "0xca24f757aa63b9edab2e763f3e63e7edf08ff7a03cb0fd4122bf99c3f7e23897",
+  "event_root_hash": "0xf1c1025f6ca8db0927fbb273eb4f6acbe85c1a5ec6aee4dda0e8222930ed10d9",
+  "state_checkpoint_hash": null,
+  "gas_used": "1153",
+  "success": true,
+  "vm_status": "Executed successfully",
+  "accumulator_root_hash": "0x5391c6eec2c34149f00a9e7224b06799401b0961b3d4d32945ea864ef4bb76c8",
+  "changes": [
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::coin::PairedCoinType",
+        "data": {
+          "type": {
+            "account_address": "0x1",
+            "module_name": "0x6170746f735f636f696e",
+            "struct_name": "0x4170746f73436f696e"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::coin::PairedFungibleAssetRefs",
+        "data": {
+          "burn_ref_opt": {
+            "vec": []
+          },
+          "mint_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0xa"
+                }
+              }
+            ]
+          },
+          "transfer_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0xa"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::fungible_asset::ConcurrentSupply",
+        "data": {
+          "current": {
+            "max_value": "340282366920938463463374607431768211455",
+            "value": "18467744072899559515"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::fungible_asset::Metadata",
+        "data": {
+          "decimals": 8,
+          "icon_uri": "",
+          "name": "Aptos Coin",
+          "project_uri": "",
+          "symbol": "APT"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": true,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x1",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xa",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::primary_fungible_store::DeriveRefPod",
+        "data": {
+          "metadata_derive_ref": {
+            "self": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44",
+      "state_key_hash": "0x7ec06f6100c4c4277b9be478ced4d8572e6b36e46f518d414cd68628ee4acf0b",
+      "data": {
+        "type": "0x1::coin::CoinInfo<0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44::coin_factory::Emojicoin>",
+        "data": {
+          "decimals": 8,
+          "name": "⚽ emojicoin",
+          "supply": {
+            "vec": [
+              {
+                "aggregator": {
+                  "vec": []
+                },
+                "integer": {
+                  "vec": [
+                    {
+                      "limit": "340282366920938463463374607431768211455",
+                      "value": "0"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "symbol": "⚽"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44",
+      "state_key_hash": "0xb78d7673d9ab5205e8cbb0ff243b50be5a5dff8e2fe5d7b10b1a4953d0b65d7b",
+      "data": {
+        "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Market",
+        "data": {
+          "clamm_virtual_reserves": {
+            "base": "4900000000000000",
+            "quote": "40000000001"
+          },
+          "cpamm_real_reserves": {
+            "base": "0",
+            "quote": "0"
+          },
+          "cumulative_stats": {
+            "base_volume": "282664853840924",
+            "integrator_fees": "117939999",
+            "n_chat_messages": "0",
+            "n_swaps": "2",
+            "pool_fees_base": "0",
+            "pool_fees_quote": "0",
+            "quote_volume": "2370060000"
+          },
+          "extend_ref": {
+            "self": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44"
+          },
+          "last_swap": {
+            "avg_execution_price_q64": "154282769884369",
+            "base_volume": "141332426920462",
+            "is_sell": true,
+            "nonce": "3",
+            "quote_volume": "1182060000",
+            "time": "1750381414182458"
+          },
+          "lp_coin_supply": "0",
+          "metadata": {
+            "emoji_bytes": "0xe29abd",
+            "market_address": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44",
+            "market_id": "3"
+          },
+          "periodic_state_trackers": [
+            {
+              "close_price_q64": "154282769884369",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155058060185296",
+              "integrator_fees": "117939999",
+              "low_price_q64": "154282769884369",
+              "n_chat_messages": "0",
+              "n_swaps": "2",
+              "open_price_q64": "155058060185296",
+              "period": "60000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381380000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "36734693879"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "282664853840924",
+              "volume_quote": "2370060000"
+            },
+            {
+              "close_price_q64": "154282769884369",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155058060185296",
+              "integrator_fees": "117939999",
+              "low_price_q64": "154282769884369",
+              "n_chat_messages": "0",
+              "n_swaps": "2",
+              "open_price_q64": "155058060185296",
+              "period": "300000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "36734693879"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "282664853840924",
+              "volume_quote": "2370060000"
+            },
+            {
+              "close_price_q64": "154282769884369",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155058060185296",
+              "integrator_fees": "117939999",
+              "low_price_q64": "154282769884369",
+              "n_chat_messages": "0",
+              "n_swaps": "2",
+              "open_price_q64": "155058060185296",
+              "period": "900000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "36734693879"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "282664853840924",
+              "volume_quote": "2370060000"
+            },
+            {
+              "close_price_q64": "154282769884369",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155058060185296",
+              "integrator_fees": "117939999",
+              "low_price_q64": "154282769884369",
+              "n_chat_messages": "0",
+              "n_swaps": "2",
+              "open_price_q64": "155058060185296",
+              "period": "1800000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "36734693879"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "282664853840924",
+              "volume_quote": "2370060000"
+            },
+            {
+              "close_price_q64": "154282769884369",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155058060185296",
+              "integrator_fees": "117939999",
+              "low_price_q64": "154282769884369",
+              "n_chat_messages": "0",
+              "n_swaps": "2",
+              "open_price_q64": "155058060185296",
+              "period": "3600000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "36734693879"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "282664853840924",
+              "volume_quote": "2370060000"
+            },
+            {
+              "close_price_q64": "154282769884369",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155058060185296",
+              "integrator_fees": "117939999",
+              "low_price_q64": "154282769884369",
+              "n_chat_messages": "0",
+              "n_swaps": "2",
+              "open_price_q64": "155058060185296",
+              "period": "14400000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750377600000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "36734693879"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "282664853840924",
+              "volume_quote": "2370060000"
+            },
+            {
+              "close_price_q64": "154282769884369",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155058060185296",
+              "integrator_fees": "117939999",
+              "low_price_q64": "154282769884369",
+              "n_chat_messages": "0",
+              "n_swaps": "2",
+              "open_price_q64": "155058060185296",
+              "period": "86400000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750377600000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "36734693879"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "282664853840924",
+              "volume_quote": "2370060000"
+            }
+          ],
+          "sequence_info": {
+            "last_bump_time": "1750381414182458",
+            "nonce": "3"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xd14c168e2b66a2b7955575b2ebae2c452adf45d34290919db9856753ead4443",
+      "state_key_hash": "0x8a6d19a087afb2a3233840c6e70da2f1d72e6f368b550fd9e6fc51decc3c612c",
+      "data": {
+        "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Registry",
+        "data": {
+          "coin_symbol_emojis": {
+            "handle": "0x461507797f7720a83b29ffe65577cd6e3d70eb430c6826e4602a5b290e946f2"
+          },
+          "extend_ref": {
+            "self": "0xd14c168e2b66a2b7955575b2ebae2c452adf45d34290919db9856753ead4443"
+          },
+          "global_stats": {
+            "cumulative_chat_messages": {
+              "max_value": "18446744073709551615",
+              "value": "0"
+            },
+            "cumulative_integrator_fees": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "723850299"
+            },
+            "cumulative_quote_volume": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "3546209700"
+            },
+            "cumulative_swaps": {
+              "max_value": "18446744073709551615",
+              "value": "3"
+            },
+            "fully_diluted_value": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "296069586061"
+            },
+            "market_cap": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "1210732902"
+            },
+            "total_quote_locked": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "1176149701"
+            },
+            "total_value_locked": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "75626839597"
+            }
+          },
+          "markets_by_emoji_bytes": {
+            "buckets": {
+              "inner": {
+                "handle": "0x1f5fa701721ef3be77f5e5377adfffdc09882cd8825d7e6f7199581cc85c68c5"
+              },
+              "length": "2"
+            },
+            "level": 1,
+            "num_buckets": "2",
+            "size": "8",
+            "split_load_threshold": 75,
+            "target_bucket_size": "22"
+          },
+          "markets_by_market_id": {
+            "buckets": {
+              "inner": {
+                "handle": "0xc4b884b6449d6345160f67c760f34fcd6ebbc09d229bc6cb2d5f29875b031029"
+              },
+              "length": "2"
+            },
+            "level": 1,
+            "num_buckets": "2",
+            "size": "8",
+            "split_load_threshold": 75,
+            "target_bucket_size": "21"
+          },
+          "registry_address": "0xd14c168e2b66a2b7955575b2ebae2c452adf45d34290919db9856753ead4443",
+          "sequence_info": {
+            "last_bump_time": "1750377600000000",
+            "nonce": {
+              "max_value": "18446744073709551615",
+              "value": "12"
+            }
+          },
+          "supplemental_chat_emojis": {
+            "handle": "0x9f0a0d97900ac008b5c21d26dc54a4629e3eee7e525c6bbba9b1ced307bdcdce"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x218e12bc86d7c5624e58b7abb945458c0e410eba87a9b049f665742d267d965e",
+      "state_key_hash": "0x6f9e15e52f4184c7c09ab0f1cff0d7fa318610bc93dd118d7ffad273f5241659",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "0",
+          "frozen": false,
+          "metadata": {
+            "inner": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x218e12bc86d7c5624e58b7abb945458c0e410eba87a9b049f665742d267d965e",
+      "state_key_hash": "0x6f9e15e52f4184c7c09ab0f1cff0d7fa318610bc93dd118d7ffad273f5241659",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x218e12bc86d7c5624e58b7abb945458c0e410eba87a9b049f665742d267d965e",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2",
+      "state_key_hash": "0xa879785c14b396c6cd5766e704b6796c20d5566d46334eae307baab9c65bfa99",
+      "data": {
+        "type": "0x1::coin::PairedCoinType",
+        "data": {
+          "type": {
+            "account_address": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+            "module_name": "0x636f696e5f666163746f7279",
+            "struct_name": "0x456d6f6a69636f696e"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2",
+      "state_key_hash": "0xa879785c14b396c6cd5766e704b6796c20d5566d46334eae307baab9c65bfa99",
+      "data": {
+        "type": "0x1::coin::PairedFungibleAssetRefs",
+        "data": {
+          "burn_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2"
+                }
+              }
+            ]
+          },
+          "mint_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2"
+                }
+              }
+            ]
+          },
+          "transfer_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2",
+      "state_key_hash": "0xa879785c14b396c6cd5766e704b6796c20d5566d46334eae307baab9c65bfa99",
+      "data": {
+        "type": "0x1::fungible_asset::ConcurrentSupply",
+        "data": {
+          "current": {
+            "max_value": "340282366920938463463374607431768211455",
+            "value": "4360037094969082"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2",
+      "state_key_hash": "0xa879785c14b396c6cd5766e704b6796c20d5566d46334eae307baab9c65bfa99",
+      "data": {
+        "type": "0x1::fungible_asset::Metadata",
+        "data": {
+          "decimals": 8,
+          "icon_uri": "",
+          "name": "❄️ emojicoin",
+          "project_uri": "",
+          "symbol": "❄️"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2",
+      "state_key_hash": "0xa879785c14b396c6cd5766e704b6796c20d5566d46334eae307baab9c65bfa99",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": true,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xa",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2",
+      "state_key_hash": "0xa879785c14b396c6cd5766e704b6796c20d5566d46334eae307baab9c65bfa99",
+      "data": {
+        "type": "0x1::primary_fungible_store::DeriveRefPod",
+        "data": {
+          "metadata_derive_ref": {
+            "self": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x5d4e7cb7f83d04bcc3311b8f8b298d99506eb8e4b4508aff4ae76b5a285f8f18",
+      "state_key_hash": "0x175aeaa7cc797f7aaedf832e76be655ed319a6b621e7cd68396d5f9e3110df07",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "999997596554000",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x5d4e7cb7f83d04bcc3311b8f8b298d99506eb8e4b4508aff4ae76b5a285f8f18",
+      "state_key_hash": "0x175aeaa7cc797f7aaedf832e76be655ed319a6b621e7cd68396d5f9e3110df07",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x5d4e7cb7f83d04bcc3311b8f8b298d99506eb8e4b4508aff4ae76b5a285f8f18",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x6726e84b93331c1933eea31ba8d561d40f96b92416ad02ec1e372f98eee3040e",
+      "state_key_hash": "0xabfdc84245339636018ca0845bdfb616619136b8b1f9d5c7e8dbe1d87778a8ce",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "4360037094969082",
+          "frozen": false,
+          "metadata": {
+            "inner": "0x2dd344be9e66bf75dc70d73ef0998540eb90699e7feda12da4432903bd1d4ec2"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x6726e84b93331c1933eea31ba8d561d40f96b92416ad02ec1e372f98eee3040e",
+      "state_key_hash": "0xabfdc84245339636018ca0845bdfb616619136b8b1f9d5c7e8dbe1d87778a8ce",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x6726e84b93331c1933eea31ba8d561d40f96b92416ad02ec1e372f98eee3040e",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+      "state_key_hash": "0xf0eeab54c3e9749dca18a0621a9ebd27fb763a762d782734114df89fe6a41bc7",
+      "data": {
+        "type": "0x1::coin::CoinInfo<0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b::coin_factory::Emojicoin>",
+        "data": {
+          "decimals": 8,
+          "name": "❄️ emojicoin",
+          "supply": {
+            "vec": [
+              {
+                "aggregator": {
+                  "vec": []
+                },
+                "integer": {
+                  "vec": [
+                    {
+                      "limit": "340282366920938463463374607431768211455",
+                      "value": "139962905030918"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "symbol": "❄️"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+      "state_key_hash": "0x44e39404fd1fd3c12ba499eb6f8f22f573f92a57296e99d6698b69794bce7385",
+      "data": {
+        "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Market",
+        "data": {
+          "clamm_virtual_reserves": {
+            "base": "4760037094969082",
+            "quote": "41176149700"
+          },
+          "cpamm_real_reserves": {
+            "base": "0",
+            "quote": "0"
+          },
+          "cumulative_stats": {
+            "base_volume": "139962905030918",
+            "integrator_fees": "105910300",
+            "n_chat_messages": "0",
+            "n_swaps": "1",
+            "pool_fees_base": "0",
+            "pool_fees_quote": "0",
+            "quote_volume": "1176149700"
+          },
+          "extend_ref": {
+            "self": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b"
+          },
+          "last_swap": {
+            "avg_execution_price_q64": "155013448052379",
+            "base_volume": "139962905030918",
+            "is_sell": false,
+            "nonce": "2",
+            "quote_volume": "1176149700",
+            "time": "1750381414182458"
+          },
+          "lp_coin_supply": "0",
+          "metadata": {
+            "emoji_bytes": "0xe29d84efb88f",
+            "market_address": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+            "market_id": "8"
+          },
+          "periodic_state_trackers": [
+            {
+              "close_price_q64": "155013448052379",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155013448052379",
+              "integrator_fees": "105910300",
+              "low_price_q64": "155013448052379",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "155013448052379",
+              "period": "60000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381380000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "38892145718"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "139962905030918",
+              "volume_quote": "1176149700"
+            },
+            {
+              "close_price_q64": "155013448052379",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155013448052379",
+              "integrator_fees": "105910300",
+              "low_price_q64": "155013448052379",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "155013448052379",
+              "period": "300000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "38892145718"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "139962905030918",
+              "volume_quote": "1176149700"
+            },
+            {
+              "close_price_q64": "155013448052379",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155013448052379",
+              "integrator_fees": "105910300",
+              "low_price_q64": "155013448052379",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "155013448052379",
+              "period": "900000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "38892145718"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "139962905030918",
+              "volume_quote": "1176149700"
+            },
+            {
+              "close_price_q64": "155013448052379",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155013448052379",
+              "integrator_fees": "105910300",
+              "low_price_q64": "155013448052379",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "155013448052379",
+              "period": "1800000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "38892145718"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "139962905030918",
+              "volume_quote": "1176149700"
+            },
+            {
+              "close_price_q64": "155013448052379",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155013448052379",
+              "integrator_fees": "105910300",
+              "low_price_q64": "155013448052379",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "155013448052379",
+              "period": "3600000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750381200000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "38892145718"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "139962905030918",
+              "volume_quote": "1176149700"
+            },
+            {
+              "close_price_q64": "155013448052379",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155013448052379",
+              "integrator_fees": "105910300",
+              "low_price_q64": "155013448052379",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "155013448052379",
+              "period": "14400000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750377600000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "38892145718"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "139962905030918",
+              "volume_quote": "1176149700"
+            },
+            {
+              "close_price_q64": "155013448052379",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "155013448052379",
+              "integrator_fees": "105910300",
+              "low_price_q64": "155013448052379",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "155013448052379",
+              "period": "86400000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750377600000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "38892145718"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "139962905030918",
+              "volume_quote": "1176149700"
+            }
+          ],
+          "sequence_info": {
+            "last_bump_time": "1750381414182458",
+            "nonce": "2"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+      "state_key_hash": "0xa7dafea597df3a3cdb915f38de24a0dd7a628c4d5561751c0ab41abaf9f3f615",
+      "resource": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::RegistrantGracePeriodFlag",
+      "type": "delete_resource"
+    },
+    {
+      "address": "0x72434fe5ac3b1d5afc2c5013f22f674e932962d5f6f3b059d4191ed0f1220d91",
+      "state_key_hash": "0x94943fd67dab936f2e2b4c2d0175e87cfd4a714c2154ef30e257f99e52896982",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "4500000000000000",
+          "frozen": false,
+          "metadata": {
+            "inner": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x72434fe5ac3b1d5afc2c5013f22f674e932962d5f6f3b059d4191ed0f1220d91",
+      "state_key_hash": "0x94943fd67dab936f2e2b4c2d0175e87cfd4a714c2154ef30e257f99e52896982",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x72434fe5ac3b1d5afc2c5013f22f674e932962d5f6f3b059d4191ed0f1220d91",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x7cc38060b744e9bbf1645794518a046096abcc2ae84cd6bb08c0cddb71fbfc67",
+      "state_key_hash": "0x708222a8b50cecad0884b751818146054276880553558644552ac572ece671d2",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "1176149700",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x7cc38060b744e9bbf1645794518a046096abcc2ae84cd6bb08c0cddb71fbfc67",
+      "state_key_hash": "0x708222a8b50cecad0884b751818146054276880553558644552ac572ece671d2",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x7cc38060b744e9bbf1645794518a046096abcc2ae84cd6bb08c0cddb71fbfc67",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x885cbffd6988f8483f74c698c0e7a839bbc77a01d6d51c5d8e4246aaa3a9ef61",
+      "state_key_hash": "0xc780ba5cd314bf35aa37d4b2fcad17311301b41252b68473f460369fd2135ee1",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "0",
+          "frozen": false,
+          "metadata": {
+            "inner": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x885cbffd6988f8483f74c698c0e7a839bbc77a01d6d51c5d8e4246aaa3a9ef61",
+      "state_key_hash": "0xc780ba5cd314bf35aa37d4b2fcad17311301b41252b68473f460369fd2135ee1",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x885cbffd6988f8483f74c698c0e7a839bbc77a01d6d51c5d8e4246aaa3a9ef61",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a",
+      "state_key_hash": "0xe81ae3fda36b8dabedd8d5fb7835e3975068fea872ec7ddd6858d155464c7bab",
+      "data": {
+        "type": "0x1::coin::PairedCoinType",
+        "data": {
+          "type": {
+            "account_address": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44",
+            "module_name": "0x636f696e5f666163746f7279",
+            "struct_name": "0x456d6f6a69636f696e"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a",
+      "state_key_hash": "0xe81ae3fda36b8dabedd8d5fb7835e3975068fea872ec7ddd6858d155464c7bab",
+      "data": {
+        "type": "0x1::coin::PairedFungibleAssetRefs",
+        "data": {
+          "burn_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a"
+                }
+              }
+            ]
+          },
+          "mint_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a"
+                }
+              }
+            ]
+          },
+          "transfer_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a",
+      "state_key_hash": "0xe81ae3fda36b8dabedd8d5fb7835e3975068fea872ec7ddd6858d155464c7bab",
+      "data": {
+        "type": "0x1::fungible_asset::ConcurrentSupply",
+        "data": {
+          "current": {
+            "max_value": "340282366920938463463374607431768211455",
+            "value": "4500000000000000"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a",
+      "state_key_hash": "0xe81ae3fda36b8dabedd8d5fb7835e3975068fea872ec7ddd6858d155464c7bab",
+      "data": {
+        "type": "0x1::fungible_asset::Metadata",
+        "data": {
+          "decimals": 8,
+          "icon_uri": "",
+          "name": "⚽ emojicoin",
+          "project_uri": "",
+          "symbol": "⚽"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a",
+      "state_key_hash": "0xe81ae3fda36b8dabedd8d5fb7835e3975068fea872ec7ddd6858d155464c7bab",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": true,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xa",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a",
+      "state_key_hash": "0xe81ae3fda36b8dabedd8d5fb7835e3975068fea872ec7ddd6858d155464c7bab",
+      "data": {
+        "type": "0x1::primary_fungible_store::DeriveRefPod",
+        "data": {
+          "metadata_derive_ref": {
+            "self": "0x8a1c23a438bac854b411aa48e897a19e4e0eb4cb64e7311b2f589170ee95a18a"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa74e58f8c66cde80dfa0fe05615b5f84461d32712c88ecafefee1944ba4517a9",
+      "state_key_hash": "0xf4b41b05e58675998bff539a9180e173b79b4e1d5e942dc10721dac387792b41",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "1",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa74e58f8c66cde80dfa0fe05615b5f84461d32712c88ecafefee1944ba4517a9",
+      "state_key_hash": "0xf4b41b05e58675998bff539a9180e173b79b4e1d5e942dc10721dac387792b41",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xa74e58f8c66cde80dfa0fe05615b5f84461d32712c88ecafefee1944ba4517a9",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94",
+      "state_key_hash": "0xc40f0988b41762c77a4d11cb897f7c07c813763a4507639fe9b6c1c8cee30903",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "10000000417364199",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94",
+      "state_key_hash": "0xc40f0988b41762c77a4d11cb897f7c07c813763a4507639fe9b6c1c8cee30903",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+      "state_key_hash": "0xe55aca886fe450cba7c3c11c47ca89d37131bec2cb32980b0d5f887fad9b3b64",
+      "data": {
+        "type": "0x1::account::Account",
+        "data": {
+          "authentication_key": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+          "coin_register_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+                "creation_num": "0"
+              }
+            }
+          },
+          "guid_creation_num": "2",
+          "key_rotation_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+                "creation_num": "1"
+              }
+            }
+          },
+          "rotation_capability_offer": {
+            "for": {
+              "vec": []
+            }
+          },
+          "sequence_number": "9",
+          "signer_capability_offer": {
+            "for": {
+              "vec": []
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+      "state_key_hash": "0x7f874f89b42575f2c8fa8960767cfb7eb1595471b8c6e80aae5bafe736631508",
+      "data": {
+        "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_arena::Escrow<0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44::coin_factory::Emojicoin, 0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44::coin_factory::EmojicoinLP, 0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b::coin_factory::Emojicoin, 0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b::coin_factory::EmojicoinLP>",
+        "data": {
+          "emojicoin_0": {
+            "value": "0"
+          },
+          "emojicoin_1": {
+            "value": "139962905030918"
+          },
+          "match_amount": "0",
+          "melee_id": "2"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "state_key_hash": "0x6e4b28d40f98a106a65163530924c0dcb40c1349d3aa915d108b4d6cfc1ddb19",
+      "handle": "0x1b854694ae746cdbd8d44186ca4929b2b337df21d1c74633be19b2710552fdca",
+      "key": "0x0619dc29a0aac8fa146714058e8dd6d2d0f3bdf5f6331907bf91f3acd81e6935",
+      "value": "0x0a08af2f000000000000000000000000",
+      "data": {
+        "key": "0x619dc29a0aac8fa146714058e8dd6d2d0f3bdf5f6331907bf91f3acd81e6935",
+        "key_type": "address",
+        "value": "800000010",
+        "value_type": "u128"
+      },
+      "type": "write_table_item"
+    }
+  ],
+  "sender": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+  "sequence_number": "8",
+  "max_gas_amount": "2306",
+  "gas_unit_price": "100",
+  "expiration_timestamp_secs": "1750381504",
+  "payload": {
+    "function": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_arena::swap",
+    "type_arguments": [
+      "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44::coin_factory::Emojicoin",
+      "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44::coin_factory::EmojicoinLP",
+      "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b::coin_factory::Emojicoin",
+      "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b::coin_factory::EmojicoinLP"
+    ],
+    "arguments": [],
+    "type": "entry_function_payload"
+  },
+  "signature": {
+    "public_key": "0x656fb0913497ae4540f1b0b5799e3f21f0db12e521637bbab03efede3b03ff7f",
+    "signature": "0x52f7afb4e1d694d95463cd8e47fe606f07b88b92892e67563698fa0e5309f2e23491eb5554015c5e6215667bad2cbb2ac1fa1c4852a969bd00c670f151725607",
+    "type": "ed25519_signature"
+  },
+  "replay_protection_nonce": null,
+  "events": [
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "141332426920462",
+        "store": "0x885cbffd6988f8483f74c698c0e7a839bbc77a01d6d51c5d8e4246aaa3a9ef61"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Withdraw",
+      "data": {
+        "amount": "141332426920462",
+        "store": "0x885cbffd6988f8483f74c698c0e7a839bbc77a01d6d51c5d8e4246aaa3a9ef61"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "141332426920462",
+        "store": "0x72434fe5ac3b1d5afc2c5013f22f674e932962d5f6f3b059d4191ed0f1220d91"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Withdraw",
+      "data": {
+        "amount": "1187999999",
+        "store": "0xa74e58f8c66cde80dfa0fe05615b5f84461d32712c88ecafefee1944ba4517a9"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "1182060000",
+        "store": "0x5d4e7cb7f83d04bcc3311b8f8b298d99506eb8e4b4508aff4ae76b5a285f8f18"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "5939999",
+        "store": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Swap",
+      "data": {
+        "avg_execution_price_q64": "154282769884369",
+        "balance_as_fraction_of_circulating_supply_after_q64": "0",
+        "balance_as_fraction_of_circulating_supply_before_q64": "18446744073709551616",
+        "base_volume": "141332426920462",
+        "input_amount": "141332426920462",
+        "integrator": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d",
+        "integrator_fee": "5939999",
+        "integrator_fee_rate_bps": 50,
+        "is_sell": true,
+        "market_id": "3",
+        "market_nonce": "3",
+        "net_proceeds": "1182060000",
+        "pool_fee": "0",
+        "quote_volume": "1182060000",
+        "results_in_state_transition": false,
+        "starts_in_bonding_curve": true,
+        "swapper": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+        "time": "1750381414182458"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::State",
+      "data": {
+        "clamm_virtual_reserves": {
+          "base": "4900000000000000",
+          "quote": "40000000001"
+        },
+        "cpamm_real_reserves": {
+          "base": "0",
+          "quote": "0"
+        },
+        "cumulative_stats": {
+          "base_volume": "282664853840924",
+          "integrator_fees": "117939999",
+          "n_chat_messages": "0",
+          "n_swaps": "2",
+          "pool_fees_base": "0",
+          "pool_fees_quote": "0",
+          "quote_volume": "2370060000"
+        },
+        "instantaneous_stats": {
+          "fully_diluted_value": "36734693878",
+          "market_cap": "0",
+          "total_quote_locked": "1",
+          "total_value_locked": "36734693879"
+        },
+        "last_swap": {
+          "avg_execution_price_q64": "154282769884369",
+          "base_volume": "141332426920462",
+          "is_sell": true,
+          "nonce": "3",
+          "quote_volume": "1182060000",
+          "time": "1750381414182458"
+        },
+        "lp_coin_supply": "0",
+        "market_metadata": {
+          "emoji_bytes": "0xe29abd",
+          "market_address": "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44",
+          "market_id": "3"
+        },
+        "state_metadata": {
+          "bump_time": "1750381414182458",
+          "market_nonce": "3",
+          "trigger": 3
+        }
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Withdraw",
+      "data": {
+        "amount": "1182060000",
+        "store": "0x5d4e7cb7f83d04bcc3311b8f8b298d99506eb8e4b4508aff4ae76b5a285f8f18"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "1176149700",
+        "store": "0x7cc38060b744e9bbf1645794518a046096abcc2ae84cd6bb08c0cddb71fbfc67"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Withdraw",
+      "data": {
+        "amount": "139962905030918",
+        "store": "0x6726e84b93331c1933eea31ba8d561d40f96b92416ad02ec1e372f98eee3040e"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "139962905030918",
+        "store": "0x218e12bc86d7c5624e58b7abb945458c0e410eba87a9b049f665742d267d965e"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "5910300",
+        "store": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Swap",
+      "data": {
+        "avg_execution_price_q64": "155013448052379",
+        "balance_as_fraction_of_circulating_supply_after_q64": "18446744073709551616",
+        "balance_as_fraction_of_circulating_supply_before_q64": "0",
+        "base_volume": "139962905030918",
+        "input_amount": "1182060000",
+        "integrator": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d",
+        "integrator_fee": "5910300",
+        "integrator_fee_rate_bps": 50,
+        "is_sell": false,
+        "market_id": "8",
+        "market_nonce": "2",
+        "net_proceeds": "139962905030918",
+        "pool_fee": "0",
+        "quote_volume": "1176149700",
+        "results_in_state_transition": false,
+        "starts_in_bonding_curve": true,
+        "swapper": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+        "time": "1750381414182458"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::State",
+      "data": {
+        "clamm_virtual_reserves": {
+          "base": "4760037094969082",
+          "quote": "41176149700"
+        },
+        "cpamm_real_reserves": {
+          "base": "0",
+          "quote": "0"
+        },
+        "cumulative_stats": {
+          "base_volume": "139962905030918",
+          "integrator_fees": "105910300",
+          "n_chat_messages": "0",
+          "n_swaps": "1",
+          "pool_fees_base": "0",
+          "pool_fees_quote": "0",
+          "quote_volume": "1176149700"
+        },
+        "instantaneous_stats": {
+          "fully_diluted_value": "38926728921",
+          "market_cap": "1210732902",
+          "total_quote_locked": "1176149700",
+          "total_value_locked": "38892145718"
+        },
+        "last_swap": {
+          "avg_execution_price_q64": "155013448052379",
+          "base_volume": "139962905030918",
+          "is_sell": false,
+          "nonce": "2",
+          "quote_volume": "1176149700",
+          "time": "1750381414182458"
+        },
+        "lp_coin_supply": "0",
+        "market_metadata": {
+          "emoji_bytes": "0xe29d84efb88f",
+          "market_address": "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b",
+          "market_id": "8"
+        },
+        "state_metadata": {
+          "bump_time": "1750381414182458",
+          "market_nonce": "2",
+          "trigger": 2
+        }
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Withdraw",
+      "data": {
+        "amount": "139962905030918",
+        "store": "0x218e12bc86d7c5624e58b7abb945458c0e410eba87a9b049f665742d267d965e"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_arena::Swap",
+      "data": {
+        "emojicoin_0_exchange_rate": {
+          "base": "4900000000000000",
+          "quote": "40000000001"
+        },
+        "emojicoin_0_proceeds": "0",
+        "emojicoin_1_exchange_rate": {
+          "base": "4760037094969082",
+          "quote": "41176149700"
+        },
+        "emojicoin_1_proceeds": "139962905030918",
+        "integrator_fee": "11850299",
+        "melee_id": "2",
+        "quote_volume": "1176149700",
+        "user": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::transaction_fee::FeeStatement",
+      "data": {
+        "execution_gas_units": "42",
+        "io_gas_units": "46",
+        "storage_fee_octas": "106480",
+        "storage_fee_refund_octas": "46000",
+        "total_charge_gas_units": "1153"
+      }
+    }
+  ],
+  "timestamp": "1750381414182458",
+  "type": "user_transaction"
+}
