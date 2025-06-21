@@ -2,16 +2,19 @@
 
 import { isUserTransactionResponse, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
-import { isWriteSetChangeWriteResource } from "../../../src";
-import { findEscrowsInTxn, isEscrowWritesetChange } from "../../../src/utils/arena/escrow";
-import TransactionJson from "./json/escrow-txn.json";
+import { ensureTypeTagStruct, isWriteSetChangeWriteResource } from "../../../src";
+import { findEscrowsInTxn, isEscrowWriteSetChange } from "../../../src/utils/arena/escrow";
+import TransactionJsonCoinStores from "./json/escrow-txn-coin-stores.json";
+import TransactionJsonFungibleAssets from "./json/escrow-txn-fungible-assets.json";
 
-const EscrowTxnResponse = TransactionJson as UserTransactionResponse;
+const EscrowTxnResponseCoinStores = TransactionJsonCoinStores as UserTransactionResponse;
+const EscrowTxnResponseFungibleAssets = TransactionJsonFungibleAssets as UserTransactionResponse;
+
 describe("escrow resource parser tests", () => {
   it("finds an escrow resource in a transaction's writeset changes", () => {
-    const changes = EscrowTxnResponse.changes
+    const changes = EscrowTxnResponseCoinStores.changes
       .filter(isWriteSetChangeWriteResource)
-      .filter(isEscrowWritesetChange);
+      .filter(isEscrowWriteSetChange);
     expect(changes).toHaveLength(1);
     const resource = changes.pop()!;
     expect(resource).toEqual({
@@ -39,9 +42,9 @@ describe("escrow resource parser tests", () => {
     });
   });
 
-  it("finds an escrow resource in a transaction response and converts it correctly", () => {
-    expect(isUserTransactionResponse(EscrowTxnResponse)).toBe(true);
-    const response = EscrowTxnResponse;
+  it("finds an escrow resource in a transaction response and converts it correctly (coin stores)", () => {
+    expect(isUserTransactionResponse(EscrowTxnResponseCoinStores)).toBe(true);
+    const response = EscrowTxnResponseCoinStores;
     const escrows = findEscrowsInTxn(response);
     expect(escrows).toHaveLength(1);
     const escrow = escrows.pop()!;
@@ -62,7 +65,38 @@ describe("escrow resource parser tests", () => {
         "0xbd9ababccfd739d8bf39409d44a0868ba29495bf57c0b122c15027cf224ca78c::coin_factory::EmojicoinLP",
         "0xbd8e88964b5f5b576819b9a3651a7818c1a2bad2bb5614bc0526dac104bf15cc::coin_factory::Emojicoin",
         "0xbd8e88964b5f5b576819b9a3651a7818c1a2bad2bb5614bc0526dac104bf15cc::coin_factory::EmojicoinLP",
-      ],
+      ]
+        .map(ensureTypeTagStruct)
+        .map((v) => v.toString()),
+    });
+  });
+
+  it("finds an escrow resource in a transaction response and converts it correctly (fungible assets)", () => {
+    expect(isUserTransactionResponse(EscrowTxnResponseFungibleAssets)).toBe(true);
+    const response = EscrowTxnResponseFungibleAssets;
+    const escrows = findEscrowsInTxn(response);
+    expect(escrows).toHaveLength(1);
+    const escrow = escrows.pop()!;
+    expect({
+      ...escrow,
+      coinTypes: escrow.coinTypes.map((ct) => ct.toString()),
+    }).toEqual({
+      version: BigInt(response.version),
+      user: "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+      meleeID: 2n,
+      emojicoin0: 0n,
+      emojicoin1: 139962905030918n,
+      matchAmount: 0n,
+      open: true,
+      lockedIn: false,
+      coinTypes: [
+        "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44::coin_factory::Emojicoin",
+        "0x58f40ecd236f430c28e30699bf8a7f478c6e4efe9c6d6a2227a86f41e1f0e44::coin_factory::EmojicoinLP",
+        "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b::coin_factory::Emojicoin",
+        "0x674420b88044de47849a322db8e91dd8476d6ead2923d3fe52ced655754b2c6b::coin_factory::EmojicoinLP",
+      ]
+        .map(ensureTypeTagStruct)
+        .map((v) => v.toString()),
     });
   });
 });

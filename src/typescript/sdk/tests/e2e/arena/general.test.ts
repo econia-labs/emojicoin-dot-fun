@@ -91,7 +91,7 @@ describe("general arena tests", () => {
   const emojicoin = new EmojicoinClient();
 
   const DEFAULT_MELEE_DURATION = ONE_SECOND_MICROSECONDS * 15n;
-  const LONGER_MELEE_DURATION = ONE_SECOND_MICROSECONDS * 20n;
+  const LONGER_MELEE_DURATION = ONE_SECOND_MICROSECONDS * 25n;
 
   const emojis: SymbolEmoji[][] = [
     ["♑"],

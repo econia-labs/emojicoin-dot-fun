@@ -6,7 +6,7 @@ import {
   isWriteSetChangeWriteResource,
 } from "../../../src";
 import CoinStore from "./json/coin-store.json";
-import PrimaryStore from "./json/primary-store.json";
+import PrimaryStore from "./json/fungible-store.json";
 
 const coinStoreAsWriteResource = CoinStore as WriteSetChangeWriteResource;
 const primaryStoreAsWriteResource = PrimaryStore as WriteSetChangeWriteResource;

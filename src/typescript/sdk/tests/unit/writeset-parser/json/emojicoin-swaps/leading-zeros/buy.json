@@ -1,0 +1,1256 @@
+{
+  "version": "3498",
+  "hash": "0xa33ab1cd4d1c0a561a64c0357cbb0308bf4cd8c56d15ca8d2062dad63439685c",
+  "state_change_hash": "0x8e1f6ec83c06307697b58d9ea04bdf634f37f8a4387448e0a26367cfba4d7a4a",
+  "event_root_hash": "0x66b3c2d4dd40443869a5f1bb11a0f2acf4228ce8259b6399504ff9f1dbef8035",
+  "state_checkpoint_hash": null,
+  "gas_used": "5427",
+  "success": true,
+  "vm_status": "Executed successfully",
+  "accumulator_root_hash": "0x49e300a69124d8f06b0d7b98c1a42fe1a57437fdc69acf0db4beee9b76d62249",
+  "changes": [
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::coin::PairedCoinType",
+        "data": {
+          "type": {
+            "account_address": "0x1",
+            "module_name": "0x6170746f735f636f696e",
+            "struct_name": "0x4170746f73436f696e"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::coin::PairedFungibleAssetRefs",
+        "data": {
+          "burn_ref_opt": {
+            "vec": []
+          },
+          "mint_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0xa"
+                }
+              }
+            ]
+          },
+          "transfer_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0xa"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::fungible_asset::ConcurrentSupply",
+        "data": {
+          "current": {
+            "max_value": "340282366920938463463374607431768211455",
+            "value": "18470744072797689095"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::fungible_asset::Metadata",
+        "data": {
+          "decimals": 8,
+          "icon_uri": "",
+          "name": "Aptos Coin",
+          "project_uri": "",
+          "symbol": "APT"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": true,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x1",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xa",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xa",
+      "state_key_hash": "0x1db5441d8fa4229c5844f73fd66da4ad8176cb8793d8b3a7f6ca858722030043",
+      "data": {
+        "type": "0x1::primary_fungible_store::DeriveRefPod",
+        "data": {
+          "metadata_derive_ref": {
+            "self": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+      "state_key_hash": "0x0ccf6ee8cbbcf07231e3dfa7053227792cd6ae3451975b9a600ac6ac2323f67e",
+      "data": {
+        "type": "0x1::coin::CoinInfo<0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034::coin_factory::Emojicoin>",
+        "data": {
+          "decimals": 8,
+          "name": "☹️♿ emojicoin",
+          "supply": {
+            "vec": [
+              {
+                "aggregator": {
+                  "vec": []
+                },
+                "integer": {
+                  "vec": [
+                    {
+                      "limit": "340282366920938463463374607431768211455",
+                      "value": "0"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "symbol": "☹️♿"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+      "state_key_hash": "0x785f716e0e1da55f13da9afec6105a6e2ef18999188dd5713bfd4c1eb7f31b08",
+      "data": {
+        "type": "0x1::coin::CoinInfo<0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034::coin_factory::EmojicoinLP>",
+        "data": {
+          "decimals": 8,
+          "name": "☹️♿ emojicoin LP",
+          "supply": {
+            "vec": [
+              {
+                "aggregator": {
+                  "vec": []
+                },
+                "integer": {
+                  "vec": [
+                    {
+                      "limit": "340282366920938463463374607431768211455",
+                      "value": "0"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "symbol": "LP-10"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+      "state_key_hash": "0x5b4e238323c72c0487fb34ac5993425ea79f4948767f504e8e4a51b474b2b580",
+      "data": {
+        "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Market",
+        "data": {
+          "clamm_virtual_reserves": {
+            "base": "4875864470869198",
+            "quote": "40198000000"
+          },
+          "cpamm_real_reserves": {
+            "base": "0",
+            "quote": "0"
+          },
+          "cumulative_stats": {
+            "base_volume": "24135529130802",
+            "integrator_fees": "102000000",
+            "n_chat_messages": "0",
+            "n_swaps": "1",
+            "pool_fees_base": "0",
+            "pool_fees_quote": "0",
+            "quote_volume": "198000000"
+          },
+          "extend_ref": {
+            "self": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034"
+          },
+          "last_swap": {
+            "avg_execution_price_q64": "151331064954080",
+            "base_volume": "24135529130802",
+            "is_sell": false,
+            "nonce": "2",
+            "quote_volume": "198000000",
+            "time": "1750385573208974"
+          },
+          "lp_coin_supply": "0",
+          "metadata": {
+            "emoji_bytes": "0xe298b9efb88fe299bf",
+            "market_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+            "market_id": "10"
+          },
+          "periodic_state_trackers": [
+            {
+              "close_price_q64": "151331064954080",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "151331064954080",
+              "integrator_fees": "102000000",
+              "low_price_q64": "151331064954080",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "151331064954080",
+              "period": "60000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750385520000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "37098287338"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "24135529130802",
+              "volume_quote": "198000000"
+            },
+            {
+              "close_price_q64": "151331064954080",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "151331064954080",
+              "integrator_fees": "102000000",
+              "low_price_q64": "151331064954080",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "151331064954080",
+              "period": "300000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750385400000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "37098287338"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "24135529130802",
+              "volume_quote": "198000000"
+            },
+            {
+              "close_price_q64": "151331064954080",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "151331064954080",
+              "integrator_fees": "102000000",
+              "low_price_q64": "151331064954080",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "151331064954080",
+              "period": "900000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750384800000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "37098287338"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "24135529130802",
+              "volume_quote": "198000000"
+            },
+            {
+              "close_price_q64": "151331064954080",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "151331064954080",
+              "integrator_fees": "102000000",
+              "low_price_q64": "151331064954080",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "151331064954080",
+              "period": "1800000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750384800000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "37098287338"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "24135529130802",
+              "volume_quote": "198000000"
+            },
+            {
+              "close_price_q64": "151331064954080",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "151331064954080",
+              "integrator_fees": "102000000",
+              "low_price_q64": "151331064954080",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "151331064954080",
+              "period": "3600000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750384800000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "37098287338"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "24135529130802",
+              "volume_quote": "198000000"
+            },
+            {
+              "close_price_q64": "151331064954080",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "151331064954080",
+              "integrator_fees": "102000000",
+              "low_price_q64": "151331064954080",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "151331064954080",
+              "period": "14400000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750377600000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "37098287338"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "24135529130802",
+              "volume_quote": "198000000"
+            },
+            {
+              "close_price_q64": "151331064954080",
+              "ends_in_bonding_curve": true,
+              "high_price_q64": "151331064954080",
+              "integrator_fees": "102000000",
+              "low_price_q64": "151331064954080",
+              "n_chat_messages": "0",
+              "n_swaps": "1",
+              "open_price_q64": "151331064954080",
+              "period": "86400000000",
+              "pool_fees_base": "0",
+              "pool_fees_quote": "0",
+              "start_time": "1750377600000000",
+              "starts_in_bonding_curve": true,
+              "tvl_to_lp_coin_ratio_end": {
+                "lp_coins": "0",
+                "tvl": "37098287338"
+              },
+              "tvl_to_lp_coin_ratio_start": {
+                "lp_coins": "0",
+                "tvl": "0"
+              },
+              "volume_base": "24135529130802",
+              "volume_quote": "198000000"
+            }
+          ],
+          "sequence_info": {
+            "last_bump_time": "1750385573208974",
+            "nonce": "2"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+      "state_key_hash": "0x861113650c76db816462d8582c00981d0e385fff607185e0e22d56e45d43e42b",
+      "data": {
+        "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::LPCoinCapabilities<0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034::coin_factory::Emojicoin, 0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034::coin_factory::EmojicoinLP>",
+        "data": {
+          "burn": {
+            "dummy_field": false
+          },
+          "mint": {
+            "dummy_field": false
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+      "state_key_hash": "0x2d05ba06f692136a4ba7e0fec77899585eb599756cd50096213f9c4ec2da756e",
+      "resource": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::RegistrantGracePeriodFlag",
+      "type": "delete_resource"
+    },
+    {
+      "address": "0x8a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+      "state_key_hash": "0x0ccc299e70ca7f0d3debe6452e8ab761aa00a1d496d2999994c71d02eec778bb",
+      "data": {
+        "type": "0x1::account::Account",
+        "data": {
+          "authentication_key": "0x08a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+          "coin_register_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x8a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+                "creation_num": "0"
+              }
+            }
+          },
+          "guid_creation_num": "2",
+          "key_rotation_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x8a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+                "creation_num": "1"
+              }
+            }
+          },
+          "rotation_capability_offer": {
+            "for": {
+              "vec": []
+            }
+          },
+          "sequence_number": "2",
+          "signer_capability_offer": {
+            "for": {
+              "vec": []
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+      "state_key_hash": "0x48568b68dfba5e0feb51ce66938b086d1a58369cc225f292b767fdb7d338f629",
+      "data": {
+        "type": "0x1::coin::PairedCoinType",
+        "data": {
+          "type": {
+            "account_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+            "module_name": "0x636f696e5f666163746f7279",
+            "struct_name": "0x456d6f6a69636f696e"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+      "state_key_hash": "0x48568b68dfba5e0feb51ce66938b086d1a58369cc225f292b767fdb7d338f629",
+      "data": {
+        "type": "0x1::coin::PairedFungibleAssetRefs",
+        "data": {
+          "burn_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+                }
+              }
+            ]
+          },
+          "mint_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+                }
+              }
+            ]
+          },
+          "transfer_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+      "state_key_hash": "0x48568b68dfba5e0feb51ce66938b086d1a58369cc225f292b767fdb7d338f629",
+      "data": {
+        "type": "0x1::fungible_asset::ConcurrentSupply",
+        "data": {
+          "current": {
+            "max_value": "340282366920938463463374607431768211455",
+            "value": "4500000000000000"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+      "state_key_hash": "0x48568b68dfba5e0feb51ce66938b086d1a58369cc225f292b767fdb7d338f629",
+      "data": {
+        "type": "0x1::fungible_asset::Metadata",
+        "data": {
+          "decimals": 8,
+          "icon_uri": "",
+          "name": "☹️♿ emojicoin",
+          "project_uri": "",
+          "symbol": "☹️♿"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+      "state_key_hash": "0x48568b68dfba5e0feb51ce66938b086d1a58369cc225f292b767fdb7d338f629",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": true,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xa",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+      "state_key_hash": "0x48568b68dfba5e0feb51ce66938b086d1a58369cc225f292b767fdb7d338f629",
+      "data": {
+        "type": "0x1::primary_fungible_store::DeriveRefPod",
+        "data": {
+          "metadata_derive_ref": {
+            "self": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xd14c168e2b66a2b7955575b2ebae2c452adf45d34290919db9856753ead4443",
+      "state_key_hash": "0x8a6d19a087afb2a3233840c6e70da2f1d72e6f368b550fd9e6fc51decc3c612c",
+      "data": {
+        "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Registry",
+        "data": {
+          "coin_symbol_emojis": {
+            "handle": "0x461507797f7720a83b29ffe65577cd6e3d70eb430c6826e4602a5b290e946f2"
+          },
+          "extend_ref": {
+            "self": "0xd14c168e2b66a2b7955575b2ebae2c452adf45d34290919db9856753ead4443"
+          },
+          "global_stats": {
+            "cumulative_chat_messages": {
+              "max_value": "18446744073709551615",
+              "value": "0"
+            },
+            "cumulative_integrator_fees": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "22232622298"
+            },
+            "cumulative_quote_volume": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "2409813574380"
+            },
+            "cumulative_swaps": {
+              "max_value": "18446744073709551615",
+              "value": "13"
+            },
+            "fully_diluted_value": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "360078878229"
+            },
+            "market_cap": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "1341542670"
+            },
+            "total_quote_locked": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "28173745256"
+            },
+            "total_value_locked": {
+              "max_value": "340282366920938463463374607431768211455",
+              "value": "166502917552"
+            }
+          },
+          "markets_by_emoji_bytes": {
+            "buckets": {
+              "inner": {
+                "handle": "0x1f5fa701721ef3be77f5e5377adfffdc09882cd8825d7e6f7199581cc85c68c5"
+              },
+              "length": "2"
+            },
+            "level": 1,
+            "num_buckets": "2",
+            "size": "10",
+            "split_load_threshold": 75,
+            "target_bucket_size": "22"
+          },
+          "markets_by_market_id": {
+            "buckets": {
+              "inner": {
+                "handle": "0xc4b884b6449d6345160f67c760f34fcd6ebbc09d229bc6cb2d5f29875b031029"
+              },
+              "length": "2"
+            },
+            "level": 1,
+            "num_buckets": "2",
+            "size": "10",
+            "split_load_threshold": 75,
+            "target_bucket_size": "21"
+          },
+          "registry_address": "0xd14c168e2b66a2b7955575b2ebae2c452adf45d34290919db9856753ead4443",
+          "sequence_info": {
+            "last_bump_time": "1750377600000000",
+            "nonce": {
+              "max_value": "18446744073709551615",
+              "value": "27"
+            }
+          },
+          "supplemental_chat_emojis": {
+            "handle": "0x9f0a0d97900ac008b5c21d26dc54a4629e3eee7e525c6bbba9b1ced307bdcdce"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xd8e0ac29dc5cc73603b303a5be1bc56dc7a469492d06b817d18e718edfddcd2",
+      "state_key_hash": "0xb68e49f4bcc6bdf9bb39d636dd59438009e39a09531b32d957378cfcbc68141c",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "24135529130802",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xd8e0ac29dc5cc73603b303a5be1bc56dc7a469492d06b817d18e718edfddcd2",
+      "state_key_hash": "0xb68e49f4bcc6bdf9bb39d636dd59438009e39a09531b32d957378cfcbc68141c",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x8a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xd8e0ac29dc5cc73603b303a5be1bc56dc7a469492d06b817d18e718edfddcd2",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+      "state_key_hash": "0x05e6bc2620cb5f49712a9be78e3f65ce54cbed75df3a034a2cac08ff0c50ed71",
+      "data": {
+        "type": "0x1::coin::PairedCoinType",
+        "data": {
+          "type": {
+            "account_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+            "module_name": "0x636f696e5f666163746f7279",
+            "struct_name": "0x456d6f6a69636f696e4c50"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+      "state_key_hash": "0x05e6bc2620cb5f49712a9be78e3f65ce54cbed75df3a034a2cac08ff0c50ed71",
+      "data": {
+        "type": "0x1::coin::PairedFungibleAssetRefs",
+        "data": {
+          "burn_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea"
+                }
+              }
+            ]
+          },
+          "mint_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea"
+                }
+              }
+            ]
+          },
+          "transfer_ref_opt": {
+            "vec": [
+              {
+                "metadata": {
+                  "inner": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+      "state_key_hash": "0x05e6bc2620cb5f49712a9be78e3f65ce54cbed75df3a034a2cac08ff0c50ed71",
+      "data": {
+        "type": "0x1::fungible_asset::ConcurrentSupply",
+        "data": {
+          "current": {
+            "max_value": "340282366920938463463374607431768211455",
+            "value": "0"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+      "state_key_hash": "0x05e6bc2620cb5f49712a9be78e3f65ce54cbed75df3a034a2cac08ff0c50ed71",
+      "data": {
+        "type": "0x1::fungible_asset::Metadata",
+        "data": {
+          "decimals": 8,
+          "icon_uri": "",
+          "name": "☹️♿ emojicoin LP",
+          "project_uri": "",
+          "symbol": "LP-10"
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+      "state_key_hash": "0x05e6bc2620cb5f49712a9be78e3f65ce54cbed75df3a034a2cac08ff0c50ed71",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": true,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xa",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+      "state_key_hash": "0x05e6bc2620cb5f49712a9be78e3f65ce54cbed75df3a034a2cac08ff0c50ed71",
+      "data": {
+        "type": "0x1::primary_fungible_store::DeriveRefPod",
+        "data": {
+          "metadata_derive_ref": {
+            "self": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x7c3a1a5a71284d0ce5f0293556ea1281bb339a952ed944fee2376b868973cf7b",
+      "state_key_hash": "0x70ec5c87c8868f02ed25fdf0af3bc5951cbb1a2e6cedfb6e3501926526b88983",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "999999599077900",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x7c3a1a5a71284d0ce5f0293556ea1281bb339a952ed944fee2376b868973cf7b",
+      "state_key_hash": "0x70ec5c87c8868f02ed25fdf0af3bc5951cbb1a2e6cedfb6e3501926526b88983",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x8a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x7c3a1a5a71284d0ce5f0293556ea1281bb339a952ed944fee2376b868973cf7b",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x87e3d2fbf4fcf50d7878c6b75277b823ae32768bd26e1bec92ca4428db1c37db",
+      "state_key_hash": "0xc3d30a88a991f08178530adc6d972fb2d4824c49759f0d9133275f2235f51337",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "198000000",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0x87e3d2fbf4fcf50d7878c6b75277b823ae32768bd26e1bec92ca4428db1c37db",
+      "state_key_hash": "0xc3d30a88a991f08178530adc6d972fb2d4824c49759f0d9133275f2235f51337",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0x87e3d2fbf4fcf50d7878c6b75277b823ae32768bd26e1bec92ca4428db1c37db",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94",
+      "state_key_hash": "0xc40f0988b41762c77a4d11cb897f7c07c813763a4507639fe9b6c1c8cee30903",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "10000021926136198",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xa"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94",
+      "state_key_hash": "0xc40f0988b41762c77a4d11cb897f7c07c813763a4507639fe9b6c1c8cee30903",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xb2e99a889c325f62c594adfe9b1b63509e3e4766bcaa0ac1b69b404355f57b62",
+      "state_key_hash": "0x3aa3c950ef748ff14bd697136b0c7df497e38735e1fffc5989210636d582555c",
+      "data": {
+        "type": "0x1::fungible_asset::FungibleStore",
+        "data": {
+          "balance": "4475864470869198",
+          "frozen": false,
+          "metadata": {
+            "inner": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "address": "0xb2e99a889c325f62c594adfe9b1b63509e3e4766bcaa0ac1b69b404355f57b62",
+      "state_key_hash": "0x3aa3c950ef748ff14bd697136b0c7df497e38735e1fffc5989210636d582555c",
+      "data": {
+        "type": "0x1::object::ObjectCore",
+        "data": {
+          "allow_ungated_transfer": false,
+          "guid_creation_num": "1125899906842625",
+          "owner": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+          "transfer_events": {
+            "counter": "0",
+            "guid": {
+              "id": {
+                "addr": "0xb2e99a889c325f62c594adfe9b1b63509e3e4766bcaa0ac1b69b404355f57b62",
+                "creation_num": "1125899906842624"
+              }
+            }
+          }
+        }
+      },
+      "type": "write_resource"
+    },
+    {
+      "state_key_hash": "0x81afec915545779795f917174c03167eb5fd5ea5fb99396660528d5991221e0c",
+      "handle": "0x19e024f0a7ab09c9de6c524bec711ea46431b068d7fa6f119affb617d2406029",
+      "key": "0x02f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e8790340c636f696e5f666163746f727909456d6f6a69636f696e",
+      "value": "0x0c50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66",
+      "data": {
+        "key": {
+          "account_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+          "module_name": "0x636f696e5f666163746f7279",
+          "struct_name": "0x456d6f6a69636f696e"
+        },
+        "key_type": "0x1::type_info::TypeInfo",
+        "value": {
+          "inner": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+        },
+        "value_type": "0x1::object::Object<0x1::fungible_asset::Metadata>"
+      },
+      "type": "write_table_item"
+    },
+    {
+      "state_key_hash": "0xa3856b76ceaab7569c2f0fce6118640d99604a41b9e9140920a18aabed755880",
+      "handle": "0x19e024f0a7ab09c9de6c524bec711ea46431b068d7fa6f119affb617d2406029",
+      "key": "0x02f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e8790340c636f696e5f666163746f72790b456d6f6a69636f696e4c50",
+      "value": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea",
+      "data": {
+        "key": {
+          "account_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+          "module_name": "0x636f696e5f666163746f7279",
+          "struct_name": "0x456d6f6a69636f696e4c50"
+        },
+        "key_type": "0x1::type_info::TypeInfo",
+        "value": {
+          "inner": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea"
+        },
+        "value_type": "0x1::object::Object<0x1::fungible_asset::Metadata>"
+      },
+      "type": "write_table_item"
+    },
+    {
+      "state_key_hash": "0x6e4b28d40f98a106a65163530924c0dcb40c1349d3aa915d108b4d6cfc1ddb19",
+      "handle": "0x1b854694ae746cdbd8d44186ca4929b2b337df21d1c74633be19b2710552fdca",
+      "key": "0x0619dc29a0aac8fa146714058e8dd6d2d0f3bdf5f6331907bf91f3acd81e6935",
+      "value": "0x0ae9a435000000000000000000000000",
+      "data": {
+        "key": "0x619dc29a0aac8fa146714058e8dd6d2d0f3bdf5f6331907bf91f3acd81e6935",
+        "key_type": "address",
+        "value": "900000010",
+        "value_type": "u128"
+      },
+      "type": "write_table_item"
+    }
+  ],
+  "sender": "0x8a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+  "sequence_number": "1",
+  "max_gas_amount": "10854",
+  "gas_unit_price": "100",
+  "expiration_timestamp_secs": "1750385663",
+  "payload": {
+    "function": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::swap",
+    "type_arguments": [
+      "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034::coin_factory::Emojicoin",
+      "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034::coin_factory::EmojicoinLP"
+    ],
+    "arguments": [
+      "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+      "200000000",
+      false,
+      "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d",
+      100,
+      "22928752674262"
+    ],
+    "type": "entry_function_payload"
+  },
+  "signature": {
+    "public_key": "0x4df9f7e359f21c034faffc343a99b4e364d107fcff3b4c293f5f30217f064e81",
+    "signature": "0x47fc8e0ee9d0281b04ce22da731084933a34939ff8929c0260a6af3161cf950564997101b7b1a4a79a0df1a879ae29fbb7edcd6f161f508efca59f42d18a6700",
+    "type": "ed25519_signature"
+  },
+  "replay_protection_nonce": null,
+  "events": [
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::coin::PairCreation",
+      "data": {
+        "coin_type": {
+          "account_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+          "module_name": "0x636f696e5f666163746f7279",
+          "struct_name": "0x456d6f6a69636f696e"
+        },
+        "fungible_asset_metadata_address": "0xc50df83e8c1db62f9ff7c51a7f3075c82ef281515df28c0fd790df72a9f5c66"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "4500000000000000",
+        "store": "0xb2e99a889c325f62c594adfe9b1b63509e3e4766bcaa0ac1b69b404355f57b62"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::coin::PairCreation",
+      "data": {
+        "coin_type": {
+          "account_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+          "module_name": "0x636f696e5f666163746f7279",
+          "struct_name": "0x456d6f6a69636f696e4c50"
+        },
+        "fungible_asset_metadata_address": "0x12574ac3b360308005c6eec8df71c405dfcaf21ef3b303bd1d9112d12ee7f0ea"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Withdraw",
+      "data": {
+        "amount": "200000000",
+        "store": "0x7c3a1a5a71284d0ce5f0293556ea1281bb339a952ed944fee2376b868973cf7b"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "198000000",
+        "store": "0x87e3d2fbf4fcf50d7878c6b75277b823ae32768bd26e1bec92ca4428db1c37db"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Withdraw",
+      "data": {
+        "amount": "24135529130802",
+        "store": "0xb2e99a889c325f62c594adfe9b1b63509e3e4766bcaa0ac1b69b404355f57b62"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "24135529130802",
+        "store": "0xd8e0ac29dc5cc73603b303a5be1bc56dc7a469492d06b817d18e718edfddcd2"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::fungible_asset::Deposit",
+      "data": {
+        "amount": "2000000",
+        "store": "0xae128fe9a2c38462cc04e95f50c16135a1cb28a99c980008f195e43396610d94"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::Swap",
+      "data": {
+        "avg_execution_price_q64": "151331064954080",
+        "balance_as_fraction_of_circulating_supply_after_q64": "18446744073709551616",
+        "balance_as_fraction_of_circulating_supply_before_q64": "0",
+        "base_volume": "24135529130802",
+        "input_amount": "200000000",
+        "integrator": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d",
+        "integrator_fee": "2000000",
+        "integrator_fee_rate_bps": 100,
+        "is_sell": false,
+        "market_id": "10",
+        "market_nonce": "2",
+        "net_proceeds": "24135529130802",
+        "pool_fee": "0",
+        "quote_volume": "198000000",
+        "results_in_state_transition": false,
+        "starts_in_bonding_curve": true,
+        "swapper": "0x8a970c81d33342a19f5b3dd2f0976f74426728011f1c4bf3098639c68817b05",
+        "time": "1750385573208974"
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d::emojicoin_dot_fun::State",
+      "data": {
+        "clamm_virtual_reserves": {
+          "base": "4875864470869198",
+          "quote": "40198000000"
+        },
+        "cpamm_real_reserves": {
+          "base": "0",
+          "quote": "0"
+        },
+        "cumulative_stats": {
+          "base_volume": "24135529130802",
+          "integrator_fees": "102000000",
+          "n_chat_messages": "0",
+          "n_swaps": "1",
+          "pool_fees_base": "0",
+          "pool_fees_quote": "0",
+          "quote_volume": "198000000"
+        },
+        "instantaneous_stats": {
+          "fully_diluted_value": "37099267438",
+          "market_cap": "198980099",
+          "total_quote_locked": "198000000",
+          "total_value_locked": "37098287338"
+        },
+        "last_swap": {
+          "avg_execution_price_q64": "151331064954080",
+          "base_volume": "24135529130802",
+          "is_sell": false,
+          "nonce": "2",
+          "quote_volume": "198000000",
+          "time": "1750385573208974"
+        },
+        "lp_coin_supply": "0",
+        "market_metadata": {
+          "emoji_bytes": "0xe298b9efb88fe299bf",
+          "market_address": "0x2f240a0a457b74e7eaf8f609ba2fe12e4e163c4593a0f9e522eb7526e879034",
+          "market_id": "10"
+        },
+        "state_metadata": {
+          "bump_time": "1750385573208974",
+          "market_nonce": "2",
+          "trigger": 2
+        }
+      }
+    },
+    {
+      "guid": {
+        "creation_number": "0",
+        "account_address": "0x0"
+      },
+      "sequence_number": "0",
+      "type": "0x1::transaction_fee::FeeStatement",
+      "data": {
+        "execution_gas_units": "23",
+        "io_gas_units": "29",
+        "storage_fee_octas": "537600",
+        "storage_fee_refund_octas": "46000",
+        "total_charge_gas_units": "5427"
+      }
+    }
+  ],
+  "timestamp": "1750385573208974",
+  "type": "user_transaction"
+}
