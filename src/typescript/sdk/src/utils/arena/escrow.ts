@@ -48,7 +48,7 @@ export const isUserEscrow = (v: UserEscrow | HistoricalEscrow): v is UserEscrow 
 export const isEscrowResource = (resource: MoveResource): resource is ArenaJsonTypes["Escrow"] =>
   /^0x([a-zA-Z0-9])+::emojicoin_arena::Escrow<0x.*LP>$/.test(resource.type);
 
-export const isEscrowWritesetChange = (
+export const isEscrowWriteSetChange = (
   change: WriteSetChangeWriteResource
 ): change is WriteSetChangeWriteResource & {
   data: ArenaJsonTypes["Escrow"];
@@ -93,7 +93,7 @@ export const parseResourceForEscrow = <T extends MoveResource>({
 export const findEscrowsInTxn = ({ version, changes }: UserTransactionResponse) =>
   changes
     .filter(isWriteSetChangeWriteResource)
-    .filter(isEscrowWritesetChange)
+    .filter(isEscrowWriteSetChange)
     .map(({ address, data }) =>
       parseResourceForEscrow({
         address: toAccountAddressString(address),
