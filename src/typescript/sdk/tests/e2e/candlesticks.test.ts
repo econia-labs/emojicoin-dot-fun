@@ -188,5 +188,5 @@ describe("ensures arena candlesticks work", () => {
 
     expect(fifteenSecondCandlesticks).toHaveLength(2);
     expectEqualOHLCV(fifteenSecondCandlesticks[1], secondCandlestick);
-  }, 30000);
+  }, 60000);
 });

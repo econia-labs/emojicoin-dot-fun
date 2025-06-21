@@ -1,5 +1,6 @@
 import type { UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
+import { getBalanceFromWriteSetChanges, toEmojicoinTypes } from "../../..";
 import { rawPeriodToEnum } from "../../../const";
 import type { AccountAddressString } from "../../../emojicoin_dot_fun";
 import {
@@ -17,7 +18,6 @@ import {
   toTransactionMetadataForUserLiquidityPools,
   type TransactionMetadata,
 } from "../../types";
-import { getLPCoinBalanceFromWriteSet } from "../parse-write-set";
 import type { EventsModels, UserLiquidityPoolsMap } from ".";
 import type { BumpEvent } from "./builder";
 
@@ -111,16 +111,17 @@ export const addModelsForBumpEvent = (args: {
 
     const key = [event.provider, event.marketID] as [AccountAddressString, bigint];
     const currPool = rows.userPools.get(key);
+    const { emojicoinLP } = toEmojicoinTypes(market.marketAddress);
     const newPool: DatabaseModels["user_liquidity_pools"] = {
       transaction: toTransactionMetadataForUserLiquidityPools(transaction),
       liquidity,
       market,
       lpCoinBalance: response
-        ? getLPCoinBalanceFromWriteSet({
+        ? (getBalanceFromWriteSetChanges({
             response,
-            symbolBytes: market.symbolData.bytes,
-            userAddress: liquidity.provider,
-          })
+            ownerAddress: liquidity.provider,
+            coinType: emojicoinLP,
+          }) ?? 0n)
         : 0n,
     };
 

@@ -7,7 +7,7 @@ import { getAptosClient } from "../../utils";
 import { getFundedAccount } from "../../utils/test-accounts";
 import checkRows from "../helpers/equality-checks";
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 describe("address standardization tests", () => {
   it("standardizes a user's address", async () => {

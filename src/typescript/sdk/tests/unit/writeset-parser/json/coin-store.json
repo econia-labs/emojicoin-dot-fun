@@ -1,0 +1,32 @@
+{
+  "address": "0xbd9ababccfd739d8bf39409d44a0868ba29495bf57c0b122c15027cf224ca78c",
+  "state_key_hash": "0xbbd774d5c4e793760af3e04183d71ee624ed11a596ce713d2a3a196705dc511d",
+  "data": {
+    "type": "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
+    "data": {
+      "coin": {
+        "value": "99000000"
+      },
+      "deposit_events": {
+        "counter": "0",
+        "guid": {
+          "id": {
+            "addr": "0xbd9ababccfd739d8bf39409d44a0868ba29495bf57c0b122c15027cf224ca78c",
+            "creation_num": "2"
+          }
+        }
+      },
+      "frozen": false,
+      "withdraw_events": {
+        "counter": "0",
+        "guid": {
+          "id": {
+            "addr": "0xbd9ababccfd739d8bf39409d44a0868ba29495bf57c0b122c15027cf224ca78c",
+            "creation_num": "3"
+          }
+        }
+      }
+    }
+  },
+  "type": "write_resource"
+}

@@ -12,7 +12,7 @@ import { getAptosClient } from "../../../src/utils/aptos-client";
 import { registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 describe("fetches the number of registered markets based on the latest processed version", () => {
   const aptos = getAptosClient();

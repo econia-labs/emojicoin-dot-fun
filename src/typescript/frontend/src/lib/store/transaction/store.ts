@@ -51,7 +51,9 @@ export const globalUserTransactionStore = createStore<UserTransactionStore>()(
           uniqueAddresses.forEach((addr) => {
             state.addresses
               .get(addr)!
-              .push(...transactions.filter(({ sender }) => sender === addr));
+              .push(
+                ...transactions.filter(({ sender }) => toAccountAddressString(sender) === addr)
+              );
           });
         });
       },

@@ -86,7 +86,7 @@ const selectArenaLeaderboardHistoryWithInfo = ({
     .range((page - 1) * pageSize, page * pageSize - 1)
     .returns<DatabaseJsonType["arena_leaderboard_history_with_arena_info"][]>();
 
-const selectMarketStateByAddress = ({ address }: { address: string }) =>
+const selectMarketStateByAddress = ({ address }: { address: AccountAddressInput }) =>
   postgrest
     .from(TableName.MarketState)
     .select("*")
