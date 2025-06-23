@@ -1,12 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { GetPoolsSchema } from "app/api/pools/schema";
 import type { PoolsData } from "app/pools/page";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { ROUTES } from "router/routes";
 import { parseJSON } from "utils";
 import { addSearchParams } from "utils/url-utils";
 import type { z } from "zod";
-
-import { LIMIT } from "@/sdk/indexer-v2/const";
 
 export const usePoolData = (args: z.input<typeof GetPoolsSchema>) => {
   const query = useInfiniteQuery({
@@ -21,7 +20,7 @@ export const usePoolData = (args: z.input<typeof GetPoolsSchema>) => {
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPageResponse, allPageResponses) =>
-      lastPageResponse?.length === (args.limit || LIMIT) ? allPageResponses.length + 1 : undefined,
+      lastPageResponse?.length === MARKETS_PER_PAGE ? allPageResponses.length + 1 : undefined,
     staleTime: 10000, // 10 seconds
   });
 
