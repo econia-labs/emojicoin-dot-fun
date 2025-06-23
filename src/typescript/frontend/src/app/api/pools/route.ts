@@ -20,7 +20,13 @@ export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   let res: Awaited<ReturnType<typeof getPoolData>> = "[]";
 
   try {
-    res = await getCachedPoolData(page, sortBy, orderBy, searchBytes, account);
+    res = await getCachedPoolData({
+      page,
+      sortBy,
+      orderBy,
+      searchEmojis: searchBytes,
+      provider: account,
+    });
   } catch (e) {
     console.error(e);
   }

@@ -1,34 +1,120 @@
 "use client";
 
 import type { PoolsData } from "app/pools/page";
-import SearchBar from "components/inputs/search-bar";
-import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
+import { Liquidity } from "components/pages/pools/components";
 import { useEmojiPicker } from "context/emoji-picker-context";
+import { toCoinDecimalString } from "lib/utils/decimals";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
+import { FormattedNumber } from "@/components/FormattedNumber";
+import SearchBar from "@/components/inputs/search-bar";
 import { Separator } from "@/components/Separator";
+import { EcTable, type EcTableColumn } from "@/components/ui/table/ecTable";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 import { useAccountAddress } from "@/hooks/use-account-address";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@/sdk/emoji_data";
-import type { SortMarketsBy } from "@/sdk/index";
-import { DEFAULT_POOLS_SORT_BY } from "@/sdk/indexer-v2/queries/query-params";
+import { SortMarketsBy } from "@/sdk/index";
 
+import { DprCell } from "./components/DprCell";
+import { DprTooltip } from "./components/DprTooltip";
+import { EmojiWithMarketLink } from "./components/EmojiWithMarketLink";
 import { usePoolData } from "./usePoolData";
 
-const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
+const COLUMNS: EcTableColumn<PoolsData>[] = [
+  {
+    id: "pool",
+    headerContent: "Pool",
+    width: 50,
+    className: "text-center",
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    renderCell: (item) => <EmojiWithMarketLink emojis={item.market.emojis} />,
+  },
+  {
+    id: SortMarketsBy.AllTimeVolume,
+    headerContent: "All-time Volume",
+    width: 170,
+    className: "text-left",
+    headClassName: "text-left",
+    cellClassName: "text-left",
+    isServerSideSortable: true,
+    renderCell: (item) => (
+      <FormattedNumber
+        title={`${toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT`}
+        value={item.state.cumulativeStats.quoteVolume}
+        suffix=" APT"
+        nominalize
+      />
+    ),
+  },
+  {
+    id: SortMarketsBy.DailyVolume,
+    headerContent: "24h Vol",
+    width: 100,
+    className: "text-right",
+    headClassName: "text-right",
+    cellClassName: "text-right",
+    isServerSideSortable: true,
+    renderCell: (item) => (
+      <FormattedNumber
+        title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
+        value={item.dailyVolume}
+        suffix=" APT"
+        nominalize
+      />
+    ),
+  },
+  {
+    id: SortMarketsBy.Tvl,
+    headerContent: "Tvl",
+    width: 100,
+    className: "text-right",
+    headClassName: "text-right",
+    cellClassName: "text-right",
+    isServerSideSortable: true,
+    renderCell: (item) => (
+      <FormattedNumber
+        title={`${toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT`}
+        value={item.state.cpammRealReserves.quote * 2n}
+        suffix=" APT"
+        nominalize
+      />
+    ),
+  },
+  {
+    id: SortMarketsBy.Apr,
+    headerContent: (
+      <div className="flex items-center gap-2">
+        <DprTooltip />
+        DPR
+      </div>
+    ),
+    width: 150,
+    className: "text-right",
+    headClassName: "text-right",
+    cellClassName: "text-right",
+    isServerSideSortable: true,
+    renderCell: (item) => <DprCell dailyTvlPerLPCoinGrowth={item.dailyTvlPerLPCoinGrowth} />,
+  },
+] as const;
+
+const ClientPoolsPage = () => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
-  const [sortBy, setSortBy] = useState<SortMarketsBy>(DEFAULT_POOLS_SORT_BY);
+  const [sortBy, setSortBy] = useState<SortMarketsBy>(SortMarketsBy.Apr);
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
-  const [page, setPage] = useState<number>(1);
-  const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
-  const [pools, setPools] = useState<"all" | "mypools">("all");
   const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));
   const { emojis, setEmojis } = useEmojiPicker((state) => ({
     emojis: state.emojis,
     setEmojis: state.setEmojis,
   }));
+
+  const [tab, setTab] = useState<"pools" | "myPools">("pools");
+
   useEffect(() => {
     setEmojis(realEmojis);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -40,71 +126,70 @@ const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
     setRealEmojis(emojis as SymbolEmoji[]);
   }, [emojis]);
 
-  const { data: markets } = usePoolData(
-    {
-      account: pools === "mypools" ? accountAddress : undefined,
-      page,
-      sortBy,
-      orderBy,
-      searchBytes: realEmojis?.length ? encodeEmojis(realEmojis) : undefined,
-    },
-    initialData
+  const query = usePoolData({
+    account: tab === "myPools" ? accountAddress : undefined,
+    sortBy,
+    orderBy,
+    searchBytes: realEmojis?.length ? encodeEmojis(realEmojis) : undefined,
+  });
+
+  const allMarkets = useMemo(
+    () => query.data?.pages.flatMap((page) => page) ?? [],
+    [query.data?.pages]
   );
 
   return (
-    <div className="flex flex-col justify-center items-center mt-[15px] border-y border-solid border-dark-gray">
-      <div className="w-full max-w-max mx-auto xl:px-2">
-        <div className="w-full px-8">
-          <div className="flex-col-reverse md:flex-row justify-between flex px-3 w-full border-x border-solid border-dark-gray *:grow *:basis-0">
-            <SearchBar />
-            <div className="md:hidden -ml-3 w-[calc(100%+24px)] border-t border-solid border-dark-gray" />
-            <TableHeaderSwitcher
-              title1="Pools"
-              title2="My pools"
-              onSelect={(title) => {
-                if (title === "Pools" && pools !== "all") {
-                  setPools("all");
-                } else if (title === "My pools" && pools !== "mypools") {
-                  setPools("mypools");
-                }
-              }}
+    <>
+      <div className="flex flex-col items-center relative">
+        <Separator className="absolute" />
+        <div className="flex w-full px-8 flex-col xl:flex-row max-w-[1392px] border-r border-solid border-dark-gray">
+          <Tabs
+            className="w-full xl:flex-[0_0_58%] border-l border-solid border-dark-gray"
+            value={tab}
+            onValueChange={(v) => setTab(v as "pools" | "myPools")}
+          >
+            <TabsList className="justify-between pt-0">
+              <div className="flex items-center gap-2">
+                <TabsTrigger value="pools" endSlot={<Emoji emojis={emoji("man swimming")} />}>
+                  Pools
+                </TabsTrigger>
+                <TabsTrigger
+                  value="myPools"
+                  endSlot={<Emoji emojis={emoji("person raising hand")} />}
+                >
+                  My Pools
+                </TabsTrigger>
+              </div>
+              <SearchBar className="max-w-[300px]" />
+            </TabsList>
+            <Separator className="absolute" />
+            <div className={"flex w-full overflow-auto h-[40dvh] xl:h-[70dvh]"}>
+              <EcTable
+                isLoading={query.isLoading}
+                variant="select"
+                columns={COLUMNS}
+                items={allMarkets}
+                className="[&_td]:text-xs"
+                getKey={(i) => i.market.marketID.toString()}
+                onClick={(_, i) => setSelectedIndex(i)}
+                pagination={query}
+                serverSideOrderHandler={(col, dir) => {
+                  setSortBy(col as SortMarketsBy);
+                  setOrderBy(dir);
+                }}
+              />
+            </div>
+            <Separator className="xl:hidden" />
+          </Tabs>
+          <div className="relative xl:flex-1 flex min-h-[600px] justify-center items-center border-l border-solid border-dark-gray">
+            <Liquidity
+              market={selectedIndex !== undefined ? allMarkets[selectedIndex] : undefined}
             />
-          </div>
-          <Separator />
-        </div>
-
-        <div className="flex flex-col xl:flex-row px-8">
-          <div className="flex relative w-full border-x border-solid border-dark-gray xl:w-[57%]">
-            <PoolsTable
-              index={selectedIndex}
-              data={markets}
-              sortBy={(s) => {
-                setSortBy(s);
-                setPage(1);
-                setAllDataIsLoaded(false);
-              }}
-              orderBy={(s) => {
-                setOrderBy(s);
-                setPage(1);
-                setAllDataIsLoaded(false);
-              }}
-              onSelect={(index) => {
-                setSelectedIndex(index);
-              }}
-              onEnd={() => {
-                if (!allDataIsLoaded) {
-                  setPage(page + 1);
-                }
-              }}
-            />
-          </div>
-          <div className="xl:hidden -ml-8 w-[calc(100%+64px)] border-t border-solid border-dark-gray" />
-          <div className="flex grow relative w-full xl:w-[43%] border-x border-solid border-dark-gray">
-            <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
           </div>
         </div>
       </div>
-    </div>
+      <Separator />
+    </>
   );
 };
 
