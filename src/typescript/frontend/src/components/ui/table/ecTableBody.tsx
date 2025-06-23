@@ -15,7 +15,12 @@ export const EcTableBody = <T,>({
   onClick,
   pagination,
   minRows,
-}: TableProps<T> & { minRows: number; className: string }) => {
+  selectedRowKey,
+}: TableProps<T> & {
+  minRows: number;
+  className: string;
+  selectedRowKey?: string | null;
+}) => {
   const [firstItemKey, setFirstItemKey] = useState<string | undefined>(undefined);
 
   const animateInsertion = useMemo(() => {
@@ -43,11 +48,13 @@ export const EcTableBody = <T,>({
             <EcTableRow
               animateInsertion={animateInsertion && i === 0}
               key={getKey(item)}
+              id={getKey(item)}
               item={item}
               height={rowHeight}
               index={i}
               columns={columns}
               onClick={onClick}
+              selectedRowKey={selectedRowKey}
             />
           ))}
       {Array.from({ length: minRows - items.length }).map((_, i) => (

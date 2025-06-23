@@ -10,7 +10,7 @@ import { ExplorerLink } from "@/components/explorer-link/ExplorerLink";
 import { FormattedNumber } from "@/components/FormattedNumber";
 import Info from "@/components/info";
 import { Loading } from "@/components/loading";
-import { PnlModal } from "@/components/pnl-modal/pnl-modal";
+import { PnlModal } from "@/components/pnl-modal/PnlModal";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import type { ArenaLeaderboardHistoryWithArenaInfoModel } from "@/sdk/index";
 import usePnlModalStore from "@/store/pnl-modal/store";

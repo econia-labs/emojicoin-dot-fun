@@ -13,8 +13,8 @@ export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const rawParams = parseSearchParams(searchParams);
 
-  const { page, limit, marketID, orderBy } = GetChatsSchema.parse(rawParams);
-  const swaps = await fetchChatEvents({ marketID, pageSize: limit, page, orderBy });
+  const { page, marketID, orderBy } = GetChatsSchema.parse(rawParams);
+  const swaps = await fetchChatEvents({ marketID, page, orderBy });
 
   return new NextResponse(stringifyJSON(swaps));
 });
