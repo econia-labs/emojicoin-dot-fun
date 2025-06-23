@@ -4,7 +4,7 @@ import { useHistoricalPositions } from "lib/hooks/positions/use-historical-posit
 import { cn } from "lib/utils/class-name";
 import { useMemo, useState } from "react";
 
-import { PnlModal } from "@/components/pnl-modal/pnl-modal";
+import { PnlModal } from "@/components/pnl-modal/PnlModal";
 import type { ArenaInfoModel, MarketStateModel } from "@/sdk/indexer-v2/types";
 import usePnlModalStore from "@/store/pnl-modal/store";
 

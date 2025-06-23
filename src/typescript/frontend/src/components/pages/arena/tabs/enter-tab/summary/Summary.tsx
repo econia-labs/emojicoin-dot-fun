@@ -6,7 +6,7 @@ import { GlowingEmoji } from "utils/emoji";
 
 import Button from "@/components/button";
 import { FormattedNumber } from "@/components/FormattedNumber";
-import { PnlModal } from "@/components/pnl-modal/pnl-modal";
+import { PnlModal } from "@/components/pnl-modal/PnlModal";
 import Popup from "@/components/popup";
 import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { useTradingStats } from "@/hooks/use-trading-stats";

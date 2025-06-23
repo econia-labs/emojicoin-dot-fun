@@ -7,13 +7,19 @@ import { fetchUserLiquidityPools } from "@/queries/pools";
 import type { OrderBy } from "@/sdk/indexer-v2/const";
 import type { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
-export async function getPoolData(
-  page: number,
-  sortBy: SortMarketsBy,
-  orderBy?: OrderBy,
-  searchEmojis?: string[],
-  provider?: AccountAddress
-) {
+export async function getPoolData({
+  page,
+  sortBy,
+  orderBy,
+  searchEmojis,
+  provider,
+}: {
+  page: number;
+  sortBy: SortMarketsBy;
+  orderBy?: OrderBy;
+  searchEmojis?: string[];
+  provider?: AccountAddress;
+}) {
   const res = provider
     ? fetchUserLiquidityPools({
         page,
