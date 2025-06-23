@@ -5,7 +5,7 @@ import { Emoji } from "utils/emoji";
 import { FormattedNumber } from "@/components/FormattedNumber";
 import Popup from "@/components/popup";
 
-import { XprPopup } from "./xprPopup";
+import { XprPopup } from "./XprPopup";
 
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;

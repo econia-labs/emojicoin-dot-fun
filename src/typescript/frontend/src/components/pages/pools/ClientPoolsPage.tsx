@@ -18,9 +18,9 @@ import { useAccountAddress } from "@/hooks/use-account-address";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@/sdk/emoji_data";
 import { SortMarketsBy } from "@/sdk/index";
 
-import { DprCell } from "./components/dprCell";
-import { DprTooltip } from "./components/dprTooltip";
-import { EmojiWithMarketLink } from "./components/emojiWithMarketLink";
+import { DprCell } from "./components/DprCell";
+import { DprTooltip } from "./components/DprTooltip";
+import { EmojiWithMarketLink } from "./components/EmojiWithMarketLink";
 import { usePoolData } from "./usePoolData";
 
 const COLUMNS: EcTableColumn<PoolsData>[] = [
