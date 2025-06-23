@@ -13,15 +13,15 @@ ALTER TABLE market_registration_events
 --
 -- Most often, these two fields match; however, objects and resource accounts
 -- are often used in place of the transaction "sender" account as a proxy to
--- interact with the contract, meaning that the actual user intending to
--- interact with the contract is often only the "sender" and *not*` the
+-- interact with the module, meaning that the actual user intending to
+-- interact with the module is often only the "sender" and *not*` the
 -- address in the corresponding event field.
 --
 -- It is possible that this assumption could be wrong, in that the "sender"
 -- and individual "swapper"/"user"/"provider"/"registrant" fields don't match,
 -- but the actual user is *not* the sender but in the fact the one in the event
 -- field. A specific example of this would be if an account (the "sender") signs
--- and sends a multi-sig script or wrapper contract in which multiple other
+-- and sends a multi-sig script or wrapper module in which multiple other
 -- accounts sign separate swap/chat/register/liquidity transactions.
 --
 -- However, the difference between "sender" and the corresponding event field
