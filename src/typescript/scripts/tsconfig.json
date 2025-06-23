@@ -21,13 +21,12 @@
     "noEmit": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "outDir": "./dist",
     "paths": {
-      "@/contract-apis": [
-        "node_modules/@econia-labs/emojicoin-sdk/src/emojicoin_dot_fun/contract-apis"
+      "@/move-modules": [
+        "node_modules/@econia-labs/emojicoin-sdk/src/emojicoin_dot_fun/move-modules"
       ],
-      "@/contract-apis/*": [
-        "node_modules/@econia-labs/emojicoin-sdk/src/emojicoin_dot_fun/contract-apis/*"
+      "@/move-modules/*": [
+        "node_modules/@econia-labs/emojicoin-sdk/src/emojicoin_dot_fun/move-modules/*"
       ]
     },
     "preserveWatchOutput": true,

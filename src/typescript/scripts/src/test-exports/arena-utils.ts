@@ -1,14 +1,14 @@
+import { generateRandomSymbol } from "@econia-labs/emojicoin-sdk";
+import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
+
 import {
-  registerAndUnlockInitialMarketsForArenaTest,
-  waitUntilCurrentMeleeEnds,
-  setNextMeleeDurationAndEnsureCrank,
   depositToVault,
-  ONE_MINUTE_MICROSECONDS,
   ONE_SECOND_MICROSECONDS,
+  registerAndUnlockInitialMarketsForArenaTest,
+  setNextMeleeDurationAndEnsureCrank,
+  waitUntilCurrentMeleeEnds,
 } from "../../../sdk/tests/e2e/arena/utils";
 import { getPublisher } from "../../../sdk/tests/utils";
-import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
-import { generateRandomSymbol } from "@econia-labs/emojicoin-sdk";
 
 const setNextDurationAndEnsureCrank = async (duration?: bigint) => {
   await setNextMeleeDurationAndEnsureCrank(duration).catch(async (e) => {
@@ -29,10 +29,9 @@ const setNextDurationAndEnsureCrank = async (duration?: bigint) => {
 };
 
 export {
-  registerAndUnlockInitialMarketsForArenaTest,
-  waitUntilCurrentMeleeEnds,
-  setNextDurationAndEnsureCrank,
   depositToVault,
-  ONE_MINUTE_MICROSECONDS,
   ONE_SECOND_MICROSECONDS,
+  registerAndUnlockInitialMarketsForArenaTest,
+  setNextDurationAndEnsureCrank,
+  waitUntilCurrentMeleeEnds,
 };

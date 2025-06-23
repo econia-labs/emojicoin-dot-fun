@@ -4,8 +4,9 @@ import {
   getRandomFundedAccounts,
   setNextDurationAndEnsureCrank,
 } from "src/test-exports";
-import { makeRandomTrades } from "../utils/make-random-trades";
+
 import { DEFAULT_MELEE_DURATION } from "../utils/const";
+import { makeRandomTrades } from "../utils/make-random-trades";
 
 const LOG_FAILED = false;
 const NUM_ACCOUNTS = 100;

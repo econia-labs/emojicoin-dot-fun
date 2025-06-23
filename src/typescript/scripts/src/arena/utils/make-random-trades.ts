@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 // cspell:word kolorist
 
-import { type Account } from "@aptos-labs/ts-sdk";
-import { ONE_APT, sleep, type fetchAllCurrentMeleeData } from "@econia-labs/emojicoin-sdk";
+import type { Account } from "@aptos-labs/ts-sdk";
+import { type fetchAllCurrentMeleeData, ONE_APT, sleep } from "@econia-labs/emojicoin-sdk";
 import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
 import { gray, yellow } from "kolorist";
 import { getAccountPrefix } from "src/test-exports";
@@ -40,7 +40,7 @@ export const makeRandomTrades = async ({
   enterSymbolIndex = Math.random() <= 0.5 ? 0 : 1,
   numTrades = 100,
 }: MakeRandomTrades) => {
-  const [symbol0, symbol1] = [melee.market1.symbolEmojis, melee.market2.symbolEmojis];
+  const [symbol0, symbol1] = [melee.market0.symbolEmojis, melee.market1.symbolEmojis];
   const coins = [symbol0, symbol1];
   const currentCoinIndex = enterSymbolIndex;
   const coloredID = gray(accountID);
@@ -56,7 +56,7 @@ export const makeRandomTrades = async ({
         lockIn,
         symbol0,
         symbol1,
-        currentCoinIndex === 0 ? "symbol1" : "symbol2"
+        currentCoinIndex === 0 ? "symbol0" : "symbol1"
       )
       .then(() => {
         console.info(`${accountID} has entered!`);
