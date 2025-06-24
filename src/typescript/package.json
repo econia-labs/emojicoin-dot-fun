@@ -62,7 +62,8 @@
   "version": "0.0.0",
   "workspaces": [
     "sdk",
-    "frontend"
+    "frontend",
+    "scripts"
   ],
   "pnpm": {
     "allowNonAppliedPatches": true,
