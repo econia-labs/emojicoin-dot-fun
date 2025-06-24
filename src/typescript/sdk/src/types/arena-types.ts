@@ -213,7 +213,7 @@ const withVersionAndEventIndex = (data: {
  *
  * Only succeeds if every character in a string is a number 0-9.
  *
- * Accepts leading zeroes.
+ * Accepts leading zeros.
  */
 const isValidBigIntString = (str: string) => /^\d+$/.test(str);
 
@@ -292,6 +292,8 @@ export const toArenaExitEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaExit" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  // There is no way to know this in some cases where we encounter an exit event.
+  // Thus, we pass `true` here. It's only used in e2e tests.
   duringMelee: true,
 });
 
@@ -309,6 +311,8 @@ export const toArenaSwapEvent = (
   ...toExchangeRate(data),
   eventName: "ArenaSwap" as const,
   ...withVersionAndEventIndex({ version, eventIndex }),
+  // There is no way to know this in some cases where we encounter an exit event.
+  // Thus, we pass `true` here. It's only used in e2e tests.
   duringMelee: true,
 });
 

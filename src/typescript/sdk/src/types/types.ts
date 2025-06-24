@@ -1,4 +1,4 @@
-import type { AccountAddress, TypeTag } from "@aptos-labs/ts-sdk";
+import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { hexToBytes } from "@noble/hashes/utils";
 
 import { type ArenaPeriod, rawTriggerToEnum, type Trigger } from "../const";
@@ -8,6 +8,7 @@ import type { STRUCT_STRINGS } from "../utils";
 import { standardizeAddress } from "../utils/account-address";
 import type { Flatten } from ".";
 import type { ArenaTypes } from "./arena-types";
+import type { CoinAndFungibleAssetTypes } from "./coin-and-fungible-assets-types";
 import { fromAggregatorSnapshot } from "./core";
 import {
   type AnyEmojicoinJSONEvent,
@@ -52,117 +53,87 @@ export type WithMarketID = {
   marketID: bigint;
 };
 
-export type Types = ArenaTypes & {
-  EmojicoinInfo: {
-    marketAddress: AccountAddress;
-    emojicoin: TypeTag;
-    emojicoinLP: TypeTag;
-  };
-
-  TableHandle: {
-    handle: AccountAddressString;
-  };
-
-  ExtendRef: {
-    self: AccountAddressString;
-  };
-
-  SmartTable: {
-    buckets: {
-      inner: Types["TableHandle"];
-      length: number;
+export type Types = CoinAndFungibleAssetTypes &
+  ArenaTypes & {
+    EmojicoinInfo: {
+      marketAddress: AccountAddress;
+      emojicoin: TypeTag;
+      emojicoinLP: TypeTag;
     };
-    level: number;
-    numBuckets: number;
-    size: bigint;
-    splitLoadThreshold: number;
-    targetBucketSize: number;
-  };
 
-  SequenceInfo: {
-    nonce: bigint;
-    lastBumpTime: bigint;
-  };
+    TableHandle: {
+      handle: AccountAddressString;
+    };
 
-  ParallelizableSequenceInfo: Types["SequenceInfo"];
+    ExtendRef: {
+      self: AccountAddressString;
+    };
 
-  TVLtoLPCoinRatio: {
-    tvl: bigint;
-    lpCoins: bigint;
-  };
+    SmartTable: {
+      buckets: {
+        inner: Types["TableHandle"];
+        length: number;
+      };
+      level: number;
+      numBuckets: number;
+      size: bigint;
+      splitLoadThreshold: number;
+      targetBucketSize: number;
+    };
 
-  PeriodicStateTracker: {
-    startTime: bigint;
-    period: bigint;
-    openPriceQ64: bigint;
-    highPriceQ64: bigint;
-    lowPriceQ64: bigint;
-    closePriceQ64: bigint;
-    volumeBase: bigint;
-    volumeQuote: bigint;
-    integratorFees: bigint;
-    poolFeesBase: bigint;
-    poolFeesQuote: bigint;
-    numSwaps: bigint;
-    numChatMessages: bigint;
-    startsInBondingCurve: boolean;
-    endsInBondingCurve: boolean;
-    coinRatioStart: Types["TVLtoLPCoinRatio"];
-    coinRatioEnd: Types["TVLtoLPCoinRatio"];
-  };
+    GUID: {
+      id: {
+        creationNum: bigint;
+        addr: AccountAddress;
+      };
+    };
 
-  RegistryAddress: {
-    registryAddress: AccountAddressString;
-  };
+    EventHandle: {
+      counter: bigint;
+      guid: Types["GUID"];
+    };
 
-  RegistryView: {
-    registryAddress: AccountAddressString;
-    nonce: bigint;
-    lastBumpTime: bigint;
-    numMarkets: bigint;
-    cumulativeQuoteVolume: bigint;
-    totalQuoteLocked: bigint;
-    totalValueLocked: bigint;
-    marketCap: bigint;
-    fullyDilutedValue: bigint;
-    cumulativeIntegratorFees: bigint;
-    cumulativeSwaps: bigint;
-    cumulativeChatMessages: bigint;
-  };
+    SequenceInfo: {
+      nonce: bigint;
+      lastBumpTime: bigint;
+    };
 
-  // The result of the Move module's `market_view` view function. NOT the database view.
-  MarketView: {
-    metadata: Types["MarketMetadata"];
-    sequenceInfo: Types["SequenceInfo"];
-    clammVirtualReserves: Types["Reserves"];
-    cpammRealReserves: Types["Reserves"];
-    lpCoinSupply: bigint;
-    inBondingCurve: boolean;
-    cumulativeStats: Types["CumulativeStats"];
-    instantaneousStats: Types["InstantaneousStats"];
-    lastSwap: Types["LastSwap"];
-    periodicStateTrackers: Array<Types["PeriodicStateTracker"]>;
-    aptosCoinBalance: bigint;
-    emojicoinBalance: bigint;
-    emojicoinLPBalance: bigint;
-  };
+    ParallelizableSequenceInfo: Types["SequenceInfo"];
 
-  Market: {
-    metadata: Types["MarketMetadata"];
-    sequenceInfo: Types["SequenceInfo"];
-    extendRef: Types["ExtendRef"];
-    clammVirtualReserves: Types["Reserves"];
-    cpammRealReserves: Types["Reserves"];
-    lpCoinSupply: bigint;
-    cumulativeStats: Types["CumulativeStats"];
-    lastSwap: Types["LastSwap"];
-    periodicStateTrackers: Array<Types["PeriodicStateTracker"]>;
-  };
+    TVLtoLPCoinRatio: {
+      tvl: bigint;
+      lpCoins: bigint;
+    };
 
-  Registry: {
-    coinSymbolEmojis: Types["TableHandle"];
-    extendRef: Types["ExtendRef"];
-    globalStats: {
+    PeriodicStateTracker: {
+      startTime: bigint;
+      period: bigint;
+      openPriceQ64: bigint;
+      highPriceQ64: bigint;
+      lowPriceQ64: bigint;
+      closePriceQ64: bigint;
+      volumeBase: bigint;
+      volumeQuote: bigint;
+      integratorFees: bigint;
+      poolFeesBase: bigint;
+      poolFeesQuote: bigint;
+      numSwaps: bigint;
+      numChatMessages: bigint;
+      startsInBondingCurve: boolean;
+      endsInBondingCurve: boolean;
+      coinRatioStart: Types["TVLtoLPCoinRatio"];
+      coinRatioEnd: Types["TVLtoLPCoinRatio"];
+    };
+
+    RegistryAddress: {
+      registryAddress: AccountAddressString;
+    };
+
+    RegistryView: {
+      registryAddress: AccountAddressString;
+      nonce: bigint;
+      lastBumpTime: bigint;
+      numMarkets: bigint;
       cumulativeQuoteVolume: bigint;
       totalQuoteLocked: bigint;
       totalValueLocked: bigint;
@@ -172,226 +143,269 @@ export type Types = ArenaTypes & {
       cumulativeSwaps: bigint;
       cumulativeChatMessages: bigint;
     };
-    marketsByEmojiBytes: Types["SmartTable"];
-    marketsByMarketID: Types["SmartTable"];
-    registryAddress: AccountAddressString;
-    sequenceInfo: Types["SequenceInfo"];
-    supplementalChatEmojis: Types["TableHandle"];
-  };
 
-  MarketMetadata: {
-    marketID: bigint;
-    marketAddress: AccountAddressString;
-    emojiBytes: Uint8Array;
-  };
+    // The result of the Move module's `market_view` view function. NOT the database view.
+    MarketView: {
+      metadata: Types["MarketMetadata"];
+      sequenceInfo: Types["SequenceInfo"];
+      clammVirtualReserves: Types["Reserves"];
+      cpammRealReserves: Types["Reserves"];
+      lpCoinSupply: bigint;
+      inBondingCurve: boolean;
+      cumulativeStats: Types["CumulativeStats"];
+      instantaneousStats: Types["InstantaneousStats"];
+      lastSwap: Types["LastSwap"];
+      periodicStateTrackers: Array<Types["PeriodicStateTracker"]>;
+      aptosCoinBalance: bigint;
+      emojicoinBalance: bigint;
+      emojicoinLPBalance: bigint;
+    };
 
-  Reserves: {
-    base: bigint;
-    quote: bigint;
-  };
+    Market: {
+      metadata: Types["MarketMetadata"];
+      sequenceInfo: Types["SequenceInfo"];
+      extendRef: Types["ExtendRef"];
+      clammVirtualReserves: Types["Reserves"];
+      cpammRealReserves: Types["Reserves"];
+      lpCoinSupply: bigint;
+      cumulativeStats: Types["CumulativeStats"];
+      lastSwap: Types["LastSwap"];
+      periodicStateTrackers: Array<Types["PeriodicStateTracker"]>;
+    };
 
-  PeriodicStateMetadata: {
-    startTime: bigint;
-    period: bigint;
-    emitTime: bigint;
-    emitMarketNonce: bigint;
-    trigger: Trigger;
-  };
+    Registry: {
+      coinSymbolEmojis: Types["TableHandle"];
+      extendRef: Types["ExtendRef"];
+      globalStats: {
+        cumulativeQuoteVolume: bigint;
+        totalQuoteLocked: bigint;
+        totalValueLocked: bigint;
+        marketCap: bigint;
+        fullyDilutedValue: bigint;
+        cumulativeIntegratorFees: bigint;
+        cumulativeSwaps: bigint;
+        cumulativeChatMessages: bigint;
+      };
+      marketsByEmojiBytes: Types["SmartTable"];
+      marketsByMarketID: Types["SmartTable"];
+      registryAddress: AccountAddressString;
+      sequenceInfo: Types["SequenceInfo"];
+      supplementalChatEmojis: Types["TableHandle"];
+    };
 
-  StateMetadata: {
-    marketNonce: bigint;
-    bumpTime: bigint;
-    trigger: Trigger;
-  };
+    MarketMetadata: {
+      marketID: bigint;
+      marketAddress: AccountAddressString;
+      emojiBytes: Uint8Array;
+    };
 
-  CumulativeStats: {
-    baseVolume: bigint;
-    quoteVolume: bigint;
-    integratorFees: bigint;
-    poolFeesBase: bigint;
-    poolFeesQuote: bigint;
-    numSwaps: bigint;
-    numChatMessages: bigint;
-  };
+    Reserves: {
+      base: bigint;
+      quote: bigint;
+    };
 
-  InstantaneousStats: {
-    totalQuoteLocked: bigint;
-    totalValueLocked: bigint;
-    marketCap: bigint;
-    fullyDilutedValue: bigint;
-  };
-
-  LastSwap: {
-    isSell: boolean;
-    avgExecutionPriceQ64: bigint;
-    baseVolume: bigint;
-    quoteVolume: bigint;
-    nonce: bigint;
-    time: bigint;
-  };
-
-  SwapEvent: Flatten<
-    WithMarketID &
-      WithVersionAndGUID & {
-        marketID: bigint;
-        time: bigint;
-        marketNonce: bigint;
-        swapper: AccountAddressString;
-        sender: AccountAddressString;
-        inputAmount: bigint;
-        isSell: boolean;
-        integrator: AccountAddressString;
-        integratorFeeRateBPs: number;
-        netProceeds: bigint;
-        baseVolume: bigint;
-        quoteVolume: bigint;
-        avgExecutionPriceQ64: bigint;
-        integratorFee: bigint;
-        poolFee: bigint;
-        startsInBondingCurve: boolean;
-        resultsInStateTransition: boolean;
-        balanceAsFractionOfCirculatingSupplyBeforeQ64: bigint;
-        balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
-      }
-  >;
-
-  ChatEvent: Flatten<
-    WithMarketID &
-      WithVersionAndGUID & {
-        marketMetadata: Types["MarketMetadata"];
-        emitTime: bigint;
-        emitMarketNonce: bigint;
-        user: AccountAddressString;
-        message: string;
-        userEmojicoinBalance: bigint;
-        circulatingSupply: bigint;
-        balanceAsFractionOfCirculatingSupplyQ64: bigint;
-      }
-  >;
-
-  MarketRegistrationEvent: Flatten<
-    WithMarketID &
-      WithVersionAndGUID & {
-        marketMetadata: Types["MarketMetadata"];
-        time: bigint;
-        registrant: AccountAddressString;
-        integrator: AccountAddressString;
-        integratorFee: bigint;
-      }
-  >;
-
-  PeriodicStateEvent: Flatten<
-    WithMarketID &
-      WithVersionAndGUID & {
-        marketMetadata: Types["MarketMetadata"];
-        periodicStateMetadata: Types["PeriodicStateMetadata"];
-        openPriceQ64: bigint;
-        highPriceQ64: bigint;
-        lowPriceQ64: bigint;
-        closePriceQ64: bigint;
-        volumeBase: bigint;
-        volumeQuote: bigint;
-        integratorFees: bigint;
-        poolFeesBase: bigint;
-        poolFeesQuote: bigint;
-        numSwaps: bigint;
-        numChatMessages: bigint;
-        startsInBondingCurve: boolean;
-        endsInBondingCurve: boolean;
-        tvlPerLPCoinGrowthQ64: bigint;
-      }
-  >;
-
-  StateEvent: Flatten<
-    WithMarketID &
-      WithVersionAndGUID & {
-        marketMetadata: Types["MarketMetadata"];
-        stateMetadata: Types["StateMetadata"];
-        clammVirtualReserves: Types["Reserves"];
-        cpammRealReserves: Types["Reserves"];
-        lpCoinSupply: bigint;
-        cumulativeStats: Types["CumulativeStats"];
-        instantaneousStats: Types["InstantaneousStats"];
-        lastSwap: Types["LastSwap"];
-      }
-  >;
-
-  GlobalStateEvent: Flatten<
-    WithVersionAndGUID & {
+    PeriodicStateMetadata: {
+      startTime: bigint;
+      period: bigint;
       emitTime: bigint;
-      registryNonce: bigint;
+      emitMarketNonce: bigint;
       trigger: Trigger;
-      cumulativeQuoteVolume: bigint;
+    };
+
+    StateMetadata: {
+      marketNonce: bigint;
+      bumpTime: bigint;
+      trigger: Trigger;
+    };
+
+    CumulativeStats: {
+      baseVolume: bigint;
+      quoteVolume: bigint;
+      integratorFees: bigint;
+      poolFeesBase: bigint;
+      poolFeesQuote: bigint;
+      numSwaps: bigint;
+      numChatMessages: bigint;
+    };
+
+    InstantaneousStats: {
       totalQuoteLocked: bigint;
       totalValueLocked: bigint;
       marketCap: bigint;
       fullyDilutedValue: bigint;
-      cumulativeIntegratorFees: bigint;
-      cumulativeSwaps: bigint;
-      cumulativeChatMessages: bigint;
-    }
-  >;
+    };
 
-  LiquidityEvent: Flatten<
-    WithMarketID &
+    LastSwap: {
+      isSell: boolean;
+      avgExecutionPriceQ64: bigint;
+      baseVolume: bigint;
+      quoteVolume: bigint;
+      nonce: bigint;
+      time: bigint;
+    };
+
+    SwapEvent: Flatten<
+      WithMarketID &
+        WithVersionAndGUID & {
+          marketID: bigint;
+          time: bigint;
+          marketNonce: bigint;
+          swapper: AccountAddressString;
+          sender: AccountAddressString;
+          inputAmount: bigint;
+          isSell: boolean;
+          integrator: AccountAddressString;
+          integratorFeeRateBPs: number;
+          netProceeds: bigint;
+          baseVolume: bigint;
+          quoteVolume: bigint;
+          avgExecutionPriceQ64: bigint;
+          integratorFee: bigint;
+          poolFee: bigint;
+          startsInBondingCurve: boolean;
+          resultsInStateTransition: boolean;
+          balanceAsFractionOfCirculatingSupplyBeforeQ64: bigint;
+          balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
+        }
+    >;
+
+    ChatEvent: Flatten<
+      WithMarketID &
+        WithVersionAndGUID & {
+          marketMetadata: Types["MarketMetadata"];
+          emitTime: bigint;
+          emitMarketNonce: bigint;
+          user: AccountAddressString;
+          message: string;
+          userEmojicoinBalance: bigint;
+          circulatingSupply: bigint;
+          balanceAsFractionOfCirculatingSupplyQ64: bigint;
+        }
+    >;
+
+    MarketRegistrationEvent: Flatten<
+      WithMarketID &
+        WithVersionAndGUID & {
+          marketMetadata: Types["MarketMetadata"];
+          time: bigint;
+          registrant: AccountAddressString;
+          integrator: AccountAddressString;
+          integratorFee: bigint;
+        }
+    >;
+
+    PeriodicStateEvent: Flatten<
+      WithMarketID &
+        WithVersionAndGUID & {
+          marketMetadata: Types["MarketMetadata"];
+          periodicStateMetadata: Types["PeriodicStateMetadata"];
+          openPriceQ64: bigint;
+          highPriceQ64: bigint;
+          lowPriceQ64: bigint;
+          closePriceQ64: bigint;
+          volumeBase: bigint;
+          volumeQuote: bigint;
+          integratorFees: bigint;
+          poolFeesBase: bigint;
+          poolFeesQuote: bigint;
+          numSwaps: bigint;
+          numChatMessages: bigint;
+          startsInBondingCurve: boolean;
+          endsInBondingCurve: boolean;
+          tvlPerLPCoinGrowthQ64: bigint;
+        }
+    >;
+
+    StateEvent: Flatten<
+      WithMarketID &
+        WithVersionAndGUID & {
+          marketMetadata: Types["MarketMetadata"];
+          stateMetadata: Types["StateMetadata"];
+          clammVirtualReserves: Types["Reserves"];
+          cpammRealReserves: Types["Reserves"];
+          lpCoinSupply: bigint;
+          cumulativeStats: Types["CumulativeStats"];
+          instantaneousStats: Types["InstantaneousStats"];
+          lastSwap: Types["LastSwap"];
+        }
+    >;
+
+    GlobalStateEvent: Flatten<
       WithVersionAndGUID & {
-        marketID: bigint;
-        time: bigint;
-        marketNonce: bigint;
-        provider: AccountAddressString;
-        baseAmount: bigint;
-        quoteAmount: bigint;
-        lpCoinAmount: bigint;
-        liquidityProvided: boolean;
-        baseDonationClaimAmount: bigint;
-        quoteDonationClaimAmount: bigint;
+        emitTime: bigint;
+        registryNonce: bigint;
+        trigger: Trigger;
+        cumulativeQuoteVolume: bigint;
+        totalQuoteLocked: bigint;
+        totalValueLocked: bigint;
+        marketCap: bigint;
+        fullyDilutedValue: bigint;
+        cumulativeIntegratorFees: bigint;
+        cumulativeSwaps: bigint;
+        cumulativeChatMessages: bigint;
       }
-  >;
+    >;
 
-  // Query return type for `market_data` view.
-  MarketDataView: {
-    marketID: number;
-    marketAddress: `0x${string}`;
-    marketCap: number;
-    bumpTime: number;
-    version: number | string;
-    numSwaps: number;
-    numChatMessages: number;
-    clammVirtualReservesBase: number;
-    clammVirtualReservesQuote: number;
-    cpammRealReservesBase: number;
-    cpammRealReservesQuote: number;
-    lpCoinSupply: number;
-    avgExecutionPriceQ64: number;
-    emojiBytes: `0x${string}`;
-    allTimeVolume: number;
-    dailyVolume: number;
-    tvlPerLpCoinGrowth: number;
-  };
+    LiquidityEvent: Flatten<
+      WithMarketID &
+        WithVersionAndGUID & {
+          marketID: bigint;
+          time: bigint;
+          marketNonce: bigint;
+          provider: AccountAddressString;
+          baseAmount: bigint;
+          quoteAmount: bigint;
+          lpCoinAmount: bigint;
+          liquidityProvided: boolean;
+          baseDonationClaimAmount: bigint;
+          quoteDonationClaimAmount: bigint;
+        }
+    >;
 
-  RegistrantGracePeriodFlag: {
-    marketRegistrant: `0x${string}`;
-    marketRegistrationTime: bigint;
-  };
+    // Query return type for `market_data` view.
+    MarketDataView: {
+      marketID: number;
+      marketAddress: `0x${string}`;
+      marketCap: number;
+      bumpTime: number;
+      version: number | string;
+      numSwaps: number;
+      numChatMessages: number;
+      clammVirtualReservesBase: number;
+      clammVirtualReservesQuote: number;
+      cpammRealReservesBase: number;
+      cpammRealReservesQuote: number;
+      lpCoinSupply: number;
+      avgExecutionPriceQ64: number;
+      emojiBytes: `0x${string}`;
+      allTimeVolume: number;
+      dailyVolume: number;
+      tvlPerLpCoinGrowth: number;
+    };
 
-  EmojicoinDotFunRewards: {
-    swap: Types["SwapEvent"];
-    octasRewardAmount: bigint;
-  };
+    RegistrantGracePeriodFlag: {
+      marketRegistrant: `0x${string}`;
+      marketRegistrationTime: bigint;
+    };
 
-  Candlestick: {
-    marketID: bigint;
-    version: bigint;
-    period: ArenaPeriod;
-    startTime: Date;
-    openPrice: number;
-    closePrice: number;
-    highPrice: number;
-    lowPrice: number;
-    volume: bigint;
-    symbolEmojis: SymbolEmoji[];
+    EmojicoinDotFunRewards: {
+      swap: Types["SwapEvent"];
+      octasRewardAmount: bigint;
+    };
+
+    Candlestick: {
+      marketID: bigint;
+      version: bigint;
+      period: ArenaPeriod;
+      startTime: Date;
+      openPrice: number;
+      closePrice: number;
+      highPrice: number;
+      lowPrice: number;
+      volume: bigint;
+      symbolEmojis: SymbolEmoji[];
+    };
   };
-};
 
 export const toExtendRef = (data: JsonTypes["ExtendRef"]): Types["ExtendRef"] => ({
   self: standardizeAddress(data.self),
@@ -542,6 +556,18 @@ export const toSmartTable = (data: JsonTypes["SmartTable"]): Types["SmartTable"]
   size: BigInt(data.size),
   splitLoadThreshold: data.split_load_threshold,
   targetBucketSize: Number(data.target_bucket_size),
+});
+
+export const toGUID = (data: JsonTypes["GUID"]): Types["GUID"] => ({
+  id: {
+    creationNum: BigInt(data.id.creation_num),
+    addr: AccountAddress.from(data.id.addr),
+  },
+});
+
+export const toEventHandle = (data: JsonTypes["EventHandle"]): Types["EventHandle"] => ({
+  counter: BigInt(data.counter),
+  guid: toGUID(data.guid),
 });
 
 export const toRegistryResource = (data: JsonTypes["Registry"]): Types["Registry"] => ({

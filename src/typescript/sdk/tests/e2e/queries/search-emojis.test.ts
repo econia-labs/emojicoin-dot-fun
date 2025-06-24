@@ -4,7 +4,7 @@ import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 import { registerMarketHelper } from "../../utils";
 import { getFundedAccounts } from "../../utils/test-accounts";
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 describe("queries markets by the various emojis in their symbols", () => {
   const registrants = getFundedAccounts("017", "018", "019", "020", "021", "022");

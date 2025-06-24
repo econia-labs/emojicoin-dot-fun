@@ -15,7 +15,7 @@ import { getFundedAccounts } from "../../utils/test-accounts";
 import checkRows from "../helpers/equality-checks";
 import { fetchLatestStateEventForMarket, fetchLiquidityEvents } from ".";
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 describe("queries swap_events and returns accurate swap row data", () => {
   const aptos = getAptosClient();

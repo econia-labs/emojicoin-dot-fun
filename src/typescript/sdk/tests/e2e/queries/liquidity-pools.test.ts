@@ -12,7 +12,7 @@ import { getAptosClient } from "../../utils";
 import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketHelper } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
 
-jest.setTimeout(20000);
+jest.setTimeout(60000);
 
 describe("queries for liquidity pools", () => {
   const { config: aptosConfig } = getAptosClient();

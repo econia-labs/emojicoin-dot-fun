@@ -15,7 +15,9 @@ function get_publisher_address() {
 
 function get_publisher_private_key() {
 	if [ -f $CONFIG_PATH ]; then
-		echo $(cat $CONFIG_PATH | yq -r '.profiles.publisher.private_key')
+		full_key=$(cat "$CONFIG_PATH" | yq -r '.profiles.publisher.private_key')
+		key_only=$(echo "$full_key" | sed -E 's/^ed25519-priv-0x//')
+		echo "$key_only"
 	else
 		echo ""
 	fi
