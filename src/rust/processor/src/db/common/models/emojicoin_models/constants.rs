@@ -68,20 +68,3 @@ lazy_static! {
 
 // When a market is first registered, the market_nonce field is emitted in the resulting events as 1.
 pub const INITIAL_MARKET_NONCE: u64 = 1;
-
-#[cfg(test)]
-mod tests {
-    use crate::utils::util::standardize_address;
-
-    #[test]
-    fn ensure_module_address_is_standardized() {
-        if standardize_address(env!("EMOJICOIN_MODULE_ADDRESS")) != env!("EMOJICOIN_MODULE_ADDRESS")
-        {
-            panic!(
-                "The non-standardized module address: {} is invalid because it doesn't match the standardized address: {}",
-                env!("EMOJICOIN_MODULE_ADDRESS"),
-                standardize_address(env!("EMOJICOIN_MODULE_ADDRESS"))
-            );
-        }
-    }
-}

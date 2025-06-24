@@ -6,7 +6,7 @@ mod json_tests {
             json_types::{EventWithMarket, GlobalStateEvent},
             utils::{to_lp_coin_type, to_lp_primary_store_address},
         },
-        fungible_asset_models::v2_fungible_asset_balances::{
+        fungible_asset::fungible_asset_models::v2_fungible_asset_balances::{
             get_paired_metadata_address, get_primary_fungible_store_address,
         },
     };
