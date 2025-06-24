@@ -1,4 +1,3 @@
-// Copyright © Aptos Foundation
-// SPDX-License-Identifier: Apache-2.0
-
+pub mod default;
 pub mod emojicoin_models;
+pub mod fungible_asset;
