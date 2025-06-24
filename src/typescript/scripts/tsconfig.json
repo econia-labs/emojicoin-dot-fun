@@ -19,6 +19,7 @@
     "moduleDetection": "force",
     "moduleResolution": "bundler",
     "noEmit": true,
+    "noErrorTruncation": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "paths": {
