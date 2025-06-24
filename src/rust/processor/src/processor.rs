@@ -449,13 +449,23 @@ async fn insert_to_db(
 
             {
                 use schema::processor_status::dsl::*;
-                let timestamp =  parse_timestamp(last_transaction.timestamp.as_ref().unwrap(), last_transaction.version as i64)
-                    .naive_utc();
+                let timestamp = parse_timestamp(
+                    last_transaction.timestamp.as_ref().unwrap(),
+                    last_transaction.version as i64,
+                )
+                .naive_utc();
                 diesel::insert_into(processor_status)
-                    .values((processor.eq("emojicoin"), last_success_version.eq(last_transaction.version as i64), last_transaction_timestamp.eq(timestamp)))
+                    .values((
+                        processor.eq("emojicoin"),
+                        last_success_version.eq(last_transaction.version as i64),
+                        last_transaction_timestamp.eq(timestamp),
+                    ))
                     .on_conflict(processor)
                     .do_update()
-                    .set((last_success_version.eq(last_transaction.version as i64), last_transaction_timestamp.eq(timestamp)))
+                    .set((
+                        last_success_version.eq(last_transaction.version as i64),
+                        last_transaction_timestamp.eq(timestamp),
+                    ))
                     .execute(conn)
                     .await?;
             }
@@ -926,7 +936,6 @@ impl EmojicoinProcessor {
                         insert_events.swap_events.push(swap_model);
                     }
                     BumpEvent::Liquidity(event) => {
-                        let market_addr = market_addr.clone();
                         let evt_model =
                             LiquidityEventModel::new(txn_info.clone(), event, state_event);
                         insert_events.liquidity_events.push(evt_model.clone());
@@ -940,11 +949,7 @@ impl EmojicoinProcessor {
                             bigdecimal_to_u64(&evt_model.market_id),
                         );
                         let new_pool: UserLiquidityPoolsModel =
-                            UserLiquidityPoolsModel::from_event_and_writeset(
-                                txn,
-                                evt_model,
-                                &market_addr,
-                            );
+                            UserLiquidityPoolsModel::from_event_and_writeset(txn, evt_model);
                         user_pools_db
                             .entry(key)
                             .and_modify(|pool| {
