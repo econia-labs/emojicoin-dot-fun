@@ -69,8 +69,7 @@ where
     match Trigger::from_i16(trigger) {
         Some(trigger) => Ok(trigger),
         None => Err(D::Error::custom(format!(
-            "Failed to deserialize Trigger from i16: {}",
-            trigger
+            "Failed to deserialize Trigger from i16: {trigger}"
         ))),
     }
 }
@@ -131,8 +130,7 @@ where
         "14400000000" => Ok(Period::FourHours),
         "86400000000" => Ok(Period::OneDay),
         _ => Err(D::Error::custom(format!(
-            "Failed to deserialize PeriodType from string: {}",
-            period
+            "Failed to deserialize PeriodType from string: {period}"
         ))),
     }
 }

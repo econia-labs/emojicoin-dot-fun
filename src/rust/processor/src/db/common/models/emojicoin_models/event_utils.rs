@@ -79,7 +79,7 @@ impl EventGroupBuilder {
         if event.get_market_id() != self.market_id || event.get_market_nonce() != self.market_nonce
         {
             let msg = "EventGroupBuilder can only have one market_id and market_nonce.";
-            panic!("{} New event: {:?} Initial event: {:?}", msg, event, self);
+            panic!("{msg} New event: {event:?} Initial event: {self:?}");
         }
         match event {
             EventWithMarket::MarketRegistration(e) => {

@@ -709,14 +709,14 @@ impl EmojicoinProcessor {
                                     &melee.emojicoin_0_market_address,
                                     market_registrations,
                                     states,
-                                    &pool,
+                                    pool,
                                 )
                                 .await?;
                                 let market_1 = get_market_data(
                                     &melee.emojicoin_1_market_address,
                                     market_registrations,
                                     states,
-                                    &pool,
+                                    pool,
                                 )
                                 .await?;
 
@@ -1142,8 +1142,7 @@ impl EmojicoinProcessor {
             }
             Err(e) => Err(anyhow!(e)).with_context(|| {
                 format!(
-                    "Could not insert events into the db (from {} to {}).",
-                    first_transaction_version, last_transaction_version
+                    "Could not insert events into the db (from {first_transaction_version} to {last_transaction_version})."
                 )
             }),
         }
