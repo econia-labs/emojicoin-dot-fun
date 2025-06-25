@@ -156,7 +156,7 @@ const TableCard = ({
               }
             : undefined
       }
-      className="grid-emoji-card group cursor-pointer border-solid bg-black border border-dark-gray hover:z-10 hover:border-ec-blue"
+      className="group cursor-pointer border-solid bg-black border border-dark-gray hover:z-10 hover:border-ec-blue"
       variants={tableCardVariants}
       animate={variant}
       custom={{ curr, prev, layoutDelay }}
@@ -185,7 +185,7 @@ const TableCard = ({
       <EmojiMarketPageLink emojis={emojis}>
         <motion.div animate={controls} variants={animationsOn ? glowVariants : {}}>
           <motion.div
-            className="flex flex-col relative grid-emoji-card w-full h-full py-[10px] px-[19px] overflow-hidden"
+            className="flex flex-col relative w-full h-full py-[10px] px-[19px] overflow-hidden"
             whileHover="hover"
             animate={controls}
             variants={animationsOn ? borderVariants : onlyHoverVariant}
