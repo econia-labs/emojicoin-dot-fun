@@ -32,7 +32,6 @@ const getCustomAptosClient = (network: Network) =>
   );
 
 /**
- *
  * @example
  * ```shell
  * # Register a specific market with a symbol input
