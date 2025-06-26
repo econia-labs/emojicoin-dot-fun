@@ -2,7 +2,7 @@
 // cspell:word kolorist
 
 import type { Account } from "@aptos-labs/ts-sdk";
-import { type fetchAllCurrentMeleeData, ONE_APT, sleep } from "@econia-labs/emojicoin-sdk";
+import { type fetchAllCurrentMeleeData, sleep } from "@econia-labs/emojicoin-sdk";
 import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
 import { gray, yellow } from "kolorist";
 import { getAccountPrefix } from "src/test-exports";
