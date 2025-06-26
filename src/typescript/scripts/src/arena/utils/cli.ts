@@ -84,8 +84,8 @@ async function main() {
       if (!isOver) {
         console.error("Melee isn't over yet!");
       }
-      const [symbol1, symbol2] = [meleeView.market1.symbolEmojis, meleeView.market2.symbolEmojis];
-      const res = await emojicoin.arena.enter(publisher, 1n, false, symbol1, symbol2, "symbol1");
+      const [symbol0, symbol1] = [meleeView.market0.symbolEmojis, meleeView.market1.symbolEmojis];
+      const res = await emojicoin.arena.enter(publisher, 1n, false, symbol0, symbol1, "symbol1");
       const { models } = res;
       const { melee } = models.arenaMeleeEvents.pop() ?? {};
       if (melee) {
@@ -113,13 +113,13 @@ async function main() {
         console.log("Failure!! Melee has already ended.");
         return;
       }
-      const [symbol1, symbol2] = [meleeView.market1.symbolEmojis, meleeView.market2.symbolEmojis];
+      const [symbol0, symbol1] = [meleeView.market0.symbolEmojis, meleeView.market1.symbolEmojis];
       const res = await emojicoin.arena.enter(
         publisher,
         10000n,
         false,
+        symbol0,
         symbol1,
-        symbol2,
         "symbol1"
       );
       const { models } = res;
