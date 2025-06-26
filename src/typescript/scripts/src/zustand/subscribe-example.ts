@@ -1,8 +1,8 @@
-import { immer } from "zustand/middleware/immer";
 import { enableMapSet } from "immer";
-import { createStore } from "zustand/vanilla";
 import { sleep } from "node_modules/@econia-labs/emojicoin-sdk/src/utils";
 import { subscribeWithSelector } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
+import { createStore } from "zustand/vanilla";
 
 type MyStore = {
   insert: (addr: `0x${string}`) => void;

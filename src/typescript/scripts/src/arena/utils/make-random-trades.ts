@@ -9,8 +9,6 @@ import { getAccountPrefix } from "src/test-exports";
 
 type Melee = Awaited<ReturnType<typeof fetchAllCurrentMeleeData>>;
 
-const upToOneApt = () => BigInt(Math.floor(Math.random() * ONE_APT * 10));
-
 interface MakeRandomTrades {
   emojicoin?: EmojicoinClient;
   melee: Melee;

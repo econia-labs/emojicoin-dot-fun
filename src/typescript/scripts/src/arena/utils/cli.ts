@@ -35,11 +35,17 @@ const getCustomAptosClient = (network: Network) =>
  *
  * @example
  * ```shell
- * # Specify the symbol
- * pnpm run utils:register-market --
+ * # Register a specific market with a symbol input
+ * pnpm run utils:cli -- register 🍄🍄
  *
  * # Or generate a random symbol
- * pnpm run utils:register-market
+ * pnpm run utils:cli -- register
+ *
+ * # Get help on all available commands
+ * pnpm run utils:cli -- help
+ *
+ * # Get help on a specific command
+ * pnpm run utils:cli -- help register
  * ```
  */
 async function main() {
@@ -53,17 +59,21 @@ async function main() {
       const aptos = getCustomAptosClient(network);
       const emojicoin = new EmojicoinClient({ aptos });
       const symbolEmojis = getSymbolEmojisInString(symbol);
-      // I hate looking at the long emojis, but we need some for testing purposes.
-      if (Math.random() < 0.5) {
-        while (symbolEmojis.length > 1) {
-          symbolEmojis.pop();
+      try {
+        const { response: res1 } = await emojicoin.register(publisher, symbolEmojis);
+        const { response: res2 } = await emojicoin.buy(publisher, symbolEmojis, 1n);
+        const symbolUsed = symbolEmojis.join("");
+        console.log(
+          `Success! Symbol: "${symbolUsed}" register: ${res1.version}, swap: ${res2.version}`
+        );
+      } catch (e) {
+        const version = "transaction" in (e as any) ? (e as any).transaction.version : "unknown";
+        if ((e as Error).message.includes("E_ALREADY_REGISTERED")) {
+          console.log(`Failure! ${version}. Market is already registered.`);
+        } else {
+          console.error(`Failure! Version: ${version}`);
         }
       }
-      const { response: res1 } = await emojicoin.register(publisher, symbolEmojis);
-      const { response: res2 } = await emojicoin.buy(publisher, symbolEmojis, 1n);
-      console.log(
-        `Success! symbol: ${symbolEmojis} register: ${res1.version}, swap: ${res2.version}`
-      );
     });
 
   program
@@ -109,7 +119,7 @@ async function main() {
         new Date().getTime() >
         meleeView.view.startTime.getTime() + Number(meleeView.view.duration / 1000n)
       ) {
-        console.log("Failure!! Melee has already ended.");
+        console.log("Failure! Melee has already ended.");
         return;
       }
       const [symbol0, symbol1] = [meleeView.market0.symbolEmojis, meleeView.market1.symbolEmojis];
