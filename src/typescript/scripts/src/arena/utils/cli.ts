@@ -3,6 +3,7 @@
 
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import {
+  EmojicoinArena,
   fetchArenaMeleeView,
   fetchArenaRegistryView,
   fetchMeleeEmojiData,
@@ -15,9 +16,7 @@ import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
 import { program } from "commander";
 import { lightBlue } from "kolorist";
 
-import { FundVault } from "@/move-modules/emojicoin-arena";
-
-import { getPublisher } from "../../../../sdk/tests/utils";
+import { getPublisher } from "../../../../sdk/tests/utils/helpers";
 import { toExplorerLink } from "./explorer-link";
 
 const publisher = getPublisher();
@@ -144,7 +143,7 @@ async function main() {
     .action(async (options) => {
       const network = options.network;
       const aptos = getCustomAptosClient(network);
-      const res = await FundVault.submit({
+      const res = await EmojicoinArena.FundVault.submit({
         aptosConfig: aptos.config,
         funder: publisher,
         amount: ONE_APT * 10000000,
