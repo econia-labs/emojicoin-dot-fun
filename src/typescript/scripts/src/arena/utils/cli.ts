@@ -1,6 +1,7 @@
 // cspell:word kolorist
 // cspell:word funder
 
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import {
   fetchArenaMeleeView,
   fetchArenaRegistryView,
@@ -11,12 +12,13 @@ import {
   ONE_APT,
 } from "@econia-labs/emojicoin-sdk";
 import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
-import { getPublisher } from "../../../../sdk/tests/utils";
 import { program } from "commander";
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-import { toExplorerLink } from "./explorer-link";
 import { lightBlue } from "kolorist";
-import { FundVault } from "@/contract-apis/emojicoin-arena";
+
+import { FundVault } from "@/move-modules/emojicoin-arena";
+
+import { getPublisher } from "../../../../sdk/tests/utils";
+import { toExplorerLink } from "./explorer-link";
 
 const publisher = getPublisher();
 
