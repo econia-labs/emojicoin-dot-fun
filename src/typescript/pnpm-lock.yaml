@@ -281,8 +281,8 @@ importers:
         specifier: 1.38.0
         version: 1.38.0(axios@1.8.4)(got@11.8.6)
       '@econia-labs/emojicoin-sdk':
-        specifier: 0.11.1-rc.alpha
-        version: 0.11.1-rc.alpha(axios@1.8.4)(got@11.8.6)
+        specifier: 0.11.1
+        version: 0.11.1(axios@1.8.4)(got@11.8.6)
       axios:
         specifier: '>=1.8.2'
         version: 1.8.4
@@ -745,8 +745,8 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  '@econia-labs/emojicoin-sdk@0.11.1-rc.alpha':
-    resolution: {integrity: sha512-ryR0hYM8PUZYbm78pJxsvuHxcKAQSQXPlyhxKh0k3TG9xOppoVwrfihhKrb4F4gOhQ2x+rC9doFD+P66TuzOMg==}
+  '@econia-labs/emojicoin-sdk@0.11.1':
+    resolution: {integrity: sha512-EMzIB2thpzJhiXz6TowTJ2Ay5yfsMzNVkS8gG5gpTfi/5xHz0U+i1uc0UbhBSQzevGB9QA0qQboAchSv0KnUbg==}
     engines: {node: '>=v20.12.2'}
 
   '@emnapi/core@1.4.3':
@@ -5940,7 +5940,7 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@econia-labs/emojicoin-sdk@0.11.1-rc.alpha(axios@1.8.4)(got@11.8.6)':
+  '@econia-labs/emojicoin-sdk@0.11.1(axios@1.8.4)(got@11.8.6)':
     dependencies:
       '@aptos-labs/ts-sdk': 1.38.0(axios@1.8.4)(got@11.8.6)
       '@noble/hashes': 1.7.2
