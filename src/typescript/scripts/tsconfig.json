@@ -7,7 +7,7 @@
     "declarationDir": "dist",
     "declarationMap": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": false,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "lib": [
