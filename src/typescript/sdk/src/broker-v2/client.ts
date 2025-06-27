@@ -12,17 +12,6 @@ import {
   type WebSocketSubscriptions,
 } from "./types";
 
-const SendToBroker = (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) => {
-  const originalMethod = descriptor.value;
-  /* eslint-disable-next-line func-names, no-param-reassign */
-  descriptor.value = function (...args: unknown[]) {
-    const result = originalMethod.apply(this, args);
-    (this as WebSocketClient).sendToBroker();
-    return result;
-  };
-  return descriptor;
-};
-
 export const convertWebSocketMessageToBrokerEvent = <T extends string>(e: MessageEvent<T>) => {
   const response = parseJSONWithBigInts<BrokerMessage>(e.data);
   const [brokerEvent, message] = Object.entries(response)[0] as [BrokerEvent, BrokerJsonTypes];
@@ -110,25 +99,24 @@ export class WebSocketClient {
     };
   }
 
-  @SendToBroker
   public subscribeToArenaPeriod(period: PeriodTypeFromBroker) {
     this.subscriptions.arenaPeriods.add(period);
     this.arenaPeriodRequest = {
       action: "subscribe",
       period,
     };
+    this.sendToBroker();
   }
 
-  @SendToBroker
   public unsubscribeFromArenaPeriod(period: PeriodTypeFromBroker) {
     this.subscriptions.arenaPeriods.delete(period);
     this.arenaPeriodRequest = {
       action: "unsubscribe",
       period,
     };
+    this.sendToBroker();
   }
 
-  @SendToBroker
   public subscribeEvents(
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
     arena?: {
@@ -140,9 +128,9 @@ export class WebSocketClient {
     newTypes.forEach((e) => this.subscriptions.eventTypes.add(e));
     this.subscriptions.arena = !!arena?.arenaBaseEvents;
     this.arenaPeriodRequest = arena?.arenaPeriodRequest;
+    this.sendToBroker();
   }
 
-  @SendToBroker
   public unsubscribeEvents(
     input: SubscribableBrokerEvents | SubscribableBrokerEvents[],
     arena?: {
@@ -154,6 +142,7 @@ export class WebSocketClient {
     newTypes.forEach((e) => this.subscriptions.eventTypes.delete(e));
     this.subscriptions.arena = !arena?.arenaBaseEvents;
     this.arenaPeriodRequest = arena?.arenaPeriodRequest;
+    this.sendToBroker();
   }
 
   public sendToBroker() {
