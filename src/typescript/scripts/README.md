@@ -35,6 +35,22 @@ pnpm run arena:init
 pnpm run arena:bots
 ```
 
+#### Register a random market
+
+```shell
+# Register a specific market with a symbol input
+pnpm run utils:cli -- register 🍄🍄
+
+ # Or generate a random symbol
+pnpm run utils:cli -- register
+
+ # Get help on all available commands
+pnpm run utils:cli -- help
+
+ # Get help on a specific command
+pnpm run utils:cli -- help register
+```
+
 ### Running a script for non-local networks
 
 To run a script that doesn't necessarily need to run on a local network, just
