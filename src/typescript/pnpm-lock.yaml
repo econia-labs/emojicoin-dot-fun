@@ -281,8 +281,8 @@ importers:
         specifier: 1.38.0
         version: 1.38.0(axios@1.8.4)(got@11.8.6)
       '@econia-labs/emojicoin-sdk':
-        specifier: 0.11.0
-        version: 0.11.0(axios@1.8.4)(got@11.8.6)
+        specifier: 0.11.1
+        version: 0.11.1(axios@1.8.4)(got@11.8.6)
       axios:
         specifier: '>=1.8.2'
         version: 1.8.4
@@ -292,6 +292,12 @@ importers:
       find-git-root:
         specifier: ^1.0.4
         version: 1.0.4
+      immer:
+        specifier: ^10.1.1
+        version: 10.1.1
+      zustand:
+        specifier: ^5.0.3
+        version: 5.0.6(@types/react@18.3.20)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
     devDependencies:
       '@types/big.js':
         specifier: ^6.2.2
@@ -311,6 +317,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^7.18.0
         version: 7.18.0(eslint@8.57.1)(typescript@5.6.2)
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
       dotenv-cli:
         specifier: ^7.4.2
         version: 7.4.4
@@ -736,8 +745,8 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  '@econia-labs/emojicoin-sdk@0.11.0':
-    resolution: {integrity: sha512-2KRdEd0NQhN/5PxCz1YSetIda2EtJu1hqVWyqjc2CgGMT/5CHHeRyQkEWMjodpWcUv3ZLXtXLD+8+etpBHbR7A==}
+  '@econia-labs/emojicoin-sdk@0.11.1':
+    resolution: {integrity: sha512-EMzIB2thpzJhiXz6TowTJ2Ay5yfsMzNVkS8gG5gpTfi/5xHz0U+i1uc0UbhBSQzevGB9QA0qQboAchSv0KnUbg==}
     engines: {node: '>=v20.12.2'}
 
   '@emnapi/core@1.4.3':
@@ -2448,6 +2457,7 @@ packages:
   aptos@1.21.0:
     resolution: {integrity: sha512-PRKjoFgL8tVEc9+oS7eJUv8GNxx8n3+0byH2+m7CP3raYOD6yFKOecuwjVMIJmgfpjp6xH0P0HDMGZAXmSyU0Q==}
     engines: {node: '>=11.0.0'}
+    deprecated: Package aptos is no longer supported, please migrate to https://www.npmjs.com/package/@aptos-labs/ts-sdk
 
   arg@5.0.2:
     resolution: {integrity: sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg==}
@@ -5497,6 +5507,24 @@ packages:
       react:
         optional: true
 
+  zustand@5.0.6:
+    resolution: {integrity: sha512-ihAqNeUVhe0MAD+X8M5UzqyZ9k3FFZLBTtqo6JLPwV53cbRB/mJwBI0PxcIgqhBBHlEs8G45OTDTMq3gNcLq3A==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
 snapshots:
 
   '@adraffy/ens-normalize@1.10.1': {}
@@ -5912,7 +5940,7 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@econia-labs/emojicoin-sdk@0.11.0(axios@1.8.4)(got@11.8.6)':
+  '@econia-labs/emojicoin-sdk@0.11.1(axios@1.8.4)(got@11.8.6)':
     dependencies:
       '@aptos-labs/ts-sdk': 1.38.0(axios@1.8.4)(got@11.8.6)
       '@noble/hashes': 1.7.2
@@ -11248,3 +11276,10 @@ snapshots:
       '@types/react': 18.3.20
       immer: 10.1.1
       react: 18.3.1
+
+  zustand@5.0.6(@types/react@18.3.20)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1)):
+    optionalDependencies:
+      '@types/react': 18.3.20
+      immer: 10.1.1
+      react: 18.3.1
+      use-sync-external-store: 1.5.0(react@18.3.1)

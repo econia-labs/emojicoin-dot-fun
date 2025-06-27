@@ -2,21 +2,19 @@
 // cspell:word kolorist
 
 import type { Account } from "@aptos-labs/ts-sdk";
-import { type fetchAllCurrentMeleeData, ONE_APT, sleep } from "@econia-labs/emojicoin-sdk";
+import { type fetchAllCurrentMeleeData, sleep } from "@econia-labs/emojicoin-sdk";
 import { EmojicoinClient } from "@econia-labs/emojicoin-sdk/client";
 import { gray, yellow } from "kolorist";
 import { getAccountPrefix } from "src/test-exports";
 
 type Melee = Awaited<ReturnType<typeof fetchAllCurrentMeleeData>>;
 
-const upToOneApt = () => BigInt(Math.floor(Math.random() * ONE_APT * 10));
-
 interface MakeRandomTrades {
   emojicoin?: EmojicoinClient;
   melee: Melee;
   account: Account;
   lockIn?: boolean;
-  inputAmount?: bigint;
+  inputAmounts: bigint[];
   accountID?: string;
   enterSymbolIndex?: 0 | 1;
   numTrades?: number;
@@ -35,7 +33,7 @@ export const makeRandomTrades = async ({
   melee,
   account,
   lockIn = false,
-  inputAmount = upToOneApt(),
+  inputAmounts,
   accountID = getAccountPrefix(account),
   enterSymbolIndex = Math.random() <= 0.5 ? 0 : 1,
   numTrades = 100,
@@ -49,6 +47,8 @@ export const makeRandomTrades = async ({
     // Initial sleep to offset each account.
     await sleep(Number(accountID) * 100);
 
+    const inputAmount = inputAmounts.pop();
+    if (inputAmount === undefined) throw new Error("Not enough input amounts to use.");
     await emojicoin.arena
       .enter(
         account,
@@ -65,7 +65,7 @@ export const makeRandomTrades = async ({
     let i = 0;
     while (i < numTrades) {
       const baseSleep = i * 200;
-      const randomizedSleep = Math.random() * 30 * 1000;
+      const randomizedSleep = Math.random() * 30 * 100;
       await sleep(baseSleep + randomizedSleep);
       await emojicoin.arena.swap(account, symbol0, symbol1);
       const fromCoin = coins[(currentCoinIndex + i) % 2].join("");
