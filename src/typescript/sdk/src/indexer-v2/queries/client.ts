@@ -4,7 +4,7 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 
 import { EMOJICOIN_INDEXER_URL, FETCH_DEBUG, FETCH_DEBUG_VERBOSE } from "../../server/env";
 import { parsePostgrestJSON, stringifyJSONWithBigInts } from "../json-bigint";
-import type { TableName } from "../types/json-types";
+import type { DatabaseRpc, TableName } from "../types/json-types";
 
 /**
  * Fetch with BigInt support. This is necessary because the JSON returned by the indexer
@@ -63,9 +63,37 @@ const fetchPatch: typeof fetch = async (input, init) => {
  */
 export const toQueryArray = <T>(s: T[]) => `{${s.join(",")}}`;
 
-// Custom client that enforces a proper table name when calling `from`.
+// Custom client that enforces proper table names and RPC function names.
 class CustomClient extends PostgrestClient {
-  from = (table: TableName) => super.from(table);
+  override from<T extends TableName>(relation: T) {
+    return super.from(relation);
+  }
+
+  /**
+   * @deprecated Use `dbRpc` instead to enforce allowed Database RPC function calls.
+   */
+  rpc = super.rpc as never;
+
+  /**
+   * Overrides the `rpc` function call to ensure that the `DatabaseRPC` function name exists in
+   * the TypeScript types.
+   *
+   * Also defaults to using a `get` request instead of a `post` request if no parameter is passed
+   * in specifying `options.get`.
+   */
+  dbRpc<T extends DatabaseRpc>(
+    fn: T,
+    args?: Record<string, unknown>,
+    options?: {
+      head?: boolean;
+      get?: boolean;
+      count?: "exact" | "planned" | "estimated";
+    }
+  ) {
+    // Default to using `get`, not `post`.
+    const get = options?.get ?? true;
+    return super.rpc(fn, args, { ...options, get });
+  }
 }
 
 const localIndexer =
