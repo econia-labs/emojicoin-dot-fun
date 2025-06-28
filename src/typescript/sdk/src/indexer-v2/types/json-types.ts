@@ -277,7 +277,7 @@ type FlattenedExchangeRateWithEventIndex<T extends keyof JsonTypes> = Flatten<
 type CandlestickData = {
   market_id: Uint64String;
   last_transaction_version: Uint64String;
-  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
+  period: PeriodTypeFromDatabase;
   start_time: PostgresTimestamp;
 
   open_price: number;
@@ -288,6 +288,25 @@ type CandlestickData = {
   symbol_emojis: SymbolEmoji[];
 
   volume: Uint64String;
+};
+
+type ChunkedCandlesticksMetadata = {
+  chunk_id: number;
+  // Sent to the `postgrest` client as a `PostgresTimestamp` but is automatically parsed as a Date.
+  first_start_time: Date;
+  // Sent to the `postgrest` client as a `PostgresTimestamp` but is automatically parsed as a Date.
+  last_start_time: Date;
+  num_items: number;
+};
+
+export type CachedChunkedCandlesticks = {
+  metadata: {
+    market_id: Uint64String;
+    symbol_emojis: SymbolEmoji[];
+    period: PeriodTypeFromDatabase;
+    key_ordering: (keyof CandlestickData)[];
+  };
+  rows: CandlestickData[keyof CandlestickData][][];
 };
 
 type ArenaMeleeEventData = Flatten<
@@ -490,6 +509,7 @@ export enum DatabaseRpc {
   AggregateMarketState = "aggregate_market_state",
   MarketLatestCandlesticks = "market_latest_candlesticks",
   ArenaLatestCandlesticks = "arena_latest_candlesticks",
+  ChunkedCandlesticksMetadata = "chunked_candlesticks_metadata",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -583,6 +603,7 @@ export type DatabaseJsonType = {
       })
   >;
   [TableName.Candlesticks]: CandlestickData;
+  [DatabaseRpc.ChunkedCandlesticksMetadata]: ChunkedCandlesticksMetadata;
   [TableName.ArenaMeleeEvents]: Flatten<TransactionMetadata & ArenaMeleeEventData>;
   [TableName.ArenaEnterEvents]: Flatten<TransactionMetadata & ArenaEnterEventData>;
   [TableName.ArenaExitEvents]: Flatten<TransactionMetadata & ArenaExitEventData>;
@@ -655,6 +676,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.PriceFeedWithNulls] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.AggregateMarketState] &
+  DatabaseJsonType[DatabaseRpc.ChunkedCandlesticksMetadata] &
   DatabaseJsonType[DatabaseRpc.MarketLatestCandlesticks] &
   DatabaseJsonType[DatabaseRpc.ArenaLatestCandlesticks];
 

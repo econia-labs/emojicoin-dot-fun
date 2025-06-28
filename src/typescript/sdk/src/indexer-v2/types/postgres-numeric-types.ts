@@ -153,7 +153,11 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
  * These are verified with the `postgrest` schema response.
  * @see schema.test.ts
  */
-export const integerColumns: Set<AnyColumnName> = new Set(["integrator_fee_rate_bps"]);
+export const integerColumns: Set<AnyColumnName> = new Set([
+  "integrator_fee_rate_bps",
+  "chunk_id",
+  "num_items",
+]);
 
 export const timestampColumns: Set<AnyColumnName> = new Set([
   "bump_time",
@@ -164,6 +168,8 @@ export const timestampColumns: Set<AnyColumnName> = new Set([
   "last_transaction_timestamp",
   "start_time",
   "transaction_timestamp",
+  "first_start_time",
+  "last_start_time",
 ]);
 
 export const nullableColumns: Set<AnyColumnName> = new Set([
