@@ -54,6 +54,8 @@ function toChunkMetadata(
  * then used by the caller to fetch specific chunks of data.
  *
  * This data is then stored efficiently as chunks in the `unstable_cache` cache.
+ *
+ * Returns up to `LIMIT` rows.
  */
 export async function fetchChunkedCandlesticksMetadata({
   marketID,
@@ -80,6 +82,31 @@ export async function fetchChunkedCandlesticksMetadata({
     .limit(LIMIT)
     .range((page - 1) * LIMIT, page * LIMIT - 1)
     .overrideTypes<DatabaseJsonType["chunked_candlesticks_metadata"][], { merge: false }>();
+}
+
+export async function fetchAllChunkedCandlesticksMetadata({
+  marketID,
+  period,
+  chunkSize,
+}: {
+  marketID: AnyNumberString;
+  period: PeriodTypeFromDatabase;
+  chunkSize: number;
+}) {
+  const chunks: DatabaseJsonType["chunked_candlesticks_metadata"][] = [];
+  let lastRes: DatabaseJsonType["chunked_candlesticks_metadata"][] = [];
+  let page = 1;
+
+  // Exhaustively fetch all chunks. This repeatedly fetches while the most recent fetched data
+  // doesn't have `LIMIT` # of rows.
+  do {
+    lastRes =
+      (await fetchChunkedCandlesticksMetadata({ marketID, period, chunkSize, page })).data ?? [];
+    page += 1;
+    chunks.push(...lastRes);
+  } while (lastRes.length % LIMIT === 0);
+
+  return chunks;
 }
 
 type PeriodParams = {
@@ -141,7 +168,7 @@ export function chunkedCandlestickMetadataToChunksNecessary({
   // This means that the chunks fetched must *always* encapsulate `to`; that is, they must either
   // be exactly equal to or later in time than `to`.
   // First, filter out all chunks where the chunk's left time boundary is later than `to` to
-  // constrict the timespan/range, because they will include irrelevant data that is discarded.
+  // constrict the time span/range, because they will include irrelevant data that is discarded.
   const filtered = chunkedCandlesticksMetadata.filter(
     // Note this is `>=`, not `>`, because `to` is non-inclusive.
     (chunk) => chunk.first_start_time.getTime() >= to.getTime()
