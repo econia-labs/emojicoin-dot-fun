@@ -1,7 +1,7 @@
 import FEATURE_FLAGS from "lib/feature-flags";
 import { fetchCachedArenaInfo } from "lib/queries/arena-info";
 import { unstable_cache } from "next/cache";
-import { parseJSON, stringifyJSON } from "utils";
+import { parseResponseJSON, stringifyJSON } from "utils";
 
 import { fetchSpecificMarkets, fetchVaultBalance, toArenaInfoModel } from "@/sdk/indexer-v2";
 
@@ -96,7 +96,7 @@ export const fetchCachedMeleeData = async () => {
   if (!FEATURE_FLAGS.Arena) throw new Error("Do not call this function when arena isn't enabled.");
 
   const res = await cachedFetch()
-    .then(parseJSON<MeleeData>)
+    .then(parseResponseJSON<MeleeData>)
     .catch((e) => logAndDefault(e));
 
   if (!res.arenaInfo) console.warn(`[WARNING]: Failed to fetch melee data.`);

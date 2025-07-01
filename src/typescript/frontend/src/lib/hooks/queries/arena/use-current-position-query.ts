@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { parseResponseJSON } from "utils";
 
 import { useAccountAddress } from "@/hooks/use-account-address";
 import type { UserPositionResponse } from "@/sdk/indexer-v2/queries/api/user-position/types";
@@ -29,7 +29,7 @@ export const useCurrentPositionQuery = () => {
       if (!accountAddress) return null;
       const res = await fetch(url)
         .then((res) => res.text())
-        .then(parseJSON<UserPositionResponse>)
+        .then(parseResponseJSON<UserPositionResponse>)
         .then(toUserPositionWithInfo);
       return res;
     },

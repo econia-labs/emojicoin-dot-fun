@@ -1,7 +1,7 @@
 "use server";
 
 import { unstable_cache } from "next/cache";
-import { parseJSON, stringifyJSON } from "utils";
+import { parseResponseJSON, stringifyJSON } from "utils";
 
 import { MarketView } from "@/move-modules/emojicoin-dot-fun";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
@@ -24,5 +24,5 @@ const cachedOnChainMarketView = unstable_cache(fetchOnChainMarketView, ["fetch-m
 
 export const wrappedCachedOnChainMarketView = async (marketAddress: `0x${string}`) => {
   const cached = await cachedOnChainMarketView(marketAddress);
-  return parseJSON<ReturnType<typeof toMarketView>>(cached);
+  return parseResponseJSON<ReturnType<typeof toMarketView>>(cached);
 };

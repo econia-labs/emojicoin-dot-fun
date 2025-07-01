@@ -1,7 +1,7 @@
 // cspell:word timespan
 
 import { unstable_cache } from "next/cache";
-import { parseJSON, stringifyJSON } from "utils";
+import { parseResponseJSON, stringifyJSON } from "utils";
 
 import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
 import {
@@ -188,7 +188,7 @@ export const getCandlesticksRoute = async (args: CandlesticksSearchParams) => {
     }
 
     if (i == 0) {
-      const parsed = parseJSON<CandlesticksDataType>(res.data);
+      const parsed = parseResponseJSON<CandlesticksDataType>(res.data);
       const filtered = parsed.filter(
         (val) => val.periodicMetadata.startTime < BigInt(to) * 1_000_000n
       );
