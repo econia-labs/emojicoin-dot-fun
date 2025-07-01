@@ -39,3 +39,10 @@ export type PeriodicStateEventQueryArgs = {
   end: Date;
   period: Period;
 } & Omit<MarketStateQueryArgs, "page" | "pageSize" | "searchEmojis" | "sortBy" | "orderBy">;
+
+export type CandlesticksQueryArgs = {
+  marketID: AnyNumberString;
+  firstStartTime: Date;
+  lastStartTime: Date;
+  period: Period;
+};
