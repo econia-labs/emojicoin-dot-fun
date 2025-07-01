@@ -1,9 +1,12 @@
-import { type DatabaseJsonType, DatabaseRpc, type PeriodTypeFromDatabase } from "../../../..";
+import {
+  type DatabaseJsonType,
+  DatabaseRpc,
+  type PeriodTypeFromDatabase,
+  VERCEL_TARGET_ENV,
+} from "../../../..";
 import type { AnyNumberString } from "../../../../types/types";
 import { LIMIT } from "../../../const";
 import { postgrest } from "../../client";
-
-const CHUNK_SIZE = 500;
 
 const CACHED_CHUNKED_CANDLESTICKS_METADATA_KEY_ORDERING = [
   "transaction_version",
@@ -14,7 +17,7 @@ const CACHED_CHUNKED_CANDLESTICKS_METADATA_KEY_ORDERING = [
   "volume",
 ] as const;
 
-type ChunkMetadata = {
+export type ChunkMetadata = {
   // Whether or not the chunk has exactly `chunk_size` items.
   complete: boolean;
   chunkID: number;
@@ -23,15 +26,17 @@ type ChunkMetadata = {
   numItems: number;
 };
 
-function toChunkMetadata(
+export function toChunkMetadata(
   metadata: DatabaseJsonType["chunked_candlesticks_metadata"][],
   chunkSize: number
 ): ChunkMetadata[] {
   return metadata.map((m) => ({
     complete: m.num_items === chunkSize,
     chunkID: m.chunk_id,
-    firstStartTime: m.first_start_time,
-    lastStartTime: m.last_start_time,
+    firstStartTime:
+      typeof m.first_start_time === "string" ? new Date(m.first_start_time) : m.first_start_time,
+    lastStartTime:
+      typeof m.last_start_time === "string" ? new Date(m.last_start_time) : m.last_start_time,
     numItems: m.num_items,
   }));
 }
@@ -57,7 +62,7 @@ function toChunkMetadata(
  *
  * Returns up to `LIMIT` rows.
  */
-export async function fetchChunkedCandlesticksMetadata({
+async function fetchChunkedCandlesticksMetadata({
   marketID,
   period,
   chunkSize,
@@ -109,11 +114,9 @@ export async function fetchAllChunkedCandlesticksMetadata({
   return chunks;
 }
 
-type PeriodParams = {
+type ToAndCountBack = {
   to: number;
-  from: number;
   countBack: number;
-  firstDataRequest: boolean;
 };
 
 /**
@@ -139,83 +142,48 @@ type PeriodParams = {
  * metadata
  * @param periodParams the period params from the datafeed API
  */
-export function chunkedCandlestickMetadataToChunksNecessary({
-  chunkSize,
-  chunkedCandlesticksMetadata,
-  periodParams,
+export function getOnlyRelevantChunks({
+  expectedChunkSize,
+  chunkMetadata,
+  toAndCountBack,
 }: {
-  chunkSize: number;
-  chunkedCandlesticksMetadata: DatabaseJsonType["chunked_candlesticks_metadata"][];
-  periodParams: PeriodParams;
+  expectedChunkSize: number;
+  chunkMetadata: ChunkMetadata[];
+  toAndCountBack: ToAndCountBack;
 }) {
-  // Convert the seconds-based `from` and `to` to Date objects.
-  const [from, to] = [periodParams.from, periodParams.to].map((v) => new Date(v * 1000));
-  const { countBack } = periodParams;
+  // Convert the seconds-based param to a Date object.
+  const to = new Date(toAndCountBack.to * 1000);
 
-  // Throw an error if chunks aren't in ascending order.
-  if (chunkedCandlesticksMetadata.length > 1) {
-    const [first, second] = [
-      chunkedCandlesticksMetadata[0],
-      chunkedCandlesticksMetadata.at(1)!,
-    ].map((c) => c.first_start_time);
+  if (chunkMetadata.length > 1) {
+    const [first, second] = [chunkMetadata[0], chunkMetadata.at(1)!].map((c) => c.firstStartTime);
     const isAscending = first.getTime() < second.getTime();
     if (!isAscending) {
       throw new Error(`Chunk dates should be in ascending order. Got: ${first} => ${second}`);
+    }
+    const someRowsHaveIncorrectLength = chunkMetadata.some(
+      (row, i) => i !== chunkMetadata.length - 1 && row.numItems !== expectedChunkSize
+    );
+    if (someRowsHaveIncorrectLength) {
+      const lengths = chunkMetadata.map((row) => row.numItems);
+      const msg = "Only the last item in the chunk metadata should have a non-`chunkSize` length.";
+      const fullMessage = `${msg} Lengths: ${lengths}`;
+      if (process.env.NODE_ENV === "development") {
+        throw new Error(fullMessage);
+      } else {
+        console.error(fullMessage);
+      }
     }
   }
 
   // `to` will always be the latest point in time necessary to retrieve.
   // This means that the chunks fetched must *always* encapsulate `to`; that is, they must either
-  // be exactly equal to or later in time than `to`.
-  // First, filter out all chunks where the chunk's left time boundary is later than `to` to
-  // constrict the time span/range, because they will include irrelevant data that is discarded.
-  const filtered = chunkedCandlesticksMetadata.filter(
+  // be exactly equal to or earlier in time than `to`.
+  return chunkMetadata.filter(
+    // Filter out all chunks where the chunk's left time boundary is later than `to` to
+    // constrict the time span/range, because they will include irrelevant data that is discarded.
     // Note this is `>=`, not `>`, because `to` is non-inclusive.
-    (chunk) => chunk.first_start_time.getTime() >= to.getTime()
+    (chunk) => !(chunk.firstStartTime.getTime() >= to.getTime())
   );
-
-  // In some cases, the `to` time might be in the middle of a chunk, meaning that the items after
-  // it will eventually be discarded. However, the intra-chunk start times won't be known until the
-  // chunk data is actually fetched. Thus, when calculating the chunks necessary, it's necessary
-  // to be pessimistic and assume the worst case scenario; i.e., that the `to` time is the earliest
-  // item in a chunk and that the other `chunkSize - 1` items will be discarded.
-  // More intuitively, imagine a `countBack` of `350`, and a `chunkSize` of 500.
-  // If `to` is item #200 of the last chunk (size 500), the only way to ensure that enough items are
-  // returned is to retrieve two chunks, the one containing `to` and the next one.
-  // This is essentially the same thing as specifying the `countBack` as `countBack + chunkSize`.
-  const pessimisticCountBack = countBack + chunkSize;
-
-  const chunks: DatabaseJsonType["chunked_candlesticks_metadata"][] = [];
-  let numCandlesticks = 0;
-
-  const hasEnoughCandlesticks = () => numCandlesticks >= pessimisticCountBack;
-
-  while (filtered.length && !hasEnoughCandlesticks()) {
-    const nextChunk = filtered.pop()!;
-    // Preserve ascending order by shifting instead of pushing.
-    chunks.unshift(nextChunk);
-    numCandlesticks += nextChunk.num_items;
-  }
-
-  // Ensure that the earliest chunk's start time is before `from`, otherwise keep adding chunks.
-  let earliestChunk = chunks.at(0);
-
-  const firstChunkIsBeforeFromParam = () =>
-    earliestChunk && earliestChunk.first_start_time.getTime() < from.getTime();
-
-  while (filtered.length && !firstChunkIsBeforeFromParam()) {
-    const nextChunk = filtered.pop()!;
-    chunks.unshift(nextChunk);
-    earliestChunk = chunks.at(0);
-    // Not necessary due to implicit logic, but nonetheless good to be accurate.
-    numCandlesticks += nextChunk.num_items;
-  }
-
-  return {
-    chunks: toChunkMetadata(chunks, chunkSize),
-    // Whether or not the chunk metadata spanned enough items/time to fulfill the period params.
-    complete: hasEnoughCandlesticks() && firstChunkIsBeforeFromParam(),
-  };
 }
 
 /**
