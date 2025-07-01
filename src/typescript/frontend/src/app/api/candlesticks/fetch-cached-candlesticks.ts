@@ -25,7 +25,6 @@ export async function fetchCachedChunkedCandlesticks(
 ) {
   const { marketID, period, firstStartTime, lastStartTime, complete } = args;
 
-  // If a chunk is complete, cache it for a very long time.
   const fetchFunction = complete ? fetchHistoricalCandlestickData : fetchIncompleteCandlestickData;
 
   return await fetchFunction({

@@ -2,31 +2,14 @@ import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "l
 import { ROUTES } from "router/routes";
 import { fetchRateLimited } from "utils";
 
-import {
-  type ArenaPeriod,
-  type Period,
-  type PeriodDuration,
-  periodEnumToRawDuration,
-  Trigger,
-} from "@/sdk/const";
-import { toMarketEmojiData } from "@/sdk/emoji_data/utils";
-import type {
-  ArenaCandlestickModel,
-  MarketMetadataModel,
-  PeriodicStateEventModel,
-} from "@/sdk/indexer-v2";
-import { getMarketResource } from "@/sdk/markets/utils";
-import { getAptosClient } from "@/sdk/utils/aptos-client";
+import type { ArenaPeriod, Period, PeriodDuration } from "@/sdk/const";
+import type { ArenaCandlestickModel, CandlestickModel } from "@/sdk/indexer-v2";
 import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { XOR } from "@/sdk/utils/utility-types";
-import type { Flatten, Types } from "@/sdk-types";
-import type { Bar, PeriodParams } from "@/static/charting_library";
+import type { Flatten } from "@/sdk-types";
+import type { PeriodParams } from "@/static/charting_library";
 import type { BarWithNonce } from "@/store/event/candlestick-bars";
-import {
-  marketToLatestBars,
-  periodicStateTrackerToLatestBar,
-  toBarWithNonce,
-} from "@/store/event/candlestick-bars";
+import { toBarWithNonce } from "@/store/event/candlestick-bars";
 
 export const fetchCandlesticksForChart = async ({
   marketID,
@@ -49,9 +32,7 @@ export const fetchCandlesticksForChart = async ({
   const route =
     marketID !== undefined ? ROUTES.api["candlesticks"] : ROUTES.api["arena"]["candlesticks"];
 
-  return await fetchRateLimited<PeriodicStateEventModel[] | ArenaCandlestickModel[]>(
-    `${route}?${params}`
-  )
+  return await fetchRateLimited<CandlestickModel[] | ArenaCandlestickModel[]>(`${route}?${params}`)
     .then((res) =>
       res
         .map(toBarWithNonce)
@@ -94,25 +75,6 @@ function curriedBarsReducer(
   };
 }
 
-/**
- * Push the latest bar (the on-chain bar) to the bars array if it exists and update its `open` value
- * to be the previous bar's `close` if it's not the only bar.
- *
- * This logic is very similar to what's used in `createBarFrom[Swap|PeriodicState]`.
- */
-export const updateLastBar = (bars: Bar[], onChainLatest: Bar) => {
-  const emittedLatest = bars.at(-1);
-  if (emittedLatest) {
-    if (!hasTradingActivity(onChainLatest)) {
-      onChainLatest.high = emittedLatest.close;
-      onChainLatest.low = emittedLatest.close;
-      onChainLatest.close = emittedLatest.close;
-    }
-    onChainLatest.open = emittedLatest.close !== 0 ? emittedLatest.close : onChainLatest.close;
-  }
-  bars.push(onChainLatest);
-};
-
 export const createDummyBar = (
   periodDuration: PeriodDuration,
   symbol: string | ArenaChartSymbol
@@ -132,40 +94,3 @@ export const createDummyBar = (
     nonce: 0n,
   };
 };
-
-/**
- * Make an uncached client-side fetch for the current market resource from the Aptos fullnode.
- */
-export const fetchLatestBarsFromMarketResource = async ({
-  marketAddress,
-  period,
-}: {
-  marketAddress: `0x${string}`;
-  period: Period;
-}) => {
-  const marketResource = await getMarketResource({ aptos: getAptosClient(), marketAddress });
-  return {
-    marketMetadata: marketResourceToMarketMetadataModel(marketResource),
-    latestBar: getLatestBarFromTracker(marketResource, period),
-    latestBars: marketToLatestBars(marketResource),
-  };
-};
-
-function getLatestBarFromTracker(marketResource: Types["Market"], period: Period) {
-  const periodDuration = periodEnumToRawDuration(period);
-  const { periodicStateTrackers, sequenceInfo } = marketResource;
-  const tracker = periodicStateTrackers.find((p) => Number(p.period) === periodDuration);
-  if (!tracker) return undefined;
-  return periodicStateTrackerToLatestBar(tracker, sequenceInfo.nonce);
-}
-
-function marketResourceToMarketMetadataModel(market: Types["Market"]): MarketMetadataModel {
-  return {
-    marketID: market.metadata.marketID,
-    time: 0n,
-    marketNonce: market.sequenceInfo.nonce,
-    trigger: Trigger.PackagePublication, // Make up a bunk trigger, since this field won't be used.
-    marketAddress: market.metadata.marketAddress,
-    ...toMarketEmojiData(market.metadata.emojiBytes),
-  };
-}

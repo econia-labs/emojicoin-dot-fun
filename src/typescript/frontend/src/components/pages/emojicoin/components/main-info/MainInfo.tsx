@@ -104,7 +104,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
   const explorerLink = toExplorerLink({
     linkType: "coin",
-    value: `${data.marketView.metadata.marketAddress}::coin_factory::Emojicoin`,
+    value: `${data.marketAddress}::coin_factory::Emojicoin`,
   });
 
   const borderStyle = "border-solid border-[1px] border-dark-gray rounded-[3px] p-[1em]";
@@ -238,7 +238,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           <div className={`flex flex-row flex-wrap justify-between`} style={{ gap: "8px 0" }}>
             <motion.div
               onClick={() => {
-                navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
+                navigator.clipboard.writeText(data.marketAddress);
               }}
               whileTap={{ scaleX: 0.96, scaleY: 0.98 }}
               transition={{ ease: "linear", duration: 0.05 }}

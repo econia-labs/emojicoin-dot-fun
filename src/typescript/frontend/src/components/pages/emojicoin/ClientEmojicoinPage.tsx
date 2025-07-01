@@ -14,7 +14,6 @@ import type { SubscribableBrokerEvents } from "@/broker/types";
 import { Box } from "@/containers";
 import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
 import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
-import { marketToLatestBars } from "@/store/event/candlestick-bars";
 
 import DesktopGrid from "./components/desktop-grid";
 import MainInfo from "./components/main-info/MainInfo";
@@ -27,14 +26,11 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { lg } = useTailwindBreakpoints();
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const loadEventsFromServer = useEventStore((s) => s.loadEventsFromServer);
-  const setLatestBars = useEventStore((s) => s.setLatestBars);
 
   useEffect(() => {
-    const { swaps, state, marketView } = props.data;
+    const { swaps, state } = props.data;
     loadMarketStateFromServer([state]);
     loadEventsFromServer([...swaps]);
-    const latestBars = marketToLatestBars(marketView);
-    setLatestBars({ marketMetadata: state.market, latestBars });
 
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [props.data]);
