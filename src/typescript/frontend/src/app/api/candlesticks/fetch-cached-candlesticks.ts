@@ -3,7 +3,6 @@ import { CACHE_ONE_YEAR } from "next/dist/lib/constants";
 
 import { fetchCandlesticksInRange } from "@/queries/market";
 import type { Period } from "@/sdk/const";
-import { toCandlestickModel } from "@/sdk/index";
 import type { ChunkMetadata } from "@/sdk/indexer-v2/queries/api/candlesticks";
 import type { AnyNumberString } from "@/sdk/types/types";
 
@@ -32,5 +31,5 @@ export async function fetchCachedChunkedCandlesticks(
     period,
     firstStartTime,
     lastStartTime,
-  }).then((res) => res.map(toCandlestickModel));
+  });
 }
