@@ -292,10 +292,10 @@ type CandlestickData = {
 
 type ChunkedCandlesticksMetadata = {
   chunk_id: number;
-  // Sent to the `postgrest` client as a `PostgresTimestamp` but is automatically parsed as a Date.
-  first_start_time: Date;
-  // Sent to the `postgrest` client as a `PostgresTimestamp` but is automatically parsed as a Date.
-  last_start_time: Date;
+  // `Date` when received by the `postgrest` client; a string when retrieved from `unstable_cache`.
+  first_start_time: string | Date;
+  // `Date` when received by the `postgrest` client; a string when retrieved from `unstable_cache`.
+  last_start_time: string | Date;
   num_items: number;
 };
 

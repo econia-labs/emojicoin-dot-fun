@@ -31,7 +31,8 @@ type QueryFunction<
   args: QueryArgs
 ) =>
   | PostgrestFilterBuilder<Schema, Row, Result, RelationName, Relationships>
-  | PostgrestTransformBuilder<Schema, Row, Result, RelationName, Relationships>;
+  | PostgrestTransformBuilder<Schema, Row, Result, RelationName, Relationships>
+  | PostgrestBuilder<unknown, false>;
 
 type WithConfig<T> = T & { minimumVersion?: AnyNumberString };
 
