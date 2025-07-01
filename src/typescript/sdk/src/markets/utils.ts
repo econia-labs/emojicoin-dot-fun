@@ -308,7 +308,7 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
   return { marketAddress, emojicoin, emojicoinLP };
 };
 
-export async function getMarketResource(args: {
+export async function fetchMarketResource(args: {
   aptos: Aptos;
   marketAddress: AccountAddressInput;
   ledgerVersion?: AnyNumber;

@@ -1,6 +1,4 @@
-import Big from "big.js";
-
-import { type AnyPeriod, type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@/sdk/const";
+import { type AnyPeriod, type Period, periodEnumToRawDuration } from "@/sdk/const";
 import type {
   ArenaCandlestickModel,
   CandlestickModel,
@@ -10,7 +8,6 @@ import type {
 import { isPeriodicStateEventModel } from "@/sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime, toNominal } from "@/sdk/utils";
 import { q64ToBig } from "@/sdk/utils/nominal-price";
-import type { Types } from "@/sdk-types";
 
 export type BarWithNonce = {
   time: number;
@@ -24,40 +21,6 @@ export type BarWithNonce = {
 
 export type LatestBar = BarWithNonce & {
   period: AnyPeriod;
-};
-
-export const periodicStateTrackerToLatestBar = (
-  tracker: Types["PeriodicStateTracker"],
-  nonce: bigint
-): LatestBar => {
-  const { startTime } = tracker;
-  return {
-    time: Big(startTime.toString()).div(1000).toNumber(),
-    open: q64ToBig(tracker.openPriceQ64).toNumber(),
-    high: q64ToBig(tracker.highPriceQ64).toNumber(),
-    low: q64ToBig(tracker.lowPriceQ64).toNumber(),
-    close: q64ToBig(tracker.closePriceQ64).toNumber(),
-    volume: toNominal(tracker.volumeQuote),
-    period: rawPeriodToEnum(tracker.period),
-    nonce,
-  };
-};
-
-export const marketToLatestBars = <
-  T extends {
-    periodicStateTrackers: Types["MarketView"]["periodicStateTrackers"];
-    sequenceInfo: Types["MarketView"]["sequenceInfo"];
-  },
->(
-  market: T
-): LatestBar[] => {
-  const { periodicStateTrackers, sequenceInfo } = market;
-  const latestBars: LatestBar[] = [];
-  for (const tracker of periodicStateTrackers) {
-    const bar = periodicStateTrackerToLatestBar(tracker, sequenceInfo.nonce);
-    latestBars.push(bar);
-  }
-  return latestBars;
 };
 
 /**

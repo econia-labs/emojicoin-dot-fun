@@ -1,9 +1,4 @@
-import {
-  type DatabaseJsonType,
-  DatabaseRpc,
-  type PeriodTypeFromDatabase,
-  VERCEL_TARGET_ENV,
-} from "../../../..";
+import { type DatabaseJsonType, DatabaseRpc, type PeriodTypeFromDatabase } from "../../../..";
 import type { AnyNumberString } from "../../../../types/types";
 import { LIMIT } from "../../../const";
 import { postgrest } from "../../client";

@@ -43,7 +43,7 @@ import {
   LOCAL_STORAGE_EVENT_TYPES,
   maybeUpdateLocalStorage,
 } from "./local-storage";
-import type { EventStore, SetLatestBarsArgs } from "./types";
+import type { EventStore } from "./types";
 import {
   ensureMarketInStore,
   handleLatestBarForPeriodicStateEvent,
@@ -232,7 +232,6 @@ export const createEventStore = () => {
           });
         });
       },
-      // For updating the latest bar with the new candlestick types.
       maybeUpdateMeleeLatestBar(latestBarFromDatafeed, period, meleeID) {
         if (!latestBarFromDatafeed) return;
         set((state) => {
@@ -241,25 +240,16 @@ export const createEventStore = () => {
           updateLatestBarFromDatafeed(melee, { ...latestBarFromDatafeed, period });
         });
       },
-      setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => {
+      // This function should only be called if the market exists in the map already.
+      maybeUpdateMarketLatestBar(latestBarFromDatafeed, period, symbol) {
+        if (!latestBarFromDatafeed) return;
+        if (!get().markets.get(symbol)) {
+          console.warn("Market doesn't exist in map.");
+          return;
+        }
         set((state) => {
-          ensureMarketInStore(state, marketMetadata);
-          const symbol = marketMetadata.symbolData.symbol;
           const market = state.markets.get(symbol)!;
-          latestBars.forEach((bar) => {
-            const period = bar.period;
-            // A bar's open should never be zero, so use the previous bar if it exists and isn't 0,
-            // otherwise, use the existing current bar's close.
-            if (bar.open === 0) {
-              const prevLatestBarClose = market[period].latestBar?.close;
-              if (prevLatestBarClose) {
-                bar.open = prevLatestBarClose;
-              } else {
-                bar.open = bar.close;
-              }
-            }
-            market[period].latestBar = bar;
-          });
+          updateLatestBarFromDatafeed(market, { ...latestBarFromDatafeed, period });
         });
       },
       subscribeToPeriod: ({ symbol, period, cb }) => {
