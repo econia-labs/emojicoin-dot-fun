@@ -10,12 +10,7 @@ import type { IBasicDataFeed } from "@/static/charting_library";
 import type { BarWithNonce } from "@/store/event/candlestick-bars";
 
 import { ResolutionStringToPeriod } from "./const";
-import {
-  createDummyBar,
-  fetchCandlesticksForChart,
-  fetchLatestBarsFromMarketResource,
-  updateLastBar,
-} from "./get-bars";
+import { createDummyBar, fetchCandlesticksForChart } from "./get-bars";
 import {
   CONFIGURATION_DATA,
   constructLibrarySymbolInfo,
@@ -29,10 +24,10 @@ export const useDatafeed = (symbol: string) => {
   const getShowEmptyBars = useUserSettings((s) => s.getShowEmptyBars);
   const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
-  const setLatestBars = useEventStore((s) => s.setLatestBars);
   const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarkets);
   const getMeleeMap = useEventStore((s) => s.getMeleeMap);
   const maybeUpdateMeleeLatestBar = useEventStore((s) => s.maybeUpdateMeleeLatestBar);
+  const maybeUpdateMarketLatestBar = useEventStore((s) => s.maybeUpdateMarketLatestBar);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -107,7 +102,7 @@ export const useDatafeed = (symbol: string) => {
               return;
             }
 
-            const { marketID, marketAddress } = entry.marketMetadata;
+            const { marketID } = entry.marketMetadata;
 
             bars = await fetchCandlesticksForChart({
               marketID: marketID.toString(),
@@ -116,18 +111,7 @@ export const useDatafeed = (symbol: string) => {
             });
 
             if (isFetchForMostRecentBars) {
-              const { marketMetadata, latestBar, latestBars } =
-                await fetchLatestBarsFromMarketResource({
-                  marketAddress,
-                  period,
-                });
-
-              // Set the latest bars in the state store.
-              setLatestBars({ marketMetadata, latestBars });
-              if (latestBar) {
-                // Mutates the `bars` array.
-                updateLastBar(bars, latestBar);
-              }
+              maybeUpdateMarketLatestBar(bars.at(-1), period, symbol);
             }
           }
 
@@ -175,12 +159,12 @@ export const useDatafeed = (symbol: string) => {
     [
       // All the functions below are stable references to zustand functions.
       getRegisteredMarketMap,
-      setLatestBars,
       subscribeToPeriod,
       unsubscribeFromPeriod,
       getMeleeMap,
       getShowEmptyBars,
       maybeUpdateMeleeLatestBar,
+      maybeUpdateMarketLatestBar,
       symbol,
       router,
     ]

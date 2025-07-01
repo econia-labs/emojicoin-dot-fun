@@ -66,11 +66,6 @@ type PeriodSubscription = {
   cb: SubscribeBarsCallback;
 };
 
-export type SetLatestBarsArgs = {
-  marketMetadata: MarketStoreMetadata;
-  latestBars: readonly LatestBar[];
-};
-
 type EventActions = {
   getMarket: (m?: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getMarketLatestState: (m?: SymbolEmoji[]) => undefined | Readonly<MarketLatestState>;
@@ -84,7 +79,11 @@ type EventActions = {
     period: AnyPeriod,
     meleeID: bigint
   ) => void;
-  setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => void;
+  maybeUpdateMarketLatestBar: (
+    bar: BarWithNonce | undefined,
+    period: AnyPeriod,
+    symbol: string
+  ) => void;
   subscribeToPeriod: ({ symbol, period, cb }: PeriodSubscription) => void;
   unsubscribeFromPeriod: ({ symbol, period }: Omit<PeriodSubscription, "cb">) => void;
 };

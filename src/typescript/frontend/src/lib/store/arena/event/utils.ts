@@ -8,6 +8,7 @@ import {
   isArenaMeleeModel,
   isArenaSwapModel,
 } from "@/sdk/types/arena-types";
+import type { MarketEventStore } from "@/store/event/types";
 
 import type { LatestBar } from "../../event/candlestick-bars";
 import { getCandlestickModelNonce, toBarWithNonce } from "../../event/candlestick-bars";
@@ -86,12 +87,12 @@ export const handleLatestBarForArenaCandlestick = (
  * Thus, the only thing to do here is just update the latest bar if it's stale or doesn't exist.
  */
 export const updateLatestBarFromDatafeed = (
-  melee: WritableDraft<MeleeState>,
+  marketOrMelee: WritableDraft<MeleeState> | WritableDraft<MarketEventStore>,
   // Has already had its open price corrected in the curried bars reducer after being fetched.
   barFromDatafeed: LatestBar
 ) => {
   const { period } = barFromDatafeed;
-  const current = melee[period];
+  const current = marketOrMelee[period];
 
   if (!current.latestBar || current.latestBar.nonce < barFromDatafeed.nonce) {
     current.latestBar = barFromDatafeed;
