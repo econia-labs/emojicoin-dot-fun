@@ -63,6 +63,8 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
     res.shift();
   }
 
+  // cpsell Remove this once done testing.
+  //
   // const THE_TRUTH = await postgrest
   //   .from(TableName.PeriodicStateEvents)
   //   .select("*")
