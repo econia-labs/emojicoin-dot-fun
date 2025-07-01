@@ -2,7 +2,7 @@ import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import { unstable_cache } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
-import type { CandlestickModel, DatabaseJsonType } from "@/sdk/index";
+import type { DatabaseJsonType } from "@/sdk/index";
 import {
   fetchAllChunkedCandlesticksMetadata,
   getOnlyRelevantChunks,
@@ -11,8 +11,6 @@ import {
 
 import { fetchCachedChunkedCandlesticks } from "./fetch-cached-candlesticks";
 import { CandlesticksSearchParamsSchema } from "./search-params-schema";
-import { stringifyJSON } from "utils";
-import { stringifyJSONWithBigInts } from "@/sdk/indexer-v2";
 
 const CHUNK_SIZE = 500;
 
@@ -47,7 +45,7 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
     });
 
     // Now fetch each chunk one by one until `countBack` rows have been retrieved.
-    const res: CandlestickModel[] = [];
+    const res: DatabaseJsonType["candlesticks"][] = [];
     // Since `to` is in seconds.
     const toAsDate = new Date(to * 1000);
     while (relevantChunks.length && res.length < countBack) {
@@ -59,7 +57,7 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
       });
 
       // Only include candlesticks less than the `to` param, since it's non-inclusive.
-      const filtered = inner.filter((c) => c.startTime.getTime() < toAsDate.getTime());
+      const filtered = inner.filter((c) => new Date(c.start_time).getTime() < toAsDate.getTime());
       res.unshift(...filtered);
     }
 
@@ -68,7 +66,7 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
       res.shift();
     }
 
-    return NextResponse.json(stringifyJSONWithBigInts(res));
+    return NextResponse.json(res);
   } catch (e) {
     return new NextResponse((e as Error).message, { status: 400 });
   }
