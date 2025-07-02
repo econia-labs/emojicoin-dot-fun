@@ -180,11 +180,3 @@ export function getOnlyRelevantChunks({
     (chunk) => !(chunk.firstStartTime.getTime() >= to.getTime())
   );
 }
-
-/**
- * The chunks returned here will be stable in terms of their `chunk_id` and the earliest and
- * latest `first_start_time`s. That is, the results can be cached permanently once the number
- * of items in a chunk is equal to the `chunk_size`.
- *
- */
-export function fetchCandlestickChunks() {}
