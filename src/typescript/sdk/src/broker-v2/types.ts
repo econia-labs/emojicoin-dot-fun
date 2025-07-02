@@ -1,4 +1,4 @@
-import { type AnyPeriod, ArenaPeriod } from "../const";
+import { Period } from "../const";
 import {
   type BrokerEventModels,
   DatabaseTypeConverter,
@@ -112,15 +112,15 @@ export type WebSocketSubscriptions = {
   arenaPeriods: Set<PeriodTypeFromBroker>;
 };
 
-const PeriodToBrokerPeriodType: Record<AnyPeriod, PeriodTypeFromBroker> = {
-  [ArenaPeriod.Period15S]: "FifteenSeconds",
-  [ArenaPeriod.Period1M]: "OneMinute",
-  [ArenaPeriod.Period5M]: "FiveMinutes",
-  [ArenaPeriod.Period15M]: "FifteenMinutes",
-  [ArenaPeriod.Period30M]: "ThirtyMinutes",
-  [ArenaPeriod.Period1H]: "OneHour",
-  [ArenaPeriod.Period4H]: "FourHours",
-  [ArenaPeriod.Period1D]: "OneDay",
+const PeriodToBrokerPeriodType: Record<Period, PeriodTypeFromBroker> = {
+  [Period.Period15S]: "FifteenSeconds",
+  [Period.Period1M]: "OneMinute",
+  [Period.Period5M]: "FiveMinutes",
+  [Period.Period15M]: "FifteenMinutes",
+  [Period.Period30M]: "ThirtyMinutes",
+  [Period.Period1H]: "OneHour",
+  [Period.Period4H]: "FourHours",
+  [Period.Period1D]: "OneDay",
 };
 
-export const periodToPeriodTypeFromBroker = (period: AnyPeriod) => PeriodToBrokerPeriodType[period];
+export const periodToPeriodTypeFromBroker = (period: Period) => PeriodToBrokerPeriodType[period];
