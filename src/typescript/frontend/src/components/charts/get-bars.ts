@@ -2,8 +2,8 @@ import { type ArenaChartSymbol, hasTradingActivity, isArenaChartSymbol } from "l
 import { ROUTES } from "router/routes";
 import { fetchRateLimited } from "utils";
 
-import type { ArenaPeriod, Period, PeriodDuration } from "@/sdk/const";
-import type { ArenaCandlestickModel, CandlestickModel } from "@/sdk/indexer-v2";
+import type { Period, PeriodDuration } from "@/sdk/const";
+import type { ArenaCandlestickModel, DatabaseJsonType } from "@/sdk/indexer-v2";
 import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { XOR } from "@/sdk/utils/utility-types";
 import type { Flatten } from "@/sdk-types";
@@ -19,7 +19,7 @@ export const fetchCandlesticksForChart = async ({
 }: Flatten<
   XOR<{ marketID: string }, { meleeID: string }> & {
     periodParams: PeriodParams;
-    period: ArenaPeriod | Period;
+    period: Period;
   }
 >) => {
   const params = new URLSearchParams({
@@ -32,7 +32,7 @@ export const fetchCandlesticksForChart = async ({
   const route =
     marketID !== undefined ? ROUTES.api["candlesticks"] : ROUTES.api["arena"]["candlesticks"];
 
-  return await fetchRateLimited<CandlestickModel[] | ArenaCandlestickModel[]>(`${route}?${params}`)
+  return await fetchRateLimited<DatabaseJsonType["candlesticks"] | ArenaCandlestickModel[]>(`${route}?${params}`)
     .then((res) =>
       res
         .map(toBarWithNonce)

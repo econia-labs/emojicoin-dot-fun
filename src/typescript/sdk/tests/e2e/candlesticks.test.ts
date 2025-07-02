@@ -1,13 +1,6 @@
 // cspell:word OHLCV
 
-import {
-  ArenaPeriod,
-  calculateCurvePrice,
-  NON_ARENA_PERIODS,
-  ONE_APT_BIGINT,
-  sleep,
-  type SymbolEmoji,
-} from "../../src";
+import { calculateCurvePrice, ONE_APT_BIGINT, Period, PERIODS, sleep, type SymbolEmoji } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
   type CandlestickModel,
@@ -59,7 +52,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
       ReturnType<typeof fetchArenaLatestCandlesticks | typeof fetchMarketLatestCandlesticks>
     >
   ) {
-    const numPeriodTypes = NON_ARENA_PERIODS.size + 1;
+    const numPeriodTypes = PERIODS.size + 1;
     expect(latestCandlesticks).not.toBe(null);
     expect(latestCandlesticks).toBeTruthy();
     expect(latestCandlesticks).toHaveLength(numPeriodTypes);
@@ -89,7 +82,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     const firstLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticks);
 
-    const first15s = firstLatestCandlesticks.find((v) => v.period === ArenaPeriod.Period15S)!;
+    const first15s = firstLatestCandlesticks.find((v) => v.period === Period.Period15S)!;
     expect(first15s).toBeDefined();
 
     await sleep(15001);
@@ -99,7 +92,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     const secondLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticks);
     const second15sModel = toCandlestickModel(
-      secondLatestCandlesticks.find((v) => v.period === ArenaPeriod.Period15S)!
+      secondLatestCandlesticks.find((v) => v.period === Period.Period15S)!
     );
     expect(second15sModel).toBeDefined();
     expect(second15sModel.version).toBe(BigInt(buyRes.response.version));
@@ -189,7 +182,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     // ---------------------------------------------------------------------------------------------
     // Check initial state of candlesticks.
     // ---------------------------------------------------------------------------------------------
-    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === Period.Period15S);
 
     expect(fifteenSecondCandlesticks).toHaveLength(1);
     expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
@@ -204,7 +197,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     updateFirstCandlestickOHLCV();
 
     expect(candlesticks).not.toBeNull();
-    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === Period.Period15S);
     expect(fifteenSecondCandlesticks).toHaveLength(1);
     expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
 
@@ -218,7 +211,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     updateFirstCandlestickOHLCV();
 
     expect(candlesticks).not.toBeNull();
-    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === Period.Period15S);
     expect(fifteenSecondCandlesticks).toHaveLength(1);
     expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
 
@@ -241,7 +234,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
 
     expect(candlesticks).not.toBeNull();
     fifteenSecondCandlesticks = candlesticks!
-      .filter((c) => c.period === ArenaPeriod.Period15S)
+      .filter((c) => c.period === Period.Period15S)
       .toSorted((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
     expect(fifteenSecondCandlesticks).toHaveLength(2);
@@ -256,7 +249,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     await refreshCandlesticksAndStateData();
 
     fifteenSecondCandlesticks = candlesticks!
-      .filter((c) => c.period === ArenaPeriod.Period15S)
+      .filter((c) => c.period === Period.Period15S)
       .toSorted((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
     expect(fifteenSecondCandlesticks).toHaveLength(2);

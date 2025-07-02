@@ -188,9 +188,8 @@ export const INITIAL_REAL_RESERVES: Types["Reserves"] = {
   quote: 0n,
 };
 
-export type AnyPeriod = Period | ArenaPeriod;
-
 export enum Period {
+  Period15S = "period_15s",
   Period1M = "period_1m",
   Period5M = "period_5m",
   Period15M = "period_15m",
@@ -198,17 +197,6 @@ export enum Period {
   Period1H = "period_1h",
   Period4H = "period_4h",
   Period1D = "period_1d",
-}
-
-export enum ArenaPeriod {
-  Period15S = "period_15s",
-  Period1M = Period.Period1M,
-  Period5M = Period.Period5M,
-  Period15M = Period.Period15M,
-  Period30M = Period.Period30M,
-  Period1H = Period.Period1H,
-  Period4H = Period.Period4H,
-  Period1D = Period.Period1D,
 }
 
 /// As defined in the database, aka the enum string.
@@ -225,6 +213,7 @@ export enum Trigger {
 export const toPeriod = (s: DatabaseStructType["PeriodicStateMetadata"]["period"]) =>
   ({
     // From the database.
+    period_15s: Period.Period15S,
     period_1m: Period.Period1M,
     period_5m: Period.Period5M,
     period_15m: Period.Period15M,
@@ -233,6 +222,7 @@ export const toPeriod = (s: DatabaseStructType["PeriodicStateMetadata"]["period"
     period_4h: Period.Period4H,
     period_1d: Period.Period1D,
     // From the broker.
+    FifteenSeconds: Period.Period15S,
     OneMinute: Period.Period1M,
     FiveMinutes: Period.Period5M,
     FifteenMinutes: Period.Period15M,
@@ -245,30 +235,7 @@ export const toPeriod = (s: DatabaseStructType["PeriodicStateMetadata"]["period"
     throw new Error(`Unknown period: ${s}`);
   })();
 
-export const toArenaPeriod = (s: DatabaseStructType["ArenaCandlestick"]["period"]) =>
-  ({
-    // From the database.
-    period_15s: ArenaPeriod.Period15S,
-    period_1m: ArenaPeriod.Period1M,
-    period_5m: ArenaPeriod.Period5M,
-    period_15m: ArenaPeriod.Period15M,
-    period_30m: ArenaPeriod.Period30M,
-    period_1h: ArenaPeriod.Period1H,
-    period_4h: ArenaPeriod.Period4H,
-    period_1d: ArenaPeriod.Period1D,
-    // From the broker.
-    FifteenSeconds: ArenaPeriod.Period15S,
-    OneMinute: ArenaPeriod.Period1M,
-    FiveMinutes: ArenaPeriod.Period5M,
-    FifteenMinutes: ArenaPeriod.Period15M,
-    ThirtyMinutes: ArenaPeriod.Period30M,
-    OneHour: ArenaPeriod.Period1H,
-    FourHours: ArenaPeriod.Period4H,
-    OneDay: ArenaPeriod.Period1D,
-  })[s as ValueOf<typeof ArenaPeriod>] ??
-  (() => {
-    throw new Error(`Unknown period: ${s}`);
-  })();
+export const toArenaPeriod = toPeriod;
 
 export const toTrigger = (s: DatabaseStructType["GlobalStateEventData"]["trigger"]) =>
   ({
@@ -319,8 +286,8 @@ export enum PeriodDuration {
   PERIOD_1D = 86400000000,
 }
 
-export const periodEnumToRawDuration = (period: Period | ArenaPeriod): PeriodDuration => {
-  if (period === ArenaPeriod.Period15S) return PeriodDuration.PERIOD_15S;
+export const periodEnumToRawDuration = (period: Period): PeriodDuration => {
+  if (period === Period.Period15S) return PeriodDuration.PERIOD_15S;
   if (period === Period.Period1M) return PeriodDuration.PERIOD_1M;
   if (period === Period.Period5M) return PeriodDuration.PERIOD_5M;
   if (period === Period.Period15M) return PeriodDuration.PERIOD_15M;
@@ -395,7 +362,7 @@ export const toPeriodDuration = (num: number | bigint): PeriodDuration => {
   throw new Error(`Invalid candlestick period duration: ${num}`);
 };
 
-export const NON_ARENA_PERIODS = new Set([
+export const PERIODS = new Set([
   Period.Period1M,
   Period.Period5M,
   Period.Period15M,
@@ -404,6 +371,3 @@ export const NON_ARENA_PERIODS = new Set([
   Period.Period4H,
   Period.Period1D,
 ]);
-
-export const isNonArenaPeriod = (period: Period | ArenaPeriod): period is Period =>
-  (NON_ARENA_PERIODS as Set<string>).has(period);

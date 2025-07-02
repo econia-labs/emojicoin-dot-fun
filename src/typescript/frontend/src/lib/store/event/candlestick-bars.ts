@@ -1,4 +1,4 @@
-import { type AnyPeriod, type Period, periodEnumToRawDuration } from "@/sdk/const";
+import { type Period, periodEnumToRawDuration } from "@/sdk/const";
 import type {
   ArenaCandlestickModel,
   CandlestickModel,
@@ -20,7 +20,7 @@ export type BarWithNonce = {
 };
 
 export type LatestBar = BarWithNonce & {
-  period: AnyPeriod;
+  period: Period;
 };
 
 /**

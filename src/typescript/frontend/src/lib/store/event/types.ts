@@ -1,7 +1,7 @@
 import type { WritableDraft } from "immer";
 import type { ArenaChartSymbol } from "lib/chart-utils";
 
-import type { AnyPeriod, Period } from "@/sdk/const";
+import type { Period } from "@/sdk/const";
 import type { SymbolEmoji } from "@/sdk/emoji_data";
 import type {
   BrokerEventModels,
@@ -43,6 +43,7 @@ export type MarketEventStore = {
   liquidityEvents: readonly Liquidity[];
   stateEvents: readonly (MarketLatestStateEvent | MarketLatestState)[];
   chatEvents: readonly Chat[];
+  [Period.Period15S]: CandlestickData;
   [Period.Period1M]: CandlestickData;
   [Period.Period5M]: CandlestickData;
   [Period.Period15M]: CandlestickData;
@@ -62,7 +63,7 @@ export type EventState = {
 
 type PeriodSubscription = {
   symbol: string | ArenaChartSymbol;
-  period: AnyPeriod;
+  period: Period;
   cb: SubscribeBarsCallback;
 };
 
@@ -76,12 +77,12 @@ type EventActions = {
   pushEventsFromClient: (event: BrokerEventModels[], pushToLocalStorage?: boolean) => void;
   maybeUpdateMeleeLatestBar: (
     bar: BarWithNonce | undefined,
-    period: AnyPeriod,
+    period: Period,
     meleeID: bigint
   ) => void;
   maybeUpdateMarketLatestBar: (
     bar: BarWithNonce | undefined,
-    period: AnyPeriod,
+    period: Period,
     symbol: string
   ) => void;
   subscribeToPeriod: ({ symbol, period, cb }: PeriodSubscription) => void;

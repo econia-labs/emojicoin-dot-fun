@@ -4,7 +4,7 @@ import { CDN_URL } from "lib/env";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
 
-import { ArenaPeriod, Period } from "@/sdk/const";
+import { Period } from "@/sdk/const";
 import type {
   ChartingLibraryWidgetOptions,
   LanguageCode,
@@ -13,7 +13,8 @@ import type {
 } from "@/static/charting_library";
 
 export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
-  "15S",
+  // Disable 15 second periods.
+  // "15S",
   "1",
   "5",
   "15",
@@ -28,8 +29,9 @@ const GREEN = hexToRgba(GREEN_HEX);
 const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
 const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
-export const ResolutionStringToPeriod: { [key: string]: Period | ArenaPeriod } = {
-  "15S": ArenaPeriod.Period15S,
+export const ResolutionStringToPeriod: { [key: string]: Period } = {
+  // Disable 15 second periods.
+  // "15S": ArenaPeriod.Period15S,
   "1": Period.Period1M,
   "5": Period.Period5M,
   "15": Period.Period15M,
@@ -45,7 +47,7 @@ export const EXCHANGE_NAME = "emojicoin.fun";
 
 export type ArenaOrMarketChart = "arena" | "market";
 const DEFAULT_RESOLUTIONS = {
-  arena: "15S" as ResolutionString,
+  arena: "1" as ResolutionString,
   market: "60" as ResolutionString,
 };
 

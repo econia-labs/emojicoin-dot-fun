@@ -1,7 +1,7 @@
 import type { WritableDraft } from "immer";
 import type { ArenaChartSymbol } from "lib/chart-utils";
 
-import { ArenaPeriod, Period } from "@/sdk/const";
+import { Period } from "@/sdk/const";
 import type {
   ArenaEnterModel,
   ArenaExitModel,
@@ -24,7 +24,7 @@ export type MeleeState = {
   swaps: readonly ArenaSwapModel[];
   enters: readonly ArenaEnterModel[];
   exits: readonly ArenaExitModel[];
-  [ArenaPeriod.Period15S]: CandlestickData;
+  [Period.Period15S]: CandlestickData;
   [Period.Period1M]: CandlestickData;
   [Period.Period5M]: CandlestickData;
   [Period.Period15M]: CandlestickData;
@@ -51,7 +51,7 @@ const createInitialMeleeState = (): WritableDraft<MeleeState> => ({
   swaps: [],
   enters: [],
   exits: [],
-  [ArenaPeriod.Period15S]: createInitialCandlestickData(),
+  [Period.Period15S]: createInitialCandlestickData(),
   [Period.Period1M]: createInitialCandlestickData(),
   [Period.Period5M]: createInitialCandlestickData(),
   [Period.Period15M]: createInitialCandlestickData(),
