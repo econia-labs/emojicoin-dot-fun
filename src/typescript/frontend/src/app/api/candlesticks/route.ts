@@ -58,10 +58,11 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
 
       // Only include candlesticks less than the `to` param, since it's non-inclusive.
       const filtered = inner.filter((c) => new Date(c.start_time).getTime() < toAsDate.getTime());
+      // `unshift` because it's in ascending order.
       res.unshift(...filtered);
     }
 
-    // Make sure `res` is exactly `countBack` items.
+    // Make sure `res` is exactly `countBack` items. `shift` because it's in ascending order.
     while (res.length > countBack) {
       res.shift();
     }

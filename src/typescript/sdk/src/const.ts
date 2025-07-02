@@ -199,6 +199,19 @@ export enum Period {
   Period1D = "period_1d",
 }
 
+// "period_15s" is no longer supported.
+export const SupportedPeriods = {
+  Period1M: Period.Period1M,
+  Period5M: Period.Period5M,
+  Period15M: Period.Period15M,
+  Period30M: Period.Period30M,
+  Period1H: Period.Period1H,
+  Period4H: Period.Period4H,
+  Period1D: Period.Period1D,
+} as const;
+
+export type SupportedPeriod = typeof SupportedPeriods[keyof typeof SupportedPeriods];
+
 /// As defined in the database, aka the enum string.
 export enum Trigger {
   PackagePublication = "package_publication",
