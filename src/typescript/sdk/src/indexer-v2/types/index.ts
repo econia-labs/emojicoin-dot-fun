@@ -1,6 +1,6 @@
 import Big from "big.js";
 
-import { type Period, toArenaPeriod, toPeriod, toTrigger, type Trigger } from "../../const";
+import { type Period, toPeriod, toTrigger, type Trigger } from "../../const";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
 import type { AccountAddressString, Uint64String } from "../../emojicoin_dot_fun";
 import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
@@ -254,7 +254,7 @@ const toArenaCandlestickFromDatabase = (
   meleeID: BigInt(data.melee_id),
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
-  period: toArenaPeriod(data.period),
+  period: toPeriod(data.period),
   startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),
@@ -793,7 +793,7 @@ const toCandlestickFromDatabase = (
   marketID: BigInt(data.market_id),
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
-  period: toArenaPeriod(data.period),
+  period: toPeriod(data.period),
   startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),

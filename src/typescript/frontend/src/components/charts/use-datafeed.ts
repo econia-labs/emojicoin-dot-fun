@@ -5,7 +5,7 @@ import path from "path";
 import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 
-import { isNonArenaPeriod, periodEnumToRawDuration } from "@/sdk/const";
+import { periodEnumToRawDuration } from "@/sdk/const";
 import type { IBasicDataFeed } from "@/static/charting_library";
 import type { BarWithNonce } from "@/store/event/candlestick-bars";
 
@@ -93,9 +93,6 @@ export const useDatafeed = (symbol: string) => {
               maybeUpdateMeleeLatestBar(bars.at(-1), period, meleeID);
             }
           } else {
-            if (!isNonArenaPeriod(period)) {
-              throw new Error("Invalid period type for a non-arena symbol.");
-            }
             const entry = getRegisteredMarketMap().get(symbol);
             if (!entry) {
               console.error("Market metadata not in state for:", symbol);
@@ -109,6 +106,8 @@ export const useDatafeed = (symbol: string) => {
               periodParams,
               period,
             });
+
+            console.log(bars);
 
             if (isFetchForMostRecentBars) {
               maybeUpdateMarketLatestBar(bars.at(-1), period, symbol);

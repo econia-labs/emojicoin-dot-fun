@@ -1,6 +1,6 @@
 import type { WritableDraft } from "immer";
 
-import { NON_ARENA_PERIODS, Period, periodEnumToRawDuration } from "@/sdk/const";
+import { Period, periodEnumToRawDuration, PERIODS } from "@/sdk/const";
 import type {
   EventModelWithMarket,
   PeriodicStateEventModel,
@@ -21,6 +21,7 @@ const createInitialMarketState = (
   liquidityEvents: [],
   stateEvents: [],
   chatEvents: [],
+  [Period.Period15S]: createInitialCandlestickData(),
   [Period.Period1M]: createInitialCandlestickData(),
   [Period.Period5M]: createInitialCandlestickData(),
   [Period.Period15M]: createInitialCandlestickData(),
@@ -44,7 +45,7 @@ export const handleLatestBarForSwapEvent = (
   market: WritableDraft<MarketEventStore>,
   event: SwapEventModel
 ) => {
-  for (const period of NON_ARENA_PERIODS) {
+  for (const period of PERIODS) {
     const data = market[period];
     const swapPeriodStart = getPeriodStartTimeFromTime(event.market.time, period);
     const latestBarPeriodStart = BigInt(data.latestBar?.time ?? -1n) * 1000n;
