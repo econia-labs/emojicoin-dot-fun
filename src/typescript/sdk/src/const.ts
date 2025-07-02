@@ -210,7 +210,7 @@ export const SupportedPeriods = {
   Period1D: Period.Period1D,
 } as const;
 
-export type SupportedPeriod = typeof SupportedPeriods[keyof typeof SupportedPeriods];
+export type SupportedPeriod = (typeof SupportedPeriods)[keyof typeof SupportedPeriods];
 
 /// As defined in the database, aka the enum string.
 export enum Trigger {
