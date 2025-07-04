@@ -384,3 +384,15 @@ export const PERIODS = new Set([
   Period.Period4H,
   Period.Period1D,
 ]);
+
+export const MINUTES_IN_ONE_DAY = 1440;
+
+export const PERIODS_IN_ONE_DAY = {
+  [Period.Period1M]: MINUTES_IN_ONE_DAY,
+  [Period.Period5M]: MINUTES_IN_ONE_DAY / 5,
+  [Period.Period15M]: MINUTES_IN_ONE_DAY / 15,
+  [Period.Period30M]: MINUTES_IN_ONE_DAY / 30,
+  [Period.Period1H]: MINUTES_IN_ONE_DAY / 60,
+  [Period.Period4H]: MINUTES_IN_ONE_DAY / 240,
+  [Period.Period1D]: 1,
+} as const;
