@@ -4,9 +4,9 @@ import Big from "big.js";
 import {
   APTOS_COIN_TYPE_STRING,
   calculateCurvePrice,
+  fetchMarketResource,
   getBalanceFromWriteSetChanges,
   getMarketAddress,
-  getMarketResource,
   maxBigInt,
   ONE_APT_BIGINT,
   PreciseBig,
@@ -98,7 +98,7 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
   }> => {
     const marketAddress = getMarketAddress(symbolEmojis);
     const coinTypes = toEmojicoinTypes(marketAddress);
-    return await getMarketResource({ aptos, marketAddress })
+    return await fetchMarketResource({ aptos, marketAddress })
       .then((market) => calculateCurvePrice(market))
       .then((beforePrice) =>
         (inputAmount >= 0 ? emojicoin.buy : emojicoin.sell)(
