@@ -4,17 +4,24 @@ import type {
   PeriodTypeFromDatabase,
 } from "../../../types/json-types";
 
+const CACHED_CANDLESTICKS_KEYS_ORDER: (keyof DatabaseJsonType["candlesticks"])[] = [
+  "last_transaction_version",
+  "open_price",
+  "high_price",
+  "low_price",
+  "close_price",
+  "volume",
+];
+
 export function toCachedChunkedCandlesticks({
   marketID,
   period,
   data,
-  key_ordering,
   strict = false,
 }: {
   marketID: string;
   period: PeriodTypeFromDatabase;
   data: DatabaseJsonType["candlesticks"][];
-  key_ordering: (keyof DatabaseJsonType["candlesticks"])[];
   strict?: boolean;
 }): CachedChunkedCandlesticks | null {
   if (!data.length) return null;
@@ -29,7 +36,7 @@ export function toCachedChunkedCandlesticks({
           d.market_id === marketID &&
           d.symbol_emojis.join("") === symbol_emojis.join("") &&
           d.period === period &&
-          key_ordering.every((k) => k in d)
+          CACHED_CANDLESTICKS_KEYS_ORDER.every((k) => k in d)
       )
     ) {
       throw new Error(
@@ -43,8 +50,25 @@ export function toCachedChunkedCandlesticks({
       market_id,
       symbol_emojis,
       period,
-      key_ordering,
+      key_ordering: CACHED_CANDLESTICKS_KEYS_ORDER,
     },
-    rows: data.map((d) => key_ordering.map((k) => d[k])),
+    rows: data.map((d) => CACHED_CANDLESTICKS_KEYS_ORDER.map((k) => d[k])),
   };
+}
+
+export function fromCachedChunkedCandlesticks(
+  cachedData: ReturnType<typeof toCachedChunkedCandlesticks>
+) {
+  if (!cachedData) return [];
+  const { metadata, rows } = cachedData;
+  const { market_id, period, symbol_emojis } = metadata;
+  // Explode the array of arrays into an array of objects/rows.
+  return rows.map((row) =>
+    Object.fromEntries([
+      ["market_id", market_id],
+      ["period", period],
+      ["symbol_emojis", symbol_emojis],
+      ...metadata.key_ordering.map((key, i) => [key, row[i]] as const),
+    ])
+  );
 }
