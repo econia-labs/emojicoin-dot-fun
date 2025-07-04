@@ -299,16 +299,6 @@ type ChunkedCandlesticksMetadata = {
   num_items: number;
 };
 
-export type CachedChunkedCandlesticks = {
-  metadata: {
-    market_id: Uint64String;
-    symbol_emojis: SymbolEmoji[];
-    period: PeriodTypeFromDatabase;
-    key_ordering: (keyof CandlestickData)[];
-  };
-  rows: CandlestickData[keyof CandlestickData][][];
-};
-
 type ArenaMeleeEventData = Flatten<
   Omit<JsonTypes["ArenaMeleeEvent"], "start_time"> & {
     event_index: Uint64String;
