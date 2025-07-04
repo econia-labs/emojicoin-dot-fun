@@ -228,7 +228,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                       {!!emptyCells &&
                         Array.from({ length: emptyCells }).map((_, i) => (
                           <EmptyTableCard
-                            key={`empty-table-card-${page - 1 * MARKETS_PER_PAGE + (markets.length - 1 + i)}`}
+                            key={`empty-table-card-${sort}-${page - 1 * MARKETS_PER_PAGE + (markets.length - 1 + i)}`}
                             index={markets.length - 1 + i}
                             rowLength={rowLength}
                             pageOffset={page - 1 * MARKETS_PER_PAGE}
