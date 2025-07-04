@@ -22,7 +22,7 @@ export default function EmptyTableCard({
       initial={{
         opacity: 0,
       }}
-      className="group border-solid bg-black border border-dark-gray hover:z-10 hover:border-ec-blue"
+      className="group border-solid bg-black border border-dark-gray hover:z-10"
       variants={tableCardVariants}
       animate={"initial"}
       custom={{ curr }}
@@ -30,14 +30,6 @@ export default function EmptyTableCard({
         type: "just",
         delay: 0,
         duration: 0,
-      }}
-      whileHover={{
-        filter: "brightness(1.05) saturate(1.1)",
-        boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
-        transition: {
-          filter: { duration: 0.05 },
-          boxShadow: { duration: 0.05 },
-        },
       }}
     ></motion.div>
   );
