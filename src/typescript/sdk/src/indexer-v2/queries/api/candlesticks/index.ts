@@ -1,6 +1,6 @@
 import { type DatabaseJsonType, DatabaseRpc, type PeriodTypeFromDatabase } from "../../../..";
 import type { AnyNumberString } from "../../../../types/types";
-import { LIMIT } from "../../../const";
+import { MAX_ROW_LIMIT } from "../../../const";
 import { postgrest } from "../../client";
 
 export type ChunkMetadata = {
@@ -45,8 +45,6 @@ export function toChunkMetadata(
  * then used by the caller to fetch specific chunks of data.
  *
  * This data is then stored efficiently as chunks in the `unstable_cache` cache.
- *
- * Returns up to `LIMIT` rows.
  */
 async function fetchChunkedCandlesticksMetadata({
   marketID,
@@ -70,8 +68,8 @@ async function fetchChunkedCandlesticksMetadata({
       { get: true }
     )
     .select("*")
-    .limit(LIMIT)
-    .range((page - 1) * LIMIT, page * LIMIT - 1)
+    .limit(MAX_ROW_LIMIT)
+    .range((page - 1) * MAX_ROW_LIMIT, page * MAX_ROW_LIMIT - 1)
     .overrideTypes<DatabaseJsonType["chunked_candlesticks_metadata"][], { merge: false }>();
 }
 
@@ -89,13 +87,13 @@ export async function fetchAllChunkedCandlesticksMetadata({
   let page = 1;
 
   // Exhaustively fetch all chunks. This repeatedly fetches while the most recent fetched data
-  // doesn't have `LIMIT` # of rows.
+  // doesn't have the max # of rows.
   do {
     lastRes =
       (await fetchChunkedCandlesticksMetadata({ marketID, period, chunkSize, page })).data ?? [];
     page += 1;
     chunks.push(...lastRes);
-  } while (lastRes.length % LIMIT === 0);
+  } while (lastRes.length % MAX_ROW_LIMIT === 0);
 
   return chunks;
 }
