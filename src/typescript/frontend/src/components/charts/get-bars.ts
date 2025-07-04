@@ -3,11 +3,8 @@ import { ROUTES } from "router/routes";
 import { fetchRateLimited } from "utils";
 
 import type { Period, PeriodDuration } from "@/sdk/const";
-import {
-  type DatabaseJsonType,
-  toArenaCandlestickModel,
-  toCandlestickModel,
-} from "@/sdk/indexer-v2";
+import type { DatabaseJsonType } from "@/sdk/indexer-v2/types";
+import { toArenaCandlestickModel, toCandlestickModel } from "@/sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { XOR } from "@/sdk/utils/utility-types";
 import type { Flatten } from "@/sdk-types";
