@@ -1,4 +1,4 @@
-import type { ArenaPeriod } from "../const";
+import type { Period } from "../const";
 import type { SymbolEmoji } from "../emoji_data";
 import type { AccountAddressString } from "../emojicoin_dot_fun";
 import type {
@@ -175,7 +175,7 @@ export type ArenaTypes = {
   ArenaCandlestick: {
     meleeID: bigint;
     version: bigint;
-    period: ArenaPeriod;
+    period: Period;
     startTime: Date;
     openPrice: number;
     closePrice: number;
