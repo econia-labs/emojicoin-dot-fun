@@ -375,16 +375,7 @@ export const toPeriodDuration = (num: number | bigint): PeriodDuration => {
   throw new Error(`Invalid candlestick period duration: ${num}`);
 };
 
-export const PERIODS = new Set([
-  Period.Period1M,
-  Period.Period5M,
-  Period.Period15M,
-  Period.Period30M,
-  Period.Period1H,
-  Period.Period4H,
-  Period.Period1D,
-]);
-
+export const PERIODS = new Set([...Object.values(SupportedPeriods)]);
 export const MINUTES_IN_ONE_DAY = 1440;
 
 export const PERIODS_IN_ONE_DAY = {

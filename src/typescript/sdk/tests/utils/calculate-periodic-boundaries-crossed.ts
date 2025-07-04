@@ -1,4 +1,4 @@
-import { NON_ARENA_PERIODS, type Period, periodEnumToRawDuration } from "../../src/const";
+import { type Period, periodEnumToRawDuration, PERIODS } from "../../src/const";
 import type { AnyNumberString } from "../../src/types";
 import { getPeriodBoundary } from "../../src/utils/misc";
 
@@ -34,7 +34,7 @@ export const calculatePeriodBoundariesCrossed = ({
   if (start > end) {
     throw new Error("End time cannot be later than start time.");
   }
-  const periodsCrossed = Array.from(NON_ARENA_PERIODS).reduce(
+  const periodsCrossed = Array.from(PERIODS).reduce(
     (acc, period) => {
       // Get each period boundary of the start time; i.e., round it down to the nearest boundary.
       const lowerPeriodBoundary = getPeriodBoundary(start, period);

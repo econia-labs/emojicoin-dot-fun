@@ -107,8 +107,6 @@ export const useDatafeed = (symbol: string) => {
               period,
             });
 
-            console.log(bars);
-
             if (isFetchForMostRecentBars) {
               maybeUpdateMarketLatestBar(bars.at(-1), period, symbol);
             }
