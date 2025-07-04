@@ -3,15 +3,6 @@ import type { AnyNumberString } from "../../../../types/types";
 import { LIMIT } from "../../../const";
 import { postgrest } from "../../client";
 
-const CACHED_CHUNKED_CANDLESTICKS_METADATA_KEY_ORDERING = [
-  "transaction_version",
-  "open_price",
-  "high_price",
-  "low_price",
-  "close_price",
-  "volume",
-] as const;
-
 export type ChunkMetadata = {
   // Whether or not the chunk has exactly `chunk_size` items.
   complete: boolean;
