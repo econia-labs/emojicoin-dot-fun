@@ -4,7 +4,7 @@ import { unstable_cache } from "next/cache";
 
 import type { DatabaseJsonType, SupportedPeriod } from "@/sdk/index";
 import { Period, PERIODS_IN_ONE_DAY, TableName } from "@/sdk/index";
-import { ORDER_BY, postgrest } from "@/sdk/indexer-v2";
+import { MAX_ROW_LIMIT, ORDER_BY, postgrest } from "@/sdk/indexer-v2";
 import type { AnyNumberString } from "@/sdk-types";
 
 // -------------------------------------------------------------------------------------------------
@@ -13,8 +13,6 @@ import type { AnyNumberString } from "@/sdk-types";
 // If the arena duration is ever more than 24 hours, this endpoint will just not return all
 // candlesticks.
 // -------------------------------------------------------------------------------------------------
-
-const MAX_ROW_LIMIT = 500;
 
 // Quick sanity check at build time.
 if (Math.ceil(PERIODS_IN_ONE_DAY[Period.Period1M] / MAX_ROW_LIMIT) > 3) {
