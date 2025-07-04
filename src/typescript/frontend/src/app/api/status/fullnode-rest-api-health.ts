@@ -2,7 +2,7 @@ import "server-only";
 
 import { NetworkToNodeAPI } from "@aptos-labs/ts-sdk";
 import { APTOS_NETWORK } from "lib/env";
-import { parseJSON } from "utils";
+import { parseResponseJSON } from "utils";
 
 import { getAptosApiKey } from "@/sdk/index";
 
@@ -32,7 +32,7 @@ export default async function fetchFullnodeRestApiHealth() {
   };
   const res = await fetch(fullnodeURL, requestInit)
     .then((res) => res.text())
-    .then(parseJSON<FullnodeResponse>)
+    .then(parseResponseJSON<FullnodeResponse>)
     .catch(console.error);
   return res;
 }

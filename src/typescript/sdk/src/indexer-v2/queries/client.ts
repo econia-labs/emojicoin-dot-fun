@@ -3,7 +3,7 @@ import "server-only";
 import { PostgrestClient } from "@supabase/postgrest-js";
 
 import { EMOJICOIN_INDEXER_URL, FETCH_DEBUG, FETCH_DEBUG_VERBOSE } from "../../server/env";
-import { parseJSONWithBigInts, stringifyJSONWithBigInts } from "../json-bigint";
+import { parsePostgrestJSON, stringifyJSONWithBigInts } from "../json-bigint";
 import type { TableName } from "../types/json-types";
 
 /**
@@ -22,7 +22,7 @@ const fetchPatch: typeof fetch = async (input, init) => {
   }
 
   const text = await response.text();
-  const json = parseJSONWithBigInts(text);
+  const json = parsePostgrestJSON(text);
   const stringified = stringifyJSONWithBigInts(json);
 
   if (FETCH_DEBUG || FETCH_DEBUG_VERBOSE) {

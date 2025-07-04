@@ -1,4 +1,4 @@
-import { parseJSONWithBigInts } from "../indexer-v2/json-bigint";
+import { parsePostgrestJSON } from "../indexer-v2/json-bigint";
 import type { BrokerEventModels, PeriodTypeFromBroker } from "../indexer-v2/types";
 import type { BrokerJsonTypes } from "../indexer-v2/types/json-types";
 import { ensureArray } from "../utils/misc";
@@ -13,7 +13,7 @@ import {
 } from "./types";
 
 export const convertWebSocketMessageToBrokerEvent = <T extends string>(e: MessageEvent<T>) => {
-  const response = parseJSONWithBigInts<BrokerMessage>(e.data);
+  const response = parsePostgrestJSON<BrokerMessage>(e.data);
   const [brokerEvent, message] = Object.entries(response)[0] as [BrokerEvent, BrokerJsonTypes];
   const event = brokerMessageConverter[brokerEvent](message);
   return event;

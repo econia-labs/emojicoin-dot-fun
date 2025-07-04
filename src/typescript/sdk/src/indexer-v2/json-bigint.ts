@@ -36,9 +36,8 @@ const parseFloat = (v: any) => Big(v).toString();
 const parseBigInt = (v: any) => BigInt(v);
 const parseInteger = (v: any) => Number(v);
 // Ensure the Zulu/UTC indicator is there, since it's stored as a timestamp with no timezone
-// although it definitely has one. Don't convert to `Date`, because it loses some microsecond
-// precision, although it's totally possible to call new Date(...) and have it work as expected.
-const parseTimestamp = (v: any) => `${v}Z`;
+// although it definitely has one.
+const parseTimestamp = (v: any) => (typeof v === "string" && !v.endsWith("Z") ? `${v}Z` : `${v}`);
 const parseDefault = (v: any) => v;
 const floatConversions = [...Array.from(floatColumns).map((c) => [c, parseFloat] as const)];
 const bigintConversions = [...Array.from(bigintColumns).map((c) => [c, parseBigInt] as const)];
@@ -58,7 +57,7 @@ const converter = new Map<AnyColumnName, (value: any) => any>([
  * Parses a JSON string that uses bigints- i.e., numbers too large for a normal number, but not used
  * as strings. Without this parsing method, the parsed value loses precision or results in an error.
  *
- * THe parsing functions are designated by the column field name, which means there shouldn't ever
+ * The parsing functions are designated by the column field name, which means there shouldn't ever
  * be overlapping column names with different types in the database, otherwise the parsing function
  * may fail.
  *
@@ -67,7 +66,7 @@ const converter = new Map<AnyColumnName, (value: any) => any>([
  *
  * @see {@link tryWithFallbackParse}
  */
-export const parseJSONWithBigInts = <T>(msg: string): T => {
+export const parsePostgrestJSON = <T>(msg: string): T => {
   return JSON_BIGINT.parse(msg, (key, value) => {
     try {
       // Early return on expected nullable columns.
@@ -76,16 +75,14 @@ export const parseJSONWithBigInts = <T>(msg: string): T => {
       }
       const fn = converter.get(key as AnyColumnName) ?? parseDefault;
       // Curry the retrieved parsing function to add a fallback parsing function.
-      const fnWithFallback = tryWithFallbackParse(fn);
-      return fnWithFallback(value);
+      return tryWithFallbackParse(fn)(value);
     } catch {
       console.error(`Failed to parse ${key}: ${value} as a ${converter.get(key as AnyColumnName)}`);
     }
   });
 };
 
-export const stringifyJSONWithBigInts = (
-  msg: any,
-  replacer?: (this: any, key: string, value: any) => any,
-  space?: string | number
-): string => JSON_BIGINT.stringify(msg, replacer, space);
+export const stringifyJSONWithBigInts = (msg: any): string =>
+  // By default, ensure it stringifies bigints to a string, because it seems to ignore
+  // the option param `storeAsString: true`.
+  JSON_BIGINT.stringify(msg, (_k: string, v: any) => (typeof v === "bigint" ? v.toString() : v));

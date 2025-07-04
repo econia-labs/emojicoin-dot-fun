@@ -3,7 +3,7 @@ import type { ArenaInfoResponse } from "app/api/arena/info/route";
 import { useEventStore } from "context/event-store-context/hooks";
 import { useEffect } from "react";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { parseResponseJSON } from "utils";
 
 import { toArenaInfoModel, toMarketStateModel } from "@/sdk/index";
 
@@ -23,7 +23,7 @@ export function useResyncArenaInfoQuery() {
     queryFn: () =>
       fetch(url)
         .then((res) => res.text())
-        .then(parseJSON<ArenaInfoResponse>)
+        .then(parseResponseJSON<ArenaInfoResponse>)
         .then(({ arena_info, market_0, market_1 }) => ({
           arenaInfo: toArenaInfoModel(arena_info),
           market0: toMarketStateModel(market_0),

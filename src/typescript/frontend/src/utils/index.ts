@@ -12,7 +12,8 @@ export const DateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
 export const stringifyJSON = <T>(data: T) =>
   JSON.stringify(data, (_, value) => (typeof value === "bigint" ? `${value}n` : value));
 
-export const parseJSON = <T>(json: string): T =>
+// Specifically for JSON that comes from an `/api` response or the nextjs cache.
+export const parseResponseJSON = <T>(json: string): T =>
   JSON.parse(json, (_, value) => {
     if (typeof value === "string" && BigIntTrailingNRegex.test(value)) {
       return BigInt(value.slice(0, -1));
@@ -45,7 +46,7 @@ export async function fetchRateLimited<T>(endpoint: string, retries = 3): Promis
           }
           return res.text();
         })
-        .then((res) => parseJSON<T>(res));
+        .then((res) => parseResponseJSON<T>(res));
       return data;
     } catch (e) {
       const reset = Number((e as Error).message);

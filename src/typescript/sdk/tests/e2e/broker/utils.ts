@@ -9,7 +9,7 @@ import {
   type SubscribableBrokerEvents,
   type SubscriptionMessage,
 } from "../../../src/broker-v2/types";
-import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
+import { parsePostgrestJSON } from "../../../src/indexer-v2";
 import type { BrokerEventModels } from "../../../src/indexer-v2/types";
 import type { BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import checkArenaRows from "../helpers/arena-equality-checks";
@@ -31,7 +31,7 @@ export const connectNewClient = async () => {
    */
   client.onmessage = (e: MessageEvent<string>) => {
     messageEvents.push(e);
-    const parsed = parseJSONWithBigInts<BrokerMessage>(e.data);
+    const parsed = parsePostgrestJSON<BrokerMessage>(e.data);
     const [brokerEvent, message] = Object.entries(parsed)[0] as [BrokerEvent, BrokerJsonTypes];
     brokerMessages.push({
       [brokerEvent]: message,
@@ -75,7 +75,7 @@ export const compareParsedData = <T extends BrokerEventModels>({
   if (!messageEvent) throw new Error("Never.");
   if (!brokerMessage) throw new Error("Never.");
   if (!event) throw new Error("Never.");
-  const parsed = parseJSONWithBigInts<BrokerMessage>(messageEvent.data);
+  const parsed = parsePostgrestJSON<BrokerMessage>(messageEvent.data);
   expect(parsed).toEqual(brokerMessage);
   const row = parsed[eventName];
   const model = brokerMessageConverter[eventName](row) as T;
