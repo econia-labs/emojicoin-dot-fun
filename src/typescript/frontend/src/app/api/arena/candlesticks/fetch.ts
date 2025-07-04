@@ -12,7 +12,7 @@ import {
   toIndex,
 } from "app/api/candlesticks/utils";
 import { unstable_cache } from "next/cache";
-import { parseJSON, stringifyJSON } from "utils";
+import { parseResponseJSON, stringifyJSON } from "utils";
 
 import type { ArenaPeriod } from "@/sdk/const";
 import {
@@ -126,7 +126,7 @@ export const fetchArenaCandlesticksRoute = async (args: ArenaCandlesticksSearchP
     const res = await query({ meleeID, index: localIndex, period });
 
     if (i === 0) {
-      const parsed = parseJSON<ArenaCandlestickModel[]>(res.data);
+      const parsed = parseResponseJSON<ArenaCandlestickModel[]>(res.data);
       const filtered = parsed.filter((val) => val.startTime.getTime() < to * 1000);
       totalCount += filtered.length;
       data = jsonStrAppend(data, stringifyJSON(filtered));
