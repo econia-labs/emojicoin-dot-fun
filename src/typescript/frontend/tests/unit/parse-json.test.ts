@@ -1,4 +1,4 @@
-import { parseJSON, stringifyJSON } from "utils";
+import { parseResponseJSON, stringifyJSON } from "utils";
 
 import {
   type ArenaCandlestickModel,
@@ -28,9 +28,9 @@ describe("json parse and stringify tests", () => {
       my_number: 10,
       okie: [10, "ok!", 3, false, "boo"],
     };
-    expect(parseJSON(text)).toEqual(obj);
+    expect(parseResponseJSON(text)).toEqual(obj);
     const stringified = stringifyJSON(obj);
-    const parsedAgain = parseJSON<typeof obj>(stringified);
+    const parsedAgain = parseResponseJSON<typeof obj>(stringified);
     expect(parsedAgain).toEqual(obj);
   });
 
@@ -58,9 +58,9 @@ describe("json parse and stringify tests", () => {
         my_not_bigint_again: 100,
       },
     ];
-    expect(parseJSON(text)).toEqual(obj);
+    expect(parseResponseJSON(text)).toEqual(obj);
     const stringified = stringifyJSON(obj);
-    const parsedAgain = parseJSON<typeof obj>(stringified);
+    const parsedAgain = parseResponseJSON<typeof obj>(stringified);
     expect(parsedAgain).toEqual(obj);
   });
 
@@ -100,7 +100,7 @@ describe("json parse and stringify tests", () => {
       new Date("1969-07-20T20:17:40Z"),
     ];
     const parseAndMap = (v: string): number[] =>
-      parseJSON<Date[]>(v).map((vv) => (vv as Date).getTime());
+      parseResponseJSON<Date[]>(v).map((vv) => (vv as Date).getTime());
     expect(parseAndMap(text)).toEqual(obj.map((v) => v.getTime()));
     const stringified = stringifyJSON(obj);
     const parsedAgain = parseAndMap(stringified);
@@ -121,7 +121,7 @@ describe("json parse and stringify tests", () => {
       n_swaps: "2",
     };
     const stringified = stringifyJSON(candlestick);
-    const parsed = parseJSON<typeof candlestick>(stringified);
+    const parsed = parseResponseJSON<typeof candlestick>(stringified);
     expect(parsed).toEqual({
       ...candlestick,
       start_time: new Date(candlestick.start_time),
@@ -129,7 +129,7 @@ describe("json parse and stringify tests", () => {
 
     const model = toArenaCandlestickModel(candlestick);
     const stringifiedModel = stringifyJSON(model);
-    const parsedModel = parseJSON<ArenaCandlestickModel>(stringifiedModel);
+    const parsedModel = parseResponseJSON<ArenaCandlestickModel>(stringifiedModel);
     expect(parsedModel).toEqual(model);
   });
 });
