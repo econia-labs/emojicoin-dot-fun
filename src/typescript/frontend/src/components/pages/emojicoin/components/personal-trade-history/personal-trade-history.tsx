@@ -11,6 +11,7 @@ import { Emoji } from "utils/emoji";
 import { useAccountAddress } from "@/hooks/use-account-address";
 import { toNominal } from "@/sdk/utils";
 
+import PriceHeaderInfo from "../../PriceHeaderInfo";
 import type { TradeHistoryProps } from "../../types";
 
 export const PersonalTradeHistory = (props: TradeHistoryProps) => {
@@ -47,7 +48,7 @@ export const PersonalTradeHistory = (props: TradeHistoryProps) => {
       },
       {
         id: "price",
-        headerContent: "Price",
+        headerContent: <PriceHeaderInfo />,
         width: 100,
         renderCell: (item) => (
           <ColoredPriceDisplay
