@@ -284,7 +284,7 @@ export default function SwapComponent({
           {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
         </InnerWrapper>
       </SimulateInputsWrapper>
-      <div className="flex flex-row justify-between py-[10px] pl-[18px] pr-2">
+      <div className="flex flex-row justify-between py-[10px] px-1">
         {avgPriceLabel}
         <div className="text-dark-gray">
           <span className="text-xl leading-[0]">
