@@ -254,6 +254,7 @@ export const createEventStore = () => {
         });
       },
       subscribeToPeriod: ({ symbol, period, cb }) => {
+        const brokerPeriodType = periodToPeriodTypeFromBroker(period);
         if (isArenaChartSymbol(symbol)) {
           const meleeID = get().meleeMap.get(symbol);
           const melee = meleeID !== undefined && get().melees.has(meleeID);
@@ -261,7 +262,6 @@ export const createEventStore = () => {
           set((state) => {
             const melee = state.melees.get(meleeID)!;
             melee[period].callback = cb;
-            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
             state.client.subscribeToArenaPeriod(brokerPeriodType);
           });
         } else {
@@ -269,10 +269,12 @@ export const createEventStore = () => {
           set((state) => {
             const market = state.markets.get(symbol)!;
             market[period].callback = cb;
+            state.client.subscribeToMarketPeriod(market.marketMetadata.marketID, brokerPeriodType);
           });
         }
       },
       unsubscribeFromPeriod: ({ symbol, period }) => {
+        const brokerPeriodType = periodToPeriodTypeFromBroker(period);
         if (isArenaChartSymbol(symbol)) {
           const meleeID = get().meleeMap.get(symbol);
           const melee = meleeID !== undefined && get().melees.has(meleeID);
@@ -280,7 +282,6 @@ export const createEventStore = () => {
           set((state) => {
             const melee = state.melees.get(meleeID)!;
             melee[period].callback = undefined;
-            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
             state.client.unsubscribeFromArenaPeriod(brokerPeriodType);
           });
         } else {
@@ -288,6 +289,10 @@ export const createEventStore = () => {
           set((state) => {
             const market = state.markets.get(symbol)!;
             market[period].callback = undefined;
+            state.client.unsubscribeFromMarketPeriod(
+              market.marketMetadata.marketID,
+              brokerPeriodType
+            );
           });
         }
       },
