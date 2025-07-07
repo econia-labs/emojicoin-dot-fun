@@ -1,6 +1,6 @@
 import type { WritableDraft } from "immer";
 
-import type { ArenaCandlestickModel, ArenaModelWithMeleeID } from "@/sdk/indexer-v2";
+import type { ArenaCandlestickModel, ArenaModelWithMeleeID, CandlestickModel } from "@/sdk/indexer-v2";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,
@@ -44,16 +44,16 @@ export const toMappedMelees = <T extends ArenaModelWithMeleeID>(models: T[]) => 
 };
 
 /**
- * Arena candlestick model data is already validated by the db, so use the data if it's newer than
+ * Candlestick model data is already validated by the db, so use the data if it's newer than
  * what's in the current latest bar.
  */
-export const handleLatestBarForArenaCandlestick = (
-  melee: WritableDraft<MeleeState>,
-  model: ArenaCandlestickModel
+export const handleUpdateLatestBar = (
+  state: WritableDraft<MeleeState> | WritableDraft<MarketEventStore>,
+  model: ArenaCandlestickModel | CandlestickModel
 ) => {
   const { period } = model;
   const incomingNonce = getCandlestickModelNonce(model);
-  const current = melee[period];
+  const current = state[period];
   const shouldCreateNewBar =
     !current.latestBar || current.latestBar.time !== model.startTime.getTime();
 

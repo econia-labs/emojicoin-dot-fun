@@ -1112,6 +1112,8 @@ export const isLiquidityEventModel = (d: BrokerEventModels): d is LiquidityEvent
   d.eventName === "Liquidity";
 export const isGlobalStateEventModel = (d: BrokerEventModels): d is GlobalStateEventModel =>
   d.eventName === "GlobalState";
+export const isNonArenaCandlestickModel = (d: BrokerEventModels): d is CandlestickModel =>
+  d.eventName === CANDLESTICK_NAME;
 
 /**
  * Non-arena event models with markets.
