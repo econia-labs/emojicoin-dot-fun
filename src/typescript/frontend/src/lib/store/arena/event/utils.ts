@@ -1,6 +1,10 @@
 import type { WritableDraft } from "immer";
 
-import type { ArenaCandlestickModel, ArenaModelWithMeleeID, CandlestickModel } from "@/sdk/indexer-v2";
+import type {
+  ArenaCandlestickModel,
+  ArenaModelWithMeleeID,
+  CandlestickModel,
+} from "@/sdk/indexer-v2";
 import {
   isArenaCandlestickModel,
   isArenaEnterModel,
