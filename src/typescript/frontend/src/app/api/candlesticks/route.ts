@@ -45,10 +45,10 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
     });
 
     // Now fetch each chunk one by one until `countBack` rows have been retrieved.
-    const res: DatabaseJsonType["candlesticks"][] = [];
+    const candlesticks: DatabaseJsonType["candlesticks"][] = [];
     // Since `to` is in seconds.
     const toAsDate = new Date(to * 1000);
-    while (relevantChunks.length && res.length < countBack) {
+    while (relevantChunks.length && candlesticks.length < countBack) {
       const nextChunkMetadata = relevantChunks.pop()!;
       const inner = await fetchCachedChunkedCandlesticks({
         marketID,
@@ -59,13 +59,11 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
       // Only include candlesticks less than the `to` param, since it's non-inclusive.
       const filtered = inner.filter((c) => new Date(c.start_time).getTime() < toAsDate.getTime());
       // `unshift` because it's in ascending order.
-      res.unshift(...filtered);
+      candlesticks.unshift(...filtered);
     }
 
-    // Make sure `res` is exactly `countBack` items. `shift` because it's in ascending order.
-    while (res.length > countBack) {
-      res.shift();
-    }
+    // Return exactly `countBack` items. Use a negative index because the start time is ascending.
+    const res = candlesticks.slice(-countBack);
 
     return NextResponse.json(res);
   } catch (e) {

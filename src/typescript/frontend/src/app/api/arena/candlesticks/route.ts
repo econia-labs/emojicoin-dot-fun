@@ -25,11 +25,9 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
     );
 
     // Make sure the response is exactly `countBack` items.
-    while (filtered.length > countBack) {
-      filtered.shift();
-    }
+    const candlesticks = filtered.slice(-countBack);
 
-    return NextResponse.json(filtered);
+    return NextResponse.json(candlesticks);
   } catch (e) {
     return new NextResponse((e as Error).message, { status: 400 });
   }
