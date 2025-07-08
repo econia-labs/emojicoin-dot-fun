@@ -38,6 +38,14 @@ aptos move build-publish-payload \
 	--json-output-file $json_dir/market_metadata.json \
 	--skip-fetch-latest-git-deps
 
+aptos move build-publish-payload \
+	--assume-yes \
+	--named-addresses \
+	emojicoin_dot_fun=$profile,favorites=$profile \
+	--package-dir $move_dir/favorites/ \
+	--json-output-file $json_dir/favorites.json \
+	--skip-fetch-latest-git-deps
+
 # Ensure the default duration const is in the source file exactly as expected.
 original_const="const DEFAULT_DURATION: u64 = 20 \* 3_600_000_000;"
 source_file="$move_dir/emojicoin_arena/sources/emojicoin_arena.move"

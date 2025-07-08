@@ -29,6 +29,9 @@ COPY src/move/rewards/Move.toml move/rewards/Move.toml
 COPY src/move/market_metadata/sources/* move/market_metadata/sources/
 COPY src/move/market_metadata/Move.toml move/market_metadata/Move.toml
 
+COPY src/move/favorites/sources/* move/favorites/sources/
+COPY src/move/favorites/Move.toml move/favorites/Move.toml
+
 COPY src/move/emojicoin_arena/sources/* move/emojicoin_arena/sources/
 COPY src/move/emojicoin_arena/Move.toml move/emojicoin_arena/Move.toml
 
