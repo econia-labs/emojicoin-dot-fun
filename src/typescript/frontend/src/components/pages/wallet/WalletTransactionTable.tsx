@@ -16,6 +16,7 @@ import { type AnyEmoji, encodeEmojis, type SymbolEmoji } from "@/sdk/emoji_data"
 import type { OrderByStrings } from "@/sdk/indexer-v2/const";
 import { toNominal } from "@/sdk/utils";
 
+import PriceHeaderInfo from "../emojicoin/PriceHeaderInfo";
 import { type SwapEvent, useSwapEventsQuery } from "./useSwapEventsQuery";
 
 const COLUMNS: EcTableColumn<SwapEvent>[] = [
@@ -54,7 +55,7 @@ const COLUMNS: EcTableColumn<SwapEvent>[] = [
     ),
   },
   {
-    headerContent: "Price",
+    headerContent: <PriceHeaderInfo />,
     id: "price",
     width: 120,
     renderCell: (item) => (
