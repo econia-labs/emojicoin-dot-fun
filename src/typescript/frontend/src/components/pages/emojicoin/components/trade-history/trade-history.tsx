@@ -17,6 +17,7 @@ import { useSwapEventsQuery } from "@/components/pages/wallet/useSwapEventsQuery
 import type { SwapEventModel } from "@/sdk/indexer-v2";
 import { toNominal } from "@/sdk/utils";
 
+import PriceHeaderInfo from "../../PriceHeaderInfo";
 import type { TradeHistoryProps } from "../../types";
 
 const toTableItem = ({ swap, transaction, market, guid }: SwapEventModel) => ({
@@ -93,7 +94,7 @@ export const TradeHistory = (props: TradeHistoryProps) => {
       },
       {
         id: "price",
-        headerContent: "Price",
+        headerContent: <PriceHeaderInfo />,
         width: 80,
         renderCell: (item) => (
           <ColoredPriceDisplay
