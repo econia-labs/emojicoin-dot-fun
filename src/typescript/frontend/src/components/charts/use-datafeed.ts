@@ -63,15 +63,10 @@ export const useDatafeed = (symbol: string) => {
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
-        const { to } = periodParams;
+        const { firstDataRequest: isFetchForMostRecentBars } = periodParams;
         const period = ResolutionStringToPeriod[resolution];
         const periodDuration = periodEnumToRawDuration(period);
         const symbol = symbolInfoToSymbol(symbolInfo);
-
-        // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
-        // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
-        const endDate = new Date(to * 1000);
-        const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
 
         let bars: BarWithNonce[] = [];
 
