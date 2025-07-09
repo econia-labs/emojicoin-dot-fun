@@ -3,6 +3,7 @@
 import {
   ArenaPeriod,
   calculateCurvePrice,
+  NON_ARENA_PERIODS,
   ONE_APT_BIGINT,
   sleep,
   type SymbolEmoji,
@@ -10,6 +11,8 @@ import {
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
   type CandlestickModel,
+  fetchArenaLatestCandlesticks,
+  fetchMarketLatestCandlesticks,
   type MarketLatestStateEventModel,
   postgrest,
   TableName,
@@ -41,15 +44,84 @@ const expectEqualOHLCV = (
   expect(fromDb.volume).toEqual(calculated.volume);
 };
 
-describe("ensures arena candlesticks work", () => {
+describe("ensures non-periodic state event based candlesticks work", () => {
   const emojicoin = new EmojicoinClient();
 
-  const emojis: SymbolEmoji[][] = [["♑"], ["♒"]];
+  const emojis: SymbolEmoji[][] = [["♑"], ["♒"], ["🧻"], ["🧻", "🧻"]];
 
   beforeEach(async () => {
     await waitForNew15sPeriodBoundary();
     return true;
   }, 70000);
+
+  function checkUniqueLatestCandlesticks(
+    latestCandlesticks: Awaited<
+      ReturnType<typeof fetchArenaLatestCandlesticks | typeof fetchMarketLatestCandlesticks>
+    >
+  ) {
+    const numPeriodTypes = NON_ARENA_PERIODS.size + 1;
+    expect(latestCandlesticks).not.toBe(null);
+    expect(latestCandlesticks).toBeTruthy();
+    expect(latestCandlesticks).toHaveLength(numPeriodTypes);
+
+    const uniquePeriods = new Set(latestCandlesticks!.map((v) => v.period));
+    expect(uniquePeriods.size).toEqual(numPeriodTypes);
+  }
+
+  it("receives all latest candlesticks for a market as soon as it is registered", async () => {
+    const account = getFundedAccount("668");
+    const { marketID } = await emojicoin.register(account, emojis[2]).then(async (res) => {
+      await waitForProcessor(res.response);
+      return res.registration.event;
+    });
+
+    const latestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkUniqueLatestCandlesticks(latestCandlesticks);
+  });
+
+  it("receives updated latest 15s candlestick after a market is traded on", async () => {
+    const account = getFundedAccount("669");
+    const { marketID } = await emojicoin.register(account, emojis[3]).then(async (res) => {
+      await waitForProcessor(res.response);
+      return res.registration.event;
+    });
+
+    const firstLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkUniqueLatestCandlesticks(firstLatestCandlesticks);
+
+    const first15s = firstLatestCandlesticks.find((v) => v.period === ArenaPeriod.Period15S)!;
+    expect(first15s).toBeDefined();
+
+    await sleep(15001);
+    const inputAmount = ONE_APT_BIGINT;
+    const buyRes = await emojicoin.buy(account, emojis[3], inputAmount);
+    await waitForProcessor(buyRes);
+    const secondLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
+    const second15sModel = toCandlestickModel(
+      secondLatestCandlesticks.find((v) => v.period === ArenaPeriod.Period15S)!
+    );
+    expect(second15sModel).toBeDefined();
+    expect(second15sModel.version).toBe(BigInt(buyRes.response.version));
+    expect(second15sModel.volume).toBe(inputAmount);
+    const first15sModel = toCandlestickModel(first15s);
+    const firstStartTime = first15sModel.startTime.getTime();
+    const secondStartTime = second15sModel.startTime.getTime();
+    expect(secondStartTime).not.toEqual(firstStartTime);
+    const nextTwoStartTimes = [firstStartTime + 15000, firstStartTime + 30000];
+    expect(nextTwoStartTimes).toContain(second15sModel.startTime.getTime());
+    expect(second15sModel.guid).not.toEqual(first15sModel.guid);
+  }, 30000);
+
+  it("receives no candlesticks for a melee if it has no trading activity yet", async () => {
+    // Since the first melee is created in test prior to the test harness even firing up and isn't
+    // ever traded on, this test can just check that melee specifically.
+    const FIRST_MELEE_ID = 1;
+
+    const latestArenaCandlesticks = (await fetchArenaLatestCandlesticks(FIRST_MELEE_ID))!;
+    // Note that the postgres function actually returns 0 rows (not null) if there's no data yet,
+    // but it's coerced to `null` by the TypeScript SDK function call to make things less confusing.
+    expect(latestArenaCandlesticks).toBeNull();
+  });
 
   it("verifies that candlesticks are correct on markets without prior data", async () => {
     // We have to swap with the accounts that registered the markets as the
@@ -59,7 +131,7 @@ describe("ensures arena candlesticks work", () => {
     // the two initial markets, or one of the funded accounts (0x000 to 0xfff).
     const account = getFundedAccount("667");
 
-    const registerResponse = await emojicoin.register(getFundedAccount("667"), emojis[0]);
+    const registerResponse = await emojicoin.register(account, emojis[0]);
     const { marketID } = registerResponse.registration.event;
 
     await waitForProcessor(registerResponse);
