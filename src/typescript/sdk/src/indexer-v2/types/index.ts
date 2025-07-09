@@ -648,10 +648,15 @@ export const GuidGetters = {
     eventName: EVENT_NAMES.State,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
   }),
-  candlestick: ({ market_id, start_time, period }: DatabaseJsonType["candlesticks"]) => ({
+  candlestick: ({
+    market_id,
+    start_time,
+    period,
+    last_transaction_version: version,
+  }: DatabaseJsonType["candlesticks"]) => ({
     // Not a real module-emitted event, but used to classify the type of data.
     eventName: CANDLESTICK_NAME,
-    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
+    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}::${version}`,
   }),
   arenaEnterEvent: ({
     melee_id,
