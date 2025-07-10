@@ -14,9 +14,11 @@ type HomogenousCandlestickModels = CandlestickModel[] | ArenaCandlestickModel[];
  * homogenous array output type.
  */
 export const convertToCandlestickModels = (data: HomogenousCandlesticksJson) =>
-  "melee_id" in data[0]
-    ? (data as DatabaseJsonType["arena_candlesticks"][]).map(toArenaCandlestickModel)
-    : (data as DatabaseJsonType["candlesticks"][]).map(toCandlestickModel);
+  data.length === 0
+    ? []
+    : "melee_id" in data[0]
+      ? (data as DatabaseJsonType["arena_candlesticks"][]).map(toArenaCandlestickModel)
+      : (data as DatabaseJsonType["candlesticks"][]).map(toCandlestickModel);
 
 const findOrThrow = <T extends HomogenousCandlestickModels>(models: T, period: Period) => {
   const res = models.find((v) => v.period === period);
