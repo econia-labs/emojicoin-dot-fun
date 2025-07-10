@@ -3,23 +3,13 @@ import { ROUTES } from "router/routes";
 import { fetchRateLimited } from "utils";
 
 import type { Period, PeriodDuration } from "@/sdk/const";
-import type { DatabaseJsonType } from "@/sdk/indexer-v2/types";
-import { toArenaCandlestickModel, toCandlestickModel } from "@/sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { XOR } from "@/sdk/utils/utility-types";
 import type { Flatten } from "@/sdk-types";
 import type { PeriodParams } from "@/static/charting_library";
 import type { BarWithNonce } from "@/store/event/candlestick-bars";
 import { toBarWithNonce } from "@/store/event/candlestick-bars";
-
-type HomogenousJsonCandlestickModel =
-  | DatabaseJsonType["candlesticks"][]
-  | DatabaseJsonType["arena_candlesticks"][];
-
-const convertToCandlestickModel = (data: HomogenousJsonCandlestickModel) =>
-  "melee_id" in data[0]
-    ? (data as DatabaseJsonType["arena_candlesticks"][]).map(toArenaCandlestickModel)
-    : (data as DatabaseJsonType["candlesticks"][]).map(toCandlestickModel);
+import { convertToCandlestickModels, HomogenousCandlesticksJson } from "@/sdk/indexer-v2";
 
 export const fetchCandlesticksForChart = async ({
   marketID,
@@ -42,8 +32,8 @@ export const fetchCandlesticksForChart = async ({
   const route =
     marketID !== undefined ? ROUTES.api["candlesticks"] : ROUTES.api["arena"]["candlesticks"];
 
-  return await fetchRateLimited<HomogenousJsonCandlestickModel>(`${route}?${params}`)
-    .then(convertToCandlestickModel)
+  return await fetchRateLimited<HomogenousCandlesticksJson>(`${route}?${params}`)
+    .then(convertToCandlestickModels)
     .then((res) =>
       res
         .map(toBarWithNonce)
