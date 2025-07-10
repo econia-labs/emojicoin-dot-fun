@@ -1,6 +1,13 @@
 // cspell:word OHLCV
 
-import { calculateCurvePrice, ONE_APT_BIGINT, Period, PERIODS, sleep, type SymbolEmoji } from "../../src";
+import {
+  calculateCurvePrice,
+  ONE_APT_BIGINT,
+  Period,
+  PERIODS,
+  sleep,
+  type SymbolEmoji,
+} from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
   type CandlestickModel,
@@ -10,6 +17,7 @@ import {
   postgrest,
   TableName,
   toCandlestickModel,
+  toLatestCandlesticks,
   toMarketLatestStateEventModel,
 } from "../../src/indexer-v2";
 import { getFundedAccount } from "../utils/test-accounts";
@@ -52,13 +60,16 @@ describe("ensures non-periodic state event based candlesticks work", () => {
       ReturnType<typeof fetchArenaLatestCandlesticks | typeof fetchMarketLatestCandlesticks>
     >
   ) {
-    const numPeriodTypes = PERIODS.size + 1;
+    const numPeriodTypes = PERIODS.size;
     expect(latestCandlesticks).not.toBe(null);
     expect(latestCandlesticks).toBeTruthy();
     expect(latestCandlesticks).toHaveLength(numPeriodTypes);
 
     const uniquePeriods = new Set(latestCandlesticks!.map((v) => v.period));
     expect(uniquePeriods.size).toEqual(numPeriodTypes);
+
+    expect(() => toLatestCandlesticks(latestCandlesticks!)).not.toThrow();
+    expect(Object.keys(toLatestCandlesticks(latestCandlesticks!))).toHaveLength(numPeriodTypes);
   }
 
   it("receives all latest candlesticks for a market as soon as it is registered", async () => {
@@ -79,31 +90,30 @@ describe("ensures non-periodic state event based candlesticks work", () => {
       return res.registration.event;
     });
 
-    const firstLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
-    checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticks);
+    const firstLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticksRes);
 
-    const first15s = firstLatestCandlesticks.find((v) => v.period === Period.Period15S)!;
+    const firstLatestCandlesticks = toLatestCandlesticks(firstLatestCandlesticksRes);
+    const first15s = firstLatestCandlesticks[Period.Period15S];
     expect(first15s).toBeDefined();
 
     await sleep(15001);
     const inputAmount = ONE_APT_BIGINT;
     const buyRes = await emojicoin.buy(account, emojis[3], inputAmount);
     await waitForProcessor(buyRes);
-    const secondLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
-    checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticks);
-    const second15sModel = toCandlestickModel(
-      secondLatestCandlesticks.find((v) => v.period === Period.Period15S)!
-    );
-    expect(second15sModel).toBeDefined();
-    expect(second15sModel.version).toBe(BigInt(buyRes.response.version));
-    expect(second15sModel.volume).toBe(inputAmount);
-    const first15sModel = toCandlestickModel(first15s);
-    const firstStartTime = first15sModel.startTime.getTime();
-    const secondStartTime = second15sModel.startTime.getTime();
+    const secondLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticksRes);
+    const secondLatestCandlesticks = toLatestCandlesticks(secondLatestCandlesticksRes);
+    const second15s = secondLatestCandlesticks[Period.Period15S];
+    expect(second15s).toBeDefined();
+    expect(second15s.version).toBe(BigInt(buyRes.response.version));
+    expect(second15s.volume).toBe(inputAmount);
+    const firstStartTime = first15s.startTime.getTime();
+    const secondStartTime = second15s.startTime.getTime();
     expect(secondStartTime).not.toEqual(firstStartTime);
     const nextTwoStartTimes = [firstStartTime + 15000, firstStartTime + 30000];
-    expect(nextTwoStartTimes).toContain(second15sModel.startTime.getTime());
-    expect(second15sModel.guid).not.toEqual(first15sModel.guid);
+    expect(nextTwoStartTimes).toContain(second15s.startTime.getTime());
+    expect(second15s.guid).not.toEqual(first15s.guid);
   }, 30000);
 
   it("receives no candlesticks for a melee if it has no trading activity yet", async () => {
