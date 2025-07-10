@@ -11,7 +11,7 @@ export type HomogenousCandlesticksJson =
   | DatabaseJsonType["candlesticks"][]
   | DatabaseJsonType["arena_candlesticks"][];
 
-type HomogenousCandlestickModels = CandlestickModel[] | ArenaCandlestickModel[];
+export type HomogenousCandlestickModels = CandlestickModel[] | ArenaCandlestickModel[];
 
 /**
  * A utility function to convert to the model while avoiding an unintended union and instead force a

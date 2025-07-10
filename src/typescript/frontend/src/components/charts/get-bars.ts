@@ -3,13 +3,14 @@ import { ROUTES } from "router/routes";
 import { fetchRateLimited } from "utils";
 
 import type { Period, PeriodDuration } from "@/sdk/const";
+import type {
+  HomogenousCandlesticksJson} from "@/sdk/utils/latest-candlesticks";
+import {
+  convertToCandlestickModels
+} from "@/sdk/utils/latest-candlesticks";
 import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type { XOR } from "@/sdk/utils/utility-types";
-import {
-  convertToCandlestickModels,
-  type Flatten,
-  type HomogenousCandlesticksJson,
-} from "@/sdk-types";
+import type { Flatten } from "@/sdk-types";
 import type { PeriodParams } from "@/static/charting_library";
 import type { BarWithNonce } from "@/store/event/candlestick-bars";
 import { toBarWithNonce } from "@/store/event/candlestick-bars";

@@ -20,7 +20,8 @@ import {
   ARENA_CANDLESTICK_NAME,
   safeParseBigIntOrPostgresTimestamp,
 } from "../../types/arena-types";
-import { deserializeToHexString, toAccountAddressString } from "../../utils";
+import { toAccountAddressString } from "../../utils/account-address";
+import { deserializeToHexString } from "../../utils/hex";
 import { q64ToBig } from "../../utils/nominal-price";
 import {
   type BlockAndEventIndexMetadata,
