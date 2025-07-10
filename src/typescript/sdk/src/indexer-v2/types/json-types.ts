@@ -488,6 +488,8 @@ export enum TableName {
 export enum DatabaseRpc {
   UserPools = "user_pools",
   AggregateMarketState = "aggregate_market_state",
+  MarketLatestCandlesticks = "market_latest_candlesticks",
+  ArenaLatestCandlesticks = "arena_latest_candlesticks",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -622,6 +624,8 @@ export type DatabaseJsonType = {
     n_chat_events: Uint64String;
     n_liquidity_events: Uint64String;
   }>;
+  [DatabaseRpc.MarketLatestCandlesticks]: CandlestickData;
+  [DatabaseRpc.ArenaLatestCandlesticks]: ArenaCandlestickData;
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
@@ -650,6 +654,8 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistoryWithArenaInfo] &
   DatabaseJsonType[TableName.PriceFeedWithNulls] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
-  DatabaseJsonType[DatabaseRpc.AggregateMarketState];
+  DatabaseJsonType[DatabaseRpc.AggregateMarketState] &
+  DatabaseJsonType[DatabaseRpc.MarketLatestCandlesticks] &
+  DatabaseJsonType[DatabaseRpc.ArenaLatestCandlesticks];
 
 export type AnyColumnName = keyof Columns;
