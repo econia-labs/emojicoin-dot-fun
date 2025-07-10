@@ -7,6 +7,7 @@ import {
   PERIODS,
   sleep,
   type SymbolEmoji,
+  toLatestCandlesticks,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
@@ -17,7 +18,6 @@ import {
   postgrest,
   TableName,
   toCandlestickModel,
-  toLatestCandlesticks,
   toMarketLatestStateEventModel,
 } from "../../src/indexer-v2";
 import { getFundedAccount } from "../utils/test-accounts";
