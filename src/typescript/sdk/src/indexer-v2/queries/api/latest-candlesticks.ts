@@ -6,11 +6,6 @@ import { postgrest } from "../client";
 /**
  * Fetches the latest (aka current) arena candlesticks for a given meleeID.
  *
- * Note that the postgres function will return 0 rows if the melee doesn't exist, but this is
- * confusing, since it's more desirable to simply return exactly N candlesticks, where N is the
- * number of periods or `0`, that way the caller knows for sure that all candlesticks exist or none
- * of them do.
- *
  * Note that an arena's latest candlesticks only exist once the arena has started and one of the
  * markets is traded on while the arena is ongoing.
  */
@@ -25,11 +20,6 @@ export const fetchArenaLatestCandlesticks = async (meleeID: AnyNumberString) =>
 
 /**
  * Fetches the latest (aka current) market candlesticks for a given marketID.
- *
- * Note that the postgres function will return 0 rows if the market doesn't exist, but this is
- * confusing, since it's more desirable to simply return exactly N candlesticks, where N is the
- * number of periods or `0`, that way the caller knows for sure that all candlesticks exist or none
- * of them do.
  *
  * Note that a market's latest candlesticks *always* exist immediately upon registration.
  */

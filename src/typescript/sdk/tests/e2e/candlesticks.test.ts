@@ -54,7 +54,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     return true;
   }, 70000);
 
-  function checkUniqueLatestCandlesticks(
+  function checkNumberOfUniqueLatestCandlesticks(
     latestCandlesticks: Awaited<
       ReturnType<typeof fetchArenaLatestCandlesticks | typeof fetchMarketLatestCandlesticks>
     >
@@ -76,7 +76,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     });
 
     const latestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
-    checkUniqueLatestCandlesticks(latestCandlesticks);
+    checkNumberOfUniqueLatestCandlesticks(latestCandlesticks);
   });
 
   it("receives updated latest 15s candlestick after a market is traded on", async () => {
@@ -87,7 +87,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     });
 
     const firstLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
-    checkUniqueLatestCandlesticks(firstLatestCandlesticks);
+    checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticks);
 
     const first15s = firstLatestCandlesticks.find((v) => v.period === ArenaPeriod.Period15S)!;
     expect(first15s).toBeDefined();
@@ -97,6 +97,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     const buyRes = await emojicoin.buy(account, emojis[3], inputAmount);
     await waitForProcessor(buyRes);
     const secondLatestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticks);
     const second15sModel = toCandlestickModel(
       secondLatestCandlesticks.find((v) => v.period === ArenaPeriod.Period15S)!
     );
