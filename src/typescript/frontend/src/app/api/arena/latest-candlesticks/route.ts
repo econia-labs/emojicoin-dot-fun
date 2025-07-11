@@ -7,9 +7,6 @@ import { fetchArenaLatestCandlesticks } from "@/sdk/indexer-v2";
 
 import { LatestArenaCandlesticksSearchParamsSchema } from "./search-params-schema";
 
-export const fetchCache = "force-no-store";
-export const revalidate = 0;
-
 const cachedResponse = unstable_cache(fetchArenaLatestCandlesticks, [], {
   revalidate: 2,
   tags: ["fetch-arena-latest-candlesticks"],

@@ -6,9 +6,6 @@ import { fetchMarketLatestCandlesticks } from "@/sdk/indexer-v2";
 
 import { LatestCandlesticksSearchParamsSchema } from "./search-params-schema";
 
-export const fetchCache = "force-no-store";
-export const revalidate = 0;
-
 const cachedResponse = unstable_cache(fetchMarketLatestCandlesticks, [], {
   revalidate: 2,
   tags: ["fetch-market-latest-candlesticks"],
