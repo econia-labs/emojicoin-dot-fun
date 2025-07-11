@@ -8,7 +8,7 @@ import { fetchPositionWithArenaInfo } from "@/sdk/indexer-v2/queries/api/user-po
 import type { UserPositionResponse } from "@/sdk/indexer-v2/queries/api/user-position/types";
 import { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 
-export const fetchCache = "force-no-store";
+export const fetchCache = "default-no-store";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ user: string }> }) {
   if (!FEATURE_FLAGS.Arena) {
