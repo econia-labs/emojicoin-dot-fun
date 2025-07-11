@@ -7,7 +7,7 @@ import {
   PERIODS,
   sleep,
   type SymbolEmoji,
-  toLatestCandlesticksModel,
+  toLatestMarketCandlesticksModel,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
@@ -90,9 +90,9 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     const firstLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticksRes);
 
-    const firstLatestCandlesticks = toLatestCandlesticksModel(firstLatestCandlesticksRes);
-    const first15s = firstLatestCandlesticks[Period.Period15S];
-    expect(first15s).toBeDefined();
+    const firstLatestCandlesticks = toLatestMarketCandlesticksModel(firstLatestCandlesticksRes);
+    const first15s = firstLatestCandlesticks[Period.Period15S]!;
+    expect(first15s).toBeTruthy();
 
     await sleep(15001);
     const inputAmount = ONE_APT_BIGINT;
@@ -100,9 +100,9 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     await waitForProcessor(buyRes);
     const secondLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticksRes);
-    const secondLatestCandlesticks = toLatestCandlesticksModel(secondLatestCandlesticksRes);
-    const second15s = secondLatestCandlesticks[Period.Period15S];
-    expect(second15s).toBeDefined();
+    const secondLatestCandlesticks = toLatestMarketCandlesticksModel(secondLatestCandlesticksRes);
+    const second15s = secondLatestCandlesticks[Period.Period15S]!;
+    expect(second15s).toBeTruthy();
     expect(second15s.version).toBe(BigInt(buyRes.response.version));
     expect(second15s.volume).toBe(inputAmount);
     const firstStartTime = first15s.startTime.getTime();

@@ -3,15 +3,17 @@ import { ROUTES } from "router/routes";
 import { fetchRateLimited, parseResponseJSON } from "utils";
 
 import type { Period, PeriodDuration } from "@/sdk/const";
+import type { DatabaseJsonType, LatestMarketCandlesticks } from "@/sdk/index";
 import { getPeriodStartTimeFromTime } from "@/sdk/utils/misc";
 import type {
   HomogenousCandlestickModels,
   HomogenousCandlesticksJson,
-  LatestCandlesticks,
+  LatestArenaCandlesticks,
 } from "@/sdk/utils/to-latest-candlesticks";
 import {
   convertToCandlestickModels,
-  toLatestCandlesticksModel,
+  toLatestArenaCandlesticksModel,
+  toLatestMarketCandlesticksModel,
 } from "@/sdk/utils/to-latest-candlesticks";
 import type { XOR } from "@/sdk/utils/utility-types";
 import type { Flatten } from "@/sdk-types";
@@ -34,8 +36,15 @@ const fetchLatestCandlesticks = async ({
 
   return await fetch(`${route}?${params}`)
     .then((res) => res.text())
-    .then((res) => parseResponseJSON<LatestCandlesticks<HomogenousCandlesticksJson[number]>>(res))
-    .then(toLatestCandlesticksModel)
+    .then((res) =>
+      meleeID
+        ? toLatestArenaCandlesticksModel(
+            parseResponseJSON<LatestArenaCandlesticks<DatabaseJsonType["arena_candlesticks"]>>(res)
+          )
+        : toLatestMarketCandlesticksModel(
+            parseResponseJSON<LatestMarketCandlesticks<DatabaseJsonType["candlesticks"]>>(res)
+          )
+    )
     .catch((e) => {
       console.error(e);
       return null;
@@ -75,7 +84,9 @@ export const fetchCandlesticksForChart = async ({
       return [] as HomogenousCandlestickModels;
     });
   const latestPromise = firstDataRequest
-    ? fetchLatestCandlesticks(id).then((res) => (res ? res[period] : null))
+    ? fetchLatestCandlesticks(id).then((res) =>
+        res && period in res ? res[period as keyof typeof res] : null
+      )
     : Promise.resolve(null);
 
   // There's not really a clear way to name the variables below, so to clarify:

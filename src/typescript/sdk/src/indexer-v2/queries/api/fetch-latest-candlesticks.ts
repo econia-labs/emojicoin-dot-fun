@@ -1,5 +1,9 @@
 import type { DatabaseJsonType } from "../../..";
-import { DatabaseRpc, toLatestCandlesticksJson } from "../../..";
+import {
+  DatabaseRpc,
+  toLatestArenaCandlesticksJson,
+  toLatestMarketCandlesticksJson,
+} from "../../..";
 import type { AnyNumberString } from "../../../types/types";
 import { postgrest } from "../client";
 
@@ -24,7 +28,7 @@ export const fetchArenaLatestCandlesticks = async (meleeID: AnyNumberString) => 
       .overrideTypes<DatabaseJsonType["arena_latest_candlesticks"][], { merge: false }>()
       // No rows returned means the arena hasn't been traded on yet, and it's confusing to return an
       // empty array when no candlesticks exist yet, so return `null` instead if there are no rows.
-      .then((res) => (res.data ? toLatestCandlesticksJson(res.data) : null));
+      .then((res) => (res.data ? toLatestArenaCandlesticksJson(res.data) : null));
   } catch (e) {
     console.error(e);
     return null;
@@ -46,9 +50,7 @@ export const fetchMarketLatestCandlesticks = async (marketID: AnyNumberString) =
       )
       .select("*")
       .overrideTypes<DatabaseJsonType["market_latest_candlesticks"][], { merge: false }>()
-      // No rows returned means the market doesn't exist, and it's confusing to return an empty array,
-      // so return `null` instead if there are no rows.
-      .then((res) => (res.data ? toLatestCandlesticksJson(res.data) : null));
+      .then((res) => (res.data ? toLatestMarketCandlesticksJson(res.data) : null));
   } catch (e) {
     console.error(e);
     return null;
