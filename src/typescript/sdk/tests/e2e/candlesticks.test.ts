@@ -7,7 +7,7 @@ import {
   PERIODS,
   sleep,
   type SymbolEmoji,
-  toLatestCandlesticks,
+  toLatestCandlesticksModel,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
@@ -65,11 +65,8 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     expect(latestCandlesticks).toBeTruthy();
     expect(latestCandlesticks).toHaveLength(numPeriodTypes);
 
-    const uniquePeriods = new Set(latestCandlesticks!.map((v) => v.period));
+    const uniquePeriods = new Set(Object.keys(latestCandlesticks!));
     expect(uniquePeriods.size).toEqual(numPeriodTypes);
-
-    expect(() => toLatestCandlesticks(latestCandlesticks!)).not.toThrow();
-    expect(Object.keys(toLatestCandlesticks(latestCandlesticks!))).toHaveLength(numPeriodTypes);
   }
 
   it("receives all latest candlesticks for a market as soon as it is registered", async () => {
@@ -93,7 +90,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     const firstLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticksRes);
 
-    const firstLatestCandlesticks = toLatestCandlesticks(firstLatestCandlesticksRes);
+    const firstLatestCandlesticks = toLatestCandlesticksModel(firstLatestCandlesticksRes);
     const first15s = firstLatestCandlesticks[Period.Period15S];
     expect(first15s).toBeDefined();
 
@@ -103,7 +100,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     await waitForProcessor(buyRes);
     const secondLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticksRes);
-    const secondLatestCandlesticks = toLatestCandlesticks(secondLatestCandlesticksRes);
+    const secondLatestCandlesticks = toLatestCandlesticksModel(secondLatestCandlesticksRes);
     const second15s = secondLatestCandlesticks[Period.Period15S];
     expect(second15s).toBeDefined();
     expect(second15s.version).toBe(BigInt(buyRes.response.version));

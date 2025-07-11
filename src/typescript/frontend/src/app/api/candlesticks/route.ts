@@ -12,6 +12,9 @@ import {
 import { fetchCachedChunkedCandlesticks } from "./fetch-cached-candlesticks";
 import { CandlesticksSearchParamsSchema } from "./search-params-schema";
 
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 const CHUNK_SIZE = 500;
 
 const fetchCachedAllChunkedCandlestickMetadata = unstable_cache(

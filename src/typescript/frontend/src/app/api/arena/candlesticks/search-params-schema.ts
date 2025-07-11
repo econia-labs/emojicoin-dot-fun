@@ -11,7 +11,7 @@ export const ArenaCandlesticksSearchParamsSchema = z.object({
 });
 
 /**
- * The search params used in the `GET` request at `candlesticks/api`.
+ * The search params used in the `GET` request at `/api/arena/candlesticks`.
  *
  * @property {string} meleeID       - A number string, as the melee ID.
  * @property {string} to            - A number string, as the end time boundary as a UNIX timestamp.

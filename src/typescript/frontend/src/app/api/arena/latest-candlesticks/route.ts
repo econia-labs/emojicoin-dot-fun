@@ -1,0 +1,33 @@
+import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
+import FEATURE_FLAGS from "lib/feature-flags";
+import { unstable_cache } from "next/cache";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { fetchArenaLatestCandlesticks } from "@/sdk/indexer-v2";
+
+import { LatestArenaCandlesticksSearchParamsSchema } from "./search-params-schema";
+
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
+const cachedResponse = unstable_cache(fetchArenaLatestCandlesticks, [], {
+  revalidate: 2,
+  tags: ["fetch-arena-latest-candlesticks"],
+});
+
+export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
+  if (!FEATURE_FLAGS.Arena) {
+    return new NextResponse("Arena isn't enabled.", { status: 503 });
+  }
+
+  const { searchParams } = request.nextUrl;
+  const params = Object.fromEntries(searchParams.entries());
+  const { meleeID } = LatestArenaCandlesticksSearchParamsSchema.parse(params);
+
+  try {
+    const latest = await cachedResponse(meleeID);
+    return NextResponse.json(latest);
+  } catch (e) {
+    return new NextResponse((e as Error).message, { status: 400 });
+  }
+});

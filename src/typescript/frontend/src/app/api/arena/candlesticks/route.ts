@@ -5,6 +5,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import fetchCachedArenaCandlesticks from "./fetch-cached-arena-candlesticks";
 import { ArenaCandlesticksSearchParamsSchema } from "./search-params-schema";
 
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
   if (!FEATURE_FLAGS.Arena) {
     return new NextResponse("Arena isn't enabled.", { status: 503 });
