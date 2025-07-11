@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { AccountAddress } from "@aptos-labs/ts-sdk";
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
-import { getAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import { fetchCachedPriceFeed, type NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -93,7 +93,7 @@ export const revalidate = 10;
  * ```
  */
 export const GET = apiRouteErrorHandler(async (_req: NextRequest) => {
-  const aptPrice = await getAptPrice();
+  const aptPrice = await fetchCachedAptPrice();
   const priceFeed = await fetchCachedPriceFeed();
   const res = priceFeed.map((mkt) => {
     (mkt as TrendingMarketArgs)["apt_price"] = aptPrice;
