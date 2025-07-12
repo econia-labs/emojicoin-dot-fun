@@ -18,7 +18,7 @@ import {
 import {
   type AnyArenaEvent,
   ARENA_CANDLESTICK_NAME,
-  safeParseBigIntOrPostgresTimestamp,
+  safeParseDateOrBigIntOrPostgresTimestamp,
 } from "../../types/arena-types";
 import { toAccountAddressString } from "../../utils/account-address";
 import { deserializeToHexString } from "../../utils/hex";
@@ -256,7 +256,7 @@ const toArenaCandlestickFromDatabase = (
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   period: toPeriod(data.period),
-  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  startTime: safeParseDateOrBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),
   highPrice: Number(data.high_price),
@@ -800,7 +800,7 @@ const toCandlestickFromDatabase = (
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   period: toPeriod(data.period),
-  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  startTime: safeParseDateOrBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),
   highPrice: Number(data.high_price),
