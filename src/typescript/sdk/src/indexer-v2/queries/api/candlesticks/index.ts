@@ -89,7 +89,6 @@ export async function fetchAllChunkedCandlesticksMetadata({
   // Exhaustively fetch all chunks. This repeatedly fetches while the most recent fetched data
   // doesn't have the max # of rows.
   do {
-    console.log({ marketID, period, chunkSize, page });
     lastRes =
       (await fetchChunkedCandlesticksMetadata({ marketID, period, chunkSize, page })).data ?? [];
     page += 1;

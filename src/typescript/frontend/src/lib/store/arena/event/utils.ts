@@ -57,7 +57,7 @@ export const handleUpdateLatestBar = (
 ) => {
   const { period } = model;
   const incomingNonce = getCandlestickModelNonce(model);
- const current = state[period];
+  const current = state[period];
 
   if (!current.latestBar || current.latestBar.time !== model.startTime.getTime()) {
     current.latestBar = {
