@@ -88,7 +88,6 @@ export const handleUpdateLatestBar = (
  */
 export const updateLatestBarFromDatafeed = (
   marketOrMelee: WritableDraft<MeleeState> | WritableDraft<MarketEventStore>,
-  // Has already had its open price corrected in the curried bars reducer after being fetched.
   barFromDatafeed: LatestBar
 ) => {
   const { period } = barFromDatafeed;
