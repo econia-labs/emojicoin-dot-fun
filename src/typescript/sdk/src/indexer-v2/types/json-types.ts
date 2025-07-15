@@ -639,7 +639,7 @@ export type DatabaseJsonType = {
   [DatabaseRpc.ArenaLatestCandlesticks]: ArenaCandlestickData;
 };
 
-type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
+type Columns = keyof (DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.PeriodicStateEvents] &
   DatabaseJsonType[TableName.MarketRegistrationEvents] &
   DatabaseJsonType[TableName.SwapEvents] &
@@ -663,11 +663,15 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistoryWithArenaInfo] &
-  DatabaseJsonType[TableName.PriceFeedWithNulls] &
-  DatabaseJsonType[DatabaseRpc.UserPools] &
+  DatabaseJsonType[TableName.PriceFeedWithNulls]);
+
+// Columns that exclusively appear here are not included in the `postgrest` schema.
+type AnyRpcColumn = keyof (DatabaseJsonType[DatabaseRpc.UserPools] &
   DatabaseJsonType[DatabaseRpc.AggregateMarketState] &
   DatabaseJsonType[DatabaseRpc.ChunkedCandlesticksMetadata] &
   DatabaseJsonType[DatabaseRpc.MarketLatestCandlesticks] &
-  DatabaseJsonType[DatabaseRpc.ArenaLatestCandlesticks];
+  DatabaseJsonType[DatabaseRpc.ArenaLatestCandlesticks]);
 
-export type AnyColumnName = keyof Columns;
+export type ExclusivelyRpcColumn = Exclude<AnyRpcColumn, Columns>;
+
+export type AnyColumnName = Columns | AnyRpcColumn;

@@ -1,10 +1,11 @@
 // cspell:word bigserial
 // cspell:word smallserial
-import type { AnyColumnName } from "./json-types";
+import type { AnyColumnName, ExclusivelyRpcColumn } from "./json-types";
 
 const floats: Set<string> = new Set(["numeric", "decimal", "double precision", "real"]);
 const bigints: Set<string> = new Set(["bigint", "bigserial"]);
 const integers: Set<string> = new Set(["smallint", "integer", "serial", "smallserial"]);
+const timestamps: Set<string> = new Set(["timestamp without time zone"]);
 
 /**
  * @see {@link https://www.postgresql.org/docs/current/datatype-numeric.html}
@@ -13,6 +14,7 @@ export const PostgresNumericTypes = {
   floats,
   bigints,
   integers,
+  timestamps,
 };
 
 /**
@@ -127,6 +129,11 @@ export const floatColumns: Set<AnyColumnName> = new Set([
   "close_price",
   "high_price",
   "low_price",
+
+  // Exclusively in the aggregate_market_state() function
+  "n_markets",
+  "n_markets_in_bonding_curve",
+  "n_markets_post_bonding_curve",
 ]);
 
 /**
@@ -144,6 +151,14 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
   "transaction_version",
   "arena_info_last_transaction_version",
   "leaderboard_history_last_transaction_version",
+
+  // aggregate_market_state() columns
+  "last_emojicoin_transaction_version",
+  "n_global_state_events",
+  "n_market_registration_events",
+  "n_swap_events",
+  "n_chat_events",
+  "n_liquidity_events",
 ]);
 
 /**
@@ -155,8 +170,8 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
  */
 export const integerColumns: Set<AnyColumnName> = new Set([
   "integrator_fee_rate_bps",
-  "chunk_id",
-  "num_items",
+  "chunk_id", // Only in chunked_candlesticks_metadata() RPC function.
+  "num_items", // Only in chunked_candlesticks_metadata() RPC function.
 ]);
 
 export const timestampColumns: Set<AnyColumnName> = new Set([
@@ -164,19 +179,36 @@ export const timestampColumns: Set<AnyColumnName> = new Set([
   "emit_time",
   "inserted_at",
   "last_swap_time",
-  "last_bump_time",
+  "last_bump_time", // Only in aggregate_market_state() RPC function.
   "last_transaction_timestamp",
   "start_time",
   "transaction_timestamp",
-  "first_start_time",
-  "last_start_time",
+  "first_start_time", // Only in chunked_candlesticks_metadata() RPC function.
+  "last_start_time", // Only in chunked_candlesticks_metadata() RPC function.
 ]);
 
 export const nullableColumns: Set<AnyColumnName> = new Set([
-  // Note this value is non-nullable in later versions of the indexer SDK- although it's not
-  // integrated yet in this codebase yet.
+  // Note `entry_function` is non-nullable in later versions of the indexer SDK- although it's not
+  // integrated in this codebase yet.
   "entry_function",
   "open_price_q64",
   "close_price_q64",
   "delta_percentage",
+]);
+
+export const exclusivelyRpcColumns: Set<ExclusivelyRpcColumn> = new Set([
+  "first_start_time",
+  "last_bump_time",
+  "last_start_time",
+  "chunk_id",
+  "num_items",
+  "last_emojicoin_transaction_version",
+  "n_markets",
+  "n_markets_in_bonding_curve",
+  "n_markets_post_bonding_curve",
+  "n_global_state_events",
+  "n_market_registration_events",
+  "n_swap_events",
+  "n_chat_events",
+  "n_liquidity_events",
 ]);
