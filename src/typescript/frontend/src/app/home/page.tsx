@@ -1,7 +1,7 @@
 import { AptPriceContextProvider } from "context/AptPrice";
 import { CookieUserSettingsManager } from "lib/cookie-user-settings/cookie-user-settings-common";
 import FEATURE_FLAGS from "lib/feature-flags";
-import { getAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import { getFavorites } from "lib/queries/get-favorite-markets";
 import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
 import { fetchCachedPriceFeed } from "lib/queries/price-feed";
@@ -31,7 +31,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       return [] as DatabaseModels["price_feed"][];
     });
   const numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
-  const aptPricePromise = getAptPrice();
+  const aptPricePromise = fetchCachedAptPrice();
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchCachedMeleeData()
         .then((res) => (res.arenaInfo ? res : null))
