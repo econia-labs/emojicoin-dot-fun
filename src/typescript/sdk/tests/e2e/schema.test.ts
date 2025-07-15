@@ -16,6 +16,8 @@ import { EMOJICOIN_INDEXER_URL } from "../../src/server/env";
 
 /**
  * a new Set containing all the elements in `s1` which are not also in `s2`.
+ *
+ * Only used here because it's not available in CI for some reason.
  */
 const difference = <T>(s1: Set<T>, s2: Set<T>) =>
   Array.from(s1).reduce((acc, v) => {
