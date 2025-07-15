@@ -58,17 +58,13 @@ export const handleUpdateLatestBar = (
   const { period } = model;
   const incomingNonce = getCandlestickModelNonce(model);
   const current = state[period];
-  const shouldCreateNewBar =
-    !current.latestBar || current.latestBar.time !== model.startTime.getTime();
 
-  if (shouldCreateNewBar) {
+  if (!current.latestBar || current.latestBar.time !== model.startTime.getTime()) {
     current.latestBar = {
       ...toBarWithNonce(model),
       open: current.latestBar?.close ?? model.openPrice,
       period,
     };
-  } else if (!current.latestBar) {
-    throw new Error("This should never occur. It is a type guard/hint.");
   } else if (incomingNonce >= current.latestBar.nonce) {
     // A latest bar exists in state and a new bar should not be created.
     // Since this incoming model data hasn't been processed by the datafeed API utilities used to
@@ -92,7 +88,6 @@ export const handleUpdateLatestBar = (
  */
 export const updateLatestBarFromDatafeed = (
   marketOrMelee: WritableDraft<MeleeState> | WritableDraft<MarketEventStore>,
-  // Has already had its open price corrected in the curried bars reducer after being fetched.
   barFromDatafeed: LatestBar
 ) => {
   const { period } = barFromDatafeed;

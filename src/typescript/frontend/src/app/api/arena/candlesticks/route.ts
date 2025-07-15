@@ -18,10 +18,10 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
     const { meleeID, period, to, countBack } = validatedParams;
     const allArenaCandlesticksForPeriod = await fetchCachedArenaCandlesticks({ meleeID, period });
 
-    // Filter all candlesticks that occur at or after `to`; note `to` is in seconds.
+    // Filter out all candlesticks that occur at or after `to`; note `to` is in seconds.
     const toAsDate = new Date(to * 1000);
     const filtered = allArenaCandlesticksForPeriod.filter(
-      (c) => new Date(c.start_time).getTime() >= toAsDate.getTime()
+      (c) => new Date(c.start_time).getTime() < toAsDate.getTime()
     );
 
     // Make sure the response is exactly `countBack` items.

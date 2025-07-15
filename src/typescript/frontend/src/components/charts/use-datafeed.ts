@@ -63,7 +63,7 @@ export const useDatafeed = (symbol: string) => {
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
-        const { firstDataRequest: isFetchForMostRecentBars } = periodParams;
+        const { firstDataRequest } = periodParams;
         const period = ResolutionStringToPeriod[resolution];
         const periodDuration = periodEnumToRawDuration(period);
         const symbol = symbolInfoToSymbol(symbolInfo);
@@ -82,9 +82,10 @@ export const useDatafeed = (symbol: string) => {
               meleeID: meleeID.toString(),
               periodParams,
               period,
+              firstDataRequest,
             });
 
-            if (isFetchForMostRecentBars) {
+            if (firstDataRequest) {
               maybeUpdateMeleeLatestBar(bars.at(-1), period, meleeID);
             }
           } else {
@@ -100,15 +101,16 @@ export const useDatafeed = (symbol: string) => {
               marketID: marketID.toString(),
               periodParams,
               period,
+              firstDataRequest,
             });
 
-            if (isFetchForMostRecentBars) {
+            if (firstDataRequest) {
               maybeUpdateMarketLatestBar(bars.at(-1), period, symbol);
             }
           }
 
           const noData = bars.length === 0;
-          if (noData && isFetchForMostRecentBars) {
+          if (noData && firstDataRequest) {
             // Create a single empty bar if there's no trading activity, otherwise the chart shows "No chart data".
             const dummyBar = createDummyBar(periodDuration, symbol);
             bars.push(dummyBar);
