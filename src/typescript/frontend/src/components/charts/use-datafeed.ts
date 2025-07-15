@@ -12,8 +12,8 @@ import type { BarWithNonce } from "@/store/event/candlestick-bars";
 import { ResolutionStringToPeriod } from "./const";
 import { createDummyBar, fetchCandlesticksForChart } from "./get-bars";
 import {
-  CONFIGURATION_DATA,
   constructLibrarySymbolInfo,
+  getConfigurationData,
   searchSymbolsFromRegisteredMarketMap,
   symbolInfoToSymbol,
 } from "./trading-view-utils";
@@ -32,7 +32,7 @@ export const useDatafeed = (symbol: string) => {
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
       onReady: (callback) => {
-        setTimeout(() => callback(CONFIGURATION_DATA));
+        setTimeout(() => callback(getConfigurationData(symbol)));
       },
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
         const registeredMarketMap = getRegisteredMarketMap();

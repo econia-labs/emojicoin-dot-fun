@@ -1,10 +1,12 @@
 import { unstable_cache } from "next/cache";
 import { CACHE_ONE_YEAR } from "next/dist/lib/constants";
+import type { z } from "zod";
 
 import { fetchCandlesticksInRange } from "@/queries/market";
-import type { SupportedPeriod } from "@/sdk/const";
 import type { ChunkMetadata } from "@/sdk/indexer-v2/queries/api/candlesticks";
 import type { AnyNumberString } from "@/sdk/types/types";
+
+import type { SupportedPeriodSchema } from "./supported-period-schema";
 
 const HISTORICAL_CACHE_REVALIDATION_TIME = CACHE_ONE_YEAR;
 const INCOMPLETE_CACHE_REVALIDATION_TIME = 10;
@@ -20,7 +22,7 @@ const fetchIncompleteCandlestickData = unstable_cache(fetchCandlesticksInRange, 
 });
 
 export async function fetchCachedChunkedCandlesticks(
-  args: { marketID: AnyNumberString; period: SupportedPeriod } & ChunkMetadata
+  args: { marketID: AnyNumberString; period: z.infer<typeof SupportedPeriodSchema> } & ChunkMetadata
 ) {
   const { marketID, period, firstStartTime, lastStartTime, complete } = args;
 
