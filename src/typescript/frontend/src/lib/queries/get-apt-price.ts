@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import { COINGECKO_API_KEY } from "lib/server-env";
 import { unstable_cache } from "next/cache";
@@ -8,7 +8,7 @@ const COINGECKO_ROOT_URL = "https://pro-api.coingecko.com/api";
 const COINGECKO_ENDPOINT = "v3/simple/price";
 const COINGECKO_PARAMS = "vs_currencies=usd&precision=4";
 
-export const getAptPrice = unstable_cache(
+export const fetchCachedAptPrice = unstable_cache(
   async () =>
     fetch(
       `${COINGECKO_ROOT_URL}/${COINGECKO_ENDPOINT}` +

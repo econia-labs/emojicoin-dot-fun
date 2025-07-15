@@ -1,5 +1,5 @@
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
-import { getAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import { type NextRequest, NextResponse } from "next/server";
 import { stringifyJSON } from "utils";
 import { parseSearchParams } from "utils/url-utils";
@@ -47,7 +47,7 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
     .order("market_id")
     .range(skip, skip + limit - 1);
 
-  const aptPrice = await getAptPrice();
+  const aptPrice = await fetchCachedAptPrice();
 
   const data = markets.data?.map((e) => ({
     ticker_id: `${e.market_address}::coin_factory::Emojicoin_${APTOS_COIN_TYPE_STRING}`,
