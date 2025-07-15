@@ -181,6 +181,7 @@ export const timestampColumns: Set<AnyColumnName> = new Set([
   "last_swap_time",
   "last_bump_time", // Only in aggregate_market_state() RPC function.
   "last_transaction_timestamp",
+  "last_updated",
   "start_time",
   "transaction_timestamp",
   "first_start_time", // Only in chunked_candlesticks_metadata() RPC function.
