@@ -3,7 +3,7 @@ import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { wrappedCachedOnChainMarketView } from "lib/queries/aptos-client/market-view";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
-import { getAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import type { Metadata } from "next";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 
@@ -92,7 +92,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
         logAndReturnValue("swap events", [])
       ),
       wrappedCachedOnChainMarketView(marketAddress),
-      getAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
+      fetchCachedAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
       fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
       FEATURE_FLAGS.Arena
         ? fetchLatestMeleeEvent({})

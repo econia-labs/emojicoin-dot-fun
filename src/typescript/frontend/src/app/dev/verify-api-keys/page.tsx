@@ -1,6 +1,6 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { CDN_URL } from "lib/env";
-import { getAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 
 import { fetchMarketsWithCount } from "@/queries/home";
 import { VERCEL } from "@/sdk/const";
@@ -58,7 +58,7 @@ const VerifyApiKeys = async () => {
 
   // Check that CoinGecko API key works
   try {
-    await getAptPrice();
+    await fetchCachedAptPrice();
   } catch (e) {
     throw new Error(`Couldn't fetch APT price.\n\tInvalid CoinGecko API key.`);
   }

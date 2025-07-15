@@ -5,9 +5,6 @@ import { parseSearchParams } from "utils/url-utils";
 
 import fetchCachedFullMarketStatsQuery from "./full-query";
 
-export const fetchCache = "force-no-store";
-export const revalidate = 0;
-
 /**
  * @param page - the pagination page number
  * @param sortBy - the column to sort by, see {@link createStatsSchema} for more info
