@@ -14,6 +14,15 @@ import {
 } from "../../src/indexer-v2/types/postgres-numeric-types";
 import { EMOJICOIN_INDEXER_URL } from "../../src/server/env";
 
+/**
+ * a new Set containing all the elements in `s1` which are not also in `s2`.
+ */
+const difference = <T>(s1: Set<T>, s2: Set<T>) =>
+  Array.from(s1).reduce((acc, v) => {
+    if (!s2.has(v)) acc.add(v);
+    return acc;
+  }, new Set<T>([]));
+
 // This is not the full response type; it's just what we use in this test.
 interface DatabaseSchema {
   definitions: {
@@ -90,12 +99,12 @@ describe("verifies the schema is what's expected", () => {
     // we parse things correctly.
     // Check equality by comparing with the set of fields in [type]Columns while accounting for
     // the columns that will not be in the API spec since they're only in RPC functions.
-    expect(floats).toEqual(floatColumns.difference(exclusivelyRpcColumns));
-    expect(bigints).toEqual(bigintColumns.difference(exclusivelyRpcColumns));
-    expect(integers).toEqual(integerColumns.difference(exclusivelyRpcColumns));
+    expect(floats).toEqual(difference(floatColumns, exclusivelyRpcColumns));
+    expect(bigints).toEqual(difference(bigintColumns, exclusivelyRpcColumns));
+    expect(integers).toEqual(difference(integerColumns, exclusivelyRpcColumns));
 
     // Check timestamp columns, too.
-    expect(timestamps).toEqual(timestampColumns.difference(exclusivelyRpcColumns));
+    expect(timestamps).toEqual(difference(timestampColumns, exclusivelyRpcColumns));
   });
 
   it("ensures that the schema has been updated post migrations", async () => {
