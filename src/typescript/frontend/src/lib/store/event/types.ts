@@ -76,12 +76,12 @@ type EventActions = {
   loadEventsFromServer: (events: BrokerEventModels[]) => void;
   pushEventsFromClient: (event: BrokerEventModels[], pushToLocalStorage?: boolean) => void;
   maybeUpdateMeleeLatestBar: (
-    bar: BarWithNonce | undefined,
+    barFromDatafeed: BarWithNonce | undefined,
     period: Period,
     meleeID: bigint
   ) => void;
   maybeUpdateMarketLatestBar: (
-    bar: BarWithNonce | undefined,
+    barFromDatafeed: BarWithNonce | undefined,
     period: Period,
     symbol: string
   ) => void;

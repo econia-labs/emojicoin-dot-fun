@@ -18,7 +18,7 @@ import {
 import {
   type AnyArenaEvent,
   ARENA_CANDLESTICK_NAME,
-  safeParseBigIntOrPostgresTimestamp,
+  safeParseDateOrBigIntOrPostgresTimestamp,
 } from "../../types/arena-types";
 import { toAccountAddressString } from "../../utils/account-address";
 import { deserializeToHexString } from "../../utils/hex";
@@ -256,7 +256,7 @@ const toArenaCandlestickFromDatabase = (
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   period: toPeriod(data.period),
-  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  startTime: safeParseDateOrBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),
   highPrice: Number(data.high_price),
@@ -648,10 +648,15 @@ export const GuidGetters = {
     eventName: EVENT_NAMES.State,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
   }),
-  candlestick: ({ market_id, start_time, period }: DatabaseJsonType["candlesticks"]) => ({
+  candlestick: ({
+    market_id,
+    start_time,
+    period,
+    last_transaction_version: version,
+  }: DatabaseJsonType["candlesticks"]) => ({
     // Not a real module-emitted event, but used to classify the type of data.
     eventName: CANDLESTICK_NAME,
-    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
+    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}::${version}`,
   }),
   arenaEnterEvent: ({
     melee_id,
@@ -795,7 +800,7 @@ const toCandlestickFromDatabase = (
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
   period: toPeriod(data.period),
-  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  startTime: safeParseDateOrBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),
   highPrice: Number(data.high_price),
@@ -1112,6 +1117,8 @@ export const isLiquidityEventModel = (d: BrokerEventModels): d is LiquidityEvent
   d.eventName === "Liquidity";
 export const isGlobalStateEventModel = (d: BrokerEventModels): d is GlobalStateEventModel =>
   d.eventName === "GlobalState";
+export const isNonArenaCandlestickModel = (d: BrokerEventModels): d is CandlestickModel =>
+  d.eventName === CANDLESTICK_NAME;
 
 /**
  * Non-arena event models with markets.

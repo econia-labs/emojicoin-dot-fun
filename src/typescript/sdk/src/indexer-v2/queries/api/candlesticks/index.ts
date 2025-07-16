@@ -163,9 +163,9 @@ export function getOnlyRelevantChunks({
   // This means that the chunks fetched must *always* encapsulate `to`; that is, they must either
   // be exactly equal to or earlier in time than `to`.
   return chunkMetadata.filter(
-    // Filter out all chunks where the chunk's left time boundary is later than `to` to
-    // constrict the time span/range, because they will include irrelevant data that is discarded.
-    // Note this is `>=`, not `>`, because `to` is non-inclusive.
-    (chunk) => !(chunk.firstStartTime.getTime() >= to.getTime())
+    // Filter out all chunks where the chunk's left time boundary is greater than or equal to `to`
+    // to constrict the time span/range, because they will include irrelevant data that is
+    // discarded. Note that `to` is explicitly non-inclusive.
+    (chunk) => chunk.firstStartTime.getTime() < to.getTime()
   );
 }

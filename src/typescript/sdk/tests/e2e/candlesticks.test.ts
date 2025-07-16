@@ -4,10 +4,9 @@ import {
   calculateCurvePrice,
   ONE_APT_BIGINT,
   Period,
-  PERIODS,
   sleep,
   type SymbolEmoji,
-  toLatestCandlesticks,
+  toLatestMarketCandlesticksModel,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
@@ -56,20 +55,16 @@ describe("ensures non-periodic state event based candlesticks work", () => {
   }, 70000);
 
   function checkNumberOfUniqueLatestCandlesticks(
-    latestCandlesticks: Awaited<
-      ReturnType<typeof fetchArenaLatestCandlesticks | typeof fetchMarketLatestCandlesticks>
-    >
+    latestCandlesticks: Awaited<ReturnType<typeof fetchMarketLatestCandlesticks>>
   ) {
-    const numPeriodTypes = PERIODS.size;
+    const numPeriodTypes = new Set(Object.keys(Period));
     expect(latestCandlesticks).not.toBe(null);
     expect(latestCandlesticks).toBeTruthy();
-    expect(latestCandlesticks).toHaveLength(numPeriodTypes);
 
-    const uniquePeriods = new Set(latestCandlesticks!.map((v) => v.period));
-    expect(uniquePeriods.size).toEqual(numPeriodTypes);
-
-    expect(() => toLatestCandlesticks(latestCandlesticks!)).not.toThrow();
-    expect(Object.keys(toLatestCandlesticks(latestCandlesticks!))).toHaveLength(numPeriodTypes);
+    const uniquePeriods = new Set(Object.keys(latestCandlesticks!));
+    const uniqueCandlesticks = new Set(Object.values(latestCandlesticks!));
+    expect(uniquePeriods.size).toEqual(numPeriodTypes.size);
+    expect(uniqueCandlesticks.size).toEqual(numPeriodTypes.size);
   }
 
   it("receives all latest candlesticks for a market as soon as it is registered", async () => {
@@ -93,9 +88,9 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     const firstLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticksRes);
 
-    const firstLatestCandlesticks = toLatestCandlesticks(firstLatestCandlesticksRes);
-    const first15s = firstLatestCandlesticks[Period.Period15S];
-    expect(first15s).toBeDefined();
+    const firstLatestCandlesticks = toLatestMarketCandlesticksModel(firstLatestCandlesticksRes);
+    const first15s = firstLatestCandlesticks[Period.Period15S]!;
+    expect(first15s).toBeTruthy();
 
     await sleep(15001);
     const inputAmount = ONE_APT_BIGINT;
@@ -103,9 +98,9 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     await waitForProcessor(buyRes);
     const secondLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticksRes);
-    const secondLatestCandlesticks = toLatestCandlesticks(secondLatestCandlesticksRes);
-    const second15s = secondLatestCandlesticks[Period.Period15S];
-    expect(second15s).toBeDefined();
+    const secondLatestCandlesticks = toLatestMarketCandlesticksModel(secondLatestCandlesticksRes);
+    const second15s = secondLatestCandlesticks[Period.Period15S]!;
+    expect(second15s).toBeTruthy();
     expect(second15s.version).toBe(BigInt(buyRes.response.version));
     expect(second15s.volume).toBe(inputAmount);
     const firstStartTime = first15s.startTime.getTime();
@@ -124,7 +119,13 @@ describe("ensures non-periodic state event based candlesticks work", () => {
     const latestArenaCandlesticks = (await fetchArenaLatestCandlesticks(FIRST_MELEE_ID))!;
     // Note that the postgres function actually returns 0 rows (not null) if there's no data yet,
     // but it's coerced to `null` by the TypeScript SDK function call to make things less confusing.
-    expect(latestArenaCandlesticks).toBeNull();
+    expect(new Set(Object.keys(latestArenaCandlesticks))).toEqual(
+      // Arena has specific periods.
+      new Set(["period_15s", "period_1m", "period_5m", "period_15m", "period_30m", "period_1h"])
+    );
+    Object.values(latestArenaCandlesticks).forEach((v) => {
+      expect(v).toBeUndefined();
+    });
   });
 
   it("verifies that candlesticks are correct on markets without prior data", async () => {

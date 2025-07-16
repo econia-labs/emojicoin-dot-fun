@@ -12,8 +12,8 @@ import type { BarWithNonce } from "@/store/event/candlestick-bars";
 import { ResolutionStringToPeriod } from "./const";
 import { createDummyBar, fetchCandlesticksForChart } from "./get-bars";
 import {
-  CONFIGURATION_DATA,
   constructLibrarySymbolInfo,
+  getConfigurationData,
   searchSymbolsFromRegisteredMarketMap,
   symbolInfoToSymbol,
 } from "./trading-view-utils";
@@ -32,7 +32,7 @@ export const useDatafeed = (symbol: string) => {
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
       onReady: (callback) => {
-        setTimeout(() => callback(CONFIGURATION_DATA));
+        setTimeout(() => callback(getConfigurationData(symbol)));
       },
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
         const registeredMarketMap = getRegisteredMarketMap();
@@ -63,15 +63,10 @@ export const useDatafeed = (symbol: string) => {
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
-        const { to } = periodParams;
+        const { firstDataRequest } = periodParams;
         const period = ResolutionStringToPeriod[resolution];
         const periodDuration = periodEnumToRawDuration(period);
         const symbol = symbolInfoToSymbol(symbolInfo);
-
-        // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
-        // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
-        const endDate = new Date(to * 1000);
-        const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
 
         let bars: BarWithNonce[] = [];
 
@@ -87,9 +82,10 @@ export const useDatafeed = (symbol: string) => {
               meleeID: meleeID.toString(),
               periodParams,
               period,
+              firstDataRequest,
             });
 
-            if (isFetchForMostRecentBars) {
+            if (firstDataRequest) {
               maybeUpdateMeleeLatestBar(bars.at(-1), period, meleeID);
             }
           } else {
@@ -105,15 +101,16 @@ export const useDatafeed = (symbol: string) => {
               marketID: marketID.toString(),
               periodParams,
               period,
+              firstDataRequest,
             });
 
-            if (isFetchForMostRecentBars) {
+            if (firstDataRequest) {
               maybeUpdateMarketLatestBar(bars.at(-1), period, symbol);
             }
           }
 
           const noData = bars.length === 0;
-          if (noData && isFetchForMostRecentBars) {
+          if (noData && firstDataRequest) {
             // Create a single empty bar if there's no trading activity, otherwise the chart shows "No chart data".
             const dummyBar = createDummyBar(periodDuration, symbol);
             bars.push(dummyBar);

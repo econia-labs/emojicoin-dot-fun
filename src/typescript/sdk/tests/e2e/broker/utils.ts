@@ -17,7 +17,19 @@ import checkRows from "../helpers/equality-checks";
 
 const MAX_WAIT_TIME = 5000;
 
-const BROKER_URL = process.env.NEXT_PUBLIC_BROKER_URL!;
+export const BROKER_URL = process.env.NEXT_PUBLIC_BROKER_URL!;
+
+// Wait for the connection to be established to ensure the client connects.
+export const waitForClientToConnect = async (client: WebSocket) => {
+  await waitFor({
+    condition: () => client.readyState === client.OPEN,
+    interval: 10,
+    maxWaitTime: MAX_WAIT_TIME,
+    errorMessage: "Client `readyState` is not `OPEN` after maximum wait time.",
+  });
+  expect(client.readyState).toEqual(client.OPEN);
+};
+
 export const connectNewClient = async () => {
   expect(BROKER_URL).toBeDefined();
   const client = new WebSocket(new URL(BROKER_URL));
@@ -26,7 +38,7 @@ export const connectNewClient = async () => {
   const events: BrokerEventModels[] = [];
 
   /**
-   * Copy the functionality in the parser function so we have more granular access to the data.
+   * Copy the functionality in the parser function so we have more granular access to data.
    * @see convertWebSocketMessageToBrokerEvent
    */
   client.onmessage = (e: MessageEvent<string>) => {
@@ -39,21 +51,9 @@ export const connectNewClient = async () => {
     events.push(brokerMessageConverter[brokerEvent](message));
   };
 
-  // Wait for the connection to be established.
-  await waitFor({
-    condition: () => client.readyState === client.OPEN,
-    interval: 10,
-    maxWaitTime: MAX_WAIT_TIME,
-    errorMessage: "Client `readyState` is not `OPEN` after maximum wait time.",
-  });
-  expect(client.readyState).toEqual(client.OPEN);
+  await waitForClientToConnect(client);
 
-  return {
-    client,
-    messageEvents,
-    brokerMessages,
-    events,
-  };
+  return { client, messageEvents, brokerMessages, events };
 };
 
 export const compareParsedData = <T extends BrokerEventModels>({
