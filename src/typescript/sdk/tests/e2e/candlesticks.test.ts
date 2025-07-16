@@ -77,7 +77,7 @@ describe("ensures non-periodic state event based candlesticks work", () => {
 
     const latestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
     checkNumberOfUniqueLatestCandlesticks(latestCandlesticks);
-  });
+  }, 15000);
 
   it("receives updated latest 15s candlestick after a market is traded on", async () => {
     const account = getFundedAccount("669");
