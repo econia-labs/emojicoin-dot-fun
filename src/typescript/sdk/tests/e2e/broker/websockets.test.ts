@@ -701,6 +701,12 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
       await sleep(10);
     }
 
+    // Use a fresh events array to check upon reception of new messages/events.
+    const events3: BrokerEventModels[] = [];
+    client.setOnMessage((e) => {
+      events3.push(e);
+    });
+
     // Then subscribe to market2 30m candlesticks.
     client.subscribeToMarketPeriod(marketID2, p(Period.Period30M));
 
@@ -709,12 +715,6 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     const { response: sender2_res3 } = await emojicoin.buy(sender2, symbol2, ONE_APT_BIGINT);
     // Wait for all responses to be processed by the indexer.
     await waitForEmojicoinIndexer(maxBigInt(sender1_res3.version, sender2_res3.version));
-
-    // Use a fresh events array to check upon reception of new messages/events.
-    const events3: BrokerEventModels[] = [];
-    client.setOnMessage((e) => {
-      events3.push(e);
-    });
 
     // Wait for it to receive the event.
     await customWaitFor(() => getCandlesticks(events3).length === 1);
