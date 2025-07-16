@@ -609,7 +609,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     // Ensure it didn't receive any extra events after a short buffer of time.
     await sleep(5000);
-    expect(getCandlesticks(events).length).toHaveLength(2);
+    expect(getCandlesticks(events)).toHaveLength(2);
 
     // Then check the expectations for the candlesticks.
     const candle15s = getCandlesticks(events).find((v) => v.period === Period.Period15S)!;
