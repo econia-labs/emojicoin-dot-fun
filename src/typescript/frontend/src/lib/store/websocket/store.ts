@@ -18,13 +18,15 @@ export type ClientState = {
 export type ClientActions = {
   close: () => void;
   subscribeEvents: (
-    events: SubscribableBrokerEvents[],
+    events: Exclude<SubscribableBrokerEvents, "PeriodicState">[],
     arena?: { arenaBaseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
   ) => void;
   unsubscribeEvents: (
-    events: SubscribableBrokerEvents[],
+    events: Exclude<SubscribableBrokerEvents, "PeriodicState">[],
     arena?: { arenaBaseEvents?: boolean; arenaPeriod?: PeriodTypeFromBroker }
   ) => void;
+  subscribeToMarketPeriod: (marketID: bigint, period: PeriodTypeFromBroker) => void;
+  unsubscribeFromMarketPeriod: (marketID: bigint, period: PeriodTypeFromBroker) => void;
   subscribeToArenaPeriod: (period: PeriodTypeFromBroker) => void;
   unsubscribeFromArenaPeriod: (period: PeriodTypeFromBroker) => void;
 };
@@ -81,6 +83,12 @@ export const createWebSocketClientStore = (
   connected: false as boolean,
   close: () => {
     get().client.client.close();
+  },
+  subscribeToMarketPeriod: (marketID, period) => {
+    get().client.subscribeToMarketPeriod(marketID, period);
+  },
+  unsubscribeFromMarketPeriod: (marketID, period) => {
+    get().client.unsubscribeFromMarketPeriod(marketID, period);
   },
   subscribeToArenaPeriod: (period) => {
     get().client.subscribeToArenaPeriod(period);

@@ -1,11 +1,14 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
+import type { z } from "zod";
 
-import type { DatabaseJsonType, SupportedPeriod } from "@/sdk/index";
+import type { DatabaseJsonType } from "@/sdk/index";
 import { Period, PERIODS_IN_ONE_DAY, TableName } from "@/sdk/index";
 import { MAX_ROW_LIMIT, ORDER_BY, postgrest } from "@/sdk/indexer-v2";
 import type { AnyNumberString } from "@/sdk-types";
+
+import type { SupportedPeriodSchemaArena } from "./supported-period-schema";
 
 // -------------------------------------------------------------------------------------------------
 // NOTE:
@@ -24,7 +27,13 @@ if (Math.ceil(PERIODS_IN_ONE_DAY[Period.Period1M] / MAX_ROW_LIMIT) > 3) {
 // Thus, just cache all rows for each period, and let the API endpoint figure out what specific
 // data to return based on the request params.
 const fetchCachedArenaCandlesticks = unstable_cache(
-  async ({ meleeID, period }: { meleeID: AnyNumberString; period: SupportedPeriod }) => {
+  async ({
+    meleeID,
+    period,
+  }: {
+    meleeID: AnyNumberString;
+    period: z.infer<typeof SupportedPeriodSchemaArena>;
+  }) => {
     const maxNumCandlesticks = PERIODS_IN_ONE_DAY[period];
     // Put a hard cap on the number of fetches to do.
     const maxNumFetches = Math.ceil(maxNumCandlesticks / MAX_ROW_LIMIT);

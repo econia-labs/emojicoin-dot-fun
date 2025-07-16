@@ -10,7 +10,7 @@ import {
   TableName,
 } from "../indexer-v2/types/json-types";
 import type { ARENA_CANDLESTICK_NAME } from "../types/arena-types";
-import type { AnyNumberString, CANDLESTICK_NAME } from "../types/types";
+import type { CANDLESTICK_NAME } from "../types/types";
 
 export type BrokerEvent = SubscribableBrokerEvents | BrokerArenaEvent;
 
@@ -87,12 +87,20 @@ export type BrokerMessage = {
 };
 
 /**
- * Arena periods are subscribed in a granular way- like an actual sub/pub model with topics.
+ * Subscribe to candlestick periods in a granular way- like an actual sub/pub model with topics.
  */
-export type ArenaPeriodRequest = {
+export type MarketPeriodRequest = {
+  // Serde expects a number because it's typed as a `u64`.
+  market_id: number;
   action: "subscribe" | "unsubscribe";
   period: PeriodTypeFromBroker;
 };
+
+/**
+ * Arena period requests aren't granular by melee ID, since there's only ever one melee occurring.
+ * Thus this is just a single request to subscribe to a period type for arena candlesticks.
+ */
+export type ArenaPeriodRequest = Omit<MarketPeriodRequest, "market_id">;
 
 /**
  * The message the client sends to the broker to subscribe or unsubscribe.
@@ -100,14 +108,16 @@ export type ArenaPeriodRequest = {
 export type SubscriptionMessage = {
   markets: number[];
   event_types: BrokerEvent[];
+  market_period?: ArenaPeriodRequest;
   arena: boolean;
   arena_period?: ArenaPeriodRequest;
 };
 
 /* eslint-disable-next-line import/no-unused-modules */
 export type WebSocketSubscriptions = {
-  marketIDs: Set<AnyNumberString>;
+  marketIDs: Set<number>;
   eventTypes: Set<BrokerEvent>;
+  marketPeriods: Map<bigint, Set<PeriodTypeFromBroker>>;
   arena: boolean;
   arenaPeriods: Set<PeriodTypeFromBroker>;
 };
