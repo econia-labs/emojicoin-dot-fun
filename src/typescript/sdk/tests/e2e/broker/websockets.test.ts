@@ -567,6 +567,8 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     expect(BROKER_URL).toBeDefined();
     const events: BrokerEventModels[] = [];
 
+    let testIsFinished = false;
+
     const client = new WebSocketClient({
       url: BROKER_URL,
       listeners: {
@@ -574,7 +576,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
           events.push(e);
         },
         onClose: (e) => {
-          throw new Error(e.reason);
+          if (!testIsFinished) throw new Error(e.reason);
         },
         onError: (e) => {
           throw new Error(e.type);
@@ -680,7 +682,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     // Ensure it didn't receive any extra events after a short buffer of time.
     await sleep(5000);
-    expect(getCandlesticks(events2).length).toHaveLength(numCandlesticksFromSells);
+    expect(getCandlesticks(events2)).toHaveLength(numCandlesticksFromSells);
 
     const market1Candlesticks = getCandlesticks(events2).filter((v) => v.marketID === marketID1);
     const market2Candlesticks = getCandlesticks(events2).filter((v) => v.marketID === marketID2);
@@ -695,5 +697,8 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     expect(market2Candlesticks).toHaveLength(market2ExpectedPeriods.length);
     // Explicitly check that the second market does not include a 30m period candlestick.
     expect(market2Candlesticks.find((v) => v.period === Period.Period30M)).toBeUndefined();
+
+    // Ensure the WebSocket's `onClose` function doesn't throw now since the test is complete.
+    testIsFinished = true;
   });
 });
