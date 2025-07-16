@@ -1,3 +1,5 @@
+// cspell:word unsubscriptions
+
 import type { TypeTag } from "@aptos-labs/ts-sdk";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 
@@ -605,7 +607,6 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     // Wait for all responses to be processed by the indexer.
     await waitForEmojicoinIndexer(maxBigInt(sender1_res1.version, sender2_res1.version));
-
     // Wait for it to receive the events.
     await customWaitFor(() => getCandlesticks(events).length === 2);
 
@@ -630,29 +631,9 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     });
 
     // Ensure it granularly subscribes to and unsubscribes from market + period combinations.
+    // ---------------------------------------------------------------------------------------------
 
-    const subscriptions = [
-      // Subscribe to market 1 for all periods except 30m and 1d.
-      [marketID1, p(Period.Period15S)],
-      [marketID1, p(Period.Period1M)],
-      [marketID1, p(Period.Period5M)],
-      [marketID1, p(Period.Period15M)],
-      [marketID1, p(Period.Period1H)],
-      [marketID1, p(Period.Period4H)],
-      // Subscribe to 1H and 1D period for market 2, in addition to the existing 15s and 1m subs.
-      [marketID2, p(Period.Period1H)],
-      [marketID2, p(Period.Period1D)],
-      // Subscribe to the 30m sub for market 2, but unsubscribe later.
-      [marketID2, p(Period.Period30M)],
-    ] as const;
-
-    for (const [market, period] of subscriptions) {
-      client.subscribeToMarketPeriod(market, period);
-      await sleep(10);
-    }
-
-    client.unsubscribeFromMarketPeriod(marketID2, p(Period.Period30M));
-
+    // Subscribe to market 1 for all periods except 30m and 1d.
     const market1ExpectedPeriods = [
       Period.Period15S,
       Period.Period1M,
@@ -661,6 +642,8 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
       Period.Period1H,
       Period.Period4H,
     ];
+
+    // Add 1h and 1d periods for market 2, in addition to the existing 15s and 1m subs.
     const market2ExpectedPeriods = [
       Period.Period15S,
       Period.Period1M,
@@ -668,10 +651,25 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
       Period.Period1D,
     ];
 
+    const newSubscriptions = [
+      ...market1ExpectedPeriods.map((period) => [marketID1, p(period)] as const),
+      // Subscribe to 1H and 1D period for market 2, in addition to the existing 15s and 1m subs.
+      [marketID2, p(Period.Period1H)],
+      [marketID2, p(Period.Period1D)],
+      // Subscribe to the 30m sub for market 2; note that it's unsubscribed from shortly after this.
+      [marketID2, p(Period.Period30M)],
+    ] as const;
+
+    for (const [market, period] of newSubscriptions) {
+      client.subscribeToMarketPeriod(market, period);
+      await sleep(10);
+    }
+
+    client.unsubscribeFromMarketPeriod(marketID2, p(Period.Period30M));
+
     // Now ensure a swap for each market receives the proper periods.
     const { response: sender1_res2 } = await emojicoin.sell(sender1, symbol1, 10000000n);
     const { response: sender2_res2 } = await emojicoin.sell(sender2, symbol2, 10000000n);
-
     // Wait for all responses to be processed by the indexer.
     await waitForEmojicoinIndexer(maxBigInt(sender1_res2.version, sender2_res2.version));
 
@@ -684,19 +682,52 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     await sleep(5000);
     expect(getCandlesticks(events2)).toHaveLength(numCandlesticksFromSells);
 
-    const market1Candlesticks = getCandlesticks(events2).filter((v) => v.marketID === marketID1);
-    const market2Candlesticks = getCandlesticks(events2).filter((v) => v.marketID === marketID2);
+    const mkt1Candles = getCandlesticks(events2).filter((v) => v.marketID === marketID1);
+    const mkt2Candles = getCandlesticks(events2).filter((v) => v.marketID === marketID2);
 
-    expect(new Set(market1Candlesticks.map((v) => v.period))).toEqual(
-      new Set(market1ExpectedPeriods)
-    );
-    expect(new Set(market2Candlesticks.map((v) => v.period))).toEqual(
-      new Set(market2ExpectedPeriods)
-    );
-    expect(market1Candlesticks).toHaveLength(market1ExpectedPeriods.length);
-    expect(market2Candlesticks).toHaveLength(market2ExpectedPeriods.length);
+    expect(new Set(mkt1Candles.map((v) => v.period))).toEqual(new Set(market1ExpectedPeriods));
+    expect(new Set(mkt2Candles.map((v) => v.period))).toEqual(new Set(market2ExpectedPeriods));
+    expect(mkt1Candles).toHaveLength(market1ExpectedPeriods.length);
+    expect(mkt2Candles).toHaveLength(market2ExpectedPeriods.length);
     // Explicitly check that the second market does not include a 30m period candlestick.
-    expect(market2Candlesticks.find((v) => v.period === Period.Period30M)).toBeUndefined();
+    expect(mkt2Candles.find((v) => v.period === Period.Period30M)).toBeUndefined();
+
+    const unsubscriptionsMkt1 = mkt1Candles.map((c) => [marketID1, p(c.period)] as const);
+    const unsubscriptionsMkt2 = mkt2Candles.map((c) => [marketID2, p(c.period)] as const);
+
+    // Now unsubscribe from everything.
+    for (const [market, period] of [...unsubscriptionsMkt1, ...unsubscriptionsMkt2]) {
+      client.unsubscribeFromMarketPeriod(market, period);
+      await sleep(10);
+    }
+
+    // Then subscribe to market2 30m candlesticks.
+    client.subscribeToMarketPeriod(marketID2, p(Period.Period30M));
+
+    // Do two more swaps, one for each market.
+    const { response: sender1_res3 } = await emojicoin.buy(sender1, symbol1, ONE_APT_BIGINT);
+    const { response: sender2_res3 } = await emojicoin.buy(sender2, symbol2, ONE_APT_BIGINT);
+    // Wait for all responses to be processed by the indexer.
+    await waitForEmojicoinIndexer(maxBigInt(sender1_res3.version, sender2_res3.version));
+
+    // Use a fresh events array to check upon reception of new messages/events.
+    const events3: BrokerEventModels[] = [];
+    client.setOnMessage((e) => {
+      events3.push(e);
+    });
+
+    // Wait for it to receive the event.
+    await customWaitFor(() => getCandlesticks(events3).length === 1);
+
+    // Ensure it didn't receive any extra events after a short buffer of time.
+    await sleep(5000);
+    expect(getCandlesticks(events3)).toHaveLength(1);
+
+    // Check that the candlestick received was a 30m candlestick.
+    const lone30mCandlestick = getCandlesticks(events3).at(0)!;
+    expect(lone30mCandlestick).toBeDefined();
+    expect(lone30mCandlestick.period).toEqual(Period.Period30M);
+    expect(lone30mCandlestick.marketID).toEqual(marketID2);
 
     // Ensure the WebSocket's `onClose` function doesn't throw now since the test is complete.
     testIsFinished = true;
