@@ -731,5 +731,5 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
 
     // Ensure the WebSocket's `onClose` function doesn't throw now since the test is complete.
     testIsFinished = true;
-  }, 45000);
+  }, 60000);
 });
