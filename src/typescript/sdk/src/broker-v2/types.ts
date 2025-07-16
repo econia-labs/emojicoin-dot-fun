@@ -10,7 +10,7 @@ import {
   TableName,
 } from "../indexer-v2/types/json-types";
 import type { ARENA_CANDLESTICK_NAME } from "../types/arena-types";
-import type { AnyNumberString, CANDLESTICK_NAME } from "../types/types";
+import type { CANDLESTICK_NAME } from "../types/types";
 
 export type BrokerEvent = SubscribableBrokerEvents | BrokerArenaEvent;
 
@@ -115,7 +115,7 @@ export type SubscriptionMessage = {
 
 /* eslint-disable-next-line import/no-unused-modules */
 export type WebSocketSubscriptions = {
-  marketIDs: Set<AnyNumberString>;
+  marketIDs: Set<number>;
   eventTypes: Set<BrokerEvent>;
   marketPeriods: Map<bigint, Set<PeriodTypeFromBroker>>;
   arena: boolean;

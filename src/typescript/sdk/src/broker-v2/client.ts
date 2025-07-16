@@ -31,7 +31,7 @@ type WebSocketClientEventListeners = {
 export type WebSocketClientArgs = {
   url: string | URL;
   listeners: WebSocketClientEventListeners;
-  permanentlySubscribeToMarketRegistrations: boolean;
+  permanentlySubscribeToMarketRegistrations?: boolean;
 };
 
 /* eslint-disable-next-line import/no-unused-modules */

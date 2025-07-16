@@ -3,22 +3,31 @@ import { AccountAddress } from "@aptos-labs/ts-sdk";
 
 import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/move-modules";
 
-import type { MarketEmojiData, SymbolEmoji, Types } from "../../../src";
+import type { BrokerEventModels, MarketEmojiData, SymbolEmoji, Types } from "../../../src";
 import {
+  calculateCurvePrice,
   compareBigInt,
   encodeEmojis,
   enumerate,
   getEmojicoinMarketAddressAndTypeTags,
   getEvents,
+  isNonArenaCandlestickModel,
   maxBigInt,
   ONE_APT,
+  ONE_APT_BIGINT,
+  Period,
+  periodToPeriodTypeFromBroker,
   sleep,
   SYMBOL_EMOJI_DATA,
   toMarketEmojiData,
   zip,
 } from "../../../src";
-import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
+import {
+  convertWebSocketMessageToBrokerEvent,
+  WebSocketClient,
+} from "../../../src/broker-v2/client";
 import type { BrokerEvent } from "../../../src/broker-v2/types";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import { stringifyJSONWithBigInts } from "../../../src/indexer-v2";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import {
@@ -30,12 +39,19 @@ import {
 } from "../../../src/indexer-v2/types";
 import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
 import { getFundedAccounts } from "../../utils/test-accounts";
-import { compareParsedData, connectNewClient, customWaitFor, subscribe } from "./utils";
+import {
+  BROKER_URL,
+  compareParsedData,
+  connectNewClient,
+  customWaitFor,
+  subscribe,
+  waitForClientToConnect,
+} from "./utils";
 
 jest.setTimeout(20000);
 
 describe("tests to ensure that websocket event subscriptions work as expected", () => {
-  const registrants = getFundedAccounts("040", "041", "042", "043", "044", "045");
+  const registrants = getFundedAccounts("040", "041", "042", "043", "044", "045", "095", "096");
   const aptos = getAptosClient();
   const senderArgs = Array.from(registrants).map((acc) => ({
     registrant: acc,
@@ -59,7 +75,16 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
   };
 
   const marketData: MarketEmojiData[] = (
-    [["🍌"], ["🍟"], ["🍺"], ["🍦"], ["🍌", "🍟"], ["🍉", "🍉"]] as Array<SymbolEmoji[]>
+    [
+      ["🍌"],
+      ["🍟"],
+      ["🍺"],
+      ["🍦"],
+      ["🍌", "🍟"],
+      ["🍉", "🍉"],
+      ["🍺", "🍺"],
+      ["🍌", "🍌"],
+    ] as Array<SymbolEmoji[]>
   )
     .map(encodeEmojis)
     .map(toMarketEmojiData);
@@ -523,5 +548,152 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
           .includes(brokerEvent.market.symbolData.bytes.join(","))
       ).toBe(true);
     });
+  });
+
+  // NOTE: This test does not verify candlestick correctness, as that's mostly done in the arena
+  // candlesticks test. This is meant to test the subscription to candlesticks by the WebSocket
+  // client class.
+  it("ensures the WebSocketClient works as expected with granular subscriptions", async () => {
+    const MARKET_INDICES = [6, 7];
+    const emojicoin = new EmojicoinClient();
+    const { symbolEmojis: symbol1 } = marketData[MARKET_INDICES[0]];
+    const { symbolEmojis: symbol2 } = marketData[MARKET_INDICES[1]];
+    const { marketID: marketID1 } = marketsRegistered[MARKET_INDICES[0]];
+    const { marketID: marketID2 } = marketsRegistered[MARKET_INDICES[1]];
+    const sender1 = registrants[MARKET_INDICES[0]];
+    const sender2 = registrants[MARKET_INDICES[1]];
+
+    // Set up the client to use the WebSocketClient.
+    expect(BROKER_URL).toBeDefined();
+    const events: BrokerEventModels[] = [];
+
+    const client = new WebSocketClient({
+      url: BROKER_URL,
+      listeners: {
+        onMessage: (e) => {
+          events.push(e);
+        },
+        onClose: (e) => {
+          throw new Error(e.reason);
+        },
+        onError: (e) => {
+          throw new Error(e.type);
+        },
+      },
+    });
+
+    // Wait it for it to fully connect.
+    await waitForClientToConnect(client.client);
+
+    expect(client.subscriptions.arena).toBe(false);
+    expect(client.subscriptions.arenaPeriods.size).toBe(0);
+    expect(client.subscriptions.marketPeriods.size).toBe(0);
+    expect(client.subscriptions.marketIDs).toEqual(new Set([]));
+    expect(Array.from(client.subscriptions.marketPeriods.keys())).toHaveLength(0);
+
+    const p = periodToPeriodTypeFromBroker;
+
+    // Only subscribe to the second market, periods 15s and 1m.
+    client.subscribeToMarketPeriod(marketID2, p(Period.Period15S));
+    client.subscribeToMarketPeriod(marketID2, p(Period.Period1M));
+    const { response: sender1_res1 } = await emojicoin.buy(sender1, symbol1, ONE_APT_BIGINT);
+    const { swap, response: sender2_res1 } = await emojicoin.buy(sender2, symbol2, ONE_APT_BIGINT);
+
+    const getCandlesticks = (arr: BrokerEventModels[]) => arr.filter(isNonArenaCandlestickModel);
+
+    // Wait for all responses to be processed by the indexer.
+    await waitForEmojicoinIndexer(maxBigInt(sender1_res1.version, sender2_res1.version));
+
+    // Wait for it to receive the events.
+    await customWaitFor(() => getCandlesticks(events).length === 2);
+
+    // Ensure it didn't receive any extra events after a short buffer of time.
+    await sleep(5000);
+    expect(getCandlesticks(events).length).toHaveLength(2);
+
+    // Then check the expectations for the candlesticks.
+    const candle15s = getCandlesticks(events).find((v) => v.period === Period.Period15S)!;
+    const candle1m = getCandlesticks(events).find((v) => v.period === Period.Period1M)!;
+    expect(candle15s).toBeDefined();
+    expect(candle1m).toBeDefined();
+    expect(candle15s.version).toEqual(BigInt(sender2_res1.version));
+    expect(candle1m.version).toEqual(BigInt(sender2_res1.version));
+    expect(candle15s.closePrice).toBeCloseTo(calculateCurvePrice(swap.model.state).toNumber(), 10);
+    expect(candle1m.closePrice).toEqual(candle15s.closePrice);
+
+    // Use a fresh events array to check upon reception of new messages/events.
+    const events2: BrokerEventModels[] = [];
+    client.setOnMessage((e) => {
+      events2.push(e);
+    });
+
+    // Ensure it granularly subscribes to and unsubscribes from market + period combinations.
+
+    const subscriptions = [
+      // Subscribe to market 1 for all periods except 30m and 1d.
+      [marketID1, p(Period.Period15S)],
+      [marketID1, p(Period.Period1M)],
+      [marketID1, p(Period.Period5M)],
+      [marketID1, p(Period.Period15M)],
+      [marketID1, p(Period.Period1H)],
+      [marketID1, p(Period.Period4H)],
+      // Subscribe to 1H and 1D period for market 2, in addition to the existing 15s and 1m subs.
+      [marketID2, p(Period.Period1H)],
+      [marketID2, p(Period.Period1D)],
+      // Subscribe to the 30m sub for market 2, but unsubscribe later.
+      [marketID2, p(Period.Period30M)],
+    ] as const;
+
+    for (const [market, period] of subscriptions) {
+      client.subscribeToMarketPeriod(market, period);
+      await sleep(10);
+    }
+
+    client.unsubscribeFromMarketPeriod(marketID2, p(Period.Period30M));
+
+    const market1ExpectedPeriods = [
+      Period.Period15S,
+      Period.Period1M,
+      Period.Period5M,
+      Period.Period15M,
+      Period.Period1H,
+      Period.Period4H,
+    ];
+    const market2ExpectedPeriods = [
+      Period.Period15S,
+      Period.Period1M,
+      Period.Period1H,
+      Period.Period1D,
+    ];
+
+    // Now ensure a swap for each market receives the proper periods.
+    const { response: sender1_res2 } = await emojicoin.sell(sender1, symbol1, 10000000n);
+    const { response: sender2_res2 } = await emojicoin.sell(sender2, symbol2, 10000000n);
+
+    // Wait for all responses to be processed by the indexer.
+    await waitForEmojicoinIndexer(maxBigInt(sender1_res2.version, sender2_res2.version));
+
+    const numCandlesticksFromSells = market1ExpectedPeriods.length + market2ExpectedPeriods.length;
+
+    // Wait for it to receive the events.
+    await customWaitFor(() => getCandlesticks(events2).length === numCandlesticksFromSells);
+
+    // Ensure it didn't receive any extra events after a short buffer of time.
+    await sleep(5000);
+    expect(getCandlesticks(events2).length).toHaveLength(numCandlesticksFromSells);
+
+    const market1Candlesticks = getCandlesticks(events2).filter((v) => v.marketID === marketID1);
+    const market2Candlesticks = getCandlesticks(events2).filter((v) => v.marketID === marketID2);
+
+    expect(new Set(market1Candlesticks.map((v) => v.period))).toEqual(
+      new Set(market1ExpectedPeriods)
+    );
+    expect(new Set(market2Candlesticks.map((v) => v.period))).toEqual(
+      new Set(market2ExpectedPeriods)
+    );
+    expect(market1Candlesticks).toHaveLength(market1ExpectedPeriods.length);
+    expect(market2Candlesticks).toHaveLength(market2ExpectedPeriods.length);
+    // Explicitly check that the second market does not include a 30m period candlestick.
+    expect(market2Candlesticks.find((v) => v.period === Period.Period30M)).toBeUndefined();
   });
 });
