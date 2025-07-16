@@ -3,11 +3,11 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use futures_util::StreamExt;
+use futures_util::{SinkExt, StreamExt};
 use log::{error, info, warn};
 use processor::emojicoin_dot_fun::EmojicoinDbEvent;
 use tokio::sync::{broadcast::Sender, RwLock};
-use tokio_tungstenite::connect_async;
+use tokio_tungstenite::{connect_async, tungstenite::Message};
 
 use crate::HealthStatus;
 
@@ -112,12 +112,7 @@ async fn processor_connection(
         let mut interval = tokio::time::interval(Duration::from_secs(PING_INTERVAL));
         loop {
             interval.tick().await;
-            if let Err(e) = futures_util::SinkExt::send(
-                &mut write,
-                tokio_tungstenite::tungstenite::Message::Ping(vec![]),
-            )
-            .await
-            {
+            if let Err(e) = SinkExt::send(&mut write, Message::Ping(vec![])).await {
                 error!("Ping failed: {e}");
                 break;
             } else {
