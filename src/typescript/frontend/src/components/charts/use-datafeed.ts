@@ -1,3 +1,4 @@
+import { MAX_CANDLESTICK_COUNT_BACK } from "const";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { decodeSymbolsForChart, isArenaChartSymbol, parseSymbolWithParams } from "lib/chart-utils";
 import { useRouter } from "next/navigation";
@@ -62,7 +63,11 @@ export const useDatafeed = (symbol: string) => {
         const symbolInfo = constructLibrarySymbolInfo(baseChartSymbol, emptyBars);
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
-      getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
+      getBars: async (symbolInfo, resolution, periParamsIn, onHistoryCallback, onErrorCallback) => {
+        const periodParams = {
+          ...periParamsIn,
+          countBack: Math.min(periParamsIn.countBack, MAX_CANDLESTICK_COUNT_BACK),
+        };
         const { firstDataRequest } = periodParams;
         const period = ResolutionStringToPeriod[resolution];
         const periodDuration = periodEnumToRawDuration(period);
