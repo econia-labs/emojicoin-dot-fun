@@ -1,11 +1,11 @@
-import { type DatabaseJsonType, toAggregateMarketState } from "../types";
+import { type DatabaseJsonType, DatabaseRpc, toAggregateMarketState } from "../types";
 import { postgrest } from "./client";
 
 export const callAggregateMarketState = () =>
   // Since this is a read-only function call, prefer to call this as a `GET` request. It makes API
   // gateway authorization simpler and cleaner.
   postgrest
-    .rpc("aggregate_market_state", {}, { get: true })
+    .dbRpc(DatabaseRpc.AggregateMarketState, {}, { get: true })
     .select("*")
     .single()
     .then((res) => {

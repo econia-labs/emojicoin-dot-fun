@@ -1,4 +1,9 @@
+// The max number of rows returned from `postgrest`.
+export const MAX_ROW_LIMIT = 500;
+
+// The default limit/soft cap on the number of rows returned.
 export const LIMIT = 100;
+
 export const ORDER_BY = {
   DESC: {
     ascending: false as const,

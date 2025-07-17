@@ -2,7 +2,7 @@ import "server-only";
 
 import type { AccountAddressInput } from "@aptos-labs/ts-sdk";
 
-import type { ArenaPeriod, DatabaseJsonType } from "../../..";
+import type { DatabaseJsonType, Period } from "../../..";
 import type { AnyNumberString } from "../../../types";
 import { toAccountAddressString } from "../../../utils/account-address";
 import { ORDER_BY } from "../../const";
@@ -103,7 +103,7 @@ const selectArenaCandlesticksSince = ({
   meleeID: AnyNumberString;
   start: Date;
   end: Date;
-  period: ArenaPeriod;
+  period: Period;
 }) => {
   const query = postgrest
     .from(TableName.ArenaCandlesticks)

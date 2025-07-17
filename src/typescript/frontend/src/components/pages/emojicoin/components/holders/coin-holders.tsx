@@ -8,19 +8,20 @@ import { useRouter } from "next/navigation";
 import { type FC, useMemo } from "react";
 import { ROUTES } from "router/routes";
 
+import type { MarketStateModel } from "@/sdk/index";
 import { calculateCirculatingSupply } from "@/sdk/markets";
 import { toNominal, toNominalPrice } from "@/sdk/utils";
-import type { Types } from "@/sdk-types";
 
 interface Props {
   emojicoin: string;
   holders: AssetBalance[];
-  marketView: Types["MarketView"];
+  state: MarketStateModel["state"];
+  lastSwap: MarketStateModel["lastSwap"];
 }
 
-export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
+export const CoinHolders: FC<Props> = ({ emojicoin, holders, state, lastSwap }) => {
   const aptPrice = useAptPrice();
-  const maxSupply = useMemo(() => toNominal(calculateCirculatingSupply(marketView)), [marketView]);
+  const maxSupply = useMemo(() => toNominal(calculateCirculatingSupply(state)), [state]);
   const router = useRouter();
 
   const holdersWithRank = useMemo(
@@ -28,12 +29,12 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, marketView }) => {
       holders.map((holder, index) => {
         const amount = toNominal(BigInt(holder.amount));
         const supplyPercentage = (amount / maxSupply) * 100;
-        const price = toNominalPrice(marketView.lastSwap.avgExecutionPriceQ64);
+        const price = toNominalPrice(lastSwap.avgExecutionPriceQ64);
         const value = amount * price;
         const usdValue = value * (aptPrice || 0);
         return { ...holder, amount, supplyPercentage, value, usdValue, rank: index + 1 };
       }),
-    [aptPrice, holders, marketView.lastSwap.avgExecutionPriceQ64, maxSupply]
+    [aptPrice, holders, lastSwap.avgExecutionPriceQ64, maxSupply]
   );
 
   const columns: EcTableColumn<(typeof holdersWithRank)[number]>[] = useMemo(
