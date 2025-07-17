@@ -27,19 +27,18 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
   const { searchParams } = request.nextUrl;
   const paramsObject = Object.fromEntries(searchParams.entries());
   const validatedParams = CandlesticksSearchParamsSchema.parse(paramsObject);
-  const { marketID, period, countBack, to, chunkSize } = {
+  const { marketID, period, countBack, to } = {
     ...validatedParams,
-    chunkSize: CHUNK_SIZE,
   };
   try {
     const chunkMetadata = await fetchCachedAllChunkedCandlestickMetadata({
       marketID,
       period,
-      chunkSize,
-    }).then((res) => toChunkMetadata(res, chunkSize));
+      chunkSize: CHUNK_SIZE,
+    }).then((res) => toChunkMetadata(res, CHUNK_SIZE));
 
     const relevantChunks = getOnlyRelevantChunks({
-      expectedChunkSize: chunkSize,
+      expectedChunkSize: CHUNK_SIZE,
       chunkMetadata,
       toAndCountBack: { to, countBack },
     });
