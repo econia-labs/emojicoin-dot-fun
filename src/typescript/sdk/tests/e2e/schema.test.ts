@@ -2,14 +2,28 @@
 // cspell:word proname
 // cspell:word pronamespace
 
-import { type AnyColumnName, TableName } from "../../src/indexer-v2/types/json-types";
+import type { AnyColumnName } from "../../src/indexer-v2/types/json-types";
+import { TableName } from "../../src/indexer-v2/types/json-types";
 import {
   bigintColumns,
+  exclusivelyRpcColumns,
   floatColumns,
   integerColumns,
   PostgresNumericTypes,
+  timestampColumns,
 } from "../../src/indexer-v2/types/postgres-numeric-types";
 import { EMOJICOIN_INDEXER_URL } from "../../src/server/env";
+
+/**
+ * a new Set containing all the elements in `s1` which are not also in `s2`.
+ *
+ * Only used here because it's not available in CI for some reason.
+ */
+const difference = <T>(s1: Set<T>, s2: Set<T>) =>
+  Array.from(s1).reduce((acc, v) => {
+    if (!s2.has(v)) acc.add(v);
+    return acc;
+  }, new Set<T>([]));
 
 // This is not the full response type; it's just what we use in this test.
 interface DatabaseSchema {
@@ -59,6 +73,7 @@ describe("verifies the schema is what's expected", () => {
     const bigints: Set<AnyColumnName> = new Set();
     const floats: Set<AnyColumnName> = new Set();
     const integers: Set<AnyColumnName> = new Set();
+    const timestamps: Set<AnyColumnName> = new Set();
     for (const table of tables) {
       expect(definitions[table]).toBeDefined();
       expect(definitions[table].properties).toBeDefined();
@@ -71,19 +86,27 @@ describe("verifies the schema is what's expected", () => {
         floats: floatTypes,
         bigints: bigintTypes,
         integers: integerTypes,
+        timestamps: timestampTypes,
       } = PostgresNumericTypes;
       for (const [field, property] of entries) {
+        // Otherwise, add and check it later.
         if (floatTypes.has(property.format)) floats.add(field);
         if (bigintTypes.has(property.format)) bigints.add(field);
         if (integerTypes.has(property.format)) integers.add(field);
+        if (timestampTypes.has(property.format)) timestamps.add(field);
       }
     }
 
     // Check if we have it in our set of bigint/numeric types. This is useful for ensuring that
     // we parse things correctly.
-    expect(floats).toEqual(floatColumns);
-    expect(bigints).toEqual(bigintColumns);
-    expect(integers).toEqual(integerColumns);
+    // Check equality by comparing with the set of fields in [type]Columns while accounting for
+    // the columns that will not be in the API spec since they're only in RPC functions.
+    expect(floats).toEqual(difference(floatColumns, exclusivelyRpcColumns));
+    expect(bigints).toEqual(difference(bigintColumns, exclusivelyRpcColumns));
+    expect(integers).toEqual(difference(integerColumns, exclusivelyRpcColumns));
+
+    // Check timestamp columns, too.
+    expect(timestamps).toEqual(difference(timestampColumns, exclusivelyRpcColumns));
   });
 
   it("ensures that the schema has been updated post migrations", async () => {

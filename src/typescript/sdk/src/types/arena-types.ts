@@ -1,4 +1,4 @@
-import type { ArenaPeriod } from "../const";
+import type { Period } from "../const";
 import type { SymbolEmoji } from "../emoji_data";
 import type { AccountAddressString } from "../emojicoin_dot_fun";
 import type {
@@ -175,7 +175,7 @@ export type ArenaTypes = {
   ArenaCandlestick: {
     meleeID: bigint;
     version: bigint;
-    period: ArenaPeriod;
+    period: Period;
     startTime: Date;
     openPrice: number;
     closePrice: number;
@@ -211,22 +211,23 @@ const withVersionAndEventIndex = (data: {
 /**
  * Regex test for a valid bigint string.
  *
- * Only succeeds if every character in a string is a number 0-9.
- *
  * Accepts leading zeros.
  */
-const isValidBigIntString = (str: string) => /^\d+$/.test(str);
+const isPositiveBigIntString = (str: string) => /^\d+n?$/.test(str);
 
 /**
  * Since we've coalesced the types for the database and emitted module event data, it's helpful
- * to have a function that can handle either an incoming bigint string or a postgres timestamp.
+ * to have a function that can handle either an incoming Date object, a bigint string, or a postgres
+ * timestamp.
  *
  * NOTE: This function returns `new Date(0)` if all attempts at parsing fail. Explanation below.
  */
-export const safeParseBigIntOrPostgresTimestamp = (anyInput: AnyNumberString) => {
+export const safeParseDateOrBigIntOrPostgresTimestamp = (anyInput: AnyNumberString | Date) => {
+  if (anyInput instanceof Date) return anyInput;
   const input = anyInput.toString();
-  if (isValidBigIntString(input)) {
-    const bigInput = BigInt(input);
+  if (isPositiveBigIntString(input)) {
+    const stripped = input.replace("n", "");
+    const bigInput = BigInt(stripped);
     return dateFromMicroseconds(bigInput);
   }
   try {
@@ -247,7 +248,7 @@ export const toArenaMeleeEvent = (
   meleeID: BigInt(data.melee_id),
   emojicoin0MarketAddress: toAccountAddressString(data.emojicoin_0_market_address),
   emojicoin1MarketAddress: toAccountAddressString(data.emojicoin_1_market_address),
-  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  startTime: safeParseDateOrBigIntOrPostgresTimestamp(data.start_time),
   duration: BigInt(data.duration),
   maxMatchPercentage: BigInt(data.max_match_percentage),
   maxMatchAmount: BigInt(data.max_match_amount),

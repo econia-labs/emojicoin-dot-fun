@@ -1,3 +1,4 @@
+import { MAX_CANDLESTICK_COUNT_BACK } from "const";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { decodeSymbolsForChart, isArenaChartSymbol, parseSymbolWithParams } from "lib/chart-utils";
 import { useRouter } from "next/navigation";
@@ -5,20 +6,15 @@ import path from "path";
 import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 
-import { isNonArenaPeriod, periodEnumToRawDuration } from "@/sdk/const";
+import { periodEnumToRawDuration } from "@/sdk/const";
 import type { IBasicDataFeed } from "@/static/charting_library";
 import type { BarWithNonce } from "@/store/event/candlestick-bars";
 
 import { ResolutionStringToPeriod } from "./const";
+import { createDummyBar, fetchCandlesticksForChart } from "./get-bars";
 import {
-  createDummyBar,
-  fetchCandlesticksForChart,
-  fetchLatestBarsFromMarketResource,
-  updateLastBar,
-} from "./get-bars";
-import {
-  CONFIGURATION_DATA,
   constructLibrarySymbolInfo,
+  getConfigurationData,
   searchSymbolsFromRegisteredMarketMap,
   symbolInfoToSymbol,
 } from "./trading-view-utils";
@@ -29,15 +25,15 @@ export const useDatafeed = (symbol: string) => {
   const getShowEmptyBars = useUserSettings((s) => s.getShowEmptyBars);
   const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
-  const setLatestBars = useEventStore((s) => s.setLatestBars);
   const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarkets);
   const getMeleeMap = useEventStore((s) => s.getMeleeMap);
   const maybeUpdateMeleeLatestBar = useEventStore((s) => s.maybeUpdateMeleeLatestBar);
+  const maybeUpdateMarketLatestBar = useEventStore((s) => s.maybeUpdateMarketLatestBar);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
       onReady: (callback) => {
-        setTimeout(() => callback(CONFIGURATION_DATA));
+        setTimeout(() => callback(getConfigurationData(symbol)));
       },
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
         const registeredMarketMap = getRegisteredMarketMap();
@@ -67,16 +63,15 @@ export const useDatafeed = (symbol: string) => {
         const symbolInfo = constructLibrarySymbolInfo(baseChartSymbol, emptyBars);
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
-      getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
-        const { to } = periodParams;
+      getBars: async (symbolInfo, resolution, periParamsIn, onHistoryCallback, onErrorCallback) => {
+        const periodParams = {
+          ...periParamsIn,
+          countBack: Math.min(periParamsIn.countBack, MAX_CANDLESTICK_COUNT_BACK),
+        };
+        const { firstDataRequest } = periodParams;
         const period = ResolutionStringToPeriod[resolution];
         const periodDuration = periodEnumToRawDuration(period);
         const symbol = symbolInfoToSymbol(symbolInfo);
-
-        // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
-        // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
-        const endDate = new Date(to * 1000);
-        const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
 
         let bars: BarWithNonce[] = [];
 
@@ -92,47 +87,35 @@ export const useDatafeed = (symbol: string) => {
               meleeID: meleeID.toString(),
               periodParams,
               period,
+              firstDataRequest,
             });
 
-            if (isFetchForMostRecentBars) {
+            if (firstDataRequest) {
               maybeUpdateMeleeLatestBar(bars.at(-1), period, meleeID);
             }
           } else {
-            if (!isNonArenaPeriod(period)) {
-              throw new Error("Invalid period type for a non-arena symbol.");
-            }
             const entry = getRegisteredMarketMap().get(symbol);
             if (!entry) {
               console.error("Market metadata not in state for:", symbol);
               return;
             }
 
-            const { marketID, marketAddress } = entry.marketMetadata;
+            const { marketID } = entry.marketMetadata;
 
             bars = await fetchCandlesticksForChart({
               marketID: marketID.toString(),
               periodParams,
               period,
+              firstDataRequest,
             });
 
-            if (isFetchForMostRecentBars) {
-              const { marketMetadata, latestBar, latestBars } =
-                await fetchLatestBarsFromMarketResource({
-                  marketAddress,
-                  period,
-                });
-
-              // Set the latest bars in the state store.
-              setLatestBars({ marketMetadata, latestBars });
-              if (latestBar) {
-                // Mutates the `bars` array.
-                updateLastBar(bars, latestBar);
-              }
+            if (firstDataRequest) {
+              maybeUpdateMarketLatestBar(bars.at(-1), period, symbol);
             }
           }
 
           const noData = bars.length === 0;
-          if (noData && isFetchForMostRecentBars) {
+          if (noData && firstDataRequest) {
             // Create a single empty bar if there's no trading activity, otherwise the chart shows "No chart data".
             const dummyBar = createDummyBar(periodDuration, symbol);
             bars.push(dummyBar);
@@ -175,12 +158,12 @@ export const useDatafeed = (symbol: string) => {
     [
       // All the functions below are stable references to zustand functions.
       getRegisteredMarketMap,
-      setLatestBars,
       subscribeToPeriod,
       unsubscribeFromPeriod,
       getMeleeMap,
       getShowEmptyBars,
       maybeUpdateMeleeLatestBar,
+      maybeUpdateMarketLatestBar,
       symbol,
       router,
     ]
