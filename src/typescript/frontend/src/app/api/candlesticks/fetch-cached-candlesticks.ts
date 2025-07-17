@@ -17,9 +17,12 @@ const fetchHistoricalCandlestickData = unstable_cache(fetchCandlesticksInRange, 
   tags: ["fetch-historical-candlestick-data"],
 });
 
-// `unstable_cache` works by using the callback function's `cb.toString()` value as part of the
-// cache key. In order to ensure a hit despite varying input args, create the callback function
-// on the fly but ensure that `cb.toString()` is always constant by using a reference to the arg,
+/**
+ * `unstable_cache` works by using the callback function's `cb.toString()` value as part of the
+ * cache key. In order to ensure a hit despite varying input args, create the callback function
+ * on the fly but ensure that `cb.toString()` is always constant by using a reference to the arg.
+ * This is achieved through currying the function.
+ */
 const stableFetchIncompleteCandlestickData = ({
   marketID,
   period,
