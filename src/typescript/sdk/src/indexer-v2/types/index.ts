@@ -1,6 +1,6 @@
 import Big from "big.js";
 
-import { type Period, toArenaPeriod, toPeriod, toTrigger, type Trigger } from "../../const";
+import { type Period, toPeriod, toTrigger, type Trigger } from "../../const";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
 import type { AccountAddressString, Uint64String } from "../../emojicoin_dot_fun";
 import { calculateCurvePrice, type ReservesAndBondingCurveState } from "../../markets";
@@ -18,9 +18,10 @@ import {
 import {
   type AnyArenaEvent,
   ARENA_CANDLESTICK_NAME,
-  safeParseBigIntOrPostgresTimestamp,
+  safeParseDateOrBigIntOrPostgresTimestamp,
 } from "../../types/arena-types";
-import { deserializeToHexString, toAccountAddressString } from "../../utils";
+import { toAccountAddressString } from "../../utils/account-address";
+import { deserializeToHexString } from "../../utils/hex";
 import { q64ToBig } from "../../utils/nominal-price";
 import {
   type BlockAndEventIndexMetadata,
@@ -254,8 +255,8 @@ const toArenaCandlestickFromDatabase = (
   meleeID: BigInt(data.melee_id),
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
-  period: toArenaPeriod(data.period),
-  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  period: toPeriod(data.period),
+  startTime: safeParseDateOrBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),
   highPrice: Number(data.high_price),
@@ -647,10 +648,15 @@ export const GuidGetters = {
     eventName: EVENT_NAMES.State,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
   }),
-  candlestick: ({ market_id, start_time, period }: DatabaseJsonType["candlesticks"]) => ({
+  candlestick: ({
+    market_id,
+    start_time,
+    period,
+    last_transaction_version: version,
+  }: DatabaseJsonType["candlesticks"]) => ({
     // Not a real module-emitted event, but used to classify the type of data.
     eventName: CANDLESTICK_NAME,
-    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}`,
+    guid: `${CANDLESTICK_NAME}::${market_id}::${period}::${start_time}::${version}`,
   }),
   arenaEnterEvent: ({
     melee_id,
@@ -793,8 +799,8 @@ const toCandlestickFromDatabase = (
   marketID: BigInt(data.market_id),
   version: BigInt(data.last_transaction_version),
   volume: BigInt(data.volume),
-  period: toArenaPeriod(data.period),
-  startTime: safeParseBigIntOrPostgresTimestamp(data.start_time),
+  period: toPeriod(data.period),
+  startTime: safeParseDateOrBigIntOrPostgresTimestamp(data.start_time),
   openPrice: Number(data.open_price),
   closePrice: Number(data.close_price),
   highPrice: Number(data.high_price),
@@ -1111,6 +1117,8 @@ export const isLiquidityEventModel = (d: BrokerEventModels): d is LiquidityEvent
   d.eventName === "Liquidity";
 export const isGlobalStateEventModel = (d: BrokerEventModels): d is GlobalStateEventModel =>
   d.eventName === "GlobalState";
+export const isNonArenaCandlestickModel = (d: BrokerEventModels): d is CandlestickModel =>
+  d.eventName === CANDLESTICK_NAME;
 
 /**
  * Non-arena event models with markets.

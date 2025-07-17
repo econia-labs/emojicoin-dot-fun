@@ -3,9 +3,9 @@ import { useEffect } from "react";
 
 import type { SubscribableBrokerEvents } from "@/broker/types";
 
-// Note that we let the charting library handle the subscription to arena periods.
+// Note that we let the charting library handle the subscription to candlesticks.
 type ReliableSubscribeArgs = {
-  eventTypes: Array<SubscribableBrokerEvents>;
+  eventTypes: Array<Exclude<SubscribableBrokerEvents, "PeriodicState">>;
   arena?: boolean;
 };
 

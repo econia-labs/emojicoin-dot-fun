@@ -4,7 +4,7 @@ import { TransferCoins } from "@/move-modules";
 
 import {
   type AnyNumberString,
-  getMarketResource,
+  fetchMarketResource,
   maxBigInt,
   type SymbolEmoji,
   toEmojicoinTypes,
@@ -38,7 +38,7 @@ describe("tests the swap functionality", () => {
   let getMarketResourceHelper: (
     marketAddress: AccountAddressInput,
     version: AnyNumberString
-  ) => ReturnType<typeof getMarketResource>;
+  ) => ReturnType<typeof fetchMarketResource>;
   beforeAll(async () => {
     const versions = await Promise.all(
       zip(registrants, marketSymbols).map(([registrant, emojis]) =>
@@ -50,7 +50,7 @@ describe("tests the swap functionality", () => {
     );
     maxRegisterTxnVersion = maxBigInt(...versions);
     getMarketResourceHelper = (marketAddress, version) =>
-      getMarketResource({ aptos, marketAddress, ledgerVersion: BigInt(version) });
+      fetchMarketResource({ aptos, marketAddress, ledgerVersion: BigInt(version) });
     return true;
   });
 

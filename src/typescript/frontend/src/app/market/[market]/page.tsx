@@ -1,7 +1,6 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
-import { wrappedCachedOnChainMarketView } from "lib/queries/aptos-client/market-view";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import type { Metadata } from "next";
@@ -87,11 +86,10 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const { marketID } = state.market;
     const marketAddress = getMarketAddress(emojis).toString();
 
-    const [swaps, marketView, aptPrice, holders, melee] = await Promise.all([
+    const [swaps, aptPrice, holders, melee] = await Promise.all([
       fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
         logAndReturnValue("swap events", [])
       ),
-      wrappedCachedOnChainMarketView(marketAddress),
       fetchCachedAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
       fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
       FEATURE_FLAGS.Arena
@@ -113,7 +111,6 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
             symbol: state.market.symbolData.symbol,
             swaps,
             state,
-            marketView,
             holders,
             ...state.market,
           }}

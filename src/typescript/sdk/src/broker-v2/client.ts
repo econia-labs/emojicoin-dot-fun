@@ -7,6 +7,7 @@ import {
   type BrokerEvent,
   type BrokerMessage,
   brokerMessageConverter,
+  type MarketPeriodRequest,
   type SubscribableBrokerEvents,
   type SubscriptionMessage,
   type WebSocketSubscriptions,
@@ -30,7 +31,7 @@ type WebSocketClientEventListeners = {
 export type WebSocketClientArgs = {
   url: string | URL;
   listeners: WebSocketClientEventListeners;
-  permanentlySubscribeToMarketRegistrations: boolean;
+  permanentlySubscribeToMarketRegistrations?: boolean;
 };
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -38,6 +39,8 @@ export class WebSocketClient {
   public readonly client: WebSocket;
 
   public subscriptions: WebSocketSubscriptions;
+
+  public marketPeriodRequest?: MarketPeriodRequest;
 
   public arenaPeriodRequest?: ArenaPeriodRequest;
 
@@ -62,9 +65,13 @@ export class WebSocketClient {
     this.subscriptions = {
       marketIDs: new Set(),
       eventTypes: new Set(),
+      // For the newer candlestick models, not periodic state events.
+      marketPeriods: new Map(),
       arena: false,
+      // For the newer candlestick models, not periodic state events.
       arenaPeriods: new Set(),
     };
+    this.marketPeriodRequest = undefined;
     this.arenaPeriodRequest = undefined;
     this.client = new WebSocket(new URL(url));
 
@@ -97,6 +104,34 @@ export class WebSocketClient {
     this.client.onerror = (e: Event) => {
       onError(e);
     };
+  }
+
+  public subscribeToMarketPeriod(marketID: bigint, period: PeriodTypeFromBroker) {
+    const { marketPeriods } = this.subscriptions;
+    if (!marketPeriods.get(marketID)) {
+      marketPeriods.set(marketID, new Set());
+    }
+    marketPeriods.get(marketID)!.add(period);
+    this.marketPeriodRequest = {
+      market_id: Number(marketID),
+      action: "subscribe",
+      period,
+    };
+    this.sendToBroker();
+  }
+
+  public unsubscribeFromMarketPeriod(marketID: bigint, period: PeriodTypeFromBroker) {
+    const { marketPeriods } = this.subscriptions;
+    if (!marketPeriods.get(marketID)) {
+      marketPeriods.set(marketID, new Set());
+    }
+    marketPeriods.get(marketID)!.delete(period);
+    this.marketPeriodRequest = {
+      market_id: Number(marketID),
+      action: "unsubscribe",
+      period,
+    };
+    this.sendToBroker();
   }
 
   public subscribeToArenaPeriod(period: PeriodTypeFromBroker) {
@@ -158,13 +193,15 @@ export class WebSocketClient {
         ? []
         : Array.from(this.subscriptions.marketIDs).map(Number),
       event_types: this.subscribedTo.allBaseEvents ? [] : Array.from(this.subscriptions.eventTypes),
+      market_period: this.marketPeriodRequest,
       arena: this.subscriptions.arena,
       arena_period: this.arenaPeriodRequest,
     };
     const msg = JSON.stringify(subscriptionMessage);
     this.client.send(msg);
 
-    // Clear the period request after sending the message.
+    // Clear the period requests after sending the message.
     this.arenaPeriodRequest = undefined;
+    this.marketPeriodRequest = undefined;
   }
 }
