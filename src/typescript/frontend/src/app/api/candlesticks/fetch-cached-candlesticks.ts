@@ -38,7 +38,7 @@ const stableFetchIncompleteCandlestickData = ({
 
   return unstable_cache(stableIncompleteFetcher, [], {
     revalidate: INCOMPLETE_CACHE_REVALIDATION_TIME,
-    tags: ["fetch-incomplete-candlestick-data", marketID.toString(), period.toString()],
+    tags: ["fetch-incomplete-candlestick-data", `market_${marketID}-${period}`],
   });
 };
 
