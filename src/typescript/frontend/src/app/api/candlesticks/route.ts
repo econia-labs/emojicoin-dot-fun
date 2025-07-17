@@ -26,10 +26,7 @@ const fetchCachedAllChunkedCandlestickMetadata = unstable_cache(
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
   const { searchParams } = request.nextUrl;
   const paramsObject = Object.fromEntries(searchParams.entries());
-  const validatedParams = CandlesticksSearchParamsSchema.parse(paramsObject);
-  const { marketID, period, countBack, to } = {
-    ...validatedParams,
-  };
+  const { marketID, period, countBack, to } = CandlesticksSearchParamsSchema.parse(paramsObject);
   try {
     const chunkMetadata = await fetchCachedAllChunkedCandlestickMetadata({
       marketID,

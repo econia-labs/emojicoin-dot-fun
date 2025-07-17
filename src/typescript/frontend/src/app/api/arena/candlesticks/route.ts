@@ -12,10 +12,9 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
 
   const { searchParams } = request.nextUrl;
   const params = Object.fromEntries(searchParams.entries());
-  const validatedParams = ArenaCandlesticksSearchParamsSchema.parse(params);
+  const { meleeID, period, to, countBack } = ArenaCandlesticksSearchParamsSchema.parse(params);
 
   try {
-    const { meleeID, period, to, countBack } = validatedParams;
     const allArenaCandlesticksForPeriod = await fetchCachedArenaCandlesticks({ meleeID, period });
 
     // Filter out all candlesticks that occur at or after `to`; note `to` is in seconds.

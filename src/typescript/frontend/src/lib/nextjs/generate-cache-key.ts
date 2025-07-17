@@ -38,7 +38,7 @@ function generateCacheKey(invocationKey: string): string {
     MAIN_KEY_PREFIX,
     "",
     invocationKey,
-    {},
+    undefined,
     {},
     undefined,
     undefined,

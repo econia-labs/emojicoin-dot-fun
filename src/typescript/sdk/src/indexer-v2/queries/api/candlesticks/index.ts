@@ -1,3 +1,5 @@
+import type { PostgrestError } from "@supabase/postgrest-js";
+
 import { type DatabaseJsonType, DatabaseRpc, type PeriodTypeFromDatabase } from "../../../..";
 import type { AnyNumberString } from "../../../../types/types";
 import { MAX_ROW_LIMIT } from "../../../const";
@@ -73,6 +75,14 @@ async function fetchChunkedCandlesticksMetadata({
     .overrideTypes<DatabaseJsonType["chunked_candlesticks_metadata"][], { merge: false }>();
 }
 
+/**
+ * At 500 chunks per fetch, with 500 rows per chunk, a single fetch of the chunk metadata will
+ * cover 250,000 candlesticks.
+ *
+ * At 20 max fetches, this is 5,000,000 candlesticks, which spans ~9.5 years for the 1m period.
+ */
+const MAX_FETCHES = 20;
+
 export async function fetchAllChunkedCandlesticksMetadata({
   marketID,
   period,
@@ -83,17 +93,27 @@ export async function fetchAllChunkedCandlesticksMetadata({
   chunkSize: number;
 }) {
   const chunks: DatabaseJsonType["chunked_candlesticks_metadata"][] = [];
-  let lastRes: DatabaseJsonType["chunked_candlesticks_metadata"][] = [];
+  let data: DatabaseJsonType["chunked_candlesticks_metadata"][] = [];
+  let error: unknown | PostgrestError | null = null;
   let page = 1;
 
-  // Exhaustively fetch all chunks. This repeatedly fetches while the most recent fetched data
-  // doesn't have the max # of rows.
+  // Exhaustively fetch all chunks.
   do {
-    lastRes =
-      (await fetchChunkedCandlesticksMetadata({ marketID, period, chunkSize, page })).data ?? [];
+    try {
+      const res = await fetchChunkedCandlesticksMetadata({ marketID, period, chunkSize, page });
+      data = res.data ?? [];
+      error = res.error;
+    } catch (e) {
+      data = [];
+      error = e;
+    }
     page += 1;
-    chunks.push(...lastRes);
-  } while (lastRes.length % MAX_ROW_LIMIT === 0);
+    chunks.push(...data);
+    // Only continue while there's no error, exactly MAX_ROW_LIMIT rows were returned, and the
+    // internal pagination page doesn't exceed MAX_FETCHES.
+  } while (!error && data.length === MAX_ROW_LIMIT && page < MAX_FETCHES);
+
+  if (error) console.error(error);
 
   return chunks;
 }
