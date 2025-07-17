@@ -2,6 +2,7 @@
 // cspell:word minmov
 // cspell:word pricescale
 
+import type { ArenaChartSymbol } from "lib/chart-utils";
 import { getClientTimezone } from "lib/chart-utils";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 
@@ -13,17 +14,19 @@ import type {
 } from "@/static/charting_library";
 import type { EventStore } from "@/store/event/types";
 
-import { EXCHANGE_NAME, TV_CHARTING_LIBRARY_RESOLUTIONS } from "./const";
+import { EXCHANGE_NAME, getTradingViewLibraryResolutions } from "./const";
 
-export const CONFIGURATION_DATA: DatafeedConfiguration = {
-  supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
+export const getConfigurationData: (symbol: ArenaChartSymbol | string) => DatafeedConfiguration = (
+  symbol
+) => ({
+  supported_resolutions: getTradingViewLibraryResolutions(symbol),
   symbols_types: [
     {
       name: "crypto",
       value: "crypto",
     },
   ],
-};
+});
 
 export const searchSymbolsFromRegisteredMarketMap = ({
   userInput,
@@ -82,7 +85,7 @@ export const constructLibrarySymbolInfo = (
   has_weekly_and_monthly: false,
   timezone: getClientTimezone() as Timezone,
   type: "crypto",
-  supported_resolutions: CONFIGURATION_DATA.supported_resolutions,
+  supported_resolutions: getConfigurationData(symbol).supported_resolutions,
   format: "price",
 });
 

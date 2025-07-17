@@ -275,10 +275,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
         <Flex width="100%" justifyContent="space-between" alignItems="center" mb="10px">
           <Flex flexDirection="row">
             <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="center">
-              <button
-                onClick={() => setDirection(direction === "add" ? "remove" : "add")}
-                className="absolute left-[-30px]"
-              >
+              <button onClick={() => setDirection(direction === "add" ? "remove" : "add")}>
                 <Arrows color="econiaBlue" />
               </button>
 

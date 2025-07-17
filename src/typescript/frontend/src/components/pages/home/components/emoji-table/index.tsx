@@ -25,6 +25,7 @@ import { MAX_NUM_FAVORITES } from "@/sdk/index";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
+import EmptyTableCard from "../table-card/EmptyTableCard";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import { ClientGrid } from "./ClientGrid";
 import { ButtonsBlock } from "./components/buttons-block";
@@ -105,6 +106,11 @@ const EmojiTable = (props: EmojiTableProps) => {
   );
 
   const rowLength = useGridRowLength();
+
+  const emptyCells = useMemo(() => {
+    const maxPossibleCells = Math.ceil(markets.length / rowLength) * rowLength;
+    return maxPossibleCells - markets.length;
+  }, [markets.length, rowLength]);
 
   // Update cookies and refresh the page.
   const setIsFilterFavorites = (newVal: boolean) => {
@@ -219,6 +225,16 @@ const EmojiTable = (props: EmojiTableProps) => {
                       ) : (
                         <ClientGrid markets={markets} page={page} sortBy={sort} />
                       )}
+                      {!!emptyCells &&
+                        Array.from({ length: emptyCells }).map((_, i) => (
+                          <EmptyTableCard
+                            key={`empty-table-card-${sort}-${page - 1 * MARKETS_PER_PAGE + (markets.length - 1 + i)}`}
+                            index={markets.length - 1 + i}
+                            rowLength={rowLength}
+                            pageOffset={page - 1 * MARKETS_PER_PAGE}
+                            sortBy={sort}
+                          />
+                        ))}
                     </div>
                   </motion.div>
                 </AnimatePresence>

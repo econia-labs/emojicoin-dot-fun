@@ -1,6 +1,6 @@
 import { MS_IN_ONE_DAY } from "components/charts/const";
 import { parse, satisfies, type SemVer } from "semver";
-import { parseJSON, stringifyJSON } from "utils";
+import { parseResponseJSON, stringifyJSON } from "utils";
 
 import packages from "../../package.json";
 
@@ -43,7 +43,7 @@ export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): 
     return null;
   }
   try {
-    const cache = parseJSON<LocalStorageCache<T>>(str);
+    const cache = parseResponseJSON<LocalStorageCache<T>>(str);
     const range = `~${LOCAL_STORAGE_VERSIONS[key].major}`;
     // Check for no breaking changes.
     if (!satisfies(cache.version ?? "1.0.0", range)) {

@@ -308,7 +308,7 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
   return { marketAddress, emojicoin, emojicoinLP };
 };
 
-export async function getMarketResource(args: {
+export async function fetchMarketResource(args: {
   aptos: Aptos;
   marketAddress: AccountAddressInput;
   ledgerVersion?: AnyNumber;
@@ -533,3 +533,28 @@ export const calculateCurvePrice = (args: ReservesAndBondingCurveState) => {
     : args.cpammRealReserves;
   return PreciseBig(quote.toString()).div(base.toString());
 };
+
+/**
+ * Calculate the average execution price more similarly to how a centralized exchange does, in that
+ * it doesn't include fees in the reported execution price.
+ */
+export function calculateAverageExecutionPricePreFees(args: {
+  baseVolume: bigint;
+  quoteVolume: bigint;
+  poolFee: bigint;
+  integratorFee: bigint;
+  isSell: boolean;
+}) {
+  const isBuy = !args.isSell;
+
+  const [baseVolume, quoteVolume, poolFee, integratorFee] = [
+    args.baseVolume,
+    args.quoteVolume,
+    args.poolFee,
+    args.integratorFee,
+  ].map((v) => Big(v.toString()));
+
+  return isBuy
+    ? quoteVolume.div(baseVolume.plus(poolFee))
+    : quoteVolume.plus(poolFee.plus(integratorFee)).div(baseVolume);
+}

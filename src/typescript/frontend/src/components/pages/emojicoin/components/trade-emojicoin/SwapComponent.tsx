@@ -1,5 +1,6 @@
 "use client";
 
+import Big from "big.js";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
 import { InputNumeric } from "components/inputs";
@@ -19,6 +20,7 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import { getMaxSlippageSettings } from "utils/slippage";
 
+import { ColoredPriceDisplay } from "@/components/misc/ColoredPriceDisplay";
 import Popup from "@/components/popup";
 import { Flex, FlexGap } from "@/containers";
 import { toEmojicoinTypes } from "@/sdk/markets/utils";
@@ -94,7 +96,7 @@ export default function SwapComponent({
 
   const gasCost = useGetGasWithDefault({ marketAddress, inputAmount, isSell, numSwaps });
 
-  const { netProceeds, error } = calculateSwapPriceFromMarketState({
+  const { netProceeds, baseVolume, quoteVolume, error } = calculateSwapPriceFromMarketState({
     latestMarketState,
     isSell,
     inputAmount,
@@ -149,6 +151,21 @@ export default function SwapComponent({
       </AnimatePresence>
     );
   }, [t, account, isSell, aptBalance, emojicoinBalance, sufficientBalance]);
+
+  const avgPriceLabel = useMemo(() => {
+    const label = `${t("Avg Price")}: `;
+    return (
+      <div className="text-light-gray uppercase">
+        <span>{label}</span>
+        {baseVolume > 0n && (
+          <ColoredPriceDisplay
+            price={Big(quoteVolume.toString()).div(baseVolume.toString()).toNumber()}
+            colorFor="neutral"
+          />
+        )}
+      </div>
+    );
+  }, [t, baseVolume, quoteVolume]);
 
   return (
     <Column className="relative w-full max-w-[414px] justify-center">
@@ -267,8 +284,8 @@ export default function SwapComponent({
           {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
         </InnerWrapper>
       </SimulateInputsWrapper>
-      <div className="flex flex-row justify-between py-[10px]">
-        <div></div>
+      <div className="flex flex-row justify-between py-[10px] px-1">
+        {avgPriceLabel}
         <div className="text-dark-gray">
           <span className="text-xl leading-[0]">
             {gasCost === DEFAULT_SWAP_GAS_COST ? "~" : ""}

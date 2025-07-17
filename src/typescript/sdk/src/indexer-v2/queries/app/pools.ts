@@ -2,7 +2,7 @@ import type { Account, AccountAddressInput } from "@aptos-labs/ts-sdk";
 
 import { toAccountAddressString } from "../../../utils";
 import { LIMIT, ORDER_BY } from "../../const";
-import { toUserPoolsRPCResponse } from "../../types";
+import { DatabaseRpc, toUserPoolsRPCResponse } from "../../types";
 import { type MarketStateQueryArgs, SortMarketsBy } from "../../types/common";
 import { postgrest } from "../client";
 import { sortByWithFallback } from "../query-params";
@@ -18,7 +18,7 @@ const callUserPools = ({
   // Since this is a read-only function call, prefer to call this as a `GET` request. It makes API
   // gateway authorization simpler and cleaner.
   let query = postgrest
-    .rpc("user_pools", { provider: toAccountAddressString(provider) }, { get: true })
+    .dbRpc(DatabaseRpc.UserPools, { provider: toAccountAddressString(provider) }, { get: true })
     .select("*")
     .order(sortByWithFallback(sortBy), orderBy)
     .limit(pageSize);

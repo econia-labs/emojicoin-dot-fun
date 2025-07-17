@@ -14,7 +14,7 @@ export const revalidate = 0;
 export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const params = parseSearchParams(searchParams);
-  const { page, sender, limit, marketID, orderBy, symbolEmojis } = GetTradesSchema.parse(params);
+  const { page, sender, marketID, orderBy, symbolEmojis } = GetTradesSchema.parse(params);
   if (!sender && !marketID && !symbolEmojis) {
     return NextResponse.json(
       { error: "At least one of address, marketID or symbolEmojis is required" },
@@ -27,7 +27,6 @@ export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const swaps = await fetchSwapEvents({
     sender,
     marketID,
-    pageSize: limit,
     page,
     orderBy,
     symbolEmojis,

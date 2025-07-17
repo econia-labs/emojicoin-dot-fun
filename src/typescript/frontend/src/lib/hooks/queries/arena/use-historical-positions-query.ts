@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { parseResponseJSON } from "utils";
 
 import { useAccountAddress } from "@/hooks/use-account-address";
 import type { DatabaseJsonType, Types } from "@/sdk/index";
@@ -20,7 +20,7 @@ export const useHistoricalPositionsQuery = () => {
       if (!accountAddress) return null;
       const historicalPositions = await fetch(url)
         .then((res) => res.text())
-        .then(parseJSON<DatabaseJsonType["arena_leaderboard_history_with_arena_info"][]>)
+        .then(parseResponseJSON<DatabaseJsonType["arena_leaderboard_history_with_arena_info"][]>)
         .then((res) =>
           res
             .map(toArenaLeaderboardHistoryWithArenaInfo)

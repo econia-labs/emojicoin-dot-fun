@@ -79,6 +79,13 @@ fund_and_publish() {
 		--gas-unit-price $gas_unit_price \
 		--profile $profile
 
+	aptos move run \
+		--assume-yes \
+		--json-file /app/json/favorites.json \
+		--max-gas 2000000 \
+		--gas-unit-price $gas_unit_price \
+		--profile $profile
+
 	water_bytes="f09f92a7" # For 💧.
 	fire_bytes="f09f94a5"  # For 🔥.
 	# Alternatively, you could pass "raw:0104f09f92a7" to properly serialize

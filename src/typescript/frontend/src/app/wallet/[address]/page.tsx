@@ -3,7 +3,7 @@
 import { sha3_256 } from "@noble/hashes/sha3";
 import { WalletClientPage } from "components/pages/wallet/WalletClientPage";
 import { AptPriceContextProvider } from "context/AptPrice";
-import { getAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import generateMetadataHelper from "lib/utils/generate-metadata-helper";
 import type { Metadata } from "next";
 
@@ -51,7 +51,7 @@ export default async function WalletPage({ params }: Props) {
     return <UserNotFound />;
   }
 
-  const aptPrice = await getAptPrice();
+  const aptPrice = await fetchCachedAptPrice();
 
   return (
     <div className="mx-auto">

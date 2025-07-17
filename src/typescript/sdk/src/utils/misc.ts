@@ -2,7 +2,6 @@ import { AccountAddress, type InputGenerateTransactionOptions } from "@aptos-lab
 import Big from "big.js";
 
 import {
-  type AnyPeriod,
   type Period,
   type PeriodDuration,
   periodEnumToRawDuration,
@@ -101,7 +100,7 @@ export function getPeriodStartTime(
  */
 export function getPeriodStartTimeFromTime(
   microseconds: AnyNumberString,
-  period: PeriodDuration | AnyPeriod
+  period: PeriodDuration | Period
 ) {
   const periodDuration = typeof period !== "number" ? periodEnumToRawDuration(period) : period;
   const time = BigInt(microseconds);

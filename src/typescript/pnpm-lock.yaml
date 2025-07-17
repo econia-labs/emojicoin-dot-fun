@@ -275,6 +275,94 @@ importers:
         specifier: 5.6.2
         version: 5.6.2
 
+  scripts:
+    dependencies:
+      '@aptos-labs/ts-sdk':
+        specifier: 1.38.0
+        version: 1.38.0(axios@1.8.4)(got@11.8.6)
+      '@econia-labs/emojicoin-sdk':
+        specifier: 0.11.1
+        version: 0.11.1(axios@1.8.4)(got@11.8.6)
+      axios:
+        specifier: '>=1.8.2'
+        version: 1.8.4
+      big.js:
+        specifier: ^6.2.2
+        version: 6.2.2
+      find-git-root:
+        specifier: ^1.0.4
+        version: 1.0.4
+      immer:
+        specifier: ^10.1.1
+        version: 10.1.1
+      zustand:
+        specifier: ^5.0.3
+        version: 5.0.6(@types/react@18.3.20)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
+    devDependencies:
+      '@types/big.js':
+        specifier: ^6.2.2
+        version: 6.2.2
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/lodash':
+        specifier: ^4.17.15
+        version: 4.17.16
+      '@types/node':
+        specifier: ^20.16.11
+        version: 20.17.30
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^7.18.0
+        version: 7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1)(typescript@5.6.2)
+      '@typescript-eslint/parser':
+        specifier: ^7.18.0
+        version: 7.18.0(eslint@8.57.1)(typescript@5.6.2)
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
+      dotenv-cli:
+        specifier: ^7.4.2
+        version: 7.4.4
+      eslint:
+        specifier: ^8.57.1
+        version: 8.57.1
+      eslint-import-resolver-typescript:
+        specifier: ^3.10.0
+        version: 3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1)
+      eslint-plugin-import:
+        specifier: ^2.31.0
+        version: 2.31.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-typescript@3.10.0)(eslint@8.57.1)
+      eslint-plugin-simple-import-sort:
+        specifier: ^12.1.1
+        version: 12.1.1(eslint@8.57.1)
+      eslint-plugin-unused-imports:
+        specifier: ^3.2.0
+        version: 3.2.0(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1)(typescript@5.6.2))(eslint@8.57.1)
+      graphql-request:
+        specifier: ^7.1.2
+        version: 7.1.2(graphql@16.10.0)
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.17.30)
+      kolorist:
+        specifier: ^1.8.0
+        version: 1.8.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      prettier:
+        specifier: ^3.3.3
+        version: 3.5.3
+      tree-kill:
+        specifier: ^1.2.2
+        version: 1.2.2
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.3
+      typescript:
+        specifier: 5.6.2
+        version: 5.6.2
+
   sdk:
     dependencies:
       '@aptos-labs/ts-sdk':
@@ -656,6 +744,10 @@ packages:
   '@discoveryjs/json-ext@0.5.7':
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
+
+  '@econia-labs/emojicoin-sdk@0.11.1':
+    resolution: {integrity: sha512-EMzIB2thpzJhiXz6TowTJ2Ay5yfsMzNVkS8gG5gpTfi/5xHz0U+i1uc0UbhBSQzevGB9QA0qQboAchSv0KnUbg==}
+    engines: {node: '>=v20.12.2'}
 
   '@emnapi/core@1.4.3':
     resolution: {integrity: sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==}
@@ -5415,6 +5507,24 @@ packages:
       react:
         optional: true
 
+  zustand@5.0.6:
+    resolution: {integrity: sha512-ihAqNeUVhe0MAD+X8M5UzqyZ9k3FFZLBTtqo6JLPwV53cbRB/mJwBI0PxcIgqhBBHlEs8G45OTDTMq3gNcLq3A==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
 snapshots:
 
   '@adraffy/ens-normalize@1.10.1': {}
@@ -5829,6 +5939,21 @@ snapshots:
   '@bcoe/v8-coverage@0.2.3': {}
 
   '@discoveryjs/json-ext@0.5.7': {}
+
+  '@econia-labs/emojicoin-sdk@0.11.1(axios@1.8.4)(got@11.8.6)':
+    dependencies:
+      '@aptos-labs/ts-sdk': 1.38.0(axios@1.8.4)(got@11.8.6)
+      '@noble/hashes': 1.7.2
+      '@supabase/postgrest-js': 1.19.4
+      big.js: 6.2.2
+      emoji-regex: 10.3.0
+      find-git-root: 1.0.4
+      json-bigint: 1.0.0
+      server-only: 0.0.1
+      zod: 3.24.2
+    transitivePeerDependencies:
+      - axios
+      - got
 
   '@emnapi/core@1.4.3':
     dependencies:
@@ -8389,7 +8514,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -8411,7 +8536,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -11151,3 +11276,10 @@ snapshots:
       '@types/react': 18.3.20
       immer: 10.1.1
       react: 18.3.1
+
+  zustand@5.0.6(@types/react@18.3.20)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1)):
+    optionalDependencies:
+      '@types/react': 18.3.20
+      immer: 10.1.1
+      react: 18.3.1
+      use-sync-external-store: 1.5.0(react@18.3.1)

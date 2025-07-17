@@ -8,7 +8,7 @@ import { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 
 const ROWS_RETURNED = 100;
 
-export const fetchCache = "force-no-store";
+export const fetchCache = "default-no-store";
 
 // NOTE: This just returns the first 100 historical escrows + the current escrow.
 // Past that, it would require custom pagination.

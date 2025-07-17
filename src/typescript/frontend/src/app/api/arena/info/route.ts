@@ -6,7 +6,7 @@ import type { DatabaseJsonType } from "@/sdk/index";
 import { fetchArenaInfoJson, fetchSpecificMarketsUnsafe } from "@/sdk/indexer-v2/queries";
 import { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 
-export const fetchCache = "force-no-store";
+export const fetchCache = "default-no-store";
 
 export type ArenaInfoResponse = {
   arena_info: DatabaseJsonType["arena_info"];

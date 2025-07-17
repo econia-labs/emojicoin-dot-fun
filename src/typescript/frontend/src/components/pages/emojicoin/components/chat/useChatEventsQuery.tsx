@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { GetChatsSchema } from "app/api/chats/schema";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { parseResponseJSON } from "utils";
 import { addSearchParams } from "utils/url-utils";
 import type { z } from "zod";
 
@@ -21,7 +21,7 @@ export const useChatEventsQuery = (args: z.input<typeof GetChatsSchema>) => {
           const errorText = await r.text();
           throw new Error(`HTTP error ${r.status}: ${errorText}`);
         }
-        return parseJSON<ChatEvent[]>(await r.text());
+        return parseResponseJSON<ChatEvent[]>(await r.text());
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>

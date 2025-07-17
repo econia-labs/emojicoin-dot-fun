@@ -5,6 +5,7 @@ import type { AccountAddress } from "@aptos-labs/ts-sdk";
 import type { SymbolEmoji } from "../../../emoji_data/types";
 import type { AnyNumberString } from "../../../types";
 import { LIMIT, ORDER_BY } from "../../const";
+import type { DatabaseJsonType } from "../../types";
 import {
   toChatEventModel,
   toMarketRegistrationEventModel,
@@ -12,7 +13,11 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import type { MarketStateQueryArgs, PeriodicStateEventQueryArgs } from "../../types/common";
+import type {
+  CandlesticksQueryArgs,
+  MarketStateQueryArgs,
+  PeriodicStateEventQueryArgs,
+} from "../../types/common";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
@@ -73,6 +78,22 @@ const selectChatsByMarketID = ({
   return query;
 };
 
+const selectCandlesticksInRange = ({
+  marketID,
+  period,
+  firstStartTime,
+  lastStartTime,
+}: CandlesticksQueryArgs) =>
+  postgrest
+    .from(TableName.Candlesticks)
+    .select("*")
+    .eq("market_id", marketID)
+    .eq("period", period)
+    .gte("start_time", firstStartTime.toISOString())
+    .lte("start_time", lastStartTime.toISOString())
+    .order("start_time", ORDER_BY.ASC)
+    .overrideTypes<DatabaseJsonType["candlesticks"][], { merge: false }>();
+
 // This query uses `offset` instead of `page` because the periodic state events query requires
 // more granular pagination due to the requirements of the private TradingView charting library.
 const selectPeriodicEventsSince = ({
@@ -124,3 +145,5 @@ export const fetchMarketRegistration = queryHelperSingle(
   selectMarketRegistration,
   toMarketRegistrationEventModel
 );
+
+export const fetchCandlesticksInRange = queryHelper(selectCandlesticksInRange);

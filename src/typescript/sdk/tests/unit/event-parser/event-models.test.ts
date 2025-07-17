@@ -2,7 +2,7 @@
 import fs from "fs";
 import path from "path";
 
-import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
+import { parsePostgrestJSON } from "../../../src/indexer-v2/json-bigint";
 import { toMarketStateModel } from "../../../src/indexer-v2/types";
 import type { DatabaseJsonType } from "../../../src/indexer-v2/types/json-types";
 import goldens from "./goldens";
@@ -20,7 +20,7 @@ const jsonBuffer = fs.readFileSync(statesJsonPath);
 const data: {
   pre_bonding_curve: DatabaseJsonType["market_state"][];
   post_bonding_curve: DatabaseJsonType["market_state"][];
-} = parseJSONWithBigInts(jsonBuffer.toString());
+} = parsePostgrestJSON(jsonBuffer.toString());
 
 const TestData = {
   preBondingCurve: {
@@ -74,7 +74,7 @@ describe("tests for parsing event model data", () => {
   it("parses a market state model with a market pre bonding curve", () => {
     const { preBondingCurve: data } = TestData;
     const { json, text } = data;
-    const parsedArray = parseJSONWithBigInts<DatabaseJsonType["market_state"][]>(text);
+    const parsedArray = parsePostgrestJSON<DatabaseJsonType["market_state"][]>(text);
     const [parsed] = parsedArray;
     expect(parsedArray).toEqual(json);
     expect(parsed).toEqual(json[0]);
@@ -90,7 +90,7 @@ describe("tests for parsing event model data", () => {
   it("parses a market state model with a market post bonding curve", () => {
     const { postBondingCurve: data } = TestData;
     const { json, text } = data;
-    const parsedArray = parseJSONWithBigInts<DatabaseJsonType["market_state"][]>(text);
+    const parsedArray = parsePostgrestJSON<DatabaseJsonType["market_state"][]>(text);
     const [parsed] = parsedArray;
     expect(parsedArray).toEqual(json);
     expect(parsed).toEqual(json[0]);

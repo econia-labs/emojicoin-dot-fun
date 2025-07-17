@@ -1,0 +1,15 @@
+.aptos/
+.DS_Store
+*/**/.DS_Store
+.env*.local
+.env
+.history/
+.idea/
+.npm/
+.vscode/
+build/
+coverage/
+dist/
+node_modules/
+*.bak
+tests/.tmp/
