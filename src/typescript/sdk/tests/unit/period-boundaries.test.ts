@@ -1,4 +1,4 @@
-import { getPeriodStartTime, NON_ARENA_PERIODS, PeriodDuration } from "../../src";
+import { getPeriodStartTime, PeriodDuration, PERIODS } from "../../src";
 import { calculatePeriodBoundariesCrossed } from "../utils";
 import { SAMPLE_STATE_EVENT, SAMPLE_SWAP_EVENT } from "../utils/sample-data";
 
@@ -210,7 +210,7 @@ describe("calculates period boundaries crossed", () => {
     const endDay = new Date(Number(endMicroseconds / 1000n)).getUTCDate();
     expect(startDay + 1).toEqual(endDay);
     const numBoundaries = calculatePeriodBoundariesCrossed({ startMicroseconds, endMicroseconds });
-    expect(numBoundaries).toEqual(NON_ARENA_PERIODS.size);
+    expect(numBoundaries).toEqual(PERIODS.size);
   });
 
   it("calculates that exactly only 1 period boundary is crossed over a 4m59s time period", () => {
@@ -229,7 +229,7 @@ describe("calculates period boundaries crossed", () => {
     expect(startDay + 3).toEqual(endDay);
     const numBoundaries = calculatePeriodBoundariesCrossed({ startMicroseconds, endMicroseconds });
     expect(numBoundaries).toEqual(7);
-    expect(numBoundaries).toEqual(NON_ARENA_PERIODS.size);
+    expect(numBoundaries).toEqual(PERIODS.size);
   });
 
   it("throws if the end time is later than the start time", () => {

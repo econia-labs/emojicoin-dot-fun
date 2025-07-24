@@ -145,7 +145,7 @@ type GridCoordinateHistory = {
   curr: GridCoordinate;
 };
 
-type GridCoordinate = {
+export type GridCoordinate = {
   row: number;
   col: number;
   index: number;

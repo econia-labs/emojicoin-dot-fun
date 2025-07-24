@@ -1,15 +1,18 @@
 // cspell:word OHLCV
 
 import {
-  ArenaPeriod,
   calculateCurvePrice,
   ONE_APT_BIGINT,
+  Period,
   sleep,
   type SymbolEmoji,
+  toLatestMarketCandlesticksModel,
 } from "../../src";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import {
   type CandlestickModel,
+  fetchArenaLatestCandlesticks,
+  fetchMarketLatestCandlesticks,
   type MarketLatestStateEventModel,
   postgrest,
   TableName,
@@ -41,15 +44,89 @@ const expectEqualOHLCV = (
   expect(fromDb.volume).toEqual(calculated.volume);
 };
 
-describe("ensures arena candlesticks work", () => {
+describe("ensures non-periodic state event based candlesticks work", () => {
   const emojicoin = new EmojicoinClient();
 
-  const emojis: SymbolEmoji[][] = [["♑"], ["♒"]];
+  const emojis: SymbolEmoji[][] = [["♑"], ["♒"], ["🧻"], ["🧻", "🧻"]];
 
   beforeEach(async () => {
     await waitForNew15sPeriodBoundary();
     return true;
   }, 70000);
+
+  function checkNumberOfUniqueLatestCandlesticks(
+    latestCandlesticks: Awaited<ReturnType<typeof fetchMarketLatestCandlesticks>>
+  ) {
+    const numPeriodTypes = new Set(Object.keys(Period));
+    expect(latestCandlesticks).not.toBe(null);
+    expect(latestCandlesticks).toBeTruthy();
+
+    const uniquePeriods = new Set(Object.keys(latestCandlesticks!));
+    const uniqueCandlesticks = new Set(Object.values(latestCandlesticks!));
+    expect(uniquePeriods.size).toEqual(numPeriodTypes.size);
+    expect(uniqueCandlesticks.size).toEqual(numPeriodTypes.size);
+  }
+
+  it("receives all latest candlesticks for a market as soon as it is registered", async () => {
+    const account = getFundedAccount("668");
+    const { marketID } = await emojicoin.register(account, emojis[2]).then(async (res) => {
+      await waitForProcessor(res.response);
+      return res.registration.event;
+    });
+
+    const latestCandlesticks = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkNumberOfUniqueLatestCandlesticks(latestCandlesticks);
+  }, 15000);
+
+  it("receives updated latest 15s candlestick after a market is traded on", async () => {
+    const account = getFundedAccount("669");
+    const { marketID } = await emojicoin.register(account, emojis[3]).then(async (res) => {
+      await waitForProcessor(res.response);
+      return res.registration.event;
+    });
+
+    const firstLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkNumberOfUniqueLatestCandlesticks(firstLatestCandlesticksRes);
+
+    const firstLatestCandlesticks = toLatestMarketCandlesticksModel(firstLatestCandlesticksRes);
+    const first15s = firstLatestCandlesticks[Period.Period15S]!;
+    expect(first15s).toBeTruthy();
+
+    await sleep(15001);
+    const inputAmount = ONE_APT_BIGINT;
+    const buyRes = await emojicoin.buy(account, emojis[3], inputAmount);
+    await waitForProcessor(buyRes);
+    const secondLatestCandlesticksRes = (await fetchMarketLatestCandlesticks(marketID))!;
+    checkNumberOfUniqueLatestCandlesticks(secondLatestCandlesticksRes);
+    const secondLatestCandlesticks = toLatestMarketCandlesticksModel(secondLatestCandlesticksRes);
+    const second15s = secondLatestCandlesticks[Period.Period15S]!;
+    expect(second15s).toBeTruthy();
+    expect(second15s.version).toBe(BigInt(buyRes.response.version));
+    expect(second15s.volume).toBe(inputAmount);
+    const firstStartTime = first15s.startTime.getTime();
+    const secondStartTime = second15s.startTime.getTime();
+    expect(secondStartTime).not.toEqual(firstStartTime);
+    const nextTwoStartTimes = [firstStartTime + 15000, firstStartTime + 30000];
+    expect(nextTwoStartTimes).toContain(second15s.startTime.getTime());
+    expect(second15s.guid).not.toEqual(first15s.guid);
+  }, 30000);
+
+  it("receives no candlesticks for a melee if it has no trading activity yet", async () => {
+    // Since the first melee is created in test prior to the test harness even firing up and isn't
+    // ever traded on, this test can just check that melee specifically.
+    const FIRST_MELEE_ID = 1;
+
+    const latestArenaCandlesticks = (await fetchArenaLatestCandlesticks(FIRST_MELEE_ID))!;
+    // Note that the postgres function actually returns 0 rows (not null) if there's no data yet,
+    // but it's coerced to `null` by the TypeScript SDK function call to make things less confusing.
+    expect(new Set(Object.keys(latestArenaCandlesticks))).toEqual(
+      // Arena has specific periods.
+      new Set(["period_15s", "period_1m", "period_5m", "period_15m", "period_30m", "period_1h"])
+    );
+    Object.values(latestArenaCandlesticks).forEach((v) => {
+      expect(v).toBeUndefined();
+    });
+  });
 
   it("verifies that candlesticks are correct on markets without prior data", async () => {
     // We have to swap with the accounts that registered the markets as the
@@ -59,7 +136,7 @@ describe("ensures arena candlesticks work", () => {
     // the two initial markets, or one of the funded accounts (0x000 to 0xfff).
     const account = getFundedAccount("667");
 
-    const registerResponse = await emojicoin.register(getFundedAccount("667"), emojis[0]);
+    const registerResponse = await emojicoin.register(account, emojis[0]);
     const { marketID } = registerResponse.registration.event;
 
     await waitForProcessor(registerResponse);
@@ -116,7 +193,7 @@ describe("ensures arena candlesticks work", () => {
     // ---------------------------------------------------------------------------------------------
     // Check initial state of candlesticks.
     // ---------------------------------------------------------------------------------------------
-    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === Period.Period15S);
 
     expect(fifteenSecondCandlesticks).toHaveLength(1);
     expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
@@ -131,7 +208,7 @@ describe("ensures arena candlesticks work", () => {
     updateFirstCandlestickOHLCV();
 
     expect(candlesticks).not.toBeNull();
-    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === Period.Period15S);
     expect(fifteenSecondCandlesticks).toHaveLength(1);
     expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
 
@@ -145,7 +222,7 @@ describe("ensures arena candlesticks work", () => {
     updateFirstCandlestickOHLCV();
 
     expect(candlesticks).not.toBeNull();
-    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandlesticks = candlesticks!.filter((c) => c.period === Period.Period15S);
     expect(fifteenSecondCandlesticks).toHaveLength(1);
     expectEqualOHLCV(fifteenSecondCandlesticks[0], firstCandlestick);
 
@@ -168,7 +245,7 @@ describe("ensures arena candlesticks work", () => {
 
     expect(candlesticks).not.toBeNull();
     fifteenSecondCandlesticks = candlesticks!
-      .filter((c) => c.period === ArenaPeriod.Period15S)
+      .filter((c) => c.period === Period.Period15S)
       .toSorted((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
     expect(fifteenSecondCandlesticks).toHaveLength(2);
@@ -183,7 +260,7 @@ describe("ensures arena candlesticks work", () => {
     await refreshCandlesticksAndStateData();
 
     fifteenSecondCandlesticks = candlesticks!
-      .filter((c) => c.period === ArenaPeriod.Period15S)
+      .filter((c) => c.period === Period.Period15S)
       .toSorted((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
     expect(fifteenSecondCandlesticks).toHaveLength(2);

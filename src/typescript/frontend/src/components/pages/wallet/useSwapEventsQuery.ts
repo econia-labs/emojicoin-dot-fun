@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { GetTradesSchema } from "app/api/trades/schema";
 import { ROUTES } from "router/routes";
-import { parseJSON } from "utils";
+import { parseResponseJSON } from "utils";
 import { addSearchParams } from "utils/url-utils";
 import type { z } from "zod";
 
@@ -33,7 +33,7 @@ export const useSwapEventsQuery = (
           const errorText = await r.text();
           throw new Error(`HTTP error ${r.status}: ${errorText}`);
         }
-        return parseJSON<SwapEvent[]>(await r.text());
+        return parseResponseJSON<SwapEvent[]>(await r.text());
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPageResponse, allPageResponses) =>

@@ -3,11 +3,11 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use futures_util::StreamExt;
+use futures_util::{SinkExt, StreamExt};
 use log::{error, info, warn};
 use processor::emojicoin_dot_fun::EmojicoinDbEvent;
 use tokio::sync::{broadcast::Sender, RwLock};
-use tokio_tungstenite::connect_async;
+use tokio_tungstenite::{connect_async, tungstenite::Message};
 
 use crate::HealthStatus;
 
@@ -89,59 +89,86 @@ pub async fn start(
     }
 }
 
+const PING_INTERVAL: u64 = 30;
+
 async fn processor_connection(
     processor_url: String,
     tx: Sender<EmojicoinDbEvent>,
     processor_connection_health: Arc<RwLock<HealthStatus>>,
 ) -> Result<(), ConnectionError> {
     let connection = connect_async(processor_url).await;
-    let mut connection = if let Ok(connection) = connection {
-        connection
+    let (mut write, mut read) = if let Ok(connection) = connection {
+        connection.0.split()
     } else {
         *processor_connection_health.write().await = HealthStatus::Dead;
         error!("Could not connect to the processor.");
         return Err(ConnectionError::ConnectionImpossible);
     };
+
     *processor_connection_health.write().await = HealthStatus::Ok;
+
+    // Simple heartbeat check to ensure that the `read_handle` below isn't stuck on `read.next()`.
+    let ping_handle = tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(PING_INTERVAL));
+        loop {
+            interval.tick().await;
+            if let Err(e) = SinkExt::send(&mut write, Message::Ping(vec![])).await {
+                error!("Ping failed: {e}");
+                break;
+            } else {
+                info!("Ping to processor succeeded!");
+            }
+        }
+    });
+
+    let health_for_read = processor_connection_health.clone();
     info!("Connected to the processor.");
     let mut is_sick = false;
-    while let Some(msg) = connection.0.next().await {
-        if msg.is_err() {
-            *processor_connection_health.write().await = HealthStatus::Sick;
-            is_sick = true;
-            error!("Got an error instead of a message: {}", msg.unwrap_err());
-            continue;
-        }
-        let msg = msg.unwrap();
-        let msg = msg.to_text();
-        if msg.is_err() {
-            *processor_connection_health.write().await = HealthStatus::Sick;
-            is_sick = true;
-            error!("Could not convert message to text: {}", msg.unwrap_err());
-            continue;
-        }
-        let msg = msg.unwrap();
-        let res: Result<EmojicoinDbEvent, _> = serde_json::de::from_str(msg);
-        if res.is_err() {
-            *processor_connection_health.write().await = HealthStatus::Sick;
-            is_sick = true;
-            error!(
-                "Could not parse message: error: {}, message: {}",
-                res.unwrap_err(),
-                msg
-            );
-            continue;
-        }
-        if is_sick {
-            *processor_connection_health.write().await = HealthStatus::Ok;
-        }
-        // Log the JSON string.
-        info!("Got message from processor: {msg}.");
+    let read_handle = tokio::spawn(async move {
+        while let Some(msg) = read.next().await {
+            if msg.is_err() {
+                *health_for_read.write().await = HealthStatus::Sick;
+                is_sick = true;
+                error!("Got an error instead of a message: {}", msg.unwrap_err());
+                continue;
+            }
+            let msg = msg.unwrap();
+            let msg = msg.to_text();
+            if msg.is_err() {
+                *health_for_read.write().await = HealthStatus::Sick;
+                is_sick = true;
+                error!("Could not convert message to text: {}", msg.unwrap_err());
+                continue;
+            }
+            let msg = msg.unwrap();
+            let res: Result<EmojicoinDbEvent, _> = serde_json::de::from_str(msg);
+            if res.is_err() {
+                *health_for_read.write().await = HealthStatus::Sick;
+                is_sick = true;
+                error!(
+                    "Could not parse message: error: {}, message: {}",
+                    res.unwrap_err(),
+                    msg
+                );
+                continue;
+            }
+            if is_sick {
+                *health_for_read.write().await = HealthStatus::Ok;
+            }
+            // Log the JSON string.
+            info!("Got message from processor: {msg}.");
 
-        // And send the actual db model event.
-        let db_msg = res.unwrap();
-        let _ = tx.send(db_msg);
+            // And send the actual db model event.
+            let db_msg = res.unwrap();
+            let _ = tx.send(db_msg);
+        }
+    });
+
+    tokio::select! {
+        _ = ping_handle => (),
+        _ = read_handle => (),
     }
+
     info!("Connection to the processor terminated.");
     *processor_connection_health.write().await = HealthStatus::Dead;
     Err(ConnectionError::ConnectionLost)

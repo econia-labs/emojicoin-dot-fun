@@ -3,8 +3,8 @@ import { Ed25519Account, Hex } from "@aptos-labs/ts-sdk";
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
+  fetchMarketResource,
   getMarketAddress,
-  getMarketResource,
   getRegistryAddress,
   ONE_APT,
   SYMBOL_EMOJI_DATA,
@@ -64,7 +64,7 @@ describe("registers a market successfully", () => {
 
     expect(publisherObjectResources).toBeDefined();
 
-    const marketObjectMarketResource = await getMarketResource({
+    const marketObjectMarketResource = await fetchMarketResource({
       aptos,
       marketAddress: derivedNamedObjectAddress,
     });

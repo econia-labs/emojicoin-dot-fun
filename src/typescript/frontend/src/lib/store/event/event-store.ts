@@ -12,6 +12,7 @@ import {
   isLiquidityEventModel,
   isMarketLatestStateEventModel,
   isMarketRegistrationEventModel,
+  isNonArenaCandlestickModel,
   isPeriodicStateEventModel,
   isSwapEventModel,
 } from "@/sdk/indexer-v2/types";
@@ -32,7 +33,7 @@ import {
 } from "../arena/event/store";
 import {
   getMeleeIDFromArenaModel,
-  handleLatestBarForArenaCandlestick,
+  handleUpdateLatestBar,
   toMappedMelees,
   updateLatestBarFromDatafeed,
 } from "../arena/event/utils";
@@ -43,14 +44,8 @@ import {
   LOCAL_STORAGE_EVENT_TYPES,
   maybeUpdateLocalStorage,
 } from "./local-storage";
-import type { EventStore, SetLatestBarsArgs } from "./types";
-import {
-  ensureMarketInStore,
-  handleLatestBarForPeriodicStateEvent,
-  handleLatestBarForSwapEvent,
-  initialState,
-  toMappedMarketEvents,
-} from "./utils";
+import type { EventStore } from "./types";
+import { ensureMarketInStore, initialState, toMappedMarketEvents } from "./utils";
 
 // Ensure maps/sets are enabled for immer by the time this is instantiated.
 enableMapSet();
@@ -164,7 +159,7 @@ export const createEventStore = () => {
             melee.swaps.push(...extractFilter(events, isArenaSwapModel));
             // Update all the latest bars for arena candlesticks.
             extractFilter(events, isArenaCandlestickModel).forEach((candlestick) => {
-              handleLatestBarForArenaCandlestick(melee, candlestick);
+              handleUpdateLatestBar(melee, candlestick);
             });
             DEBUG_ASSERT(() => events.length === 0);
           });
@@ -186,6 +181,7 @@ export const createEventStore = () => {
             if (isGlobalStateEventModel(event)) {
               state.globalStateEvents.unshift(event);
             } else {
+              // Singular market event models.
               if (isEventModelWithMarket(event)) {
                 const marketMetadata = event.market;
                 const symbol = marketMetadata.symbolData.symbol;
@@ -193,7 +189,6 @@ export const createEventStore = () => {
                 const market = state.markets.get(symbol)!;
                 if (isSwapEventModel(event)) {
                   market.swapEvents.unshift(event);
-                  handleLatestBarForSwapEvent(market, event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "swap", event);
                 } else if (isChatEventModel(event)) {
                   market.chatEvents.unshift(event);
@@ -205,26 +200,32 @@ export const createEventStore = () => {
                   market.stateEvents.unshift(event);
                   state.stateFirehose.unshift(event);
                   maybeUpdateLocalStorage(pushToLocalStorage, "market", event);
-                } else if (isPeriodicStateEventModel(event)) {
-                  handleLatestBarForPeriodicStateEvent(market, event);
-                  maybeUpdateLocalStorage(pushToLocalStorage, "periodic", event);
                 }
-              } else {
-                if (isArenaModelWithMeleeID(event)) {
-                  const meleeID = getMeleeIDFromArenaModel(event);
-                  ensureMeleeInStore(state, meleeID);
-                  const melee = state.melees.get(meleeID)!;
-                  if (isArenaMeleeModel(event)) {
-                    state.meleeEvents.unshift(event);
-                  } else if (isArenaEnterModel(event)) {
-                    melee.enters.unshift(event);
-                  } else if (isArenaExitModel(event)) {
-                    melee.exits.unshift(event);
-                  } else if (isArenaSwapModel(event)) {
-                    melee.swaps.unshift(event);
-                  } else if (isArenaCandlestickModel(event)) {
-                    handleLatestBarForArenaCandlestick(melee, event);
-                  }
+                // Singular market candlesticks (not periodic state events, but candlesticks).
+              } else if (isNonArenaCandlestickModel(event)) {
+                const symbol = event.symbolEmojis.join("");
+                const market = state.markets.get(symbol);
+                if (market) {
+                  handleUpdateLatestBar(market, event);
+                } else {
+                  const msg = `Received candlestick for a market not in state store yet: ${symbol}`;
+                  console.warn(msg);
+                }
+                // Melee events/data, including candlesticks.
+              } else if (isArenaModelWithMeleeID(event)) {
+                const meleeID = getMeleeIDFromArenaModel(event);
+                ensureMeleeInStore(state, meleeID);
+                const melee = state.melees.get(meleeID)!;
+                if (isArenaMeleeModel(event)) {
+                  state.meleeEvents.unshift(event);
+                } else if (isArenaEnterModel(event)) {
+                  melee.enters.unshift(event);
+                } else if (isArenaExitModel(event)) {
+                  melee.exits.unshift(event);
+                } else if (isArenaSwapModel(event)) {
+                  melee.swaps.unshift(event);
+                } else if (isArenaCandlestickModel(event)) {
+                  handleUpdateLatestBar(melee, event);
                 }
               }
               updateRewardsRemainingAndVaultBalance(state, event);
@@ -232,7 +233,6 @@ export const createEventStore = () => {
           });
         });
       },
-      // For updating the latest bar with the new candlestick types.
       maybeUpdateMeleeLatestBar(latestBarFromDatafeed, period, meleeID) {
         if (!latestBarFromDatafeed) return;
         set((state) => {
@@ -241,28 +241,20 @@ export const createEventStore = () => {
           updateLatestBarFromDatafeed(melee, { ...latestBarFromDatafeed, period });
         });
       },
-      setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => {
+      // This function should only be called if the market exists in the map already.
+      maybeUpdateMarketLatestBar(latestBarFromDatafeed, period, symbol) {
+        if (!latestBarFromDatafeed) return;
+        if (!get().markets.get(symbol)) {
+          console.warn("Market doesn't exist in map.");
+          return;
+        }
         set((state) => {
-          ensureMarketInStore(state, marketMetadata);
-          const symbol = marketMetadata.symbolData.symbol;
           const market = state.markets.get(symbol)!;
-          latestBars.forEach((bar) => {
-            const period = bar.period;
-            // A bar's open should never be zero, so use the previous bar if it exists and isn't 0,
-            // otherwise, use the existing current bar's close.
-            if (bar.open === 0) {
-              const prevLatestBarClose = market[period].latestBar?.close;
-              if (prevLatestBarClose) {
-                bar.open = prevLatestBarClose;
-              } else {
-                bar.open = bar.close;
-              }
-            }
-            market[period].latestBar = bar;
-          });
+          updateLatestBarFromDatafeed(market, { ...latestBarFromDatafeed, period });
         });
       },
       subscribeToPeriod: ({ symbol, period, cb }) => {
+        const brokerPeriodType = periodToPeriodTypeFromBroker(period);
         if (isArenaChartSymbol(symbol)) {
           const meleeID = get().meleeMap.get(symbol);
           const melee = meleeID !== undefined && get().melees.has(meleeID);
@@ -270,7 +262,6 @@ export const createEventStore = () => {
           set((state) => {
             const melee = state.melees.get(meleeID)!;
             melee[period].callback = cb;
-            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
             state.client.subscribeToArenaPeriod(brokerPeriodType);
           });
         } else {
@@ -278,10 +269,12 @@ export const createEventStore = () => {
           set((state) => {
             const market = state.markets.get(symbol)!;
             market[period].callback = cb;
+            state.client.subscribeToMarketPeriod(market.marketMetadata.marketID, brokerPeriodType);
           });
         }
       },
       unsubscribeFromPeriod: ({ symbol, period }) => {
+        const brokerPeriodType = periodToPeriodTypeFromBroker(period);
         if (isArenaChartSymbol(symbol)) {
           const meleeID = get().meleeMap.get(symbol);
           const melee = meleeID !== undefined && get().melees.has(meleeID);
@@ -289,7 +282,6 @@ export const createEventStore = () => {
           set((state) => {
             const melee = state.melees.get(meleeID)!;
             melee[period].callback = undefined;
-            const brokerPeriodType = periodToPeriodTypeFromBroker(period);
             state.client.unsubscribeFromArenaPeriod(brokerPeriodType);
           });
         } else {
@@ -297,6 +289,10 @@ export const createEventStore = () => {
           set((state) => {
             const market = state.markets.get(symbol)!;
             market[period].callback = undefined;
+            state.client.unsubscribeFromMarketPeriod(
+              market.marketMetadata.marketID,
+              brokerPeriodType
+            );
           });
         }
       },

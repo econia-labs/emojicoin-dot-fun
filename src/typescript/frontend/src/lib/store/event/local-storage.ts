@@ -1,4 +1,4 @@
-import { parseJSON, stringifyJSON } from "utils";
+import { parseResponseJSON, stringifyJSON } from "utils";
 
 import type { EventModelWithMarket } from "@/sdk/indexer-v2";
 
@@ -29,7 +29,7 @@ export const maybeUpdateLocalStorage = (
 
   if (!update) return;
   const str = localStorage.getItem(key) ?? "[]";
-  const data: EventModelWithMarket[] = parseJSON(str);
+  const data: EventModelWithMarket[] = parseResponseJSON(str);
   data.unshift(event);
   localStorage.setItem(key, stringifyJSON(data));
 };
@@ -38,7 +38,7 @@ export const cleanReadLocalStorage = (key: EventLocalStorageKey) => {
   if (typeof window === "undefined") return [];
 
   const str = localStorage.getItem(key) ?? "[]";
-  const data: EventModelWithMarket[] = parseJSON(str);
+  const data: EventModelWithMarket[] = parseResponseJSON(str);
   const relevantItems = data.filter(shouldKeep);
   localStorage.setItem(key, stringifyJSON(relevantItems));
   return relevantItems;

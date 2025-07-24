@@ -1,10 +1,12 @@
 // cspell:word localstorage
 
+import type { ArenaChartSymbol } from "lib/chart-utils";
+import { isArenaChartSymbol } from "lib/chart-utils";
 import { CDN_URL } from "lib/env";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
 
-import { ArenaPeriod, Period } from "@/sdk/const";
+import { Period } from "@/sdk/const";
 import type {
   ChartingLibraryWidgetOptions,
   LanguageCode,
@@ -12,24 +14,19 @@ import type {
   ThemeName,
 } from "@/static/charting_library";
 
-export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
-  "15S",
-  "1",
-  "5",
-  "15",
-  "30",
-  "60",
-  "240",
-  "1D",
-] as ResolutionString[];
+export const getTradingViewLibraryResolutions = (symbol: ArenaChartSymbol | string) =>
+  (isArenaChartSymbol(symbol)
+    ? ["1", "5", "15", "30", "60"]
+    : ["1", "5", "15", "30", "60", "240", "1D"]) as ResolutionString[];
 
 const PINK = hexToRgba(PINK_HEX);
 const GREEN = hexToRgba(GREEN_HEX);
 const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
 const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
-export const ResolutionStringToPeriod: { [key: string]: Period | ArenaPeriod } = {
-  "15S": ArenaPeriod.Period15S,
+export const ResolutionStringToPeriod: { [key: string]: Period } = {
+  // Disable 15 second periods.
+  // "15S": Period.Period15S,
   "1": Period.Period1M,
   "5": Period.Period5M,
   "15": Period.Period15M,
@@ -45,7 +42,7 @@ export const EXCHANGE_NAME = "emojicoin.fun";
 
 export type ArenaOrMarketChart = "arena" | "market";
 const DEFAULT_RESOLUTIONS = {
-  arena: "15S" as ResolutionString,
+  arena: "1" as ResolutionString,
   market: "60" as ResolutionString,
 };
 

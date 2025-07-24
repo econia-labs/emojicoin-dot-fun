@@ -4,12 +4,18 @@ import { useMemo } from "react";
 
 import { getAptosClient } from "@/sdk/utils";
 
+import type { ResponseError } from "./queries/client";
 import { withResponseError } from "./queries/client";
 
 const fetchAccountSequenceNumber = async (accountAddress: AccountAddressInput) =>
-  withResponseError(getAptosClient().account.getAccountInfo({ accountAddress })).then((res) =>
-    BigInt(res.sequence_number)
-  );
+  withResponseError(getAptosClient().account.getAccountInfo({ accountAddress }))
+    .then((res) => BigInt(res.sequence_number))
+    .catch((e) => {
+      if ("type" in e && (e as ResponseError).type === "Account not found") {
+        return 0n;
+      }
+      throw e;
+    });
 
 const CONST_KEY = "account_sequence_number";
 const TEN_SECONDS = 10 * 1000;

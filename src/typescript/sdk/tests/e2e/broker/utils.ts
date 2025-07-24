@@ -9,7 +9,7 @@ import {
   type SubscribableBrokerEvents,
   type SubscriptionMessage,
 } from "../../../src/broker-v2/types";
-import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";
+import { parsePostgrestJSON } from "../../../src/indexer-v2";
 import type { BrokerEventModels } from "../../../src/indexer-v2/types";
 import type { BrokerJsonTypes } from "../../../src/indexer-v2/types/json-types";
 import checkArenaRows from "../helpers/arena-equality-checks";
@@ -17,7 +17,19 @@ import checkRows from "../helpers/equality-checks";
 
 const MAX_WAIT_TIME = 5000;
 
-const BROKER_URL = process.env.NEXT_PUBLIC_BROKER_URL!;
+export const BROKER_URL = process.env.NEXT_PUBLIC_BROKER_URL!;
+
+// Wait for the connection to be established to ensure the client connects.
+export const waitForClientToConnect = async (client: WebSocket) => {
+  await waitFor({
+    condition: () => client.readyState === client.OPEN,
+    interval: 10,
+    maxWaitTime: MAX_WAIT_TIME,
+    errorMessage: "Client `readyState` is not `OPEN` after maximum wait time.",
+  });
+  expect(client.readyState).toEqual(client.OPEN);
+};
+
 export const connectNewClient = async () => {
   expect(BROKER_URL).toBeDefined();
   const client = new WebSocket(new URL(BROKER_URL));
@@ -26,12 +38,12 @@ export const connectNewClient = async () => {
   const events: BrokerEventModels[] = [];
 
   /**
-   * Copy the functionality in the parser function so we have more granular access to the data.
+   * Copy the functionality in the parser function so we have more granular access to data.
    * @see convertWebSocketMessageToBrokerEvent
    */
   client.onmessage = (e: MessageEvent<string>) => {
     messageEvents.push(e);
-    const parsed = parseJSONWithBigInts<BrokerMessage>(e.data);
+    const parsed = parsePostgrestJSON<BrokerMessage>(e.data);
     const [brokerEvent, message] = Object.entries(parsed)[0] as [BrokerEvent, BrokerJsonTypes];
     brokerMessages.push({
       [brokerEvent]: message,
@@ -39,21 +51,9 @@ export const connectNewClient = async () => {
     events.push(brokerMessageConverter[brokerEvent](message));
   };
 
-  // Wait for the connection to be established.
-  await waitFor({
-    condition: () => client.readyState === client.OPEN,
-    interval: 10,
-    maxWaitTime: MAX_WAIT_TIME,
-    errorMessage: "Client `readyState` is not `OPEN` after maximum wait time.",
-  });
-  expect(client.readyState).toEqual(client.OPEN);
+  await waitForClientToConnect(client);
 
-  return {
-    client,
-    messageEvents,
-    brokerMessages,
-    events,
-  };
+  return { client, messageEvents, brokerMessages, events };
 };
 
 export const compareParsedData = <T extends BrokerEventModels>({
@@ -75,7 +75,7 @@ export const compareParsedData = <T extends BrokerEventModels>({
   if (!messageEvent) throw new Error("Never.");
   if (!brokerMessage) throw new Error("Never.");
   if (!event) throw new Error("Never.");
-  const parsed = parseJSONWithBigInts<BrokerMessage>(messageEvent.data);
+  const parsed = parsePostgrestJSON<BrokerMessage>(messageEvent.data);
   expect(parsed).toEqual(brokerMessage);
   const row = parsed[eventName];
   const model = brokerMessageConverter[eventName](row) as T;

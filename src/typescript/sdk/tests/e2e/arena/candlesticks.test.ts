@@ -1,12 +1,6 @@
 import type { Account } from "@aptos-labs/ts-sdk";
 
-import {
-  ArenaPeriod,
-  calculateCurvePrice,
-  ONE_APT_BIGINT,
-  sleep,
-  type SymbolEmoji,
-} from "../../../src";
+import { calculateCurvePrice, ONE_APT_BIGINT, Period, sleep, type SymbolEmoji } from "../../../src";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {
   type ArenaCandlestickModel,
@@ -195,7 +189,7 @@ describe("ensures arena candlesticks work", () => {
     expect(candlesticks).not.toBeNull();
     expect(candlesticks!.length).toBeGreaterThan(0);
 
-    fifteenSecondCandles = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandles = candlesticks!.filter((c) => c.period === Period.Period15S);
 
     expectedPrice = calculatePrice(state0, state1);
     const expectedOpenPrice = expectedPrice;
@@ -235,7 +229,7 @@ describe("ensures arena candlesticks work", () => {
 
     expect(candlesticks).not.toBeNull();
 
-    fifteenSecondCandles = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandles = candlesticks!.filter((c) => c.period === Period.Period15S);
 
     expect(fifteenSecondCandles).toHaveLength(1);
     expect(fifteenSecondCandles[0].nSwaps).toEqual(2n);
@@ -260,7 +254,7 @@ describe("ensures arena candlesticks work", () => {
 
     expectedPrice = calculatePrice(state0!, state1!);
     expectedVolume += state0!.lastSwap.quoteVolume + state1!.lastSwap.quoteVolume;
-    fifteenSecondCandles = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandles = candlesticks!.filter((c) => c.period === Period.Period15S);
 
     expect(fifteenSecondCandles).toHaveLength(1);
     expect(fifteenSecondCandles[0].nSwaps).toEqual(4n);
@@ -285,7 +279,7 @@ describe("ensures arena candlesticks work", () => {
 
     expect(candlesticks).not.toBeNull();
 
-    fifteenSecondCandles = candlesticks!.filter((c) => c.period === ArenaPeriod.Period15S);
+    fifteenSecondCandles = candlesticks!.filter((c) => c.period === Period.Period15S);
 
     expect(fifteenSecondCandles).toHaveLength(2);
     // We check that the previous candle hasn't changed

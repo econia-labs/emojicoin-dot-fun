@@ -8,17 +8,19 @@ const ScrambledNumberLabel = ({
   suffix = "",
   prefix = "",
   className = "",
+  title,
 }: {
   value: string;
   suffix?: string;
   prefix?: string;
   className?: string;
+  title?: string;
 }) => {
   const { ref, replay } = useLabelScrambler(value, suffix, prefix);
   useEffect(() => {
     replay();
   }, [value, replay]);
-  return <span className={className} ref={ref}>{`${prefix}${value}${suffix}`}</span>;
+  return <span title={title} className={className} ref={ref}>{`${prefix}${value}${suffix}`}</span>;
 };
 
 /**
@@ -42,11 +44,13 @@ export const FormattedNumber = ({
   suffix = "",
   prefix = "",
   className,
+  title,
   style = "sliding-precision",
 }: FormatNumberStringProps & {
   scramble?: boolean;
   suffix?: string;
   prefix?: string;
+  title?: string;
   className?: string;
 }) => {
   const displayValue = useMemo(() => {
@@ -64,9 +68,10 @@ export const FormattedNumber = ({
       prefix={prefix}
       suffix={suffix}
       className={className}
+      title={title}
     />
   ) : (
-    <span className={className}>
+    <span title={title} className={className}>
       {prefix}
       {displayValue}
       {suffix}

@@ -6,7 +6,7 @@
     "declarationDir": "types",
     "declarationMap": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": false,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "lib": [
@@ -18,6 +18,7 @@
     "moduleDetection": "force",
     "moduleResolution": "bundler",
     "noEmit": true,
+    "noErrorTruncation": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "paths": {

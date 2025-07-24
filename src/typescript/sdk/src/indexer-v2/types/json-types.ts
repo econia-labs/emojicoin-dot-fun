@@ -277,7 +277,7 @@ type FlattenedExchangeRateWithEventIndex<T extends keyof JsonTypes> = Flatten<
 type CandlestickData = {
   market_id: Uint64String;
   last_transaction_version: Uint64String;
-  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
+  period: PeriodTypeFromDatabase;
   start_time: PostgresTimestamp;
 
   open_price: number;
@@ -288,6 +288,15 @@ type CandlestickData = {
   symbol_emojis: SymbolEmoji[];
 
   volume: Uint64String;
+};
+
+type ChunkedCandlesticksMetadata = {
+  chunk_id: number;
+  // `Date` when received by the `postgrest` client; a string when retrieved from `unstable_cache`.
+  first_start_time: string | Date;
+  // `Date` when received by the `postgrest` client; a string when retrieved from `unstable_cache`.
+  last_start_time: string | Date;
+  num_items: number;
 };
 
 type ArenaMeleeEventData = Flatten<
@@ -488,6 +497,9 @@ export enum TableName {
 export enum DatabaseRpc {
   UserPools = "user_pools",
   AggregateMarketState = "aggregate_market_state",
+  MarketLatestCandlesticks = "market_latest_candlesticks",
+  ArenaLatestCandlesticks = "arena_latest_candlesticks",
+  ChunkedCandlesticksMetadata = "chunked_candlesticks_metadata",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -581,6 +593,7 @@ export type DatabaseJsonType = {
       })
   >;
   [TableName.Candlesticks]: CandlestickData;
+  [DatabaseRpc.ChunkedCandlesticksMetadata]: ChunkedCandlesticksMetadata;
   [TableName.ArenaMeleeEvents]: Flatten<TransactionMetadata & ArenaMeleeEventData>;
   [TableName.ArenaEnterEvents]: Flatten<TransactionMetadata & ArenaEnterEventData>;
   [TableName.ArenaExitEvents]: Flatten<TransactionMetadata & ArenaExitEventData>;
@@ -622,9 +635,11 @@ export type DatabaseJsonType = {
     n_chat_events: Uint64String;
     n_liquidity_events: Uint64String;
   }>;
+  [DatabaseRpc.MarketLatestCandlesticks]: CandlestickData;
+  [DatabaseRpc.ArenaLatestCandlesticks]: ArenaCandlestickData;
 };
 
-type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
+type Columns = keyof (DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.PeriodicStateEvents] &
   DatabaseJsonType[TableName.MarketRegistrationEvents] &
   DatabaseJsonType[TableName.SwapEvents] &
@@ -648,8 +663,15 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.ArenaLeaderboard] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistory] &
   DatabaseJsonType[TableName.ArenaLeaderboardHistoryWithArenaInfo] &
-  DatabaseJsonType[TableName.PriceFeedWithNulls] &
-  DatabaseJsonType[DatabaseRpc.UserPools] &
-  DatabaseJsonType[DatabaseRpc.AggregateMarketState];
+  DatabaseJsonType[TableName.PriceFeedWithNulls]);
 
-export type AnyColumnName = keyof Columns;
+// Columns that exclusively appear here are not included in the `postgrest` schema.
+type AnyRpcColumn = keyof (DatabaseJsonType[DatabaseRpc.UserPools] &
+  DatabaseJsonType[DatabaseRpc.AggregateMarketState] &
+  DatabaseJsonType[DatabaseRpc.ChunkedCandlesticksMetadata] &
+  DatabaseJsonType[DatabaseRpc.MarketLatestCandlesticks] &
+  DatabaseJsonType[DatabaseRpc.ArenaLatestCandlesticks]);
+
+export type ExclusivelyRpcColumn = Exclude<AnyRpcColumn, Columns>;
+
+export type AnyColumnName = Columns | AnyRpcColumn;

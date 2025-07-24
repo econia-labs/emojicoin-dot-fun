@@ -1,7 +1,8 @@
 import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { hexToBytes } from "@noble/hashes/utils";
 
-import { type ArenaPeriod, rawTriggerToEnum, type Trigger } from "../const";
+import type { Period, Trigger } from "../const";
+import { rawTriggerToEnum } from "../const";
 import type { SymbolEmoji } from "../emoji_data";
 import type { AccountAddressString } from "../emojicoin_dot_fun/types";
 import type { STRUCT_STRINGS } from "../utils";
@@ -396,7 +397,7 @@ export type Types = CoinAndFungibleAssetTypes &
     Candlestick: {
       marketID: bigint;
       version: bigint;
-      period: ArenaPeriod;
+      period: Period;
       startTime: Date;
       openPrice: number;
       closePrice: number;
