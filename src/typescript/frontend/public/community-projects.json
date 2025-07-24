@@ -34,5 +34,17 @@
     "id": "5",
     "name": "\ud83e\udd81\u2665\ufe0f Pride Share",
     "url": "https://prideshare.proudlionstudios.com/"
+  },
+  {
+    "description": "Ledger isn't just a tool\u2014it's a movement. A digital notebook where every sketch, doodle, or design becomes a permanent on-chain collectible. Draw directly in your browser, mint with one click, and watch your page live forever on the Aptos blockchain. There is even AI auto drawing assistance if you need or want it, with more styles to be added soon.",
+    "id": "6",
+    "name": "Ledgerapp",
+    "url": "https://ledgerapp.fun/"
+  },
+  {
+    "description": "Quark AI telegram bot solves the problem of expensive, subscription-based AI services by creating the first fully on-chain, pay-as-you-go AI platform where every message is charged in \ud83d\udcd2 emojicoin. Traditional AI services lock users into monthly subscriptions regardless of usage, while our platform charges only for actual consumption - each conversation, image generation, and tool usage is precisely metered and paid for with cryptocurrency. We serve crypto users who want transparent, usage-based AI billing, cost-conscious individuals who prefer paying only for what they use, Web3 communities who need seamless token transfers and AI-powered moderation tools, and Telegram group administrators who want automated community management directly integrated into their workflows.",
+    "id": "7",
+    "name": "Quark AI",
+    "url": "https://quarkbot.fun/"
   }
 ]
