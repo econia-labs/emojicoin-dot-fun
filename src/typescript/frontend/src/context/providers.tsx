@@ -36,7 +36,7 @@ enableMapSet();
 
 const queryClient = new QueryClient();
 
-const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsWithChildren) => {
+const Providers = ({ children }: & React.PropsWithChildren) => {
   const [isOpen, setIsOpen] = useState(false);
   const { lg } = useTailwindBreakpoints();
   const isMobileMenuOpen = isOpen && !lg;
@@ -61,7 +61,7 @@ const Providers = ({ userAgent, children }: { userAgent: string } & React.PropsW
     isMounted && (
       <ThemeProvider theme={darkTheme}>
         <QueryClientProvider client={queryClient}>
-          <UserSettingsProvider userAgent={userAgent}>
+          <UserSettingsProvider>
             <AptosWalletAdapterProvider
               autoConnect={true}
               dappConfig={{
