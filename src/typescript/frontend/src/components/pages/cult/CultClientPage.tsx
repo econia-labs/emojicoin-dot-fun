@@ -6,10 +6,23 @@ import { shuffle } from "lodash";
 import { useMemo, useState } from "react";
 import { useWindowSize } from "react-use";
 
-import communityProjects from "../../../../public/community-projects.json";
+import CommunityProjectsJson from "../../../../public/community-projects.json";
 import { Clippy } from "./Clippy";
 import { StyledAlert } from "./StyledAlert";
 import { CommunityCreationWinDesktopItem, WinDesktopItem, WinIcons } from "./WinDesktopItem";
+
+// Ensure all names are unique.
+if (new Set(CommunityProjectsJson.map((v) => v.name)).size !== CommunityProjectsJson.length) {
+  throw new Error("Each community project must have a unique name.");
+}
+
+// Then sort by name.
+const communityProjects = CommunityProjectsJson.toSorted((a, b) =>
+  a.name.localeCompare(b.name)
+).map((v, i) => ({
+  ...v,
+  id: i,
+}));
 
 const JSON_FILE_GITHUB_URL =
   "https://github.com/econia-labs/emojicoin-dot-fun/blob/main/src/typescript/frontend/public/community-projects.json";
@@ -47,7 +60,7 @@ export default function CultClientPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, width]);
 
-  const setSelectedProject = (id: string) => {
+  const setSelectedProject = (id: number) => {
     const project = communityProjects.find((proj) => proj.id === id);
     if (!project) return;
 
