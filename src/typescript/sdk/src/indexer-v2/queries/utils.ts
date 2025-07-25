@@ -36,9 +36,8 @@ type QueryFunction<
 
 type WithConfig<T> = T & { minimumVersion?: AnyNumberString };
 
-// This is primarily used for testing purposes, otherwise this interval might be too short.
-const POLLING_INTERVAL = 500;
-const POLLING_TIMEOUT = 5000;
+const TEST_POLLING_INTERVAL = 1000;
+const TEST_POLLING_TIMEOUT = 10000;
 
 const extractRow = <T>(res: PostgrestSingleResponse<T>) => res.data;
 const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? ([] as T[]);
@@ -93,7 +92,7 @@ export const waitForEmojicoinIndexer = async (
 ) =>
   new Promise<void>((resolve, reject) => {
     let i = 0;
-    const maxTries = Math.floor((maxWaitTimeMs ?? POLLING_TIMEOUT) / POLLING_INTERVAL);
+    const maxTries = Math.floor((maxWaitTimeMs ?? TEST_POLLING_TIMEOUT) / TEST_POLLING_INTERVAL);
 
     const check = async () => {
       try {
@@ -106,7 +105,7 @@ export const waitForEmojicoinIndexer = async (
         } else {
           setTimeout(() => {
             check();
-          }, POLLING_INTERVAL);
+          }, TEST_POLLING_INTERVAL);
         }
         i += 1;
       } catch (e) {
