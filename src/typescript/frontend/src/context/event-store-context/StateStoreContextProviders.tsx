@@ -15,11 +15,12 @@ import createUserSettingsStore, { type UserSettingsStore } from "@/store/user-se
 export const UserSettingsContext = createContext<StoreApi<UserSettingsStore> | null>(null);
 
 interface UserSettingsProviderProps {
-  userAgent: string;
   children: ReactNode;
 }
 
-export const UserSettingsProvider = ({ userAgent, children }: UserSettingsProviderProps) => {
+export const UserSettingsProvider = ({ children }: UserSettingsProviderProps) => {
+  const { userAgent } = navigator;
+
   const store = useRef<StoreApi<UserSettingsStore>>();
   if (!store.current) {
     store.current = createUserSettingsStore(userAgent);
