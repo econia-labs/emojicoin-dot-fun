@@ -13,10 +13,7 @@ type Callback = (...args: any[]) => Promise<any>;
  * @param cb The same `cb` passed to `unstable_cache`.
  * @param keyParts The same `keyParts` passed to `unstable_cache`.
  */
-export function generateCacheKeyForUnstableCache<T extends Callback>(
-  cb: T,
-  keyParts?: string[]
-): T {
+export function generateCacheKeyForUnstableCache<T extends Callback>(cb: T, keyParts?: string[]) {
   const fixedKey = `${cb.toString()}-${Array.isArray(keyParts) && keyParts.join(",")}`;
 
   const cachedCb = (...args: any[]) => {
@@ -25,7 +22,7 @@ export function generateCacheKeyForUnstableCache<T extends Callback>(
     return cacheKey;
   };
 
-  return cachedCb as unknown as T;
+  return cachedCb;
 }
 
 /**

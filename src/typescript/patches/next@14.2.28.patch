@@ -1,0 +1,342 @@
+diff --git a/dist/esm/server/lib/incremental-cache/fetch-cache.js b/dist/esm/server/lib/incremental-cache/fetch-cache.js
+index ab0cbbcd7f155c619c0fddd59d7b3422fc0b3ae4..ddeb3a5bf49d9bd4378c14abf1b175a692e69d23 100644
+--- a/dist/esm/server/lib/incremental-cache/fetch-cache.js
++++ b/dist/esm/server/lib/incremental-cache/fetch-cache.js
+@@ -45,6 +45,7 @@ export default class FetchCache {
+         return !!(ctx._requestHeaders["x-vercel-sc-host"] || process.env.SUSPENSE_CACHE_URL);
+     }
+     constructor(ctx){
++        console.log("------------------------------------------- esm fetch-cache.js");
+         this.headers = {};
+         this.headers["Content-Type"] = "application/json";
+         if (CACHE_HEADERS_HEADER in ctx._requestHeaders) {
+@@ -98,6 +99,8 @@ export default class FetchCache {
+                 console.log("not using memory store for fetch cache");
+             }
+         }
++        console.log("Headers at the end of FetchCache constructor");
++        console.log(this.headers);
+     }
+     resetRequestCache() {
+         memoryCache == null ? void 0 : memoryCache.reset();
+@@ -242,6 +245,8 @@ export default class FetchCache {
+             }
+             return;
+         }
++        console.log(`GET: dumping memory cache for: ${key}`);
++        console.log(memoryCache.dump());
+         memoryCache == null ? void 0 : memoryCache.set(key, {
+             value: data,
+             lastModified: Date.now()
+@@ -298,6 +303,8 @@ export default class FetchCache {
+                 }
+             }
+         }
++        console.log(`${key}, this.cacheEndpoint: ${this.cacheEndpoint}`);
++        console.log(this.headers);
+         return;
+     }
+ }
+diff --git a/dist/esm/server/lib/incremental-cache/index.js b/dist/esm/server/lib/incremental-cache/index.js
+index ea5838838ef20c3bc27664284bfc58d705f621db..9f409f25b3668ceabb649784c3ce5305a8011114 100644
+--- a/dist/esm/server/lib/incremental-cache/index.js
++++ b/dist/esm/server/lib/incremental-cache/index.js
+@@ -96,6 +96,7 @@ export class IncrementalCache {
+         (_this_cacheHandler = this.cacheHandler) == null ? void 0 : (_this_cacheHandler_resetRequestCache = _this_cacheHandler.resetRequestCache) == null ? void 0 : _this_cacheHandler_resetRequestCache.call(_this_cacheHandler);
+     }
+     async unlock(cacheKey) {
++        console.error(`esm/server/lib/incremental-cache: UNLocking the incremental cache lock for key: ${cacheKey}`);
+         const unlock = this.unlocks.get(cacheKey);
+         if (unlock) {
+             unlock();
+@@ -104,6 +105,7 @@ export class IncrementalCache {
+         }
+     }
+     async lock(cacheKey) {
++        console.error(`esm/server/lib/incremental-cache: Locking the incremental cache lock for key: ${cacheKey}`);
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+             await invokeIpcMethod({
+@@ -257,6 +259,7 @@ export class IncrementalCache {
+     }
+     // get data from cache if available
+     async get(cacheKey, ctx = {}) {
++        console.error(`esm/server/lib/incremental-cache: GETTING the incremental cache lock for key: ${cacheKey}`);
+         var _this_cacheHandler, _cacheData_value;
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+@@ -340,6 +343,7 @@ export class IncrementalCache {
+     }
+     // populate the incremental cache with new data
+     async set(pathname, data, ctx) {
++        console.error(`esm/server/lib/incremental-cache: SETTING the incremental cache lock for key: ${pathname}`);
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+             return invokeIpcMethod({
+diff --git a/dist/server/base-server.js b/dist/server/base-server.js
+index a437c1dd076e6fbc93a7e1c06104b36e4ad7cf2b..98924e1f6bd17ee90115aa7647453bed3b8dd5ae 100644
+--- a/dist/server/base-server.js
++++ b/dist/server/base-server.js
+@@ -1390,9 +1390,11 @@ class Server {
+                                 },
+                                 revalidate
+                             };
++                            console.log("RETURNING cached entry for SSG response in non-edge runtime");
+                             return cacheEntry;
+                         }
+                         // Send the response now that we have copied it into the cache.
++                        console.log("SENDING the response out directly...?");
+                         await (0, _sendresponse.sendResponse)(req, res, response, context.renderOpts.waitUntil);
+                         return null;
+                     } catch (err) {
+@@ -1493,6 +1495,15 @@ class Server {
+                 revalidate: metadata.revalidate
+             };
+         };
++        console.log(`resolvedUrlPathname: ${resolvedUrlPathname}, ssgCacheKey: ${ssgCacheKey}`);
++        console.log({
++            MATCHES_isPreviewMode: !isPreviewMode,
++            MATCHES_isSSG: isSSG,
++            MATCHES_supportsDynamicResponse: !opts.supportsDynamicResponse,
++            MATCHES_isServerAction: !isServerAction,
++            MATCHES_minimalPostponed: !minimalPostponed,
++            MATCHES_isDynamicRSCRequest: !isDynamicRSCRequest,
++        });
+         const cacheEntry = await this.responseCache.get(ssgCacheKey, async (hasResolved, previousCacheEntry, isRevalidating)=>{
+             const isProduction = !this.renderOpts.dev;
+             const didRespond = hasResolved || res.sent;
+diff --git a/dist/server/lib/incremental-cache/fetch-cache.js b/dist/server/lib/incremental-cache/fetch-cache.js
+index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..bee8731efd9329bee1126e82c84ace650f7c1135 100644
+--- a/dist/server/lib/incremental-cache/fetch-cache.js
++++ b/dist/server/lib/incremental-cache/fetch-cache.js
+@@ -57,9 +57,11 @@ class FetchCache {
+         return true;
+     }
+     static isAvailable(ctx) {
+-        return !!(ctx._requestHeaders["x-vercel-sc-host"] || process.env.SUSPENSE_CACHE_URL);
++        const res = !!(ctx._requestHeaders["x-vercel-sc-host"] || process.env.SUSPENSE_CACHE_URL);
++        return res;
+     }
+     constructor(ctx){
++        console.log("------------------------------------------- CJS fetch-cache.js");
+         this.headers = {};
+         this.headers["Content-Type"] = "application/json";
+         if (CACHE_HEADERS_HEADER in ctx._requestHeaders) {
+@@ -168,6 +170,14 @@ class FetchCache {
+             }
+             return null;
+         }
++        
++        console.log("-".repeat(100));
++        if (!memoryCache.get(key)) {
++            console.log(`mem-cache MISS: ${key} tags: ${tags.join("") || fetchUrl}`);
++        } else {
++            console.log(`mem-cache HIT: ${key} tags: ${tags.join("") || fetchUrl}`);
++        }
++
+         // memory cache is cleared at the end of each request
+         // so that revalidate events are pulled from upstream
+         // on successive requests
+@@ -257,6 +267,15 @@ class FetchCache {
+             }
+             return;
+         }
++
++        
++        console.log("-".repeat(100));
++        if (!!memoryCache) {
++            console.log(`mem-cache SET: ${key} tags: ${tags.join("") || fetchUrl}`);
++        } else {
++            console.log(`mem-cache NULL/NO-SET: ${key}, tags: ${tags.join("") || fetchUrl}`);
++        }
++
+         memoryCache == null ? void 0 : memoryCache.set(key, {
+             value: data,
+             lastModified: Date.now()
+@@ -285,6 +304,7 @@ class FetchCache {
+                     fetchUrl,
+                     fetchIdx
+                 };
++                
+                 const res = await fetch(`${this.cacheEndpoint}/v1/suspense-cache/${key}`, {
+                     method: "POST",
+                     headers: {
+@@ -295,6 +315,17 @@ class FetchCache {
+                     body: body,
+                     next: fetchParams
+                 });
++                console.log("*".repeat(50));
++                console.dir({
++                    method: "POST",
++                    headers: {
++                        "x-vercel-revalidate": this.headers["x-vercel-revalidate"],
++                        [CACHE_FETCH_URL_HEADER]: fetchUrl || "",
++                        [CACHE_TAGS_HEADER]: (tags == null ? void 0 : tags.join(",")) || ""
++                    },
++                    next: fetchParams
++                }, { depth: 3 });
++                console.log("*".repeat(50));
+                 if (res.status === 429) {
+                     const retryAfter = res.headers.get("retry-after") || "60000";
+                     rateLimitedUntil = Date.now() + parseInt(retryAfter);
+diff --git a/dist/server/lib/incremental-cache/index.js b/dist/server/lib/incremental-cache/index.js
+index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..dbe19e2ca86be5343e121dd899a0dc8ee426e261 100644
+--- a/dist/server/lib/incremental-cache/index.js
++++ b/dist/server/lib/incremental-cache/index.js
+@@ -50,18 +50,19 @@ class IncrementalCache {
+         this.hasCustomCacheHandler = Boolean(CurCacheHandler);
+         if (!CurCacheHandler) {
+             if (fs && serverDistDir) {
+-                if (debug) {
+-                    console.log("using filesystem cache handler");
+-                }
+                 CurCacheHandler = _filesystemcache.default;
+             }
+             if (_fetchcache.default.isAvailable({
+                 _requestHeaders: requestHeaders
+-            }) && minimalMode && fetchCache) {
++            }) && fetchCache) {
+                 if (debug) {
+                     console.log("using fetch cache handler");
+                 }
+                 CurCacheHandler = _fetchcache.default;
++            } else {
++                if (debug) {
++                    console.log("using filesystem cache handler");
++                }
+             }
+         } else if (debug) {
+             console.log("using custom cache handler", CurCacheHandler.name);
+@@ -123,6 +124,7 @@ class IncrementalCache {
+         (_this_cacheHandler = this.cacheHandler) == null ? void 0 : (_this_cacheHandler_resetRequestCache = _this_cacheHandler.resetRequestCache) == null ? void 0 : _this_cacheHandler_resetRequestCache.call(_this_cacheHandler);
+     }
+     async unlock(cacheKey) {
++        console.error(`server/lib/incremental-cache: UNLocking the incremental cache lock for key: ${cacheKey}`);
+         const unlock = this.unlocks.get(cacheKey);
+         if (unlock) {
+             unlock();
+@@ -131,6 +133,7 @@ class IncrementalCache {
+         }
+     }
+     async lock(cacheKey) {
++        console.error(`server/lib/incremental-cache: Locking the incremental cache lock for key: ${cacheKey}`);
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+             await invokeIpcMethod({
+@@ -284,6 +287,7 @@ class IncrementalCache {
+     }
+     // get data from cache if available
+     async get(cacheKey, ctx = {}) {
++        console.error(`server/lib/incremental-cache: GETTING the incremental cache lock for key: ${cacheKey}`);
+         var _this_cacheHandler, _cacheData_value;
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+@@ -367,6 +371,8 @@ class IncrementalCache {
+     }
+     // populate the incremental cache with new data
+     async set(pathname, data, ctx) {
++        console.error(`server/lib/incremental-cache: SETTING the incremental cache lock for key: ${pathname}`);
++        
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+             return invokeIpcMethod({
+diff --git a/dist/server/lib/router-server.js b/dist/server/lib/router-server.js
+index 867c17d33e1587fc730c7a714bad8afee50c907a..eea02fb410f4b60287f6638f0ffb7f53ea1da75b 100644
+--- a/dist/server/lib/router-server.js
++++ b/dist/server/lib/router-server.js
+@@ -49,6 +49,7 @@ const debug = (0, _debug.default)("next:router-server:main");
+ const isNextFont = (pathname)=>pathname && /\/media\/[^/]+\.(woff|woff2|eot|ttf|otf)$/.test(pathname);
+ const requestHandlers = {};
+ async function initialize(opts) {
++  console.log("*".repeat(100), "minimal mode?", opts.minimalMode);
+     if (!process.env.NODE_ENV) {
+         // @ts-ignore not readonly
+         process.env.NODE_ENV = opts.dev ? "development" : "production";
+diff --git a/dist/server/next-server.js b/dist/server/next-server.js
+index c820df908513b7c18591bca26a4590f57e4db9bc..6e1edc286aedcb02281c259bd0f823597c2c0fff 100644
+--- a/dist/server/next-server.js
++++ b/dist/server/next-server.js
+@@ -497,6 +497,7 @@ class NextNodeServer extends _baseserver.default {
+         if (cacheHandler) {
+             CacheHandler = (0, _interopdefault.interopDefault)(await dynamicImportEsmDefault((0, _formatdynamicimportpath.formatDynamicImportPath)(this.distDir, cacheHandler)));
+         }
++        console.log("getting/creating incremental cache in next-server.js");
+         // incremental-cache is request specific
+         // although can have shared caches in module scope
+         // per-cache handler
+diff --git a/dist/server/response-cache/index.js b/dist/server/response-cache/index.js
+index 1eb0442e93039097bcee27cc296ffcd5a9a96d94..48b320c4f4d9acb46ed20e121053d81fc9678d03 100644
+--- a/dist/server/response-cache/index.js
++++ b/dist/server/response-cache/index.js
+@@ -29,6 +29,7 @@ function _export_star(from, to) {
+ }
+ class ResponseCache {
+     constructor(minimalMode){
++        console.log(`creating ResponseCache with minimalMode = ${minimalMode}`);
+         this.batcher = _batcher.Batcher.create({
+             // Ensure on-demand revalidate doesn't block normal requests, it should be
+             // safe to run an on-demand revalidate for the same key as a normal request.
+@@ -46,8 +47,18 @@ class ResponseCache {
+     async get(key, responseGenerator, context) {
+         // If there is no key for the cache, we can't possibly look this up in the
+         // cache so just return the result of the response generator.
++        console.log("~".repeat(100));
++        if (!key) {
++            console.log("CACHE MISS IN RESPONSE CACHE; RETURNING RESPONSE GENERATOR");
++            console.log("~".repeat(100));
++        }
+         if (!key) return responseGenerator(false, null);
+         const { incrementalCache, isOnDemandRevalidate = false } = context;
++        console.log(`${isOnDemandRevalidate} key: ${key}`)
++        console.log({
++            isOnDemandRevalidate,
++            key,
++        });
+         const response = await this.batcher.batch({
+             key,
+             isOnDemandRevalidate
+@@ -56,6 +67,8 @@ class ResponseCache {
+             // We keep the previous cache entry around to leverage when the
+             // incremental cache is disabled in minimal mode.
+             if (this.minimalMode && ((_this_previousCacheItem = this.previousCacheItem) == null ? void 0 : _this_previousCacheItem.key) === cacheKey && this.previousCacheItem.expiresAt > Date.now()) {
++                console.log("RETURNING THE PREVIOUS CACHE ITEM ENTRY. IS THIS THE CULPRIT?");
++                console.log("~".repeat(100));
+                 return this.previousCacheItem.entry;
+             }
+             // Coerce the kindHint into a given kind for the incremental cache.
+@@ -71,6 +84,7 @@ class ResponseCache {
+                 cachedResponse = !this.minimalMode ? await incrementalCache.get(key, {
+                     kindHint
+                 }) : null;
++                console.log(`not minimal mode? ${!this.minimalMode}, so cachedResponse = ${cachedResponse}`);
+                 if (cachedResponse && !isOnDemandRevalidate) {
+                     var _cachedResponse_value;
+                     if (((_cachedResponse_value = cachedResponse.value) == null ? void 0 : _cachedResponse_value.kind) === "FETCH") {
+@@ -112,12 +126,15 @@ class ResponseCache {
+                 }
+                 if (typeof resolveValue.revalidate !== "undefined") {
+                     if (this.minimalMode) {
++                        console.log(`in minimal mode, so prev cache item is just an object`);
++                        console.log(this.previousCacheItem);
+                         this.previousCacheItem = {
+                             key: cacheKey,
+                             entry: resolveValue,
+                             expiresAt: Date.now() + 1000
+                         };
+                     } else {
++                        console.log("NOT MINIMAL MODE. SO SETTTTTTTTTTTTING INCREMENTAL CACHE for key", key);
+                         await incrementalCache.set(key, resolveValue.value, {
+                             revalidate: resolveValue.revalidate
+                         });
+diff --git a/dist/server/web-server.js b/dist/server/web-server.js
+index 72625807c2f9d0adffc46daeb9f053d32f681b80..fff34390732002600141af0d1b799bc93486bbe1 100644
+--- a/dist/server/web-server.js
++++ b/dist/server/web-server.js
+@@ -119,6 +119,7 @@ class NextWebServer extends _baseserver.default {
+     }
+     async getIncrementalCache({ requestHeaders }) {
+         const dev = !!this.renderOpts.dev;
++        console.log("getting/creating incremental cache in web-server.js");
+         // incremental-cache is request specific
+         // although can have shared caches in module scope
+         // per-cache handler

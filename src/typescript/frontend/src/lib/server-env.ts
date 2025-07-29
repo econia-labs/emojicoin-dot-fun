@@ -1,5 +1,11 @@
 import "server-only";
 
+import {
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_PRODUCTION_BUILD,
+  PHASE_PRODUCTION_SERVER,
+} from "next/dist/shared/lib/constants";
+
 import { EMOJICOIN_INDEXER_URL } from "@/sdk/server/env";
 
 import { APTOS_NETWORK, IS_ALLOWLIST_ENABLED } from "./env";
@@ -62,3 +68,19 @@ export const RATE_LIMITER = (() => {
     },
   } as const;
 })();
+
+const PHASES = [
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_PRODUCTION_BUILD,
+  PHASE_PRODUCTION_SERVER,
+  "",
+] as const;
+
+export const NEXT_PHASE: (typeof PHASES)[number] = (() => {
+  const phase = (process.env.NEXT_PHASE ?? "") as (typeof PHASES)[number];
+  const validPhase = PHASES.includes(phase);
+  if (!validPhase) throw new Error(`Invalid process.env.NEXT_PHASE: ${process.env.NEXT_PHASE}`);
+  return phase;
+})();
+
+export const IS_NEXT_BUILD_PHASE = NEXT_PHASE === "phase-production-build";
