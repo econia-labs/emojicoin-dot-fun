@@ -4,3 +4,4 @@ export * from "./dexscreener";
 export * from "./home";
 export * from "./market";
 export * from "./pools";
+export * from "./static-params";

@@ -49,6 +49,11 @@ const nextConfig = {
       dynamic: 0, // Default is normally 30s.
       static: 60, // Default is normally 180s.
     },
+    // Not confirmed working: the idea here is to force synchronous revalidation after 60 seconds
+    // but allow asynchronous (background) revalidation before that. This way, users wouldn't see
+    // an extremely stale page if it hasn't been visited in a while- the most they'd ever see is
+    // 60 seconds. 
+    swrDelta: 60,
   },
   // Log full fetch URLs if we're in a specific environment.
   logging:
