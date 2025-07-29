@@ -48,7 +48,6 @@ const tabs = [
             emojicoin={props.data.symbol}
             marketAddress={props.data.marketAddress}
             marketEmojis={props.data.symbolEmojis}
-            initNumSwaps={props.data.swaps.length}
           />
         </div>
       </div>

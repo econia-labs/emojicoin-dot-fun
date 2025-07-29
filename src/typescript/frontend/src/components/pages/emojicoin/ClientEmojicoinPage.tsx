@@ -6,11 +6,12 @@ import { useEventStore } from "context/event-store-context";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { GlobeIcon } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { darkColors } from "theme";
 
 import { Box } from "@/containers";
+import { useCurrentMeleeInfo } from "@/hooks/use-current-melee-info";
 import { useReliableSubscribe } from "@/hooks/use-reliable-subscribe";
 import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
 
@@ -22,21 +23,24 @@ import type { EmojicoinProps } from "./types";
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { lg } = useTailwindBreakpoints();
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
-  const loadEventsFromServer = useEventStore((s) => s.loadEventsFromServer);
+  const { symbol0, symbol1 } = useCurrentMeleeInfo();
 
   useEffect(() => {
-    const { swaps, state } = props.data;
+    const { state } = props.data;
     loadMarketStateFromServer([state]);
-    loadEventsFromServer([...swaps]);
-
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [props.data]);
 
   useReliableSubscribe({ eventTypes: ["Chat", "Swap"] });
 
+  const isInMelee = useMemo(
+    () => symbol0 && symbol1 && [symbol0, symbol1].includes(props.data.symbol),
+    [symbol0, symbol1, props.data.symbol]
+  );
+
   return (
     <Box>
-      {FEATURE_FLAGS.Arena && props.isInMelee && (
+      {FEATURE_FLAGS.Arena && isInMelee && (
         <Carousel gap={16}>
           <div className="flex flex-row items-center gap-[16px]">
             <Link href={ROUTES.arena}>
