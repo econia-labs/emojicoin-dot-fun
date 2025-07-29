@@ -7,18 +7,16 @@ import type { SymbolString } from "@/store/event/types";
 
 type DataProps = MarketMetadataModel & {
   symbol: SymbolString;
-  swaps: Array<DatabaseModels["swap_events"]>;
   state: DatabaseModels["market_state"];
   holders: AssetBalance[];
 };
 
 export interface EmojicoinProps {
   data: DataProps;
-  isInMelee: boolean;
 }
 
 export interface MainInfoProps {
-  data: Omit<DataProps, "swaps">;
+  data: DataProps;
 }
 
 export interface GridProps {
@@ -26,13 +24,12 @@ export interface GridProps {
 }
 
 export interface ChatProps {
-  data: Omit<DataProps, "swaps">;
+  data: DataProps;
 }
 export interface SwapComponentProps {
   emojicoin: string;
   marketAddress: AccountAddressString;
   marketEmojis: SymbolEmoji[];
-  initNumSwaps: number;
 }
 export interface TradeHistoryProps {
   data: DataProps;

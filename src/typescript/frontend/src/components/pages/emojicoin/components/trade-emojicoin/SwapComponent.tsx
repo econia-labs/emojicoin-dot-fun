@@ -60,7 +60,6 @@ export default function SwapComponent({
   emojicoin,
   marketAddress,
   marketEmojis,
-  initNumSwaps,
 }: SwapComponentProps) {
   const { t } = translationFunction();
   const searchParams = useSearchParams();
@@ -88,13 +87,9 @@ export default function SwapComponent({
       ? outputAmount - (outputAmount * maxSlippage) / 10000n
       : 1n;
 
-  const numSwaps = useEventStore(
-    (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
-  );
-
   const latestMarketState = useEventStore((s) => s.getMarket(marketEmojis)?.stateEvents?.at(0));
 
-  const gasCost = useGetGasWithDefault({ marketAddress, inputAmount, isSell, numSwaps });
+  const gasCost = useGetGasWithDefault({ marketAddress, inputAmount, isSell });
 
   const { netProceeds, baseVolume, quoteVolume, error } = calculateSwapPriceFromMarketState({
     latestMarketState,
