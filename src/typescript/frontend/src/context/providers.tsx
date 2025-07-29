@@ -36,7 +36,7 @@ enableMapSet();
 
 const queryClient = new QueryClient();
 
-const Providers = ({ children }: & React.PropsWithChildren) => {
+const Providers = ({ children }: React.PropsWithChildren) => {
   const [isOpen, setIsOpen] = useState(false);
   const { lg } = useTailwindBreakpoints();
   const isMobileMenuOpen = isOpen && !lg;
