@@ -66,7 +66,6 @@ export const useGetGasWithDefault = (args: {
   marketAddress: AccountAddressString;
   inputAmount: bigint | number | string;
   isSell: boolean;
-  numSwaps: number;
 }) => {
   const { account } = useWallet();
   const { aptos } = useAptos();
