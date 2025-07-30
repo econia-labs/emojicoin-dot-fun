@@ -1,5 +1,5 @@
 diff --git a/dist/esm/server/lib/incremental-cache/fetch-cache.js b/dist/esm/server/lib/incremental-cache/fetch-cache.js
-index ab0cbbcd7f155c619c0fddd59d7b3422fc0b3ae4..1540cecaf9f686e0af992924208f36227436b1e2 100644
+index ab0cbbcd7f155c619c0fddd59d7b3422fc0b3ae4..ddeb3a5bf49d9bd4378c14abf1b175a692e69d23 100644
 --- a/dist/esm/server/lib/incremental-cache/fetch-cache.js
 +++ b/dist/esm/server/lib/incremental-cache/fetch-cache.js
 @@ -45,6 +45,7 @@ export default class FetchCache {
@@ -19,6 +19,24 @@ index ab0cbbcd7f155c619c0fddd59d7b3422fc0b3ae4..1540cecaf9f686e0af992924208f3622
      }
      resetRequestCache() {
          memoryCache == null ? void 0 : memoryCache.reset();
+@@ -242,6 +245,8 @@ export default class FetchCache {
+             }
+             return;
+         }
++        console.log(`GET: dumping memory cache for: ${key}`);
++        console.log(memoryCache.dump());
+         memoryCache == null ? void 0 : memoryCache.set(key, {
+             value: data,
+             lastModified: Date.now()
+@@ -298,6 +303,8 @@ export default class FetchCache {
+                 }
+             }
+         }
++        console.log(`${key}, this.cacheEndpoint: ${this.cacheEndpoint}`);
++        console.log(this.headers);
+         return;
+     }
+ }
 diff --git a/dist/esm/server/lib/incremental-cache/index.js b/dist/esm/server/lib/incremental-cache/index.js
 index ea5838838ef20c3bc27664284bfc58d705f621db..9f409f25b3668ceabb649784c3ce5305a8011114 100644
 --- a/dist/esm/server/lib/incremental-cache/index.js
@@ -96,7 +114,7 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..ecafe7049692171493f3ccb1df4ffac8
      }
  }
 diff --git a/dist/server/lib/incremental-cache/index.js b/dist/server/lib/incremental-cache/index.js
-index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..4be8ceaeecc2bc6322d31f4f1fc1010417542b92 100644
+index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..77b2fdac7b74398df13a8a3d9542cdeb94623c2f 100644
 --- a/dist/server/lib/incremental-cache/index.js
 +++ b/dist/server/lib/incremental-cache/index.js
 @@ -123,6 +123,7 @@ class IncrementalCache {
@@ -127,7 +145,7 @@ index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..4be8ceaeecc2bc6322d31f4f1fc10104
      }
      // populate the incremental cache with new data
      async set(pathname, data, ctx) {
-+        console.error(`server/lib/incremental-cache: SETTING the incremental cache lock for key: ${patchname}`);
++        console.error(`server/lib/incremental-cache: SETTING the incremental cache lock for key: ${pathname}`);
          if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
              const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
              return invokeIpcMethod({
