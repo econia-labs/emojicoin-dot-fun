@@ -7,6 +7,7 @@ export const dynamic = "force-static";
 
 export async function GET() {
   if (process.env.NODE_ENV !== "test") {
+    console.log("Fetching from test.");
     return new NextResponse(new Date().toISOString());
   }
   const aptos = getAptosClient();
