@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { getAptosClient } from "@/sdk/utils/aptos-client";
 
 export const revalidate = 2;
-export const fetchCache = "default-cache";
+export const dynamic = "force-static";
 
 export async function GET() {
   if (process.env.NODE_ENV !== "test") {
-    return new NextResponse("-1");
+    return new NextResponse(new Date().toISOString());
   }
   const aptos = getAptosClient();
   try {

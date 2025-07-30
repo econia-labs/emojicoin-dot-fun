@@ -49,6 +49,10 @@ const nextConfig = {
       dynamic: 0, // Default is normally 30s.
       static: 60, // Default is normally 180s.
     },
+    // Synchronously block ISR-generated responses if they are more than 60
+    // seconds stale. Otherwise, return the cached value (even if stale)
+    // and asynchronously regenerate in the background (background revalidation).
+    swrDelta: 60,
   },
   // Log full fetch URLs if we're in a specific environment.
   logging:
