@@ -4,6 +4,7 @@ import FEATURE_FLAGS from "lib/feature-flags";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 
 import { fetchLatestMeleeEvent } from "@/queries/arena";
@@ -12,7 +13,6 @@ import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 
 import EmojiNotFoundPage from "./not-found";
-import { unstable_cache } from "next/cache";
 
 export const revalidate = 2;
 
