@@ -20,7 +20,7 @@ index ab0cbbcd7f155c619c0fddd59d7b3422fc0b3ae4..1540cecaf9f686e0af992924208f3622
      resetRequestCache() {
          memoryCache == null ? void 0 : memoryCache.reset();
 diff --git a/dist/esm/server/lib/incremental-cache/index.js b/dist/esm/server/lib/incremental-cache/index.js
-index ea5838838ef20c3bc27664284bfc58d705f621db..cdbd599b23876d0f8afac7662716985f4db7e32a 100644
+index ea5838838ef20c3bc27664284bfc58d705f621db..9f409f25b3668ceabb649784c3ce5305a8011114 100644
 --- a/dist/esm/server/lib/incremental-cache/index.js
 +++ b/dist/esm/server/lib/incremental-cache/index.js
 @@ -96,6 +96,7 @@ export class IncrementalCache {
@@ -51,12 +51,12 @@ index ea5838838ef20c3bc27664284bfc58d705f621db..cdbd599b23876d0f8afac7662716985f
      }
      // populate the incremental cache with new data
      async set(pathname, data, ctx) {
-+        console.error(`esm/server/lib/incremental-cache: SETTING the incremental cache lock for key: ${cacheKey}`);
++        console.error(`esm/server/lib/incremental-cache: SETTING the incremental cache lock for key: ${pathname}`);
          if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
              const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
              return invokeIpcMethod({
 diff --git a/dist/server/lib/incremental-cache/fetch-cache.js b/dist/server/lib/incremental-cache/fetch-cache.js
-index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..2f6f6c6299a456541cc2b0e15ded3633579704d0 100644
+index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..ecafe7049692171493f3ccb1df4ffac8c288d7e5 100644
 --- a/dist/server/lib/incremental-cache/fetch-cache.js
 +++ b/dist/server/lib/incremental-cache/fetch-cache.js
 @@ -60,6 +60,7 @@ class FetchCache {
@@ -76,8 +76,27 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..2f6f6c6299a456541cc2b0e15ded3633
      }
      resetRequestCache() {
          memoryCache == null ? void 0 : memoryCache.reset();
+@@ -168,6 +171,9 @@ class FetchCache {
+             }
+             return null;
+         }
++        console.log(`GET: dumping memory cache for: ${key}`);
++        console.log(memoryCache.dump());
++
+         // memory cache is cleared at the end of each request
+         // so that revalidate events are pulled from upstream
+         // on successive requests
+@@ -313,6 +319,8 @@ class FetchCache {
+                 }
+             }
+         }
++        console.log(`${key}, this.cacheEndpoint: ${this.cacheEndpoint}`);
++        console.log(this.headers);
+         return;
+     }
+ }
 diff --git a/dist/server/lib/incremental-cache/index.js b/dist/server/lib/incremental-cache/index.js
-index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..aa15b4281481448edc7e3e08c97566b705039315 100644
+index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..4be8ceaeecc2bc6322d31f4f1fc1010417542b92 100644
 --- a/dist/server/lib/incremental-cache/index.js
 +++ b/dist/server/lib/incremental-cache/index.js
 @@ -123,6 +123,7 @@ class IncrementalCache {
@@ -108,7 +127,7 @@ index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..aa15b4281481448edc7e3e08c97566b7
      }
      // populate the incremental cache with new data
      async set(pathname, data, ctx) {
-+        console.error(`server/lib/incremental-cache: SETTING the incremental cache lock for key: ${cacheKey}`);
++        console.error(`server/lib/incremental-cache: SETTING the incremental cache lock for key: ${patchname}`);
          if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
              const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
              return invokeIpcMethod({
