@@ -1,0 +1,82 @@
+diff --git a/dist/esm/server/lib/incremental-cache/fetch-cache.js b/dist/esm/server/lib/incremental-cache/fetch-cache.js
+index ab0cbbcd7f155c619c0fddd59d7b3422fc0b3ae4..1540cecaf9f686e0af992924208f36227436b1e2 100644
+--- a/dist/esm/server/lib/incremental-cache/fetch-cache.js
++++ b/dist/esm/server/lib/incremental-cache/fetch-cache.js
+@@ -45,6 +45,7 @@ export default class FetchCache {
+         return !!(ctx._requestHeaders["x-vercel-sc-host"] || process.env.SUSPENSE_CACHE_URL);
+     }
+     constructor(ctx){
++        console.log("------------------------------------------- esm fetch-cache.js");
+         this.headers = {};
+         this.headers["Content-Type"] = "application/json";
+         if (CACHE_HEADERS_HEADER in ctx._requestHeaders) {
+@@ -98,6 +99,8 @@ export default class FetchCache {
+                 console.log("not using memory store for fetch cache");
+             }
+         }
++        console.log("Headers at the end of FetchCache constructor");
++        console.log(this.headers);
+     }
+     resetRequestCache() {
+         memoryCache == null ? void 0 : memoryCache.reset();
+diff --git a/dist/esm/server/lib/incremental-cache/index.js b/dist/esm/server/lib/incremental-cache/index.js
+index ea5838838ef20c3bc27664284bfc58d705f621db..4cd60ae8410e75ee87fd9cda7f54449861875eab 100644
+--- a/dist/esm/server/lib/incremental-cache/index.js
++++ b/dist/esm/server/lib/incremental-cache/index.js
+@@ -96,6 +96,7 @@ export class IncrementalCache {
+         (_this_cacheHandler = this.cacheHandler) == null ? void 0 : (_this_cacheHandler_resetRequestCache = _this_cacheHandler.resetRequestCache) == null ? void 0 : _this_cacheHandler_resetRequestCache.call(_this_cacheHandler);
+     }
+     async unlock(cacheKey) {
++        console.log(`esm/server/lib/incremental-cache: UNLocking the incremental cache lock for key: ${cacheKey}`);
+         const unlock = this.unlocks.get(cacheKey);
+         if (unlock) {
+             unlock();
+@@ -104,6 +105,7 @@ export class IncrementalCache {
+         }
+     }
+     async lock(cacheKey) {
++        console.log(`esm/server/lib/incremental-cache: Locking the incremental cache lock for key: ${cacheKey}`);
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+             await invokeIpcMethod({
+diff --git a/dist/server/lib/incremental-cache/fetch-cache.js b/dist/server/lib/incremental-cache/fetch-cache.js
+index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..2f6f6c6299a456541cc2b0e15ded3633579704d0 100644
+--- a/dist/server/lib/incremental-cache/fetch-cache.js
++++ b/dist/server/lib/incremental-cache/fetch-cache.js
+@@ -60,6 +60,7 @@ class FetchCache {
+         return !!(ctx._requestHeaders["x-vercel-sc-host"] || process.env.SUSPENSE_CACHE_URL);
+     }
+     constructor(ctx){
++        console.log("------------------------------------------- CJS fetch-cache.js");
+         this.headers = {};
+         this.headers["Content-Type"] = "application/json";
+         if (CACHE_HEADERS_HEADER in ctx._requestHeaders) {
+@@ -113,6 +114,8 @@ class FetchCache {
+                 console.log("not using memory store for fetch cache");
+             }
+         }
++        console.log("Headers at the end of FetchCache constructor");
++        console.log(this.headers);
+     }
+     resetRequestCache() {
+         memoryCache == null ? void 0 : memoryCache.reset();
+diff --git a/dist/server/lib/incremental-cache/index.js b/dist/server/lib/incremental-cache/index.js
+index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..eca68d5953abf9d52a65fb19be39ca0f14872910 100644
+--- a/dist/server/lib/incremental-cache/index.js
++++ b/dist/server/lib/incremental-cache/index.js
+@@ -123,6 +123,7 @@ class IncrementalCache {
+         (_this_cacheHandler = this.cacheHandler) == null ? void 0 : (_this_cacheHandler_resetRequestCache = _this_cacheHandler.resetRequestCache) == null ? void 0 : _this_cacheHandler_resetRequestCache.call(_this_cacheHandler);
+     }
+     async unlock(cacheKey) {
++        console.log(`server/lib/incremental-cache: UNLocking the incremental cache lock for key: ${cacheKey}`);
+         const unlock = this.unlocks.get(cacheKey);
+         if (unlock) {
+             unlock();
+@@ -131,6 +132,7 @@ class IncrementalCache {
+         }
+     }
+     async lock(cacheKey) {
++        console.log(`server/lib/incremental-cache: Locking the incremental cache lock for key: ${cacheKey}`);
+         if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
+             const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
+             await invokeIpcMethod({
