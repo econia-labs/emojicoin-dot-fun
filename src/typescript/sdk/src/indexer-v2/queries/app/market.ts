@@ -9,6 +9,7 @@ import type { DatabaseJsonType } from "../../types";
 import {
   toChatEventModel,
   toMarketRegistrationEventModel,
+  toMarketStateModel,
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
