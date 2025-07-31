@@ -8,9 +8,10 @@ import { unstable_cache } from "next/cache";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 
 import { fetchLatestMeleeEvent } from "@/queries/arena";
-import { fetchMarketState, fetchSwapEvents } from "@/queries/market";
+import { fetchMarketStateJson, fetchSwapEvents } from "@/queries/market";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
+import { toMarketStateModel } from "@/sdk/index";
 
 import EmojiNotFoundPage from "./not-found";
 
@@ -81,10 +82,10 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     return res;
   });
 
-  const state = await unstable_cache(fetchMarketState, [], {
+  const state = await unstable_cache(fetchMarketStateJson, [], {
     revalidate: 2,
     tags: ["market-state-fetch"],
-  })({ searchEmojis: emojis });
+  })({ searchEmojis: emojis }).then((res) => res ? toMarketStateModel(res) : res);
 
   if (state) {
     const { marketID } = state.market;
