@@ -7,10 +7,8 @@ import type { AnyNumberString } from "../../../types";
 import { LIMIT, ORDER_BY } from "../../const";
 import type { DatabaseJsonType } from "../../types";
 import {
-  toArenaInfoModel,
   toChatEventModel,
   toMarketRegistrationEventModel,
-  toMarketStateModel,
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";

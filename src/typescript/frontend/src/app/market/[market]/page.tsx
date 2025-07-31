@@ -72,6 +72,12 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
  * Whereas the actual emoji bytes are: 0xf09f9285f09f8fbe.
  */
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
+  console.log(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_BRANCH_URL,
+    process.env.VERCEL_URL
+  );
+
   const { market: marketSlug } = params.params;
   const names = pathToEmojiNames(marketSlug);
   const emojis = names.map((n) => {
@@ -85,7 +91,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const state = await unstable_cache(fetchMarketStateJson, [], {
     revalidate: 2,
     tags: ["market-state-fetch"],
-  })({ searchEmojis: emojis }).then((res) => res ? toMarketStateModel(res) : res);
+  })({ searchEmojis: emojis }).then((res) => (res ? toMarketStateModel(res) : res));
 
   if (state) {
     const { marketID } = state.market;
