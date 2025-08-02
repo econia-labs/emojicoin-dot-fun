@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { COINGECKO_API_KEY } from "lib/server-env";
 
 const COINGECKO_APT_ID = "aptos";
@@ -29,7 +29,7 @@ export const fetchAptPrice = () =>
       return undefined;
     });
 
-export const fetchCachedAptPrice = cacheWrapper(fetchAptPrice, ["apt-price"], {
+export const fetchCachedAptPrice = unstableCacheWrapper(fetchAptPrice, ["coingecko-apt-price"], {
   revalidate: 10,
-  tags: ["apt-price"],
+  tags: ["coingecko-apt-price"],
 });

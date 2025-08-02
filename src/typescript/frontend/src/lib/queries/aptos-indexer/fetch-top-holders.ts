@@ -1,7 +1,7 @@
 "use server";
 
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { cacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { NEXT_PHASE } from "lib/server-env";
 
 import { toEmojicoinTypes } from "@/sdk/markets";
@@ -25,8 +25,11 @@ export async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
 /**
  * The cached version of {@link fetchTopHoldersInternal}.
  */
-export const fetchCachedTopHolders = cacheWrapper(fetchTopHoldersInternal, ["fetch-holders"], {
-  revalidate: 10,
-  tags: ["fetch-top-holders"],
-  noUnstableCache: true,
-});
+export const fetchCachedTopHolders = unstableCacheWrapper(
+  fetchTopHoldersInternal,
+  ["fetch-top-holders"],
+  {
+    revalidate: 10,
+    tags: ["fetch-top-holders"],
+  }
+);

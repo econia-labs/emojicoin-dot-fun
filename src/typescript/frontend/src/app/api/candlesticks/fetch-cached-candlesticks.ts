@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { CACHE_ONE_YEAR } from "next/dist/lib/constants";
 import type { z } from "zod";
 
@@ -12,10 +12,14 @@ import type { SupportedPeriodSchema } from "./supported-period-schema";
 const HISTORICAL_CACHE_REVALIDATION_TIME = CACHE_ONE_YEAR;
 const INCOMPLETE_CACHE_REVALIDATION_TIME = 10;
 
-const fetchHistoricalCandlestickData = unstable_cache(fetchCandlesticksInRange, [], {
-  revalidate: HISTORICAL_CACHE_REVALIDATION_TIME,
-  tags: ["fetch-historical-candlestick-data"],
-});
+const fetchHistoricalCandlestickData = unstableCacheWrapper(
+  fetchCandlesticksInRange,
+  ["fetch-historical-candlestick-data"],
+  {
+    revalidate: HISTORICAL_CACHE_REVALIDATION_TIME,
+    tags: ["fetch-historical-candlestick-data"],
+  }
+);
 
 /**
  * `unstable_cache` works by using the callback function's `cb.toString()` value as part of the
@@ -36,7 +40,7 @@ const stableFetchIncompleteCandlestickData = ({
     return fetchCandlesticksInRange({ marketID, period, firstStartTime, lastStartTime });
   };
 
-  return unstable_cache(stableIncompleteFetcher, [], {
+  return unstableCacheWrapper(stableIncompleteFetcher, ["fetch-incomplete-candlestick-data"], {
     revalidate: INCOMPLETE_CACHE_REVALIDATION_TIME,
     tags: ["fetch-incomplete-candlestick-data", `market_${marketID}-${period}`],
   });
