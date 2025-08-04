@@ -8,7 +8,7 @@ export const fetchCachedArenaInfo = unstableCacheWrapper(
   fetchArenaInfoJson,
   ["current-arena-info"],
   {
-    revalidate: 10,
+    revalidate: 2,
     tags: ["current-arena-info"],
   }
 );

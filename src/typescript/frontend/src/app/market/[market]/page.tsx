@@ -12,6 +12,7 @@ import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 import { toMarketStateModel } from "@/sdk/index";
 
 import EmojiNotFoundPage from "./not-found";
+import { fetchCachedMarketState } from "../cached-fetches";
 
 export const revalidate = 10;
 export const dynamic = "force-static";
@@ -69,14 +70,6 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
   };
 }
 
-const buildCachedMarketState = unstableCacheWrapper(
-  fetchMarketStateJson,
-  ["build-cached-market-state"],
-  {
-    tags: ["build-cached-market-state"],
-  }
-);
-
 /**
  * Note that our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
  * That is, if you paste the emoji 💅🏾 into the URL, it becomes %F0%9F%92%85%F0%9F%8F%BE.
@@ -93,7 +86,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const emojis = names.map((v) => SYMBOL_EMOJI_DATA.byStrictName(v).emoji);
   // console.log(`time: ${new Date().toISOString()}, ${JSON.stringify(params)}`);
 
-  const stateJson = await buildCachedMarketState({ searchEmojis: emojis });
+  const stateJson = await fetchCachedMarketState({ searchEmojis: emojis });
 
   if (stateJson) {
     const state = toMarketStateModel(stateJson);
