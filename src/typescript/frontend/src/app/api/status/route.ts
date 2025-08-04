@@ -9,6 +9,7 @@ import {
 } from "./cached-fetches";
 
 export const revalidate = 2;
+export const dynamic = "force-static";
 
 export const GET = apiRouteErrorHandler(async (_req: NextRequest) => {
   const [emojicoinProcessorStatus, aptosProcessorStatus, fullnodeRestApiHealth] = await Promise.all(

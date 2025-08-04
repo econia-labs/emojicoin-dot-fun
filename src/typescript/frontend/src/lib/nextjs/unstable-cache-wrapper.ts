@@ -3,19 +3,17 @@
 import { IS_NEXT_BUILD_PHASE } from "lib/server-env";
 import { unstable_cache } from "next/cache";
 
+import { sleep } from "@/sdk/index";
+import type { JsonValue } from "@/sdk/types/json-types";
+
+import PatchedFetchCache from "./cache-handler";
 import { unstableCacheKeyGenerator } from "./generate-cache-key";
+import { getPatchedFetchCache } from "./get-incremental-cache";
+import { cacheLog, createLock } from "./redis";
 
 type Callback = (...args: any[]) => Promise<any>;
 
-const buildCache = IS_NEXT_BUILD_PHASE ? new Map<string, Promise<{}>>() : undefined;
-
-const MIN_KEY_LENGTH = 8;
-
 /**
- * A more stable and efficient version of `unstable_cache`, achieved with a proxy object to update
- * the callback function's `.toString()` function and `.name` field, while also deduplicating
- * fetches at build time. See more information below.
- *
  * BUILD TIME DEDUPING:
  * Since `unstable_cache` nor the fetch deduping efforts properly work at build time when used in
  * the prerender for `generateStaticParams`, it's necessary to memoize the value of fetch results
@@ -23,17 +21,22 @@ const MIN_KEY_LENGTH = 8;
  *
  * With 2,000+ markets in production, this function removes thousands of extra queries at build time
  * when running pre-rendered pages from `generateStaticParams`.
+ */
+const buildCache = IS_NEXT_BUILD_PHASE ? new Map<string, Promise<JsonValue>>() : undefined;
+const MIN_KEY_LENGTH = 8;
+
+/**
+ * The global TTL for all recently updated CDN entries on Vercel.
+ * @see {@link https://vercel.com/docs/incremental-static-regeneration}
+ */
+const CDN_TTL_MS = 300;
+
+/**
+ * A more stable and efficient version of `unstable_cache`, achieved with a proxy object to update
+ * the callback function's `.toString()` function and `.name` field and deduplication through a
+ * redis lock/release mechanism.
  *
- * FORCED UNIQUE KEY GENERATION:
- * The `cb.toString()` function used in the cache key generation in `unstable_cache` is
- * unreliable and sometimes even results in different keys for the same exact function due to
- * code minification.
- *
- * e.g., `() => func.a();` might minify to `() => func.o();` non-deterministically.
- *
- * To fix this, this function creates a Proxy object on the underlying callback function and updates
- * its `.toString()` function. This facilitates stabilizing the cache key generation inside
- * `unstable_cache` without having to rely on side effects from altering the underlying cb object.
+ * This should be used for any expensive queries/fetches that should be globally deduped.
  */
 export function unstableCacheWrapper<T extends Callback>(
   cb: T,
@@ -54,70 +57,207 @@ export function unstableCacheWrapper<T extends Callback>(
     tags?: string[];
   }
 ): T {
-  try {
-    const uniqueKey = Array.isArray(uniqueKeyParts) ? uniqueKeyParts.join(",") : uniqueKeyParts;
-    // Enforce some arbitrary minimum for the cache key length.
-    if (uniqueKey.length < MIN_KEY_LENGTH) {
-      throw new Error(`Cache key must be at least ${MIN_KEY_LENGTH} characters. Got: ${uniqueKey}`);
-    }
-    const stableCallback = withStableNameAndToString(cb, uniqueKey);
-
-    // Add the `uniqueKey` to the `tags` array if it's not already there.
-    const dedupedTags = new Set([uniqueKey, ...(options?.tags ?? [])]);
-    const tags = Array.from(dedupedTags);
-
-    // Simplify the `keyParts` array and force the caller to stringify the key prior.
-    const keyParts = [uniqueKey];
-
-    const slightlyLessUnstableCache = async (...args: any[]) => {
-      const encodedArgs = JSON.stringify(args, (_, v) =>
-        typeof v === "string" ? encodeURIComponent(v) : v
-      );
-      const argsWithoutParens = encodedArgs.replace(/^\[(.*)\]$/, "$1");
-      const functionCallTag = `${uniqueKey}(${argsWithoutParens})`;
-      const cb = unstable_cache(stableCallback, keyParts, {
-        revalidate: options.revalidate,
-        // Add the stringified `args` to the tags for debuggability and so it's possible to
-        // revalidate by an invocation with specific args passed to it.
-        tags: args.length ? [...tags, functionCallTag] : tags,
-      });
-      return cb(...args);
-    };
-
-    // At runtime just return the `unstable_cache` function with stabilized key generation.
-    if (!buildCache) return slightlyLessUnstableCache as unknown as T;
-
-    // Otherwise, dedupe the build-time fetch with a cache key by unrolling the inner cache key
-    // generation logic and storing the `unstable_cache` invocation in a lazy promise map.
-    const cacheKeyFunction = unstableCacheKeyGenerator(stableCallback, keyParts);
-    const memoizedBuildFetch = async (...args: any[]) => {
-      const cacheKey = cacheKeyFunction(args);
-      if (!buildCache.has(cacheKey)) {
-        const promise = slightlyLessUnstableCache(...args);
-        buildCache.set(cacheKey, promise);
-      }
-      const res = await buildCache.get(cacheKey);
-      return res as ReturnType<T>;
-    };
-    return memoizedBuildFetch as unknown as T;
-  } catch (e) {
-    console.error(e);
-    throw e;
+  const uniqueKey = Array.isArray(uniqueKeyParts) ? uniqueKeyParts.join(",") : uniqueKeyParts;
+  // Enforce some arbitrary minimum for the cache key length.
+  if (uniqueKey.length < MIN_KEY_LENGTH) {
+    throw new Error(`Cache key must be at least ${MIN_KEY_LENGTH} characters. Got: ${uniqueKey}`);
   }
+
+  const finalStableCb = stabilizedWithExplicitTags(cb, uniqueKey, options);
+
+  // At runtime just return the `unstable_cache` function with stabilized key generation.
+  if (!buildCache) return finalStableCb as T;
+
+  return finalStableCb as T;
+
+  // Otherwise, dedupe the build-time fetch with a cache key by unrolling the inner cache key
+  // generation logic and storing the `unstable_cache` invocation in a lazy promise map.
+  // This deduplicates ~80% of fetches when the CDN caching mechanism isn't available.
+  const memoizedBuildFetch = async (...args: any[]) => {
+    const keyParts = createKeyParts(uniqueKey);
+    const cacheKey = unstableCacheKeyGenerator(finalStableCb, keyParts)(...args);
+    if (!buildCache.has(cacheKey)) {
+      const promise = finalStableCb(...args);
+      buildCache.set(cacheKey, promise);
+    }
+    const res = await buildCache.get(cacheKey);
+    return res as ReturnType<T>;
+  };
+  return memoizedBuildFetch as unknown as T;
+}
+
+/**
+ * This function handles locking and releasing the key associated with the cache key for a given
+ * `cb` function.
+ *
+ * It transforms the function so that the lock must be acquired before calling the original
+ * function. The exact purpose is to intercept the origin fetch with a lock/release mechanism so
+ * that queries aren't needlessly called if there's already another revaliation occurring in another
+ * remote request.
+ *
+ * Since the `cb` function is only called in `unstable_cache` if the CDN cache entry doesn't exist,
+ * the lock is only acquired when `unstable_cache` determines that revalidation must occur. It
+ * doesn't matter if it's synchronous or asynchronous here; ultimately, this is just meant to
+ * reduce unnecessary load on the origin endpoint.
+ *
+ * For *background revalidation* fetches:
+ * | Cache entry exists and is not stale         | HIT, no revalidation
+ * | Cache entry exists and is stale             | STALE, asynchronous revalidation (not awaited)
+ * | Cache entry does not exist                  | MISS, *forces* synchronous revalidation
+ *
+ * For *on demand* fetches, the possible scenarios are as follows:
+ * | Cache entry exists and is not stale         | HIT, no revalidation
+ * | Cache entry exists and is stale             | STALE, *forces* synchronous revalidation
+ * | Cache entry does not exist                  | MISS, *forces* synchronous revalidation
+ *
+ * @param cb The callback function passed to @see unstableCacheWrapper
+ * @param uniqueCacheKey The unique key passed to @see unstableCacheWrapper
+ */
+function addLockAndRelease<T extends Callback>(
+  cb: T,
+  // The unique cache key entry- not globally unique. e.g. `current-arena-info` or `getMarket(1)`
+  uniqueCacheKey: string,
+  // The uuid for the function invocation.
+  uuid: string
+) {
+  // Only used to generate the cache key since the function isn't properly curried and we can't
+  // extract the args without intercepting the function call first.
+  const stabilizedProxy = createStabilizedProxy(cb, uniqueCacheKey);
+  const newCb = async (...args: any[]) => {
+    const cacheKey = unstableCacheKeyGenerator(stabilizedProxy, [uniqueCacheKey])(...args);
+    const lock = createLock(cacheKey);
+    const functionCallTag = prettifyFunctionCall(uniqueCacheKey, ...args);
+
+    const acquired = await lock.acquire().catch((e) => {
+      console.error(`Failed to acquire lock: ${e}`);
+      return false;
+    });
+
+    const addToCacheKeyLog = (msg: string) =>
+      cacheLog({
+        cacheKey,
+        entry: `${msg} ${functionCallTag}`,
+        uuid,
+      });
+
+    if (acquired) {
+      addToCacheKeyLog("WRITE");
+      return stabilizedProxy(...args).then((res) => {
+        // Wait for the cache entry to update on the CDN and *then* release the lock.
+        // Otherwise, multiple instances can acquire the lock before the CDN will show as fresh.
+        sleep(CDN_TTL_MS).then(() =>
+          lock.release().then((released) => {
+            if (!released) console.error("Lock wasn't released properly?");
+            addToCacheKeyLog(`${released ? "" : "FAILED "}RELEASE`);
+          })
+        );
+        return res;
+      });
+    } else {
+      addToCacheKeyLog("MISS, ENTERING POLLING");
+
+      // If the lock wasn't acquired, return a callback that polls the cache entry several times
+      // before trying to do an origin fetch. This is the brunt of the deduplication.
+      // If polling fails, the function simply falls back to doing the original `unstable_callback`
+      // implementation (with updated tags and info).
+      const pollWithFallback = async (...args: any[]) => {
+        const fc = getPatchedFetchCache();
+        if (fc) {
+          const pollResult = await fc.pollCacheEndpoint({ cacheKey, uuid });
+          if (pollResult) {
+            // The CDN cache entry is valid, return it but mark the unique call as "do not post".
+            fc.markAsDoNotPost(uuid);
+            return pollResult;
+          }
+        }
+        // Otherwise, fallback to default `unstable_cache` behavior that doesn't deduplicate
+        // origin fetches across different requests.
+        const msg = `Failed to retrieve cache entry: ${cacheKey}. Falling back to origin fetch.`;
+        console.warn(msg);
+        cacheLog({ cacheKey: "FAILURES", entry: `${cacheKey}-${msg}-${functionCallTag}`, uuid });
+        addToCacheKeyLog("DUPLICATE WRITE");
+        return stabilizedProxy(...args);
+      };
+      return pollWithFallback(...args);
+    }
+  };
+  return newCb;
+}
+
+function prettifyFunctionCall(uniqueKey: string, ...args: any[]) {
+  const encodedArgs = JSON.stringify(args, (_, v) =>
+    typeof v === "string" ? encodeURIComponent(v) : v
+  );
+  const argsWithoutParens = encodedArgs.replace(/^\[(.*)\]$/, "$1");
+  return `${uniqueKey}(${argsWithoutParens})`;
 }
 
 /**
  * Creates a proxy object for a function and updates the proxy's `.toString()` and `.name` fields to
  * return the passed in cache key instead.
  *
+ * The `cb.toString()` function used in the cache key generation in `unstable_cache` is
+ * unreliable and sometimes even results in different keys for the same exact function due to
+ * code minification.
+ *
+ * e.g., `() => func.a();` might minify to `() => func.o();` non-deterministically.
+ *
+ * To fix this, this function creates a Proxy object on the underlying callback function and updates
+ * its `.toString()` function. This facilitates stabilizing the cache key generation inside
+ * `unstable_cache` without having to rely on side effects from altering the underlying cb object.
+ *
  * This fixes the issue of non-deterministic keys generated for the `unstable_cache` function.
  */
-function withStableNameAndToString<T extends (...args: any[]) => any>(fn: T, cacheKey: string): T {
-  return new Proxy(fn, {
+function createStabilizedProxy<T extends Callback>(cb: T, uniqueKey: string): T {
+  return new Proxy(cb, {
     get(target, prop, receiver) {
-      if (prop === "toString") return () => `${cacheKey}-stable-toString`;
-      if (prop === "name") return `${cacheKey}-stable-name`;
+      if (prop === "toString") return () => uniqueKey;
+      if (prop === "name") return uniqueKey;
       return Reflect.get(target, prop, receiver);
     },
   });
+}
+
+/**
+ * Stabilize the final callback and call `unstable_cache` with it.
+ *
+ * The function call tag (used for debuggability and explicit tag revalidation) can't be created
+ * without access to the runtime args, so instead of creating yet another wrapped callback, simply
+ * couple the stabilization logic with the final explicit tags creation, call `unstable_cache` with
+ * it, and return that.
+ */
+function stabilizedWithExplicitTags<T extends Callback>(
+  cb: T,
+  uniqueKey: string,
+  options: {
+    revalidate?: number | false;
+    tags?: string[];
+  }
+) {
+  // Add the `uniqueKey` to the `tags` array if it's not already there.
+  const staticTags = new Set([uniqueKey, ...(options?.tags ?? [])]);
+  const baseTags = Array.from(staticTags);
+
+  const res = async (...args: any[]) => {
+    // Add a unique tag to `tags` to be able to look up this unique function invocation in the
+    // patched fetch cache.
+    const uuid = PatchedFetchCache.generateUUID();
+    const functionCallTag = prettifyFunctionCall(uniqueKey, ...args);
+    const tags = [...baseTags, functionCallTag, uuid];
+    const lockWrapped = addLockAndRelease(cb, uniqueKey, uuid);
+    const stabilizedProxy = createStabilizedProxy(lockWrapped, uniqueKey);
+    return unstable_cache(stabilizedProxy, createKeyParts(uniqueKey), {
+      revalidate: options.revalidate,
+      // Add the stringified `args` to the tags for debuggability and so it's possible to
+      // revalidate by an invocation with specific args passed to it.
+      tags,
+    })(...args);
+  };
+
+  return res as T;
+}
+
+// Consolidate the key parts creation behavior with this helper function.
+function createKeyParts(uniqueKey: string) {
+  return [uniqueKey];
 }

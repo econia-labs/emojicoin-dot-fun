@@ -9,7 +9,7 @@ const withBundleAnalyzer = analyzer({
 
 const DEBUG = process.env.BUILD_DEBUG === "true";
 /** @type {import('next').NextConfig} */
-const debugConfigOptions = {
+const debugConfigOptions= {
   productionBrowserSourceMaps: true,
   outputFileTracing: true,
   swcMinify: false,
@@ -30,6 +30,7 @@ const nextConfig = {
       "eaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e",
   },
   ...(DEBUG ? debugConfigOptions : {}),
+  swcMinify: process.env.NODE_ENV === "development" ? false : undefined,
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
@@ -38,6 +39,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+  cacheHandler: new URL('./src/lib/nextjs/cache-handler.js', import.meta.url).pathname,
   /**
    * Match the new default behavior in next 15, without opinionated caching for dynamic pages.
    * @see {@link https://nextjs.org/docs/app/api-reference/config/next-config-js/staleTimes#version-history}
@@ -52,9 +54,12 @@ const nextConfig = {
     // Not confirmed working: the idea here is to force synchronous revalidation after 60 seconds
     // but allow asynchronous (background) revalidation before that. This way, users wouldn't see
     // an extremely stale page if it hasn't been visited in a while- the most they'd ever see is
-    // 60 seconds. 
+    // 60 seconds.
     swrDelta: 60,
+    serverMinification: process.env.NODE_ENV === "development" ? false : true,
+    serverSourceMaps: process.env.NODE_ENV === "development" ? true : false,
   },
+  productionBrowserSourceMaps: process.env.NODE_ENV === "development" ? true : false,
   // Log full fetch URLs if we're in a specific environment.
   logging:
     process.env.NODE_ENV === "development" ||

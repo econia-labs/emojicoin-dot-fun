@@ -7,9 +7,8 @@ import { AptPriceContextProvider } from "context/AptPrice";
 import LayoutGlobalState from "context/LayoutGlobalState";
 import Providers from "context/providers";
 import DisplayDebugData from "lib/local-development/DisplayDebugData";
-import { maybeCacheBuildFetch } from "lib/nextjs/build-cache";
 import { fetchCachedArenaInfo } from "lib/queries/arena-info";
-import { fetchAptPrice, fetchCachedAptPrice } from "lib/queries/get-apt-price";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import StyledComponentsRegistry from "lib/registry";
 import type { Metadata, Viewport } from "next";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
@@ -29,13 +28,11 @@ export const viewport: Viewport = {
 export const revalidate = 10;
 // Use `error` instead of `force-static` here to ensure all pages are statically rendered.
 // export const dynamic = "error";
+export const dynamic = "force-static";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [aptPrice, arenaInfo] = await Promise.all([
-    fetchCachedAptPrice().then((res) => {
-      // console.log("FETCHING CACHED APT PRICE IN LAYOUT.TSX");
-      return res;
-    }),
+    fetchCachedAptPrice(),
     fetchCachedArenaInfo().then((res) => (res ? toArenaInfoModel(res) : null)),
   ]);
 
