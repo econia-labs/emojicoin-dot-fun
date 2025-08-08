@@ -27,7 +27,7 @@ const fetchMeleeData = async ({
   exchangeRatesPromise,
 }: {
   arenaInfo: ArenaInfoModel;
-  exchangeRatesPromise: ReturnType<typeof invokeExchangeRatesCallback>;
+  exchangeRatesPromise: ReturnType<typeof fetchCachedExchangeRatesWithErrorHandling>;
 }) => {
   try {
     const vaultBalancePromise = fetchVaultBalance();
@@ -65,7 +65,7 @@ const fetchMeleeData = async ({
   }
 };
 
-const invokeExchangeRatesCallback = (arenaInfo: ArenaInfoModel) =>
+const fetchCachedExchangeRatesWithErrorHandling = (arenaInfo: ArenaInfoModel) =>
   fetchCachedExchangeRatesAtMeleeStart(arenaInfo)().catch((e) => {
     console.error(
       `Couldn't fetch exchange rates at melee start for melee ID: ${arenaInfo.meleeID}`
@@ -87,7 +87,7 @@ const cachedFetches = async () => {
 
   if (!arenaInfo) return logAndDefault("Couldn't fetch arena info.");
 
-  const exchangeRatesPromise = invokeExchangeRatesCallback(arenaInfo);
+  const exchangeRatesPromise = fetchCachedExchangeRatesWithErrorHandling(arenaInfo);
   const fetchCachedCurrentMeleeData = unstable_cache(
     async () =>
       fetchMeleeData({ arenaInfo, exchangeRatesPromise }).catch(logAndDefault).then(stringifyJSON),

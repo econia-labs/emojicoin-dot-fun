@@ -114,37 +114,6 @@ export const fetchLargestMarketID = async () => {
     .then((r) => Number(r.data?.market_id) ?? 0);
 };
 
-/**
- * Retrieves the number of markets by querying the view function in the registry module on-chain.
- * The ledger (transaction) version is specified in order to reflect the exact total number of
- * unique markets the `emojicoin-dot-fun` processor will have processed up to that version.
- *
- * @returns The number of registered markets at the latest processed transaction version
- */
-export const fetchNumRegisteredMarkets = async () => {
-  const aptos = getAptosClient();
-  let latestVersion: bigint;
-  try {
-    latestVersion = await getLatestProcessedEmojicoinVersion();
-  } catch (e) {
-    console.error("Couldn't get the latest processed version.", e);
-    throw e;
-  }
-  try {
-    const numRegisteredMarkets = await RegistryView.view({
-      aptos,
-      options: {
-        ledgerVersion: latestVersion,
-      },
-    }).then((r) => toRegistryView(r).numMarkets);
-    return Number(numRegisteredMarkets);
-  } catch (e: unknown) {
-    // If the view function fails for some reason, find the largest market id in the database for a
-    // cheap fetch of the number of registered markets. Also because `count: exact` does not work.
-    return await fetchLargestMarketID();
-  }
-};
-
 // Note the no-op conversion function- this is simply to satisfy the `queryHelper` params and
 // indicate with generics that we don't convert the type here.
 // We don't do it because of the issues with serialization/deserialization in `unstable_cache`.

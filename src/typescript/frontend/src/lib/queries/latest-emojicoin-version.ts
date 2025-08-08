@@ -1,7 +1,6 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
-import { cache } from "react";
 import type { z } from "zod";
 
 import { sleep } from "@/sdk/index";
@@ -12,13 +11,13 @@ import type { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 const fetchLatestProcessorVersion = () =>
   getProcessorStatus().then((res) => res.lastSuccessVersion.toString());
 
-// Cache in-flight fetches within a single request with React's `cache`.
-// Then, wrap the inner indexer call with `unstable_cache`, so it's cached across multiple requests.
-export const fetchCachedLatestProcessorVersion = cache(
-  unstable_cache(fetchLatestProcessorVersion, [], {
+export const fetchCachedLatestProcessorVersion = unstable_cache(
+  fetchLatestProcessorVersion,
+  ["latest-emojicoin-indexer-version"],
+  {
     revalidate: 1,
     tags: ["latest-emojicoin-indexer-version"],
-  })
+  }
 );
 
 const FETCH_INTERVAL = 1000;

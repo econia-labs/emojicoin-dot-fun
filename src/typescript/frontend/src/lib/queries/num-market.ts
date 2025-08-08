@@ -1,9 +1,9 @@
 import { unstable_cache } from "next/cache";
 
-import { fetchNumRegisteredMarkets } from "@/queries/home";
+import { fetchLargestMarketID } from "@/queries/home";
 
-export const fetchCachedNumMarketsFromAptosNode = unstable_cache(
-  fetchNumRegisteredMarkets,
+export const fetchCachedNumRegisteredMarkets = unstable_cache(
+  fetchLargestMarketID,
   ["num-registered-markets"],
   {
     revalidate: 10,
