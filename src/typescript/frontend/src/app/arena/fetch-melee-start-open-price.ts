@@ -54,7 +54,7 @@ const fetchCachedExchangeRatesAtMeleeStart = (arenaInfo: ArenaInfoModel) =>
         market1Address: arenaInfo.emojicoin1MarketAddress,
         meleeID: arenaInfo.meleeID.toString(),
       }),
-    [],
+    ["fetch-exchange-rates-at-melee-start"],
     {
       // `unstable_cache` doesn't cache error responses, so just specify to cache this forever.
       revalidate: false,
