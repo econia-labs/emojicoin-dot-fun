@@ -97,7 +97,7 @@ const cachedFetches = async () => {
       tags: ["current-melee-data"],
     }
   );
-  return await fetchCachedCurrentMeleeData().then(parseResponseJSON<MeleeData>);
+  return fetchCachedCurrentMeleeData().then(parseResponseJSON<MeleeData>);
 };
 
 export const fetchCachedMeleeData = async () => {
