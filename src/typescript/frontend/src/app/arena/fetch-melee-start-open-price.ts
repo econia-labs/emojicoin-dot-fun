@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 
 import { EmojicoinArena } from "@/move-modules";
 import { fetchMeleeEventByMeleeIDJson } from "@/queries/arena";
-import type { AccountAddressString } from "@/sdk/index";
+import type { AccountAddressString, ArenaInfoModel } from "@/sdk/index";
 import { getAptosClient, toEmojicoinTypesForEntry } from "@/sdk/index";
 
 const fetchExchangeRate = (marketAddress: AccountAddressString, version: bigint) =>
@@ -46,10 +46,20 @@ async function fetchExchangeRatesAtMeleeStart({
 /**
  * Fetch the exchange rates of the two emojicoins in the melee at the exact version the melee began.
  */
-const fetchCachedExchangeRatesAtMeleeStart = unstable_cache(fetchExchangeRatesAtMeleeStart, [], {
-  // Revalidate every 10 minutes to avoid permanently caching a response as a 404 response.
-  revalidate: 600,
-  tags: ["fetch-exchange-rates-at-melee-start"],
-});
+const fetchCachedExchangeRatesAtMeleeStart = (arenaInfo: ArenaInfoModel) =>
+  unstable_cache(
+    () =>
+      fetchExchangeRatesAtMeleeStart({
+        market0Address: arenaInfo.emojicoin0MarketAddress,
+        market1Address: arenaInfo.emojicoin1MarketAddress,
+        meleeID: arenaInfo.meleeID.toString(),
+      }),
+    [],
+    {
+      // `unstable_cache` doesn't cache error responses, so just specify to cache this forever.
+      revalidate: false,
+      tags: ["fetch-exchange-rates-at-melee-start"],
+    }
+  );
 
 export default fetchCachedExchangeRatesAtMeleeStart;

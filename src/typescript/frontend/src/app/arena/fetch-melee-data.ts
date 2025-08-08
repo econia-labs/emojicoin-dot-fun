@@ -3,6 +3,7 @@ import { fetchCachedArenaInfo } from "lib/queries/arena-info";
 import { unstable_cache } from "next/cache";
 import { parseResponseJSON, stringifyJSON } from "utils";
 
+import type { ArenaInfoModel } from "@/sdk/indexer-v2";
 import { fetchSpecificMarkets, fetchVaultBalance, toArenaInfoModel } from "@/sdk/indexer-v2";
 
 import calculateExchangeRateDelta from "./calculate-exchange-rate-delta";
@@ -21,31 +22,15 @@ const logAndDefault = (e: unknown) => {
 };
 
 export type MeleeData = Awaited<ReturnType<typeof fetchMeleeData>>;
-const fetchMeleeData = async () => {
+const fetchMeleeData = async ({
+  arenaInfo,
+  exchangeRatesPromise,
+}: {
+  arenaInfo: ArenaInfoModel;
+  exchangeRatesPromise: ReturnType<typeof invokeExchangeRatesCallback>;
+}) => {
   try {
     const vaultBalancePromise = fetchVaultBalance();
-    const arenaInfo = await fetchCachedArenaInfo()
-      .then((res) => (res ? toArenaInfoModel(res) : null))
-      .catch(() => null);
-
-    if (!arenaInfo) {
-      throw new Error("Couldn't fetch arena info");
-    }
-
-    const exchangeRatesAtMeleeStartPromise = fetchCachedExchangeRatesAtMeleeStart({
-      meleeID: arenaInfo.meleeID.toString(),
-      market0Address: arenaInfo.emojicoin0MarketAddress,
-      market1Address: arenaInfo.emojicoin1MarketAddress,
-    }).catch((e) => {
-      console.error(
-        `Couldn't fetch exchange rates at melee start for melee ID: ${arenaInfo.meleeID}`
-      );
-      console.error(e);
-      return {
-        market0ExchangeRate: null,
-        market1ExchangeRate: null,
-      };
-    });
 
     const { market0, market1 } = await fetchSpecificMarkets([
       arenaInfo.emojicoin0Symbols,
@@ -61,7 +46,7 @@ const fetchMeleeData = async () => {
 
     const [vaultBalance, meleeStartExchangeRates] = await Promise.all([
       vaultBalancePromise,
-      exchangeRatesAtMeleeStartPromise,
+      exchangeRatesPromise,
     ]);
 
     const { market0ExchangeRate: mkt0Rate, market1ExchangeRate: mkt1Rate } =
@@ -80,24 +65,45 @@ const fetchMeleeData = async () => {
   }
 };
 
-const cachedFetch = unstable_cache(
-  async () => {
-    const res = await fetchMeleeData().catch((e) => logAndDefault(e));
-    return stringifyJSON(res);
-  },
-  [],
-  {
-    revalidate: 2,
-    tags: ["current-melee"],
-  }
-);
+const invokeExchangeRatesCallback = (arenaInfo: ArenaInfoModel) =>
+  fetchCachedExchangeRatesAtMeleeStart(arenaInfo)().catch((e) => {
+    console.error(
+      `Couldn't fetch exchange rates at melee start for melee ID: ${arenaInfo.meleeID}`
+    );
+    console.error(e);
+    return {
+      market0ExchangeRate: null,
+      market1ExchangeRate: null,
+    };
+  });
+
+const cachedFetches = async () => {
+  const arenaInfo = await fetchCachedArenaInfo()
+    .then((res) => (res ? toArenaInfoModel(res) : res))
+    .catch((e) => {
+      console.error(e);
+      return null;
+    });
+
+  if (!arenaInfo) return logAndDefault("Couldn't fetch arena info.");
+
+  const exchangeRatesPromise = invokeExchangeRatesCallback(arenaInfo);
+  const fetchCachedCurrentMeleeData = unstable_cache(
+    async () =>
+      fetchMeleeData({ arenaInfo, exchangeRatesPromise }).catch(logAndDefault).then(stringifyJSON),
+    ["current-melee-data"],
+    {
+      revalidate: 2,
+      tags: ["current-melee-data"],
+    }
+  );
+  return await fetchCachedCurrentMeleeData().then(parseResponseJSON<MeleeData>);
+};
 
 export const fetchCachedMeleeData = async () => {
   if (!FEATURE_FLAGS.Arena) throw new Error("Do not call this function when arena isn't enabled.");
 
-  const res = await cachedFetch()
-    .then(parseResponseJSON<MeleeData>)
-    .catch((e) => logAndDefault(e));
+  const res = await cachedFetches().catch((e) => logAndDefault(e));
 
   if (!res.arenaInfo) console.warn(`[WARNING]: Failed to fetch melee data.`);
 
