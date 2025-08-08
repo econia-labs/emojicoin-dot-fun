@@ -7,7 +7,7 @@ import type { ArenaInfoModel } from "@/sdk/indexer-v2";
 import { fetchSpecificMarkets, fetchVaultBalance, toArenaInfoModel } from "@/sdk/indexer-v2";
 
 import calculateExchangeRateDelta from "./calculate-exchange-rate-delta";
-import fetchCachedExchangeRatesAtMeleeStart from "./fetch-melee-start-open-price";
+import createCachedExchangeRatesAtMeleeStartFetcher from "./fetch-melee-start-open-price";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
@@ -66,7 +66,7 @@ const fetchMeleeData = async ({
 };
 
 const fetchCachedExchangeRatesWithErrorHandling = (arenaInfo: ArenaInfoModel) =>
-  fetchCachedExchangeRatesAtMeleeStart(arenaInfo)().catch((e) => {
+  createCachedExchangeRatesAtMeleeStartFetcher(arenaInfo)().catch((e) => {
     console.error(
       `Couldn't fetch exchange rates at melee start for melee ID: ${arenaInfo.meleeID}`
     );

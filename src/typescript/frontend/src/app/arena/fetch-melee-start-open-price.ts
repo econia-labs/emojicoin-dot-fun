@@ -62,4 +62,4 @@ const createCachedExchangeRatesAtMeleeStartFetcher = (arenaInfo: ArenaInfoModel)
     }
   );
 
-export default fetchCachedExchangeRatesAtMeleeStart;
+export default createCachedExchangeRatesAtMeleeStartFetcher;

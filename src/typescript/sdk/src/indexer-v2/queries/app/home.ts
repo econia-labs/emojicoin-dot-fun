@@ -1,8 +1,5 @@
 import "server-only";
 
-import { RegistryView } from "../../../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
-import { toRegistryView } from "../../../types";
-import { getAptosClient } from "../../../utils/aptos-client";
 import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
 import { DatabaseTypeConverter } from "../../types";
 import {
@@ -14,7 +11,7 @@ import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { joinEqClauses } from "../misc";
 import { sortByWithFallback } from "../query-params";
-import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
+import { queryHelper, queryHelperWithCount } from "../utils";
 
 // A helper function to abstract the logic for fetching rows that contain market state.
 const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({
