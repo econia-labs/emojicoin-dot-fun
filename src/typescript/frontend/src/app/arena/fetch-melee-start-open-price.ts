@@ -46,7 +46,7 @@ async function fetchExchangeRatesAtMeleeStart({
 /**
  * Fetch the exchange rates of the two emojicoins in the melee at the exact version the melee began.
  */
-const fetchCachedExchangeRatesAtMeleeStart = (arenaInfo: ArenaInfoModel) =>
+const createCachedExchangeRatesAtMeleeStartFetcher = (arenaInfo: ArenaInfoModel) =>
   unstable_cache(
     () =>
       fetchExchangeRatesAtMeleeStart({
