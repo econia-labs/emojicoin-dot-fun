@@ -1,18 +1,16 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
-import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
-import { fetchMarketStateJson } from "@/queries/market";
 import { fetchAllMarketSymbols } from "@/queries/static-params";
 import type { SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 import { toMarketStateModel } from "@/sdk/index";
 
-import EmojiNotFoundPage from "./not-found";
 import { fetchCachedMarketState } from "../cached-fetches";
+import EmojiNotFoundPage from "./not-found";
 
 export const revalidate = 10;
 export const dynamic = "force-static";
