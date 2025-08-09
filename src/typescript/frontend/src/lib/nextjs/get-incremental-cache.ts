@@ -4,7 +4,7 @@ import type { IncrementalCache } from "next/dist/server/lib/incremental-cache";
 
 import PatchedFetchCache from "./cache-handler";
 
-const getIncrementalCache = () => {
+export const getIncrementalCache = () => {
   const store = staticGenerationAsyncStorage.getStore();
   const maybeIncrementalCache: IncrementalCache | undefined =
     store?.incrementalCache || (globalThis as any).__incrementalCache;
