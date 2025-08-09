@@ -68,8 +68,6 @@ export function unstableCacheWrapper<T extends Callback>(
   // At runtime just return the `unstable_cache` function with stabilized key generation.
   if (!buildCache) return finalStableCb as T;
 
-  return finalStableCb as T;
-
   // Otherwise, dedupe the build-time fetch with a cache key by unrolling the inner cache key
   // generation logic and storing the `unstable_cache` invocation in a lazy promise map.
   // This deduplicates ~80% of fetches when the CDN caching mechanism isn't available.
@@ -92,8 +90,7 @@ export function unstableCacheWrapper<T extends Callback>(
  *
  * It transforms the function so that the lock must be acquired before calling the original
  * function. The exact purpose is to intercept the origin fetch with a lock/release mechanism so
- * that queries aren't needlessly called if there's already another revaliation occurring in another
- * remote request.
+ * that queries aren't called if there's already another revalidation occurring remotely.
  *
  * Since the `cb` function is only called in `unstable_cache` if the CDN cache entry doesn't exist,
  * the lock is only acquired when `unstable_cache` determines that revalidation must occur. It

@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createHash } from "crypto";
 
+import { getIncrementalCache } from "./get-incremental-cache";
+
 type Callback = (...args: any[]) => Promise<any>;
 
 /**
@@ -35,18 +37,20 @@ function generateCacheKey(invocationKey: string): string {
 
   const cacheString = JSON.stringify([
     MAIN_KEY_PREFIX,
-    "",
-    invocationKey,
-    undefined,
-    {},
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    [],
+    getIncrementalCache()?.fetchCacheKeyPrefix || "",
+    // The normal usage for `fetch` cache keys are marked below. For `unstable_cache` wrapped
+    // functions, only the `invocationKey` is present, which is passed down as the url.
+    invocationKey, // url
+    undefined, // init.method
+    {}, // headers
+    undefined, // init.mode
+    undefined, // init.redirect
+    undefined, // init.credentials
+    undefined, // init.referrer
+    undefined, // init.referrerPolicy
+    undefined, // init.integrity
+    undefined, // init.cache
+    [], // bodyChunks
   ]);
 
   return createHash("sha256").update(cacheString).digest("hex");
