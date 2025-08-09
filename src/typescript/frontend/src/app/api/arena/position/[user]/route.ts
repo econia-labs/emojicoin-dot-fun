@@ -29,9 +29,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return new NextResponse("Invalid address.", { status: 400 });
   }
 
-  const { arena_info, market_0, market_1 } = await fetchCachedMeleeData();
+  const { arenaInfo, market0, market1 } = await fetchCachedMeleeData();
 
-  if (!arena_info || !market_0 || !market_1) {
+  if (!arenaInfo || !market0 || !market1) {
     return new NextResponse("Couldn't fetch current melee data in user position route.", {
       status: 424,
     });

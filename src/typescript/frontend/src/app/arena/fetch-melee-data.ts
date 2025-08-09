@@ -16,13 +16,13 @@ import createCachedExchangeRatesAtMeleeStartFetcher from "./fetch-melee-start-op
 const logAndDefault = (e: unknown) => {
   console.error(e);
   return {
-    arena_info: null,
-    market_0: null,
-    market_1: null,
-    rewards_remaining: null,
-    market_0_delta: null,
-    market_1_delta: null,
-  } as const;
+    arenaInfo: null,
+    market0: null,
+    market1: null,
+    rewardsRemaining: null,
+    market0Delta: null,
+    market1Delta: null,
+  };
 };
 
 const fetchMeleeData = async ({
@@ -91,32 +91,20 @@ const cachedFetches = async () => {
     }
   );
 
-  return fetchCachedCurrentMeleeData();
+  return fetchCachedCurrentMeleeData().then((v) => ({
+    arenaInfo: toArenaInfoModel(v.arena_info),
+    market0: toMarketStateModel(v.market_0),
+    market1: toMarketStateModel(v.market_1),
+    rewardsRemaining: BigInt(v.rewards_remaining),
+    market0Delta: v.market_0_delta,
+    market1Delta: v.market_1_delta,
+  }));
 };
 
 export const fetchCachedMeleeData = async () => {
   if (!FEATURE_FLAGS.Arena) throw new Error("Do not call this function when arena isn't enabled.");
 
-  const res = await cachedFetches()
-    .then((v) => ({
-      arenaInfo: v.arena_info ? toArenaInfoModel(v.arena_info) : null,
-      market0: v.market_0 ? toMarketStateModel(v.market_0) : null,
-      market1: v.market_1 ? toMarketStateModel(v.market_1) : null,
-      rewardsRemaining: v.rewards_remaining ? BigInt(v.rewards_remaining) : null,
-      market0Delta: v.market_0_delta,
-      market1Delta: v.market_1_delta,
-    }))
-    .catch((e) => {
-      console.error(e);
-      return {
-        arenaInfo: null,
-        market0: null,
-        market1: null,
-        rewardsRemaining: null,
-        market0Delta: null,
-        market1Delta: null,
-      };
-    });
+  const res = await cachedFetches().catch(logAndDefault);
 
   if (!res.arenaInfo) console.warn(`[WARNING]: Failed to fetch melee data.`);
 
