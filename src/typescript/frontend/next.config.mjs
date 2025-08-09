@@ -56,10 +56,10 @@ const nextConfig = {
     // an extremely stale page if it hasn't been visited in a while- the most they'd ever see is
     // 60 seconds.
     swrDelta: 60,
-    serverMinification: process.env.NODE_ENV === "development" ? false : true,
-    serverSourceMaps: process.env.NODE_ENV === "development" ? true : false,
+    serverMinification: DEBUG || process.env.NODE_ENV === "development" ? false : true,
+    serverSourceMaps: DEBUG || process.env.NODE_ENV === "development" ? true : false,
   },
-  productionBrowserSourceMaps: process.env.NODE_ENV === "development" ? true : false,
+  productionBrowserSourceMaps: DEBUG || process.env.NODE_ENV === "development" ? true : false,
   // Log full fetch URLs if we're in a specific environment.
   logging:
     process.env.NODE_ENV === "development" ||
