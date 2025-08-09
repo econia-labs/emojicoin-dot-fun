@@ -81,13 +81,14 @@ class PatchedFetchCache extends FetchCache {
         fetchUrl: "",
         fetchIdx: 0,
       },
-    });
+    })
+      // Fix the undici cloning bug. See the documentation on `cloneResponse` for more details.
+      // This is necessary because we've subverted the next.js deduping efforts by passing the abort
+      // controller signal, which is the code path where the undici fix is.
+      .then(cloneResponse)
+      .then(([cloned1, _cloned2]) => cloned1);
 
-    // Fix the undici cloning bug. See the documentation on `cloneResponse` for more details.
-    // This is necessary because we've subverted the next.js deduping efforts by passing the abort
-    // controller signal, which is the code path where the undici fix is.
-    const [res1, _res2] = cloneResponse(res);
-    return res1;
+    return res;
   }
 
   async pollCacheEndpoint({
