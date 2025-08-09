@@ -1,3 +1,5 @@
+// cspell:word undici
+
 const FetchCache = require("next/dist/server/lib/incremental-cache/fetch-cache").default;
 const crypto = require("crypto");
 const { nextConfig } = require("../../../next.config.mjs");
@@ -16,6 +18,9 @@ const VERCEL_CACHE_CONTROL_HEADER = "vercel-cdn-cache-control";
 const UUID_PREFIX = "__uuid-";
 
 const swrDelta = parseInt(nextConfig?.experimental?.swrDelta || 60);
+
+// In case the global cache log hasn't been set by the time this file is imported.
+if (!globalThis.__cacheLog) globalThis.__cacheLog = () => {};
 
 class PatchedFetchCache extends FetchCache {
   shouldNotPost = new Set([]);
@@ -101,7 +106,7 @@ class PatchedFetchCache extends FetchCache {
       const res = await this.getFromCDN(cacheKey);
 
       if (!res) {
-        console.warn("No CDN reponse in patched fetch cache.");
+        console.warn("No CDN response in patched fetch cache.");
         globalThis.__cacheLog({ cacheKey: "NO CDN RESPONSE", entry: "", uuid });
         return null;
       }
