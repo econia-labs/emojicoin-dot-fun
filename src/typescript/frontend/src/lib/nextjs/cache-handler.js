@@ -24,6 +24,15 @@ const UUID_PREFIX = "__uuid-";
 
 const swrDelta = nextConfig?.default.experimental?.swrDelta || 60;
 
+/**
+ * @param {string[] | undefined} tags
+ * @returns {number}
+ *
+ */
+function findUUIDIndexInTags(tags) {
+  return tags?.findIndex((v) => v.startsWith(UUID_PREFIX)) ?? -1;
+}
+
 // In case the global cache log hasn't been set by the time this file is imported.
 if (!globalThis.__cacheLog) globalThis.__cacheLog = () => {};
 
@@ -158,26 +167,36 @@ class PatchedFetchCache extends FetchCache {
 
       if (res.ok) {
         /** @type Promise<unknown> */
-        const parsedBodyPromise = res
+        const parsedBody = await res
           .json() // `r` is whatever the CDN returns; we expect { data: { body: string } }
           .then(
             /** @param {{ data?: { body?: string } } } r */
             (r) => JSON.parse(r?.data?.body ?? "null")
           );
         if (state === "fresh" || !waitOnFresh) {
-          return parsedBodyPromise;
+          return parsedBody;
         }
 
         // Just return it if it's not too old- to avoid an origin fetch.
         if (i === numAttempts - 1 && state === "stale-while-revalidate" && age < swrDelta) {
           console.warn(`Returned stale data for cache key ${cacheKey}, age: ${age}`);
           globalThis.__cacheLog({ cacheKey, entry: `Returned stale data, age: ${age}` });
-          return parsedBodyPromise;
+          return parsedBody;
         }
       }
     }
 
     return null;
+  }
+
+  /**
+   * Stubbed in case we ever want to add to it later.
+   *
+   * @type {import("next/dist/server/lib/incremental-cache/fetch-cache").default["get"]}
+   */
+  async get(...args) {
+    const [cacheKey, ctx] = args;
+    return super.get(...args);
   }
 
   /**
@@ -194,7 +213,7 @@ class PatchedFetchCache extends FetchCache {
     if (data?.kind !== "FETCH") return super.set(cacheKey, data, ctx);
 
     // Find `idx` and remove `uuid` from that index if it exists.
-    const idx = ctx.tags?.findIndex((v) => v.startsWith(UUID_PREFIX)) ?? -1;
+    const idx = findUUIDIndexInTags(ctx.tags);
     const uuid = (idx > -1 ? ctx.tags?.splice(idx, 1).pop() : "") ?? "";
 
     /**
