@@ -73,30 +73,8 @@ index ea5838838ef20c3bc27664284bfc58d705f621db..9f409f25b3668ceabb649784c3ce5305
          if (process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT && process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY && process.env.NEXT_RUNTIME !== "edge") {
              const invokeIpcMethod = require("../server-ipc/request-utils").invokeIpcMethod;
              return invokeIpcMethod({
-diff --git a/dist/server/base-server.js b/dist/server/base-server.js
-index a437c1dd076e6fbc93a7e1c06104b36e4ad7cf2b..c29fa6bd65d0e9d7f008cc88756aff953c3106ec 100644
---- a/dist/server/base-server.js
-+++ b/dist/server/base-server.js
-@@ -1493,6 +1493,17 @@ class Server {
-                 revalidate: metadata.revalidate
-             };
-         };
-+        if (!!process.env.NEXT_PRIVATE_DEBUG_CACHE) {
-+            console.log(`resolvedUrlPathname: ${resolvedUrlPathname}, ssgCacheKey: ${ssgCacheKey}`);
-+            console.log({
-+                MATCHES_isPreviewMode: !isPreviewMode,
-+                MATCHES_isSSG: isSSG,
-+                MATCHES_supportsDynamicResponse: !opts.supportsDynamicResponse,
-+                MATCHES_isServerAction: !isServerAction,
-+                MATCHES_minimalPostponed: !minimalPostponed,
-+                MATCHES_isDynamicRSCRequest: !isDynamicRSCRequest,
-+            });
-+        }
-         const cacheEntry = await this.responseCache.get(ssgCacheKey, async (hasResolved, previousCacheEntry, isRevalidating)=>{
-             const isProduction = !this.renderOpts.dev;
-             const didRespond = hasResolved || res.sent;
 diff --git a/dist/server/lib/incremental-cache/fetch-cache.js b/dist/server/lib/incremental-cache/fetch-cache.js
-index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..d38d9a01e318d1a02f0cbd498b14e87a82aef825 100644
+index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..f383028727fe362c55a845c8e7307821b369b8cb 100644
 --- a/dist/server/lib/incremental-cache/fetch-cache.js
 +++ b/dist/server/lib/incremental-cache/fetch-cache.js
 @@ -24,6 +24,18 @@ const CACHE_REVALIDATE_HEADER = "x-vercel-revalidate";
@@ -157,34 +135,15 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..d38d9a01e318d1a02f0cbd498b14e87a
                  const res = await fetch(`${this.cacheEndpoint}/v1/suspense-cache/${key}`, {
                      method: "GET",
                      headers: {
-@@ -194,6 +215,26 @@ class FetchCache {
+@@ -194,6 +215,7 @@ class FetchCache {
                      },
                      next: fetchParams
                  });
 +
-+                
-+                if (DEBUG) {
-+                    console.dir({
-+                        method: "GET",
-+                        headers: {
-+                            ...this.headers,
-+                            [CACHE_FETCH_URL_HEADER]: fetchUrl,
-+                            [CACHE_TAGS_HEADER]: (tags == null ? void 0 : tags.join(",")) || "",
-+                            [_constants.NEXT_CACHE_SOFT_TAGS_HEADER]: (softTags == null ? void 0 : softTags.join(",")) || ""
-+                        },
-+                        next: fetchParams
-+                    });
-+                    console.dir({
-+                        headers: Object.fromEntries(Array.from(res.headers.entries())),
-+                        status: res.status,
-+                        ok: res.ok,
-+                    });
-+                }
-+
                  if (res.status === 429) {
                      const retryAfter = res.headers.get("retry-after") || "60000";
                      rateLimitedUntil = Date.now() + parseInt(retryAfter);
-@@ -244,7 +285,10 @@ class FetchCache {
+@@ -244,7 +266,10 @@ class FetchCache {
                      console.error(`Failed to get from fetch-cache`, err);
                  }
              }
@@ -195,7 +154,7 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..d38d9a01e318d1a02f0cbd498b14e87a
          return data || null;
      }
      async set(...args) {
-@@ -257,11 +301,16 @@ class FetchCache {
+@@ -257,11 +282,16 @@ class FetchCache {
              }
              return;
          }
@@ -212,7 +171,7 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..d38d9a01e318d1a02f0cbd498b14e87a
              try {
                  const start = Date.now();
                  if (data !== null && "revalidate" in data) {
-@@ -285,6 +334,11 @@ class FetchCache {
+@@ -285,6 +315,11 @@ class FetchCache {
                      fetchUrl,
                      fetchIdx
                  };
@@ -224,32 +183,7 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..d38d9a01e318d1a02f0cbd498b14e87a
                  const res = await fetch(`${this.cacheEndpoint}/v1/suspense-cache/${key}`, {
                      method: "POST",
                      headers: {
-@@ -295,6 +349,24 @@ class FetchCache {
-                     body: body,
-                     next: fetchParams
-                 });
-+                if (DEBUG) {
-+                    console.dir({
-+                        method: "POST",
-+                        headers: {
-+                            "x-vercel-revalidate": this.headers["x-vercel-revalidate"],
-+                            [CACHE_FETCH_URL_HEADER]: fetchUrl || "",
-+                            [CACHE_TAGS_HEADER]: (tags == null ? void 0 : tags.join(",")) || ""
-+                        },
-+                        next: fetchParams
-+                    }, { depth: 3 });
-+                    
-+                    console.dir({
-+                        headers: Object.fromEntries(Array.from(res.headers.entries())),
-+                        status: res.status,
-+                        ok: res.ok,
-+                    });
-+                }
-+
-                 if (res.status === 429) {
-                     const retryAfter = res.headers.get("retry-after") || "60000";
-                     rateLimitedUntil = Date.now() + parseInt(retryAfter);
-@@ -313,6 +385,7 @@ class FetchCache {
+@@ -313,6 +348,7 @@ class FetchCache {
                  }
              }
          }
@@ -286,7 +220,7 @@ index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..0688d9b72ad0d05f3846e2c2d3f4f8d6
          } else if (debug) {
              console.log("using custom cache handler", CurCacheHandler.name);
 diff --git a/dist/server/web/spec-extension/unstable-cache.js b/dist/server/web/spec-extension/unstable-cache.js
-index 1cbb26c565dea760e48f2668e0f7e81582ea51d4..7c6c753f0ba5d3496d5af7b522aa64d08647e7ac 100644
+index 1cbb26c565dea760e48f2668e0f7e81582ea51d4..f2b486ad92cbc3fde7e447705775bc71f94f7707 100644
 --- a/dist/server/web/spec-extension/unstable-cache.js
 +++ b/dist/server/web/spec-extension/unstable-cache.js
 @@ -12,6 +12,18 @@ const _constants = require("../../../lib/constants");
@@ -316,33 +250,3 @@ index 1cbb26c565dea760e48f2668e0f7e81582ea51d4..7c6c753f0ba5d3496d5af7b522aa64d0
                              store.pendingRevalidates[invocationKey] = _staticgenerationasyncstorageexternal.staticGenerationAsyncStorage.run({
                                  ...store,
                                  // force any nested fetches to bypass cache so they revalidate
-@@ -155,10 +168,16 @@ function unstable_cache(cb, keyParts, options = {}) {
-                 // when the unstable_cache call is revalidated
-                 fetchCache: "force-no-store",
-                 isUnstableCacheCallback: true
--            }, cb, ...args);
--            if (!store.isDraftMode) {
--                cacheNewResult(result, incrementalCache, cacheKey, tags, options.revalidate, fetchIdx, fetchUrl);
--            }
-+            }, cb, ...args).then(async (result) => {
-+                // In App Router we return the stale result and revalidate in the background
-+                if (!store.pendingRevalidates) {
-+                    store.pendingRevalidates = {};
-+                }
-+                if (!store.isDraftMode) {
-+                    const cachedResult = cacheNewResult(result, incrementalCache, cacheKey, tags, options.revalidate, fetchIdx, fetchUrl);
-+                    store.pendingRevalidates[invocationKey] = cachedResult;
-+                }
-+            });
-             return result;
-         } else {
-             noStoreFetchIdx += 1;
-@@ -212,7 +231,7 @@ function unstable_cache(cb, keyParts, options = {}) {
-                 isStaticGeneration: false,
-                 prerenderState: null
-             }, cb, ...args);
--            cacheNewResult(result, incrementalCache, cacheKey, tags, options.revalidate, fetchIdx, fetchUrl);
-+            await cacheNewResult(result, incrementalCache, cacheKey, tags, options.revalidate, fetchIdx, fetchUrl);
-             return result;
-         }
-     };

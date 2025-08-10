@@ -19,7 +19,7 @@ patchedDependencies:
     hash: orfljpacakypvfgaa776cfcfbe
     path: patches/bigint-buffer@1.1.5.patch
   next@14.2.28:
-    hash: 6t364nncthr5rreb55qdkthoii
+    hash: 4msgzfaqktzg7pjuwlbjzwabui
     path: patches/next@14.2.28.patch
 
 importers:
@@ -164,7 +164,7 @@ importers:
         version: 0.400.0(react@18.3.1)
       next:
         specifier: ^14.2.28
-        version: 14.2.28(patch_hash=6t364nncthr5rreb55qdkthoii)(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.28(patch_hash=4msgzfaqktzg7pjuwlbjzwabui)(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -9965,7 +9965,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@14.2.28(patch_hash=6t364nncthr5rreb55qdkthoii)(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@14.2.28(patch_hash=4msgzfaqktzg7pjuwlbjzwabui)(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.2.28
       '@swc/helpers': 0.5.5
