@@ -162,8 +162,10 @@ function addLockAndRelease<T extends Callback>(
         if (fc) {
           const pollResult = await fc.pollCacheEndpoint({ cacheKey, uuid });
           if (pollResult) {
-            // The CDN cache entry is valid, return it but mark the unique call as "do not post".
+            // Mark this instance as do not POST, because the other instance that acquired the lock
+            // already POSTed to this cache entry.
             fc.markAsDoNotPost(uuid);
+            // Then return the result to the outer function.
             return pollResult;
           }
         }
@@ -208,8 +210,8 @@ function prettifyFunctionCall(uniqueKey: string, ...args: any[]) {
 function createStabilizedProxy<T extends Callback>(cb: T, uniqueKey: string): T {
   return new Proxy(cb, {
     get(target, prop, receiver) {
-      if (prop === "toString") return () => uniqueKey;
-      if (prop === "name") return uniqueKey;
+      if (prop === "toString") return () => `${uniqueKey}${process.env.BUILD_PREFIX || ""}`;
+      if (prop === "name") return `${uniqueKey}${process.env.BUILD_PREFIX || ""}`;
       return Reflect.get(target, prop, receiver);
     },
   });
