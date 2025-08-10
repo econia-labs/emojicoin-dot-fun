@@ -1,10 +1,15 @@
+// @ts-check
 // cspell:word undici
 
 const FetchCache = require("next/dist/server/lib/incremental-cache/fetch-cache").default;
 const crypto = require("crypto");
-const { nextConfig } = require("../../../next.config.mjs");
+const nextConfig = require("../../../next.config.mjs");
 const { cloneResponse } = require("next/dist/server/lib/clone-response");
 
+/**
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const _CACHE_TAGS_HEADER = "x-vercel-cache-tags";
@@ -17,23 +22,36 @@ const VERCEL_CACHE_CONTROL_HEADER = "vercel-cdn-cache-control";
 
 const UUID_PREFIX = "__uuid-";
 
-const swrDelta = parseInt(nextConfig?.experimental?.swrDelta || 60);
+const swrDelta = nextConfig?.default.experimental?.swrDelta || 60;
 
 // In case the global cache log hasn't been set by the time this file is imported.
 if (!globalThis.__cacheLog) globalThis.__cacheLog = () => {};
 
 class PatchedFetchCache extends FetchCache {
+  /** @type {Set<string>} */
   shouldNotPost = new Set([]);
+
+  /** @type {Map<string, number>} */
   numFetches = new Map();
 
-  markAsDoNotPost(s) {
-    this.shouldNotPost.add(s);
+  /**
+   * @param {string} uuid
+   */
+  markAsDoNotPost(uuid) {
+    this.shouldNotPost.add(uuid);
   }
 
+  /**
+   * @returns {string}
+   */
   static generateUUID() {
     return `${UUID_PREFIX}${crypto.randomUUID()}`;
   }
 
+  /**
+   * The base class stores these privately; we just surface them with minimal typing.
+   * @returns {{ cacheEndpoint?: string, headers?: Record<string, string> }}
+   */
   getCacheEndpointAndHeaders() {
     return {
       cacheEndpoint: this["cacheEndpoint"],
@@ -41,6 +59,9 @@ class PatchedFetchCache extends FetchCache {
     };
   }
 
+  /**
+   * @param {string} uuid
+   */
   removeEntry(uuid) {
     this.shouldNotPost.delete(uuid);
     this.numFetches.delete(uuid);
@@ -48,8 +69,10 @@ class PatchedFetchCache extends FetchCache {
 
   /**
    * Bypass all nextjs patched fetching behavior and fetch a cache entry directly from Vercel's CDN.
-   *
    * Note that the `internal` flag must be passed to bypass the fetch patch applied at build time.
+   *
+   * @param {string} cacheKey
+   * @returns {Promise<Response|null>}
    */
   async getFromCDN(cacheKey) {
     const { cacheEndpoint, headers } = this.getCacheEndpointAndHeaders();
@@ -75,7 +98,13 @@ class PatchedFetchCache extends FetchCache {
        * @see {@link https://github.com/vercel/next.js/blob/e65628a237ea76d77d911aedb12d5137fddd90fb/packages/next/src/server/lib/dedupe-fetch.ts#L45}
        */
       signal: new AbortController().signal,
+      /**
+       * Override the type. This is how they do it in next's `fetch-cache.ts`.
+       * @type {NextFetchRequestConfig}
+       */
       next: {
+        // @ts-expect-error The `internal` field isn't exposed publicly, but this is correct.
+        // See `fetch-cache.ts` in the next codebase.
         internal: true,
         fetchType: "cache-get",
         fetchUrl: "",
@@ -91,6 +120,18 @@ class PatchedFetchCache extends FetchCache {
     return res;
   }
 
+  /**
+   * Poll Vercel CDN until fresh (or acceptable stale) data is available.
+   *
+   * @param {{
+   *   cacheKey: string,
+   *   uuid: string,
+   *   pollingInterval?: number,
+   *   numAttempts?: number,
+   *   waitOnFresh?: boolean
+   * }} params
+   * @returns {Promise<unknown|null>} Parsed JSON body or null if not obtained.
+   */
   async pollCacheEndpoint({
     cacheKey,
     uuid,
@@ -99,10 +140,9 @@ class PatchedFetchCache extends FetchCache {
     numAttempts = 20,
     waitOnFresh = true,
   }) {
-    if (!this.numFetches.has(uuid)) this.numFetches.set(uuid, 0);
-
     for (let i = 0; i < numAttempts; i += 1) {
-      this.numFetches.set(uuid, this.numFetches.get(uuid) + 1);
+      const prev = this.numFetches.get(uuid) ?? 0;
+      this.numFetches.set(uuid, prev + 1);
       await sleep(pollingInterval);
       const res = await this.getFromCDN(cacheKey);
 
@@ -117,7 +157,13 @@ class PatchedFetchCache extends FetchCache {
       const date = res.headers.get("date");
 
       if (res.ok) {
-        const parsedBodyPromise = res.json().then((r) => JSON.parse(r.data.body));
+        /** @type Promise<unknown> */
+        const parsedBodyPromise = res
+          .json() // `r` is whatever the CDN returns; we expect { data: { body: string } }
+          .then(
+            /** @param {{ data?: { body?: string } } } r */
+            (r) => JSON.parse(r?.data?.body ?? "null")
+          );
         if (state === "fresh" || !waitOnFresh) {
           return parsedBodyPromise;
         }
@@ -134,6 +180,12 @@ class PatchedFetchCache extends FetchCache {
     return null;
   }
 
+  /**
+   * Intercept "FETCH" entries to control posting behavior keyed by a UUID tag.
+   * For non-FETCH kinds, defer to the base implementation.
+   *
+   * @type {import("next/dist/server/lib/incremental-cache/fetch-cache").default["set"]}
+   */
   async set(...args) {
     const [cacheKey, data, ctx] = args;
     const { fetchCache, fetchUrl } = ctx;
@@ -141,11 +193,14 @@ class PatchedFetchCache extends FetchCache {
     if (!fetchCache) return;
     if (data?.kind !== "FETCH") return super.set(cacheKey, data, ctx);
 
-    const uuid = ctx.tags?.find((v) => v.startsWith(UUID_PREFIX));
-    const idx = ctx.tags?.indexOf(uuid);
-    // Now remove it from tags.
-    if (idx > -1) ctx.tags?.splice(idx, 1);
+    // Find `idx` and remove `uuid` from that index if it exists.
+    const idx = ctx.tags?.findIndex((v) => v.startsWith(UUID_PREFIX)) ?? -1;
+    const uuid = (idx > -1 ? ctx.tags?.splice(idx, 1).pop() : "") ?? "";
 
+    /**
+     * @param {string} msg
+     * @returns {void}
+     */
     const addToCacheKeyLog = (msg) =>
       globalThis.__cacheLog({
         cacheKey,
