@@ -9,8 +9,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
 
-export const dynamic = "force-dynamic";
-
 export const metadata = generateMetadataHelper({
   title: "verify",
   description: "verify so we know who to blame when the chart dips",
