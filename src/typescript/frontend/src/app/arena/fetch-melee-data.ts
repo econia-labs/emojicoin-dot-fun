@@ -25,16 +25,10 @@ const logAndDefault = (e: unknown) => {
   };
 };
 
-const fetchMeleeData = async ({
-  arena_info,
-  exchange_rates_promise,
-}: {
-  arena_info: DatabaseJsonType["arena_info"];
-  exchange_rates_promise: ReturnType<typeof fetchCachedExchangeRatesWithErrorHandling>;
-}) => {
+const fetchMeleeData = async ({ arena_info }: { arena_info: DatabaseJsonType["arena_info"] }) => {
   const vault_balance_promise = fetchVaultBalanceJson();
 
-  const [market_0, market_1] = await fetchSpecificMarketsJson([
+  const specific_markets_promise = fetchSpecificMarketsJson([
     arena_info.emojicoin_0_symbols,
     arena_info.emojicoin_1_symbols,
   ]).then((r) => [
@@ -42,36 +36,39 @@ const fetchMeleeData = async ({
     r.find((v) => v.market_address === arena_info.emojicoin_1_market_address),
   ]);
 
+  const [vault_balance, [market_0, market_1]] = await Promise.all([
+    vault_balance_promise,
+    specific_markets_promise,
+  ]);
+
   if (!market_0 || !market_1) {
     throw new Error("Couldn't fetch arena markets.");
   }
-
-  const [vaultBalance, { market_0_rate, market_1_rate }] = await Promise.all([
-    vault_balance_promise,
-    exchange_rates_promise,
-  ]);
 
   return {
     arena_info,
     market_0,
     market_1,
-    rewards_remaining: vaultBalance?.new_balance || "0",
-    market_0_delta: market_0_rate ? calculateExchangeRateDelta(market_0_rate, market_0) : null,
-    market_1_delta: market_1_rate ? calculateExchangeRateDelta(market_1_rate, market_1) : null,
+    rewards_remaining: vault_balance?.new_balance || "0",
   };
 };
 
 const fetchCachedExchangeRatesWithErrorHandling = (arena_info: DatabaseJsonType["arena_info"]) =>
-  createCachedExchangeRatesAtMeleeStartFetcher(arena_info)().catch((e) => {
-    console.error(
-      `Couldn't fetch exchange rates at melee start for melee ID: ${arena_info.melee_id}`
-    );
-    console.error(e);
-    return {
-      market_0_rate: null,
-      market_1_rate: null,
-    };
-  });
+  createCachedExchangeRatesAtMeleeStartFetcher(arena_info)()
+    .then((res) => {
+      if ("market_0_rate" in res && "market_1_rate" in res) return res;
+      throw new Error(`Invalid exchange rate response: ${JSON.stringify(res)}`);
+    })
+    .catch((e) => {
+      console.error(
+        `Couldn't fetch exchange rates at melee start for melee ID: ${arena_info.melee_id}`
+      );
+      console.error(e);
+      return {
+        market_0_rate: null,
+        market_1_rate: null,
+      };
+    });
 
 const cachedFetches = async () => {
   const arena_info = await fetchCachedArenaInfo().catch((e) => {
@@ -81,9 +78,8 @@ const cachedFetches = async () => {
 
   if (!arena_info) return logAndDefault("Couldn't fetch arena info.");
 
-  const exchange_rates_promise = fetchCachedExchangeRatesWithErrorHandling(arena_info);
   const fetchCachedCurrentMeleeData = unstable_cache(
-    async () => fetchMeleeData({ arena_info, exchange_rates_promise }),
+    async () => fetchMeleeData({ arena_info }),
     ["current-melee-data"],
     {
       revalidate: 2,
@@ -91,14 +87,19 @@ const cachedFetches = async () => {
     }
   );
 
-  return fetchCachedCurrentMeleeData().then((v) => ({
-    arenaInfo: toArenaInfoModel(v.arena_info),
-    market0: toMarketStateModel(v.market_0),
-    market1: toMarketStateModel(v.market_1),
-    rewardsRemaining: BigInt(v.rewards_remaining),
-    market0Delta: v.market_0_delta,
-    market1Delta: v.market_1_delta,
-  }));
+  const [melee, { market_0_rate, market_1_rate }] = await Promise.all([
+    fetchCachedCurrentMeleeData(),
+    fetchCachedExchangeRatesWithErrorHandling(arena_info),
+  ]);
+
+  return {
+    arenaInfo: toArenaInfoModel(melee.arena_info),
+    market0: toMarketStateModel(melee.market_0),
+    market1: toMarketStateModel(melee.market_1),
+    rewardsRemaining: BigInt(melee.rewards_remaining),
+    market0Delta: market_0_rate ? calculateExchangeRateDelta(market_0_rate, melee.market_0) : null,
+    market1Delta: market_1_rate ? calculateExchangeRateDelta(market_1_rate, melee.market_1) : null,
+  };
 };
 
 export const fetchCachedMeleeData = async () => {
