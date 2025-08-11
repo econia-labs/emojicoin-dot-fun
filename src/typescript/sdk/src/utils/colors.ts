@@ -10,23 +10,20 @@ const INFO = "\x1b[1;35m";
 const DARK_GRAY = "\x1b[38;5;238m";
 const LIGHT_GRAY = "\x1b[37m";
 
-let enabled = true;
+let enabled: boolean | undefined = undefined;
 
-const noColors =
-  process.env.NODE_ENV === "production" ||
-  VERCEL_TARGET_ENV === "production" ||
-  VERCEL_TARGET_ENV === "release-preview" ||
-  process.env.NODE_DISABLE_COLORS ||
-  process.env.TERM === "dumb" ||
-  process.env.FORCE_COLOR === "0" ||
-  process.env.NO_COLOR;
-
-export const tryToEnableColors = () => {
-  if (enabled) return;
-  // For some reason logs don't print in frontend builds, so force it like this.
-  if (!noColors) {
-    enabled = true;
-  }
+export const enableColorsIfAllowed = () => {
+  // Return if it's already been set.
+  if (typeof enabled === "boolean") return;
+  const noColor =
+    process.env.NODE_ENV === "production" ||
+    VERCEL_TARGET_ENV === "production" ||
+    VERCEL_TARGET_ENV === "release-preview" ||
+    process.env.NODE_DISABLE_COLORS ||
+    process.env.TERM === "dumb" ||
+    process.env.FORCE_COLOR === "0" ||
+    process.env.NO_COLOR;
+  enabled = !noColor;
 };
 
 export type CacheLogColors = keyof typeof cacheLogColors;

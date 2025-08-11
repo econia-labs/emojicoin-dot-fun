@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unused-modules */
-import { type CacheLogColors,cacheLogColors as color, VERCEL_TARGET_ENV } from "..";
+import { type CacheLogColors, cacheLogColors as color, VERCEL_TARGET_ENV } from "..";
 
 // Get the time locally in local development.
 // In CI, prod, preview, etc, just use UTC time.
