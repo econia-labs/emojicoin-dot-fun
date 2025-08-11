@@ -7,6 +7,11 @@ const nextConfig = require("../../../next.config.mjs");
 const { cloneResponse } = require("next/dist/server/lib/clone-response");
 
 /**
+ * @type {typeof import("../../../../sdk/src/utils/log-cache-debug").logCacheDebug}
+ */
+const logCacheDebug = (args) => globalThis.__logCacheDebug(args);
+
+/**
  * @param {number} ms
  * @returns {Promise<void>}
  */
@@ -26,15 +31,12 @@ const swrDelta = nextConfig?.default.experimental?.swrDelta || 60;
 
 /**
  * @param {string[] | undefined} tags
- * @returns {number}
+ * @returns {string | undefined}
  *
  */
-function findUUIDIndexInTags(tags) {
-  return tags?.findIndex((v) => v.startsWith(UUID_PREFIX)) ?? -1;
+function findUUID(tags) {
+  return tags?.find((v) => v.startsWith(UUID_PREFIX));
 }
-
-// In case the global cache log hasn't been set by the time this file is imported.
-if (!globalThis.__cacheLog) globalThis.__cacheLog = () => {};
 
 class PatchedFetchCache extends FetchCache {
   /** @type {Set<string>} */
@@ -69,9 +71,18 @@ class PatchedFetchCache extends FetchCache {
   }
 
   /**
-   * @param {string} uuid
+   * @param {string[] | undefined} tags NOTE: `tags` is mutated in this function.
+   * @param {string | undefined} uuid
    */
-  removeEntry(uuid) {
+  removeEntry(tags, uuid) {
+    if (!uuid) return;
+    if (tags) {
+      const idx = tags.findIndex((v) => v === uuid) ?? -1;
+      if (idx > -1) {
+        // Mutate the `tags` array by removing the uuid.
+        tags.splice(idx, 1);
+      }
+    }
     this.shouldNotPost.delete(uuid);
     this.numFetches.delete(uuid);
   }
@@ -157,7 +168,7 @@ class PatchedFetchCache extends FetchCache {
 
       if (!res) {
         console.warn("No CDN response in patched fetch cache.");
-        globalThis.__cacheLog({ cacheKey: "NO CDN RESPONSE", entry: "", uuid });
+        logCacheDebug({ cacheKey, label: ["FAILURE", "error"], msg: "Couldn't get CDN response." });
         return null;
       }
 
@@ -180,7 +191,11 @@ class PatchedFetchCache extends FetchCache {
         // Just return it if it's not too old- to avoid an origin fetch.
         if (i === numAttempts - 1 && state === "stale-while-revalidate" && age < swrDelta) {
           console.warn(`Returned stale data for cache key ${cacheKey}, age: ${age}`);
-          globalThis.__cacheLog({ cacheKey, entry: `Returned stale data, age: ${age}` });
+          logCacheDebug({
+            cacheKey,
+            label: ["STALE RETURN", "warning"],
+            msg: `Returned stale data, age: ${age}`,
+          });
           return parsedBody;
         }
       }
@@ -190,12 +205,11 @@ class PatchedFetchCache extends FetchCache {
   }
 
   /**
-   * Stubbed in case we ever want to add to it later.
-   *
-   * @type {import("next/dist/server/lib/incremental-cache/fetch-cache").default["get"]}
+   * @type {FetchCache["get"]}
    */
   async get(...args) {
     const [cacheKey, ctx] = args;
+    this.addToCacheKeyLog({ label: ["GET", "fetchGet"], args });
     return super.get(...args);
   }
 
@@ -203,7 +217,7 @@ class PatchedFetchCache extends FetchCache {
    * Intercept "FETCH" entries to control posting behavior keyed by a UUID tag.
    * For non-FETCH kinds, defer to the base implementation.
    *
-   * @type {import("next/dist/server/lib/incremental-cache/fetch-cache").default["set"]}
+   * @type {FetchCache["set"]}
    */
   async set(...args) {
     const [cacheKey, data, ctx] = args;
@@ -212,30 +226,40 @@ class PatchedFetchCache extends FetchCache {
     if (!fetchCache) return;
     if (data?.kind !== "FETCH") return super.set(cacheKey, data, ctx);
 
-    // Find `idx` and remove `uuid` from that index if it exists.
-    const idx = findUUIDIndexInTags(ctx.tags);
-    const uuid = (idx > -1 ? ctx.tags?.splice(idx, 1).pop() : "") ?? "";
+    const uuid = findUUID(ctx.tags);
 
-    /**
-     * @param {string} msg
-     * @returns {void}
-     */
-    const addToCacheKeyLog = (msg) =>
-      globalThis.__cacheLog({
-        cacheKey,
-        entry: `${msg} ${fetchUrl}`,
-        uuid,
+    if (uuid && this.shouldNotPost.has(uuid)) {
+      this.addToCacheKeyLog({
+        label: ["POLL HIT", "debug"],
+        msg: `Poll hit after ${this.numFetches.get(uuid)} fetches`,
+        args,
       });
-
-    if (this.shouldNotPost.has(uuid)) {
-      addToCacheKeyLog(`SKIP after ${this.numFetches.get(uuid)} fetches`);
-      this.removeEntry(uuid);
+      this.removeEntry(ctx.tags, uuid);
       return;
     }
 
-    addToCacheKeyLog("POST");
-    this.removeEntry(uuid);
+    this.addToCacheKeyLog({ label: ["POST", "info"], args });
+    this.removeEntry(ctx.tags, uuid);
     return super.set(cacheKey, data, ctx);
+  }
+
+  /**
+   * @param {{
+   *   label: Parameters<typeof logCacheDebug>[0]["label"],
+   *   msg?: string,
+   *   args: Parameters<FetchCache["get"]> | Parameters<FetchCache["set"]>,
+   * }} params
+   */
+  async addToCacheKeyLog({ label, msg, args }) {
+    // `set` has 3 args, `get` has 2. Can't use -1 for `ctx` because sometimes it's not present.
+    const [cacheKey, ctx] = args.length === 3 ? [args[0], args[2]] : [args[0], args[1]];
+    logCacheDebug({
+      cacheKey,
+      label,
+      msg,
+      fetchUrl: ctx?.fetchUrl,
+      uuid: findUUID(ctx?.tags),
+    });
   }
 }
 
