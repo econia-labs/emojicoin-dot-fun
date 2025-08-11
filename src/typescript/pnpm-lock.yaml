@@ -150,9 +150,6 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
-      kolorist:
-        specifier: ^1.8.0
-        version: 1.8.0
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
