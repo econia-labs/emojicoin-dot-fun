@@ -9,7 +9,7 @@ const nextConfig = require("../../../next.config.mjs");
 const { cloneResponse } = require("next/dist/server/lib/clone-response");
 
 /**
- * @type {typeof import("../../../../sdk/src/utils/log-cache-debug").logCacheDebug}
+ * @type {typeof import("../../../../sdk/src/utils/log-cache-debug").logCacheDebug} next/dist/server/lib/incremental-cache
  */
 const logCacheDebug = (args) => globalThis.__logCacheDebug(args);
 
@@ -19,11 +19,7 @@ const logCacheDebug = (args) => globalThis.__logCacheDebug(args);
  */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const _CACHE_TAGS_HEADER = "x-vercel-cache-tags";
-const _CACHE_HEADERS_HEADER = "x-vercel-sc-headers";
 const CACHE_STATE_HEADER = "x-vercel-cache-state";
-const _CACHE_REVALIDATE_HEADER = "x-vercel-revalidate";
-const _CACHE_FETCH_URL_HEADER = "x-vercel-cache-item-name";
 const CACHE_CONTROL_VALUE_HEADER = "x-vercel-cache-control";
 const VERCEL_CACHE_CONTROL_HEADER = "vercel-cdn-cache-control";
 
@@ -38,6 +34,13 @@ const swrDelta = nextConfig?.default.experimental?.swrDelta || 60;
  */
 function findUUID(tags) {
   return tags?.find((v) => v.startsWith(UUID_PREFIX));
+}
+
+/**
+ * @returns {string}
+ */
+function _generateUUID() {
+  return `${UUID_PREFIX}${crypto.randomUUID()}`;
 }
 
 /**
@@ -59,6 +62,9 @@ async function addToCacheKeyLog({ label, msg, args }) {
   });
 }
 class FetchDeduplicater {
+  /** @type {Map<string, Parameters<CacheHandler["get"]>[1]>} */
+  contextMap = new Map();
+
   /** @type {Set<string>} */
   shouldNotPost = new Set([]);
 
@@ -87,13 +93,7 @@ class FetchDeduplicater {
     }
     this.shouldNotPost.delete(uuid);
     this.numFetches.delete(uuid);
-  }
-
-  /**
-   * @returns {string}
-   */
-  static generateUUID() {
-    return `${UUID_PREFIX}${crypto.randomUUID()}`;
+    this.contextMap.delete(uuid);
   }
 
   /**
@@ -107,6 +107,10 @@ class FetchDeduplicater {
    */
   async get({ args, superGet }) {
     const [cacheKey, ctx] = args;
+    const uuid = findUUID(ctx?.tags);
+    if (uuid && !this.contextMap.has(uuid)) {
+      this.contextMap.set(uuid, ctx);
+    }
     addToCacheKeyLog({ label: ["GET", "fetchGet"], args });
     return superGet(...args);
   }
@@ -143,6 +147,123 @@ class FetchDeduplicater {
     this.removeEntry(ctx.tags, uuid);
     return superSet(cacheKey, data, ctx);
   }
+
+  /**
+   * Poll storage until fresh (or acceptable stale) data is available.
+   *
+   * NOTE: `getEntryFromStorage` is the underlying implementation-specific mechanism for retrieval.
+   *
+   * @template T
+   * @param {{
+   *   cacheKey: string,
+   *   uuid: string,
+   *   pollingInterval: number,
+   *   numAttempts: number,
+   *   getEntryFromStorage: (cacheKey: string, uuid?: string) => Promise<{ isStale: boolean, parsedBody: T }>,
+   *   waitOnFresh?: boolean
+   * }} params
+   * @returns {Promise<T | null>} Parsed JSON body or null if not obtained.
+   */
+  async pollCacheEntry({ cacheKey, uuid, pollingInterval, numAttempts, getEntryFromStorage }) {
+    for (let i = 0; i < numAttempts; i += 1) {
+      const prev = this.numFetches.get(uuid) ?? 0;
+      this.numFetches.set(uuid, prev + 1);
+      await sleep(pollingInterval);
+      const res = await getEntryFromStorage(cacheKey);
+      if (!res) {
+        logCacheDebug({
+          cacheKey,
+          label: ["FAILURE", "error"],
+          msg: "Couldn't retrieve cache entry.",
+          alwaysLog: true,
+        });
+        return null;
+      }
+
+      if (!res.isStale && res.parsedBody) {
+        return res.parsedBody;
+      }
+    }
+
+    return null;
+  }
+}
+
+class PatchedFileSystemCache extends FileSystemCache {
+  /**
+   * @param {ConstructorParameters<typeof FileSystemCache>} args
+   */
+  constructor(...args) {
+    super(...args);
+    this.deduplicator = new FetchDeduplicater();
+  }
+
+  static generateUUID() {
+    return _generateUUID();
+  }
+
+  /**
+   * Poll the filesystem cache until fresh (or acceptable stale) data is available.
+   *
+   * @param {{
+   *   cacheKey: string,
+   *   uuid: string,
+   *   pollingInterval?: number,
+   *   numAttempts?: number,
+   *   waitOnFresh?: boolean
+   * }} params
+   * @returns {Promise<unknown|null>} Parsed JSON body or null if not obtained.
+   */
+  async pollCacheEntry({
+    cacheKey,
+    uuid,
+    pollingInterval = 10,
+    numAttempts = 200,
+    waitOnFresh = true,
+  }) {
+    if (!this["flushToDisk"]) return null;
+    try {
+      const filePath = this["getFilePath"](`${cacheKey}`, "fetch");
+      const fileData = await this["fs"].readFile(filePath, "utf8");
+      const { mtime } = await this["fs"].stat(filePath);
+
+      const lastModified = mtime.getTime();
+      const cacheData = {
+        lastModified: mtime.getTime(),
+        /** @type {import("next/dist/server/response-cache").CachedFetchValue} */
+        value: JSON.parse(fileData),
+      };
+      const ctx = this.deduplicator.contextMap.get(uuid) ?? {};
+      const revalidate = ctx.revalidate || cacheData.value.revalidate;
+      const age = (Date.now() - (cacheData.lastModified || 0)) / 1000;
+
+      const isStale = age > revalidate;
+      const data = cacheData.value.data;
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }
+
+  /**
+   * @type {FileSystemCache["get"]}
+   */
+  async get(...args) {
+    return this.deduplicator.get({
+      args,
+      superGet: super.get.bind(this),
+    });
+  }
+
+  /**
+   * @type {FileSystemCache["set"]}
+   */
+  async set(...args) {
+    return this.deduplicator.set({
+      args,
+      superSet: super.set.bind(this),
+    });
+  }
 }
 
 class PatchedFetchCache extends FetchCache {
@@ -153,9 +274,9 @@ class PatchedFetchCache extends FetchCache {
     super(...args);
     this.deduplicator = new FetchDeduplicater();
   }
-  
+
   static generateUUID() {
-    return FetchDeduplicater.generateUUID();
+    return _generateUUID();
   }
 
   /**
@@ -168,6 +289,94 @@ class PatchedFetchCache extends FetchCache {
       headers: this["headers"],
     };
   }
+
+  /**
+   * Bypass all nextjs patched fetching behavior and fetch a cache entry directly from Vercel's CDN.
+   * Note that the `internal` flag must be passed to bypass the fetch patch applied at build time.
+   *
+   * @param {string} cacheKey
+   * @returns {ReturnType<Parameters<FetchDeduplicater["pollCacheEntry"]>[0]["getEntryFromStorage"]>}
+   * @throws if the value can't be retrieved somehow
+   */
+  async getFromStorage(cacheKey) {
+    const { cacheEndpoint, headers } = this.getCacheEndpointAndHeaders();
+    if (!cacheEndpoint || !headers) {
+      throw new Error("Couldn't get cache endpoint or headers.");
+    }
+
+    // The Vercel CDN docs suggest doing this to force a fresh return value, but not sure if they
+    // meant it in some other context than directly hitting the CDN. Regardless, it's harmless.
+    const extraHeaders = {
+      [CACHE_CONTROL_VALUE_HEADER]: "cache-control: public, max-age=0, must-revalidate",
+      [VERCEL_CACHE_CONTROL_HEADER]: "cache-control: public, max-age=0, must-revalidate",
+      pragma: "no-cache",
+    };
+
+    const response = fetch(`${cacheEndpoint}/v1/suspense-cache/${cacheKey}`, {
+      method: "GET",
+      headers: {
+        ...headers,
+        ...extraHeaders,
+      },
+      /** This is necessary to bypass *all* fetch deduping. Unless this is here, this will always
+       * return the first value retrieved from the CDN.
+       * @see {@link https://github.com/vercel/next.js/blob/e65628a237ea76d77d911aedb12d5137fddd90fb/packages/next/src/server/lib/dedupe-fetch.ts#L45}
+       */
+      signal: new AbortController().signal,
+      /**
+       * Override the type. This is how they do it in next's `fetch-cache.ts`.
+       * @type {NextFetchRequestConfig}
+       */
+      next: {
+        // @ts-expect-error The `internal` field isn't exposed publicly, but this is correct.
+        // See `fetch-cache.ts` in the next codebase.
+        internal: true,
+        fetchType: "cache-get",
+        fetchUrl: "",
+        fetchIdx: 0,
+      },
+    })
+      // Fix the undici cloning bug. See the documentation on `cloneResponse` for more details.
+      // This is necessary because we've subverted the next.js deduping efforts by passing the abort
+      // controller signal, which is the code path where the undici fix is.
+      .then(cloneResponse)
+      .then(([cloned1, _cloned2]) => cloned1);
+
+    const res = await response;
+
+    const state = res.headers.get(CACHE_STATE_HEADER);
+    if (!res) {
+      throw new Error("No CDN response in patched fetch cache.");
+    }
+
+    if (!res.ok) {
+      console.error(await res.text());
+      throw new Error(`Invalid response from cache: ${res.status}`);
+    }
+
+    const parsedBody = await res
+      .json() // `r` is whatever the CDN returns; we expect { data: { body: string } }
+      .then(
+        /** @param {{ data?: { body?: string } } } r */
+        (r) => JSON.parse(r?.data?.body ?? "null")
+      );
+    return {
+      isStale: state === "fresh",
+      parsedBody,
+    };
+  }
+
+  // WIP refresher
+  // -------------------------------------
+  //
+  // TODO: 11:12 PM 8-10-2025
+  // TODO: Refactor `pollCacheEndpoint` to call the underlying `FetchDeduplicator` impl of it
+  //
+  // by passnig in the `getFromStorage` in this body
+  // Then do the same for FileSystemCache
+  // Then do the dynamic/contingent decision to use file system cache or fetch cache in next.config.mjs
+  // The refactor is almost done
+  
 
   /**
    * Bypass all nextjs patched fetching behavior and fetch a cache entry directly from Vercel's CDN.
@@ -234,7 +443,7 @@ class PatchedFetchCache extends FetchCache {
    * }} params
    * @returns {Promise<unknown|null>} Parsed JSON body or null if not obtained.
    */
-  async pollCacheEndpoint({
+  async pollCacheEntry({
     cacheKey,
     uuid,
     // CDN GETs are cheap, and this function likely won't run all that often.
@@ -250,7 +459,12 @@ class PatchedFetchCache extends FetchCache {
 
       if (!res) {
         console.warn("No CDN response in patched fetch cache.");
-        logCacheDebug({ cacheKey, label: ["FAILURE", "error"], msg: "Couldn't get CDN response." });
+        logCacheDebug({
+          cacheKey,
+          label: ["FAILURE", "error"],
+          msg: "Couldn't get CDN response.",
+          alwaysLog: true,
+        });
         return null;
       }
 

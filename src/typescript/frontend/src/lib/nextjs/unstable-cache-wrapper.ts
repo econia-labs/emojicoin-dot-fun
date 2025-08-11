@@ -180,7 +180,7 @@ function addLockAndRelease<T extends Callback>(
       const pollWithFallback = async (...args: any[]) => {
         const fc = getPatchedFetchCache();
         if (fc) {
-          const pollResult = await fc.pollCacheEndpoint({ cacheKey, uuid });
+          const pollResult = await fc.pollCacheEntry({ cacheKey, uuid });
           if (pollResult) {
             // Mark this instance as do not POST, because the other instance that acquired the lock
             // already POSTed to this cache entry.
