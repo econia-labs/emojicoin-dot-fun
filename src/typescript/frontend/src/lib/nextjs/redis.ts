@@ -6,7 +6,7 @@ import { createClient } from "redis";
 import { sleep } from "@/sdk/index";
 
 let _client: ReturnType<typeof createClient> | undefined;
-const getRedisClient = async () => {
+const _getRedisClient = async () => {
   try {
     if (!process.env.USE_LOCAL_REDIS_CLIENT) return undefined;
     if (!_client) _client = createClient(); // Defaults to localhost:6379
