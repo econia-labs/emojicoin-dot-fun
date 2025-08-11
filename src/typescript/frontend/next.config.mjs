@@ -9,7 +9,7 @@ const withBundleAnalyzer = analyzer({
 
 const DEBUG = process.env.BUILD_DEBUG === "true";
 /** @type {import('next').NextConfig} */
-const debugConfigOptions= {
+const debugConfigOptions = {
   productionBrowserSourceMaps: true,
   outputFileTracing: true,
   swcMinify: false,
@@ -18,6 +18,10 @@ const debugConfigOptions= {
     serverMinification: false,
     serverSourceMaps: true,
   },
+};
+
+const getCacheHandler = () => {
+  return new URL("./src/lib/nextjs/cache-handler.js", import.meta.url).pathname;
 };
 
 /** @type {import('next').NextConfig} */
@@ -39,7 +43,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  cacheHandler: new URL('./src/lib/nextjs/cache-handler.js', import.meta.url).pathname,
+  cacheHandler: getCacheHandler(),
   /**
    * Match the new default behavior in next 15, without opinionated caching for dynamic pages.
    * @see {@link https://nextjs.org/docs/app/api-reference/config/next-config-js/staleTimes#version-history}
