@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unused-modules */
-import { type CacheLogColors, cacheLogColors as color, VERCEL_TARGET_ENV } from "..";
+import { type CacheLogColors, cacheLogColors as color, enableColorsIfAllowed, VERCEL_TARGET_ENV } from "..";
 
 // Get the time locally in local development.
 // In CI, prod, preview, etc, just use UTC time.
@@ -31,6 +31,7 @@ export async function logCacheDebug({
   alwaysLog = false,
 }: LogArgs) {
   if (!process.env.CACHE_HANDLER_DEBUG && !alwaysLog) return;
+  enableColorsIfAllowed();
 
   const [labelText, labelColor] = label;
 

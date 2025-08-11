@@ -16,7 +16,6 @@ export const enableColorsIfAllowed = () => {
   // Return if it's already been set.
   if (typeof enabled === "boolean") return;
   const noColor =
-    process.env.NODE_ENV === "production" ||
     VERCEL_TARGET_ENV === "production" ||
     VERCEL_TARGET_ENV === "release-preview" ||
     process.env.NODE_DISABLE_COLORS ||
