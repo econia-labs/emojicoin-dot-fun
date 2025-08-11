@@ -1,17 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { IS_NEXT_BUILD_PHASE } from "lib/server-env";
 import { unstable_cache } from "next/cache";
 
 import { sleep } from "@/sdk/index";
 import type { JsonValue } from "@/sdk/types/json-types";
+import { logCacheDebug } from "@/sdk/utils/log-cache-debug";
 
 import PatchedFetchCache from "./cache-handler";
 import { unstableCacheKeyGenerator } from "./generate-cache-key";
 import { getPatchedFetchCache } from "./get-incremental-cache";
-import { cacheLog, createLock } from "./redis";
+import { createLock } from "./redis";
 
 type Callback = (...args: any[]) => Promise<any>;
+
+type LabelParams = Parameters<typeof logCacheDebug>[0]["label"];
+
+// Give access to the cache log for *.js files used in `next.config.mjs`.
+// Must be here or the globalThis isn't accessed properly (if from `sdk`).
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+(globalThis as any).__logCacheDebug = logCacheDebug;
 
 /**
  * BUILD TIME DEDUPING:
@@ -130,28 +137,39 @@ function addLockAndRelease<T extends Callback>(
       return false;
     });
 
-    const addToCacheKeyLog = (msg: string) =>
-      cacheLog({
+    const logHelper = (args: { label: LabelParams; msg: string; alwaysLog?: boolean }) =>
+      logCacheDebug({
         cacheKey,
-        entry: `${msg} ${functionCallTag}`,
+        label: args.label,
+        msg: args.msg,
+        fetchUrl: functionCallTag,
         uuid,
+        alwaysLog: !!args.alwaysLog,
       });
 
     if (acquired) {
-      addToCacheKeyLog("WRITE");
+      // Uncomment this line for extremely verbose logs.
+      // logHelper({ label: ["LOCK", "success"], msg: "Acquired write lock!" });
+
       return stabilizedProxy(...args).then((res) => {
         // Wait for the cache entry to update on the CDN and *then* release the lock.
         // Otherwise, multiple instances can acquire the lock before the CDN will show as fresh.
         sleep(CDN_TTL_MS).then(() =>
           lock.release().then((released) => {
-            if (!released) console.error("Lock wasn't released properly?");
-            addToCacheKeyLog(`${released ? "" : "FAILED "}RELEASE`);
+            if (!released) {
+              logHelper({
+                label: ["RELEASE", "error"],
+                msg: "Failed to release lock.",
+                alwaysLog: true,
+              });
+            }
           })
         );
         return res;
       });
     } else {
-      addToCacheKeyLog("MISS, ENTERING POLLING");
+      // Uncomment this line for extremely verbose logs.
+      // logHelper({ label: ["LOCK", "debug"], msg: "Beginning polling..." });
 
       // If the lock wasn't acquired, return a callback that polls the cache entry several times
       // before trying to do an origin fetch. This is the brunt of the deduplication.
@@ -171,10 +189,13 @@ function addLockAndRelease<T extends Callback>(
         }
         // Otherwise, fallback to default `unstable_cache` behavior that doesn't deduplicate
         // origin fetches across different requests.
-        const msg = `Failed to retrieve cache entry: ${cacheKey}. Falling back to origin fetch.`;
+        const msg = `Failed to retrieve cache entry. Falling back to origin fetch. ${cacheKey}`;
         console.warn(msg);
-        cacheLog({ cacheKey: "FAILURES", entry: `${cacheKey}-${msg}-${functionCallTag}`, uuid });
-        addToCacheKeyLog("DUPLICATE WRITE");
+        logHelper({
+          label: ["DUPLICATE WRITE", "warning"],
+          msg: msg.split(cacheKey)[0].trim(),
+          alwaysLog: true,
+        });
         return stabilizedProxy(...args);
       };
       return pollWithFallback(...args);
