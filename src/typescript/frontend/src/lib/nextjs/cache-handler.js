@@ -2,6 +2,8 @@
 // cspell:word undici
 
 const FetchCache = require("next/dist/server/lib/incremental-cache/fetch-cache").default;
+const FileSystemCache = require("next/dist/server/lib/incremental-cache/file-system-cache").default;
+const { CacheHandler } = require("next/dist/server/lib/incremental-cache");
 const crypto = require("crypto");
 const nextConfig = require("../../../next.config.mjs");
 const { cloneResponse } = require("next/dist/server/lib/clone-response");
@@ -38,7 +40,25 @@ function findUUID(tags) {
   return tags?.find((v) => v.startsWith(UUID_PREFIX));
 }
 
-class PatchedFetchCache extends FetchCache {
+/**
+ * @param {{
+ *   label: Parameters<typeof logCacheDebug>[0]["label"],
+ *   msg?: string,
+ *   args: Parameters<FetchCache["get"]> | Parameters<FetchCache["set"]>,
+ * }} params
+ */
+async function addToCacheKeyLog({ label, msg, args }) {
+  // `set` has 3 args, `get` has 2. Can't use -1 for `ctx` because sometimes it's not present.
+  const [cacheKey, ctx] = args.length === 3 ? [args[0], args[2]] : [args[0], args[1]];
+  logCacheDebug({
+    cacheKey,
+    label,
+    msg,
+    fetchUrl: ctx?.fetchUrl,
+    uuid: findUUID(ctx?.tags),
+  });
+}
+class FetchDeduplicater {
   /** @type {Set<string>} */
   shouldNotPost = new Set([]);
 
@@ -50,24 +70,6 @@ class PatchedFetchCache extends FetchCache {
    */
   markAsDoNotPost(uuid) {
     this.shouldNotPost.add(uuid);
-  }
-
-  /**
-   * @returns {string}
-   */
-  static generateUUID() {
-    return `${UUID_PREFIX}${crypto.randomUUID()}`;
-  }
-
-  /**
-   * The base class stores these privately; we just surface them with minimal typing.
-   * @returns {{ cacheEndpoint?: string, headers?: Record<string, string> }}
-   */
-  getCacheEndpointAndHeaders() {
-    return {
-      cacheEndpoint: this["cacheEndpoint"],
-      headers: this["headers"],
-    };
   }
 
   /**
@@ -85,6 +87,86 @@ class PatchedFetchCache extends FetchCache {
     }
     this.shouldNotPost.delete(uuid);
     this.numFetches.delete(uuid);
+  }
+
+  /**
+   * @returns {string}
+   */
+  static generateUUID() {
+    return `${UUID_PREFIX}${crypto.randomUUID()}`;
+  }
+
+  /**
+   * Intercept "FETCH" entries to control posting behavior keyed by a UUID tag.
+   * For non-FETCH kinds, defer to the base implementation.
+   *
+   * @param {{
+   *   args: Parameters<(FetchCache | FileSystemCache)["get"]>,
+   *   superGet: (FetchCache | FileSystemCache)["get"],
+   * }} params
+   */
+  async get({ args, superGet }) {
+    const [cacheKey, ctx] = args;
+    addToCacheKeyLog({ label: ["GET", "fetchGet"], args });
+    return superGet(...args);
+  }
+
+  /**
+   * Intercept "FETCH" entries to control posting behavior keyed by a UUID tag.
+   * For non-FETCH kinds, defer to the base implementation.
+   *
+   * @param {{
+   *   args: Parameters<(FetchCache | FileSystemCache)["set"]>,
+   *   superSet: (FetchCache | FileSystemCache)["set"],
+   * }} params
+   */
+  async set({ args, superSet }) {
+    const [cacheKey, data, ctx] = args;
+    const { fetchCache, fetchUrl } = ctx;
+
+    if (!fetchCache) return;
+    if (data?.kind !== "FETCH") return superSet(cacheKey, data, ctx);
+
+    const uuid = findUUID(ctx.tags);
+
+    if (uuid && this.shouldNotPost.has(uuid)) {
+      addToCacheKeyLog({
+        label: ["POLL HIT", "debug"],
+        msg: `Poll hit after ${this.numFetches.get(uuid)} fetches`,
+        args,
+      });
+      this.removeEntry(ctx.tags, uuid);
+      return;
+    }
+
+    addToCacheKeyLog({ label: ["POST", "info"], args });
+    this.removeEntry(ctx.tags, uuid);
+    return superSet(cacheKey, data, ctx);
+  }
+}
+
+class PatchedFetchCache extends FetchCache {
+  /**
+   * @param {ConstructorParameters<typeof FetchCache>} args
+   */
+  constructor(...args) {
+    super(...args);
+    this.deduplicator = new FetchDeduplicater();
+  }
+  
+  static generateUUID() {
+    return FetchDeduplicater.generateUUID();
+  }
+
+  /**
+   * The base class stores these privately; we just surface them with minimal typing.
+   * @returns {{ cacheEndpoint?: string, headers?: Record<string, string> }}
+   */
+  getCacheEndpointAndHeaders() {
+    return {
+      cacheEndpoint: this["cacheEndpoint"],
+      headers: this["headers"],
+    };
   }
 
   /**
@@ -161,8 +243,8 @@ class PatchedFetchCache extends FetchCache {
     waitOnFresh = true,
   }) {
     for (let i = 0; i < numAttempts; i += 1) {
-      const prev = this.numFetches.get(uuid) ?? 0;
-      this.numFetches.set(uuid, prev + 1);
+      const prev = this.deduplicator.numFetches.get(uuid) ?? 0;
+      this.deduplicator.numFetches.set(uuid, prev + 1);
       await sleep(pollingInterval);
       const res = await this.getFromCDN(cacheKey);
 
@@ -174,7 +256,6 @@ class PatchedFetchCache extends FetchCache {
 
       const state = res.headers.get(CACHE_STATE_HEADER);
       const age = parseInt(res.headers.get("age") || "0", 10);
-      const date = res.headers.get("date");
 
       if (res.ok) {
         /** @type Promise<unknown> */
@@ -208,57 +289,19 @@ class PatchedFetchCache extends FetchCache {
    * @type {FetchCache["get"]}
    */
   async get(...args) {
-    const [cacheKey, ctx] = args;
-    this.addToCacheKeyLog({ label: ["GET", "fetchGet"], args });
-    return super.get(...args);
+    return this.deduplicator.get({
+      args,
+      superGet: super.get.bind(this),
+    });
   }
 
   /**
-   * Intercept "FETCH" entries to control posting behavior keyed by a UUID tag.
-   * For non-FETCH kinds, defer to the base implementation.
-   *
    * @type {FetchCache["set"]}
    */
   async set(...args) {
-    const [cacheKey, data, ctx] = args;
-    const { fetchCache, fetchUrl } = ctx;
-
-    if (!fetchCache) return;
-    if (data?.kind !== "FETCH") return super.set(cacheKey, data, ctx);
-
-    const uuid = findUUID(ctx.tags);
-
-    if (uuid && this.shouldNotPost.has(uuid)) {
-      this.addToCacheKeyLog({
-        label: ["POLL HIT", "debug"],
-        msg: `Poll hit after ${this.numFetches.get(uuid)} fetches`,
-        args,
-      });
-      this.removeEntry(ctx.tags, uuid);
-      return;
-    }
-
-    this.addToCacheKeyLog({ label: ["POST", "info"], args });
-    this.removeEntry(ctx.tags, uuid);
-    return super.set(cacheKey, data, ctx);
-  }
-
-  /**
-   * @param {{
-   *   label: Parameters<typeof logCacheDebug>[0]["label"],
-   *   msg?: string,
-   *   args: Parameters<FetchCache["get"]> | Parameters<FetchCache["set"]>,
-   * }} params
-   */
-  async addToCacheKeyLog({ label, msg, args }) {
-    // `set` has 3 args, `get` has 2. Can't use -1 for `ctx` because sometimes it's not present.
-    const [cacheKey, ctx] = args.length === 3 ? [args[0], args[2]] : [args[0], args[1]];
-    logCacheDebug({
-      cacheKey,
-      label,
-      msg,
-      fetchUrl: ctx?.fetchUrl,
-      uuid: findUUID(ctx?.tags),
+    return this.deduplicator.set({
+      args,
+      superSet: super.set.bind(this),
     });
   }
 }

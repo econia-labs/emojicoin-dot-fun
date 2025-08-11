@@ -2,7 +2,6 @@
 
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
-import { NEXT_PHASE } from "lib/server-env";
 
 import { toEmojicoinTypes } from "@/sdk/markets";
 import type { CoinTypeString } from "@/sdk/utils";
@@ -10,7 +9,6 @@ import type { CoinTypeString } from "@/sdk/utils";
 import { fetchEmojicoinBalances } from "./fetch-emojicoin-balances";
 
 export async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
-  console.log(`Fetching top holders for: ${marketAddress}`);
   const { emojicoin } = toEmojicoinTypes(marketAddress);
   const assetType = emojicoin.toString() as CoinTypeString;
   const holders = await fetchEmojicoinBalances({ assetType });
@@ -26,10 +24,10 @@ export async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
  * The cached version of {@link fetchTopHoldersInternal}.
  */
 export const fetchCachedTopHolders = unstableCacheWrapper(
-  fetchTopHoldersInternal,
+  (_addr: `0x${string}`) => Promise.resolve([]), //fetchTopHoldersInternal,
   ["fetch-top-holders"],
   {
-    revalidate: 10,
+    revalidate: 60,
     tags: ["fetch-top-holders"],
   }
 );

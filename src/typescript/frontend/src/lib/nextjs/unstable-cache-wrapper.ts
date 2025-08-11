@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import "server-only";
+
 import { IS_NEXT_BUILD_PHASE } from "lib/server-env";
 import { unstable_cache } from "next/cache";
 
@@ -182,7 +184,7 @@ function addLockAndRelease<T extends Callback>(
           if (pollResult) {
             // Mark this instance as do not POST, because the other instance that acquired the lock
             // already POSTed to this cache entry.
-            fc.markAsDoNotPost(uuid);
+            fc.deduplicator.markAsDoNotPost(uuid);
             // Then return the result to the outer function.
             return pollResult;
           }
