@@ -14,7 +14,7 @@ export const stringifyJSON = <T>(data: T) => {
     throw new Error("Attempted to stringify undefined JSON value.");
   }
   return JSON.stringify(data, (_, value) => (typeof value === "bigint" ? `${value}n` : value));
-}
+};
 
 // Specifically for JSON that comes from an `/api` response or the nextjs cache.
 export const parseResponseJSON = <T>(json: string): T =>
