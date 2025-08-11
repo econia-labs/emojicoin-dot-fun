@@ -1,12 +1,17 @@
 import FEATURE_FLAGS from "lib/feature-flags";
 import { fetchCachedArenaInfo } from "lib/queries/arena-info";
 import { unstable_cache } from "next/cache";
-import { parseResponseJSON, stringifyJSON } from "utils";
 
-import { fetchSpecificMarkets, fetchVaultBalance, toArenaInfoModel } from "@/sdk/indexer-v2";
+import { toMarketStateModel } from "@/sdk/index";
+import type { DatabaseJsonType } from "@/sdk/indexer-v2";
+import {
+  fetchSpecificMarketsJson,
+  fetchVaultBalanceJson,
+  toArenaInfoModel,
+} from "@/sdk/indexer-v2";
 
 import calculateExchangeRateDelta from "./calculate-exchange-rate-delta";
-import fetchCachedExchangeRatesAtMeleeStart from "./fetch-melee-start-open-price";
+import createCachedExchangeRatesAtMeleeStartFetcher from "./fetch-melee-start-open-price";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
@@ -17,87 +22,90 @@ const logAndDefault = (e: unknown) => {
     rewardsRemaining: null,
     market0Delta: null,
     market1Delta: null,
-  } as const;
+  };
 };
 
-export type MeleeData = Awaited<ReturnType<typeof fetchMeleeData>>;
-const fetchMeleeData = async () => {
-  try {
-    const vaultBalancePromise = fetchVaultBalance();
-    const arenaInfo = await fetchCachedArenaInfo()
-      .then((res) => (res ? toArenaInfoModel(res) : null))
-      .catch(() => null);
+const fetchMeleeData = async ({ arena_info }: { arena_info: DatabaseJsonType["arena_info"] }) => {
+  const vault_balance_promise = fetchVaultBalanceJson();
 
-    if (!arenaInfo) {
-      throw new Error("Couldn't fetch arena info");
-    }
+  const specific_markets_promise = fetchSpecificMarketsJson([
+    arena_info.emojicoin_0_symbols,
+    arena_info.emojicoin_1_symbols,
+  ]).then((r) => [
+    r.find((v) => v.market_address === arena_info.emojicoin_0_market_address),
+    r.find((v) => v.market_address === arena_info.emojicoin_1_market_address),
+  ]);
 
-    const exchangeRatesAtMeleeStartPromise = fetchCachedExchangeRatesAtMeleeStart({
-      meleeID: arenaInfo.meleeID.toString(),
-      market0Address: arenaInfo.emojicoin0MarketAddress,
-      market1Address: arenaInfo.emojicoin1MarketAddress,
-    }).catch((e) => {
+  const [vault_balance, [market_0, market_1]] = await Promise.all([
+    vault_balance_promise,
+    specific_markets_promise,
+  ]);
+
+  if (!market_0 || !market_1) {
+    throw new Error("Couldn't fetch arena markets.");
+  }
+
+  return {
+    arena_info,
+    market_0,
+    market_1,
+    rewards_remaining: vault_balance?.new_balance || "0",
+  };
+};
+
+const fetchCachedExchangeRatesWithErrorHandling = (arena_info: DatabaseJsonType["arena_info"]) =>
+  createCachedExchangeRatesAtMeleeStartFetcher(arena_info)()
+    .then((res) => {
+      if ("market_0_rate" in res && "market_1_rate" in res) return res;
+      throw new Error(`Invalid exchange rate response: ${JSON.stringify(res)}`);
+    })
+    .catch((e) => {
       console.error(
-        `Couldn't fetch exchange rates at melee start for melee ID: ${arenaInfo.meleeID}`
+        `Couldn't fetch exchange rates at melee start for melee ID: ${arena_info.melee_id}`
       );
       console.error(e);
       return {
-        market0ExchangeRate: null,
-        market1ExchangeRate: null,
+        market_0_rate: null,
+        market_1_rate: null,
       };
     });
 
-    const { market0, market1 } = await fetchSpecificMarkets([
-      arenaInfo.emojicoin0Symbols,
-      arenaInfo.emojicoin1Symbols,
-    ]).then((res) => ({
-      market0: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin0MarketAddress),
-      market1: res.find((v) => v.market.marketAddress === arenaInfo.emojicoin1MarketAddress),
-    }));
+const cachedFetches = async () => {
+  const arena_info = await fetchCachedArenaInfo().catch((e) => {
+    console.error(e);
+    return null;
+  });
 
-    if (!market0 || !market1) {
-      throw new Error("Couldn't fetch arena markets.");
+  if (!arena_info) return logAndDefault("Couldn't fetch arena info.");
+
+  const fetchCachedCurrentMeleeData = unstable_cache(
+    async () => fetchMeleeData({ arena_info }),
+    ["current-melee-data"],
+    {
+      revalidate: 2,
+      tags: ["current-melee-data"],
     }
+  );
 
-    const [vaultBalance, meleeStartExchangeRates] = await Promise.all([
-      vaultBalancePromise,
-      exchangeRatesAtMeleeStartPromise,
-    ]);
+  const [melee, { market_0_rate, market_1_rate }] = await Promise.all([
+    fetchCachedCurrentMeleeData(),
+    fetchCachedExchangeRatesWithErrorHandling(arena_info),
+  ]);
 
-    const { market0ExchangeRate: mkt0Rate, market1ExchangeRate: mkt1Rate } =
-      meleeStartExchangeRates;
-
-    return {
-      arenaInfo,
-      market0,
-      market1,
-      rewardsRemaining: vaultBalance ? vaultBalance.arenaVaultBalanceUpdate.newBalance : 0n,
-      market0Delta: mkt0Rate ? calculateExchangeRateDelta(mkt0Rate, market0) : null,
-      market1Delta: mkt1Rate ? calculateExchangeRateDelta(mkt1Rate, market1) : null,
-    };
-  } catch (e) {
-    return logAndDefault(e);
-  }
+  return {
+    arenaInfo: toArenaInfoModel(melee.arena_info),
+    market0: toMarketStateModel(melee.market_0),
+    market1: toMarketStateModel(melee.market_1),
+    rewardsRemaining: BigInt(melee.rewards_remaining),
+    market0Delta: market_0_rate ? calculateExchangeRateDelta(market_0_rate, melee.market_0) : null,
+    market1Delta: market_1_rate ? calculateExchangeRateDelta(market_1_rate, melee.market_1) : null,
+  };
 };
-
-const cachedFetch = unstable_cache(
-  async () => {
-    const res = await fetchMeleeData().catch((e) => logAndDefault(e));
-    return stringifyJSON(res);
-  },
-  [],
-  {
-    revalidate: 2,
-    tags: ["current-melee"],
-  }
-);
 
 export const fetchCachedMeleeData = async () => {
   if (!FEATURE_FLAGS.Arena) throw new Error("Do not call this function when arena isn't enabled.");
 
-  const res = await cachedFetch()
-    .then(parseResponseJSON<MeleeData>)
-    .catch((e) => logAndDefault(e));
+  const res = await cachedFetches().catch(logAndDefault);
 
   if (!res.arenaInfo) console.warn(`[WARNING]: Failed to fetch melee data.`);
 

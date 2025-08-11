@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SymbolEmoji } from "../../../emoji_data";
 import { chunk } from "../../../utils/misc";
-import type { DatabaseJsonType } from "../../types";
+import type { DatabaseJsonType, MarketStateModel } from "../../types";
 import { TableName, toMarketStateModel } from "../../types";
 import { postgrest } from "../client";
 
@@ -53,8 +53,9 @@ const MAX_SYMBOLS_PER_FETCH = 100;
  * @param symbols the market symbols to filter on
  * @returns the *unsorted* market state data for the market symbols passed in
  */
-export const fetchSpecificMarkets = async (symbols: SymbolEmoji[][]) => {
-  // Log a console warning to note automatic pagination.
+export async function fetchSpecificMarketsJson(
+  symbols: SymbolEmoji[][]
+): Promise<DatabaseJsonType["market_state"][]> {
   if (symbols.length > MAX_SYMBOLS_PER_FETCH) {
     console.warn(`More than ${MAX_SYMBOLS_PER_FETCH} symbols were passed to fetchSpecificMarkets.`);
   }
@@ -64,6 +65,9 @@ export const fetchSpecificMarkets = async (symbols: SymbolEmoji[][]) => {
   const deduped = Array.from(mapped.values());
   const chunks = chunk(deduped, MAX_SYMBOLS_PER_FETCH);
   const promises = chunks.map((arr) => fetchSpecificMarketsUnsafe(arr));
-  const flattened = (await Promise.all(promises)).flat().map(toMarketStateModel);
+  const flattened = (await Promise.all(promises)).flat();
   return flattened;
-};
+}
+
+export const fetchSpecificMarkets = (symbols: SymbolEmoji[][]): Promise<MarketStateModel[]> =>
+  fetchSpecificMarketsJson(symbols).then((r) => r.map(toMarketStateModel));
