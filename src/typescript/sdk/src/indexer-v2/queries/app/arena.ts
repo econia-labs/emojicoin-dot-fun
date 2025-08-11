@@ -57,7 +57,7 @@ const selectVaultBalance = () =>
     .order("transaction_version", ORDER_BY.DESC)
     .order("event_index", ORDER_BY.DESC)
     .limit(1)
-    .maybeSingle();
+    .maybeSingle<DatabaseJsonType["arena_vault_balance_update_events"]>();
 
 const selectPosition = ({ user, meleeID }: { user: AccountAddressInput; meleeID: bigint }) =>
   postgrest
@@ -127,6 +127,7 @@ export const fetchVaultBalance = queryHelperSingle(
   selectVaultBalance,
   toArenaVaultBalanceUpdateModel
 );
+export const fetchVaultBalanceJson = queryHelperSingle(selectVaultBalance);
 export const fetchPosition = queryHelperSingle(selectPosition, toArenaPositionModel);
 export const fetchMarketStateByAddress = queryHelperSingle(
   selectMarketStateByAddress,

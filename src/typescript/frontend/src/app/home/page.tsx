@@ -3,7 +3,7 @@ import { CookieUserSettingsManager } from "lib/cookie-user-settings/cookie-user-
 import FEATURE_FLAGS from "lib/feature-flags";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import { getFavorites } from "lib/queries/get-favorite-markets";
-import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
 import { fetchCachedPriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
@@ -30,7 +30,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
     });
-  const numMarketsPromise = fetchCachedNumMarketsFromAptosNode();
+  const numMarketsPromise = fetchCachedNumRegisteredMarkets();
   const aptPricePromise = fetchCachedAptPrice();
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchCachedMeleeData()

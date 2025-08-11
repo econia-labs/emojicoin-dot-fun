@@ -1,4 +1,4 @@
-import { fetchCachedNumMarketsFromAptosNode } from "lib/queries/num-market";
+import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 
 import type { DatabaseJsonType } from "@/sdk/index";
@@ -24,7 +24,7 @@ export default async function fetchCachedFullMarketStatsQuery(
   maxPageNumber: number;
   data: DatabaseJsonType["price_feed_with_nulls"][];
 }> {
-  return await fetchCachedNumMarketsFromAptosNode()
+  return await fetchCachedNumRegisteredMarkets()
     .then(async (totalNumMarkets) => {
       const { data: validatedParams, success } =
         createStatsSchema(totalNumMarkets).safeParse(searchParams);
