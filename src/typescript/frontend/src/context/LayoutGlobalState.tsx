@@ -13,7 +13,6 @@ export default function LayoutGlobalState({ arenaInfo }: { arenaInfo: ArenaInfoM
   const loadArenaInfoFromServer = useEventStore((s) => s.loadArenaInfoFromServer);
 
   useEffect(() => {
-    console.log("setting global layout state");
     if (arenaInfo) {
       loadArenaInfoFromServer(arenaInfo);
     }

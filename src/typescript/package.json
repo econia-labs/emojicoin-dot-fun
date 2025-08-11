@@ -78,8 +78,7 @@
       "keyv": "npm:@keyvhq/core@2.1.1"
     },
     "patchedDependencies": {
-      "bigint-buffer@1.1.5": "patches/bigint-buffer@1.1.5.patch",
-      "next@14.2.28": "patches/next@14.2.28.patch"
+      "bigint-buffer@1.1.5": "patches/bigint-buffer@1.1.5.patch"
     }
   }
 }

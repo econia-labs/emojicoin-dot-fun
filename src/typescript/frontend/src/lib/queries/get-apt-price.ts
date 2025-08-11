@@ -19,7 +19,6 @@ export const fetchAptPrice = () =>
     }
   )
     .then(async (r) => {
-      console.log("ACTUALLY FETCHING FROM COINGECKO API");
       if (r.ok) return r.json();
       throw new Error(r.statusText + " " + JSON.stringify(await r.json()));
     })
