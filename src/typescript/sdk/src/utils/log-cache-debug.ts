@@ -1,5 +1,10 @@
 /* eslint-disable import/no-unused-modules */
-import { type CacheLogColors, cacheLogColors as color, enableColorsIfAllowed, VERCEL_TARGET_ENV } from "..";
+import {
+  type CacheLogColors,
+  cacheLogColors as color,
+  enableColorsIfAllowed,
+  VERCEL_TARGET_ENV,
+} from "..";
 
 // Get the time locally in local development.
 // In CI, prod, preview, etc, just use UTC time.
@@ -35,7 +40,7 @@ export async function logCacheDebug({
 
   const [labelText, labelColor] = label;
 
-  const formattedUuid = color.lightGray("id-" + (uuid?.split("-").at(1) || "").slice(0, 6));
+  const formattedUuid = color.lightGray((uuid?.split("-").at(1) || "").slice(0, 6));
   const cacheKeyAndUrl = color.muted(`${cacheKey} ${fetchUrl}`);
   const PADDING = 4;
   const labelPadding = " ".repeat(Math.max(0, PADDING - labelText.length));
