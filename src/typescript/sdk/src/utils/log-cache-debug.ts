@@ -5,6 +5,7 @@ import {
   type CacheLogColors,
   cacheLogColors as color,
   enableColorsIfAllowed,
+  VERCEL,
   VERCEL_TARGET_ENV,
 } from "..";
 
@@ -48,5 +49,13 @@ export async function logCacheDebug({
   const labelPadding = " ".repeat(Math.max(0, PADDING - labelText.length));
   const formattedLabel = color[labelColor ?? "none"](`[${labelText}] ${labelPadding}`);
   const formattedMessage = msg ? color.none(msg) : "";
-  logWithTime(`${formattedUuid} ${formattedLabel} ${formattedMessage} ${cacheKeyAndUrl}`);
+
+  const output = `${formattedUuid} ${formattedLabel} ${formattedMessage} ${cacheKeyAndUrl}`;
+  if (!VERCEL) {
+    // Vercel already has a time column in log outputs.
+    logWithTime(output);
+    return;
+  } else {
+    console.debug(output);
+  }
 }
