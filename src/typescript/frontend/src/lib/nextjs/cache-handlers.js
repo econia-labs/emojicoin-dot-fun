@@ -6,7 +6,6 @@ const FetchCache = require("next/dist/server/lib/incremental-cache/fetch-cache")
 const FileSystemCache = require("next/dist/server/lib/incremental-cache/file-system-cache").default;
 const { CacheHandler } = require("next/dist/server/lib/incremental-cache");
 const crypto = require("crypto");
-const nextConfig = require("../../../next.config.mjs");
 const { cloneResponse } = require("next/dist/server/lib/clone-response");
 
 /**
@@ -44,8 +43,6 @@ const CACHE_CONTROL_VALUE_HEADER = "x-vercel-cache-control";
 const VERCEL_CACHE_CONTROL_HEADER = "vercel-cdn-cache-control";
 
 const UUID_PREFIX = "__uuid-";
-
-const swrDelta = nextConfig?.default.experimental?.swrDelta || 60;
 
 /**
  * @param {string[] | undefined} tags
