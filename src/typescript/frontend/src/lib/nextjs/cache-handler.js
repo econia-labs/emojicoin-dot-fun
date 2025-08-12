@@ -1,7 +1,5 @@
+require("server-only");
 const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
-
-/**
- */
 
 /**
  * This is a constructor-based factory that intercepts the constructor at runtime to return
