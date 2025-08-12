@@ -38,10 +38,18 @@ class CustomCacheHandler {
       );
     }
 
+    const debug = (s) => {
+      if (process.env.CACHE_HANDLER_DEBUG) {
+        console.log(s);
+      }
+    };
+
     if (shouldUseFetchCache) {
+      debug("Using patched fetch cache.");
       return new PatchedFetchCache(rest);
     }
     if (canUseFileSystemCache && fs && serverDistDir) {
+      debug("Using patched file system cache.");
       return new PatchedFileSystemCache({
         fs,
         serverDistDir,
@@ -54,9 +62,11 @@ class CustomCacheHandler {
     const minimalMode =
       process.env.NODE_ENV !== "development" || process.env.NEXT_PRIVATE_MINIMAL_MODE;
     if (minimalMode && PatchedFetchCache.isAvailable({ _requestHeaders: rest._requestHeaders })) {
+      debug("Using patched fetch cache from fallback logic.");
       return new PatchedFetchCache(rest);
     }
     if (fs && serverDistDir) {
+      debug("Using patched file system cache from fallback logic.");
       return new PatchedFileSystemCache(rest);
     }
     console.warn("Not using a cache handler.");

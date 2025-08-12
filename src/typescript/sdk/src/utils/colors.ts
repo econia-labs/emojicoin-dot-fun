@@ -1,4 +1,4 @@
-import { VERCEL_TARGET_ENV } from "../const";
+import { VERCEL, VERCEL_TARGET_ENV } from "../const";
 
 const RESET = "\x1b[0m";
 const GRAY = "\x1b[90m";
@@ -16,6 +16,7 @@ export const enableColorsIfAllowed = () => {
   // Return if it's already been set.
   if (typeof enabled === "boolean") return;
   const noColor =
+    VERCEL ||
     VERCEL_TARGET_ENV === "production" ||
     VERCEL_TARGET_ENV === "release-preview" ||
     process.env.NODE_DISABLE_COLORS ||
