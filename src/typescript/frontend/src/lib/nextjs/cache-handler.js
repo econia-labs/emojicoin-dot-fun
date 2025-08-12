@@ -1,6 +1,16 @@
 const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
 
 /**
+ * In case all other attempts to instantiate a cache handler fail, just pass no-ops.
+ */
+const NoOpCacheHandler = {
+  get: async () => undefined,
+  set: async () => {},
+  resetRequestCache: () => {},
+  revalidateTags: async () => {},
+};
+
+/**
  * This is a constructor-based factory that intercepts the constructor at runtime to return
  * either a FileSystemCache or a FetchCache. It's necessary because `nextjs` expects this module
  * specifically only return a default export in shape of a CacheHandler constructor; that is, it
@@ -50,7 +60,7 @@ class CustomCacheHandler {
       return new PatchedFileSystemCache(rest);
     }
     console.warn("Not using a cache handler.");
-    return undefined;
+    return NoOpCacheHandler;
   }
 }
 
