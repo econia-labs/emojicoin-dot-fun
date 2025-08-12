@@ -227,7 +227,7 @@ class InternalCacheHandler {
       logCacheDebug({
         cacheKey,
         label: ["POLL FAIL", "warning"],
-        msg: `Polled ${numAttempts} times and couldn't retrieve a fresh cache entry.`,
+        msg: JSON.stringify(res, null, 2),
         alwaysLog: true,
       });
     }
