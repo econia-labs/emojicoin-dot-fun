@@ -1,7 +1,6 @@
 // @ts-check
 // cspell:word undici
 
-require("server-only");
 const FetchCache = require("next/dist/server/lib/incremental-cache/fetch-cache").default;
 const FileSystemCache = require("next/dist/server/lib/incremental-cache/file-system-cache").default;
 const { CacheHandler } = require("next/dist/server/lib/incremental-cache");

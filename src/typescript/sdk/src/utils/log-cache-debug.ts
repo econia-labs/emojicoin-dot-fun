@@ -1,4 +1,6 @@
 /* eslint-disable import/no-unused-modules */
+import "server-only";
+
 import {
   type CacheLogColors,
   cacheLogColors as color,

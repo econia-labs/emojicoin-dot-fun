@@ -1,4 +1,3 @@
-require("server-only");
 const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
 
 /**
