@@ -1,3 +1,6 @@
+const {
+  default: FileSystemCache,
+} = require("next/dist/server/lib/incremental-cache/file-system-cache");
 const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
 
 /**
@@ -30,16 +33,6 @@ class CustomCacheHandler {
    * @param {CacheHandlerArgs & ExtraOpts} ctx
    */
   constructor({ fs, serverDistDir, canUseFileSystemCache, shouldUseFetchCache, ...rest }) {
-    if (process.env.NEXT_PHASE === "phase-production-build") {
-      console.log({
-        minimalMode: process.env.NEXT_PRIVATE_MINIMAL_MODE,
-        minimalMode2: process.env.MINIMAL_MODE,
-        url: process.env.SUSPENSE_CACHE_URL,
-        t: process.env.SUSPENSE_CACHE_AUTH_TOKEN,
-        headers: rest._requestHeaders,
-        flushToDisk: rest.flushToDisk,
-      });
-    }
     if (canUseFileSystemCache === undefined || shouldUseFetchCache === undefined) {
       console.warn("WARNING: nextjs package wasn't properly patched to pass cache discriminators.");
       console.warn(
@@ -67,11 +60,10 @@ class CustomCacheHandler {
       });
     }
 
-    // Fall back to trying to figure it out ourselves. This means that the userland settings for
-    // `const fetchCache = "..."` are ignored, since there's no way to get that context here.
-    const minimalMode =
-      process.env.NODE_ENV !== "development" || process.env.NEXT_PRIVATE_MINIMAL_MODE;
-    if (minimalMode && PatchedFetchCache.isAvailable({ _requestHeaders: rest._requestHeaders })) {
+    // Decide which to use in case the next patch hasn't been applied for some reason.
+    // This means that the userland settings for `const fetchCache = "..."` are ignored, since
+    // there's no way to get that context here.
+    if (PatchedFetchCache.isAvailable({ _requestHeaders: rest._requestHeaders })) {
       debug("Using patched fetch cache from fallback logic.");
       return new PatchedFetchCache(rest);
     }
@@ -79,7 +71,11 @@ class CustomCacheHandler {
       debug("Using patched file system cache from fallback logic.");
       return new PatchedFileSystemCache(rest);
     }
-    console.warn("Not using a cache handler.");
+
+    // Default to a basic file system cache that only writes to disk if `fs` and `serverDistDir`.
+    const flushToDisk = rest.flushToDisk || (fs && serverDistDir);
+    console.warn(`Using the basic file system cache with flushToDisk: ${flushToDisk}`);
+    return new FileSystemCache({ ...rest, flushToDisk });
     return NoOpCacheHandler;
   }
 }
