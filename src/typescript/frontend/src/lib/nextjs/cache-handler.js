@@ -38,6 +38,19 @@ class CustomCacheHandler {
         ...rest,
       });
     }
+
+    // Fall back to trying to figure it out ourselves. This means that the userland settings for
+    // `const fetchCache = "..."` are ignored, since there's no way to get that context here.
+    const minimalMode =
+      process.env.NODE_ENV !== "development" || process.env.NEXT_PRIVATE_MINIMAL_MODE;
+    if (minimalMode && PatchedFetchCache.isAvailable({ _requestHeaders: rest._requestHeaders })) {
+      return new PatchedFetchCache(rest);
+    }
+    if (fs && serverDistDir) {
+      return new PatchedFileSystemCache(rest);
+    }
+    console.warn("Not using a cache handler.");
+    return undefined;
   }
 }
 
