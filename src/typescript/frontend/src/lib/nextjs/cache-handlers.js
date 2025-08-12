@@ -207,13 +207,6 @@ class InternalCacheHandler {
         return null;
       }
 
-      logCacheDebug({
-        cacheKey,
-        label: ["POLL", "muted"],
-        msg: JSON.stringify(res, null, 2),
-        uuid,
-      });
-
       if (res.isMiss || res.isStale) continue;
       try {
         // Result is fresh, try to parse.

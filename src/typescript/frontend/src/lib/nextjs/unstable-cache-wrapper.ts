@@ -147,6 +147,13 @@ function addLockAndRelease<T extends Callback>(
     });
 
     if (acquired) {
+      logCacheDebug({
+        cacheKey,
+        label: ["LOCK", "info"],
+        msg: "Acquired lock!",
+        fetchUrl: functionCallTag,
+        alwaysLog: true,
+      });
       return stabilizedProxy(...args).then((res) => {
         // Wait for the cache entry to update in storage and *then* release the lock.
         // Otherwise, multiple instances can acquire the lock before the CDN will show as fresh.
