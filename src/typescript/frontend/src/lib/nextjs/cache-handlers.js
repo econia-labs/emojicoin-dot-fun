@@ -12,6 +12,8 @@ const { cloneResponse } = require("next/dist/server/lib/clone-response");
  */
 const logCacheDebug = (args) => globalThis.__logCacheDebug(args);
 
+let rateLimitedUntil = 0;
+
 /**
  * @typedef {{
  *    isMiss: true;
@@ -127,7 +129,19 @@ class InternalCacheHandler {
    */
   async get({ args, superGet }) {
     const [cacheKey, ctx] = args;
+
+    if (ctx?.kindHint !== "fetch") return null;
+
     const uuid = findUUID(ctx?.tags);
+
+    // NOTE: `rateLimitedUntil` is only set in the fetch cache.
+    if (Date.now() < rateLimitedUntil && uuid) {
+      // Remove this entry if rate limited and return null. This should act like a normal get
+      // to nextjs now.
+      this.removeEntry(ctx.tags, uuid);
+      return null;
+    }
+
     if (uuid && !this.contextMap.has(uuid)) {
       this.contextMap.set(uuid, ctx);
     }
@@ -137,7 +151,22 @@ class InternalCacheHandler {
     // "tags vs storedTags mismatch" in nextjs repo) and saves an in-memory cache miss in the fetch
     // cache (see `hasFetchKindAndMatchingTags`);
     const originalTags = ctx?.tags?.filter((v) => v !== uuid);
-    return superGet(cacheKey, { ...ctx, tags: originalTags });
+    return superGet(cacheKey, { ...ctx, tags: originalTags }).then((res) => {
+      // Clean up entries in memory in case it's fresh, since it's only cleaned up if stale/missing.
+      if (!uuid) return res;
+      if (res === null) {
+        this.contextMap.delete(uuid);
+        return res;
+      }
+      if (res?.value?.kind !== "FETCH") return res;
+      const age = (Date.now() - (res?.lastModified || 0)) / 1000;
+      const isStale = age > (ctx.revalidate || res.value.revalidate);
+
+      if (res.lastModified === -1 || isStale) {
+        this.contextMap.delete(uuid);
+      }
+      return res;
+    });
   }
 
   /**
@@ -151,9 +180,10 @@ class InternalCacheHandler {
    */
   async set({ args, superSet }) {
     const [cacheKey, data, ctx] = args;
-    const { fetchCache, fetchUrl } = ctx;
+    const { fetchCache } = ctx;
 
     if (!fetchCache) return;
+    // Just do the normal set if it's not a fetch- that's the only kind we intercept.
     if (data?.kind !== "FETCH") return superSet(cacheKey, data, ctx);
 
     const uuid = findUUID(ctx.tags);
@@ -171,6 +201,30 @@ class InternalCacheHandler {
     addToCacheKeyLog({ label: ["POST", "info"], args });
     this.removeEntry(ctx.tags, uuid);
     return superSet(cacheKey, data, ctx);
+  }
+
+  /**
+   * @param {{
+   *   args: Parameters<(FetchCache | FileSystemCache)["revalidateTag"]>,
+   *   superRevalidateTag: (FetchCache | FileSystemCache)["revalidateTag"]
+   * }} params
+   */
+  async revalidateTags({ args, superRevalidateTag }) {
+    const [tags] = args;
+    const tagsArray = Array.isArray(tags) ? tags : [tags];
+    const uuid = findUUID(tagsArray);
+    const originalTags = tagsArray.filter((v) => v !== uuid);
+    superRevalidateTag(originalTags);
+  }
+
+  /**
+   * @param {(FetchCache | FileSystemCache)["resetRequestCache"]} superResetRequestCache
+   */
+  async resetRequestCache(superResetRequestCache) {
+    this.contextMap.clear();
+    this.numFetches.clear();
+    this.shouldNotPost.clear();
+    superResetRequestCache();
   }
 
   /**
@@ -288,7 +342,10 @@ class PatchedFileSystemCache extends FileSystemCache {
         value: JSON.parse(fileData),
       };
       const ctx = this.internalHandler.contextMap.get(uuid) ?? {};
-      const revalidate = ctx.revalidate || cacheData.value.revalidate;
+      if (!ctx) {
+        console.warn(`Missing ctx for uuid: ${uuid}`);
+      }
+      const revalidate = ctx?.revalidate || cacheData.value.revalidate;
       const age = (Date.now() - (cacheData.lastModified || 0)) / 1000;
 
       return {
@@ -347,6 +404,23 @@ class PatchedFileSystemCache extends FileSystemCache {
       args,
       superSet: super.set.bind(this),
     });
+  }
+
+  /**
+   * @type {FileSystemCache["revalidateTag"]}
+   */
+  async revalidateTag(...args) {
+    return this.internalHandler.revalidateTags({
+      args,
+      superRevalidateTag: super.revalidateTag.bind(this),
+    });
+  }
+
+  /**
+   * @type {FileSystemCache["resetRequestCache"]}
+   */
+  async resetRequestCache(...args) {
+    return this.internalHandler.resetRequestCache(super.resetRequestCache.bind(this));
   }
 }
 
@@ -436,6 +510,11 @@ class PatchedFetchCache extends FetchCache {
       };
     }
 
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("retry-after") || "60000";
+      rateLimitedUntil = Date.now() + parseInt(retryAfter);
+    }
+
     const state = response.headers.get(CACHE_STATE_HEADER);
 
     if (!response.ok) {
@@ -503,6 +582,23 @@ class PatchedFetchCache extends FetchCache {
       args,
       superSet: super.set.bind(this),
     });
+  }
+
+  /**
+   * @type {FetchCache["revalidateTag"]}
+   */
+  async revalidateTag(...args) {
+    return this.internalHandler.revalidateTags({
+      args,
+      superRevalidateTag: super.revalidateTag.bind(this),
+    });
+  }
+
+  /**
+   * @type {FetchCache["resetRequestCache"]}
+   */
+  async resetRequestCache(...args) {
+    return this.internalHandler.resetRequestCache(super.resetRequestCache.bind(this));
   }
 }
 
