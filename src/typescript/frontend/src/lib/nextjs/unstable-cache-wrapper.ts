@@ -141,7 +141,10 @@ function addLockAndRelease<T extends Callback>(
     const lock = createLock(redis, cacheKey);
     const functionCallTag = prettifyFunctionCall(uniqueEntryLabel, ...args);
 
-    const acquired = await lock.acquire().catch((e) => {
+    let lockServiceFailure = false;
+
+    const acquired = await lock.acquire({ uuid }).catch((e) => {
+      lockServiceFailure = true;
       console.error(`Failed to acquire lock: ${e}`);
       return false;
     });
@@ -175,6 +178,11 @@ function addLockAndRelease<T extends Callback>(
         return res;
       });
     } else {
+      // Lock service is most likely down- no reason to spin on the cache endpoint if it will just
+      // keep returning stale. Fetch from origin directly.
+      if (lockServiceFailure) {
+        return stabilizedProxy(...args);
+      }
       // If the lock wasn't acquired, return a callback that polls the cache entry several times
       // before trying to do an origin fetch. This is the brunt of the deduplication.
       // If polling fails, the function simply falls back to doing the original `unstable_callback`
