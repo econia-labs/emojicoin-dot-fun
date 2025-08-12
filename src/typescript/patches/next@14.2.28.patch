@@ -1,0 +1,76 @@
+diff --git a/dist/esm/server/lib/incremental-cache/index.js b/dist/esm/server/lib/incremental-cache/index.js
+index ea5838838ef20c3bc27664284bfc58d705f621db..64c3eb068b5f74f180da72cfe6d600a09f0467db 100644
+--- a/dist/esm/server/lib/incremental-cache/index.js
++++ b/dist/esm/server/lib/incremental-cache/index.js
+@@ -21,16 +21,18 @@ export class IncrementalCache {
+         this.unlocks = new Map();
+         const debug = !!process.env.NEXT_PRIVATE_DEBUG_CACHE;
+         this.hasCustomCacheHandler = Boolean(CurCacheHandler);
++        const canUseFileSystemCache = fs && serverDistDir;
++        const shouldUseFetchCache = FetchCache.isAvailable({
++            _requestHeaders: requestHeaders
++        }) && minimalMode && fetchCache;
+         if (!CurCacheHandler) {
+-            if (fs && serverDistDir) {
++            if (canUseFileSystemCache) {
+                 if (debug) {
+                     console.log("using filesystem cache handler");
+                 }
+                 CurCacheHandler = FileSystemCache;
+             }
+-            if (FetchCache.isAvailable({
+-                _requestHeaders: requestHeaders
+-            }) && minimalMode && fetchCache) {
++            if (shouldUseFetchCache) {
+                 if (debug) {
+                     console.log("using fetch cache handler");
+                 }
+@@ -74,7 +76,9 @@ export class IncrementalCache {
+                 _appDir: !!appDir,
+                 _requestHeaders: requestHeaders,
+                 fetchCacheKeyPrefix,
+-                experimental
++                experimental,
++                canUseFileSystemCache,
++                shouldUseFetchCache
+             });
+         }
+     }
+diff --git a/dist/server/lib/incremental-cache/index.js b/dist/server/lib/incremental-cache/index.js
+index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..404ad441a922145f2024bdec5dded52a23a08275 100644
+--- a/dist/server/lib/incremental-cache/index.js
++++ b/dist/server/lib/incremental-cache/index.js
+@@ -48,16 +48,18 @@ class IncrementalCache {
+         this.unlocks = new Map();
+         const debug = !!process.env.NEXT_PRIVATE_DEBUG_CACHE;
+         this.hasCustomCacheHandler = Boolean(CurCacheHandler);
++        const canUseFileSystemCache = fs && serverDistDir;
++        const shouldUseFetchCache = _fetchcache.default.isAvailable({
++            _requestHeaders: requestHeaders
++        }) && minimalMode && fetchCache;
+         if (!CurCacheHandler) {
+-            if (fs && serverDistDir) {
++            if (canUseFileSystemCache) {
+                 if (debug) {
+                     console.log("using filesystem cache handler");
+                 }
+                 CurCacheHandler = _filesystemcache.default;
+             }
+-            if (_fetchcache.default.isAvailable({
+-                _requestHeaders: requestHeaders
+-            }) && minimalMode && fetchCache) {
++            if (shouldUseFetchCache) {
+                 if (debug) {
+                     console.log("using fetch cache handler");
+                 }
+@@ -101,7 +103,9 @@ class IncrementalCache {
+                 _appDir: !!appDir,
+                 _requestHeaders: requestHeaders,
+                 fetchCacheKeyPrefix,
+-                experimental
++                experimental,
++                canUseFileSystemCache,
++                shouldUseFetchCache
+             });
+         }
+     }
