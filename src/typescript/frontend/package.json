@@ -123,10 +123,5 @@
     "test:unit": "pnpm jest tests/unit",
     "vercel-install": "./submodule.sh && pnpm i"
   },
-  "pnpm": {
-    "patchedDependencies": {
-      "next@14.2.28": "patches/next@14.2.28.patch"
-    }
-  },
   "version": "2.1.0"
 }
