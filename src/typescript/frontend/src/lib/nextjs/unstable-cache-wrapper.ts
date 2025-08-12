@@ -8,9 +8,9 @@ import { sleep } from "@/sdk/index";
 import type { JsonValue } from "@/sdk/types/json-types";
 import { logCacheDebug } from "@/sdk/utils/log-cache-debug";
 
-import PatchedFetchCache from "./cache-handler";
+import { generateUUID } from "./cache-handlers";
 import { unstableCacheKeyGenerator } from "./generate-cache-key";
-import { getPatchedFetchCache } from "./get-incremental-cache";
+import { getCacheHandler, isPatchedCacheHandler } from "./get-incremental-cache";
 import { createLock } from "./redis";
 
 type Callback = (...args: any[]) => Promise<any>;
@@ -178,15 +178,11 @@ function addLockAndRelease<T extends Callback>(
       // If polling fails, the function simply falls back to doing the original `unstable_callback`
       // implementation (with updated tags and info).
       const pollWithFallback = async (...args: any[]) => {
-        const fc = getPatchedFetchCache();
-        if (fc) {
-          const pollResult = await fc.pollCacheEntry({ cacheKey, uuid });
+        const fc = getCacheHandler();
+        if (fc && isPatchedCacheHandler(fc)) {
+          const pollResult = await fc.pollCacheEntry<Awaited<ReturnType<T>>>({ cacheKey, uuid });
           if (pollResult) {
-            // Mark this instance as do not POST, because the other instance that acquired the lock
-            // already POSTed to this cache entry.
-            fc.deduplicator.markAsDoNotPost(uuid);
-            // Then return the result to the outer function.
-            return pollResult;
+            return pollResult.value;
           }
         }
         // Otherwise, fallback to default `unstable_cache` behavior that doesn't deduplicate
@@ -263,7 +259,7 @@ function stabilizedWithExplicitTags<T extends Callback>(
   const res = async (...args: any[]) => {
     // Add a unique tag to `tags` to be able to look up this unique function invocation in the
     // patched fetch cache.
-    const uuid = PatchedFetchCache.generateUUID();
+    const uuid = generateUUID();
     const functionCallTag = prettifyFunctionCall(uniqueKey, ...args);
     const tags = [...baseTags, functionCallTag, uuid];
     const lockWrapped = addLockAndRelease(cb, uniqueKey, uuid);
