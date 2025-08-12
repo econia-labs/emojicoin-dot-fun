@@ -17,11 +17,15 @@ const logCacheDebug = (args) => globalThis.__logCacheDebug(args);
  *    isMiss: true;
  *    isStale: undefined;
  *    body: undefined;
+ *    age?: undefined;
+ *    revalidate?: undefined;
  *   }
  * | {
  *    isMiss: false;
  *    isStale: boolean;
  *    body: string;
+ *    age: number;
+ *    revalidate: number;
  *   }
  * } StorageEntry
  * */
@@ -291,6 +295,8 @@ class PatchedFileSystemCache extends FileSystemCache {
         isMiss: false,
         isStale: age > revalidate,
         body: cacheData.value.data.body,
+        age,
+        revalidate,
       };
     } catch (e) {
       console.error(e);
@@ -443,6 +449,8 @@ class PatchedFetchCache extends FetchCache {
       isMiss: false,
       isStale: state !== "fresh",
       body: res.data.body,
+      age: parseInt(response.headers.get("age") || "-1", 10),
+      revalidate: res.revalidate,
     };
   }
 
