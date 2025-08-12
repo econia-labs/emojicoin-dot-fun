@@ -203,6 +203,7 @@ class InternalCacheHandler {
           cacheKey,
           label: ["FAILURE", "error"],
           msg: "Couldn't retrieve cache entry.",
+          uuid,
           alwaysLog: true,
         });
         return null;
@@ -229,6 +230,7 @@ class InternalCacheHandler {
         label: ["POLL FAIL", "warning"],
         msg: JSON.stringify(res, null, 2),
         alwaysLog: true,
+        uuid,
       });
     }
 
