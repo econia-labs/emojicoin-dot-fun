@@ -267,7 +267,9 @@ function stabilizedWithExplicitTags<T extends Callback>(
     // patched fetch cache.
     const uuid = generateUUID();
     const functionCallTag = prettifyFunctionCall(uniqueEntryLabel, ...args);
-    const tags = [...baseTags, functionCallTag, uuid];
+    // Only add it if it has args, otherwise it's just the same as the label with parentheses.
+    const maybeFunctionCallTag = args.length ? [functionCallTag] : [];
+    const tags = [...baseTags, uuid, ...maybeFunctionCallTag];
     const { redis } = CACHE_LOCK_RELEASE ?? {};
     const maybeWrappedLock = redis ? addLockAndRelease(cb, uniqueEntryLabel, uuid, redis) : cb;
     const stabilizedProxy = createStabilizedProxy(maybeWrappedLock, uniqueEntryLabel);
