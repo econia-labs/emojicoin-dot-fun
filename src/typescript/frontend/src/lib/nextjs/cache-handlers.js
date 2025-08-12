@@ -189,11 +189,12 @@ class InternalCacheHandler {
    * @returns {Promise<CachedValue<T>>} Parsed JSON body or null if not obtained.
    */
   async pollCacheEntry({ cacheKey, uuid, pollingInterval, numAttempts, getEntryFromStorage }) {
+    let res = null;
     for (let i = 0; i < numAttempts; i += 1) {
       const prev = this.numFetches.get(uuid) ?? 0;
       this.numFetches.set(uuid, prev + 1);
       await sleep(pollingInterval);
-      const res = await getEntryFromStorage({ cacheKey, uuid }).catch((e) => {
+      res = await getEntryFromStorage({ cacheKey, uuid }).catch((e) => {
         console.error(e);
         return null;
       });
@@ -220,6 +221,15 @@ class InternalCacheHandler {
         console.error(e);
         return null;
       }
+    }
+
+    if (res) {
+      logCacheDebug({
+        cacheKey,
+        label: ["POLL FAIL", "warning"],
+        msg: `Polled ${numAttempts} times and couldn't retrieve a fresh cache entry.`,
+        alwaysLog: true,
+      });
     }
 
     return null;
