@@ -30,6 +30,16 @@ class CustomCacheHandler {
    * @param {CacheHandlerArgs & ExtraOpts} ctx
    */
   constructor({ fs, serverDistDir, canUseFileSystemCache, shouldUseFetchCache, ...rest }) {
+    if (process.env.NEXT_PHASE === "phase-production-build") {
+      console.log({
+        minimalMode: process.env.NEXT_PRIVATE_MINIMAL_MODE,
+        minimalMode2: process.env.MINIMAL_MODE,
+        url: process.env.SUSPENSE_CACHE_URL,
+        t: process.env.SUSPENSE_CACHE_AUTH_TOKEN,
+        headers: rest._requestHeaders,
+        flushToDisk: rest.flushToDisk,
+      });
+    }
     if (canUseFileSystemCache === undefined || shouldUseFetchCache === undefined) {
       console.warn("WARNING: nextjs package wasn't properly patched to pass cache discriminators.");
       console.warn(
