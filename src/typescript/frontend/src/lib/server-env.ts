@@ -1,5 +1,7 @@
+// cspell:word upstash
 import "server-only";
 
+import { Redis } from "@upstash/redis";
 import {
   PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
@@ -51,7 +53,7 @@ export const RATE_LIMITER = (() => {
   const enabled = process.env.RATE_LIMITING_ENABLED === "true";
   if (enabled) {
     if (!KV_REST_API_URL || !KV_REST_API_TOKEN) {
-      throw new Error("Rate limiting is enabled but there was no URL/token provided for KV.");
+      throw new Error("Rate limiting is enabled but Upstash API keys were not provided.");
     }
     return {
       enabled: true,
@@ -85,3 +87,23 @@ export const NEXT_PHASE: (typeof PHASES)[number] = (() => {
 })();
 
 export const IS_NEXT_BUILD_PHASE = NEXT_PHASE === "phase-production-build";
+
+export const CACHE_LOCK_RELEASE = (() => {
+  if (process.env.CACHE_LOCK_RELEASE_ENABLED === "true") {
+    try {
+      if (!KV_REST_API_URL || !KV_REST_API_TOKEN) {
+        throw new Error(
+          "Cache lock and release is enabled but Upstash API keys were not provided."
+        );
+      }
+      const redis = new Redis({
+        url: KV_REST_API_URL,
+        token: KV_REST_API_TOKEN,
+      });
+      return { redis };
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return undefined;
+})();

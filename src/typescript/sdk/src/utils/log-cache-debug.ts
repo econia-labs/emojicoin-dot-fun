@@ -1,5 +1,13 @@
 /* eslint-disable import/no-unused-modules */
-import { type CacheLogColors, cacheLogColors as color, VERCEL_TARGET_ENV } from "..";
+import "server-only";
+
+import {
+  type CacheLogColors,
+  cacheLogColors as color,
+  enableColorsIfAllowed,
+  VERCEL,
+  VERCEL_TARGET_ENV,
+} from "..";
 
 // Get the time locally in local development.
 // In CI, prod, preview, etc, just use UTC time.
@@ -31,14 +39,23 @@ export async function logCacheDebug({
   alwaysLog = false,
 }: LogArgs) {
   if (!process.env.CACHE_HANDLER_DEBUG && !alwaysLog) return;
+  enableColorsIfAllowed();
 
   const [labelText, labelColor] = label;
 
-  const formattedUuid = color.lightGray("id-" + (uuid?.split("-").at(1) || "").slice(0, 6));
+  const formattedUuid = color.lightGray((uuid?.split("-").at(1) || "").slice(0, 6));
   const cacheKeyAndUrl = color.muted(`${cacheKey} ${fetchUrl}`);
   const PADDING = 4;
   const labelPadding = " ".repeat(Math.max(0, PADDING - labelText.length));
   const formattedLabel = color[labelColor ?? "none"](`[${labelText}] ${labelPadding}`);
   const formattedMessage = msg ? color.none(msg) : "";
-  logWithTime(`${formattedUuid} ${formattedLabel} ${formattedMessage} ${cacheKeyAndUrl}`);
+
+  const output = `${formattedUuid} ${formattedLabel} ${formattedMessage} ${cacheKeyAndUrl}`;
+  if (!VERCEL) {
+    // Vercel already has a time column in log outputs.
+    logWithTime(output);
+    return;
+  } else {
+    console.debug(output);
+  }
 }

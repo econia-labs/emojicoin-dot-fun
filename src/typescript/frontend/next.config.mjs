@@ -20,10 +20,6 @@ const debugConfigOptions = {
   },
 };
 
-const getCacheHandler = () => {
-  return new URL("./src/lib/nextjs/cache-handler.js", import.meta.url).pathname;
-};
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
@@ -43,7 +39,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  cacheHandler: getCacheHandler(),
+  cacheHandler: new URL("./src/lib/nextjs/cache-handler.js", import.meta.url).pathname,
   /**
    * Match the new default behavior in next 15, without opinionated caching for dynamic pages.
    * @see {@link https://nextjs.org/docs/app/api-reference/config/next-config-js/staleTimes#version-history}

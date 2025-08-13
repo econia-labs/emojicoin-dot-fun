@@ -1,19 +1,21 @@
+// cspell:word upstash
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IS_NEXT_BUILD_PHASE } from "lib/server-env";
+import "server-only";
+
+import type { Redis } from "@upstash/redis";
+import { CACHE_LOCK_RELEASE, IS_NEXT_BUILD_PHASE } from "lib/server-env";
 import { unstable_cache } from "next/cache";
 
 import { sleep } from "@/sdk/index";
 import type { JsonValue } from "@/sdk/types/json-types";
 import { logCacheDebug } from "@/sdk/utils/log-cache-debug";
 
-import PatchedFetchCache from "./cache-handler";
+import { generateUUID } from "./cache-handlers";
 import { unstableCacheKeyGenerator } from "./generate-cache-key";
-import { getPatchedFetchCache } from "./get-incremental-cache";
-import { createLock } from "./redis";
+import { getCacheHandler, isPatchedCacheHandler } from "./get-incremental-cache";
+import { createLock } from "./upstash-lock";
 
 type Callback = (...args: any[]) => Promise<any>;
-
-type LabelParams = Parameters<typeof logCacheDebug>[0]["label"];
 
 // Give access to the cache log for *.js files used in `next.config.mjs`.
 // Must be here or the globalThis isn't accessed properly (if from `sdk`).
@@ -64,13 +66,17 @@ export function unstableCacheWrapper<T extends Callback>(
     tags?: string[];
   }
 ): T {
-  const uniqueKey = Array.isArray(uniqueKeyParts) ? uniqueKeyParts.join(",") : uniqueKeyParts;
+  const uniqueEntryLabel = Array.isArray(uniqueKeyParts)
+    ? uniqueKeyParts.join(",")
+    : uniqueKeyParts;
   // Enforce some arbitrary minimum for the cache key length.
-  if (uniqueKey.length < MIN_KEY_LENGTH) {
-    throw new Error(`Cache key must be at least ${MIN_KEY_LENGTH} characters. Got: ${uniqueKey}`);
+  if (uniqueEntryLabel.length < MIN_KEY_LENGTH) {
+    throw new Error(
+      `Cache key must be at least ${MIN_KEY_LENGTH} characters. Got: ${uniqueEntryLabel}`
+    );
   }
 
-  const finalStableCb = stabilizedWithExplicitTags(cb, uniqueKey, options);
+  const finalStableCb = stabilizedWithExplicitTags(cb, uniqueEntryLabel, options);
 
   // At runtime just return the `unstable_cache` function with stabilized key generation.
   if (!buildCache) return finalStableCb as T;
@@ -79,7 +85,7 @@ export function unstableCacheWrapper<T extends Callback>(
   // generation logic and storing the `unstable_cache` invocation in a lazy promise map.
   // This deduplicates ~80% of fetches when the CDN caching mechanism isn't available.
   const memoizedBuildFetch = async (...args: any[]) => {
-    const keyParts = createKeyParts(uniqueKey);
+    const keyParts = createKeyParts(uniqueEntryLabel);
     const cacheKey = unstableCacheKeyGenerator(finalStableCb, keyParts)(...args);
     if (!buildCache.has(cacheKey)) {
       const promise = finalStableCb(...args);
@@ -99,9 +105,9 @@ export function unstableCacheWrapper<T extends Callback>(
  * function. The exact purpose is to intercept the origin fetch with a lock/release mechanism so
  * that queries aren't called if there's already another revalidation occurring remotely.
  *
- * Since the `cb` function is only called in `unstable_cache` if the CDN cache entry doesn't exist,
- * the lock is only acquired when `unstable_cache` determines that revalidation must occur. It
- * doesn't matter if it's synchronous or asynchronous here; ultimately, this is just meant to
+ * Since the `cb` function is only called in `unstable_cache` if the cache entry doesn't exist
+ * (MISS), the lock is only acquired when `unstable_cache` determines that revalidation must occur.
+ * It doesn't matter if it's synchronous or asynchronous here; ultimately, this is just meant to
  * reduce unnecessary load on the origin endpoint.
  *
  * For *background revalidation* fetches:
@@ -115,51 +121,55 @@ export function unstableCacheWrapper<T extends Callback>(
  * | Cache entry does not exist                  | MISS, *forces* synchronous revalidation
  *
  * @param cb The callback function passed to @see unstableCacheWrapper
- * @param uniqueCacheKey The unique key passed to @see unstableCacheWrapper
+ * @param uniqueEntryLabel The unique key passed to @see unstableCacheWrapper
  */
 function addLockAndRelease<T extends Callback>(
   cb: T,
   // The unique cache key entry- not globally unique. e.g. `current-arena-info` or `getMarket(1)`
-  uniqueCacheKey: string,
+  uniqueEntryLabel: string,
   // The uuid for the function invocation.
-  uuid: string
+  uuid: string,
+  redis: Redis
 ) {
+  if (!CACHE_LOCK_RELEASE) return cb;
   // Only used to generate the cache key since the function isn't properly curried and we can't
   // extract the args without intercepting the function call first.
-  const stabilizedProxy = createStabilizedProxy(cb, uniqueCacheKey);
-  const newCb = async (...args: any[]) => {
-    const cacheKey = unstableCacheKeyGenerator(stabilizedProxy, [uniqueCacheKey])(...args);
-    const lock = createLock(cacheKey);
-    const functionCallTag = prettifyFunctionCall(uniqueCacheKey, ...args);
+  const stabilizedProxy = createStabilizedProxy(cb, uniqueEntryLabel);
 
-    const acquired = await lock.acquire().catch((e) => {
+  const newCb = async (...args: any[]) => {
+    const cacheKey = unstableCacheKeyGenerator(stabilizedProxy, [uniqueEntryLabel])(...args);
+    const lock = createLock(redis, cacheKey);
+    const functionCallTag = prettifyFunctionCall(uniqueEntryLabel, ...args);
+
+    let lockServiceFailure = false;
+
+    const acquired = await lock.acquire({ uuid }).catch((e) => {
+      lockServiceFailure = true;
       console.error(`Failed to acquire lock: ${e}`);
       return false;
     });
 
-    const logHelper = (args: { label: LabelParams; msg: string; alwaysLog?: boolean }) =>
+    if (acquired) {
       logCacheDebug({
         cacheKey,
-        label: args.label,
-        msg: args.msg,
+        label: ["LOCK", "info"],
+        msg: "Acquired lock!",
         fetchUrl: functionCallTag,
-        uuid,
-        alwaysLog: !!args.alwaysLog,
+        alwaysLog: true,
       });
-
-    if (acquired) {
-      // Uncomment this line for extremely verbose logs.
-      // logHelper({ label: ["LOCK", "success"], msg: "Acquired write lock!" });
-
       return stabilizedProxy(...args).then((res) => {
-        // Wait for the cache entry to update on the CDN and *then* release the lock.
+        // Wait for the cache entry to update in storage and *then* release the lock.
         // Otherwise, multiple instances can acquire the lock before the CDN will show as fresh.
+        // The file system cache will be faster at writing than the CDN so it works for that, too.
         sleep(CDN_TTL_MS).then(() =>
           lock.release().then((released) => {
             if (!released) {
-              logHelper({
+              logCacheDebug({
+                cacheKey,
                 label: ["RELEASE", "error"],
                 msg: "Failed to release lock.",
+                fetchUrl: functionCallTag,
+                uuid,
                 alwaysLog: true,
               });
             }
@@ -168,34 +178,36 @@ function addLockAndRelease<T extends Callback>(
         return res;
       });
     } else {
-      // Uncomment this line for extremely verbose logs.
-      // logHelper({ label: ["LOCK", "debug"], msg: "Beginning polling..." });
-
+      // Lock service is most likely down- no reason to spin on the cache endpoint if it will just
+      // keep returning stale. Fetch from origin directly.
+      if (lockServiceFailure) {
+        return stabilizedProxy(...args);
+      }
       // If the lock wasn't acquired, return a callback that polls the cache entry several times
       // before trying to do an origin fetch. This is the brunt of the deduplication.
       // If polling fails, the function simply falls back to doing the original `unstable_callback`
       // implementation (with updated tags and info).
       const pollWithFallback = async (...args: any[]) => {
-        const fc = getPatchedFetchCache();
-        if (fc) {
-          const pollResult = await fc.pollCacheEndpoint({ cacheKey, uuid });
+        const fc = getCacheHandler();
+        if (fc && isPatchedCacheHandler(fc)) {
+          const pollResult = await fc.pollCacheEntry<Awaited<ReturnType<T>>>({ cacheKey, uuid });
           if (pollResult) {
-            // Mark this instance as do not POST, because the other instance that acquired the lock
-            // already POSTed to this cache entry.
-            fc.markAsDoNotPost(uuid);
-            // Then return the result to the outer function.
-            return pollResult;
+            return pollResult.value;
           }
         }
         // Otherwise, fallback to default `unstable_cache` behavior that doesn't deduplicate
         // origin fetches across different requests.
         const msg = `Failed to retrieve cache entry. Falling back to origin fetch. ${cacheKey}`;
         console.warn(msg);
-        logHelper({
+        logCacheDebug({
+          cacheKey,
           label: ["DUPLICATE WRITE", "warning"],
           msg: msg.split(cacheKey)[0].trim(),
+          fetchUrl: functionCallTag,
+          uuid,
           alwaysLog: true,
         });
+
         return stabilizedProxy(...args);
       };
       return pollWithFallback(...args);
@@ -248,25 +260,28 @@ function createStabilizedProxy<T extends Callback>(cb: T, uniqueKey: string): T 
  */
 function stabilizedWithExplicitTags<T extends Callback>(
   cb: T,
-  uniqueKey: string,
+  uniqueEntryLabel: string,
   options: {
     revalidate?: number | false;
     tags?: string[];
   }
 ) {
   // Add the `uniqueKey` to the `tags` array if it's not already there.
-  const staticTags = new Set([uniqueKey, ...(options?.tags ?? [])]);
+  const staticTags = new Set([uniqueEntryLabel, ...(options?.tags ?? [])]);
   const baseTags = Array.from(staticTags);
 
   const res = async (...args: any[]) => {
     // Add a unique tag to `tags` to be able to look up this unique function invocation in the
     // patched fetch cache.
-    const uuid = PatchedFetchCache.generateUUID();
-    const functionCallTag = prettifyFunctionCall(uniqueKey, ...args);
-    const tags = [...baseTags, functionCallTag, uuid];
-    const lockWrapped = addLockAndRelease(cb, uniqueKey, uuid);
-    const stabilizedProxy = createStabilizedProxy(lockWrapped, uniqueKey);
-    return unstable_cache(stabilizedProxy, createKeyParts(uniqueKey), {
+    const uuid = generateUUID();
+    const functionCallTag = prettifyFunctionCall(uniqueEntryLabel, ...args);
+    // Only add it if it has args, otherwise it's just the same as the label with parentheses.
+    const maybeFunctionCallTag = args.length ? [functionCallTag] : [];
+    const tags = [...baseTags, uuid, ...maybeFunctionCallTag];
+    const { redis } = CACHE_LOCK_RELEASE ?? {};
+    const maybeWrappedLock = redis ? addLockAndRelease(cb, uniqueEntryLabel, uuid, redis) : cb;
+    const stabilizedProxy = createStabilizedProxy(maybeWrappedLock, uniqueEntryLabel);
+    return unstable_cache(stabilizedProxy, createKeyParts(uniqueEntryLabel), {
       revalidate: options.revalidate,
       // Add the stringified `args` to the tags for debuggability and so it's possible to
       // revalidate by an invocation with specific args passed to it.

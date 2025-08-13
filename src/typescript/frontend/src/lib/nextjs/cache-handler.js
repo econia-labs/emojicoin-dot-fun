@@ -1,266 +1,83 @@
-// @ts-check
-// cspell:word undici
-
-const FetchCache = require("next/dist/server/lib/incremental-cache/fetch-cache").default;
-const crypto = require("crypto");
-const nextConfig = require("../../../next.config.mjs");
-const { cloneResponse } = require("next/dist/server/lib/clone-response");
+const {
+  default: FileSystemCache,
+} = require("next/dist/server/lib/incremental-cache/file-system-cache");
+const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
 
 /**
- * @type {typeof import("../../../../sdk/src/utils/log-cache-debug").logCacheDebug}
+ * In case all other attempts to instantiate a cache handler fail, just pass no-ops.
  */
-const logCacheDebug = (args) => globalThis.__logCacheDebug(args);
+const NoOpCacheHandler = {
+  get: async () => undefined,
+  set: async () => {},
+  resetRequestCache: () => {},
+  revalidateTags: async () => {},
+};
 
 /**
- * @param {number} ms
- * @returns {Promise<void>}
- */
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-const _CACHE_TAGS_HEADER = "x-vercel-cache-tags";
-const _CACHE_HEADERS_HEADER = "x-vercel-sc-headers";
-const CACHE_STATE_HEADER = "x-vercel-cache-state";
-const _CACHE_REVALIDATE_HEADER = "x-vercel-revalidate";
-const _CACHE_FETCH_URL_HEADER = "x-vercel-cache-item-name";
-const CACHE_CONTROL_VALUE_HEADER = "x-vercel-cache-control";
-const VERCEL_CACHE_CONTROL_HEADER = "vercel-cdn-cache-control";
-
-const UUID_PREFIX = "__uuid-";
-
-const swrDelta = nextConfig?.default.experimental?.swrDelta || 60;
-
-/**
- * @param {string[] | undefined} tags
- * @returns {string | undefined}
+ * This is a constructor-based factory that intercepts the constructor at runtime to return
+ * either a FileSystemCache or a FetchCache. It's necessary because `nextjs` expects this module
+ * specifically only return a default export in shape of a CacheHandler constructor; that is, it
+ * calls it through `new CustomCacheHandler(...opts)`, *and* it only provides request headers at the
+ * constructor call-site, so they aren't available until it's called.
  *
+ * Essentially, this just intercepts the constructor and returns one of the underlying instances
+ * based on which one is available, using the same logic `nextjs` does internally in the incremental
+ * cache constructor.
  */
-function findUUID(tags) {
-  return tags?.find((v) => v.startsWith(UUID_PREFIX));
-}
-
-class PatchedFetchCache extends FetchCache {
-  /** @type {Set<string>} */
-  shouldNotPost = new Set([]);
-
-  /** @type {Map<string, number>} */
-  numFetches = new Map();
-
+class CustomCacheHandler {
   /**
-   * @param {string} uuid
-   */
-  markAsDoNotPost(uuid) {
-    this.shouldNotPost.add(uuid);
-  }
-
-  /**
-   * @returns {string}
-   */
-  static generateUUID() {
-    return `${UUID_PREFIX}${crypto.randomUUID()}`;
-  }
-
-  /**
-   * The base class stores these privately; we just surface them with minimal typing.
-   * @returns {{ cacheEndpoint?: string, headers?: Record<string, string> }}
-   */
-  getCacheEndpointAndHeaders() {
-    return {
-      cacheEndpoint: this["cacheEndpoint"],
-      headers: this["headers"],
-    };
-  }
-
-  /**
-   * @param {string[] | undefined} tags NOTE: `tags` is mutated in this function.
-   * @param {string | undefined} uuid
-   */
-  removeEntry(tags, uuid) {
-    if (!uuid) return;
-    if (tags) {
-      const idx = tags.findIndex((v) => v === uuid) ?? -1;
-      if (idx > -1) {
-        // Mutate the `tags` array by removing the uuid.
-        tags.splice(idx, 1);
-      }
-    }
-    this.shouldNotPost.delete(uuid);
-    this.numFetches.delete(uuid);
-  }
-
-  /**
-   * Bypass all nextjs patched fetching behavior and fetch a cache entry directly from Vercel's CDN.
-   * Note that the `internal` flag must be passed to bypass the fetch patch applied at build time.
+   * @typedef {ConstructorParameters<typeof PatchedFetchCache | typeof PatchedFileSystemCache>[0]} CacheHandlerArgs
    *
-   * @param {string} cacheKey
-   * @returns {Promise<Response|null>}
-   */
-  async getFromCDN(cacheKey) {
-    const { cacheEndpoint, headers } = this.getCacheEndpointAndHeaders();
-    if (!cacheEndpoint || !headers) return null;
-
-    // Not sure if this actually does anything- the Vercel CDN docs are a bit unclear if they're
-    // intended for these to be used only in Vercel functions or if they'll work here. Regardless,
-    // it doesn't hurt to add them here.
-    const extraHeaders = {
-      [CACHE_CONTROL_VALUE_HEADER]: "cache-control: public, max-age=0, must-revalidate",
-      [VERCEL_CACHE_CONTROL_HEADER]: "cache-control: public, max-age=0, must-revalidate",
-      pragma: "no-cache",
-    };
-
-    const res = fetch(`${cacheEndpoint}/v1/suspense-cache/${cacheKey}`, {
-      method: "GET",
-      headers: {
-        ...headers,
-        ...extraHeaders,
-      },
-      /** This is necessary to bypass *all* fetch deduping. Unless this is here, this will always
-       * return the first value retrieved from the CDN.
-       * @see {@link https://github.com/vercel/next.js/blob/e65628a237ea76d77d911aedb12d5137fddd90fb/packages/next/src/server/lib/dedupe-fetch.ts#L45}
-       */
-      signal: new AbortController().signal,
-      /**
-       * Override the type. This is how they do it in next's `fetch-cache.ts`.
-       * @type {NextFetchRequestConfig}
-       */
-      next: {
-        // @ts-expect-error The `internal` field isn't exposed publicly, but this is correct.
-        // See `fetch-cache.ts` in the next codebase.
-        internal: true,
-        fetchType: "cache-get",
-        fetchUrl: "",
-        fetchIdx: 0,
-      },
-    })
-      // Fix the undici cloning bug. See the documentation on `cloneResponse` for more details.
-      // This is necessary because we've subverted the next.js deduping efforts by passing the abort
-      // controller signal, which is the code path where the undici fix is.
-      .then(cloneResponse)
-      .then(([cloned1, _cloned2]) => cloned1);
-
-    return res;
-  }
-
-  /**
-   * Poll Vercel CDN until fresh (or acceptable stale) data is available.
+   * @typedef {{ canUseFileSystemCache?: boolean, shouldUseFetchCache?: boolean }} ExtraOpts
    *
-   * @param {{
-   *   cacheKey: string,
-   *   uuid: string,
-   *   pollingInterval?: number,
-   *   numAttempts?: number,
-   *   waitOnFresh?: boolean
-   * }} params
-   * @returns {Promise<unknown|null>} Parsed JSON body or null if not obtained.
+   * @param {CacheHandlerArgs & ExtraOpts} ctx
    */
-  async pollCacheEndpoint({
-    cacheKey,
-    uuid,
-    // CDN GETs are cheap, and this function likely won't run all that often.
-    pollingInterval = 100,
-    numAttempts = 20,
-    waitOnFresh = true,
-  }) {
-    for (let i = 0; i < numAttempts; i += 1) {
-      const prev = this.numFetches.get(uuid) ?? 0;
-      this.numFetches.set(uuid, prev + 1);
-      await sleep(pollingInterval);
-      const res = await this.getFromCDN(cacheKey);
-
-      if (!res) {
-        console.warn("No CDN response in patched fetch cache.");
-        logCacheDebug({ cacheKey, label: ["FAILURE", "error"], msg: "Couldn't get CDN response." });
-        return null;
-      }
-
-      const state = res.headers.get(CACHE_STATE_HEADER);
-      const age = parseInt(res.headers.get("age") || "0", 10);
-      const date = res.headers.get("date");
-
-      if (res.ok) {
-        /** @type Promise<unknown> */
-        const parsedBody = await res
-          .json() // `r` is whatever the CDN returns; we expect { data: { body: string } }
-          .then(
-            /** @param {{ data?: { body?: string } } } r */
-            (r) => JSON.parse(r?.data?.body ?? "null")
-          );
-        if (state === "fresh" || !waitOnFresh) {
-          return parsedBody;
-        }
-
-        // Just return it if it's not too old- to avoid an origin fetch.
-        if (i === numAttempts - 1 && state === "stale-while-revalidate" && age < swrDelta) {
-          console.warn(`Returned stale data for cache key ${cacheKey}, age: ${age}`);
-          logCacheDebug({
-            cacheKey,
-            label: ["STALE RETURN", "warning"],
-            msg: `Returned stale data, age: ${age}`,
-          });
-          return parsedBody;
-        }
-      }
+  constructor({ fs, serverDistDir, canUseFileSystemCache, shouldUseFetchCache, ...rest }) {
+    if (canUseFileSystemCache === undefined || shouldUseFetchCache === undefined) {
+      console.warn("WARNING: nextjs package wasn't properly patched to pass cache discriminators.");
+      console.warn(
+        "Keys included: ",
+        Object.keys({ fs, serverDistDir, canUseFileSystemCache, shouldUseFetchCache, ...rest })
+      );
     }
 
-    return null;
-  }
+    const debug = (s) => {
+      if (process.env.CACHE_HANDLER_DEBUG) {
+        console.log(s);
+      }
+    };
 
-  /**
-   * @type {FetchCache["get"]}
-   */
-  async get(...args) {
-    const [cacheKey, ctx] = args;
-    this.addToCacheKeyLog({ label: ["GET", "fetchGet"], args });
-    return super.get(...args);
-  }
-
-  /**
-   * Intercept "FETCH" entries to control posting behavior keyed by a UUID tag.
-   * For non-FETCH kinds, defer to the base implementation.
-   *
-   * @type {FetchCache["set"]}
-   */
-  async set(...args) {
-    const [cacheKey, data, ctx] = args;
-    const { fetchCache, fetchUrl } = ctx;
-
-    if (!fetchCache) return;
-    if (data?.kind !== "FETCH") return super.set(cacheKey, data, ctx);
-
-    const uuid = findUUID(ctx.tags);
-
-    if (uuid && this.shouldNotPost.has(uuid)) {
-      this.addToCacheKeyLog({
-        label: ["POLL HIT", "debug"],
-        msg: `Poll hit after ${this.numFetches.get(uuid)} fetches`,
-        args,
+    if (shouldUseFetchCache) {
+      debug("Using patched fetch cache.");
+      return new PatchedFetchCache(rest);
+    }
+    if (canUseFileSystemCache && fs && serverDistDir) {
+      debug("Using patched file system cache.");
+      return new PatchedFileSystemCache({
+        fs,
+        serverDistDir,
+        ...rest,
       });
-      this.removeEntry(ctx.tags, uuid);
-      return;
     }
 
-    this.addToCacheKeyLog({ label: ["POST", "info"], args });
-    this.removeEntry(ctx.tags, uuid);
-    return super.set(cacheKey, data, ctx);
-  }
+    // Decide which to use in case the next patch hasn't been applied for some reason.
+    // This means that the userland settings for `const fetchCache = "..."` are ignored, since
+    // there's no way to get that context here.
+    if (PatchedFetchCache.isAvailable({ _requestHeaders: rest._requestHeaders })) {
+      debug("Using patched fetch cache from fallback logic.");
+      return new PatchedFetchCache(rest);
+    }
+    if (fs && serverDistDir) {
+      debug("Using patched file system cache from fallback logic.");
+      return new PatchedFileSystemCache(rest);
+    }
 
-  /**
-   * @param {{
-   *   label: Parameters<typeof logCacheDebug>[0]["label"],
-   *   msg?: string,
-   *   args: Parameters<FetchCache["get"]> | Parameters<FetchCache["set"]>,
-   * }} params
-   */
-  async addToCacheKeyLog({ label, msg, args }) {
-    // `set` has 3 args, `get` has 2. Can't use -1 for `ctx` because sometimes it's not present.
-    const [cacheKey, ctx] = args.length === 3 ? [args[0], args[2]] : [args[0], args[1]];
-    logCacheDebug({
-      cacheKey,
-      label,
-      msg,
-      fetchUrl: ctx?.fetchUrl,
-      uuid: findUUID(ctx?.tags),
-    });
+    // Default to a basic file system cache that only writes to disk if `fs` and `serverDistDir`.
+    const flushToDisk = rest.flushToDisk || (fs && serverDistDir);
+    console.warn(`Using the basic file system cache with flushToDisk: ${flushToDisk}`);
+    return new FileSystemCache({ ...rest, flushToDisk });
+    return NoOpCacheHandler;
   }
 }
 
-module.exports = PatchedFetchCache;
+module.exports = CustomCacheHandler;
