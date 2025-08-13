@@ -69,10 +69,11 @@ function generateUUID() {
  * @param {{
  *   label: Parameters<typeof logCacheDebug>[0]["label"],
  *   msg?: string,
+ *   alwaysLog?: boolean,
  *   args: Parameters<FetchCache["get"]> | Parameters<FetchCache["set"]>,
  * }} params
  */
-async function addToCacheKeyLog({ label, msg, args }) {
+async function addToCacheKeyLog({ label, msg, args, alwaysLog }) {
   // `set` has 3 args, `get` has 2. Can't use -1 for `ctx` because sometimes it's not present.
   const [cacheKey, ctx] = args.length === 3 ? [args[0], args[2]] : [args[0], args[1]];
   logCacheDebug({
@@ -81,6 +82,7 @@ async function addToCacheKeyLog({ label, msg, args }) {
     msg,
     fetchUrl: ctx?.fetchUrl,
     uuid: findUUID(ctx?.tags),
+    alwaysLog,
   });
 }
 class InternalCacheHandler {
@@ -130,14 +132,22 @@ class InternalCacheHandler {
   async get({ args, superGet }) {
     const [cacheKey, ctx] = args;
 
+    if (ctx?.kindHint !== "fetch" && findUUID(ctx?.tags)) {
+      addToCacheKeyLog({
+        args,
+        label: ["UNEXPECTED", "error"],
+        msg: "Unexpected early return despite UUID.",
+        alwaysLog: true,
+      });
+    }
     if (ctx?.kindHint !== "fetch") return null;
 
     const uuid = findUUID(ctx?.tags);
 
     // NOTE: `rateLimitedUntil` is only set in the fetch cache.
     if (Date.now() < rateLimitedUntil && uuid) {
-      // Remove this entry if rate limited and return null. This should act like a normal get
-      // to nextjs now.
+      addToCacheKeyLog({ label: ["RATE LIMITED", "warning"], msg: "", args, alwaysLog: true });
+      // Remove this entry if rate limited and return null. This should act like a normal get now.
       this.removeEntry(ctx.tags, uuid);
       return null;
     }
