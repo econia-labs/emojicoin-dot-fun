@@ -29,6 +29,8 @@ module.exports = {
     "tailwind.config.js",
     "jest.config.js",
     "public/static",
+    "cache-handler.js",
+    "cache-handlers.js",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
