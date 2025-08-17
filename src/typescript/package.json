@@ -57,6 +57,7 @@
   },
   "version": "0.0.0",
   "workspaces": [
+    "bff",
     "sdk",
     "frontend",
     "scripts"

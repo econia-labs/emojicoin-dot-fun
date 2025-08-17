@@ -14,10 +14,6 @@ const debugConfigOptions = {
   outputFileTracing: true,
   swcMinify: false,
   cleanDistDir: true,
-  experimental: {
-    serverMinification: false,
-    serverSourceMaps: true,
-  },
 };
 
 /** @type {import('next').NextConfig} */
@@ -30,7 +26,6 @@ const nextConfig = {
       "eaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e",
   },
   ...(DEBUG ? debugConfigOptions : {}),
-  swcMinify: process.env.NODE_ENV === "development" ? false : undefined,
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
