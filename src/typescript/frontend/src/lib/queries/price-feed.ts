@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 
 import { fetchPriceFeedWithMarketState } from "@/queries/home";
 import { ORDER_BY } from "@/sdk/indexer-v2/const";
@@ -14,7 +14,7 @@ const fetchPriceFeed = () =>
     pageSize: NUM_MARKETS_ON_PRICE_FEED,
   });
 
-export const fetchCachedPriceFeed = unstable_cache(
+export const fetchCachedHomePagePriceFeed = unstableCacheWrapper(
   fetchPriceFeed,
   ["price-feed-with-market-data-home-page"],
   {

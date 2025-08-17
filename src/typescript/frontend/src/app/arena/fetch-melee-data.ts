@@ -1,5 +1,5 @@
 import FEATURE_FLAGS from "lib/feature-flags";
-import { cacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { fetchCachedArenaInfo } from "lib/queries/arena-info";
 
 import { toMarketStateModel } from "@/sdk/index";
@@ -78,7 +78,7 @@ const cachedFetches = async () => {
 
   if (!arena_info) return logAndDefault("Couldn't fetch arena info.");
 
-  const fetchCachedCurrentMeleeData = cacheWrapper(
+  const fetchCachedCurrentMeleeData = unstableCacheWrapper(
     async () => fetchMeleeData({ arena_info }),
     ["current-melee-data"],
     {

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// cpsell DO NOT include this in the final build.
 export function GET(_req: NextRequest) {
   try {
     const { cacheHandler } = (
@@ -14,13 +15,12 @@ export function GET(_req: NextRequest) {
     ).__incrementalCache;
     const endpoint = new URL(cacheHandler["cacheEndpoint"]);
     const SUSPENSE_CACHE_URL = endpoint.hostname;
-    const SUSPENSE_CACHE_ENDPOINT = endpoint.pathname.replace("/", "");
+    const SUSPENSE_CACHE_ENDPOINT = endpoint.toString().replace("/", "");
     const SUSPENSE_CACHE_AUTH_TOKEN = cacheHandler["headers"]["Authorization"].replace(
       "Bearer ",
       ""
     );
     return NextResponse.json({
-      cacheEndpoint: endpoint,
       SUSPENSE_CACHE_URL,
       SUSPENSE_CACHE_ENDPOINT,
       SUSPENSE_CACHE_AUTH_TOKEN,

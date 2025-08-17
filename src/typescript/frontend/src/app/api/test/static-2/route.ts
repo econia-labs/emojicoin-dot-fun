@@ -1,11 +1,11 @@
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-static";
 export const revalidate = 10;
 
-const fetchCachedDate = unstable_cache(
+const fetchCachedDate = unstableCacheWrapper(
   async () => {
     const d = new Date();
     return `222------------${d.getMinutes()}:${d.getSeconds()}:${d.getMilliseconds()}`;
