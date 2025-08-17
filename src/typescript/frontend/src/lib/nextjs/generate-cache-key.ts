@@ -12,8 +12,13 @@ type Callback = (...args: any[]) => Promise<any>;
  *
  * @param cb The same `cb` passed to `unstable_cache`.
  * @param keyParts The same `keyParts` passed to `unstable_cache`.
+ * 
+ * @returns The function that generates an `unstable_cache` key given the arg inputs.
  */
-export function generateCacheKeyForUnstableCache<T extends Callback>(cb: T, keyParts?: string[]) {
+export function unstableCacheKeyGenerator<T extends Callback>(
+  cb: T,
+  keyParts?: string[]
+) {
   const fixedKey = `${cb.toString()}-${Array.isArray(keyParts) && keyParts.join(",")}`;
 
   const cachedCb = (...args: any[]) => {

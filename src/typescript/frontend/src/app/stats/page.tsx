@@ -4,8 +4,8 @@
 
 import fetchCachedFullMarketStatsQuery from "app/api/stats/full-query";
 import { STATS_MARKETS_PER_PAGE, type StatsSchemaInput } from "app/api/stats/schema";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
-import { unstable_cache } from "next/cache";
 
 import { TableName, toPriceFeedWithNulls } from "@/sdk/index";
 import { postgrest } from "@/sdk/indexer-v2";
@@ -27,16 +27,16 @@ export interface StatsPageParams {
  * Swap out the max page number with the number of markets returned in the price feed query.
  * Since this can be run infrequently and it's an extra call, cache this value for longer.
  */
-const fetchCachedNumMarketsWithDailyActivity = unstable_cache(
+const fetchCachedNumMarketsWithDailyActivity = unstableCacheWrapper(
   async (): Promise<number> =>
     postgrest
       .from(TableName.PriceFeed)
       .select(undefined, { count: "exact" })
       .then((res) => res.count ?? 0),
-  ["cached-num-markets-with-daily-activity"],
+  ["num-markets-with-daily-activity"],
   {
     revalidate: 30,
-    tags: ["cached-num-markets-with-daily-activity"],
+    tags: ["num-markets-with-daily-activity"],
   }
 );
 
