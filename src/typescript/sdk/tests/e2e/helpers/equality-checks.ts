@@ -49,7 +49,9 @@ type Indexer = {
   StateEventData: ReturnType<typeof withStateEventData>;
 };
 
-export const checkTuples = (args: [string, JsonValue | undefined, JsonValue | undefined][]) => {
+export const checkTuples = (
+  args: [string, JsonValue | bigint | undefined, JsonValue | bigint | undefined][]
+) => {
   const [rows, responses] = args.reduce(
     (acc, [path, row, response]) => {
       acc[0].push(`${path}: ${row?.toString()}`);

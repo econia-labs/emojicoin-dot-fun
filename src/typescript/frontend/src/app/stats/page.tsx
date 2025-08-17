@@ -12,9 +12,6 @@ import { postgrest } from "@/sdk/indexer-v2";
 
 import StatsPageComponent from "./StatsPage";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
-
 export interface StatsPageParams {
   params?: {};
   searchParams?: StatsSchemaInput;
