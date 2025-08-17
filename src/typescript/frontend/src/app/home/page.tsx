@@ -1,6 +1,6 @@
 import FEATURE_FLAGS from "lib/feature-flags";
 import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
-import { fetchCachedPriceFeed } from "lib/queries/price-feed";
+import { fetchCachedHomePagePriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 
@@ -23,7 +23,7 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   // General market data queries
   // ---------------------------------------
-  const priceFeedPromise = fetchCachedPriceFeed()
+  const priceFeedPromise = fetchCachedHomePagePriceFeed()
     .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);

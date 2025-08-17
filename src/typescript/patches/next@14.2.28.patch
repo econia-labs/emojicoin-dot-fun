@@ -106,10 +106,25 @@ index a437c1dd076e6fbc93a7e1c06104b36e4ad7cf2b..98924e1f6bd17ee90115aa7647453bed
              const isProduction = !this.renderOpts.dev;
              const didRespond = hasResolved || res.sent;
 diff --git a/dist/server/lib/incremental-cache/fetch-cache.js b/dist/server/lib/incremental-cache/fetch-cache.js
-index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..bee8731efd9329bee1126e82c84ace650f7c1135 100644
+index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..c5afa34d53ef260bbe2a69c19aeec9a95547772a 100644
 --- a/dist/server/lib/incremental-cache/fetch-cache.js
 +++ b/dist/server/lib/incremental-cache/fetch-cache.js
-@@ -57,9 +57,11 @@ class FetchCache {
+@@ -24,6 +24,14 @@ const CACHE_REVALIDATE_HEADER = "x-vercel-revalidate";
+ const CACHE_FETCH_URL_HEADER = "x-vercel-cache-item-name";
+ const CACHE_CONTROL_VALUE_HEADER = "x-vercel-cache-control";
+ const DEBUG = Boolean(process.env.NEXT_PRIVATE_DEBUG_CACHE);
++
++const YELLOW = "\x1b[33m";
++const PURPLE = "\x1b[35m";
++const RESET = "\x1b[0m";
++
++const yellow = (s) => `${YELLOW}${s}${RESET}`;
++const purple = (s) => `${PURPLE}${s}${RESET}`;
++
+ async function fetchRetryWithTimeout(url, init, retryIndex = 0) {
+     const controller = new AbortController();
+     const timeout = setTimeout(()=>{
+@@ -57,9 +65,11 @@ class FetchCache {
          return true;
      }
      static isAvailable(ctx) {
@@ -122,38 +137,77 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..bee8731efd9329bee1126e82c84ace65
          this.headers = {};
          this.headers["Content-Type"] = "application/json";
          if (CACHE_HEADERS_HEADER in ctx._requestHeaders) {
-@@ -168,6 +170,14 @@ class FetchCache {
+@@ -168,6 +178,8 @@ class FetchCache {
              }
              return null;
          }
 +        
-+        console.log("-".repeat(100));
-+        if (!memoryCache.get(key)) {
-+            console.log(`mem-cache MISS: ${key} tags: ${tags.join("") || fetchUrl}`);
-+        } else {
-+            console.log(`mem-cache HIT: ${key} tags: ${tags.join("") || fetchUrl}`);
-+        }
-+
++        console.log(yellow("*".repeat(100)));
          // memory cache is cleared at the end of each request
          // so that revalidate events are pulled from upstream
          // on successive requests
-@@ -257,6 +267,15 @@ class FetchCache {
+@@ -176,6 +188,8 @@ class FetchCache {
+         // Get data from fetch cache. Also check if new tags have been
+         // specified with the same cache key (fetch URL)
+         if (this.cacheEndpoint && (!data || !hasFetchKindAndMatchingTags)) {
++            // Origin fetch.
++            console.log(`mem-cache MISS: ${key} tags: ${tags.join("") || fetchUrl}`);
+             try {
+                 const start = Date.now();
+                 const fetchParams = {
+@@ -194,6 +208,23 @@ class FetchCache {
+                     },
+                     next: fetchParams
+                 });
++
++                console.dir({
++                    method: "GET",
++                    headers: {
++                        ...this.headers,
++                        [CACHE_FETCH_URL_HEADER]: fetchUrl,
++                        [CACHE_TAGS_HEADER]: (tags == null ? void 0 : tags.join(",")) || "",
++                        [_constants.NEXT_CACHE_SOFT_TAGS_HEADER]: (softTags == null ? void 0 : softTags.join(",")) || ""
++                    },
++                    next: fetchParams
++                });
++                console.dir({
++                    headers: Object.fromEntries(Array.from(res.headers.entries())),
++                    status: res.status,
++                    ok: res.ok,
++                });
++
+                 if (res.status === 429) {
+                     const retryAfter = res.headers.get("retry-after") || "60000";
+                     rateLimitedUntil = Date.now() + parseInt(retryAfter);
+@@ -244,7 +275,10 @@ class FetchCache {
+                     console.error(`Failed to get from fetch-cache`, err);
+                 }
+             }
++        } else {
++            console.log(`mem-cache HIT: ${key} tags: ${tags.join("") || fetchUrl}`);
+         }
++        console.log(yellow("*".repeat(50)));
+         return data || null;
+     }
+     async set(...args) {
+@@ -257,11 +291,16 @@ class FetchCache {
              }
              return;
          }
 +
 +        
-+        console.log("-".repeat(100));
-+        if (!!memoryCache) {
-+            console.log(`mem-cache SET: ${key} tags: ${tags.join("") || fetchUrl}`);
-+        } else {
-+            console.log(`mem-cache NULL/NO-SET: ${key}, tags: ${tags.join("") || fetchUrl}`);
-+        }
++        console.log(purple("*".repeat(100)));
 +
          memoryCache == null ? void 0 : memoryCache.set(key, {
              value: data,
              lastModified: Date.now()
-@@ -285,6 +304,7 @@ class FetchCache {
+         });
+         if (this.cacheEndpoint) {
++            console.log(`mem-cache SET: ${key} tags: ${tags.join("") || fetchUrl}`);
+             try {
+                 const start = Date.now();
+                 if (data !== null && "revalidate" in data) {
+@@ -285,6 +324,7 @@ class FetchCache {
                      fetchUrl,
                      fetchIdx
                  };
@@ -161,11 +215,10 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..bee8731efd9329bee1126e82c84ace65
                  const res = await fetch(`${this.cacheEndpoint}/v1/suspense-cache/${key}`, {
                      method: "POST",
                      headers: {
-@@ -295,6 +315,17 @@ class FetchCache {
+@@ -295,6 +335,22 @@ class FetchCache {
                      body: body,
                      next: fetchParams
                  });
-+                console.log("*".repeat(50));
 +                console.dir({
 +                    method: "POST",
 +                    headers: {
@@ -175,10 +228,24 @@ index 6274e90ea7fc65b2d89a9d9bd2ccc4ca121509f4..bee8731efd9329bee1126e82c84ace65
 +                    },
 +                    next: fetchParams
 +                }, { depth: 3 });
-+                console.log("*".repeat(50));
++                
++                console.dir({
++                    headers: Object.fromEntries(Array.from(res.headers.entries())),
++                    status: res.status,
++                    ok: res.ok,
++                });
++
                  if (res.status === 429) {
                      const retryAfter = res.headers.get("retry-after") || "60000";
                      rateLimitedUntil = Date.now() + parseInt(retryAfter);
+@@ -313,6 +369,7 @@ class FetchCache {
+                 }
+             }
+         }
++        console.log(purple("*".repeat(50)))
+         return;
+     }
+ }
 diff --git a/dist/server/lib/incremental-cache/index.js b/dist/server/lib/incremental-cache/index.js
 index 754eee87cf0d60f034cb6c05ad87ac9ada5c93fe..dbe19e2ca86be5343e121dd899a0dc8ee426e261 100644
 --- a/dist/server/lib/incremental-cache/index.js

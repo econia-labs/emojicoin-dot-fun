@@ -1,6 +1,6 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 
 import type { DatabaseJsonType } from "@/sdk/index";
 import {
@@ -19,7 +19,7 @@ import { STATS_MARKETS_PER_PAGE } from "./schema";
  * NOTE: This does not perform input validation on the page number. Always validate the `page` input
  * param before calling this function.
  */
-const fetchCachedPaginatedMarketStats = unstable_cache(
+const fetchCachedPaginatedMarketStats = unstableCacheWrapper(
   async (args: StatsSchemaOutput): Promise<DatabaseJsonType["price_feed_with_nulls"][]> => {
     const { sortBy } = args;
     const pageSize = STATS_MARKETS_PER_PAGE;
@@ -37,10 +37,10 @@ const fetchCachedPaginatedMarketStats = unstable_cache(
     // the price delta related columns.
     return fetchPriceFeedWithMarketStateAndNulls({ ...args, sortBy, pageSize });
   },
-  ["stats-markets"],
+  ["paginated-market-stats"],
   {
     revalidate: 10,
-    tags: ["stats-markets"],
+    tags: ["paginated-market-stats"],
   }
 );
 
