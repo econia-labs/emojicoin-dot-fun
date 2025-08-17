@@ -8,6 +8,8 @@ import { getRandomChatEmoji } from "@/sdk/emoji_data";
 
 import MatrixRain from "../maintenance/matrix";
 
+export const dynamic = "force-static";
+
 export default function LaunchingPage() {
   const catchPhrase = useMemo(() => {
     const phrases = ["launching soon", "get ready"];

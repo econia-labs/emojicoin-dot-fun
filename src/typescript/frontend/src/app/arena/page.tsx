@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
 
 export const revalidate = 2;
+export const dynamic = "force-static";
 
 export const metadata = generateMetadataHelper({
   title: "arena",

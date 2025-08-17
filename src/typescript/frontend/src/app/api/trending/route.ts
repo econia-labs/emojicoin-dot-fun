@@ -20,6 +20,7 @@ import type { q64ToBig } from "@/sdk/utils";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 export const revalidate = 10;
+export const dynamic = "force-static";
 
 /**
  * ### /api/trending

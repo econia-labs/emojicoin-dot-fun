@@ -1,16 +1,15 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
-import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
-import { fetchMarketStateJson } from "@/queries/market";
 import { fetchAllMarketSymbols } from "@/queries/static-params";
 import type { SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
 import { toMarketStateModel } from "@/sdk/index";
 
+import { fetchCachedMarketState } from "../cached-fetches";
 import EmojiNotFoundPage from "./not-found";
 
 export const revalidate = 10;
@@ -69,14 +68,6 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
   };
 }
 
-const buildCachedMarketState = unstableCacheWrapper(
-  fetchMarketStateJson,
-  ["build-cached-market-state"],
-  {
-    tags: ["build-cached-market-state"],
-  }
-);
-
 /**
  * Note that our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
  * That is, if you paste the emoji 💅🏾 into the URL, it becomes %F0%9F%92%85%F0%9F%8F%BE.
@@ -93,7 +84,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const emojis = names.map((v) => SYMBOL_EMOJI_DATA.byStrictName(v).emoji);
   // console.log(`time: ${new Date().toISOString()}, ${JSON.stringify(params)}`);
 
-  const stateJson = await buildCachedMarketState({ searchEmojis: emojis });
+  const stateJson = await fetchCachedMarketState({ searchEmojis: emojis });
 
   if (stateJson) {
     const state = toMarketStateModel(stateJson);
