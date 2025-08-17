@@ -30,7 +30,6 @@ const fetchMarketSymbols = async (page: number) =>
     });
 
 export async function fetchAllMarketSymbols() {
-  console.log(`Fetching all market symbols at ${new Date().toISOString()}`);
   const symbols: SymbolEmoji[][] = [];
   let page = 1;
   let lastRes: SymbolEmoji[][] = [];

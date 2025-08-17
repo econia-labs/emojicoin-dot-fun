@@ -1,6 +1,6 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import type { z } from "zod";
 
 import type { DatabaseJsonType } from "@/sdk/index";
@@ -26,7 +26,7 @@ if (Math.ceil(PERIODS_IN_ONE_DAY[Period.Period1M] / MAX_ROW_LIMIT) > 3) {
 // rows for the 1m time frame. The next highest would be 5 minutes at < 500 rows.
 // Thus, just cache all rows for each period, and let the API endpoint figure out what specific
 // data to return based on the request params.
-const fetchCachedArenaCandlesticks = unstable_cache(
+const fetchCachedArenaCandlesticks = unstableCacheWrapper(
   async ({
     meleeID,
     period,
@@ -58,7 +58,7 @@ const fetchCachedArenaCandlesticks = unstable_cache(
 
     return res;
   },
-  [],
+  ["fetch-cached-arena-candlesticks"],
   {
     revalidate: 10,
     tags: ["fetch-cached-arena-candlesticks"],

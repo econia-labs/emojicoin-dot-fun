@@ -1,27 +1,21 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
-import FEATURE_FLAGS from "lib/feature-flags";
-import { maybeCacheBuildFetch } from "lib/nextjs/build-cache";
-import { cacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
-import {
-  fetchCachedTopHolders,
-  fetchTopHoldersInternal,
-} from "lib/queries/aptos-indexer/fetch-top-holders";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
+import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
-import { fetchMarketState } from "@/queries/market";
+import { fetchMarketStateJson } from "@/queries/market";
 import { fetchAllMarketSymbols } from "@/queries/static-params";
 import type { SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
+import { toMarketStateModel } from "@/sdk/index";
 
 import EmojiNotFoundPage from "./not-found";
 
 export const revalidate = 10;
 export const dynamic = "force-static";
 export const dynamicParams = false;
-
-console.log(process.env.NEXT_RUNTIME);
 
 export async function generateStaticParams() {
   // cpsell make sure this is all markets later- limiting here to avoid  hammering graphql indexer
@@ -49,14 +43,10 @@ interface EmojicoinPageProps {
   searchParams: {};
 }
 
-const EVENTS_ON_PAGE_LOAD = 25;
-
 const logAndReturnValue = <T extends [] | undefined | null>(dataType: string, onFailure: T) => {
   console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
   return onFailure;
 };
-
-const i = 0;
 
 export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
   const { market: marketSlug } = params;
@@ -79,10 +69,13 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
   };
 }
 
-const buildCachedMarketState = cacheWrapper(fetchMarketState, [], {
-  noUnstableCache: true,
-  tags: ["build-cached-market-state"],
-});
+const buildCachedMarketState = unstableCacheWrapper(
+  fetchMarketStateJson,
+  ["build-cached-market-state"],
+  {
+    tags: ["build-cached-market-state"],
+  }
+);
 
 /**
  * Note that our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
@@ -100,9 +93,10 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const emojis = names.map((v) => SYMBOL_EMOJI_DATA.byStrictName(v).emoji);
   // console.log(`time: ${new Date().toISOString()}, ${JSON.stringify(params)}`);
 
-  const state = await buildCachedMarketState({ searchEmojis: emojis });
+  const stateJson = await buildCachedMarketState({ searchEmojis: emojis });
 
-  if (state) {
+  if (stateJson) {
+    const state = toMarketStateModel(stateJson);
     const marketAddress = getMarketAddress(emojis).toString();
 
     const [holders] = await Promise.all([
