@@ -1,4 +1,4 @@
-import { DYNAMIC_FETCHERS } from "app/_internal/dynamic-fetcher";
+import { DYNAMIC_FETCHERS } from "app/internal/dynamic-fetcher";
 import { convertMeleeData } from "app/arena/fetch-melee-data";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
 import FEATURE_FLAGS from "lib/feature-flags";

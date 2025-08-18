@@ -1,4 +1,4 @@
-import { ROUTE_FETCHERS } from "app/_internal/dynamic-fetcher";
+import { ROUTE_FETCHERS } from "app/internal/dynamic-fetcher";
 import type { NextRequest } from "next/server";
 
 export const revalidate = 10;

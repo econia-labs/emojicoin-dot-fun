@@ -1,4 +1,4 @@
-import { DYNAMIC_FETCHERS } from "app/_internal/dynamic-fetcher";
+import { DYNAMIC_FETCHERS } from "app/internal/dynamic-fetcher";
 import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";

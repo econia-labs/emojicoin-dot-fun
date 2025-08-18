@@ -9,6 +9,7 @@ import {
 } from "next/dist/shared/lib/constants";
 
 import { EMOJICOIN_INDEXER_URL } from "@/sdk/server/env";
+import { logCacheDebug } from "@/sdk/utils/log-cache-debug";
 
 import { APTOS_NETWORK, IS_ALLOWLIST_ENABLED } from "./env";
 
@@ -107,3 +108,8 @@ export const CACHE_LOCK_RELEASE = (() => {
   }
   return undefined;
 })();
+
+// Give access to the cache log for *.js files used in `next.config.mjs`.
+// Must be here or the globalThis isn't accessed properly (if from `sdk`).
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+(globalThis as any).__logCacheDebug = logCacheDebug;

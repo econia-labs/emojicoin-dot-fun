@@ -17,11 +17,6 @@ import { createLock } from "./upstash-lock";
 
 type Callback = (...args: any[]) => Promise<any>;
 
-// Give access to the cache log for *.js files used in `next.config.mjs`.
-// Must be here or the globalThis isn't accessed properly (if from `sdk`).
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-(globalThis as any).__logCacheDebug = logCacheDebug;
-
 /**
  * BUILD TIME DEDUPING:
  * Since `unstable_cache` nor the fetch deduping efforts properly work at build time when used in

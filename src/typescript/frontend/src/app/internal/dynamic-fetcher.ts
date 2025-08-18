@@ -33,7 +33,7 @@ export function createDynamicFetcher<F extends Callback>({
   }
 
   const runtimeFetch = async (args?: Parameters<F>[0]) => {
-    const baseUrl = new URL(`_internal/${routeName}`, DEPLOYMENT_URL);
+    const baseUrl = new URL(`internal/${routeName}`, DEPLOYMENT_URL);
     const url = addSearchParams(`${baseUrl}`, args ?? {});
     console.log("calling runtime fetch!", url);
     const res = await fetch(url, {
