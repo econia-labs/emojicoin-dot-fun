@@ -29,6 +29,12 @@
       "@/broker/*": [
         "../../sdk/src/broker-v2/*"
       ],
+      "@/move-modules": [
+        "../../sdk/src/emojicoin_dot_fun/move-modules"
+      ],
+      "@/move-modules/*": [
+        "../../sdk/src/emojicoin_dot_fun/move-modules/*"
+      ],
       "@/queries/*": [
         "../../sdk/src/indexer-v2/queries/app/*"
       ],

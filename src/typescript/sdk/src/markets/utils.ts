@@ -38,7 +38,9 @@ import {
 } from "../emojicoin_dot_fun";
 import type { TypeTagInput } from "../emojicoin_dot_fun/types";
 import { getMarketAddress, REGISTRY_ADDRESS } from "../emojicoin_dot_fun/utils";
+import type { DatabaseJsonType } from "../indexer-v2/types/json-types";
 import type { Flatten } from "../types";
+import type { ArenaJsonTypes } from "../types/arena-json-types";
 import type { JsonTypes } from "../types/json-types";
 import type { AnyNumberString, Types } from "../types/types";
 import {
@@ -51,6 +53,7 @@ import { getAptosClient } from "../utils/aptos-client";
 import { getPrimaryFungibleStoreAddress, toConfig } from "../utils/aptos-utils";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import { getResourceFromWriteSet } from "../utils/get-resource-from-writeset";
+import { q64ToBig } from "../utils/nominal-price";
 import { ensureTypeTagStruct, STRUCT_STRINGS, TYPE_TAGS } from "../utils/type-tags";
 import type { AtLeastOne, XOR } from "../utils/utility-types";
 
@@ -557,4 +560,18 @@ export function calculateAverageExecutionPricePreFees(args: {
   return isBuy
     ? quoteVolume.div(baseVolume.plus(poolFee))
     : quoteVolume.plus(poolFee.plus(integratorFee)).div(baseVolume);
+}
+
+/**
+ * Calculates the exchange rate data based on the rates at the start of the melee and the
+ * current market state.
+ */
+export function calculateExchangeRateDelta(
+  start: ArenaJsonTypes["ExchangeRate"],
+  current: DatabaseJsonType["market_state"]
+) {
+  const startRatio = Big(start.quote).div(start.base);
+  const currentRatio = q64ToBig(current.last_swap_avg_execution_price_q64);
+  const deltaPercentage = currentRatio.div(startRatio).mul(100).sub(100).toNumber();
+  return deltaPercentage;
 }

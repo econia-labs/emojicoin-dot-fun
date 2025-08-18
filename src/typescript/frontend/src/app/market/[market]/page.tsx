@@ -1,9 +1,8 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import ArenaInfoLoader from "context/ArenaInfoLoader";
+import fetchFromBFF from "lib/bff/fetch-from-bff";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
-import { fetchCachedArenaInfo } from "lib/queries/arena-info";
-import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
@@ -11,6 +10,7 @@ import { fetchAllMarketSymbols } from "@/queries/static-params";
 import type { SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
+import type { DatabaseJsonType } from "@/sdk/index";
 import { toMarketStateModel } from "@/sdk/index";
 
 import { fetchCachedMarketState } from "../cached-fetches";
@@ -95,13 +95,17 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const marketAddress = getMarketAddress(emojis).toString();
 
     const [arenaInfo, aptPrice, holders] = await Promise.all([
-      fetchCachedArenaInfo().catch(() => logAndReturnValue("Arena info", null)),
-      fetchCachedAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
+      fetchFromBFF<DatabaseJsonType["arena_info"]>("arena/info").catch(() =>
+        logAndReturnValue("Arena info", null)
+      ),
+      fetchFromBFF<number | null>("apt-price").catch(() =>
+        logAndReturnValue("APT price", undefined)
+      ),
       fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
     ]);
 
     return (
-      <AptPriceContextProvider aptPrice={aptPrice}>
+      <AptPriceContextProvider aptPrice={aptPrice ?? undefined}>
         <ArenaInfoLoader arenaInfoJson={arenaInfo} />
         <ClientEmojicoinPage
           data={{

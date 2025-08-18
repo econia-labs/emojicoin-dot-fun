@@ -25,7 +25,7 @@ export const fetchAptPrice = () =>
     .then((r) => r.aptos.usd as number)
     .catch((e) => {
       console.error("Could not get APT price from CoinGecko.", e);
-      return undefined;
+      return null;
     });
 
 export const fetchCachedAptPrice = unstableCacheWrapper(fetchAptPrice, ["coingecko-apt-price"], {

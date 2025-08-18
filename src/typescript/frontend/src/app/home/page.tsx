@@ -1,18 +1,17 @@
 import { AptPriceContextProvider } from "context/AptPrice";
+import fetchFromBFF from "lib/bff/fetch-from-bff";
 import FEATURE_FLAGS from "lib/feature-flags";
-import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
-import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
-import { fetchCachedHomePagePriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 
 // import { cookies } from "next/headers";
 import { fetchMarkets } from "@/queries/home";
 import { symbolBytesToEmojis } from "@/sdk/emoji_data";
+import type { DatabaseJsonType } from "@/sdk/indexer-v2";
 import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
 import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
 
-import { fetchCachedMeleeData } from "../arena/fetch-melee-data";
+import type { fetchCachedMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
 import { cachedHomePageMarketStateQuery } from "./queries";
 
@@ -25,16 +24,16 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   // General market data queries
   // ---------------------------------------
-  const priceFeedPromise = fetchCachedHomePagePriceFeed()
+  const priceFeedPromise = fetchFromBFF<DatabaseJsonType["price_feed"][]>("price-feed")
     .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
     });
-  const numMarketsPromise = fetchCachedNumRegisteredMarkets();
-  const aptPricePromise = fetchCachedAptPrice();
+  const aptPricePromise = fetchFromBFF<number | null>("apt-price");
+  const numMarketsPromise = fetchFromBFF<number>("num-markets");
   const meleeDataPromise = FEATURE_FLAGS.Arena
-    ? fetchCachedMeleeData()
+    ? fetchFromBFF<Awaited<ReturnType<typeof fetchCachedMeleeData>>>("melee-data")
         .then((res) => (res.arenaInfo ? res : null))
         .catch(() => null)
     : null;
@@ -78,7 +77,7 @@ export default async function Home({ searchParams }: HomePageParams) {
   ]);
 
   return (
-    <AptPriceContextProvider aptPrice={aptPrice}>
+    <AptPriceContextProvider aptPrice={aptPrice ?? undefined}>
       <HomePageComponent
         markets={markets}
         numMarkets={numMarkets}

@@ -2,7 +2,7 @@ import FEATURE_FLAGS from "lib/feature-flags";
 import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { fetchCachedArenaInfo } from "lib/queries/arena-info";
 
-import { toMarketStateModel } from "@/sdk/index";
+import { calculateExchangeRateDelta, toMarketStateModel } from "@/sdk/index";
 import type { DatabaseJsonType } from "@/sdk/indexer-v2";
 import {
   fetchSpecificMarketsJson,
@@ -10,7 +10,6 @@ import {
   toArenaInfoModel,
 } from "@/sdk/indexer-v2";
 
-import calculateExchangeRateDelta from "./calculate-exchange-rate-delta";
 import createCachedExchangeRatesAtMeleeStartFetcher from "./fetch-melee-start-open-price";
 
 const logAndDefault = (e: unknown) => {
@@ -71,10 +70,11 @@ const fetchCachedExchangeRatesWithErrorHandling = (arena_info: DatabaseJsonType[
     });
 
 const cachedFetches = async () => {
-  const arena_info = await fetchCachedArenaInfo().catch((e) => {
-    console.error(e);
-    return null;
-  });
+  const arena_info = await fetchCachedArenaInfo();
+  // .catch((e) => {
+  //   console.error(e);
+  //   return null;
+  // });
 
   if (!arena_info) return logAndDefault("Couldn't fetch arena info.");
 
