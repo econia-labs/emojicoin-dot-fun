@@ -1,5 +1,5 @@
+import { DYNAMIC_FETCHERS } from "app/_internal/dynamic-fetcher";
 import { AptPriceContextProvider } from "context/AptPrice";
-import fetchFromBFF from "lib/bff/fetch-from-bff";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
@@ -7,11 +7,10 @@ import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/hom
 // import { cookies } from "next/headers";
 import { fetchMarkets } from "@/queries/home";
 import { symbolBytesToEmojis } from "@/sdk/emoji_data";
-import type { DatabaseJsonType } from "@/sdk/indexer-v2";
 import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
 import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
 
-import { convertMeleeData, type fetchCachedMeleeData } from "../arena/fetch-melee-data";
+import { convertMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
 import { cachedHomePageMarketStateQuery } from "./queries";
 
@@ -24,16 +23,16 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   // General market data queries
   // ---------------------------------------
-  const priceFeedPromise = fetchFromBFF<DatabaseJsonType["price_feed"][]>("price-feed")
+  const priceFeedPromise = DYNAMIC_FETCHERS["price-feed"]()
     .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
     });
-  const aptPricePromise = fetchFromBFF<number | null>("apt-price");
-  const numMarketsPromise = fetchFromBFF<number>("num-markets");
+  const aptPricePromise = DYNAMIC_FETCHERS["apt-price"]();
+  const numMarketsPromise = DYNAMIC_FETCHERS["num-markets"]();
   const meleeDataPromise = FEATURE_FLAGS.Arena
-    ? fetchFromBFF<Awaited<ReturnType<typeof fetchCachedMeleeData>>>("melee-data")
+    ? DYNAMIC_FETCHERS["arena/melee-data"]()
         .then(convertMeleeData)
         .then((res) => (res.arenaInfo ? res : null))
         .catch(() => null)

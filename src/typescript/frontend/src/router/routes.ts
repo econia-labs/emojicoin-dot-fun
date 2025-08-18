@@ -4,6 +4,7 @@ const _ = "";
 
 // cspell:word dexscreener
 const expanded = expandRoutes({
+  _internal: _,
   api: {
     arena: {
       candlesticks: _,

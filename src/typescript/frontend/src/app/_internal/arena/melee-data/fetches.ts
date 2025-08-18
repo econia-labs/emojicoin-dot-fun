@@ -1,10 +1,10 @@
-import { fetchVaultBalanceJson } from "@/queries/index";
+import { fetchArenaInfoJson, fetchVaultBalanceJson } from "@/queries/index";
 import type { DatabaseJsonType } from "@/sdk/indexer-v2";
 import { fetchSpecificMarketsJson } from "@/sdk/indexer-v2";
 
 import createCachedExchangeRatesAtMeleeStartFetcher from "./fetch-melee-start-open-price";
 
-export const fetchMeleeData = async ({
+export const fetchPartialMeleeData = async ({
   arena_info,
 }: {
   arena_info: DatabaseJsonType["arena_info"];
@@ -54,3 +54,33 @@ export const fetchCachedExchangeRatesWithErrorHandling = (
         market_1_rate: null,
       };
     });
+
+export const fetchMeleeData = async () => {
+  const arena_info = await fetchArenaInfoJson();
+  if (!arena_info) {
+    console.error("Couldn't fetch arena info for melee data.");
+    return {
+      arena_info: null,
+      market_0: null,
+      market_1: null,
+      rewards_remaining: null,
+      market_0_delta: null,
+      market_1_delta: null,
+    };
+  }
+
+  const [{ rewards_remaining, market_0, market_1 }, { market_0_rate, market_1_rate }] =
+    await Promise.all([
+      fetchPartialMeleeData({ arena_info }),
+      fetchCachedExchangeRatesWithErrorHandling(arena_info),
+    ]);
+
+  return {
+    arena_info,
+    market_0,
+    market_1,
+    rewards_remaining,
+    market_0_rate,
+    market_1_rate,
+  };
+};

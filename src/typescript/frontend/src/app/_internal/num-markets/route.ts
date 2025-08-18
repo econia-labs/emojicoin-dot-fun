@@ -1,12 +1,10 @@
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 
-import { fetchAptPrice } from "./fetch";
+import { ROUTE_FETCHERS } from "../dynamic-fetcher";
 
 export const revalidate = 10;
 export const dynamic = "error";
 
 export async function GET(_request: NextRequest) {
-  const res = await fetchAptPrice();
-  return NextResponse.json(res);
+  return ROUTE_FETCHERS["num-markets"]();
 }

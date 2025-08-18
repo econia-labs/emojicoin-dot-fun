@@ -1,5 +1,5 @@
 type PrimitiveValue = string | number | boolean | null | undefined;
-type SearchParamsRecord = Record<string, PrimitiveValue | PrimitiveValue[]>;
+export type SearchParamsRecord = Record<string, PrimitiveValue | PrimitiveValue[]>;
 
 /**
  * Adds search parameters to the URL.

@@ -37,7 +37,19 @@ const rateLimiters = (() => {
 })();
 
 export default async function middleware(request: NextRequest) {
-  const pathname = new URL(request.url).pathname;
+  const url = new URL(request.url);
+  const { pathname } = url;
+
+  // Always protect the `_internal` routes from public access.
+  if (url.hostname !== "localhost" && pathname.startsWith(ROUTES["_internal"])) {
+    if (
+      request.headers.get("x-vercel-protection-bypass") !==
+      process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+    ) {
+      return new NextResponse("", { status: 401 });
+    }
+  }
+
   if (pathname === ROUTES["launching-soon"]) {
     return NextResponse.next();
   }
