@@ -57,7 +57,7 @@ export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
     last_price: toNominalPrice(e.last_swap_avg_execution_price_q64).toString(),
     base_volume: toNominal(BigInt(e.daily_base_volume)).toString(),
     target_volume: toNominal(BigInt(e.daily_volume)).toString(),
-    liquidity_in_usd: aptPrice !== undefined ? estimateLiquidityInUSD(e, aptPrice) : undefined,
+    liquidity_in_usd: aptPrice !== null ? estimateLiquidityInUSD(e, aptPrice) : undefined,
   }));
 
   return new NextResponse(stringifyJSON(data), { headers: { "Content-type": "application/json" } });

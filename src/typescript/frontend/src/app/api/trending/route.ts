@@ -100,7 +100,7 @@ export const GET = apiRouteErrorHandler(async (_req: NextRequest) => {
   const aptPrice = await fetchCachedAptPrice();
   const priceFeed = await fetchCachedHomePagePriceFeed();
   const res = priceFeed.map((mkt) => {
-    (mkt as TrendingMarketArgs)["apt_price"] = aptPrice;
+    (mkt as TrendingMarketArgs)["apt_price"] = aptPrice ?? undefined;
     return toTrendingMarket(mkt);
   });
 
