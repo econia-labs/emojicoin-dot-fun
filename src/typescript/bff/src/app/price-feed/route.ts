@@ -7,7 +7,7 @@ import { SortMarketsBy } from "@/sdk/indexer-v2/types";
 export const revalidate = 10;
 export const dynamic = "error";
 
-export const NUM_MARKETS_ON_PRICE_FEED = 25;
+const NUM_MARKETS_ON_PRICE_FEED = 25;
 
 export async function GET(_request: NextRequest) {
   const res = await fetchPriceFeedWithMarketState({
