@@ -6,7 +6,7 @@ import { fetchLargestMarketID } from "@/queries/home";
 export const revalidate = 10;
 export const dynamic = "error";
 
-export default async function GET(_request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const res = await fetchLargestMarketID();
   return NextResponse.json(res);
 }
