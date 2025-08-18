@@ -1,4 +1,3 @@
-
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -13,14 +12,14 @@ export const dynamic = "error";
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
-  return {
+  return NextResponse.json({
     arenaInfo: null,
     market0: null,
     market1: null,
     rewardsRemaining: null,
     market0Delta: null,
     market1Delta: null,
-  };
+  });
 };
 
 export async function GET(_request: NextRequest) {
