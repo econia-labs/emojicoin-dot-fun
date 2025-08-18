@@ -6,7 +6,6 @@ import { fetchArenaInfoJson } from "@/queries/arena";
 
 export const revalidate = 10;
 export const dynamic = "error";
-export const fetchCache = "only-no-store";
 
 export async function GET(
   _request: NextRequest,
