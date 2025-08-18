@@ -4,7 +4,12 @@ import { NextResponse } from "next/server";
 import type { VERCEL_TARGET_ENV } from "@/sdk/const";
 
 export default async function middleware(request: NextRequest) {
-  if ((process.env.VERCEL_TARGET_ENV as typeof VERCEL_TARGET_ENV) === "preview") {
+  if (
+    ["preview", "development"].includes(
+      process.env.VERCEL_TARGET_ENV as typeof VERCEL_TARGET_ENV
+    ) ||
+    process.env.NODE_ENV === "development"
+  ) {
     return NextResponse.next();
   }
   const auth = request.headers.get("NEXT_PRIVATE_INTERNAL_AUTH_KEY");

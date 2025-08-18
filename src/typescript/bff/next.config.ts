@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverMinification: DEBUG || process.env.NODE_ENV === "development" ? false : true,
     serverSourceMaps: DEBUG || process.env.NODE_ENV === "development" ? true : false,
+    ...(process.env.NODE_ENV === "development" ? { allowDevelopmentBuild: true } : {}),
   },
   transpilePackages: ["@/sdk"],
 };
