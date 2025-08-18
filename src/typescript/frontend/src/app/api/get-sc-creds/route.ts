@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 // cpsell DO NOT include this in the final build.
-export function GET(_req: NextRequest) {
+export function GET(_request: NextRequest) {
   try {
     const { cacheHandler } = (
       globalThis as unknown as {

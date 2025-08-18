@@ -1,4 +1,6 @@
+import { AptPriceContextProvider } from "context/AptPrice";
 import FEATURE_FLAGS from "lib/feature-flags";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
 import { fetchCachedHomePagePriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
@@ -30,6 +32,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       return [] as DatabaseModels["price_feed"][];
     });
   const numMarketsPromise = fetchCachedNumRegisteredMarkets();
+  const aptPricePromise = fetchCachedAptPrice();
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchCachedMeleeData()
         .then((res) => (res.arenaInfo ? res : null))
@@ -66,23 +69,26 @@ export default async function Home({ searchParams }: HomePageParams) {
         pageSize: MARKETS_PER_PAGE,
       });
 
-  const [priceFeedData, markets, numMarkets, meleeData] = await Promise.all([
+  const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
     priceFeedPromise.catch(() => []),
     marketsPromise.catch(() => []),
     numMarketsPromise.catch(() => 0),
+    aptPricePromise.catch(() => undefined),
     meleeDataPromise,
   ]);
 
   return (
-    <HomePageComponent
-      markets={markets}
-      numMarkets={numMarkets}
-      page={page}
-      sortBy={sortBy}
-      searchBytes={q}
-      priceFeed={priceFeedData}
-      meleeData={meleeData}
-      isFavoriteFilterEnabled={false} //{!!favoritesSettingFromCookies && favorites.length > 0}
-    />
+    <AptPriceContextProvider aptPrice={aptPrice}>
+      <HomePageComponent
+        markets={markets}
+        numMarkets={numMarkets}
+        page={page}
+        sortBy={sortBy}
+        searchBytes={q}
+        priceFeed={priceFeedData}
+        meleeData={meleeData}
+        isFavoriteFilterEnabled={false} //{!!favoritesSettingFromCookies && favorites.length > 0}
+      />
+    </AptPriceContextProvider>
   );
 }

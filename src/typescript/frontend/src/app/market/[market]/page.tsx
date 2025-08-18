@@ -1,5 +1,9 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
+import { AptPriceContextProvider } from "context/AptPrice";
+import ArenaInfoLoader from "context/ArenaInfoLoader";
 import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
+import { fetchCachedArenaInfo } from "lib/queries/arena-info";
+import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
@@ -90,19 +94,24 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const state = toMarketStateModel(stateJson);
     const marketAddress = getMarketAddress(emojis).toString();
 
-    const [holders] = await Promise.all([
+    const [arenaInfo, aptPrice, holders] = await Promise.all([
+      fetchCachedArenaInfo().catch(() => logAndReturnValue("Arena info", null)),
+      fetchCachedAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
       fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
     ]);
 
     return (
-      <ClientEmojicoinPage
-        data={{
-          symbol: state.market.symbolData.symbol,
-          state,
-          holders,
-          ...state.market,
-        }}
-      />
+      <AptPriceContextProvider aptPrice={aptPrice}>
+        <ArenaInfoLoader arenaInfoJson={arenaInfo} />
+        <ClientEmojicoinPage
+          data={{
+            symbol: state.market.symbolData.symbol,
+            state,
+            holders,
+            ...state.market,
+          }}
+        />
+      </AptPriceContextProvider>
     );
   }
 
