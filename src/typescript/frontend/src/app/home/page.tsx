@@ -11,7 +11,7 @@ import type { DatabaseJsonType } from "@/sdk/indexer-v2";
 import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
 import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
 
-import type { fetchCachedMeleeData } from "../arena/fetch-melee-data";
+import { convertMeleeData, type fetchCachedMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
 import { cachedHomePageMarketStateQuery } from "./queries";
 
@@ -34,6 +34,7 @@ export default async function Home({ searchParams }: HomePageParams) {
   const numMarketsPromise = fetchFromBFF<number>("num-markets");
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchFromBFF<Awaited<ReturnType<typeof fetchCachedMeleeData>>>("melee-data")
+        .then(convertMeleeData)
         .then((res) => (res.arenaInfo ? res : null))
         .catch(() => null)
     : null;

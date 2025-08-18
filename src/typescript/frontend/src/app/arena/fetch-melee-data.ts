@@ -15,12 +15,12 @@ import createCachedExchangeRatesAtMeleeStartFetcher from "./fetch-melee-start-op
 const logAndDefault = (e: unknown) => {
   console.error(e);
   return {
-    arenaInfo: null,
-    market0: null,
-    market1: null,
-    rewardsRemaining: null,
-    market0Delta: null,
-    market1Delta: null,
+    arena_info: null,
+    market_0: null,
+    market_1: null,
+    rewards_remaining: null,
+    market_0_delta: null,
+    market_1_delta: null,
   };
 };
 
@@ -71,11 +71,6 @@ const fetchCachedExchangeRatesWithErrorHandling = (arena_info: DatabaseJsonType[
 
 const cachedFetches = async () => {
   const arena_info = await fetchCachedArenaInfo();
-  // .catch((e) => {
-  //   console.error(e);
-  //   return null;
-  // });
-
   if (!arena_info) return logAndDefault("Couldn't fetch arena info.");
 
   const fetchCachedCurrentMeleeData = unstableCacheWrapper(
@@ -87,18 +82,19 @@ const cachedFetches = async () => {
     }
   );
 
-  const [melee, { market_0_rate, market_1_rate }] = await Promise.all([
-    fetchCachedCurrentMeleeData(),
-    fetchCachedExchangeRatesWithErrorHandling(arena_info),
-  ]);
+  const [{ market_0, market_1, rewards_remaining }, { market_0_rate, market_1_rate }] =
+    await Promise.all([
+      fetchCachedCurrentMeleeData(),
+      fetchCachedExchangeRatesWithErrorHandling(arena_info),
+    ]);
 
   return {
-    arenaInfo: toArenaInfoModel(melee.arena_info),
-    market0: toMarketStateModel(melee.market_0),
-    market1: toMarketStateModel(melee.market_1),
-    rewardsRemaining: BigInt(melee.rewards_remaining),
-    market0Delta: market_0_rate ? calculateExchangeRateDelta(market_0_rate, melee.market_0) : null,
-    market1Delta: market_1_rate ? calculateExchangeRateDelta(market_1_rate, melee.market_1) : null,
+    arena_info,
+    market_0,
+    market_1,
+    rewards_remaining,
+    market_0_rate,
+    market_1_rate,
   };
 };
 
@@ -107,7 +103,24 @@ export const fetchCachedMeleeData = async () => {
 
   const res = await cachedFetches().catch(logAndDefault);
 
-  if (!res.arenaInfo) console.warn(`[WARNING]: Failed to fetch melee data.`);
+  if (!res.arena_info) console.warn(`[WARNING]: Failed to fetch melee data.`);
 
   return res;
+};
+
+export const convertMeleeData = (res: Awaited<ReturnType<typeof cachedFetches>>) => {
+  return res.arena_info
+    ? {
+        arenaInfo: toArenaInfoModel(res.arena_info),
+        market0: toMarketStateModel(res.market_0),
+        market1: toMarketStateModel(res.market_1),
+        rewardsRemaining: BigInt(res.rewards_remaining),
+        market0Delta: res.market_0_rate
+          ? calculateExchangeRateDelta(res.market_0_rate, res.market_0)
+          : null,
+        market1Delta: res.market_1_rate
+          ? calculateExchangeRateDelta(res.market_1_rate, res.market_1)
+          : null,
+      }
+    : { rewardsRemaining: 0n };
 };

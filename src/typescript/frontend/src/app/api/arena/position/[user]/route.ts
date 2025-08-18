@@ -1,5 +1,5 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { fetchCachedMeleeData } from "app/arena/fetch-melee-data";
+import { convertMeleeData, fetchCachedMeleeData } from "app/arena/fetch-melee-data";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { waitForVersionCached } from "lib/queries/latest-emojicoin-version";
 import { type NextRequest, NextResponse } from "next/server";
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return new NextResponse("Invalid address.", { status: 400 });
   }
 
-  const { arenaInfo, market0, market1 } = await fetchCachedMeleeData();
+  const { arenaInfo, market0, market1 } = await fetchCachedMeleeData().then(convertMeleeData);
 
   if (!arenaInfo || !market0 || !market1) {
     return new NextResponse("Couldn't fetch current melee data in user position route.", {

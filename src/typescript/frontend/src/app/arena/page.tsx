@@ -1,4 +1,4 @@
-import { fetchCachedMeleeData } from "app/arena/fetch-melee-data";
+import { convertMeleeData, fetchCachedMeleeData } from "app/arena/fetch-melee-data";
 import { ArenaClient } from "components/pages/arena/ArenaClient";
 import FEATURE_FLAGS from "lib/feature-flags";
 import generateMetadataHelper from "lib/utils/generate-metadata-helper";
@@ -17,7 +17,7 @@ export default async function Arena() {
   if (!FEATURE_FLAGS.Arena) redirect(ROUTES.home);
 
   const { arenaInfo, market0, market1, rewardsRemaining, market0Delta, market1Delta } =
-    await fetchCachedMeleeData();
+    await fetchCachedMeleeData().then(convertMeleeData);
 
   if (!arenaInfo || !market0 || !market1 || rewardsRemaining === null) redirect(ROUTES.home);
 
