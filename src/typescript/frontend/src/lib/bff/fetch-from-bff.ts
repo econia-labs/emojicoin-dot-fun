@@ -13,5 +13,9 @@ export default async function fetchFromBFF<T>(endpoint: string): Promise<T> {
     },
   });
 
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+
   return res.json() as Promise<T>;
 }
