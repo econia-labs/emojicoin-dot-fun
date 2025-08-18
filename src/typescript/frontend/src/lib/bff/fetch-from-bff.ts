@@ -4,7 +4,9 @@ const env = getEnv();
 
 const { VERCEL_BRANCH_URL } = env;
 
-const BFF_DEPLOYMENT_URL = VERCEL_BRANCH_URL ? `https://${VERCEL_BRANCH_URL}` : "http://localhost:3002";
+const BFF_DEPLOYMENT_URL = VERCEL_BRANCH_URL
+  ? `https://${VERCEL_BRANCH_URL.replace("emojicoin-dot-fun", "emojicoin-dot-fun-bff")}`
+  : "http://localhost:3002";
 const BYPASS_SECRET = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || "";
 
 export default async function fetchFromBFF<T>(endpoint: string): Promise<T> {
