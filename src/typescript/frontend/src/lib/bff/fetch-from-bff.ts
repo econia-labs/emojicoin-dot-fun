@@ -17,10 +17,12 @@ export default async function fetchFromBFF<T>(endpoint: string): Promise<T> {
   );
   const res = await fetch(url, {
     ...headers,
-    cache: "no-store",
     next: {
+      // Mark it as internal so `next` doesn't try to cache it in on the CDN.
+      // Note that this is still deduped as a request in memory, it just isn't stored on the CDN.
+      internal: true,
       revalidate: 0,
-    },
+    } as NextFetchRequestConfig,
   });
 
   if (!res.ok) {
