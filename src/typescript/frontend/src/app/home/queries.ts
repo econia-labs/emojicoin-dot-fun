@@ -2,12 +2,13 @@ import { fetchCachedMeleeData } from "app/arena/fetch-melee-data";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
-import { fetchCachedNumRegisteredMarkets, fetchIsValidPageNumber } from "lib/queries/num-market";
+import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
 import { fetchCachedHomePagePriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { safeParsePageWithDefault } from "lib/routes/home-page-params";
+import getMaxPageNumber from "lib/utils/get-max-page-number";
 
 import { fetchMarketsJson } from "@/queries/home";
 import type { MarketStateModel, MarketStateQueryArgs } from "@/sdk/index";
@@ -38,10 +39,12 @@ export async function fetchHomePageData(args: { sort: string; page: string }) {
 
   if (page < 1) return { notFound: true } as const;
 
-  const isValid = page === 1 || (await fetchIsValidPageNumber(page).catch((_e) => false));
-  if (!isValid) {
-    return { notFound: true } as const;
-  }
+  const numMarketsPromise = fetchCachedNumRegisteredMarkets().then((n) => ({
+    numMarkets: n,
+    isValid: page <= getMaxPageNumber(n, MARKETS_PER_PAGE),
+  }));
+  const isValid = page === 1 || (await numMarketsPromise).isValid;
+  if (!isValid) return { notFound: true } as const;
 
   const priceFeedPromise = fetchCachedHomePagePriceFeed()
     .then((res) => res.map(toPriceFeed))
@@ -49,7 +52,6 @@ export async function fetchHomePageData(args: { sort: string; page: string }) {
       console.error(err);
       return [] as DatabaseModels["price_feed"][];
     });
-  const numMarketsPromise = fetchCachedNumRegisteredMarkets();
   const aptPricePromise = fetchCachedAptPrice();
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchCachedMeleeData()
@@ -61,10 +63,10 @@ export async function fetchHomePageData(args: { sort: string; page: string }) {
     res.map(toMarketStateModel)
   );
 
-  const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
+  const [priceFeedData, markets, { numMarkets }, aptPrice, meleeData] = await Promise.all([
     priceFeedPromise.catch(() => []),
     marketsPromise.catch(() => [] as MarketStateModel[]),
-    numMarketsPromise.catch(() => 0),
+    numMarketsPromise.catch(() => ({ numMarkets: 0 })),
     aptPricePromise.catch(() => undefined),
     meleeDataPromise,
   ]);
