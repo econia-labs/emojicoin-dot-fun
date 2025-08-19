@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { SearchSchema } from "app/api/search/schema";
 import { useEventStore } from "context/event-store-context";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { addSearchParams } from "utils/url-utils";
 import type { z } from "zod";
@@ -45,8 +45,8 @@ export const useSearchEmojisMarkets = ({
               return res;
             })
         : [],
-    // Ten minutes.
-    staleTime: 60 * 10 * 1000,
+    // Two minutes.
+    staleTime: 60 * 2 * 1000,
     enabled: !!sortedAndFiltered.length && !isFavoriteFilterEnabled,
   });
 

@@ -14,8 +14,8 @@ export const fetchCache = "force-no-store";
 
 export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
-  const params = parseSearchParams(searchParams);
-  const accountAddress = AccountAddressSchema.parse(params);
+  const { accountAddress: addressFromParams } = parseSearchParams(searchParams);
+  const accountAddress = AccountAddressSchema.parse(addressFromParams);
 
   if (!accountAddress) {
     return NextResponse.json([], { status: 400 });

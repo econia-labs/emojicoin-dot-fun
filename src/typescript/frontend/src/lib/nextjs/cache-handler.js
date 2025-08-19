@@ -50,7 +50,8 @@ class CustomCacheHandler {
 
     if (shouldUseFetchCache) {
       return new PatchedFetchCache(rest);
-   o }
+      o;
+    }
     if (canUseFileSystemCache && fs && serverDistDir) {
       return new PatchedFileSystemCache({
         fs,

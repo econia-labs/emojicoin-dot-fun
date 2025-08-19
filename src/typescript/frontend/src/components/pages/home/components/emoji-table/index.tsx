@@ -6,7 +6,6 @@ import Text from "components/text";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
-import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-client";
 import { useFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
 import { useSearchEmojisMarkets } from "lib/hooks/queries/use-search-emojis";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
@@ -15,7 +14,7 @@ import { cn } from "lib/utils/class-name";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useTransition } from "react";
+import { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
@@ -37,13 +36,15 @@ interface EmojiTableProps
 
 const EmojiTable = (props: EmojiTableProps) => {
   const {
-    favoritesQuery: { data: { markets: favoriteMarkets = [] } = {} },
+    favoritesQuery: { data: { markets: favoriteMarkets = [] } = {}, isLoading },
   } = useFavoriteMarkets();
 
+  const favoritesSetting = useUserSettings((s) => s.favorites);
+  const setIsFilterFavorites = useUserSettings((s) => s.setFavorites);
+
   const isFavoriteFilterEnabled = useMemo(() => {
-    const favoritesInCookies = !!clientCookies.getSetting("homePageFilterFavorites");
-    return favoritesInCookies && !!favoriteMarkets?.length;
-  }, [favoriteMarkets?.length]);
+    return favoritesSetting && !!favoriteMarkets?.length;
+  }, [favoritesSetting, favoriteMarkets?.length]);
 
   const router = useRouter();
   const emojis = useEmojiPicker((s) => s.emojis);
@@ -55,27 +56,26 @@ const EmojiTable = (props: EmojiTableProps) => {
     isFavoriteFilterEnabled,
   });
 
+  // NOTE: While there will never be more than 25 favorite markets, the emoji search pagination functionality won't
+  // work past page 1. That is, if there are more than 50 markets from a search result, it will only show 50 and the
+  // user won't be able to change the page. This is a fairly small bug, but fixing it would require storing a separate
+  // page number when searching emojis (as opposed to the /home/[sort]/[page] page number in the URL).
   const { markets, page, sort, pages } = useMemo(() => {
-    const { page, sortBy: sort } = props;
+    const { sortBy: sort } = props;
+    const hasSearchEmojis = !!emojis.length;
+    const page = isFavoriteFilterEnabled || hasSearchEmojis ? 1 : props.page;
     const numMarkets = Math.max(props.numMarkets, 1);
-    const [markets, pages] = marketsSearched.length
+    const [markets, pages] = hasSearchEmojis
       ? [marketsSearched, getMaxPageNumber(marketsSearched.length, MARKETS_PER_PAGE)]
       : isFavoriteFilterEnabled && favoriteMarkets
         ? [Array.from(favoriteMarkets), 1]
         : [props.markets, getMaxPageNumber(numMarkets, MARKETS_PER_PAGE)];
     return { markets, page, sort, pages };
-  }, [props, isFavoriteFilterEnabled, favoriteMarkets, marketsSearched]);
+  }, [props, emojis, isFavoriteFilterEnabled, favoriteMarkets, marketsSearched]);
 
   const { md } = useTailwindBreakpoints();
 
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
-
-  // Use the prop value by default, but instantly set the new state
-  // on the beginning of the transition when the toggle is switched.
-  // This ref tracks the *optimistic* toggle value; that is, the value
-  // that is expected but not asynchronously confirmed with cookies yet.
-  const [isLoading, startTransition] = useTransition();
-  const toggleStateRef = useRef(isFavoriteFilterEnabled);
 
   useEffect(() => {
     loadMarketStateFromServer(markets);
@@ -113,26 +113,6 @@ const EmojiTable = (props: EmojiTableProps) => {
     const maxPossibleCells = Math.ceil(markets.length / rowLength) * rowLength;
     return maxPossibleCells - markets.length;
   }, [markets.length, rowLength]);
-
-  // Update cookies and refresh the page.
-  const setIsFilterFavorites = (newVal: boolean) => {
-    // Note the usage of the ref here facilitates snappy transitions through the usage of
-    // `startTransition` with `isLoading` and the final/ultimate ref value. This avoids
-    // inadvertently capturing the stale value in a callback and using it; that is,
-    // if a user toggles the switch multiple times, the ref is always immediately set,
-    // and at the end of the transition, the ref is retrieved/used again, rather than
-    // the value originally passed into the function.
-    // This also works visually by using the ref value as the switch/toggle value
-    // when `isLoading` is true.
-    toggleStateRef.current = newVal;
-    startTransition(() => {
-      const curr = toggleStateRef.current;
-      clientCookies.saveSetting("homePageFilterFavorites", curr);
-      // A refresh of sorts. `router.refresh()` will invalidate the RSC cache and we don't really need that since it's
-      // so expensive. Simply push the same URL and the page updates properly.
-      pushURL();
-    });
-  };
 
   return (
     <>
@@ -177,7 +157,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
-                isFilterFavorites={isLoading ? toggleStateRef.current : isFavoriteFilterEnabled}
+                isFilterFavorites={isFavoriteFilterEnabled}
                 setIsFilterFavorites={setIsFilterFavorites}
                 disableFavoritesToggle={isLoading}
               />
@@ -215,9 +195,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                     >
                       {shouldAnimateGrid ? (
                         <LiveClientGrid
-                          isFavoriteFilterEnabled={
-                            isLoading ? toggleStateRef.current : isFavoriteFilterEnabled
-                          }
+                          isFavoriteFilterEnabled={isFavoriteFilterEnabled}
                           markets={markets}
                           sortBy={sort}
                           page={page}
