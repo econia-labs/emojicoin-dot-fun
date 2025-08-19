@@ -44,7 +44,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.eq("in_bonding_curve", inBondingCurve);
   }
 
-  return query.returns<DatabaseJsonType["market_state"][]>();
+  return query.overrideTypes<DatabaseJsonType["market_state"][], { merge: false }>();
 };
 
 const selectMarketStates = (args: MarketStateQueryArgs) =>

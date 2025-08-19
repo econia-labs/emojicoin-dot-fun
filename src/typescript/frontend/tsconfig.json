@@ -19,7 +19,7 @@
     "moduleDetection": "force",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "noErrorTruncation": true,
+    "noErrorTruncation": false,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "paths": {

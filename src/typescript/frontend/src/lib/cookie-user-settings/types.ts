@@ -1,25 +1,21 @@
 import { z } from "zod";
 
-import { Schemas } from "@/sdk/index";
-
 // Define Zod schema for settings validation
 export const CookieUserSettingsSchema = z.object({
   homePageFilterFavorites: z.boolean().optional(),
   version: z.number().int().positive(),
-  accountAddress: Schemas.AccountAddress.optional().nullable(),
 });
 
 export type UserSettingsWithVersion = z.infer<typeof CookieUserSettingsSchema>;
 export type UserSettings = Omit<UserSettingsWithVersion, "version">;
 
 // Constants
-export const COOKIE_USER_SETTINGS_CURRENT_VERSION = 1;
+export const COOKIE_USER_SETTINGS_CURRENT_VERSION = 2;
 export const COOKIE_USER_SETTINGS_NAME = "ec_user_settings";
 export const COOKIE_USER_SETTINGS_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 
 export const COOKIE_USER_SETTINGS_DEFAULT_STATE: UserSettings = {
   homePageFilterFavorites: false,
-  accountAddress: undefined,
 };
 
 export function validateSettings(settings: unknown): UserSettingsWithVersion | null {

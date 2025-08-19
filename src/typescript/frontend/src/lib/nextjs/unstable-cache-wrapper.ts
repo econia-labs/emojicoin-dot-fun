@@ -3,6 +3,7 @@
 import "server-only";
 
 import type { Redis } from "@upstash/redis";
+import { APTOS_NETWORK } from "lib/env";
 import { CACHE_LOCK_RELEASE, IS_NEXT_BUILD_PHASE } from "lib/server-env";
 import { unstable_cache } from "next/cache";
 
@@ -224,6 +225,8 @@ function prettifyFunctionCall(uniqueKey: string, ...args: any[]) {
   return `${uniqueKey}(${argsWithoutParens})`;
 }
 
+const BUILD_PREFIX = process.env.BUILD_PREFIX || "";
+
 /**
  * Creates a proxy object for a function and updates the proxy's `.toString()` and `.name` fields to
  * return the passed in cache key instead.
@@ -243,8 +246,8 @@ function prettifyFunctionCall(uniqueKey: string, ...args: any[]) {
 function createStabilizedProxy<T extends Callback>(cb: T, uniqueKey: string): T {
   return new Proxy(cb, {
     get(target, prop, receiver) {
-      if (prop === "toString") return () => `${uniqueKey}${process.env.BUILD_PREFIX || ""}`;
-      if (prop === "name") return `${uniqueKey}${process.env.BUILD_PREFIX || ""}`;
+      if (prop === "toString") return () => `${BUILD_PREFIX}${uniqueKey}__${APTOS_NETWORK}`;
+      if (prop === "name") return `${BUILD_PREFIX}${uniqueKey}__${APTOS_NETWORK}`;
       return Reflect.get(target, prop, receiver);
     },
   });

@@ -7,6 +7,8 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
 import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-client";
+import { useFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
+import { useSearchEmojisMarkets } from "lib/hooks/queries/use-search-emojis";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
@@ -20,8 +22,6 @@ import { Emoji } from "utils/emoji";
 import { Separator } from "@/components/Separator";
 import useEvent from "@/hooks/use-event";
 import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
-import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
-import { MAX_NUM_FAVORITES } from "@/sdk/index";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
@@ -36,49 +36,56 @@ interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {
-  const router = useRouter();
+  const {
+    favoritesQuery: { data: { markets: favoriteMarkets = [] } = {} },
+  } = useFavoriteMarkets();
 
-  const { markets, page, sort, pages, searchBytes } = useMemo(() => {
-    const { markets, page, sortBy: sort } = props;
+  const isFavoriteFilterEnabled = useMemo(() => {
+    const favoritesInCookies = !!clientCookies.getSetting("homePageFilterFavorites");
+    return favoritesInCookies && !!favoriteMarkets?.length;
+  }, [favoriteMarkets?.length]);
+
+  const router = useRouter();
+  const emojis = useEmojiPicker((s) => s.emojis);
+
+  const marketsSearched = useSearchEmojisMarkets({
+    emojis,
+    page: props.page,
+    sortBy: props.sortBy,
+    isFavoriteFilterEnabled,
+  });
+
+  const { markets, page, sort, pages } = useMemo(() => {
+    const { page, sortBy: sort } = props;
     const numMarkets = Math.max(props.numMarkets, 1);
-    const pages = props.isFavoriteFilterEnabled
-      ? getMaxPageNumber(MAX_NUM_FAVORITES, MARKETS_PER_PAGE)
-      : getMaxPageNumber(numMarkets, MARKETS_PER_PAGE);
-    const searchBytes = props.searchBytes ?? "";
-    return { markets, page, sort, pages, searchBytes };
-  }, [props]);
+    const [markets, pages] = marketsSearched.length
+      ? [marketsSearched, getMaxPageNumber(marketsSearched.length, MARKETS_PER_PAGE)]
+      : isFavoriteFilterEnabled && favoriteMarkets
+        ? [Array.from(favoriteMarkets), 1]
+        : [props.markets, getMaxPageNumber(numMarkets, MARKETS_PER_PAGE)];
+    return { markets, page, sort, pages };
+  }, [props, isFavoriteFilterEnabled, favoriteMarkets, marketsSearched]);
 
   const { md } = useTailwindBreakpoints();
 
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
-  const setEmojis = useEmojiPicker((s) => s.setEmojis);
-  const emojis = useEmojiPicker((s) => s.emojis);
 
   // Use the prop value by default, but instantly set the new state
   // on the beginning of the transition when the toggle is switched.
   // This ref tracks the *optimistic* toggle value; that is, the value
   // that is expected but not asynchronously confirmed with cookies yet.
   const [isLoading, startTransition] = useTransition();
-  const toggleStateRef = useRef(props.isFavoriteFilterEnabled);
+  const toggleStateRef = useRef(isFavoriteFilterEnabled);
 
   useEffect(() => {
     loadMarketStateFromServer(markets);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [markets]);
 
-  useEffect(() => {
-    const decoded = symbolBytesToEmojis(searchBytes ?? "");
-    if (decoded.emojis.length > 0) {
-      setEmojis(decoded.emojis.map((e) => e.emoji));
-    }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [searchBytes]);
-
-  const pushURL = useEvent((args?: { page?: number; sort?: SortMarketsBy; emojis?: string[] }) => {
+  const pushURL = useEvent((args?: { page?: number; sort?: SortMarketsBy }) => {
     const newURL = constructURLForHomePage({
       page: args?.page ?? page,
       sort: args?.sort ?? sort,
-      searchBytes: encodeEmojis(args?.emojis ?? emojis),
     });
 
     router.push(newURL.toString(), { scroll: false });
@@ -93,16 +100,11 @@ const EmojiTable = (props: EmojiTableProps) => {
     pushURL({ sort: newPage });
   };
 
-  useEffect(() => {
-    pushURL({ page: 0 });
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [emojis]);
-
   const animationsOn = useUserSettings((s) => s.animate);
 
   const shouldAnimateGrid = useMemo(
-    () => animationsOn && sort === SortMarketsBy.BumpOrder && page === 1 && !searchBytes,
-    [sort, page, searchBytes, animationsOn]
+    () => animationsOn && sort === SortMarketsBy.BumpOrder && page === 1 && !emojis.length,
+    [sort, page, emojis, animationsOn]
   );
 
   const rowLength = useGridRowLength();
@@ -175,9 +177,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
-                isFilterFavorites={
-                  isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
-                }
+                isFilterFavorites={isLoading ? toggleStateRef.current : isFavoriteFilterEnabled}
                 setIsFilterFavorites={setIsFilterFavorites}
                 disableFavoritesToggle={isLoading}
               />
@@ -216,7 +216,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                       {shouldAnimateGrid ? (
                         <LiveClientGrid
                           isFavoriteFilterEnabled={
-                            isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
+                            isLoading ? toggleStateRef.current : isFavoriteFilterEnabled
                           }
                           markets={markets}
                           sortBy={sort}

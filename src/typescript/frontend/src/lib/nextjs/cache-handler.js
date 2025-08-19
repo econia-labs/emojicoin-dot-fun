@@ -2,6 +2,7 @@ const {
   default: FileSystemCache,
 } = require("next/dist/server/lib/incremental-cache/file-system-cache");
 const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
+const { default: FetchCache } = require("next/dist/server/lib/incremental-cache/fetch-cache");
 
 /**
  * In case all other attempts to instantiate a cache handler fail, just pass no-ops.
@@ -33,7 +34,7 @@ class CustomCacheHandler {
    * @param {CacheHandlerArgs & ExtraOpts} ctx
    */
   constructor({ fs, serverDistDir, canUseFileSystemCache, shouldUseFetchCache, ...rest }) {
-    if (canUseFileSystemCache === undefined || shouldUseFetchCache === undefined) {
+    if (canUseFileSystemCache === undefined && shouldUseFetchCache === undefined) {
       console.warn("WARNING: nextjs package wasn't properly patched to pass cache discriminators.");
       console.warn(
         "Keys included: ",
@@ -48,15 +49,14 @@ class CustomCacheHandler {
     };
 
     if (shouldUseFetchCache) {
-      debug("Using patched fetch cache.");
       return new PatchedFetchCache(rest);
-    }
+   o }
     if (canUseFileSystemCache && fs && serverDistDir) {
-      debug("Using patched file system cache.");
       return new PatchedFileSystemCache({
         fs,
         serverDistDir,
         ...rest,
+        flushToDisk: true,
       });
     }
 
