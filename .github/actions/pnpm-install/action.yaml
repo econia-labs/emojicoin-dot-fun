@@ -24,7 +24,7 @@ runs:
     with:
       cache: 'pnpm'
       cache-dependency-path: '${{ steps.set-path.outputs.path }}/pnpm-lock.yaml'
-      node-version-file: '${{ steps.set-path.outputs.path }}/package.json'
+      node-version: '22.x'
   - name: 'Install dependencies'
     run: 'pnpm install'
     shell: 'bash'
