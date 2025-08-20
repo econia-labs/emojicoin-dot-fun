@@ -4,11 +4,10 @@ import "server-only";
 
 import type { Redis } from "@upstash/redis";
 import { APTOS_NETWORK } from "lib/env";
-import { CACHE_LOCK_RELEASE, IS_NEXT_BUILD_PHASE } from "lib/server-env";
+import { CACHE_LOCK_RELEASE } from "lib/server-env";
 import { unstable_cache } from "next/cache";
 
 import { sleep } from "@/sdk/index";
-import type { JsonValue } from "@/sdk/types/json-types";
 import { logCacheDebug } from "@/sdk/utils/log-cache-debug";
 
 import { generateUUID } from "./cache-handlers";
@@ -23,16 +22,6 @@ type Callback = (...args: any[]) => Promise<any>;
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 (globalThis as any).__logCacheDebug = logCacheDebug;
 
-/**
- * BUILD TIME DEDUPING:
- * Since `unstable_cache` nor the fetch deduping efforts properly work at build time when used in
- * the prerender for `generateStaticParams`, it's necessary to memoize the value of fetch results
- * manually to avoid making repeated queries/fetches.
- *
- * With 2,000+ markets in production, this function removes thousands of extra queries at build time
- * when running pre-rendered pages from `generateStaticParams`.
- */
-const buildCache = IS_NEXT_BUILD_PHASE ? new Map<string, Promise<JsonValue>>() : undefined;
 const MIN_KEY_LENGTH = 8;
 
 /**
@@ -77,25 +66,7 @@ export function unstableCacheWrapper<T extends Callback>(
     );
   }
 
-  const finalStableCb = stabilizedWithExplicitTags(cb, uniqueEntryLabel, options);
-
-  // At runtime just return the `unstable_cache` function with stabilized key generation.
-  if (!buildCache) return finalStableCb as T;
-
-  // Otherwise, dedupe the build-time fetch with a cache key by unrolling the inner cache key
-  // generation logic and storing the `unstable_cache` invocation in a lazy promise map.
-  // This deduplicates ~80% of fetches when the CDN caching mechanism isn't available.
-  const memoizedBuildFetch = async (...args: any[]) => {
-    const keyParts = createKeyParts(uniqueEntryLabel);
-    const cacheKey = unstableCacheKeyGenerator(finalStableCb, keyParts)(...args);
-    if (!buildCache.has(cacheKey)) {
-      const promise = finalStableCb(...args);
-      buildCache.set(cacheKey, promise);
-    }
-    const res = await buildCache.get(cacheKey);
-    return res as ReturnType<T>;
-  };
-  return memoizedBuildFetch as unknown as T;
+  return stabilizedWithExplicitTags(cb, uniqueEntryLabel, options) as T;
 }
 
 /**
@@ -243,7 +214,7 @@ const BUILD_PREFIX = process.env.BUILD_PREFIX || "";
  *
  * This fixes the issue of non-deterministic keys generated for the `unstable_cache` function.
  */
-function createStabilizedProxy<T extends Callback>(cb: T, uniqueKey: string): T {
+export function createStabilizedProxy<T extends Callback>(cb: T, uniqueKey: string): T {
   return new Proxy(cb, {
     get(target, prop, receiver) {
       if (prop === "toString") return () => `${BUILD_PREFIX}${uniqueKey}__${APTOS_NETWORK}`;

@@ -25,6 +25,8 @@ const expanded = expandRoutes({
     pools: _,
     search: _,
     stats: _,
+    /** Has a market address slug: `/top-holders/[address]` */
+    "top-holders": _,
     trades: _,
     trending: _,
   },

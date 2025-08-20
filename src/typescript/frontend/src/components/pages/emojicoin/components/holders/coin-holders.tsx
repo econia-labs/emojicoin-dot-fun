@@ -3,7 +3,7 @@ import { EcTable, type EcTableColumn } from "components/ui/table/ecTable";
 import { AptCell } from "components/ui/table-cells/apt-cell";
 import { WalletAddressCell } from "components/ui/table-cells/wallet-address-cell";
 import { useAptPrice } from "context/AptPrice";
-import type { AssetBalance } from "lib/queries/aptos-indexer/fetch-emojicoin-balances";
+import { useTopHolders } from "lib/hooks/queries/use-top-holders";
 import { useRouter } from "next/navigation";
 import { type FC, useMemo } from "react";
 import { ROUTES } from "router/routes";
@@ -14,15 +14,17 @@ import { toNominal, toNominalPrice } from "@/sdk/utils";
 
 interface Props {
   emojicoin: string;
-  holders: AssetBalance[];
   state: MarketStateModel["state"];
   lastSwap: MarketStateModel["lastSwap"];
+  marketAddress: `0x${string}`;
 }
 
-export const CoinHolders: FC<Props> = ({ emojicoin, holders, state, lastSwap }) => {
+export const CoinHolders: FC<Props> = ({ emojicoin, state, lastSwap, marketAddress }) => {
   const aptPrice = useAptPrice();
   const maxSupply = useMemo(() => toNominal(calculateCirculatingSupply(state)), [state]);
   const router = useRouter();
+
+  const { isLoading, data: holders } = useTopHolders(marketAddress);
 
   const holdersWithRank = useMemo(
     () =>
@@ -92,6 +94,7 @@ export const CoinHolders: FC<Props> = ({ emojicoin, holders, state, lastSwap }) 
       columns={columns}
       getKey={(item) => item.owner_address}
       items={holdersWithRank}
+      isLoading={isLoading}
     />
   );
 };

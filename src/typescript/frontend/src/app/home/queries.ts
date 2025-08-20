@@ -1,4 +1,5 @@
 import { fetchCachedMeleeData } from "app/arena/fetch-melee-data";
+import { getSharedBuildTimeData } from "app/market/cached-fetches";
 import FEATURE_FLAGS from "lib/feature-flags";
 import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
@@ -11,14 +12,14 @@ import { safeParsePageWithDefault } from "lib/routes/home-page-params";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 
 import { fetchMarketsJson } from "@/queries/home";
-import type { MarketStateModel, MarketStateQueryArgs } from "@/sdk/index";
+import type { DatabaseJsonType, MarketStateModel, MarketStateQueryArgs } from "@/sdk/index";
 import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
-import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
+import { toPriceFeed } from "@/sdk/indexer-v2/types";
 
 /**
  * Restrict the cacheable function to the query params that are desirable for caching responses for.
  */
-const cacheableMarketStateQuery = ({
+export const cacheableMarketStateQuery = ({
   page,
   sortBy,
 }: Pick<MarketStateQueryArgs, "page" | "sortBy">) =>
@@ -39,20 +40,30 @@ export async function fetchHomePageData(args: { sort: string; page: string }) {
 
   if (page < 1) return { notFound: true } as const;
 
-  const numMarketsPromise = fetchCachedNumRegisteredMarkets().then((n) => ({
-    numMarkets: n,
-    isValid: page <= getMaxPageNumber(n, MARKETS_PER_PAGE),
-  }));
+  const {
+    numMarkets: maybeNumMarkets,
+    aptPrice: maybeAptPrice,
+    priceFeed: maybePriceFeed,
+  } = (await getSharedBuildTimeData()) ?? {};
+
+  const numMarketsPromise = maybeNumMarkets
+    ? Promise.resolve({ numMarkets: maybeNumMarkets, isValid: true })
+    : fetchCachedNumRegisteredMarkets().then((n) => ({
+        numMarkets: n,
+        isValid: page <= getMaxPageNumber(n, MARKETS_PER_PAGE),
+      }));
   const isValid = page === 1 || (await numMarketsPromise).isValid;
   if (!isValid) return { notFound: true } as const;
 
-  const priceFeedPromise = fetchCachedHomePagePriceFeed()
+  const priceFeedPromise = (
+    maybePriceFeed ? Promise.resolve(maybePriceFeed) : fetchCachedHomePagePriceFeed()
+  )
     .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
-      return [] as DatabaseModels["price_feed"][];
+      return [] as DatabaseJsonType["price_feed"][];
     });
-  const aptPricePromise = fetchCachedAptPrice();
+  const aptPricePromise = maybeAptPrice ? Promise.resolve(maybeAptPrice) : fetchCachedAptPrice();
   const meleeDataPromise = FEATURE_FLAGS.Arena
     ? fetchCachedMeleeData()
         .then((res) => (res.arenaInfo ? res : null))

@@ -324,7 +324,6 @@ class PatchedFileSystemCache extends FileSystemCache {
   /**
    * Poll the filesystem cache until fresh (or acceptable stale) data is available.
    *
-   * @template T
    * @param {{
    *   cacheKey: string,
    *   uuid: string,
@@ -355,9 +354,6 @@ class PatchedFileSystemCache extends FileSystemCache {
         value: JSON.parse(fileData),
       };
       const ctx = this.internalHandler.contextMap.get(uuid) ?? {};
-      if (!ctx) {
-        console.warn(`Missing ctx for uuid: ${uuid}`);
-      }
       const revalidate = ctx?.revalidate || cacheData.value.revalidate;
       const age = (Date.now() - (cacheData.lastModified || 0)) / 1000;
 

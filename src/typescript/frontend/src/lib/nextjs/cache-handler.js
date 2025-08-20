@@ -2,17 +2,6 @@ const {
   default: FileSystemCache,
 } = require("next/dist/server/lib/incremental-cache/file-system-cache");
 const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
-const { default: FetchCache } = require("next/dist/server/lib/incremental-cache/fetch-cache");
-
-/**
- * In case all other attempts to instantiate a cache handler fail, just pass no-ops.
- */
-const NoOpCacheHandler = {
-  get: async () => undefined,
-  set: async () => {},
-  resetRequestCache: () => {},
-  revalidateTags: async () => {},
-};
 
 /**
  * This is a constructor-based factory that intercepts the constructor at runtime to return
@@ -77,7 +66,6 @@ class CustomCacheHandler {
     const flushToDisk = rest.flushToDisk || (fs && serverDistDir);
     console.warn(`Using the basic file system cache with flushToDisk: ${flushToDisk}`);
     return new FileSystemCache({ ...rest, flushToDisk });
-    return NoOpCacheHandler;
   }
 }
 
