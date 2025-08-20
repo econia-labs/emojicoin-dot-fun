@@ -1,9 +1,5 @@
 {
-  "dependencies": {
-    "@types/node": "^20.17.30"
-  },
   "devDependencies": {
-    "@types/node": "^20.14.1",
     "dotenv-cli": "^7.4.4",
     "prettier": "^3.5.3",
     "tsx": "^4.19.3",
