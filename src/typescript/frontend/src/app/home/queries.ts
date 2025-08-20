@@ -12,7 +12,7 @@ import { safeParsePageWithDefault } from "lib/routes/home-page-params";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 
 import { fetchMarketsJson } from "@/queries/home";
-import type { DatabaseJsonType, MarketStateModel, MarketStateQueryArgs } from "@/sdk/index";
+import type { DatabaseModels, MarketStateModel, MarketStateQueryArgs } from "@/sdk/index";
 import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
 import { toPriceFeed } from "@/sdk/indexer-v2/types";
 
@@ -61,7 +61,7 @@ export async function fetchHomePageData(args: { sort: string; page: string }) {
     .then((res) => res.map(toPriceFeed))
     .catch((err) => {
       console.error(err);
-      return [] as DatabaseJsonType["price_feed"][];
+      return [] as DatabaseModels["price_feed"][];
     });
   const aptPricePromise = maybeAptPrice ? Promise.resolve(maybeAptPrice) : fetchCachedAptPrice();
   const meleeDataPromise = FEATURE_FLAGS.Arena

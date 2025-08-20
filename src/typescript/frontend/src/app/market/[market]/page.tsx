@@ -11,8 +11,8 @@ import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
 
 import {
-  fetchSharedBuildTimeData,
   fetchCachedMarketState,
+  fetchSharedBuildTimeData,
   getSharedBuildTimeData,
 } from "../cached-fetches";
 import EmojiNotFoundPage from "./not-found";
