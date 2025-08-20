@@ -79,7 +79,6 @@
     "next-env.d.ts",
     "./src/**/*.ts",
     "./src/**/*.tsx",
-    ".next/types/**/*.ts",
-    "./dist/types/**/*.ts"
+    ".next/types/**/*.ts"
   ]
 }
