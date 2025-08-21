@@ -17,6 +17,7 @@ const debugConfigOptions = {
   experimental: {
     serverMinification: false,
     serverSourceMaps: true,
+    isrFlushToDisk: true,
   },
 };
 

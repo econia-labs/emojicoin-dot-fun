@@ -5,6 +5,8 @@ import generateMetadataHelper from "lib/utils/generate-metadata-helper";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
 
+import { maybeGetArenaPagePrebuildData } from "./prebuild-data";
+
 export const revalidate = 2;
 export const dynamic = "force-static";
 
@@ -17,7 +19,7 @@ export default async function Arena() {
   if (!FEATURE_FLAGS.Arena) redirect(ROUTES.home);
 
   const { arenaInfo, market0, market1, rewardsRemaining, market0Delta, market1Delta } =
-    await fetchCachedMeleeData();
+    maybeGetArenaPagePrebuildData() ?? (await fetchCachedMeleeData());
 
   if (!arenaInfo || !market0 || !market1 || rewardsRemaining === null) redirect(ROUTES.home);
 

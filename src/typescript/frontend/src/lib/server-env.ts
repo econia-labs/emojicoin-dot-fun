@@ -4,8 +4,11 @@ import "server-only";
 import { Redis } from "@upstash/redis";
 import {
   PHASE_DEVELOPMENT_SERVER,
+  PHASE_EXPORT,
+  PHASE_INFO,
   PHASE_PRODUCTION_BUILD,
   PHASE_PRODUCTION_SERVER,
+  PHASE_TEST,
 } from "next/dist/shared/lib/constants";
 
 import { EMOJICOIN_INDEXER_URL } from "@/sdk/server/env";
@@ -73,9 +76,12 @@ export const RATE_LIMITER = (() => {
 })();
 
 const PHASES = [
-  PHASE_DEVELOPMENT_SERVER,
+  PHASE_EXPORT,
   PHASE_PRODUCTION_BUILD,
   PHASE_PRODUCTION_SERVER,
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_TEST,
+  PHASE_INFO,
   "",
 ] as const;
 

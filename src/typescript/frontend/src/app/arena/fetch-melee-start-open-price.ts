@@ -15,16 +15,16 @@ const fetchExchangeRateAtVersion = (marketAddress: AccountAddressString, version
     },
   });
 
-async function fetchExchangeRatesAtMeleeStart({
-  market0Address,
-  market1Address,
-  meleeID,
-}: {
-  market0Address: AccountAddressString;
-  market1Address: AccountAddressString;
-  // Must be a string or the `unstable_cache` serialization fails.
-  meleeID: string;
-}) {
+export type MeleeExchangeRatesJson = {
+  market_0_rate: Awaited<ReturnType<typeof fetchExchangeRateAtVersion>>;
+  market_1_rate: Awaited<ReturnType<typeof fetchExchangeRateAtVersion>>;
+};
+
+export async function fetchExchangeRatesAtMeleeStart({
+  emojicoin_0_market_address: market0Address,
+  emojicoin_1_market_address: market1Address,
+  melee_id: meleeID,
+}: DatabaseJsonType["arena_info"]): Promise<MeleeExchangeRatesJson> {
   // Get the version number of when the melee started.
   const version = await fetchMeleeEventByMeleeIDJson({ meleeID }).then(
     (res) => res?.transaction_version
@@ -48,12 +48,7 @@ async function fetchExchangeRatesAtMeleeStart({
  */
 const createCachedExchangeRatesAtMeleeStartFetcher = (arena_info: DatabaseJsonType["arena_info"]) =>
   unstableCacheWrapper(
-    () =>
-      fetchExchangeRatesAtMeleeStart({
-        market0Address: arena_info.emojicoin_0_market_address,
-        market1Address: arena_info.emojicoin_1_market_address,
-        meleeID: arena_info.melee_id,
-      }),
+    () => fetchExchangeRatesAtMeleeStart(arena_info),
     ["fetch-exchange-rates-at-melee-start"],
     {
       // `unstable_cache` doesn't cache error responses, so just specify to cache this forever.

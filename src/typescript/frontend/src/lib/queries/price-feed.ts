@@ -7,7 +7,7 @@ import { SortMarketsBy } from "@/sdk/indexer-v2/types";
 // Note all the values below are for the price feed on the home page.
 export const NUM_MARKETS_ON_PRICE_FEED = 25;
 
-const fetchPriceFeed = () =>
+export const fetchHomePagePriceFeed = () =>
   fetchPriceFeedWithMarketState({
     sortBy: SortMarketsBy.DailyVolume,
     orderBy: ORDER_BY.DESC,
@@ -15,7 +15,7 @@ const fetchPriceFeed = () =>
   });
 
 export const fetchCachedHomePagePriceFeed = unstableCacheWrapper(
-  fetchPriceFeed,
+  fetchHomePagePriceFeed,
   ["price-feed-with-market-data-home-page"],
   {
     revalidate: 10,

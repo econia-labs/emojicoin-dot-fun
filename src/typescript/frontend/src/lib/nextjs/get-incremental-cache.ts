@@ -11,13 +11,13 @@ export const getIncrementalCache = () => {
   return maybeIncrementalCache;
 };
 
-export const isPatchedFetchCache = (c: CacheHandler): c is PatchedFetchCache =>
-  c instanceof PatchedFetchCache || c["kind"] === PatchedFetchCache.kind;
+export const isPatchedFetchCache = (c?: CacheHandler): c is PatchedFetchCache =>
+  !!c && (c instanceof PatchedFetchCache || c["kind"] === PatchedFetchCache.kind);
 
-export const isPatchedFileSystemCache = (c: CacheHandler): c is PatchedFileSystemCache =>
-  c instanceof PatchedFileSystemCache || c["kind"] === PatchedFileSystemCache.kind;
+export const isPatchedFileSystemCache = (c?: CacheHandler): c is PatchedFileSystemCache =>
+  !!c && (c instanceof PatchedFileSystemCache || c["kind"] === PatchedFileSystemCache.kind);
 
-export const isPatchedCacheHandler = (c: CacheHandler) =>
+export const isPatchedCacheHandler = (c?: CacheHandler) =>
   isPatchedFetchCache(c) || isPatchedFileSystemCache(c);
 
 export const getCacheHandler = () => {

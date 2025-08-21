@@ -74,3 +74,10 @@ export type Nominal<T, B> = T & Brand<B>;
  * @see {@link https://typescript-eslint.io/rules/no-empty-object-type}
  */
 export type EmptyObject = Record<string, never>;
+
+/**
+ * Require each key to be present but union each key's value type with `null`.
+ */
+export type ExplicitlyNullable<T> = {
+  [K in keyof T]: T[K] | null;
+};
