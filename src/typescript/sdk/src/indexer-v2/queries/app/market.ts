@@ -119,7 +119,7 @@ const selectMarketState = ({ searchEmojis }: { searchEmojis: SymbolEmoji[] }) =>
     .select("*")
     .eq("symbol_emojis", toQueryArray(searchEmojis))
     .limit(1)
-    .single<DatabaseJsonType["market_state"]>();
+    .maybeSingle<DatabaseJsonType["market_state"]>();
 
 const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =>
   postgrest
@@ -127,7 +127,7 @@ const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =
     .select("*")
     .eq("market_id", marketID)
     .limit(1)
-    .single();
+    .maybeSingle<DatabaseJsonType["market_registration_events"]>();
 
 export const fetchSwapEvents = queryHelper(selectSwaps, toSwapEventModel);
 export const countSenderSwapEvents = async (sender: string): Promise<number> => {
