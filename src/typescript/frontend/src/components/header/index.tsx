@@ -7,7 +7,6 @@ import WalletDropdownMenu from "components/wallet/WalletDropdownMenu";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import Link, { type LinkProps } from "next/link";
-import { useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
 import { ROUTES } from "router/routes";
 
@@ -24,7 +23,6 @@ import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton
 
 const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
   const { t } = translationFunction();
-  const searchParams = useSearchParams();
   const clear = useEmojiPicker((s) => s.clear);
 
   const [offsetHeight, setOffsetHeight] = useState(0);
@@ -39,22 +37,17 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
     setIsOpen(false);
   }, [setIsOpen]);
 
-  // When the user clicks the home page button, they probably expect the sort to be the same as it was before
-  // they clicked. We reset the search bytes and the page here to nothing, which will resolve to their defaults.
   const linkProps: LinkProps = useMemo(() => {
-    const sortParam = searchParams.get("sort");
-    const query = sortParam ? { sort: sortParam } : {};
     return {
       href: {
         pathname: ROUTES.home,
-        query,
       },
       onClick: () => {
         handleCloseMobileMenu();
         clear();
       },
     };
-  }, [searchParams, handleCloseMobileMenu, clear]);
+  }, [handleCloseMobileMenu, clear]);
 
   return (
     <StyledContainer ref={headerRef}>

@@ -156,7 +156,7 @@ export const LiveClientGrid = ({
       {ordered.map((v, i) => {
         return (
           <TableCard
-            key={`live-${v.marketID}-${v.searchEmojisKey}`}
+            key={`live-${v.marketID}`}
             index={(page - 1) * MARKETS_PER_PAGE + i}
             pageOffset={0} // We don't paginate the live grid.
             marketID={v.marketID}

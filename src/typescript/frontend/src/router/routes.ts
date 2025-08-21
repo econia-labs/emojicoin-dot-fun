@@ -20,9 +20,13 @@ const expanded = expandRoutes({
       events: _,
       "latest-block": _,
     },
+    favorites: _,
     "latest-candlesticks": _,
     pools: _,
+    search: _,
     stats: _,
+    /** Has a market address slug: `/top-holders/[address]` */
+    "top-holders": _,
     trades: _,
     trending: _,
   },

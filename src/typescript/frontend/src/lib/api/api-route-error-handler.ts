@@ -4,12 +4,14 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
-type RequestHandler = (req: NextRequest) => Promise<NextResponse>;
+type RouteCtx<P extends object = {}> = { params: P };
 
-export function apiRouteErrorHandler(handler: RequestHandler) {
-  return async function (req: NextRequest) {
+export function apiRouteErrorHandler<P extends object = {}>(
+  handler: (req: NextRequest, ctx: RouteCtx<P>) => Promise<Response> | Response
+) {
+  return async function (req: NextRequest, ctx: RouteCtx<P>) {
     try {
-      return await handler(req);
+      return await handler(req, ctx);
     } catch (error) {
       // Validation error.
       if (error instanceof ZodError) {

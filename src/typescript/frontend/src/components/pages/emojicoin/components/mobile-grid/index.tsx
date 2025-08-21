@@ -66,9 +66,9 @@ const tabs = [
     component: (props: GridProps) => (
       <CoinHolders
         emojicoin={props.data.symbol}
-        holders={props.data.holders}
         state={props.data.state.state}
         lastSwap={props.data.state.lastSwap}
+        marketAddress={props.data.marketAddress}
       />
     ),
   },

@@ -1,0 +1,14 @@
+{
+  "exclude": [
+    "../node_modules"
+  ],
+  "extends": "../tsconfig.json",
+  "include": [
+    "./**/*.ts"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "jsx": "preserve"
+    }
+  }
+}

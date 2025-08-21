@@ -15,11 +15,9 @@ export interface HomePageProps {
   numMarkets: number;
   page: number;
   sortBy: MarketDataSortByHomePage;
-  searchBytes?: string;
   children?: React.ReactNode;
   priceFeed: DatabaseModels["price_feed"][];
   meleeData: ArenaProps | null;
-  isFavoriteFilterEnabled: boolean;
 }
 
 export default async function HomePageComponent({
@@ -27,11 +25,9 @@ export default async function HomePageComponent({
   numMarkets,
   page,
   sortBy,
-  searchBytes,
   children,
   priceFeed,
   meleeData,
-  isFavoriteFilterEnabled,
 }: HomePageProps) {
   return (
     <div className="relative">
@@ -48,14 +44,7 @@ export default async function HomePageComponent({
         <TextCarousel />
       </div>
 
-      <EmojiTable
-        isFavoriteFilterEnabled={isFavoriteFilterEnabled}
-        markets={markets}
-        numMarkets={numMarkets}
-        page={page}
-        sortBy={sortBy}
-        searchBytes={searchBytes}
-      />
+      <EmojiTable markets={markets} numMarkets={numMarkets} page={page} sortBy={sortBy} />
       <SubscribeToHomePageEvents info={meleeData?.arenaInfo} />
     </div>
   );

@@ -4,16 +4,6 @@ const {
 const { PatchedFetchCache, PatchedFileSystemCache } = require("./cache-handlers");
 
 /**
- * In case all other attempts to instantiate a cache handler fail, just pass no-ops.
- */
-const NoOpCacheHandler = {
-  get: async () => undefined,
-  set: async () => {},
-  resetRequestCache: () => {},
-  revalidateTags: async () => {},
-};
-
-/**
  * This is a constructor-based factory that intercepts the constructor at runtime to return
  * either a FileSystemCache or a FetchCache. It's necessary because `nextjs` expects this module
  * specifically only return a default export in shape of a CacheHandler constructor; that is, it
@@ -33,7 +23,7 @@ class CustomCacheHandler {
    * @param {CacheHandlerArgs & ExtraOpts} ctx
    */
   constructor({ fs, serverDistDir, canUseFileSystemCache, shouldUseFetchCache, ...rest }) {
-    if (canUseFileSystemCache === undefined || shouldUseFetchCache === undefined) {
+    if (canUseFileSystemCache === undefined && shouldUseFetchCache === undefined) {
       console.warn("WARNING: nextjs package wasn't properly patched to pass cache discriminators.");
       console.warn(
         "Keys included: ",
@@ -48,15 +38,15 @@ class CustomCacheHandler {
     };
 
     if (shouldUseFetchCache) {
-      debug("Using patched fetch cache.");
       return new PatchedFetchCache(rest);
+      o;
     }
     if (canUseFileSystemCache && fs && serverDistDir) {
-      debug("Using patched file system cache.");
       return new PatchedFileSystemCache({
         fs,
         serverDistDir,
         ...rest,
+        flushToDisk: true,
       });
     }
 
@@ -76,7 +66,6 @@ class CustomCacheHandler {
     const flushToDisk = rest.flushToDisk || (fs && serverDistDir);
     console.warn(`Using the basic file system cache with flushToDisk: ${flushToDisk}`);
     return new FileSystemCache({ ...rest, flushToDisk });
-    return NoOpCacheHandler;
   }
 }
 

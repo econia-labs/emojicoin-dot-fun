@@ -12,3 +12,13 @@ export const fetchCachedArenaInfo = unstableCacheWrapper(
     tags: ["current-arena-info"],
   }
 );
+
+// Should have the same cache entry as above, just not revalidated as often.
+export const fetchLongerCachedArenaInfo = unstableCacheWrapper(
+  fetchArenaInfoJson,
+  ["current-arena-info"],
+  {
+    revalidate: 10,
+    tags: ["current-arena-info"],
+  }
+);

@@ -37,7 +37,34 @@ const rateLimiters = (() => {
 })();
 
 export default async function middleware(request: NextRequest) {
-  const pathname = new URL(request.url).pathname;
+  const url = new URL(request.url);
+  const { pathname } = url;
+
+  if (pathname.startsWith(ROUTES["home"])) {
+    const segments = pathname.split("/").filter(Boolean);
+    // Split the path up, remove the empty segment at the beginning with the filter.
+    const sort = segments.at(1) ?? "bump";
+    const page = segments.at(2) ?? "1";
+    if (pathname === ROUTES.home) return NextResponse.next();
+    if (sort === "bump" && page === "1") {
+      return NextResponse.redirect(new URL(`${ROUTES.home}`, request.url));
+    }
+
+    const validSorts = ["bump", "all_time_vol", "daily_vol", "market_cap"];
+    const isValidSort = validSorts.includes(sort);
+    const isValidPage = /^\d+$/.test(page) && parseInt(page) >= 1;
+
+    if (isValidSort && isValidPage && segments.length === 3) {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(
+      new URL(
+        `${ROUTES.home}/${isValidSort ? sort : "bump"}/${isValidPage ? page : "1"}`,
+        request.url
+      )
+    );
+  }
+
   if (pathname === ROUTES["launching-soon"]) {
     return NextResponse.next();
   }

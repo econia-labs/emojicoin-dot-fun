@@ -1,0 +1,17 @@
+diff --git a/index.js b/index.js
+index e480b5cf2285aae782298399c110d5a2bf816deb..a5d89e9a92f68cba6392651abf2f3b0c99de1f9f 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,8 @@
+-throw new Error(
+-  "This module cannot be imported from a Client Component module. " +
+-    "It should only be used from a Server Component."
+-);
++if (process.env.INTERNAL_SKIP_SERVER_ONLY_CHECKS) {
++  // Do nothing.
++} else {
++  throw new Error(
++    "This module cannot be imported from a Client Component module. " +
++      "It should only be used from a Server Component."
++  );
++}

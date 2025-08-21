@@ -3,6 +3,9 @@ import type { Period } from "../../const";
 import type { AnyNumberString } from "../../types";
 import type { OrderBy } from "../const";
 
+/**
+ * The slug or search params based sorting values, not yet converted to the indexer query params.
+ */
 export enum SortMarketsBy {
   MarketCap = "market_cap",
   BumpOrder = "bump",

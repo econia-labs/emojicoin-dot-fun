@@ -57,7 +57,8 @@ describe("queries a market by market state", () => {
     (stateFromMiniProcessor as MarketStateModel).transaction.insertedAt =
       stateFromIndexerProcessor.transaction.insertedAt;
 
-    const replacer = (_: string, v: JsonValue) => (typeof v === "bigint" ? v.toString() : v);
+    const replacer = (_: string, v: JsonValue | bigint) =>
+      typeof v === "bigint" ? v.toString() : v;
     const res1 = JSON.stringify(stateFromMiniProcessor, replacer);
     const res2 = JSON.stringify(stateFromIndexerProcessor, replacer);
     expect(res1).toEqual(res2);

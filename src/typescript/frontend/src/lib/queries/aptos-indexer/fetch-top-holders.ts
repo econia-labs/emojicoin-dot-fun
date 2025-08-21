@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
@@ -24,7 +24,7 @@ export async function fetchTopHoldersInternal(marketAddress: `0x${string}`) {
  * The cached version of {@link fetchTopHoldersInternal}.
  */
 export const fetchCachedTopHolders = unstableCacheWrapper(
-  (_addr: `0x${string}`) => Promise.resolve([]), //fetchTopHoldersInternal,
+  fetchTopHoldersInternal,
   ["fetch-top-holders"],
   {
     revalidate: 60,

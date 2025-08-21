@@ -6,22 +6,21 @@ import Text from "components/text";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { AnimatePresence, motion } from "framer-motion";
-import { clientCookies } from "lib/cookie-user-settings/cookie-user-settings-client";
+import { useFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
+import { useSearchEmojisMarkets } from "lib/hooks/queries/use-search-emojis";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useTransition } from "react";
+import { useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
 import { Separator } from "@/components/Separator";
 import useEvent from "@/hooks/use-event";
 import { useTailwindBreakpoints } from "@/hooks/use-tailwind-breakpoints";
-import { encodeEmojis, symbolBytesToEmojis } from "@/sdk/emoji_data";
-import { MAX_NUM_FAVORITES } from "@/sdk/index";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
@@ -36,49 +35,57 @@ interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed" | "meleeData"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {
-  const router = useRouter();
+  const {
+    favoritesQuery: { data: { markets: favoriteMarkets = [] } = {}, isLoading },
+  } = useFavoriteMarkets();
 
-  const { markets, page, sort, pages, searchBytes } = useMemo(() => {
-    const { markets, page, sortBy: sort } = props;
+  const favoritesSetting = useUserSettings((s) => s.favorites);
+  const setIsFilterFavorites = useUserSettings((s) => s.setFavorites);
+
+  const isFavoriteFilterEnabled = useMemo(() => {
+    return favoritesSetting && !!favoriteMarkets?.length;
+  }, [favoritesSetting, favoriteMarkets?.length]);
+
+  const router = useRouter();
+  const emojis = useEmojiPicker((s) => s.emojis);
+
+  const marketsSearched = useSearchEmojisMarkets({
+    emojis,
+    page: props.page,
+    sortBy: props.sortBy,
+    isFavoriteFilterEnabled,
+  });
+
+  // NOTE: While there will never be more than 25 favorite markets, the emoji search pagination functionality won't
+  // work past page 1. That is, if there are more than 50 markets from a search result, it will only show 50 and the
+  // user won't be able to change the page. This is a fairly small bug, but fixing it would require storing a separate
+  // page number when searching emojis (as opposed to the /home/[sort]/[page] page number in the URL).
+  const { markets, page, sort, pages } = useMemo(() => {
+    const { sortBy: sort } = props;
+    const hasSearchEmojis = !!emojis.length;
+    const page = isFavoriteFilterEnabled || hasSearchEmojis ? 1 : props.page;
     const numMarkets = Math.max(props.numMarkets, 1);
-    const pages = props.isFavoriteFilterEnabled
-      ? getMaxPageNumber(MAX_NUM_FAVORITES, MARKETS_PER_PAGE)
-      : getMaxPageNumber(numMarkets, MARKETS_PER_PAGE);
-    const searchBytes = props.searchBytes ?? "";
-    return { markets, page, sort, pages, searchBytes };
-  }, [props]);
+    const [markets, pages] = hasSearchEmojis
+      ? [marketsSearched, getMaxPageNumber(marketsSearched.length, MARKETS_PER_PAGE)]
+      : isFavoriteFilterEnabled && favoriteMarkets
+        ? [Array.from(favoriteMarkets), 1]
+        : [props.markets, getMaxPageNumber(numMarkets, MARKETS_PER_PAGE)];
+    return { markets, page, sort, pages };
+  }, [props, emojis, isFavoriteFilterEnabled, favoriteMarkets, marketsSearched]);
 
   const { md } = useTailwindBreakpoints();
 
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
-  const setEmojis = useEmojiPicker((s) => s.setEmojis);
-  const emojis = useEmojiPicker((s) => s.emojis);
-
-  // Use the prop value by default, but instantly set the new state
-  // on the beginning of the transition when the toggle is switched.
-  // This ref tracks the *optimistic* toggle value; that is, the value
-  // that is expected but not asynchronously confirmed with cookies yet.
-  const [isLoading, startTransition] = useTransition();
-  const toggleStateRef = useRef(props.isFavoriteFilterEnabled);
 
   useEffect(() => {
     loadMarketStateFromServer(markets);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [markets]);
 
-  useEffect(() => {
-    const decoded = symbolBytesToEmojis(searchBytes ?? "");
-    if (decoded.emojis.length > 0) {
-      setEmojis(decoded.emojis.map((e) => e.emoji));
-    }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [searchBytes]);
-
-  const pushURL = useEvent((args?: { page?: number; sort?: SortMarketsBy; emojis?: string[] }) => {
+  const pushURL = useEvent((args?: { page?: number; sort?: SortMarketsBy }) => {
     const newURL = constructURLForHomePage({
       page: args?.page ?? page,
       sort: args?.sort ?? sort,
-      searchBytes: encodeEmojis(args?.emojis ?? emojis),
     });
 
     router.push(newURL.toString(), { scroll: false });
@@ -93,16 +100,11 @@ const EmojiTable = (props: EmojiTableProps) => {
     pushURL({ sort: newPage });
   };
 
-  useEffect(() => {
-    pushURL({ page: 0 });
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [emojis]);
-
   const animationsOn = useUserSettings((s) => s.animate);
 
   const shouldAnimateGrid = useMemo(
-    () => animationsOn && sort === SortMarketsBy.BumpOrder && page === 1 && !searchBytes,
-    [sort, page, searchBytes, animationsOn]
+    () => animationsOn && sort === SortMarketsBy.BumpOrder && page === 1 && !emojis.length,
+    [sort, page, emojis, animationsOn]
   );
 
   const rowLength = useGridRowLength();
@@ -111,26 +113,6 @@ const EmojiTable = (props: EmojiTableProps) => {
     const maxPossibleCells = Math.ceil(markets.length / rowLength) * rowLength;
     return maxPossibleCells - markets.length;
   }, [markets.length, rowLength]);
-
-  // Update cookies and refresh the page.
-  const setIsFilterFavorites = (newVal: boolean) => {
-    // Note the usage of the ref here facilitates snappy transitions through the usage of
-    // `startTransition` with `isLoading` and the final/ultimate ref value. This avoids
-    // inadvertently capturing the stale value in a callback and using it; that is,
-    // if a user toggles the switch multiple times, the ref is always immediately set,
-    // and at the end of the transition, the ref is retrieved/used again, rather than
-    // the value originally passed into the function.
-    // This also works visually by using the ref value as the switch/toggle value
-    // when `isLoading` is true.
-    toggleStateRef.current = newVal;
-    startTransition(() => {
-      const curr = toggleStateRef.current;
-      clientCookies.saveSetting("homePageFilterFavorites", curr);
-      // A refresh of sorts. `router.refresh()` will invalidate the RSC cache and we don't really need that since it's
-      // so expensive. Simply push the same URL and the page updates properly.
-      pushURL();
-    });
-  };
 
   return (
     <>
@@ -175,9 +157,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <SortAndAnimate
                 sortMarketsBy={sort ?? SortMarketsBy.MarketCap}
                 onSortChange={handleSortChange}
-                isFilterFavorites={
-                  isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
-                }
+                isFilterFavorites={isFavoriteFilterEnabled}
                 setIsFilterFavorites={setIsFilterFavorites}
                 disableFavoritesToggle={isLoading}
               />
@@ -215,9 +195,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                     >
                       {shouldAnimateGrid ? (
                         <LiveClientGrid
-                          isFavoriteFilterEnabled={
-                            isLoading ? toggleStateRef.current : props.isFavoriteFilterEnabled
-                          }
+                          isFavoriteFilterEnabled={isFavoriteFilterEnabled}
                           markets={markets}
                           sortBy={sort}
                           page={page}
