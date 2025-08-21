@@ -107,7 +107,7 @@
     "build:debug": "BUILD_DEBUG=true pnpm run build --no-lint --no-mangling --debug",
     "build:no-checks": "IGNORE_BUILD_ERRORS=true pnpm run build --no-lint",
     "build:no-ssg": "pnpm run build --experimental-build-mode compile",
-    "check": "tsc -p scripts/tsconfig.json",
+    "check": "tsc",
     "check:ci": "tsc -p tests/tsconfig-ci.json",
     "check:tests": "tsc -p tests/tsconfig.json",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next && rm -rf .shared-build-data",
