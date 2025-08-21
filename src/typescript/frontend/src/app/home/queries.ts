@@ -46,7 +46,7 @@ export type HomePageData =
       notFound: true;
     }
   | {
-      notFound: false;
+      notFound?: undefined;
       data: {
         markets: MarketStateModel[];
         numMarkets: number;
@@ -103,7 +103,6 @@ export async function fetchHomePageData(args: {
   ]);
 
   return {
-    notFound: false,
     data: {
       markets,
       numMarkets,

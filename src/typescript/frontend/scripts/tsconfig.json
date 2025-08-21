@@ -5,10 +5,5 @@
   "extends": "../tsconfig.json",
   "include": [
     "./**/*.ts"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "jsx": "preserve"
-    }
-  }
+  ]
 }

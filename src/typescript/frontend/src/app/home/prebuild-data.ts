@@ -36,7 +36,6 @@ export function maybeGetHomePagePrebuildData(args: {
   }
 
   return {
-    notFound: false,
     data: {
       markets,
       numMarkets: data.num_markets,
