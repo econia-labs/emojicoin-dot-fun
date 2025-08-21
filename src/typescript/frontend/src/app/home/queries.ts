@@ -6,7 +6,7 @@ import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
 import { fetchCachedHomePagePriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import type { SortByPageQueryParams, MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import type { MarketDataSortByHomePage,SortByPageQueryParams } from "lib/queries/sorting/types";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { safeParsePageWithDefault } from "lib/routes/home-page-params";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
