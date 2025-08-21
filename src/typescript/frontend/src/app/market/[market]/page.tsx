@@ -1,20 +1,19 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import ArenaInfoLoader from "context/ArenaInfoLoader";
+import { getPrebuildFileData } from "lib/nextjs/prebuild";
 import { fetchLongerCachedArenaInfo } from "lib/queries/arena-info";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
+import { fetchAllMarkets } from "@/queries/static-params";
 import type { SymbolEmoji, SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import { isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
 
-import {
-  fetchCachedMarketState,
-  fetchSharedBuildTimeData,
-  getSharedBuildTimeData,
-} from "../cached-fetches";
+import { fetchCachedMarketState } from "../cached-fetches";
+import { maybeGetMarketPrebuildData } from "../prebuild-data";
 import EmojiNotFoundPage from "./not-found";
 
 export const revalidate = 10;
@@ -22,12 +21,10 @@ export const dynamic = "force-static";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  // Warm up the cache so all the statically generated market pages get a fresh entry.
-  if (!fetchSharedBuildTimeData) {
-    throw new Error("`fetchCachedAllMarkets` should be available at build time.");
-  }
-  const { marketsBySymbol } = await fetchSharedBuildTimeData();
-  const paths = Object.values(marketsBySymbol)
+  const maybePrebuildData = getPrebuildFileData();
+  const maybeMarketData = maybePrebuildData ? Object.values(maybePrebuildData.markets) : undefined;
+  const markets = maybeMarketData ?? (await fetchAllMarkets());
+  const paths = markets
     .map((mkt) => mkt.symbol_emojis)
     .map((emojis) => emojis.map((emoji) => SYMBOL_EMOJI_DATA.byEmojiStrict(emoji).name))
     .map(emojiNamesToPath)
@@ -95,17 +92,16 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     return <EmojiNotFoundPage />;
   }
 
-  const buildTimePageData = await getSharedBuildTimeData();
+  const marketPrebuildData = maybeGetMarketPrebuildData(emojis);
 
-  const stateJson = buildTimePageData
-    ? buildTimePageData.marketsBySymbol[emojis.join("")]
-    : await fetchCachedMarketState({ searchEmojis: emojis });
+  const stateJson =
+    marketPrebuildData?.stateJson ?? (await fetchCachedMarketState({ searchEmojis: emojis }));
 
   if (stateJson) {
     const state = toMarketStateModel(stateJson);
 
-    const [arenaInfo, aptPrice] = buildTimePageData
-      ? [buildTimePageData.arenaInfo, buildTimePageData.aptPrice]
+    const [arenaInfo, aptPrice] = marketPrebuildData
+      ? [marketPrebuildData.arenaInfo, marketPrebuildData.aptPrice]
       : await Promise.all([
           fetchLongerCachedArenaInfo().catch(() => logAndReturnValue("Arena info", null)),
           fetchCachedAptPrice().catch(() => logAndReturnValue("APT price", undefined)),

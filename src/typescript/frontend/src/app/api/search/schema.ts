@@ -6,8 +6,8 @@ import { Schemas } from "@/sdk/utils";
 
 export const SearchSchema = PaginationSchema.extend({
   sortBy: z.enum([
-    SortMarketsBy.AllTimeVolume,
     SortMarketsBy.BumpOrder,
+    SortMarketsBy.AllTimeVolume,
     SortMarketsBy.DailyVolume,
     SortMarketsBy.MarketCap,
   ]),
