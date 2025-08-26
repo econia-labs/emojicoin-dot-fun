@@ -8,7 +8,7 @@ export interface StatsPageParams {
   params: StatsSchemaInput;
 }
 
-export const revalidate = 10;
+export const revalidate = 30;
 export const dynamic = "force-static";
 export const dynamicParams = true;
 
