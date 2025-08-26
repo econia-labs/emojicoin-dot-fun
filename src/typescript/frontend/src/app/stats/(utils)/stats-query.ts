@@ -6,6 +6,7 @@ import type { DatabaseJsonType } from "@/sdk/index";
 import {
   fetchPriceFeedWithMarketState,
   fetchPriceFeedWithMarketStateAndNulls,
+  toOrderBy,
 } from "@/sdk/indexer-v2";
 
 import type { StatsSchemaOutput } from "./schema";
@@ -21,7 +22,8 @@ import { STATS_MARKETS_PER_PAGE } from "./schema";
  */
 const fetchCachedPaginatedMarketStats = unstableCacheWrapper(
   async (args: StatsSchemaOutput): Promise<DatabaseJsonType["price_feed_with_nulls"][]> => {
-    const { sortBy } = args;
+    const { sort, order } = args;
+    const orderBy = toOrderBy(order);
     const pageSize = STATS_MARKETS_PER_PAGE;
 
     // If sorting by the price delta percentage, simply query the `price_feed` table.
@@ -29,13 +31,13 @@ const fetchCachedPaginatedMarketStats = unstableCacheWrapper(
     // Without using this query specifically here, sorting by price delta would show markets
     // with nulled `delta_percentage` columns first when sorting by the delta percentage DESC,
     // which would be undesirable and cumbersome to deal with.
-    if (sortBy === "delta") {
-      return fetchPriceFeedWithMarketState({ ...args, pageSize });
+    if (sort === "delta") {
+      return fetchPriceFeedWithMarketState({ ...args, sortBy: "delta", orderBy, pageSize });
     }
 
     // Otherwise, return market state data sorted by `sortBy`, but with possibly null fields for
     // the price delta related columns.
-    return fetchPriceFeedWithMarketStateAndNulls({ ...args, sortBy, pageSize });
+    return fetchPriceFeedWithMarketStateAndNulls({ ...args, sortBy: sort, orderBy, pageSize });
   },
   ["paginated-market-stats"],
   {
