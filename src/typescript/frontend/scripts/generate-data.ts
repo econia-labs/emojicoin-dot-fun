@@ -137,11 +137,12 @@ async function staticHomePageData() {
     for (const [pageChunk, i] of enumerate(chunks)) {
       const page = i + 1;
       home_pages[sort][page] = pageChunk;
+
+      // Add each market to a dictionary to avoid duplicate fetches on each market page later.
+      pageChunk.forEach((mkt) => {
+        markets[mkt.symbol_emojis.join("")] = mkt;
+      });
     }
-    // Add each market to a dictionary to avoid duplicate fetches on individual market pages later.
-    allMarkets.forEach((mkt) => {
-      markets[mkt.symbol_emojis.join("")] = mkt;
-    });
   }
 
   return { home_pages, markets };
