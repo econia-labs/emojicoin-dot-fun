@@ -24,7 +24,6 @@ const expanded = expandRoutes({
     "latest-candlesticks": _,
     pools: _,
     search: _,
-    stats: _,
     /** Has a market address slug: `/top-holders/[address]` */
     "top-holders": _,
     trades: _,
