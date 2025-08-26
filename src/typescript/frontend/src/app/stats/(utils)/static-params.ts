@@ -1,4 +1,3 @@
-import type { StatsSchemaInput } from "app/stats/(utils)/schema";
 import { STATS_MARKETS_PER_PAGE, statsSortByValues } from "app/stats/(utils)/schema";
 import { fetchNumRegisteredMarkets } from "lib/queries/num-market";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
@@ -14,13 +13,13 @@ export async function generateStatsPageStaticParams() {
             sort,
             page: `${i + 1}`,
             order: "asc",
-          },
+          } as const,
           {
             sort,
             page: `${i + 1}`,
             order: "desc",
-          },
-        ] as [StatsSchemaInput, StatsSchemaInput]
+          } as const,
+        ]
     )
   );
 }

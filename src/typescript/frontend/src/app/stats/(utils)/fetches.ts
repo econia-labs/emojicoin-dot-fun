@@ -13,19 +13,18 @@ import { TableName } from "@/sdk/indexer-v2/types/json-types";
 
 import type { StatsPageParams } from "../page";
 
+export const fetchNumMarketsWithDailyActivity = async () =>
+  postgrest
+    .from(TableName.PriceFeed)
+    .select(undefined, { count: "exact" })
+    .then((res) => res.count ?? 0);
+
 /**
  * The number of markets that show up in the price delta percentage query is different than the total
- * number of markets. It's not necessary to know this in the `/api/stats` route, but it's relevant
- * for the frontend because of the pagination buttons block.
- * Swap out the max page number with the number of markets returned in the price feed query.
- * Since this can be run infrequently and it's an extra call, cache this value for longer.
+ * number of markets. It's relevant for the frontend because of the pagination buttons block.
  */
 export const fetchCachedNumMarketsWithDailyActivity = unstableCacheWrapper(
-  async (): Promise<number> =>
-    postgrest
-      .from(TableName.PriceFeed)
-      .select(undefined, { count: "exact" })
-      .then((res) => res.count ?? 0),
+  fetchNumMarketsWithDailyActivity,
   ["num-markets-with-daily-activity"],
   {
     revalidate: 30,
@@ -50,25 +49,37 @@ export async function getStatsPageData({
 
   if (!success) return { notFound: true };
 
-  const res = await fetchCachedPaginatedMarketStats(validatedParams).then((data) => ({
-    maxPageNumber: getMaxPageNumber(totalNumMarkets, STATS_MARKETS_PER_PAGE),
-    data,
-    ...validatedParams,
-  }));
-  const { maxPageNumber: maxPageNumberFromRes, page, sort, order, data } = res;
+  const { page, sort, order: orderBy } = validatedParams;
+  const order = toOrderByString(orderBy);
 
-  const maxPageNumber =
+  const numMarketsDailyActivity =
     sort === "delta"
-      ? await fetchCachedNumMarketsWithDailyActivity().then((num) =>
-          getMaxPageNumber(num, STATS_MARKETS_PER_PAGE)
-        )
-      : maxPageNumberFromRes;
+      ? (getPrebuildFileData()?.num_markets_with_daily_activity ??
+        (await fetchCachedNumMarketsWithDailyActivity()))
+      : undefined;
+
+  const maxDeltaPages = numMarketsDailyActivity
+    ? getMaxPageNumber(numMarketsDailyActivity, STATS_MARKETS_PER_PAGE)
+    : undefined;
+
+  if (maxDeltaPages !== undefined) {
+    if (page > maxDeltaPages) {
+      return { notFound: true };
+    }
+  }
+  const data =
+    getPrebuildFileData()?.stats_pages[sort][page][order] ??
+    (await fetchCachedPaginatedMarketStats(validatedParams));
+  const maxPageNumber =
+    sort === "delta" && maxDeltaPages !== undefined
+      ? maxDeltaPages
+      : getMaxPageNumber(totalNumMarkets, STATS_MARKETS_PER_PAGE);
 
   return {
     maxPageNumber,
     page,
     sort,
-    order: toOrderByString(order),
+    order,
     data,
   };
 }

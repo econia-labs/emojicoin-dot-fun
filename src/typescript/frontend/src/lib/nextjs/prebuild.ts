@@ -1,10 +1,21 @@
 import type { JsonMeleeDataArgs } from "app/arena/fetch-melee-data";
+import type { StatsSchemaInput } from "app/stats/(utils)/schema";
 import { readFileSync } from "fs";
 import type { MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { IS_NEXT_BUILD_PHASE } from "lib/server-env";
 import path from "path";
 
 import type { DatabaseJsonType } from "@/sdk/index";
+
+type StatsSlugs = Required<StatsSchemaInput>;
+
+export type StatsPageDataDictionary = {
+  [k in StatsSlugs["sort"]]: {
+    [page: number]: {
+      [order in StatsSlugs["order"]]: DatabaseJsonType["price_feed_with_nulls"][];
+    };
+  };
+};
 
 export type HomePageDataDictionary = {
   [k in MarketDataSortByHomePage]: {
@@ -17,9 +28,11 @@ export type MarketPageDataDictionary = {
 };
 
 export type PrebuildData = {
-  pages: HomePageDataDictionary;
+  stats_pages: StatsPageDataDictionary;
+  home_pages: HomePageDataDictionary;
   markets: MarketPageDataDictionary;
   num_markets: number;
+  num_markets_with_daily_activity: number;
   price_feed: DatabaseJsonType["price_feed"][];
   melee_data: JsonMeleeDataArgs | null;
   apt_price: number | undefined;
