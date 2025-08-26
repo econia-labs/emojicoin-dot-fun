@@ -96,7 +96,7 @@ async function staticStatsPageData() {
 
     const fetchFunction = (page: number) =>
       fetchPaginatedMarketStats({ page, pageSize, order: toOrderBy(order), sort });
-    const allMarkets = await exhaustiveFetch(fetchFunction, pageSize);
+    const allMarkets = await exhaustiveFetch(fetchFunction, pageSize, 20);
     const chunks = chunk(allMarkets, STATS_MARKETS_PER_PAGE);
 
     for (const [pageChunk, i] of enumerate(chunks)) {
@@ -126,10 +126,13 @@ async function staticHomePageData() {
   }
 
   // Then fetch all the static home page data and replace in the dictionary if there are any rows.
-  for (const { sort } of staticHomePages) {
+  for (const { sort, page: pageString } of staticHomePages) {
+    // The market data is chunked and fetched exhaustively, forgoing page iteration.
+    if (pageString !== "1") continue;
+
     const fetchFunction = (page: number) =>
       fetchMarketsJson({ page, pageSize, orderBy: ORDER_BY.DESC, sortBy: sort });
-    const allMarkets = await exhaustiveFetch(fetchFunction, pageSize);
+    const allMarkets = await exhaustiveFetch(fetchFunction, pageSize, 20);
     const chunks = chunk(allMarkets, MARKETS_PER_PAGE);
     for (const [pageChunk, i] of enumerate(chunks)) {
       const page = i + 1;
