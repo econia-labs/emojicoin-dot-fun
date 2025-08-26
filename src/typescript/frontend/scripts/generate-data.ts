@@ -90,7 +90,10 @@ async function staticStatsPageData() {
   }
 
   // Then fetch all the static stats page data and replace in the dictionary if there are any rows.
-  for (const { sort, order } of staticStatsPages) {
+  for (const { sort, page: pageString, order } of staticStatsPages) {
+    // The market data is chunked and fetched exhaustively, forgoing page iteration.
+    if (pageString !== "1") continue;
+
     const fetchFunction = (page: number) =>
       fetchPaginatedMarketStats({ page, pageSize, order: toOrderBy(order), sort });
     const allMarkets = await exhaustiveFetch(fetchFunction, pageSize);
