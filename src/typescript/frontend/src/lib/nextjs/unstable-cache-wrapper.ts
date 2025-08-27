@@ -4,19 +4,21 @@ import "server-only";
 import { APTOS_NETWORK } from "lib/env";
 import { unstable_cache } from "next/cache";
 
+import type { NonEmptyLiteralString } from "@/sdk/utils/utility-types";
+
 type Callback = (...args: any[]) => Promise<any>;
 
 /**
  * A more stable version of `unstable_cache`, achieved with a proxy object to update the callback
  * function's `.toString()` function and `.name` field.
  */
-export function unstableCacheWrapper<T extends Callback>(
+export function unstableCacheWrapper<T extends Callback, const S extends string>(
   cb: T,
   /**
    * The unique function label. The args are serialized and added to the cache key generator at
    * runtime, so the only thing necessary here is a unique identifier for the query/function itself.
    */
-  uniqueFunctionLabel: Exclude<string, "">,
+  uniqueFunctionLabel: NonEmptyLiteralString<S>,
   options: {
     /** The revalidation interval in seconds. */
     revalidate?: number | false;

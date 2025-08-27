@@ -81,3 +81,14 @@ export type EmptyObject = Record<string, never>;
 export type ExplicitlyNullable<T> = {
   [K in keyof T]: T[K] | null;
 };
+
+type RequireLiteralString<S extends string> = string extends S ? never : S;
+type RequireNonEmptyString<S extends string> = S extends "" ? never : S;
+
+/**
+ * A utility type to reject empty strings and widened/generic strings, but accept non-empty literals
+ * & unions of literals.
+ */
+export type NonEmptyLiteralString<S extends string> = RequireNonEmptyString<
+  RequireLiteralString<S>
+>;
