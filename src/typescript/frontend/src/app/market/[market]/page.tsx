@@ -4,6 +4,7 @@ import ArenaInfoLoader from "context/ArenaInfoLoader";
 import { getPrebuildFileData } from "lib/nextjs/prebuild";
 import { fetchLongerCachedArenaInfo } from "lib/queries/arena-info";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
+import { GENERATE_ALL_STATIC_PAGES } from "lib/server-env";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
@@ -21,6 +22,9 @@ export const dynamic = "force-static";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
+  // if (GENERATE_ALL_STATIC_PAGES) {
+
+  // }
   const maybePrebuildData = getPrebuildFileData();
   const maybeMarketData = maybePrebuildData ? Object.values(maybePrebuildData.markets) : undefined;
   const markets = maybeMarketData ?? (await fetchAllMarkets());
