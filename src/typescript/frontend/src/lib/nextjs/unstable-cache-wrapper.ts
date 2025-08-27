@@ -12,7 +12,7 @@ type Callback = (...args: any[]) => Promise<any>;
  * A more stable version of `unstable_cache`, achieved with a proxy object to update the callback
  * function's `.toString()` function and `.name` field.
  */
-export function unstableCacheWrapper<T extends Callback, const S extends string>(
+export function unstableCacheWrapper<T extends Callback, S extends string>(
   cb: T,
   /**
    * The unique function label. The args are serialized and added to the cache key generator at
