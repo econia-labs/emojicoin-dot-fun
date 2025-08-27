@@ -1,3 +1,4 @@
+import { generateHomePageStaticParams } from "app/home/static-params";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import ArenaInfoLoader from "context/ArenaInfoLoader";
@@ -8,10 +9,13 @@ import { GENERATE_ALL_STATIC_PAGES } from "lib/server-env";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
+import { fetchMarketsJson } from "@/queries/home";
 import { fetchAllMarkets } from "@/queries/static-params";
 import type { SymbolEmoji, SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
-import { compareBigInt, isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
+import type { DatabaseJsonType } from "@/sdk/index";
+import { isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
+import { ORDER_BY } from "@/sdk/indexer-v2";
 
 import { fetchCachedMarketState } from "../cached-fetches";
 import { maybeGetMarketPrebuildData } from "../prebuild-data";
@@ -22,14 +26,25 @@ export const dynamic = "force-static";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const allMarketData = await fetchAllMarkets();
   const markets = GENERATE_ALL_STATIC_PAGES
-    ? allMarketData
-    : allMarketData
-        .toSorted((v1, v2) =>
-          compareBigInt(v1.instantaneous_stats_market_cap, v2.instantaneous_stats_market_cap)
-        )
-        .slice(0, MARKETS_PER_PAGE);
+    ? await fetchAllMarkets()
+    : // Or just generate all the market pages for each type of sorted home page that's statically built.
+      // Note these fetches are cached and can be stale since the main purpose is to generate the market slug, which
+      // never changes per market.
+      await (async () => {
+        const res: DatabaseJsonType["market_state"][] = [];
+        for (const { sort, page } of await generateHomePageStaticParams()) {
+          const moreMarkets = await fetchMarketsJson({
+            page: Number(page),
+            sortBy: sort,
+            orderBy: ORDER_BY.DESC,
+            pageSize: MARKETS_PER_PAGE,
+          });
+          res.push(...moreMarkets);
+        }
+        return res;
+      })();
+
   const paths = markets
     .map((mkt) => mkt.symbol_emojis)
     .map((emojis) => emojis.map((emoji) => SYMBOL_EMOJI_DATA.byEmojiStrict(emoji).name))
