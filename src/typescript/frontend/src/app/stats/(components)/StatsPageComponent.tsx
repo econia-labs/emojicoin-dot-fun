@@ -1,73 +1,63 @@
 "use client";
 
-import type { StatsSchemaOutput } from "app/api/stats/schema";
 import { cn } from "lib/utils/class-name";
 import { useRouter } from "next/navigation";
 import path from "path";
-import { useCallback, useTransition } from "react";
+import { useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { emojiNamesToPath } from "utils/pathname-helpers";
-import { addSearchParams } from "utils/url-utils";
 
 import { EcTable } from "@/components/ui/table/ecTable";
-import type { OrderBy, OrderByStrings } from "@/sdk/indexer-v2/const";
-import { ORDER_BY } from "@/sdk/indexer-v2/const";
-import type { PriceFeedWithNullsModel } from "@/sdk/indexer-v2/types";
+import type { OrderByStrings } from "@/sdk/indexer-v2/const";
+import { toOrderByString } from "@/sdk/indexer-v2/const";
+import { toPriceFeedWithNulls } from "@/sdk/indexer-v2/types";
+import { useStatsPageStore } from "@/store/stats-page/store";
 
+import useStatsTransition from "../(hooks)/use-stats-transition";
+import { useStatsUrlParams } from "../(hooks)/use-url-params";
+import { toggleStatsUrl } from "../(utils)/create-url";
+import type { StatsPageData } from "../(utils)/fetches";
 import statsHeaderColumns, { columnSortStrings, columnSortStringsReverseMapping } from "./columns";
 import { StatsButtonsBlock } from "./PaginationButtons";
 
-const toOrderByString = (orderBy: OrderBy): OrderByStrings =>
-  orderBy === ORDER_BY.ASC ? "asc" : "desc";
-
 export default function StatsPageComponent({
-  page,
-  sortBy,
-  orderBy,
+  sort,
   data,
   maxPageNumber,
-}: StatsSchemaOutput & {
-  data: PriceFeedWithNullsModel[];
-  maxPageNumber: number;
-}) {
+}: Pick<StatsPageData, "sort" | "data" | "maxPageNumber">) {
   const router = useRouter();
-  const [isLoading, startTransition] = useTransition();
+  const isLoading = useStatsPageStore((s) => s.isLoading);
+  // On a transition to a new slug/page, the url will update faster than the UI due to the
+  // transition schedule in `useTransition`. Use the URL for the most up to date params and
+  // the props params for the previous params.
+  const { page: currPage, sort: currSort, order: currOrder } = useStatsUrlParams();
 
-  const handleNavigation = useCallback(
-    (columnString: string, direction: OrderByStrings) => {
-      const currentSortByString = columnSortStrings[sortBy];
-      // If it's a new column, reset the order to "desc" and use the new column.
-      // If it's the same column, flip the orderBy to the opposite order.
-      // In both cases, set it to page 1.
-      const newParams =
-        currentSortByString !== columnString
-          ? {
-              sortBy: columnSortStringsReverseMapping[columnString],
-              orderBy: toOrderByString(ORDER_BY.DESC),
-              page: 1,
-            }
-          : {
-              sortBy: sortBy,
-              orderBy: direction,
-              page: 1,
-            };
-      const url = addSearchParams(ROUTES.stats, newParams);
-      startTransition(() => {
-        router.push(url);
-      });
-    },
-    [sortBy, router]
+  const handleSortClick = useStatsTransition();
+  const sorting = useMemo(
+    () => ({
+      mode: "controlled" as const,
+      column: columnSortStrings[currSort],
+      direction: toOrderByString(currOrder),
+      getLinkProps: (next: { column: string; direction: OrderByStrings }) => ({
+        href: toggleStatsUrl({
+          sort: columnSortStringsReverseMapping[next.column],
+          currSort,
+          currOrder,
+        }),
+        onClick: handleSortClick,
+      }),
+    }),
+    [currOrder, currSort, handleSortClick]
   );
 
   return (
     <>
       <StatsButtonsBlock
         numPages={maxPageNumber}
-        page={page}
-        sortBy={sortBy}
-        desc={!orderBy.ascending}
+        page={currPage}
+        sort={currSort}
+        desc={currOrder === "desc"}
         className="pb-2"
-        startTransition={startTransition}
       />
       <div className="relative w-screen">
         <div className="absolute top-0 left-[-100vw] w-[300vw] h-px bg-dark-gray z-50 pointer-events-none" />
@@ -85,11 +75,13 @@ export default function StatsPageComponent({
           textFormat="body-sm"
           emptyText="No more markets to display!"
           columns={statsHeaderColumns}
-          getKey={(item) => [orderBy, page, sortBy, item.market.marketID].join("-")}
-          items={data}
-          serverSideOrderHandler={handleNavigation}
+          getKey={(item) =>
+            `${data.findIndex((v) => BigInt(v.market_id) === item.market.marketID)}`
+          }
+          items={data.map(toPriceFeedWithNulls)}
+          sorting={sorting}
           isLoading={isLoading}
-          defaultSortColumn={columnSortStrings[sortBy]}
+          defaultSortColumn={columnSortStrings[sort]}
           onClick={(item) => {
             const namePath = emojiNamesToPath(item.market.emojis.map(({ name }) => name));
             const url = path.join(ROUTES.market, namePath);
@@ -99,11 +91,10 @@ export default function StatsPageComponent({
       </div>
       <StatsButtonsBlock
         numPages={maxPageNumber}
-        page={page}
-        sortBy={sortBy}
-        desc={!orderBy.ascending}
+        page={currPage}
+        sort={currSort}
+        desc={currOrder === "desc"}
         className="mt-3 pb-2"
-        startTransition={startTransition}
       />
     </>
   );

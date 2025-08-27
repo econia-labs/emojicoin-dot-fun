@@ -28,7 +28,7 @@ export function maybeGetHomePagePrebuildData(args: {
     throw new Error("Couldn't find prebuild data.");
   }
 
-  const markets = data.pages[sort][page].map(toMarketStateModel);
+  const markets = data.home_pages[sort][page].map(toMarketStateModel);
   // Keep in mind that this will only throw if this data isn't found at build-time, otherwise this
   // code path should never be entered.
   if (!markets) {

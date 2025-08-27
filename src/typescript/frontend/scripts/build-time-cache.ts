@@ -1,6 +1,6 @@
 import fs from "fs";
 
-import { generatedStaticHomePageData } from "./generate-data.js";
+import { generateStaticData } from "./generate-data.js";
 
 // This file should never be imported anywhere as it has top-level side effects.
 if (import.meta.url !== `file://${process.argv[1]}`) {
@@ -10,7 +10,7 @@ if (import.meta.url !== `file://${process.argv[1]}`) {
 const outputDirectory = ".shared-build-data";
 
 const main = async () => {
-  const data = await generatedStaticHomePageData();
+  const data = await generateStaticData();
   if (!fs.existsSync(outputDirectory)) {
     fs.mkdirSync(outputDirectory, { recursive: true });
   }

@@ -1,16 +1,21 @@
+import { generateHomePageStaticParams } from "app/home/static-params";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import ArenaInfoLoader from "context/ArenaInfoLoader";
-import { getPrebuildFileData } from "lib/nextjs/prebuild";
 import { fetchLongerCachedArenaInfo } from "lib/queries/arena-info";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { GENERATE_ALL_STATIC_PAGES } from "lib/server-env";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
+import { fetchMarketsJson } from "@/queries/home";
 import { fetchAllMarkets } from "@/queries/static-params";
 import type { SymbolEmoji, SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
+import type { DatabaseJsonType } from "@/sdk/index";
 import { isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
+import { ORDER_BY } from "@/sdk/indexer-v2";
 
 import { fetchCachedMarketState } from "../cached-fetches";
 import { maybeGetMarketPrebuildData } from "../prebuild-data";
@@ -21,9 +26,29 @@ export const dynamic = "force-static";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const maybePrebuildData = getPrebuildFileData();
-  const maybeMarketData = maybePrebuildData ? Object.values(maybePrebuildData.markets) : undefined;
-  const markets = maybeMarketData ?? (await fetchAllMarkets());
+  const markets = GENERATE_ALL_STATIC_PAGES
+    ? await fetchAllMarkets()
+    : // Or just generate all the market pages for each type of sorted home page that's statically built.
+      // Note these fetches are cached and can be stale since the main purpose is to generate the market slug, which
+      // never changes per market.
+      await (async () => {
+        const res: DatabaseJsonType["market_state"][] = [];
+        const seen = new Set();
+
+        for (const { sort, page } of await generateHomePageStaticParams()) {
+          const moreMarkets = await fetchMarketsJson({
+            page: Number(page),
+            sortBy: sort,
+            orderBy: ORDER_BY.DESC,
+            pageSize: MARKETS_PER_PAGE,
+          });
+          const filtered = moreMarkets.filter((v) => !seen.has(v.symbol_bytes));
+          filtered.forEach((v) => seen.add(v.symbol_bytes));
+          res.push(...filtered);
+        }
+        return res;
+      })();
+
   const paths = markets
     .map((mkt) => mkt.symbol_emojis)
     .map((emojis) => emojis.map((emoji) => SYMBOL_EMOJI_DATA.byEmojiStrict(emoji).name))
