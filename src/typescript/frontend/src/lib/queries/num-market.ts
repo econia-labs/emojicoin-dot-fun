@@ -13,9 +13,6 @@ export const fetchNumRegisteredMarkets = () =>
 export const fetchCachedNumRegisteredMarkets = unstableCacheWrapper(
   // Page should be validated to be greater than 1 by this point.
   fetchNumRegisteredMarkets,
-  ["num-registered-markets"],
-  {
-    revalidate: 10,
-    tags: ["num-registered-markets"],
-  }
+  "num-registered-markets",
+  { revalidate: 10 }
 );

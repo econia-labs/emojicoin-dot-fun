@@ -58,11 +58,8 @@ const fetchCachedArenaCandlesticks = unstableCacheWrapper(
 
     return res;
   },
-  ["fetch-cached-arena-candlesticks"],
-  {
-    revalidate: 10,
-    tags: ["fetch-cached-arena-candlesticks"],
-  }
+  "fetch-cached-arena-candlesticks",
+  { revalidate: 10 }
 );
 
 export default fetchCachedArenaCandlesticks;

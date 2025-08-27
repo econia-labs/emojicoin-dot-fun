@@ -4,6 +4,6 @@ import { fetchMarketStateJson } from "@/queries/market";
 
 export const fetchCachedMarketState = unstableCacheWrapper(
   fetchMarketStateJson,
-  ["cached-market-state"],
+  "cached-market-state",
   { revalidate: 10 }
 );

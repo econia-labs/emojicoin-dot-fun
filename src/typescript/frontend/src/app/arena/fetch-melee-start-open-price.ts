@@ -49,12 +49,9 @@ export async function fetchExchangeRatesAtMeleeStart({
 const createCachedExchangeRatesAtMeleeStartFetcher = (arena_info: DatabaseJsonType["arena_info"]) =>
   unstableCacheWrapper(
     () => fetchExchangeRatesAtMeleeStart(arena_info),
-    ["fetch-exchange-rates-at-melee-start"],
-    {
-      // `unstable_cache` doesn't cache error responses, so just specify to cache this forever.
-      revalidate: false,
-      tags: ["fetch-exchange-rates-at-melee-start"],
-    }
+    "fetch-exchange-rates-at-melee-start",
+    // `unstable_cache` doesn't cache error responses, so just specify to cache this forever.
+    { revalidate: false }
   );
 
 export default createCachedExchangeRatesAtMeleeStartFetcher;

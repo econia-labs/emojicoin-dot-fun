@@ -25,11 +25,8 @@ export const fetchNumMarketsWithDailyActivity = async () =>
  */
 export const fetchCachedNumMarketsWithDailyActivity = unstableCacheWrapper(
   fetchNumMarketsWithDailyActivity,
-  ["num-markets-with-daily-activity"],
-  {
-    revalidate: 30,
-    tags: ["num-markets-with-daily-activity"],
-  }
+  "num-markets-with-daily-activity",
+  { revalidate: 30 }
 );
 
 export type StatsPageData = {

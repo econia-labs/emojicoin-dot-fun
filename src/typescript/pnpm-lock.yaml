@@ -18,9 +18,6 @@ patchedDependencies:
   bigint-buffer@1.1.5:
     hash: orfljpacakypvfgaa776cfcfbe
     path: patches/bigint-buffer@1.1.5.patch
-  next@14.2.28:
-    hash: 54hzewiqaygfdnlxdsov3f6gla
-    path: patches/next@14.2.28.patch
   server-only@0.0.1:
     hash: wl2oyyiqzdrkh3t3qabnryjr3e
     path: patches/server-only@0.0.1.patch
@@ -116,9 +113,6 @@ importers:
       '@types/semver':
         specifier: ^7.7.0
         version: 7.7.0
-      '@upstash/lock':
-        specifier: ^0.2.1
-        version: 0.2.1(typescript@5.6.2)
       '@upstash/ratelimit':
         specifier: ^2.0.5
         version: 2.0.5(@upstash/redis@1.34.8)
@@ -160,7 +154,7 @@ importers:
         version: 0.400.0(react@18.3.1)
       next:
         specifier: ^14.2.28
-        version: 14.2.28(patch_hash=54hzewiqaygfdnlxdsov3f6gla)(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.28(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -185,9 +179,6 @@ importers:
       react-use:
         specifier: ^17.6.0
         version: 17.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      redis:
-        specifier: ^5.7.0
-        version: 5.7.0
       semver:
         specifier: ^7.7.1
         version: 7.7.1
@@ -306,9 +297,6 @@ importers:
       immer:
         specifier: ^10.1.1
         version: 10.1.1
-      redis:
-        specifier: ^5.7.0
-        version: 5.7.0
       zustand:
         specifier: ^5.0.3
         version: 5.0.6(@types/react@18.3.20)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
@@ -1807,34 +1795,6 @@ packages:
   '@react95/icons@2.1.1':
     resolution: {integrity: sha512-yWwnaHHFXZ81aN9HuLtOOOGZf4I54CtD0dufnmF07eWax6zQfP9qgnbZZMO2LdSWs4eufnmiWJc5ae/hG8VvzA==}
 
-  '@redis/bloom@5.7.0':
-    resolution: {integrity: sha512-KtBHDH2Aw1BxYDQd87PJsdEmZcpMbD4oPzdBwB4IvSRmMovukO2NNGi5vpCHhCoicS83zu7cjX1fw79uFBZFJA==}
-    engines: {node: '>= 18'}
-    peerDependencies:
-      '@redis/client': ^5.7.0
-
-  '@redis/client@5.7.0':
-    resolution: {integrity: sha512-YV3Knspdj9k6H6s4v8QRcj1WBxHt40vtPmszLKGwRUOUpUOLWSlI9oCUjprMDcQNzgSCXGXYdL/Aj6nT2+Ub0w==}
-    engines: {node: '>= 18'}
-
-  '@redis/json@5.7.0':
-    resolution: {integrity: sha512-VP3wtse1PSB/UjZAV1lWyDrWrrZcwi/cjb3L0lIarcIJ+EbHliB2QPml0Bvjz8F8F0eDJRtChJVXFc+jhGxCtA==}
-    engines: {node: '>= 18'}
-    peerDependencies:
-      '@redis/client': ^5.7.0
-
-  '@redis/search@5.7.0':
-    resolution: {integrity: sha512-dDZIq8pZJnT+kZ9xRlLLi2Rvkd792z9eh31QRIwPr5wXjAXeaQ+Nf65em6dLpsxZ60MmhwDwLrBPJpYVjKPBPQ==}
-    engines: {node: '>= 18'}
-    peerDependencies:
-      '@redis/client': ^5.7.0
-
-  '@redis/time-series@5.7.0':
-    resolution: {integrity: sha512-AJTF9sz3y1MJAukgQW4Jw8zt8qGOE3+1d87pufOP35zsFBlHipGscpctoXiNMebfy0114y/FjSprr65LjbJQSQ==}
-    engines: {node: '>= 18'}
-    peerDependencies:
-      '@redis/client': ^5.7.0
-
   '@rollup/rollup-android-arm-eabi@4.40.0':
     resolution: {integrity: sha512-+Fbls/diZ0RDerhE8kyC6hjADCXA1K4yVNlH0EYfd2XjyH0UGgzaQ8MlT0pCXAThfxv3QUAczHaL+qSv1E4/Cg==}
     cpu: [arm]
@@ -2381,11 +2341,6 @@ packages:
     resolution: {integrity: sha512-7qJHGxpQgQr9/vmeS1PktEwvNAF7TI4iJDi8Pu2CFZ9YUGHZH4fOP5TfYlZ4aVxfopnELiE4BS4FBjyK7V1/xQ==}
     engines: {node: '>=16.0.0'}
 
-  '@upstash/lock@0.2.1':
-    resolution: {integrity: sha512-7f/yeicYfNLwDwXm5fAoKbobcdHpNWPbXewmdDFfOgAB4gVWaHXT63iOc09qq6DVFTB5YHvmm0jVIFV8eQnJ+g==}
-    peerDependencies:
-      typescript: ^5.0.0
-
   '@upstash/ratelimit@2.0.5':
     resolution: {integrity: sha512-1FRv0cs3ZlBjCNOCpCmKYmt9BYGIJf0J0R3pucOPE88R21rL7jNjXG+I+rN/BVOvYJhI9niRAS/JaSNjiSICxA==}
     peerDependencies:
@@ -2814,10 +2769,6 @@ packages:
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
-
-  cluster-key-slot@1.1.2:
-    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
-    engines: {node: '>=0.10.0'}
 
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
@@ -4735,10 +4686,6 @@ packages:
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
-
-  redis@5.7.0:
-    resolution: {integrity: sha512-ZRbiWYBUYdDTopodRjCVwwCLThrkciPW3bOrkdMCW3nYEelBwUGN6SovmACDsiLUB7mnU3mXnaI5f0W7bDcwng==}
-    engines: {node: '>= 18'}
 
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
@@ -7158,26 +7105,6 @@ snapshots:
 
   '@react95/icons@2.1.1': {}
 
-  '@redis/bloom@5.7.0(@redis/client@5.7.0)':
-    dependencies:
-      '@redis/client': 5.7.0
-
-  '@redis/client@5.7.0':
-    dependencies:
-      cluster-key-slot: 1.1.2
-
-  '@redis/json@5.7.0(@redis/client@5.7.0)':
-    dependencies:
-      '@redis/client': 5.7.0
-
-  '@redis/search@5.7.0(@redis/client@5.7.0)':
-    dependencies:
-      '@redis/client': 5.7.0
-
-  '@redis/time-series@5.7.0(@redis/client@5.7.0)':
-    dependencies:
-      '@redis/client': 5.7.0
-
   '@rollup/rollup-android-arm-eabi@4.40.0':
     optional: true
 
@@ -7738,10 +7665,6 @@ snapshots:
     dependencies:
       '@upstash/redis': 1.34.8
 
-  '@upstash/lock@0.2.1(typescript@5.6.2)':
-    dependencies:
-      typescript: 5.6.2
-
   '@upstash/ratelimit@2.0.5(@upstash/redis@1.34.8)':
     dependencies:
       '@upstash/core-analytics': 0.0.10
@@ -8236,8 +8159,6 @@ snapshots:
   clsx@1.2.1: {}
 
   clsx@2.1.1: {}
-
-  cluster-key-slot@1.1.2: {}
 
   co@4.6.0: {}
 
@@ -10045,7 +9966,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@14.2.28(patch_hash=54hzewiqaygfdnlxdsov3f6gla)(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@14.2.28(@babel/core@7.26.10)(@playwright/test@1.51.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.2.28
       '@swc/helpers': 0.5.5
@@ -10480,14 +10401,6 @@ snapshots:
       picomatch: 2.3.1
 
   readdirp@4.1.2: {}
-
-  redis@5.7.0:
-    dependencies:
-      '@redis/bloom': 5.7.0(@redis/client@5.7.0)
-      '@redis/client': 5.7.0
-      '@redis/json': 5.7.0(@redis/client@5.7.0)
-      '@redis/search': 5.7.0(@redis/client@5.7.0)
-      '@redis/time-series': 5.7.0(@redis/client@5.7.0)
 
   reflect.getprototypeof@1.0.10:
     dependencies:
