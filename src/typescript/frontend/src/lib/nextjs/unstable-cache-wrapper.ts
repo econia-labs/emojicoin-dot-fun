@@ -6,8 +6,6 @@ import { unstable_cache } from "next/cache";
 
 type Callback = (...args: any[]) => Promise<any>;
 
-const MIN_KEY_LENGTH = 8;
-
 /**
  * A more stable version of `unstable_cache`, achieved with a proxy object to update the callback
  * function's `.toString()` function and `.name` field.
@@ -25,27 +23,21 @@ export function unstableCacheWrapper<T extends Callback>(
     extraTags?: string[];
   }
 ): T {
-  const uniqueEntryLabel = Array.isArray(uniqueFunctionLabel)
-    ? uniqueFunctionLabel.join(",")
-    : uniqueFunctionLabel;
-  // Enforce some arbitrary minimum for the cache key length.
-  if (uniqueEntryLabel.length < MIN_KEY_LENGTH) {
-    throw new Error(
-      `Cache key must be at least ${MIN_KEY_LENGTH} characters. Got: ${uniqueEntryLabel}`
-    );
+  if (!uniqueFunctionLabel.length) {
+    throw new Error(`You must provide a unique function key label. Got: ${uniqueFunctionLabel}`);
   }
 
   // Add the `uniqueKey` to the `tags` array if it's not already there.
-  const staticTags = new Set([uniqueEntryLabel, ...(options?.extraTags ?? [])]);
+  const staticTags = new Set([uniqueFunctionLabel, ...(options?.extraTags ?? [])]);
   const baseTags = Array.from(staticTags);
 
   // Stabilize the final callback and call `unstable_cache` with it.
   const stabilizedWithExplicitTags = async (...args: any[]) => {
-    const functionCallTag = prettifyFunctionCall(uniqueEntryLabel, ...args);
+    const functionCallTag = prettifyFunctionCall(uniqueFunctionLabel, ...args);
     // Only add the function call tag if there are args, otherwise it's the same as the label.
     const tags = !args.length ? baseTags : [...baseTags, functionCallTag];
-    const stabilizedProxy = createStabilizedProxy(cb, uniqueEntryLabel);
-    return unstable_cache(stabilizedProxy, [uniqueEntryLabel], {
+    const stabilizedProxy = createStabilizedProxy(cb, uniqueFunctionLabel);
+    return unstable_cache(stabilizedProxy, [uniqueFunctionLabel], {
       revalidate: options.revalidate,
       tags,
     })(...args);
