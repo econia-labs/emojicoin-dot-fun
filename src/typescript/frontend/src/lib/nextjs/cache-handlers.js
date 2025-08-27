@@ -345,6 +345,9 @@ class PatchedFileSystemCache extends FileSystemCache {
       const filePath = this["getFilePath"](`${cacheKey}`, "fetch");
       /** @type {ConstructorParameters<typeof FileSystemCache>[0]["fs"]} */
       const fs = this["fs"];
+      if (!fs.existsSync(filePath)) {
+        return missingEntry;
+      }
       const fileData = await fs.readFile(filePath, "utf8");
       const { mtime } = await fs.stat(filePath);
 

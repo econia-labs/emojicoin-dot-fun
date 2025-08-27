@@ -9,6 +9,7 @@ import type {
 } from "@supabase/postgrest-js";
 
 import type { AnyNumberString } from "../../types/types";
+import { sleep } from "../../utils";
 import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
 import { postgrest } from "./client";
 
@@ -215,4 +216,32 @@ export function queryHelperWithCount<
   };
 
   return query;
+}
+
+/**
+ * Utility function to exhaustively fetch all rows.
+ *
+ * Use this carefully.
+ * @param fetchFunction Some callback you can pass the page number to to get an array of rows
+ * @param expectedRowsReturned The `pageSize` or expected rows to be returned
+ */
+export async function exhaustiveFetch<T>(
+  fetchFunction: (page: number) => Promise<T[]>,
+  expectedRowsReturned: number,
+  sleepInterval?: number
+) {
+  const res: T[] = [];
+  let page = 1;
+  let lastRes: T[] = [];
+
+  do {
+    if (sleepInterval && page !== 1) {
+      await sleep(sleepInterval);
+    }
+    lastRes = await fetchFunction(page);
+    res.push(...lastRes);
+    page += 1;
+  } while (lastRes.length && lastRes.length % expectedRowsReturned === 0);
+
+  return res;
 }

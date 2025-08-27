@@ -113,3 +113,16 @@ export const CACHE_LOCK_RELEASE = (() => {
   }
   return undefined;
 })();
+
+/**
+ * Whether or not to generate *all* static pages possible for things like `/[market]/page.tsx`
+ * and the stats page.
+ *
+ * This dictates how many params are generated for the `generateStaticParams` in the home page,
+ * market page, and the stats page.
+ *
+ * If this is false or undefined, each page will only generate static params for a subset of input
+ * params- either the most active/highest market cap markets or the first page of different sorting
+ * orders.
+ */
+export const GENERATE_ALL_STATIC_PAGES = process.env.GENERATE_ALL_STATIC_PAGES === "true";

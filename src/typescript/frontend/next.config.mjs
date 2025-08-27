@@ -48,9 +48,11 @@ const nextConfig = {
   experimental: {
     // Use turbo when running/building locally. Since it's experimental, avoid it in production.
     turbo: process.env.NODE_ENV === "development" ? {} : undefined,
+    // The browser cache stale time. This is a browser/client-side specific cache, not the global
+    // data cache.
     staleTimes: {
       dynamic: 0, // Default is normally 30s.
-      static: 60, // Default is normally 180s.
+      static: 10, // Default is normally 180s.
     },
     // Not confirmed working: the idea here is to force synchronous revalidation after 60 seconds
     // but allow asynchronous (background) revalidation before that. This way, users wouldn't see

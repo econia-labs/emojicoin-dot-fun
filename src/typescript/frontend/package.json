@@ -119,6 +119,7 @@
     "lint:fix": "pnpm run lint --fix",
     "playwright:install": "playwright install --with-deps",
     "prebuild": "INTERNAL_SKIP_SERVER_ONLY_CHECKS=1 tsx scripts/build-time-cache.ts''",
+    "predev": "rm -rf .shared-build-data",
     "postbuild": "rm -rf .shared-build-data",
     "start": "next start --port 3001",
     "submodule": "./submodule.sh",
