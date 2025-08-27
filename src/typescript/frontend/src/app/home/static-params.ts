@@ -20,6 +20,6 @@ export async function generateHomePageStaticParams() {
     return Array.from({ length: maxPageNumber }).flatMap((_, i) => generateForOnePageNumber(i + 1));
   } else {
     // Just generate the first page for each sort type.
-    return generateForOnePageNumber(1);
+    return generateForOnePageNumber(1).flat();
   }
 }
