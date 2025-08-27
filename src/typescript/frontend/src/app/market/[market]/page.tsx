@@ -1,9 +1,9 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
 import ArenaInfoLoader from "context/ArenaInfoLoader";
-import { getPrebuildFileData } from "lib/nextjs/prebuild";
 import { fetchLongerCachedArenaInfo } from "lib/queries/arena-info";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { GENERATE_ALL_STATIC_PAGES } from "lib/server-env";
 import type { Metadata } from "next";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
@@ -11,7 +11,7 @@ import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 import { fetchAllMarkets } from "@/queries/static-params";
 import type { SymbolEmoji, SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
-import { isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
+import { compareBigInt, isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
 
 import { fetchCachedMarketState } from "../cached-fetches";
 import { maybeGetMarketPrebuildData } from "../prebuild-data";
@@ -22,12 +22,14 @@ export const dynamic = "force-static";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  // if (GENERATE_ALL_STATIC_PAGES) {
-
-  // }
-  const maybePrebuildData = getPrebuildFileData();
-  const maybeMarketData = maybePrebuildData ? Object.values(maybePrebuildData.markets) : undefined;
-  const markets = maybeMarketData ?? (await fetchAllMarkets());
+  const allMarketData = await fetchAllMarkets();
+  const markets = GENERATE_ALL_STATIC_PAGES
+    ? allMarketData
+    : allMarketData
+        .toSorted((v1, v2) =>
+          compareBigInt(v1.instantaneous_stats_market_cap, v2.instantaneous_stats_market_cap)
+        )
+        .slice(0, MARKETS_PER_PAGE);
   const paths = markets
     .map((mkt) => mkt.symbol_emojis)
     .map((emojis) => emojis.map((emoji) => SYMBOL_EMOJI_DATA.byEmojiStrict(emoji).name))

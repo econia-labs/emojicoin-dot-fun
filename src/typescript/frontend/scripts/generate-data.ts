@@ -18,7 +18,7 @@ import { fetchNumRegisteredMarkets } from "lib/queries/num-market";
 import { fetchHomePagePriceFeed } from "lib/queries/price-feed";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 
-import { chunk, enumerate } from "@/sdk/index";
+import { SortMarketsBy } from "@/sdk/index";
 import { MAX_ROW_LIMIT, ORDER_BY, toOrderBy } from "@/sdk/indexer-v2";
 import { exhaustiveFetch, fetchArenaInfoJson, fetchMarketsJson } from "@/sdk/indexer-v2/queries";
 
@@ -40,11 +40,6 @@ async function fetchAllMeleeData(): Promise<JsonMeleeDataArgs> {
   };
 }
 
-const pageSize = MAX_ROW_LIMIT;
-if (MAX_ROW_LIMIT % STATS_MARKETS_PER_PAGE || MAX_ROW_LIMIT % MARKETS_PER_PAGE) {
-  throw new Error("Max row limit should be perfectly divisible.");
-}
-
 export async function generateStaticData(): Promise<PrebuildData> {
   // Shared data across all markets.
   const [num_markets, apt_price, price_feed, melee_data, num_markets_with_daily_activity] =
@@ -57,7 +52,8 @@ export async function generateStaticData(): Promise<PrebuildData> {
     ]);
 
   const stats_pages = await staticStatsPageData();
-  const { home_pages, markets } = await staticHomePageData();
+  const home_pages = await staticHomePageData();
+  const markets = await staticMarketPageData();
 
   return {
     stats_pages,
@@ -84,33 +80,24 @@ async function staticStatsPageData() {
   };
 
   // Initialize all entries in the dictionary.
-  for (const { sort, page: pageString } of staticStatsPages) {
-    const page = Number(pageString);
-    stats_pages[sort][page] = { asc: [], desc: [] };
-  }
-
-  // Then fetch all the static stats page data and replace in the dictionary if there are any rows.
   for (const { sort, page: pageString, order } of staticStatsPages) {
-    // The market data is chunked and fetched exhaustively, forgoing page iteration.
-    if (pageString !== "1") continue;
-
-    const fetchFunction = (page: number) =>
-      fetchPaginatedMarketStats({ page, pageSize, order: toOrderBy(order), sort });
-    const allMarkets = await exhaustiveFetch(fetchFunction, pageSize, 20);
-    const chunks = chunk(allMarkets, STATS_MARKETS_PER_PAGE);
-
-    for (const [pageChunk, i] of enumerate(chunks)) {
-      const page = i + 1;
-      stats_pages[sort][page][order] = pageChunk;
+    const page = Number(pageString);
+    if (!(page in stats_pages[sort])) {
+      stats_pages[sort][page] = { asc: [], desc: [] };
     }
-  }
 
+    stats_pages[sort][page][order] = await fetchPaginatedMarketStats({
+      page,
+      pageSize: STATS_MARKETS_PER_PAGE,
+      order: toOrderBy(order),
+      sort,
+    });
+  }
   return stats_pages;
 }
 
 async function staticHomePageData() {
   const staticHomePages = await generateHomePageStaticParams();
-  const markets: MarketPageDataDictionary = {};
 
   const home_pages: HomePageDataDictionary = {
     all_time_vol: {},
@@ -122,28 +109,28 @@ async function staticHomePageData() {
   // Initialize all entries in the dictionary.
   for (const { sort, page: pageString } of staticHomePages) {
     const page = Number(pageString);
-    home_pages[sort][page] = [];
+    home_pages[sort][page] = await fetchMarketsJson({
+      page,
+      pageSize: MARKETS_PER_PAGE,
+      sortBy: sort,
+      orderBy: ORDER_BY.DESC,
+    });
   }
+  return home_pages;
+}
 
-  // Then fetch all the static home page data and replace in the dictionary if there are any rows.
-  for (const { sort, page: pageString } of staticHomePages) {
-    // The market data is chunked and fetched exhaustively, forgoing page iteration.
-    if (pageString !== "1") continue;
-
-    const fetchFunction = (page: number) =>
-      fetchMarketsJson({ page, pageSize, orderBy: ORDER_BY.DESC, sortBy: sort });
-    const allMarkets = await exhaustiveFetch(fetchFunction, pageSize, 20);
-    const chunks = chunk(allMarkets, MARKETS_PER_PAGE);
-    for (const [pageChunk, i] of enumerate(chunks)) {
-      const page = i + 1;
-      home_pages[sort][page] = pageChunk;
-
-      // Add each market to a dictionary to avoid duplicate fetches on each market page later.
-      pageChunk.forEach((mkt) => {
-        markets[mkt.symbol_emojis.join("")] = mkt;
-      });
-    }
-  }
-
-  return { home_pages, markets };
+async function staticMarketPageData(): Promise<MarketPageDataDictionary> {
+  const pageSize = MAX_ROW_LIMIT;
+  // Fetch all markets. Note that order and sort by values are irrelevant since this is just
+  // populating each market's entry in a dictionary.
+  const fetchFunction = (page: number) =>
+    fetchMarketsJson({
+      page,
+      pageSize,
+      orderBy: ORDER_BY.DESC,
+      sortBy: SortMarketsBy.MarketCap,
+    });
+  const allMarkets = await exhaustiveFetch(fetchFunction, pageSize);
+  const entries = allMarkets.map((mkt) => [mkt.symbol_emojis.join(""), mkt]);
+  return Object.fromEntries(entries);
 }
