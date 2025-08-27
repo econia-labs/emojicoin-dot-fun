@@ -84,11 +84,8 @@ const cachedFetches = async () => {
 
   const fetchCachedCurrentMeleeData = unstableCacheWrapper(
     async () => fetchMeleeData(arena_info),
-    ["current-melee-data"],
-    {
-      revalidate: 2,
-      tags: ["current-melee-data"],
-    }
+    "current-melee-data",
+    { revalidate: 2 }
   );
 
   const [melee, { market_0_rate, market_1_rate }] = await Promise.all([

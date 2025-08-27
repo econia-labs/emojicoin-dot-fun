@@ -13,11 +13,8 @@ const fetchLatestProcessorVersion = () =>
 
 export const fetchCachedLatestProcessorVersion = unstableCacheWrapper(
   fetchLatestProcessorVersion,
-  ["latest-emojicoin-indexer-version"],
-  {
-    revalidate: 1,
-    tags: ["latest-emojicoin-indexer-version"],
-  }
+  "latest-emojicoin-indexer-version",
+  { revalidate: 1 }
 );
 
 const FETCH_INTERVAL = 1000;

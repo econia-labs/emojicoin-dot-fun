@@ -8,11 +8,8 @@ import { LatestCandlesticksSearchParamsSchema } from "./search-params-schema";
 
 const cachedResponse = unstableCacheWrapper(
   fetchMarketLatestCandlesticks,
-  ["fetch-market-latest-candlesticks"],
-  {
-    revalidate: 2,
-    tags: ["fetch-market-latest-candlesticks"],
-  }
+  "fetch-market-latest-candlesticks",
+  { revalidate: 2 }
 );
 
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {

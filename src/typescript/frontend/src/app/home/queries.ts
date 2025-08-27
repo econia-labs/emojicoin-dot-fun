@@ -34,11 +34,8 @@ export const cacheableMarketStateQuery = ({
 
 export const cachedHomePageMarketStateQuery = unstableCacheWrapper(
   cacheableMarketStateQuery,
-  ["cacheable-market-state-queries"],
-  {
-    revalidate: 2,
-    tags: ["cacheable-market-state-queries"],
-  }
+  "cacheable-market-state-queries",
+  { revalidate: 2 }
 );
 
 export type HomePageData =

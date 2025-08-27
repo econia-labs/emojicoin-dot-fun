@@ -3,7 +3,6 @@ export * from "./aptos-client";
 export * from "./aptos-utils";
 export * from "./arena";
 export * from "./bonding-curve";
-export * from "./colors";
 export * from "./compare-bigint";
 export * from "./get-resource-from-writeset";
 export * from "./hex";

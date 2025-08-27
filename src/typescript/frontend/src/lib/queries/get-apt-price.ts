@@ -28,7 +28,6 @@ export const fetchAptPrice = () =>
       return undefined;
     });
 
-export const fetchCachedAptPrice = unstableCacheWrapper(fetchAptPrice, ["coingecko-apt-price"], {
+export const fetchCachedAptPrice = unstableCacheWrapper(fetchAptPrice, "coingecko-apt-price", {
   revalidate: 10,
-  tags: ["coingecko-apt-price"],
 });

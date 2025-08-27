@@ -11,7 +11,13 @@ export const DateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
 
 export const stringifyJSON = <T>(data: T) => {
   if (data === undefined) {
-    throw new Error("Attempted to stringify undefined JSON value.");
+    const msg = "Attempted to stringify undefined JSON value.";
+    if (process.env.NODE_ENV !== "production") {
+      throw new Error(msg);
+    } else {
+      console.warn(msg);
+      return JSON.stringify(null);
+    }
   }
   return JSON.stringify(data, (_, value) => (typeof value === "bigint" ? `${value}n` : value));
 };

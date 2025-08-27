@@ -9,11 +9,8 @@ import { LatestArenaCandlesticksSearchParamsSchema } from "./search-params-schem
 
 const cachedResponse = unstableCacheWrapper(
   fetchArenaLatestCandlesticks,
-  ["fetch-arena-latest-candlesticks"],
-  {
-    revalidate: 2,
-    tags: ["fetch-arena-latest-candlesticks"],
-  }
+  "fetch-arena-latest-candlesticks",
+  { revalidate: 2 }
 );
 
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {

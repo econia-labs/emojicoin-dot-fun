@@ -16,9 +16,6 @@ export const fetchHomePagePriceFeed = () =>
 
 export const fetchCachedHomePagePriceFeed = unstableCacheWrapper(
   fetchHomePagePriceFeed,
-  ["price-feed-with-market-data-home-page"],
-  {
-    revalidate: 10,
-    tags: ["price-feed-with-market-data-home-page"],
-  }
+  "price-feed-with-market-data-home-page",
+  { revalidate: 10 }
 );
