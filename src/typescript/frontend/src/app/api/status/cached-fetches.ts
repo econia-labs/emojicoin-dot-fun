@@ -23,8 +23,8 @@ export const fetchCachedEmojicoinProcessorStatus = unstableCacheWrapper(
         }
         return res.data;
       }),
-  ["fetch-cached-emojicoin-processor-status-for-status-page"],
-  { revalidate: 2, tags: ["fetch-cached-emojicoin-processor-status-for-status-page"] }
+  "fetch-cached-emojicoin-processor-status-for-status-page",
+  { revalidate: 2 }
 );
 
 export const fetchCachedAptosProcessorStatus = unstableCacheWrapper(
@@ -35,8 +35,8 @@ export const fetchCachedAptosProcessorStatus = unstableCacheWrapper(
         console.error(e);
         return null;
       }),
-  ["fetch-cached-aptos-processor-status"],
-  { revalidate: 2, tags: ["fetch-cached-aptos-processor-status"] }
+  "fetch-cached-aptos-processor-status",
+  { revalidate: 2 }
 );
 
 export const fetchCachedFullnodeRestApiHealth = unstableCacheWrapper(
@@ -45,6 +45,6 @@ export const fetchCachedFullnodeRestApiHealth = unstableCacheWrapper(
       console.error(e);
       return null;
     }),
-  ["fetch-cached-fullnode-rest-api-health"],
-  { revalidate: 2, tags: ["fetch-cached-fullnode-rest-api-health"] }
+  "fetch-cached-fullnode-rest-api-health",
+  { revalidate: 2 }
 );

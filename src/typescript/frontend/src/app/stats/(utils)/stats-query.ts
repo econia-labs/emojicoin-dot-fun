@@ -43,11 +43,8 @@ export async function fetchPaginatedMarketStats(
 const fetchCachedPaginatedMarketStats = unstableCacheWrapper(
   async (args: StatsSchemaOutput) =>
     fetchPaginatedMarketStats({ ...args, pageSize: STATS_MARKETS_PER_PAGE }),
-  ["paginated-market-stats"],
-  {
-    revalidate: 10,
-    tags: ["paginated-market-stats"],
-  }
+  "paginated-market-stats",
+  { revalidate: 10 }
 );
 
 export default fetchCachedPaginatedMarketStats;

@@ -16,11 +16,8 @@ const CHUNK_SIZE = 500;
 
 const fetchCachedAllChunkedCandlestickMetadata = unstableCacheWrapper(
   fetchAllChunkedCandlesticksMetadata,
-  ["fetch-all-chunked-candlesticks-metadata"],
-  {
-    revalidate: 20,
-    tags: ["fetch-all-chunked-candlesticks-metadata"],
-  }
+  "fetch-all-chunked-candlesticks-metadata",
+  { revalidate: 20 }
 );
 
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {

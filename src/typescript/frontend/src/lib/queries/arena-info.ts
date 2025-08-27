@@ -4,21 +4,12 @@ import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 
 import { fetchArenaInfoJson } from "@/queries/arena";
 
-export const fetchCachedArenaInfo = unstableCacheWrapper(
-  fetchArenaInfoJson,
-  ["current-arena-info"],
-  {
-    revalidate: 2,
-    tags: ["current-arena-info"],
-  }
-);
+export const fetchCachedArenaInfo = unstableCacheWrapper(fetchArenaInfoJson, "current-arena-info", {
+  revalidate: 2,
+});
 
-// Should have the same cache entry as above, just not revalidated as often.
 export const fetchLongerCachedArenaInfo = unstableCacheWrapper(
   fetchArenaInfoJson,
-  ["current-arena-info"],
-  {
-    revalidate: 10,
-    tags: ["current-arena-info"],
-  }
+  "current-arena-info",
+  { revalidate: 10 }
 );
