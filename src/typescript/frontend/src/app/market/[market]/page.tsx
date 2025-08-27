@@ -33,6 +33,8 @@ export async function generateStaticParams() {
       // never changes per market.
       await (async () => {
         const res: DatabaseJsonType["market_state"][] = [];
+        const seen = new Set();
+
         for (const { sort, page } of await generateHomePageStaticParams()) {
           const moreMarkets = await fetchMarketsJson({
             page: Number(page),
@@ -40,7 +42,9 @@ export async function generateStaticParams() {
             orderBy: ORDER_BY.DESC,
             pageSize: MARKETS_PER_PAGE,
           });
-          res.push(...moreMarkets);
+          const filtered = moreMarkets.filter((v) => !seen.has(v.symbol_bytes));
+          filtered.forEach((v) => seen.add(v.symbol_bytes));
+          res.push(...filtered);
         }
         return res;
       })();
