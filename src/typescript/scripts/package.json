@@ -5,7 +5,6 @@
     "big.js": "^6.2.2",
     "find-git-root": "^1.0.4",
     "immer": "^10.1.1",
-    "redis": "^5.7.0",
     "zustand": "^5.0.3"
   },
   "description": "Emojicoin scripts",
@@ -61,8 +60,7 @@
     "load-env-testnet": "dotenv -e ../example.testnet.env -v NODE_OPTIONS=\"--conditions=react-server\"",
     "arena:bots": "pnpm load-env-local -- tsx src/arena/local/bots.ts",
     "arena:init": "pnpm load-env-local -- tsx src/arena/local/init.ts",
-    "utils:cli": "pnpm load-env-local -- tsx src/arena/utils/cli.ts",
-    "redis": "pnpm load-env -- tsx src/redis"
+    "utils:cli": "pnpm load-env-local -- tsx src/arena/utils/cli.ts"
   },
   "private": true,
   "version": "0.0.1"
