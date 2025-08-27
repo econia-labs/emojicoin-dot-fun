@@ -27,10 +27,11 @@ export const maybeGetMarketPrebuildData = (
     throw new Error("Couldn't find prebuild data.");
   }
 
-  // Keep in mind that this will only throw if this market isn't found at build-time, otherwise this
-  // code path should never be entered.
+  // This will only ever occur if a market is registered in between the time the prebuild script
+  // runs and the build process begins. In that case, just return undefined so it can be fetched.
   if (!data.markets[emojis.join("")]) {
-    throw new Error(`Couldn't find market in build data: ${emojis.join("")}`);
+    console.warn(`Couldn't find market in build data: ${emojis.join("")}. Fetching it now.`);
+    return undefined;
   }
 
   return {
