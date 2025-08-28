@@ -7,6 +7,8 @@ import React, { useMemo } from "react";
 import { ROUTES } from "router/routes";
 import type { ClassNameValue } from "tailwind-merge";
 
+import SearchArrow from "@/components/arrow/SearchArrow";
+
 import useStatsTransition from "../(hooks)/use-stats-transition";
 
 interface PaginationProps {
@@ -16,7 +18,7 @@ interface PaginationProps {
 }
 
 const styles = "flex gap-3 h-fit";
-const groupHover = "group-hover:text-ec-blue";
+const groupHover = "group-hover:text-ec-blue group-hover:fill-ec-blue";
 
 const PaginationLinkWithBraces = ({
   page,
@@ -41,9 +43,9 @@ const PaginationLinkWithBraces = ({
       className={cn("group cursor-pointer", styles)}
       aria-label={ariaLabel}
     >
-      <span className={groupHover}>{"{"}</span>
+      <span>{"{"}</span>
       {children}
-      <span className={groupHover}>{"}"}</span>
+      <span>{"}"}</span>
     </Link>
   );
 };
@@ -78,7 +80,7 @@ export const StatsButtonsBlock = ({
         sort={sort}
         desc={desc}
       >
-        <span className={groupHover}>{"<"}</span>
+        <SearchArrow direction="left" className={groupHover} />
       </PaginationLinkWithBraces>
 
       <div className={styles}>
@@ -91,7 +93,7 @@ export const StatsButtonsBlock = ({
         sort={sort}
         desc={desc}
       >
-        <span className={groupHover}>{">"}</span>
+        <SearchArrow direction="right" className={groupHover} />
       </PaginationLinkWithBraces>
 
       <PaginationLinkWithBraces

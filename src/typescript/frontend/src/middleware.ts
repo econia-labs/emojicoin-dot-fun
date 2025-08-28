@@ -11,6 +11,7 @@ import {
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
 import { IS_ALLOWLIST_ENABLED } from "lib/env";
+import handleStatsOrHomePageParams from "lib/middleware/utils";
 import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITER } from "lib/server-env";
 import { type NextRequest, NextResponse } from "next/server";
 import { ROUTES } from "router/routes";
@@ -40,29 +41,9 @@ export default async function middleware(request: NextRequest) {
   const url = new URL(request.url);
   const { pathname } = url;
 
-  if (pathname.startsWith(ROUTES["home"])) {
-    const segments = pathname.split("/").filter(Boolean);
-    // Split the path up, remove the empty segment at the beginning with the filter.
-    const sort = segments.at(1) ?? "bump";
-    const page = segments.at(2) ?? "1";
-    if (pathname === ROUTES.home) return NextResponse.next();
-    if (sort === "bump" && page === "1") {
-      return NextResponse.redirect(new URL(`${ROUTES.home}`, request.url));
-    }
-
-    const validSorts = ["bump", "all_time_vol", "daily_vol", "market_cap"];
-    const isValidSort = validSorts.includes(sort);
-    const isValidPage = /^\d+$/.test(page) && parseInt(page) >= 1;
-
-    if (isValidSort && isValidPage && segments.length === 3) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(
-      new URL(
-        `${ROUTES.home}/${isValidSort ? sort : "bump"}/${isValidPage ? page : "1"}`,
-        request.url
-      )
-    );
+  const maybeNextResponse = handleStatsOrHomePageParams(url);
+  if (maybeNextResponse) {
+    return maybeNextResponse;
   }
 
   if (pathname === ROUTES["launching-soon"]) {

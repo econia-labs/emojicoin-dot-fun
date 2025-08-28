@@ -9,12 +9,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
 import { useSearchEmojisMarkets } from "lib/hooks/queries/use-search-emojis";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { constructURLForHomePage } from "lib/queries/sorting/query-params";
+import { createHomePageURL } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { ROUTES } from "router/routes";
 import { Emoji } from "utils/emoji";
 
@@ -27,7 +27,7 @@ import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
 import EmptyTableCard from "../table-card/EmptyTableCard";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import { ClientGrid } from "./ClientGrid";
-import { ButtonsBlock } from "./components/buttons-block";
+import { PaginationButtons } from "./components/PaginationButtons";
 import SortAndAnimate from "./components/SortAndAnimate";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 
@@ -83,18 +83,13 @@ const EmojiTable = (props: EmojiTableProps) => {
   }, [markets]);
 
   const pushURL = useEvent((args?: { page?: number; sort?: SortMarketsBy }) => {
-    const newURL = constructURLForHomePage({
+    const newURL = createHomePageURL({
       page: args?.page ?? page,
       sort: args?.sort ?? sort,
     });
 
     router.push(newURL.toString(), { scroll: false });
   });
-
-  const handlePageChange = (page: number) => {
-    const newPage = Math.min(Math.max(1, page), pages);
-    pushURL({ page: newPage });
-  };
 
   const handleSortChange = (newPage: SortMarketsBy) => {
     pushURL({ sort: newPage });
@@ -116,12 +111,7 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   return (
     <>
-      <ButtonsBlock
-        className="mb-[30px]"
-        value={page}
-        onChange={handlePageChange}
-        numPages={pages}
-      />
+      <PaginationButtons className="pb-3" numPages={pages} />
       <div className="flex border-t border-solid border-dark-gray">
         <div className="flex justify-center w-full">
           <div
@@ -167,61 +157,58 @@ const EmojiTable = (props: EmojiTableProps) => {
                 This provides a smooth transition from grids of varying row lengths. */}
             {markets.length > 0 ? (
               <>
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    className="relative w-full h-full"
-                    id="emoji-grid"
-                    key={rowLength}
-                    style={{
-                      // We set these so the grid layout doesn't snap when the number of items per row changes.
-                      // This actually seems to work better than the css media queries, although I've left them in module.css
-                      // in case we want to use them for other things.
-                      maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH,
-                      minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH,
-                    }}
-                    exit={{
-                      opacity: 0,
-                      transition: {
-                        duration: 0.35,
-                        type: "just",
-                      },
-                    }}
-                  >
-                    <div
-                      className="grid relative justify-center w-full gap-0"
+                <Suspense>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      className="relative w-full h-full"
+                      id="emoji-grid"
+                      key={rowLength}
                       style={{
-                        gridTemplateColumns: `repeat(auto-fill, ${EMOJI_GRID_ITEM_WIDTH}px)`,
+                        // We set these so the grid layout doesn't snap when the number of items per row changes.
+                        // This actually seems to work better than the css media queries, although I've left them in module.css
+                        // in case we want to use them for other things.
+                        maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH,
+                        minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        transition: {
+                          duration: 0.35,
+                          type: "just",
+                        },
                       }}
                     >
-                      {shouldAnimateGrid ? (
-                        <LiveClientGrid
-                          isFavoriteFilterEnabled={isFavoriteFilterEnabled}
-                          markets={markets}
-                          sortBy={sort}
-                          page={page}
-                        />
-                      ) : (
-                        <ClientGrid markets={markets} page={page} sortBy={sort} />
-                      )}
-                      {!!emptyCells &&
-                        Array.from({ length: emptyCells }).map((_, i) => (
-                          <EmptyTableCard
-                            key={`empty-table-card-${sort}-${page - 1 * MARKETS_PER_PAGE + (markets.length - 1 + i)}`}
-                            index={markets.length - 1 + i}
-                            rowLength={rowLength}
-                            pageOffset={page - 1 * MARKETS_PER_PAGE}
+                      <div
+                        className="grid relative justify-center w-full gap-0"
+                        style={{
+                          gridTemplateColumns: `repeat(auto-fill, ${EMOJI_GRID_ITEM_WIDTH}px)`,
+                        }}
+                      >
+                        {shouldAnimateGrid ? (
+                          <LiveClientGrid
+                            isFavoriteFilterEnabled={isFavoriteFilterEnabled}
+                            markets={markets}
                             sortBy={sort}
+                            page={page}
                           />
-                        ))}
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-                <ButtonsBlock
-                  className="mt-[30px]"
-                  value={page}
-                  onChange={handlePageChange}
-                  numPages={pages}
-                />
+                        ) : (
+                          <ClientGrid markets={markets} page={page} sortBy={sort} />
+                        )}
+                        {!!emptyCells &&
+                          Array.from({ length: emptyCells }).map((_, i) => (
+                            <EmptyTableCard
+                              key={`empty-table-card-${sort}-${page - 1 * MARKETS_PER_PAGE + (markets.length - 1 + i)}`}
+                              index={markets.length - 1 + i}
+                              rowLength={rowLength}
+                              pageOffset={page - 1 * MARKETS_PER_PAGE}
+                              sortBy={sort}
+                            />
+                          ))}
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </Suspense>
+                <PaginationButtons className="pt-3" numPages={pages} />
               </>
             ) : (
               <div className="py-10">

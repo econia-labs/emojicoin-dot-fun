@@ -23,6 +23,11 @@ export const STATS_MARKETS_PER_PAGE = 100;
 
 export const DEFAULT_STATS_SORT_BY = SortMarketsBy.DailyVolume;
 
+export const StatsSortSchema = z.enum(statsSortByValues).default(DEFAULT_STATS_SORT_BY);
+
+export const MAX_MIDDLEWARE_PAGE_NUMBER =
+  parseInt(process.env.MAX_MIDDLEWARE_PAGE_NUMBER ?? "1000") || 1000;
+
 /**
  * Create the schema dynamically, based on the input max number of pages.
  *
@@ -33,12 +38,18 @@ export const DEFAULT_STATS_SORT_BY = SortMarketsBy.DailyVolume;
  */
 export const createStatsSchema = (totalNumberOfMarkets: number) => {
   const maxPageNumber = getMaxPageNumber(totalNumberOfMarkets, STATS_MARKETS_PER_PAGE);
+  if (maxPageNumber > 0.9 * MAX_MIDDLEWARE_PAGE_NUMBER) {
+    console.warn(
+      `The actual, validated max page number is reaching the middleware max page number allowed` +
+        `Current: ${maxPageNumber} Max: ${MAX_MIDDLEWARE_PAGE_NUMBER}. `
+    );
+  }
 
   return z.object({
     page: PageSchema.refine((val) => val <= maxPageNumber, {
       message: `Page number cannot exceed ${maxPageNumber}`,
     }),
-    sort: z.enum(statsSortByValues).default(DEFAULT_STATS_SORT_BY),
+    sort: StatsSortSchema,
     order: OrderBySchema,
   });
 };

@@ -3,12 +3,14 @@ import { ROUTES } from "router/routes";
 import { type OrderByStrings, toOrderByString } from "@/sdk/indexer-v2/const";
 
 import type { StatsPageData } from "./fetches";
-import type { StatsColumn } from "./schema";
+import { DEFAULT_STATS_SORT_BY, type StatsColumn } from "./schema";
 
 export type PageSortOrder = Pick<StatsPageData, "page" | "sort" | "order">;
 
 export const createStatsUrl = ({ page, sort, order }: PageSortOrder) =>
-  `${ROUTES.stats}/${sort}/${page}/${toOrderByString(order)}`;
+  !!page && !!sort && !!order
+    ? (`${ROUTES.stats}/${sort}/${page}/${toOrderByString(order)}` as const)
+    : (`${ROUTES.stats}/${DEFAULT_STATS_SORT_BY}/1/desc` as const);
 
 export const toggleStatsUrl = ({
   sort,
