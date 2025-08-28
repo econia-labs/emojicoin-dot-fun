@@ -18,8 +18,12 @@ describe("swap price calculation with dynamic fees", () => {
   it("sets the fee rates to the same total fee amount for markets pre/post bonding curve", () => {
     const preRate = getDynamicBaseFeeRateBPs({ inBondingCurve: true });
     const postRate = getDynamicBaseFeeRateBPs({ inBondingCurve: false });
-    // There is no pool fee in the bonding curve, so there's no pool fee rate incurred there.
-    expect(preRate).toEqual(postRate + POOL_FEE_RATE_BPS);
+    if (INTEGRATOR_FEE_RATE_BPS > 0) {
+      // There is no pool fee in the bonding curve, so there's no pool fee rate incurred there.
+      expect(preRate).toEqual(postRate + POOL_FEE_RATE_BPS);
+    } else {
+      expect(preRate).toEqual(0);
+    }
   });
 
   it("applies correct dynamic fee inside bonding curve", () => {
@@ -116,19 +120,18 @@ describe("swap price calculation with dynamic fees", () => {
     expect(POOL_FEE_RATE_BPS).not.toEqual(0);
     expect(prePoolFeePercentage).toEqual(0);
 
-    // This assumption is made in the dynamic fee calculation function and is called there as well,
-    // including at build time.
-    expect(INTEGRATOR_FEE_RATE_BPS).toBeGreaterThanOrEqual(POOL_FEE_RATE_BPS);
-
-    // The pre/post integrator fee percentages should not be the same, since the pool fee should
-    // not be zero.
-
-    expect(preIntegratorFeePercentage).not.toEqual(postIntegratorFeePercentage);
-
-    // The pre integrator fee percentage should be very close to the post fee percentages of both
-    // of the fee types.
-    expect(preIntegratorFeePercentage).toBeCloseTo(
-      postIntegratorFeePercentage + postPoolFeePercentage
-    );
+    if (INTEGRATOR_FEE_RATE_BPS > 0) {
+      // The pre/post integrator fee percentages should not be the same, since the pool fee should
+      // not be zero.
+      expect(preIntegratorFeePercentage).not.toEqual(postIntegratorFeePercentage);
+      // The pre integrator fee percentage should be very close to the post fee percentages of both
+      // of the fee types.
+      expect(preIntegratorFeePercentage).toBeCloseTo(
+        postIntegratorFeePercentage + postPoolFeePercentage
+      );
+    } else {
+      expect(preIntegratorFeePercentage).toEqual(0);
+      expect(preIntegratorFeePercentage).toEqual(postIntegratorFeePercentage);
+    }
   }
 });
