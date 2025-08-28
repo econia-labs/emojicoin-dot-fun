@@ -2,6 +2,9 @@
 
 // @ts-check
 import analyzer from "@next/bundle-analyzer";
+import { ROUTES } from "./src/router/routes";
+import { DEFAULT_SORT_BY } from "../sdk/src/indexer-v2/types/common";
+import { DEFAULT_STATS_SORT_BY } from "./src/app/stats/(utils)/schema";
 
 const withBundleAnalyzer = analyzer({
   enabled: process.env.ANALYZE === "true",
@@ -83,6 +86,15 @@ const nextConfig = {
     },
   ],
   rewrites: async () => [
+    // Default slug rewrites.
+    {
+      source: ROUTES.home,
+      destination: `${ROUTES.home}/${DEFAULT_SORT_BY}/1`,
+    },
+    {
+      source: ROUTES.stats,
+      destination: `${ROUTES.stats}/${DEFAULT_SORT_BY}/1/desc`,
+    },
     // These rewrites have been added after moving all the API routes to the /api folder.
     {
       source: "/candlesticks",
