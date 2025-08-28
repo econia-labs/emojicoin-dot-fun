@@ -17,13 +17,22 @@ export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   let res: Awaited<ReturnType<typeof getPoolData>> = "[]";
 
   try {
-    res = await getCachedPoolData({
-      page,
-      sortBy,
-      orderBy,
-      searchEmojis: searchBytes,
-      provider: account,
-    });
+    // Don't cache the fetch if search emojis or the account provider are passed in.
+    if (searchBytes?.length || !!account) {
+      res = await getPoolData({
+        page,
+        sortBy,
+        orderBy,
+        searchEmojis: searchBytes,
+        provider: account,
+      });
+    } else {
+      res = await getCachedPoolData({
+        page,
+        sortBy,
+        orderBy,
+      });
+    }
   } catch (e) {
     console.error(e);
   }
