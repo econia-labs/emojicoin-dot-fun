@@ -16,10 +16,6 @@ export enum SortMarketsBy {
   Tvl = "tvl",
 }
 
-/**
- * Note that if this value changes, it should be reflected in the redirects in `next.config.mjs`.
- * It can't be used there without a shim or convoluted solution, so that's why it's noted here.
- */
 export const DEFAULT_SORT_BY = SortMarketsBy.BumpOrder;
 
 export type MarketStateQueryArgs = {

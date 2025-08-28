@@ -83,15 +83,6 @@ const nextConfig = {
     },
   ],
   rewrites: async () => [
-    // Default slug rewrites.
-    {
-      source: "/home",
-      destination: "/home/bump/1",
-    },
-    {
-      source: "/stats",
-      destination: "/stats/daily_vol/1/desc",
-    },
     // These rewrites have been added after moving all the API routes to the /api folder.
     {
       source: "/candlesticks",

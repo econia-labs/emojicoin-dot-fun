@@ -21,10 +21,6 @@ export type StatsSchemaOutput = z.infer<ReturnType<typeof createStatsSchema>>;
 
 export const STATS_MARKETS_PER_PAGE = 100;
 
-/**
- * Note that if this value changes, it should be reflected in the redirects in `next.config.mjs`.
- * It can't be used there without a shim or convoluted solution, so that's why it's noted here.
- */
 export const DEFAULT_STATS_SORT_BY = SortMarketsBy.DailyVolume;
 
 export const StatsSortSchema = z.enum(statsSortByValues).default(DEFAULT_STATS_SORT_BY);

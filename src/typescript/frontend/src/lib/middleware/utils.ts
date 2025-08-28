@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 import { ROUTES } from "router/routes";
 import { z } from "zod";
 
-import { SortMarketsBy, toOrderByString } from "@/sdk/indexer-v2";
+import { DEFAULT_SORT_BY, SortMarketsBy, toOrderByString } from "@/sdk/indexer-v2";
 
 /**
  * This function returns a NextResponse if the path matches home or stats.
@@ -26,13 +26,11 @@ export default function handleStatsOrHomePageParams(url: URL): NextResponse | un
   // If they're the default no-slug pages, aka /home or /stats, the next.config.mjs redirects didn't
   // work properly. Throw in non-prod, log in development.
   if (pathname === ROUTES.home || pathname === ROUTES.stats) {
-    const msg = "Unexpected bare route hit middleware — config rewrite/redirect missing.";
-    if (process.env.NODE_ENV !== "production") {
-      throw new Error(msg);
-    } else {
-      console.warn(msg);
-    }
-    return NextResponse.next();
+    const newPathname = isHome
+      ? `${ROUTES.home}/${DEFAULT_SORT_BY}/1`
+      : `${ROUTES.stats}/${DEFAULT_STATS_SORT_BY}/1/desc`;
+    const newURL = new URL(newPathname, url);
+    return NextResponse.rewrite(newURL);
   }
 
   const segments = pathname.split("/").filter(Boolean);

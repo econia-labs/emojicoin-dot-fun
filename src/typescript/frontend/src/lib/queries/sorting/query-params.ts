@@ -8,4 +8,4 @@ import { toMarketDataSortByHomePage } from "./types";
 export const createHomePageURL = ({ page, sort }: { page?: number; sort?: SortMarketsBy }) =>
   !!sort && !!page && (sort !== DEFAULT_SORT_BY || page !== 1)
     ? (`${ROUTES.home}/${toMarketDataSortByHomePage(sort)}/${safeParsePageWithDefault(page)}` as const)
-    : (`${ROUTES.home}` as const);
+    : (`${ROUTES.home}/${DEFAULT_SORT_BY}/1` as const);
