@@ -82,7 +82,14 @@ export type ExplicitlyNullable<T> = {
   [K in keyof T]: T[K] | null;
 };
 
+/**
+ * A utility type to require string literals.
+ */
 type RequireLiteralString<S extends string> = string extends S ? never : S;
+
+/**
+ * A utility type to require that a string not equal the empty string "".
+ */
 type RequireNonEmptyString<S extends string> = S extends "" ? never : S;
 
 /**
