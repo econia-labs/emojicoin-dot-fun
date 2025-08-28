@@ -1,7 +1,14 @@
+// cspell:word istouched
 import type { Scales } from "components/inputs/input/types";
 import type { Scales as TextScales } from "components/text/types";
 import type { ReactElement } from "react";
 import type { LayoutProps, ResponsiveValue, SpaceProps } from "styled-system";
+
+export const variants = {
+  FANTOM: "fantom",
+} as const;
+
+type Variant = (typeof variants)[keyof typeof variants];
 
 export interface InputGroupProps extends SpaceProps, LayoutProps {
   scale?: Scales;
@@ -13,6 +20,7 @@ export interface InputGroupProps extends SpaceProps, LayoutProps {
   touched?: boolean;
   disabled?: boolean;
   isShowError?: boolean;
+  variant?: Variant;
   forId?: string;
   textScale?: ResponsiveValue<TextScales>;
   className?: string;
@@ -26,3 +34,5 @@ export interface StyledInputGroupProps extends LayoutProps {
 }
 
 export type InputIconProps = { scale: Scales; isEndIcon?: boolean };
+
+export type InputInnerProps = { variant?: Variant };
