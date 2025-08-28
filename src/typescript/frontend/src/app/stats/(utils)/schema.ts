@@ -28,6 +28,8 @@ export const StatsSortSchema = z.enum(statsSortByValues).default(DEFAULT_STATS_S
 export const MAX_MIDDLEWARE_PAGE_NUMBER =
   parseInt(process.env.MAX_MIDDLEWARE_PAGE_NUMBER ?? "1000") || 1000;
 
+const WARNING_PERCENTAGE_THRESHOLD = 0.8;
+
 /**
  * Create the schema dynamically, based on the input max number of pages.
  *
@@ -38,7 +40,7 @@ export const MAX_MIDDLEWARE_PAGE_NUMBER =
  */
 export const createStatsSchema = (totalNumberOfMarkets: number) => {
   const maxPageNumber = getMaxPageNumber(totalNumberOfMarkets, STATS_MARKETS_PER_PAGE);
-  if (maxPageNumber > 0.9 * MAX_MIDDLEWARE_PAGE_NUMBER) {
+  if (maxPageNumber > WARNING_PERCENTAGE_THRESHOLD * MAX_MIDDLEWARE_PAGE_NUMBER) {
     console.warn(
       `The actual, validated max page number is reaching the middleware max page number allowed` +
         `Current: ${maxPageNumber} Max: ${MAX_MIDDLEWARE_PAGE_NUMBER}. `

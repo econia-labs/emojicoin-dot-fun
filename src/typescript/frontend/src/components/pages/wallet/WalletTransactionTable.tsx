@@ -119,7 +119,7 @@ export const WalletTransactionTable = ({
         items={query.data?.pages.flatMap((page) => page) ?? []}
         isLoading={query.isLoading}
         // In this case we can only sort by a single column, so no need to check for column.
-        onOrderChangeSortHandler={(_, dir) => setOrderBy(dir)}
+        onSortChange={(_, dir) => setOrderBy(dir)}
         pagination={query}
       />
     </>

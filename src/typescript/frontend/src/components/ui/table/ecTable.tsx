@@ -108,7 +108,7 @@ export interface TableProps<T> {
    *
    * NOTE: You cannot use this with `sorting`.
    */
-  onOrderChangeSortHandler?: (column: string, direction: OrderByStrings) => void;
+  onSortChange?: (column: string, direction: OrderByStrings) => void;
   /**
    * Configuration for pagination functionality.
    * Enables infinite scrolling when provided.
@@ -167,7 +167,7 @@ export const EcTable = <T,>({
   defaultSortColumn,
   pagination,
   sorting = { mode: "client" },
-  onOrderChangeSortHandler,
+  onSortChange,
   isLoading,
   emptyText,
   variant = "default",
@@ -204,14 +204,14 @@ export const EcTable = <T,>({
 
   const sorted = useMemo(() => {
     // Ignore client side sorting if the handler is provided or it's controlled.
-    if (onOrderChangeSortHandler || sorting.mode === "controlled") return memoizedItems;
+    if (onSortChange || sorting.mode === "controlled") return memoizedItems;
 
     const sortFn = _.find(columns, { id: effectiveSort.column })?.sortFn;
     if (!sortFn) return memoizedItems;
 
     return _.orderBy(memoizedItems, sortFn, effectiveSort.direction);
   }, [
-    onOrderChangeSortHandler,
+    onSortChange,
     columns,
     sorting.mode,
     effectiveSort.column,
@@ -219,18 +219,18 @@ export const EcTable = <T,>({
     memoizedItems,
   ]);
 
-  const sortHandlerIfUncontrolled = useCallback(
+  const handleUncontrolledSort = useCallback(
     (next: { column: string; direction: OrderByStrings }) => {
       if (effectiveSort.mode === "controlled") return;
 
       const col = columns.find((c) => c.id === next.column);
-      if (onOrderChangeSortHandler && col?.isServerSideSortable) {
-        onOrderChangeSortHandler(next.column, next.direction);
+      if (onSortChange && col?.isServerSideSortable) {
+        onSortChange(next.column, next.direction);
       }
 
       setUncontrolledSort({ ...next, mode: "client" });
     },
-    [columns, effectiveSort.mode, onOrderChangeSortHandler]
+    [columns, effectiveSort.mode, onSortChange]
   );
 
   const minRows = useMemo(() => {
@@ -295,7 +295,7 @@ export const EcTable = <T,>({
                   {...(column.isServerSideSortable
                     ? effectiveSort.mode === "controlled"
                       ? { sort: effectiveSort }
-                      : { sort: effectiveSort, clientSortHandler: sortHandlerIfUncontrolled }
+                      : { sort: effectiveSort, clientSortHandler: handleUncontrolledSort }
                     : undefined)}
                 />
               ))}
