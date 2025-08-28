@@ -56,7 +56,7 @@ const EmojiPickerWithInput = ({
   inputGroupProps,
   inputClassName = "",
 }: {
-  handleClick: (message: string) => Promise<void>;
+  handleClick?: (message: string) => Promise<void>;
   pickerButtonClassName?: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
@@ -89,9 +89,7 @@ const EmojiPickerWithInput = ({
   );
 
   // Append the picker visibility mutation to the end of the handleClick function.
-  const handleSubmission = async (message: string) => {
-    await handleClick(message);
-  };
+  const handleSubmission = async (message: string) => handleClick?.(message);
 
   // Clear the input and set the onClickOutside event handler on mount.
   useEffect(() => {
@@ -178,7 +176,7 @@ const EmojiPickerWithInput = ({
 
   const closeIconClassName =
     `flex items-center justify-center relative h-full ${mode !== "search" && "ml-[2.5ch] pr-[1ch]"} hover:cursor-pointer ` +
-    `${mode === "search" ? "med-pixel-close" : ""}`;
+    `${mode === "search" ? "w-[12px]" : ""}`;
 
   const close = (
     <motion.div whileTap={{ scale: 0.85 }} className={closeIconClassName} onClick={clear}>

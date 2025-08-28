@@ -8,7 +8,9 @@ import type { StatsColumn } from "./schema";
 export type PageSortOrder = Pick<StatsPageData, "page" | "sort" | "order">;
 
 export const createStatsUrl = ({ page, sort, order }: PageSortOrder) =>
-  `${ROUTES.stats}/${sort}/${page}/${toOrderByString(order)}`;
+  !!page && !!sort && !!order
+    ? `${ROUTES.stats}/${sort}/${page}/${toOrderByString(order)}` as const
+    : `${ROUTES.stats}` as const;
 
 export const toggleStatsUrl = ({
   sort,

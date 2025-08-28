@@ -7,8 +7,11 @@ import type { StatsPageData } from "../(utils)/fetches";
 import type { StatsColumn } from "../(utils)/schema";
 import { DEFAULT_STATS_SORT_BY } from "../(utils)/schema";
 
+/**
+ * Note that stats page url params are partially validated in middleware (all valid input strings).
+ */
 export const useStatsUrlParams = (): Pick<StatsPageData, "page" | "sort" | "order"> => {
-  const params = useParams<{ sort?: StatsColumn; order?: OrderByStrings; page?: string }>();
+  const params = useParams<{ sort?: StatsColumn; order?: OrderByStrings; page?: `${number}` }>();
   return useMemo(
     () => ({
       sort: params.sort ?? DEFAULT_STATS_SORT_BY,
