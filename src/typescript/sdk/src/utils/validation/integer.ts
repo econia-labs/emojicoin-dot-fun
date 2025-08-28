@@ -7,3 +7,5 @@ export const IntegerSchema = z
   .pipe(z.coerce.number().finite().safe().int());
 
 export const PositiveIntegerSchema = IntegerSchema.pipe(z.coerce.number().positive());
+
+export const NonNegativeIntegerSchema = IntegerSchema.pipe(z.coerce.number().nonnegative());
