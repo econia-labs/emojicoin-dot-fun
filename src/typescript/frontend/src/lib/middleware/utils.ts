@@ -9,7 +9,7 @@ import { ROUTES } from "router/routes";
 import { z } from "zod";
 
 import { toOrderByString } from "@/sdk/indexer-v2/const";
-import { DEFAULT_SORT_BY, SortMarketsBy } from "@/sdk/indexer-v2/types";
+import { DEFAULT_SORT_BY, SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
 /**
  * This function returns a NextResponse if the path matches home or stats.
