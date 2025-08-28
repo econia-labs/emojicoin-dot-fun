@@ -8,7 +8,8 @@ import { NextResponse } from "next/server";
 import { ROUTES } from "router/routes";
 import { z } from "zod";
 
-import { DEFAULT_SORT_BY, SortMarketsBy, toOrderByString } from "@/sdk/indexer-v2";
+import { toOrderByString } from "@/sdk/indexer-v2/const";
+import { DEFAULT_SORT_BY, SortMarketsBy } from "@/sdk/indexer-v2/types";
 
 /**
  * This function returns a NextResponse if the path matches home or stats.
