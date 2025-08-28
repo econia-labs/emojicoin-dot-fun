@@ -36,6 +36,10 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
   }
 
+  if (selectEmojis && !selectEmojis.length) {
+    console.warn("`selectEmojis` contains no emojis; this will un-intuitively omit the filter.");
+  }
+
   if (selectEmojis?.length) {
     query = query.or(joinEqClauses(selectEmojis));
   }

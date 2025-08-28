@@ -28,6 +28,8 @@ export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
     )
       .map(symbolBytesToEmojis)
       .map((r) => r.emojis.map((v) => v.emoji));
+
+    if (!favoritesAsSymbols.length) return NextResponse.json([]);
     const res = await fetchMarketsJson({ selectEmojis: favoritesAsSymbols });
     return NextResponse.json(res);
   } catch (e) {
