@@ -37,7 +37,9 @@ export const PaginationButtons = ({ numPages, className }: ButtonsBlockProps) =>
   const { page, sort } = useHomePageUrlParams();
 
   return (
-    <div className={cn("flex gap-3 md:gap-4 justify-center med-pixel-text text-dark-gray", className)}>
+    <div
+      className={cn("flex gap-3 md:gap-4 justify-center med-pixel-text text-dark-gray", className)}
+    >
       <PaginationLinkWithBraces ariaLabel={"go to the first page"} page={1} sort={sort}>
         <span className={groupHover}>{"<<"} </span>
       </PaginationLinkWithBraces>
