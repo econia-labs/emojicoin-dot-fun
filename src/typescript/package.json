@@ -37,6 +37,7 @@
     "start": "pnpm load-env -- turbo run start",
     "submodule": "turbo run submodule",
     "test": "pnpm run test:frontend:unit && pnpm run test:sdk",
+    "test:zero-fee-rates": "pnpm dotenv -v NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS=0 -- pnpm run test",
     "test:frontend": "pnpm run test:frontend:unit && test:frontend:e2e",
     "test:frontend:e2e": "pnpm run load-env:test -- turbo run test:e2e --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "test:frontend:unit": "NO_TEST_SETUP=true pnpm run load-env:test -- turbo run test:unit --filter @econia-labs/emojicoin-frontend --log-prefix none",
