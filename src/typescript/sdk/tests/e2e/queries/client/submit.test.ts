@@ -10,9 +10,9 @@ import {
   APTOS_NETWORK,
   getEmojicoinMarketAddressAndTypeTags,
   INTEGRATOR_ADDRESS,
-  INTEGRATOR_FEE_RATE_BPS,
   MODULE_ADDRESS,
   ONE_APT,
+  REWARDS_INTEGRATOR_FEE_RATE_BPS,
   REWARDS_MODULE_ADDRESS,
   REWARDS_MODULE_NAME,
   type SymbolEmoji,
@@ -337,7 +337,7 @@ describe("all submission types for the emojicoin client", () => {
         expect(swap.event.isSell).toEqual(false);
         expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
         expect(swap.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
-        expect(swap.event.integratorFeeRateBPs).toEqual(INTEGRATOR_FEE_RATE_BPS);
+        expect(swap.event.integratorFeeRateBPs).toEqual(REWARDS_INTEGRATOR_FEE_RATE_BPS);
         expect(swap.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
         expect(swap.model.market.trigger).toEqual(Trigger.SwapBuy);
       });
@@ -371,7 +371,7 @@ describe("all submission types for the emojicoin client", () => {
           expect(sell.event.isSell).toEqual(true);
           expect(sell.event.swapper).toEqual(sender.accountAddress.toString());
           expect(sell.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
-          expect(sell.event.integratorFeeRateBPs).toEqual(INTEGRATOR_FEE_RATE_BPS);
+          expect(sell.event.integratorFeeRateBPs).toEqual(REWARDS_INTEGRATOR_FEE_RATE_BPS);
           expect(sell.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
           expect(sell.model.market.trigger).toEqual(Trigger.SwapSell);
         });
