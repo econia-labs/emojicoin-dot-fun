@@ -20,6 +20,8 @@ import MainInfo from "./components/main-info/MainInfo";
 import MobileGrid from "./components/mobile-grid";
 import type { EmojicoinProps } from "./types";
 
+const subscribeArgs = { eventTypes: ["Chat", "Swap"] as ["Chat", "Swap"] };
+
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { lg } = useTailwindBreakpoints();
   const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
@@ -31,7 +33,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [props.data]);
 
-  useReliableSubscribe({ eventTypes: ["Chat", "Swap"] });
+  useReliableSubscribe(subscribeArgs);
 
   const isInMelee = useMemo(
     () => symbol0 && symbol1 && [symbol0, symbol1].includes(props.data.symbol),
