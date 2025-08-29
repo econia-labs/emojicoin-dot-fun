@@ -42,6 +42,8 @@ const PaginationLinkWithBraces = ({
       onClick={handleTransition}
       className={cn("group cursor-pointer", styles)}
       aria-label={ariaLabel}
+      // These are heavy queries- the stats page shouldn't pre-fetch them until they're more efficient.
+      prefetch={false}
     >
       <span>{"{"}</span>
       {children}

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "lib/utils/class-name";
+import type { LinkProps } from "next/link";
 import { useRouter } from "next/navigation";
 import path from "path";
 import { useMemo } from "react";
@@ -38,12 +39,14 @@ export default function StatsPageComponent({
       mode: "controlled" as const,
       column: columnSortStrings[currSort],
       direction: toOrderByString(currOrder),
-      getLinkProps: (next: { column: string; direction: OrderByStrings }) => ({
+      getLinkProps: (next: { column: string; direction: OrderByStrings }): LinkProps => ({
         href: toggleStatsUrl({
           sort: columnSortStringsReverseMapping[next.column],
           currSort,
           currOrder,
         }),
+        // These are heavy queries- the stats page shouldn't pre-fetch them until they're more efficient.
+        prefetch: false,
         onClick: handleSortClick,
       }),
     }),
