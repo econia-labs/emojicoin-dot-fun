@@ -173,7 +173,7 @@ const ClientPoolsPage = () => {
                 getKey={(i) => i.market.marketID.toString()}
                 onClick={(_, i) => setSelectedIndex(i)}
                 pagination={query}
-                serverSideOrderHandler={(col, dir) => {
+                onSortChange={(col, dir) => {
                   setSortBy(col as SortMarketsBy);
                   setOrderBy(dir);
                 }}

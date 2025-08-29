@@ -4,7 +4,7 @@ import Text from "components/text";
 import React, { cloneElement } from "react";
 
 import { InputError, InputIcon, InputInner, InputWrapper, StyledInputGroup } from "./styled";
-import { type InputGroupProps, variants } from "./types";
+import type { InputGroupProps } from "./types";
 
 export const InputGroup: React.FC<InputGroupProps> = ({
   scale = inputScales.MD,
@@ -15,7 +15,6 @@ export const InputGroup: React.FC<InputGroupProps> = ({
   label,
   touched,
   isShowError = true,
-  variant,
   forId,
   inputWrapperStyles,
   textScale = "heading1",
@@ -29,10 +28,10 @@ export const InputGroup: React.FC<InputGroupProps> = ({
       hasEndIcon={!!endIcon}
       {...props}
     >
-      <InputInner variant={variant}>
+      <InputInner>
         {label && (
           <Text
-            as={variant === variants.FANTOM ? "label" : undefined}
+            as={"label"}
             textScale={textScale}
             color="white"
             mb="20px"

@@ -1,93 +1,23 @@
 import { AptPriceContextProvider } from "context/AptPrice";
-import { CookieUserSettingsManager } from "lib/cookie-user-settings/cookie-user-settings-common";
-import FEATURE_FLAGS from "lib/feature-flags";
-import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
-import { getFavorites } from "lib/queries/get-favorite-markets";
-import { fetchCachedNumRegisteredMarkets } from "lib/queries/num-market";
-import { fetchCachedPriceFeed } from "lib/queries/price-feed";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
-import { cookies } from "next/headers";
 
-import { fetchMarkets } from "@/queries/home";
-import { symbolBytesToEmojis } from "@/sdk/emoji_data";
-import { ORDER_BY, toMarketStateModel } from "@/sdk/indexer-v2";
-import { type DatabaseModels, toPriceFeed } from "@/sdk/indexer-v2/types";
-
-import { fetchCachedMeleeData } from "../arena/fetch-melee-data";
 import HomePageComponent from "./HomePage";
-import { cachedHomePageMarketStateQuery } from "./queries";
+import { fetchHomePageData } from "./queries";
 
-export default async function Home({ searchParams }: HomePageParams) {
-  const { page, sortBy, q } = toHomePageParamsWithDefault(searchParams);
-  const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
+export const revalidate = 10;
+export const dynamic = "force-static";
 
-  // General market data queries
-  // ---------------------------------------
-  const priceFeedPromise = fetchCachedPriceFeed()
-    .then((res) => res.map(toPriceFeed))
-    .catch((err) => {
-      console.error(err);
-      return [] as DatabaseModels["price_feed"][];
-    });
-  const numMarketsPromise = fetchCachedNumRegisteredMarkets();
-  const aptPricePromise = fetchCachedAptPrice();
-  const meleeDataPromise = FEATURE_FLAGS.Arena
-    ? fetchCachedMeleeData()
-        .then((res) => (res.arenaInfo ? res : null))
-        .catch(() => null)
-    : null;
+export default async function HomePage() {
+  const result = await fetchHomePageData({ sort: "bump", page: "1" });
 
-  // Favorites
-  // ---------------------------------------
-  // cookies() can only be used in this file, otherwise the build command fails, even when using "server-only".
-  const serverCookies = new CookieUserSettingsManager(cookies());
-  // First check user settings in cookies to check the filter status.
-  const { accountAddress, homePageFilterFavorites: favoritesSettingFromCookies } =
-    serverCookies.getSettings();
-  // Fetch favorites, and ignore the favorites preference if there is a search query.
-  const favorites =
-    !q && accountAddress && favoritesSettingFromCookies ? await getFavorites(accountAddress) : [];
+  if (result.notFound) {
+    throw new Error("Default home page data not found somehow.");
+  }
 
-  // Cache the market states query if there are no params that make the query too unique to be cached effectively.
-  // Note that the order is always descending on the home page.
-  const filterByFavorites = favorites.length;
-  const isCacheable = !searchEmojis?.length && !filterByFavorites;
-  const marketsPromise = isCacheable
-    ? cachedHomePageMarketStateQuery({ page, sortBy }).then((res) => res.map(toMarketStateModel))
-    : fetchMarkets({
-        // The page is always 1 if filtering by favorites.
-        page: filterByFavorites ? 1 : page,
-        sortBy,
-        // The home page always sorts by queries in descending order.
-        orderBy: ORDER_BY.DESC,
-        searchEmojis,
-        selectEmojis: favorites.map((emojiBytes) =>
-          symbolBytesToEmojis(emojiBytes).emojis.map((e) => e.emoji)
-        ),
-        pageSize: MARKETS_PER_PAGE,
-      });
-
-  const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
-    priceFeedPromise.catch(() => []),
-    marketsPromise.catch(() => []),
-    numMarketsPromise.catch(() => 0),
-    aptPricePromise.catch(() => undefined),
-    meleeDataPromise,
-  ]);
+  const { data } = result;
 
   return (
-    <AptPriceContextProvider aptPrice={aptPrice}>
-      <HomePageComponent
-        markets={markets}
-        numMarkets={numMarkets}
-        page={page}
-        sortBy={sortBy}
-        searchBytes={q}
-        priceFeed={priceFeedData}
-        meleeData={meleeData}
-        isFavoriteFilterEnabled={!!favoritesSettingFromCookies && favorites.length > 0}
-      />
+    <AptPriceContextProvider aptPrice={data.aptPrice}>
+      <HomePageComponent {...data} />
     </AptPriceContextProvider>
   );
 }

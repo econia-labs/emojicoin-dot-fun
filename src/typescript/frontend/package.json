@@ -28,9 +28,9 @@
     "@radix-ui/react-progress": "^1.1.3",
     "@radix-ui/react-select": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tabs": "^1.1.4",
     "@radix-ui/react-toggle-group": "^1.1.7",
-    "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.2.0",
     "@react95/core": "^9.2.1",
     "@tanstack/react-query": "^5.74.3",
@@ -90,6 +90,7 @@
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.4",
     "typescript": "5.6.2"
   },
   "engines": {
@@ -101,13 +102,13 @@
   "scripts": {
     "_format": "prettier './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "build": "next build",
-    "build:debug": "BUILD_DEBUG=true next build --no-lint --no-mangling --debug",
-    "build:no-checks": "IGNORE_BUILD_ERRORS=true next build --no-lint",
-    "build:no-ssg": "next build --experimental-build-mode compile",
+    "build:debug": "BUILD_DEBUG=true pnpm run build --no-lint --no-mangling --debug",
+    "build:no-checks": "IGNORE_BUILD_ERRORS=true pnpm run build --no-lint",
+    "build:no-ssg": "pnpm run build --experimental-build-mode compile",
     "check": "tsc",
     "check:ci": "tsc -p tests/tsconfig-ci.json",
     "check:tests": "tsc -p tests/tsconfig.json",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next && rm -rf .shared-build-data",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbo --port 3001",
     "dev:lan": "NODE_OPTIONS='--inspect' next dev --turbo -H 0.0.0.0 --port 3001",
     "format": "pnpm _format --list-different --write",
@@ -115,11 +116,14 @@
     "lint": "eslint --max-warnings=0 -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
     "playwright:install": "playwright install --with-deps",
+    "prebuild": "INTERNAL_SKIP_SERVER_ONLY_CHECKS=1 tsx scripts/build-time-cache.ts''",
+    "predev": "rm -rf .shared-build-data",
+    "postbuild": "rm -rf .shared-build-data",
     "start": "next start --port 3001",
     "submodule": "./submodule.sh",
     "test:e2e": "playwright test --project=firefox",
     "test:unit": "pnpm jest tests/unit && pnpm dotenv -v NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS=0 -- pnpm jest tests/unit",
     "vercel-install": "./submodule.sh && pnpm i"
   },
-  "version": "2.1.0"
+  "version": "2.2.0"
 }

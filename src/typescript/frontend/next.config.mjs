@@ -17,6 +17,7 @@ const debugConfigOptions = {
   experimental: {
     serverMinification: false,
     serverSourceMaps: true,
+    isrFlushToDisk: true,
   },
 };
 
@@ -30,6 +31,7 @@ const nextConfig = {
       "eaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e",
   },
   ...(DEBUG ? debugConfigOptions : {}),
+  swcMinify: process.env.NODE_ENV === "development" ? false : undefined,
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
@@ -45,11 +47,21 @@ const nextConfig = {
   experimental: {
     // Use turbo when running/building locally. Since it's experimental, avoid it in production.
     turbo: process.env.NODE_ENV === "development" ? {} : undefined,
+    // The browser cache stale time. This is a browser/client-side specific cache, not the global
+    // data cache.
     staleTimes: {
       dynamic: 0, // Default is normally 30s.
-      static: 60, // Default is normally 180s.
+      static: 10, // Default is normally 180s.
     },
+    // Not confirmed working: the idea here is to force synchronous revalidation after 60 seconds
+    // but allow asynchronous (background) revalidation before that. This way, users wouldn't see
+    // an extremely stale page if it hasn't been visited in a while- the most they'd ever see is
+    // 60 seconds.
+    swrDelta: 60,
+    serverMinification: DEBUG || process.env.NODE_ENV === "development" ? false : true,
+    serverSourceMaps: DEBUG || process.env.NODE_ENV === "development" ? true : false,
   },
+  productionBrowserSourceMaps: DEBUG || process.env.NODE_ENV === "development" ? true : false,
   // Log full fetch URLs if we're in a specific environment.
   logging:
     process.env.NODE_ENV === "development" ||

@@ -36,6 +36,10 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
   }
 
+  if (selectEmojis && !selectEmojis.length) {
+    console.warn("`selectEmojis` contains no emojis; this will un-intuitively omit the filter.");
+  }
+
   if (selectEmojis?.length) {
     query = query.or(joinEqClauses(selectEmojis));
   }
@@ -44,7 +48,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.eq("in_bonding_curve", inBondingCurve);
   }
 
-  return query.returns<DatabaseJsonType["market_state"][]>();
+  return query.overrideTypes<DatabaseJsonType["market_state"][], { merge: false }>();
 };
 
 const selectMarketStates = (args: MarketStateQueryArgs) =>

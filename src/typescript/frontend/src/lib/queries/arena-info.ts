@@ -1,10 +1,15 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 
 import { fetchArenaInfoJson } from "@/queries/arena";
 
-export const fetchCachedArenaInfo = unstable_cache(fetchArenaInfoJson, ["current-arena-info"], {
+export const fetchCachedArenaInfo = unstableCacheWrapper(fetchArenaInfoJson, "current-arena-info", {
   revalidate: 2,
-  tags: ["current-arena-info"],
 });
+
+export const fetchLongerCachedArenaInfo = unstableCacheWrapper(
+  fetchArenaInfoJson,
+  "current-arena-info",
+  { revalidate: 10 }
+);

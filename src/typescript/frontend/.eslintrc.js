@@ -29,6 +29,8 @@ module.exports = {
     "tailwind.config.js",
     "jest.config.js",
     "public/static",
+    "cache-handler.js",
+    "cache-handlers.js",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -38,7 +40,7 @@ module.exports = {
     },
     ecmaVersion: "latest",
     sourceType: "module",
-    project: ["tsconfig.json", "tests/tsconfig.json"],
+    project: ["tsconfig.json", "tests/tsconfig.json", "scripts/tsconfig.json"],
     warnOnUnsupportedTypeScriptVersion: false,
   },
   plugins: ["@typescript-eslint", "import", "simple-import-sort"],

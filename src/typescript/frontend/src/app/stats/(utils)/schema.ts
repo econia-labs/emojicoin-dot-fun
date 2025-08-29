@@ -2,9 +2,9 @@ import { OrderBySchema, PageSchema } from "lib/api/schemas/api-pagination";
 import getMaxPageNumber from "lib/utils/get-max-page-number";
 import { z } from "zod";
 
-import { SortMarketsBy } from "@/sdk/index";
+import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
-const sortByValues = [
+export const statsSortByValues = [
   "delta",
   SortMarketsBy.AllTimeVolume,
   SortMarketsBy.MarketCap,
@@ -13,11 +13,22 @@ const sortByValues = [
   SortMarketsBy.Tvl,
 ] as const;
 
-export type StatsColumn = (typeof sortByValues)[number];
-export type StatsSchemaInput = z.input<ReturnType<typeof createStatsSchema>>;
+export type StatsColumn = (typeof statsSortByValues)[number];
+export type StatsSchemaInput = Omit<z.input<ReturnType<typeof createStatsSchema>>, "page"> & {
+  page?: string | number | undefined;
+};
 export type StatsSchemaOutput = z.infer<ReturnType<typeof createStatsSchema>>;
 
 export const STATS_MARKETS_PER_PAGE = 100;
+
+export const DEFAULT_STATS_SORT_BY = SortMarketsBy.DailyVolume;
+
+export const StatsSortSchema = z.enum(statsSortByValues).default(DEFAULT_STATS_SORT_BY);
+
+export const MAX_MIDDLEWARE_PAGE_NUMBER =
+  parseInt(process.env.MAX_MIDDLEWARE_PAGE_NUMBER ?? "1000") || 1000;
+
+const WARNING_PERCENTAGE_THRESHOLD = 0.8;
 
 /**
  * Create the schema dynamically, based on the input max number of pages.
@@ -29,12 +40,18 @@ export const STATS_MARKETS_PER_PAGE = 100;
  */
 export const createStatsSchema = (totalNumberOfMarkets: number) => {
   const maxPageNumber = getMaxPageNumber(totalNumberOfMarkets, STATS_MARKETS_PER_PAGE);
+  if (maxPageNumber > WARNING_PERCENTAGE_THRESHOLD * MAX_MIDDLEWARE_PAGE_NUMBER) {
+    console.warn(
+      `The actual, validated max page number is reaching the middleware max page number allowed` +
+        `Current: ${maxPageNumber} Max: ${MAX_MIDDLEWARE_PAGE_NUMBER}. `
+    );
+  }
 
   return z.object({
     page: PageSchema.refine((val) => val <= maxPageNumber, {
       message: `Page number cannot exceed ${maxPageNumber}`,
     }),
-    sortBy: z.enum(sortByValues).default(SortMarketsBy.DailyVolume),
-    orderBy: OrderBySchema,
+    sort: StatsSortSchema,
+    order: OrderBySchema,
   });
 };

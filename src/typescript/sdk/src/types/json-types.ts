@@ -17,8 +17,7 @@ export type JsonValue =
   | boolean
   | null
   | JsonValue[]
-  | { [key: string]: JsonValue }
-  | bigint;
+  | { [key: string]: JsonValue };
 
 export type JsonTypes = CoinAndFungibleAssetJsonTypes &
   ArenaJsonTypes & {

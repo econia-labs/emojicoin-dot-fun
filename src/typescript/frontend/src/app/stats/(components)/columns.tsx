@@ -1,5 +1,5 @@
-import type { StatsSchemaOutput } from "app/api/stats/schema";
-import { MiniBondingCurveProgress } from "app/stats/MiniBondingCurveProgress";
+import { MiniBondingCurveProgress } from "app/stats/(components)/MiniBondingCurveProgress";
+import type { StatsSchemaOutput } from "app/stats/(utils)/schema";
 import type { ClassValue } from "clsx";
 import { cn } from "lib/utils/class-name";
 import type { ReactNode } from "react";
@@ -32,7 +32,7 @@ export const columnSortStrings = {
  */
 export const columnSortStringsReverseMapping: Record<
   (typeof columnSortStrings)[keyof typeof columnSortStrings],
-  StatsSchemaOutput["sortBy"]
+  StatsSchemaOutput["sort"]
 > = {
   "Δ 24h": "delta",
   price: SortMarketsBy.Price,
@@ -47,11 +47,11 @@ const noWrap: ClassValue = "pl-6 whitespace-nowrap";
 // Just a helper class for the below column creation function.
 function createColumn<T>({
   label,
-  node,
+  headerContent,
   cell,
 }: {
   label: string;
-  node?: ReactNode;
+  headerContent?: ReactNode;
   cell: EcTableColumn<T>["renderCell"];
 }) {
   // Use the label if there's no `node` provided.
@@ -60,7 +60,7 @@ function createColumn<T>({
   // The cell itself is what's rendered in each table cell; i.e., each `td`.
   return {
     id: label,
-    headerContent: node ?? <span className={cn(noWrap)}>{label}</span>,
+    headerContent: headerContent ?? <span className={cn(noWrap)}>{label}</span>,
     renderCell: cell,
     isServerSideSortable: label in columnSortStringsReverseMapping,
   };
@@ -71,7 +71,7 @@ export const statsHeaderColumns: EcTableColumn<PriceFeedWithNullsModel>[] = [
     label: "symbol",
     // The same as above in `createColumn`, but ensure no padding left. Can't use
     // `not:first-child` because of the convoluted component tree with `EcTable`.
-    node: <span className={cn(noWrap, "pl-0")}>{"symbol"}</span>,
+    headerContent: <span className={cn(noWrap, "pl-0")}>{"symbol"}</span>,
     cell: (item) => <Emoji emojis={item.market.symbolData.symbol} />,
   }),
   createColumn({

@@ -1,7 +1,8 @@
 import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
 import { cn } from "lib/utils/class-name";
 import _ from "lodash";
-import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import type { LinkProps } from "next/link";
+import React, { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
 import type { OrderByStrings } from "@/sdk/indexer-v2/const";
 
@@ -50,6 +51,15 @@ export interface EcTableColumn<T> {
   renderCell?: (item: T) => React.ReactNode;
 }
 
+export type EffectiveSort =
+  | { mode: "client"; column: string; direction: OrderByStrings }
+  | {
+      mode: "controlled";
+      column: string;
+      direction: OrderByStrings;
+      getLinkProps: (next: { column: string; direction: OrderByStrings }) => LinkProps;
+    };
+
 /**
  * Props for the EcTable component.
  * @template T - The type of data items in the table
@@ -84,13 +94,21 @@ export interface TableProps<T> {
   defaultSortColumn?: string;
   /** Loading state for the table */
   isLoading?: boolean;
+  /** Externally control all internal sort column and order handling behavior.
+   * Cannot be used with `serverSideOrderHandler`.
+   */
+  sorting?:
+    | { mode: "client" } // Let `ecTable` handle the sort values.
+    | Extract<EffectiveSort, { mode: "controlled" }>;
   /**
    * Handler for server-side sorting.
    * When provided, disables client-side sorting and delegates sorting to the server.
    * Only triggers for columns where isServerSideSortable is true.
    * Example: (column, direction) => fetchSortedData(column, direction)
+   *
+   * NOTE: You cannot use this with `sorting`.
    */
-  serverSideOrderHandler?: (column: string, direction: OrderByStrings) => void;
+  onSortChange?: (column: string, direction: OrderByStrings) => void;
   /**
    * Configuration for pagination functionality.
    * Enables infinite scrolling when provided.
@@ -148,7 +166,8 @@ export const EcTable = <T,>({
   textFormat = "body-md",
   defaultSortColumn,
   pagination,
-  serverSideOrderHandler,
+  sorting = { mode: "client" },
+  onSortChange,
   isLoading,
   emptyText,
   variant = "default",
@@ -175,27 +194,44 @@ export const EcTable = <T,>({
     }
   }, []);
 
-  const [sort, setSort] = useState<{ column: string; direction: OrderByStrings }>({
+  const [uncontrolledSort, setUncontrolledSort] = useState<EffectiveSort>({
+    mode: "client",
     column: defaultSortColumn || "",
     direction: "desc",
   });
 
-  const sorted = useMemo(() => {
-    //Ignore client side sorting if orderByHandler is provided
-    if (serverSideOrderHandler) {
-      return memoizedItems;
-    }
-    const sortFn = _.find(columns, { id: sort.column })?.sortFn;
-    return _.orderBy(memoizedItems, sortFn, sort.direction);
-  }, [serverSideOrderHandler, columns, sort.column, sort.direction, memoizedItems]);
+  const effectiveSort: EffectiveSort = sorting.mode === "controlled" ? sorting : uncontrolledSort;
 
-  const setSortHandler = (sort: { column: string; direction: OrderByStrings }) => {
-    const columnData = columns.find((column) => column.id === sort.column);
-    setSort(sort);
-    if (serverSideOrderHandler && columnData?.isServerSideSortable) {
-      serverSideOrderHandler(sort.column, sort.direction);
-    }
-  };
+  const sorted = useMemo(() => {
+    // Ignore client side sorting if the handler is provided or it's controlled.
+    if (onSortChange || sorting.mode === "controlled") return memoizedItems;
+
+    const sortFn = _.find(columns, { id: effectiveSort.column })?.sortFn;
+    if (!sortFn) return memoizedItems;
+
+    return _.orderBy(memoizedItems, sortFn, effectiveSort.direction);
+  }, [
+    onSortChange,
+    columns,
+    sorting.mode,
+    effectiveSort.column,
+    effectiveSort.direction,
+    memoizedItems,
+  ]);
+
+  const handleUncontrolledSort = useCallback(
+    (next: { column: string; direction: OrderByStrings }) => {
+      if (effectiveSort.mode === "controlled") return;
+
+      const col = columns.find((c) => c.id === next.column);
+      if (onSortChange && col?.isServerSideSortable) {
+        onSortChange(next.column, next.direction);
+      }
+
+      setUncontrolledSort({ ...next, mode: "client" });
+    },
+    [columns, effectiveSort.mode, onSortChange]
+  );
 
   const minRows = useMemo(() => {
     if (containerHeight) {
@@ -253,13 +289,14 @@ export const EcTable = <T,>({
                   columnsCount={columns.length}
                   key={column.id}
                   id={column.id}
-                  sort={sort}
                   width={column.width}
-                  setSort={
-                    column.sortFn || column.isServerSideSortable ? setSortHandler : undefined
-                  }
                   className={cn(column.className, column.headClassName)}
-                  text={column.headerContent}
+                  childNode={column.headerContent}
+                  {...(column.isServerSideSortable
+                    ? effectiveSort.mode === "controlled"
+                      ? { sort: effectiveSort }
+                      : { sort: effectiveSort, clientSortHandler: handleUncontrolledSort }
+                    : undefined)}
                 />
               ))}
             </TableRow>

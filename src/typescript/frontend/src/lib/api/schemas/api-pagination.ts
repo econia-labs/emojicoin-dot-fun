@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { toOrderBy } from "@/sdk/indexer-v2";
+import { toOrderBy } from "@/sdk/indexer-v2/const";
 
 export const OrderBySchema = z
   .enum(["asc", "desc"], {

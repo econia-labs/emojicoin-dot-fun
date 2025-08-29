@@ -74,3 +74,28 @@ export type Nominal<T, B> = T & Brand<B>;
  * @see {@link https://typescript-eslint.io/rules/no-empty-object-type}
  */
 export type EmptyObject = Record<string, never>;
+
+/**
+ * Require each key to be present but union each key's value type with `null`.
+ */
+export type ExplicitlyNullable<T> = {
+  [K in keyof T]: T[K] | null;
+};
+
+/**
+ * A utility type to require string literals.
+ */
+type RequireLiteralString<S extends string> = string extends S ? never : S;
+
+/**
+ * A utility type to require that a string not equal the empty string "".
+ */
+type RequireNonEmptyString<S extends string> = S extends "" ? never : S;
+
+/**
+ * A utility type to reject empty strings and widened/generic strings, but accept non-empty literals
+ * & unions of literals.
+ */
+export type NonEmptyLiteralString<S extends string> = RequireNonEmptyString<
+  RequireLiteralString<S>
+>;

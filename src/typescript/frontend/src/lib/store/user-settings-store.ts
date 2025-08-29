@@ -5,6 +5,7 @@ type UserSettingsState = {
   animate: boolean;
   showEmptyBars: boolean;
   showUsd: boolean;
+  favorites: boolean;
 };
 
 type UserSettingsActions = {
@@ -13,6 +14,7 @@ type UserSettingsActions = {
   setShowUsd: (value: boolean) => void;
   userAgent: string;
   toggleAnimate: () => void;
+  setFavorites: (value: boolean) => void;
   getShowEmptyBars: () => boolean;
   getShowUsd: () => boolean;
 };
@@ -27,6 +29,7 @@ const defaultValues: UserSettingsState = {
   animate: true,
   showEmptyBars: true,
   showUsd: false,
+  favorites: false,
 };
 
 const readSettings = (): UserSettingsState => readLocalStorageCache("settings") ?? defaultValues;
@@ -58,6 +61,12 @@ const createUserSettingsStore = (userAgent: string) =>
     toggleAnimate: () =>
       set((state) => {
         const newState = { ...state, animate: !state.animate };
+        saveSettings(newState);
+        return newState;
+      }),
+    setFavorites: (favorites: boolean) =>
+      set((state) => {
+        const newState = { ...state, favorites };
         saveSettings(newState);
         return newState;
       }),

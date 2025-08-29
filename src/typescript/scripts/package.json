@@ -54,7 +54,7 @@
     "format:check": "pnpm _format --check",
     "lint": "eslint --max-warnings=0 'src/**/*.ts' -c .eslintrc.js",
     "lint:fix": "pnpm lint --fix",
-    "load-env": "dotenv -e .env -v NODE_OPTIONS=\"--conditions=react-server\"",
+    "load-env": "dotenv -e ../.env -v NODE_OPTIONS=\"--conditions=react-server\"",
     "load-env-local": "dotenv -e ../ci.env -e ../example.local.env -v NODE_OPTIONS=\"--conditions=react-server\"",
     "load-env-mainnet": "dotenv -e ../example.mainnet.env -v NODE_OPTIONS=\"--conditions=react-server\"",
     "load-env-testnet": "dotenv -e ../example.testnet.env -v NODE_OPTIONS=\"--conditions=react-server\"",

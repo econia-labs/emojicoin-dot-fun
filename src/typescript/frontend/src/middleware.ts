@@ -11,6 +11,7 @@ import {
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
 import { IS_ALLOWLIST_ENABLED } from "lib/env";
+import handleStatsOrHomePageParams from "lib/middleware/utils";
 import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER, RATE_LIMITER } from "lib/server-env";
 import { type NextRequest, NextResponse } from "next/server";
 import { ROUTES } from "router/routes";
@@ -37,7 +38,14 @@ const rateLimiters = (() => {
 })();
 
 export default async function middleware(request: NextRequest) {
-  const pathname = new URL(request.url).pathname;
+  const url = new URL(request.url);
+  const { pathname } = url;
+
+  const maybeNextResponse = handleStatsOrHomePageParams(url);
+  if (maybeNextResponse) {
+    return maybeNextResponse;
+  }
+
   if (pathname === ROUTES["launching-soon"]) {
     return NextResponse.next();
   }
