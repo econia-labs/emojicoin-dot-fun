@@ -24,16 +24,7 @@ export const emojiNamesToPath = (emojiNames: string[]) =>
 export const pathToEmojiNames = (path: string) =>
   decodeURIComponent(path)
     .split(EMOJI_PATH_DELIMITER)
-    .map((n) => n.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE))
-    .map((n) => {
-      const onceDecoded = SYMBOL_EMOJI_DATA.byName(n);
-      const twiceDecoded = SYMBOL_EMOJI_DATA.byName(decodeURIComponent(n));
-      const res = onceDecoded || twiceDecoded;
-      if (!res) {
-        throw new Error(`Couldn't convert path to emoji names: ${path} for n = ${n}`);
-      }
-      return res.name;
-    });
+    .map((n) => n.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE));
 
 const emojisToPath = (emojis: string[]) => {
   const names = emojis
