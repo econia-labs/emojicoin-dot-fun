@@ -9,8 +9,9 @@ export interface StatsPageParams {
 }
 
 export const revalidate = 30;
-export const dynamic = "force-static";
-export const dynamicParams = true;
+// Disabled because static pages for the stats page ultimately makes the UX worse, but the option is there.
+// export const dynamic = "force-static";
+// export const dynamicParams = true;
 
 export default async function Stats() {
   const stats = await getStatsPageData({ params: {} });
