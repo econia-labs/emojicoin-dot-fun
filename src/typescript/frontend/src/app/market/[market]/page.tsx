@@ -7,6 +7,7 @@ import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { GENERATE_ALL_STATIC_PAGES } from "lib/server-env";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
 import { fetchMarketsJson } from "@/queries/home";
@@ -19,7 +20,6 @@ import { ORDER_BY } from "@/sdk/indexer-v2";
 import { fetchCachedMarketState } from "../cached-fetches";
 import { maybeGetMarketPrebuildData } from "../prebuild-data";
 import EmojiNotFoundPage from "./not-found";
-import { notFound } from "next/navigation";
 
 export const revalidate = 10;
 export const dynamic = "force-static";
