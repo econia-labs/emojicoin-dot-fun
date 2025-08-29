@@ -11,7 +11,6 @@ import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
 import { fetchMarketsJson } from "@/queries/home";
 import { fetchAllMarkets } from "@/queries/static-params";
-import type { SymbolEmoji, SymbolEmojiName } from "@/sdk/emoji_data";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
 import type { DatabaseJsonType } from "@/sdk/index";
 import { isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
@@ -20,6 +19,7 @@ import { ORDER_BY } from "@/sdk/indexer-v2";
 import { fetchCachedMarketState } from "../cached-fetches";
 import { maybeGetMarketPrebuildData } from "../prebuild-data";
 import EmojiNotFoundPage from "./not-found";
+import { notFound } from "next/navigation";
 
 export const revalidate = 10;
 export const dynamic = "force-static";
@@ -53,7 +53,7 @@ export async function generateStaticParams() {
     .map((mkt) => mkt.symbol_emojis)
     .map((emojis) => emojis.map((emoji) => SYMBOL_EMOJI_DATA.byEmojiStrict(emoji).name))
     .map(emojiNamesToPath)
-    .map((path) => ({ market: path }));
+    .map((path) => ({ market: decodeURIComponent(path) }));
   return paths;
 }
 
@@ -79,7 +79,14 @@ const logAndReturnValue = <T extends [] | undefined | null>(dataType: string, on
 export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
   const { market: marketSlug } = params;
   const names = pathToEmojiNames(marketSlug);
-  const emojis = names.map((v) => SYMBOL_EMOJI_DATA.byStrictName(v).emoji);
+  const emojis = names.map((n) => {
+    const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
+    if (!res) {
+      console.warn(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+      notFound();
+    }
+    return res;
+  });
   const title = `${emojis.join("")}`;
   const description = `Trade ${emojis.join("")} on emojicoin.fun !`;
 
@@ -104,17 +111,19 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
  */
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market: marketSlug } = params.params;
-  const names: SymbolEmojiName[] = [];
-  const emojis: SymbolEmoji[] = [];
-  try {
-    names.push(...pathToEmojiNames(marketSlug));
-    emojis.push(...names.map((v) => SYMBOL_EMOJI_DATA.byStrictName(v).emoji));
-    const isValid = isValidMarketSymbol(emojis.join(""));
-    if (!isValid) {
-      return <EmojiNotFoundPage />;
+  const names = pathToEmojiNames(marketSlug);
+  const emojis = names.map((n) => {
+    const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
+    if (!res) {
+      console.warn(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+      return notFound();
     }
-  } catch (e) {
-    return <EmojiNotFoundPage />;
+    return res;
+  });
+
+  if (!isValidMarketSymbol(emojis.join(""))) {
+    console.warn(`Invalid market symbol: ${emojis.join("")}`);
+    return notFound();
   }
 
   const marketPrebuildData = maybeGetMarketPrebuildData(emojis);
