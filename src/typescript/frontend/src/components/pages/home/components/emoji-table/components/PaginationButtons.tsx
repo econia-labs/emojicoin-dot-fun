@@ -25,7 +25,7 @@ const PaginationLinkWithBraces = ({
   const url = useMemo(() => createHomePageURL({ page, sort }), [page, sort]);
 
   return (
-    <Link href={url} className={cn("group cursor-pointer", styles)} aria-label={ariaLabel}>
+    <Link prefetch={false} href={url} className={cn("group cursor-pointer", styles)} aria-label={ariaLabel}>
       <span>{"{"}</span>
       {children}
       <span>{"}"}</span>
