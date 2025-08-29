@@ -125,5 +125,5 @@
     "test:unit": "pnpm jest tests/unit && pnpm dotenv -v NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS=0 -- pnpm jest tests/unit",
     "vercel-install": "./submodule.sh && pnpm i"
   },
-  "version": "2.1.0"
+  "version": "2.2.0"
 }
