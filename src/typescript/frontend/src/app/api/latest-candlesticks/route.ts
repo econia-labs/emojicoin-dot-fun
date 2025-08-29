@@ -1,15 +1,16 @@
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchMarketLatestCandlesticks } from "@/sdk/indexer-v2";
 
 import { LatestCandlesticksSearchParamsSchema } from "./search-params-schema";
 
-const cachedResponse = unstable_cache(fetchMarketLatestCandlesticks, [], {
-  revalidate: 2,
-  tags: ["fetch-market-latest-candlesticks"],
-});
+const cachedResponse = unstableCacheWrapper(
+  fetchMarketLatestCandlesticks,
+  "fetch-market-latest-candlesticks",
+  { revalidate: 2 }
+);
 
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
   const { searchParams } = request.nextUrl;

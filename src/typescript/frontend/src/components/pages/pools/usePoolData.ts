@@ -21,7 +21,7 @@ export const usePoolData = (args: z.input<typeof GetPoolsSchema>) => {
     initialPageParam: 1,
     getNextPageParam: (lastPageResponse, allPageResponses) =>
       lastPageResponse?.length === MARKETS_PER_PAGE ? allPageResponses.length + 1 : undefined,
-    staleTime: 10000, // 10 seconds
+    staleTime: 60000, // 60 seconds.
   });
 
   return query;

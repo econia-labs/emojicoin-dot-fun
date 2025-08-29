@@ -1,5 +1,5 @@
 import { ProcessorType } from "@aptos-labs/ts-sdk";
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 
 import { postgrest } from "@/sdk/indexer-v2/queries/client";
 import type { DatabaseJsonType } from "@/sdk/indexer-v2/types/json-types";
@@ -8,7 +8,7 @@ import { getAptosClient } from "@/sdk/utils/aptos-client";
 
 import fetchFullnodeRestApiHealth from "./fullnode-rest-api-health";
 
-export const fetchCachedEmojicoinProcessorStatus = unstable_cache(
+export const fetchCachedEmojicoinProcessorStatus = unstableCacheWrapper(
   async () =>
     await postgrest
       .from(TableName.ProcessorStatus)
@@ -23,11 +23,11 @@ export const fetchCachedEmojicoinProcessorStatus = unstable_cache(
         }
         return res.data;
       }),
-  [],
-  { revalidate: 2, tags: ["fetch-cached-emojicoin-processor-status-for-status-page"] }
+  "fetch-cached-emojicoin-processor-status-for-status-page",
+  { revalidate: 2 }
 );
 
-export const fetchCachedAptosProcessorStatus = unstable_cache(
+export const fetchCachedAptosProcessorStatus = unstableCacheWrapper(
   () =>
     getAptosClient()
       .getProcessorStatus(ProcessorType.DEFAULT)
@@ -35,16 +35,16 @@ export const fetchCachedAptosProcessorStatus = unstable_cache(
         console.error(e);
         return null;
       }),
-  [],
-  { revalidate: 2, tags: ["fetch-cached-aptos-processor-status"] }
+  "fetch-cached-aptos-processor-status",
+  { revalidate: 2 }
 );
 
-export const fetchCachedFullnodeRestApiHealth = unstable_cache(
+export const fetchCachedFullnodeRestApiHealth = unstableCacheWrapper(
   () =>
     fetchFullnodeRestApiHealth().catch((e) => {
       console.error(e);
       return null;
     }),
-  [],
-  { revalidate: 2, tags: ["fetch-cached-fullnode-rest-api-health"] }
+  "fetch-cached-fullnode-rest-api-health",
+  { revalidate: 2 }
 );

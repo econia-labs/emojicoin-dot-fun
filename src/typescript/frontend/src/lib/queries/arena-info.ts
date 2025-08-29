@@ -1,15 +1,15 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-import { cache } from "react";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 
 import { fetchArenaInfoJson } from "@/queries/arena";
 
-// Cache in-flight fetches within a single request with React's `cache`.
-// Then, wrap the inner indexer call with `unstable_cache`, so it's cached across multiple requests.
-export const fetchCachedArenaInfo = cache(
-  unstable_cache(fetchArenaInfoJson, [], {
-    revalidate: 2,
-    tags: ["current-arena-info"],
-  })
+export const fetchCachedArenaInfo = unstableCacheWrapper(fetchArenaInfoJson, "current-arena-info", {
+  revalidate: 2,
+});
+
+export const fetchLongerCachedArenaInfo = unstableCacheWrapper(
+  fetchArenaInfoJson,
+  "current-arena-info",
+  { revalidate: 10 }
 );

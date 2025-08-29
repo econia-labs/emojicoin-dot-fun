@@ -1,36 +1,13 @@
-import type { HomePageSearchParams } from "lib/queries/sorting/query-params";
-import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
-
 import { Schemas } from "@/sdk/utils";
 
 export interface HomePageParams {
-  params?: {};
-  searchParams?: HomePageSearchParams;
+  params: {
+    sort: string;
+    page: string;
+  };
 }
 
 export const safeParsePageWithDefault = (pageInput: unknown): number => {
   const result = Schemas["PositiveInteger"].safeParse(pageInput);
   return result.success ? result.data : 1;
-};
-
-// Converts a bare `0x` and a `null` input to undefined. If it's already undefined, it remains so.
-// Otherwise, return the value.
-export const handleEmptySearchBytes = (searchBytes?: string | null) => {
-  return searchBytes === "0x" ? undefined : (searchBytes ?? undefined);
-};
-
-export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams | undefined) => {
-  const { page: pageInput, sort, bonding: inBondingCurve, q: searchBytes } = searchParams ?? {};
-
-  // Ensure the filter is a home-page-only filter.
-  const sortBy = toMarketDataSortByHomePage(sort);
-  const page = safeParsePageWithDefault(pageInput);
-  const q = handleEmptySearchBytes(searchBytes);
-
-  return {
-    page,
-    sortBy,
-    inBondingCurve,
-    q,
-  };
 };

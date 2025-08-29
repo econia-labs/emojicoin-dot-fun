@@ -7,7 +7,6 @@ import Providers from "context/providers";
 import DisplayDebugData from "lib/local-development/DisplayDebugData";
 import StyledComponentsRegistry from "lib/registry";
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
 
 import { BackgroundEmojis } from "@/components/misc/background-emojis/BackgroundEmojis";
@@ -18,14 +17,13 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const userAgent = headers().get("user-agent") || "";
   return (
     <html>
       <body>
         {/* This is used to avoid React escaping the quotes in `fontsStyle`. */}
         <style dangerouslySetInnerHTML={{ __html: fontsStyle }} />
         <StyledComponentsRegistry>
-          <Providers userAgent={userAgent}>
+          <Providers>
             <BackgroundEmojis />
             <DisplayDebugData />
             {children}

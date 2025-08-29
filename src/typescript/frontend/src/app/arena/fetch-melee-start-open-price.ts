@@ -1,11 +1,11 @@
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 
 import { EmojicoinArena } from "@/move-modules";
 import { fetchMeleeEventByMeleeIDJson } from "@/queries/arena";
-import type { AccountAddressString } from "@/sdk/index";
+import type { AccountAddressString, DatabaseJsonType } from "@/sdk/index";
 import { getAptosClient, toEmojicoinTypesForEntry } from "@/sdk/index";
 
-const fetchExchangeRate = (marketAddress: AccountAddressString, version: bigint) =>
+const fetchExchangeRateAtVersion = (marketAddress: AccountAddressString, version: bigint) =>
   EmojicoinArena.ExchangeRate.view({
     aptos: getAptosClient(),
     marketAddress,
@@ -15,16 +15,16 @@ const fetchExchangeRate = (marketAddress: AccountAddressString, version: bigint)
     },
   });
 
-async function fetchExchangeRatesAtMeleeStart({
-  market0Address,
-  market1Address,
-  meleeID,
-}: {
-  market0Address: AccountAddressString;
-  market1Address: AccountAddressString;
-  // Must be a string or the `unstable_cache` serialization fails.
-  meleeID: string;
-}) {
+export type MeleeExchangeRatesJson = {
+  market_0_rate: Awaited<ReturnType<typeof fetchExchangeRateAtVersion>>;
+  market_1_rate: Awaited<ReturnType<typeof fetchExchangeRateAtVersion>>;
+};
+
+export async function fetchExchangeRatesAtMeleeStart({
+  emojicoin_0_market_address: market0Address,
+  emojicoin_1_market_address: market1Address,
+  melee_id: meleeID,
+}: DatabaseJsonType["arena_info"]): Promise<MeleeExchangeRatesJson> {
   // Get the version number of when the melee started.
   const version = await fetchMeleeEventByMeleeIDJson({ meleeID }).then(
     (res) => res?.transaction_version
@@ -32,24 +32,26 @@ async function fetchExchangeRatesAtMeleeStart({
   if (version === undefined) {
     throw new Error(`Expected arena info for the current melee with meleeID: ${meleeID}`);
   }
-  const [market0ExchangeRate, market1ExchangeRate] = await Promise.all([
-    fetchExchangeRate(market0Address, BigInt(version)),
-    fetchExchangeRate(market1Address, BigInt(version)),
+  const [market_0_rate, market_1_rate] = await Promise.all([
+    fetchExchangeRateAtVersion(market0Address, BigInt(version)),
+    fetchExchangeRateAtVersion(market1Address, BigInt(version)),
   ]);
 
   return {
-    market0ExchangeRate,
-    market1ExchangeRate,
+    market_0_rate,
+    market_1_rate,
   };
 }
 
 /**
  * Fetch the exchange rates of the two emojicoins in the melee at the exact version the melee began.
  */
-const fetchCachedExchangeRatesAtMeleeStart = unstable_cache(fetchExchangeRatesAtMeleeStart, [], {
-  // Revalidate every 10 minutes to avoid permanently caching a response as a 404 response.
-  revalidate: 600,
-  tags: ["fetch-exchange-rates-at-melee-start"],
-});
+const createCachedExchangeRatesAtMeleeStartFetcher = (arena_info: DatabaseJsonType["arena_info"]) =>
+  unstableCacheWrapper(
+    () => fetchExchangeRatesAtMeleeStart(arena_info),
+    "fetch-exchange-rates-at-melee-start",
+    // `unstable_cache` doesn't cache error responses, so just specify to cache this forever.
+    { revalidate: false }
+  );
 
-export default fetchCachedExchangeRatesAtMeleeStart;
+export default createCachedExchangeRatesAtMeleeStartFetcher;

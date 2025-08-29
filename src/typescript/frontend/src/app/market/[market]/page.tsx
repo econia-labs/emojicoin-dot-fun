@@ -1,19 +1,61 @@
+import { generateHomePageStaticParams } from "app/home/static-params";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import { AptPriceContextProvider } from "context/AptPrice";
-import FEATURE_FLAGS from "lib/feature-flags";
-import { fetchCachedTopHolders } from "lib/queries/aptos-indexer/fetch-top-holders";
+import ArenaInfoLoader from "context/ArenaInfoLoader";
+import { fetchLongerCachedArenaInfo } from "lib/queries/arena-info";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { GENERATE_ALL_STATIC_PAGES } from "lib/server-env";
 import type { Metadata } from "next";
-import { pathToEmojiNames } from "utils/pathname-helpers";
+import { notFound } from "next/navigation";
+import { emojiNamesToPath, pathToEmojiNames } from "utils/pathname-helpers";
 
-import { fetchLatestMeleeEvent } from "@/queries/arena";
-import { fetchMarketState, fetchSwapEvents } from "@/queries/market";
+import { fetchMarketsJson } from "@/queries/home";
+import { fetchAllMarkets } from "@/queries/static-params";
 import { SYMBOL_EMOJI_DATA } from "@/sdk/emoji_data";
-import { getMarketAddress } from "@/sdk/emojicoin_dot_fun";
+import type { DatabaseJsonType } from "@/sdk/index";
+import { isValidMarketSymbol, toMarketStateModel } from "@/sdk/index";
+import { ORDER_BY } from "@/sdk/indexer-v2";
 
+import { fetchCachedMarketState } from "../cached-fetches";
+import { maybeGetMarketPrebuildData } from "../prebuild-data";
 import EmojiNotFoundPage from "./not-found";
 
-export const revalidate = 2;
+export const revalidate = 10;
+export const dynamic = "force-static";
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const markets = GENERATE_ALL_STATIC_PAGES
+    ? await fetchAllMarkets()
+    : // Or just generate all the market pages for each type of sorted home page that's statically built.
+      // Note these fetches are cached and can be stale since the main purpose is to generate the market slug, which
+      // never changes per market.
+      await (async () => {
+        const res: DatabaseJsonType["market_state"][] = [];
+        const seen = new Set();
+
+        for (const { sort, page } of await generateHomePageStaticParams()) {
+          const moreMarkets = await fetchMarketsJson({
+            page: Number(page),
+            sortBy: sort,
+            orderBy: ORDER_BY.DESC,
+            pageSize: MARKETS_PER_PAGE,
+          });
+          const filtered = moreMarkets.filter((v) => !seen.has(v.symbol_bytes));
+          filtered.forEach((v) => seen.add(v.symbol_bytes));
+          res.push(...filtered);
+        }
+        return res;
+      })();
+
+  const paths = markets
+    .map((mkt) => mkt.symbol_emojis)
+    .map((emojis) => emojis.map((emoji) => SYMBOL_EMOJI_DATA.byEmojiStrict(emoji).name))
+    .map(emojiNamesToPath)
+    .map((path) => ({ market: decodeURIComponent(path) }));
+  return paths;
+}
 
 /**
  * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
@@ -29,8 +71,6 @@ interface EmojicoinPageProps {
   searchParams: {};
 }
 
-const EVENTS_ON_PAGE_LOAD = 25;
-
 const logAndReturnValue = <T extends [] | undefined | null>(dataType: string, onFailure: T) => {
   console.warn(`[WARNING]: Failed to fetch ${dataType}.`);
   return onFailure;
@@ -42,11 +82,11 @@ export async function generateMetadata({ params }: EmojicoinPageProps): Promise<
   const emojis = names.map((n) => {
     const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
     if (!res) {
-      throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+      console.warn(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+      notFound();
     }
     return res;
   });
-
   const title = `${emojis.join("")}`;
   const description = `Trade ${emojis.join("")} on emojicoin.fun !`;
 
@@ -75,46 +115,41 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const emojis = names.map((n) => {
     const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
     if (!res) {
-      throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+      console.warn(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+      return notFound();
     }
     return res;
   });
 
-  const state = await fetchMarketState({ searchEmojis: emojis });
+  if (!isValidMarketSymbol(emojis.join(""))) {
+    console.warn(`Invalid market symbol: ${emojis.join("")}`);
+    return notFound();
+  }
 
-  if (state) {
-    const { marketID } = state.market;
-    const marketAddress = getMarketAddress(emojis).toString();
+  const marketPrebuildData = maybeGetMarketPrebuildData(emojis);
 
-    const [swaps, aptPrice, holders, melee] = await Promise.all([
-      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }).catch(() =>
-        logAndReturnValue("swap events", [])
-      ),
-      fetchCachedAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
-      fetchCachedTopHolders(marketAddress).catch(() => logAndReturnValue("top holders", [])),
-      FEATURE_FLAGS.Arena
-        ? fetchLatestMeleeEvent({})
-            .then((res) => (res ? res.melee : null))
-            .catch(() => logAndReturnValue("arena melee data", null))
-        : null,
-    ]);
+  const stateJson =
+    marketPrebuildData?.stateJson ?? (await fetchCachedMarketState({ searchEmojis: emojis }));
 
-    const isInMelee =
-      !!melee &&
-      (melee.emojicoin0MarketAddress === state.market.marketAddress ||
-        melee.emojicoin1MarketAddress === state.market.marketAddress);
+  if (stateJson) {
+    const state = toMarketStateModel(stateJson);
+
+    const [arenaInfo, aptPrice] = marketPrebuildData
+      ? [marketPrebuildData.arenaInfo, marketPrebuildData.aptPrice]
+      : await Promise.all([
+          fetchLongerCachedArenaInfo().catch(() => logAndReturnValue("Arena info", null)),
+          fetchCachedAptPrice().catch(() => logAndReturnValue("APT price", undefined)),
+        ]);
 
     return (
       <AptPriceContextProvider aptPrice={aptPrice}>
+        <ArenaInfoLoader arenaInfoJson={arenaInfo} />
         <ClientEmojicoinPage
           data={{
             symbol: state.market.symbolData.symbol,
-            swaps,
             state,
-            holders,
             ...state.market,
           }}
-          isInMelee={isInMelee}
         />
       </AptPriceContextProvider>
     );

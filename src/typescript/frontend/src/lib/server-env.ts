@@ -1,4 +1,14 @@
+// cspell:word upstash
 import "server-only";
+
+import {
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_EXPORT,
+  PHASE_INFO,
+  PHASE_PRODUCTION_BUILD,
+  PHASE_PRODUCTION_SERVER,
+  PHASE_TEST,
+} from "next/dist/shared/lib/constants";
 
 import { EMOJICOIN_INDEXER_URL } from "@/sdk/server/env";
 
@@ -39,12 +49,13 @@ if (
 
 export const MAINTENANCE_MODE: boolean = process.env.MAINTENANCE_MODE === "true";
 
+export const { KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
+
 export const RATE_LIMITER = (() => {
-  const { KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
   const enabled = process.env.RATE_LIMITING_ENABLED === "true";
   if (enabled) {
     if (!KV_REST_API_URL || !KV_REST_API_TOKEN) {
-      throw new Error("Rate limiting is enabled but there was no URL/token provided for KV.");
+      throw new Error("Rate limiting is enabled but Upstash API keys were not provided.");
     }
     return {
       enabled: true,
@@ -62,3 +73,35 @@ export const RATE_LIMITER = (() => {
     },
   } as const;
 })();
+
+const PHASES = [
+  PHASE_EXPORT,
+  PHASE_PRODUCTION_BUILD,
+  PHASE_PRODUCTION_SERVER,
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_TEST,
+  PHASE_INFO,
+  "",
+] as const;
+
+export const NEXT_PHASE: (typeof PHASES)[number] = (() => {
+  const phase = (process.env.NEXT_PHASE ?? "") as (typeof PHASES)[number];
+  const validPhase = PHASES.includes(phase);
+  if (!validPhase) throw new Error(`Invalid process.env.NEXT_PHASE: ${process.env.NEXT_PHASE}`);
+  return phase;
+})();
+
+export const IS_NEXT_BUILD_PHASE = NEXT_PHASE === "phase-production-build";
+
+/**
+ * Whether or not to generate *all* static pages possible for things like `/[market]/page.tsx`
+ * and the stats page.
+ *
+ * This dictates how many params are generated for the `generateStaticParams` in the home page,
+ * market page, and the stats page.
+ *
+ * If this is false or undefined, each page will only generate static params for a subset of input
+ * params- either the most active/highest market cap markets or the first page of different sorting
+ * orders.
+ */
+export const GENERATE_ALL_STATIC_PAGES = process.env.GENERATE_ALL_STATIC_PAGES === "true";

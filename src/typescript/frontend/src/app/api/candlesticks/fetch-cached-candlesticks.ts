@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { CACHE_ONE_YEAR } from "next/dist/lib/constants";
 import type { z } from "zod";
 
@@ -12,23 +12,25 @@ import type { SupportedPeriodSchema } from "./supported-period-schema";
 const HISTORICAL_CACHE_REVALIDATION_TIME = CACHE_ONE_YEAR;
 const INCOMPLETE_CACHE_REVALIDATION_TIME = 10;
 
-const fetchHistoricalCandlestickData = unstable_cache(fetchCandlesticksInRange, [], {
-  revalidate: HISTORICAL_CACHE_REVALIDATION_TIME,
-  tags: ["fetch-historical-candlestick-data"],
-});
+const fetchHistoricalCandlestickData = unstableCacheWrapper(
+  fetchCandlesticksInRange,
+  "fetch-historical-candlestick-data",
+  { revalidate: HISTORICAL_CACHE_REVALIDATION_TIME }
+);
 
 /**
- * `unstable_cache` works by using the callback function's `cb.toString()` value as part of the
- * cache key. In order to ensure a hit despite varying input args, create the callback function
- * on the fly but ensure that `cb.toString()` is always constant by using a reference to the arg.
- * This is achieved through currying the function.
+ * Since there should only be a single entry for each market for the latest candlestick data, create
+ * a stable (aka cacheable) callback function by capturing the first/last start time variables in
+ * the closure returned.
+ *
+ * That is, this function is cacheable by marketID and period. The first/last start times will often
+ * change, but the cache entry will always remain the same, making this a single stable entry for
+ * each market's incomplete candlestick data.
  */
 const stableFetchIncompleteCandlestickData = ({
-  marketID,
-  period,
   firstStartTime,
   lastStartTime,
-}: CandlesticksQueryArgs) => {
+}: Omit<CandlesticksQueryArgs, "marketID" | "period">) => {
   const stableIncompleteFetcher = async ({
     marketID,
     period,
@@ -36,9 +38,8 @@ const stableFetchIncompleteCandlestickData = ({
     return fetchCandlesticksInRange({ marketID, period, firstStartTime, lastStartTime });
   };
 
-  return unstable_cache(stableIncompleteFetcher, [], {
+  return unstableCacheWrapper(stableIncompleteFetcher, "fetch-incomplete-candlestick-data", {
     revalidate: INCOMPLETE_CACHE_REVALIDATION_TIME,
-    tags: ["fetch-incomplete-candlestick-data", `market_${marketID}-${period}`],
   });
 };
 
@@ -48,8 +49,6 @@ export async function fetchCachedChunkedCandlesticks(
   const { marketID, period, firstStartTime, lastStartTime, complete } = args;
 
   const fetchIncompleteCandlestickData = stableFetchIncompleteCandlestickData({
-    marketID,
-    period,
     firstStartTime,
     lastStartTime,
   });

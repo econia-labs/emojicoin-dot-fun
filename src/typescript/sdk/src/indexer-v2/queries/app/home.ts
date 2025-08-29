@@ -1,8 +1,5 @@
 import "server-only";
 
-import { RegistryView } from "../../../emojicoin_dot_fun/move-modules/emojicoin-dot-fun";
-import { toRegistryView } from "../../../types";
-import { getAptosClient } from "../../../utils/aptos-client";
 import { LIMIT, ORDER_BY, toOrderBy } from "../../const";
 import { DatabaseTypeConverter } from "../../types";
 import {
@@ -14,7 +11,7 @@ import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { joinEqClauses } from "../misc";
 import { sortByWithFallback } from "../query-params";
-import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
+import { queryHelper, queryHelperWithCount } from "../utils";
 
 // A helper function to abstract the logic for fetching rows that contain market state.
 const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({
@@ -39,6 +36,10 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
   }
 
+  if (selectEmojis && !selectEmojis.length) {
+    console.warn("`selectEmojis` contains no emojis; this will un-intuitively omit the filter.");
+  }
+
   if (selectEmojis?.length) {
     query = query.or(joinEqClauses(selectEmojis));
   }
@@ -47,7 +48,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
     query = query.eq("in_bonding_curve", inBondingCurve);
   }
 
-  return query.returns<DatabaseJsonType["market_state"][]>();
+  return query.overrideTypes<DatabaseJsonType["market_state"][], { merge: false }>();
 };
 
 const selectMarketStates = (args: MarketStateQueryArgs) =>
@@ -112,37 +113,6 @@ export const fetchLargestMarketID = async () => {
     .limit(1)
     .single()
     .then((r) => Number(r.data?.market_id) ?? 0);
-};
-
-/**
- * Retrieves the number of markets by querying the view function in the registry module on-chain.
- * The ledger (transaction) version is specified in order to reflect the exact total number of
- * unique markets the `emojicoin-dot-fun` processor will have processed up to that version.
- *
- * @returns The number of registered markets at the latest processed transaction version
- */
-export const fetchNumRegisteredMarkets = async () => {
-  const aptos = getAptosClient();
-  let latestVersion: bigint;
-  try {
-    latestVersion = await getLatestProcessedEmojicoinVersion();
-  } catch (e) {
-    console.error("Couldn't get the latest processed version.", e);
-    throw e;
-  }
-  try {
-    const numRegisteredMarkets = await RegistryView.view({
-      aptos,
-      options: {
-        ledgerVersion: latestVersion,
-      },
-    }).then((r) => toRegistryView(r).numMarkets);
-    return Number(numRegisteredMarkets);
-  } catch (e: unknown) {
-    // If the view function fails for some reason, find the largest market id in the database for a
-    // cheap fetch of the number of registered markets. Also because `count: exact` does not work.
-    return await fetchLargestMarketID();
-  }
 };
 
 // Note the no-op conversion function- this is simply to satisfy the `queryHelper` params and

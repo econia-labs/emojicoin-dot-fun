@@ -1,5 +1,5 @@
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { parseSearchParams } from "utils/url-utils";
@@ -7,10 +7,7 @@ import { parseSearchParams } from "utils/url-utils";
 import { getPoolData } from "./getPoolDataQuery";
 import { GetPoolsSchema } from "./schema";
 
-const getCachedPoolData = unstable_cache(getPoolData, ["pool-data"], {
-  revalidate: 5,
-  tags: ["pool-data"],
-});
+const getCachedPoolData = unstableCacheWrapper(getPoolData, "pool-data", { revalidate: 5 });
 
 export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
@@ -20,13 +17,22 @@ export const GET = apiRouteErrorHandler(async (req: NextRequest) => {
   let res: Awaited<ReturnType<typeof getPoolData>> = "[]";
 
   try {
-    res = await getCachedPoolData({
-      page,
-      sortBy,
-      orderBy,
-      searchEmojis: searchBytes,
-      provider: account,
-    });
+    // Don't cache the fetch if search emojis or the account provider are passed in.
+    if (searchBytes?.length || !!account) {
+      res = await getPoolData({
+        page,
+        sortBy,
+        orderBy,
+        searchEmojis: searchBytes,
+        provider: account,
+      });
+    } else {
+      res = await getCachedPoolData({
+        page,
+        sortBy,
+        orderBy,
+      });
+    }
   } catch (e) {
     console.error(e);
   }

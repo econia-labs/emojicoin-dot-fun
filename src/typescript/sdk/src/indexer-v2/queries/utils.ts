@@ -9,6 +9,7 @@ import type {
 } from "@supabase/postgrest-js";
 
 import type { AnyNumberString } from "../../types/types";
+import { sleep } from "../../utils";
 import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
 import { postgrest } from "./client";
 
@@ -36,9 +37,8 @@ type QueryFunction<
 
 type WithConfig<T> = T & { minimumVersion?: AnyNumberString };
 
-// This is primarily used for testing purposes, otherwise this interval might be too short.
-const POLLING_INTERVAL = 500;
-const POLLING_TIMEOUT = 5000;
+const TEST_POLLING_INTERVAL = 1000;
+const TEST_POLLING_TIMEOUT = 10000;
 
 const extractRow = <T>(res: PostgrestSingleResponse<T>) => res.data;
 const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? ([] as T[]);
@@ -93,7 +93,7 @@ export const waitForEmojicoinIndexer = async (
 ) =>
   new Promise<void>((resolve, reject) => {
     let i = 0;
-    const maxTries = Math.floor((maxWaitTimeMs ?? POLLING_TIMEOUT) / POLLING_INTERVAL);
+    const maxTries = Math.floor((maxWaitTimeMs ?? TEST_POLLING_TIMEOUT) / TEST_POLLING_INTERVAL);
 
     const check = async () => {
       try {
@@ -106,7 +106,7 @@ export const waitForEmojicoinIndexer = async (
         } else {
           setTimeout(() => {
             check();
-          }, POLLING_INTERVAL);
+          }, TEST_POLLING_INTERVAL);
         }
         i += 1;
       } catch (e) {
@@ -216,4 +216,32 @@ export function queryHelperWithCount<
   };
 
   return query;
+}
+
+/**
+ * Utility function to exhaustively fetch all rows.
+ *
+ * Use this carefully.
+ * @param fetchFunction Some callback you can pass the page number to to get an array of rows
+ * @param expectedRowsReturned The `pageSize` or expected rows to be returned
+ */
+export async function exhaustiveFetch<T>(
+  fetchFunction: (page: number) => Promise<T[]>,
+  expectedRowsReturned: number,
+  sleepInterval?: number
+) {
+  const res: T[] = [];
+  let page = 1;
+  let lastRes: T[] = [];
+
+  do {
+    if (sleepInterval && page !== 1) {
+      await sleep(sleepInterval);
+    }
+    lastRes = await fetchFunction(page);
+    res.push(...lastRes);
+    page += 1;
+  } while (lastRes.length && lastRes.length % expectedRowsReturned === 0);
+
+  return res;
 }

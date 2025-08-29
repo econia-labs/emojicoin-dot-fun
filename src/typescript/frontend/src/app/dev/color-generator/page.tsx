@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 
 import { VERCEL_TARGET_ENV } from "@/sdk/const";
 
+export const dynamic = "force-static";
+
 export default function EmojiColorPage() {
   if (VERCEL_TARGET_ENV === "production" || VERCEL_TARGET_ENV === "release-preview") {
     redirect("/404");

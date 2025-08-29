@@ -12,7 +12,7 @@
     "@types/big.js": "^6.2.2",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.15",
-    "@types/node": "^20.16.11",
+    "@types/node": "^22.7.5",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "axios": ">=0.28.0",
@@ -33,7 +33,7 @@
     "typescript": "5.6.2"
   },
   "engines": {
-    "node": ">=v20.12.2"
+    "node": ">=22.18.0"
   },
   "files": [
     "dist"
@@ -54,7 +54,7 @@
     "format:check": "pnpm _format --check",
     "lint": "eslint --max-warnings=0 'src/**/*.ts' -c .eslintrc.js",
     "lint:fix": "pnpm lint --fix",
-    "load-env": "dotenv -e .env -v NODE_OPTIONS=\"--conditions=react-server\"",
+    "load-env": "dotenv -e ../.env -v NODE_OPTIONS=\"--conditions=react-server\"",
     "load-env-local": "dotenv -e ../ci.env -e ../example.local.env -v NODE_OPTIONS=\"--conditions=react-server\"",
     "load-env-mainnet": "dotenv -e ../example.mainnet.env -v NODE_OPTIONS=\"--conditions=react-server\"",
     "load-env-testnet": "dotenv -e ../example.testnet.env -v NODE_OPTIONS=\"--conditions=react-server\"",

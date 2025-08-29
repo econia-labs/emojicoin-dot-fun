@@ -11,7 +11,7 @@ import type { DatabaseStructType } from "./indexer-v2/types/json-types";
 import type { Types } from "./types";
 import type { CoinTypeString } from "./utils";
 import type { ValueOf } from "./utils/utility-types";
-import { PositiveIntegerSchema } from "./utils/validation/integer";
+import { NonNegativeIntegerSchema } from "./utils/validation/integer";
 
 export const VERCEL = process.env.VERCEL === "1";
 let vercelTargetEnv: "production" | "preview" | "development" | "release-preview";
@@ -118,9 +118,15 @@ export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(envVariables.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 export const INTEGRATOR_ADDRESS = (() =>
   AccountAddress.from(envVariables.NEXT_PUBLIC_INTEGRATOR_ADDRESS))();
-export const INTEGRATOR_FEE_RATE_BPS = PositiveIntegerSchema.parse(
+export const INTEGRATOR_FEE_RATE_BPS = NonNegativeIntegerSchema.parse(
   envVariables.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
 );
+/**
+ * See `INTEGRATOR_FEE_RATE_BPS` in
+ * {@link [emojicoin_dot_fun_rewards.move](../../../move/rewards/sources/emojicoin_dot_fun_rewards.move)}
+ * for more info.
+ */
+export const REWARDS_INTEGRATOR_FEE_RATE_BPS = 100;
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
 export const APTOS_COIN_TYPE_STRING = parseTypeTag(APTOS_COIN).toString() as CoinTypeString;

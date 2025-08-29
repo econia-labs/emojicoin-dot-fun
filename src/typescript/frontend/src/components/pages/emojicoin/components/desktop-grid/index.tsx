@@ -42,9 +42,9 @@ const tabs = [
     component: (props: GridProps) => (
       <CoinHolders
         emojicoin={props.data.symbol}
-        holders={props.data.holders}
         state={props.data.state.state}
         lastSwap={props.data.state.lastSwap}
+        marketAddress={props.data.marketAddress}
       />
     ),
   },
@@ -82,7 +82,6 @@ const DesktopGrid = (props: GridProps) => {
                 emojicoin={props.data.symbolData.symbol}
                 marketAddress={props.data.marketAddress}
                 marketEmojis={props.data.symbolEmojis}
-                initNumSwaps={props.data.swaps.length}
               />
             </StyledBlockWrapper>
           </StyledBlock>
