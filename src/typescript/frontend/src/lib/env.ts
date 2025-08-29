@@ -2,7 +2,7 @@ import type { Network } from "@aptos-labs/ts-sdk";
 import { parse } from "semver";
 
 import type { AccountAddressString } from "@/sdk/emojicoin_dot_fun";
-import { PositiveIntegerSchema } from "@/sdk/utils/validation/integer";
+import { NonNegativeIntegerSchema } from "@/sdk/utils/validation/integer";
 
 import packageInfo from "../../package.json";
 
@@ -64,7 +64,7 @@ const VERSION = parse(packageInfo.version);
 
 // Must be duplicated from the sdk/src/const.ts file because the SDK exports functions not available
 // in the edge runtime in middleware.
-const INTEGRATOR_FEE_RATE_BPS = PositiveIntegerSchema.parse(
+const INTEGRATOR_FEE_RATE_BPS = NonNegativeIntegerSchema.parse(
   process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
 );
 

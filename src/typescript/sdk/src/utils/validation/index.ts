@@ -1,12 +1,13 @@
 import { AccountAddressSchema } from "./account-address";
 import { BigIntSchema, PositiveBigIntSchema } from "./bigint";
-import { IntegerSchema, PositiveIntegerSchema } from "./integer";
+import { IntegerSchema, NonNegativeIntegerSchema, PositiveIntegerSchema } from "./integer";
 import { SymbolEmojisSchema } from "./symbol-emoji";
 
 export const Schemas = {
   Integer: IntegerSchema,
   BigInt: BigIntSchema,
   PositiveInteger: PositiveIntegerSchema,
+  NonNegativeInteger: NonNegativeIntegerSchema,
   PositiveBigInt: PositiveBigIntSchema,
   AccountAddress: AccountAddressSchema,
   SymbolEmojis: SymbolEmojisSchema,
