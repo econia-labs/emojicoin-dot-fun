@@ -3,7 +3,10 @@
 import type { AccountAddress } from "@aptos-labs/ts-sdk";
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import { fetchCachedAptPrice } from "lib/queries/get-apt-price";
-import { fetchCachedPriceFeed, type NUM_MARKETS_ON_PRICE_FEED } from "lib/queries/price-feed";
+import {
+  fetchCachedHomePagePriceFeed,
+  type NUM_MARKETS_ON_PRICE_FEED,
+} from "lib/queries/price-feed";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -17,6 +20,7 @@ import type { q64ToBig } from "@/sdk/utils";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 export const revalidate = 10;
+export const dynamic = "force-static";
 
 /**
  * ### /api/trending
@@ -94,7 +98,7 @@ export const revalidate = 10;
  */
 export const GET = apiRouteErrorHandler(async (_req: NextRequest) => {
   const aptPrice = await fetchCachedAptPrice();
-  const priceFeed = await fetchCachedPriceFeed();
+  const priceFeed = await fetchCachedHomePagePriceFeed();
   const res = priceFeed.map((mkt) => {
     (mkt as TrendingMarketArgs)["apt_price"] = aptPrice;
     return toTrendingMarket(mkt);

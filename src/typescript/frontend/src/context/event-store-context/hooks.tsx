@@ -19,10 +19,19 @@ export const useUserSettings = <T,>(selector: (store: UserSettingsStore) => T): 
 };
 
 export const globalNameStore = createNameStore();
-export const globalEventStore = createEventStore();
+let globalEventStore: ReturnType<typeof createEventStore>;
+
+// Create a singleton with checks to ensure that this isn't created at runtime during the prebuild scripts, since this
+// is a top-level call and the `createWebSocketClientStore` call inside `createEventStore` tries to connect to wss.
+const getGlobalEventStoreSingleton = () => {
+  if (!globalEventStore) {
+    globalEventStore = createEventStore();
+  }
+  return globalEventStore;
+};
 
 export const useNameStore = <T,>(selector: (store: NameStore) => T): T =>
   useStore(globalNameStore, selector);
 
 export const useEventStore = <T,>(selector: (store: EventAndClientStore) => T): T =>
-  useStore(globalEventStore, selector);
+  useStore(getGlobalEventStoreSingleton(), selector);

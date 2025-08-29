@@ -1,6 +1,6 @@
 import FEATURE_FLAGS from "lib/feature-flags";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { fetchCachedArenaInfo } from "lib/queries/arena-info";
-import { unstable_cache } from "next/cache";
 
 import { toMarketStateModel } from "@/sdk/index";
 import type { DatabaseJsonType } from "@/sdk/indexer-v2";
@@ -9,23 +9,27 @@ import {
   fetchVaultBalanceJson,
   toArenaInfoModel,
 } from "@/sdk/indexer-v2";
+import type { ExplicitlyNullable } from "@/sdk/utils/utility-types";
 
 import calculateExchangeRateDelta from "./calculate-exchange-rate-delta";
+import type { MeleeExchangeRatesJson } from "./fetch-melee-start-open-price";
 import createCachedExchangeRatesAtMeleeStartFetcher from "./fetch-melee-start-open-price";
+
+export const NO_MELEE_DATA = {
+  arenaInfo: null,
+  market0: null,
+  market1: null,
+  rewardsRemaining: null,
+  market0Delta: null,
+  market1Delta: null,
+};
 
 const logAndDefault = (e: unknown) => {
   console.error(e);
-  return {
-    arenaInfo: null,
-    market0: null,
-    market1: null,
-    rewardsRemaining: null,
-    market0Delta: null,
-    market1Delta: null,
-  };
+  return NO_MELEE_DATA;
 };
 
-const fetchMeleeData = async ({ arena_info }: { arena_info: DatabaseJsonType["arena_info"] }) => {
+export const fetchMeleeData = async (arena_info: DatabaseJsonType["arena_info"]) => {
   const vault_balance_promise = fetchVaultBalanceJson();
 
   const specific_markets_promise = fetchSpecificMarketsJson([
@@ -78,13 +82,10 @@ const cachedFetches = async () => {
 
   if (!arena_info) return logAndDefault("Couldn't fetch arena info.");
 
-  const fetchCachedCurrentMeleeData = unstable_cache(
-    async () => fetchMeleeData({ arena_info }),
-    ["current-melee-data"],
-    {
-      revalidate: 2,
-      tags: ["current-melee-data"],
-    }
+  const fetchCachedCurrentMeleeData = unstableCacheWrapper(
+    async () => fetchMeleeData(arena_info),
+    "current-melee-data",
+    { revalidate: 2 }
   );
 
   const [melee, { market_0_rate, market_1_rate }] = await Promise.all([
@@ -92,15 +93,27 @@ const cachedFetches = async () => {
     fetchCachedExchangeRatesWithErrorHandling(arena_info),
   ]);
 
-  return {
-    arenaInfo: toArenaInfoModel(melee.arena_info),
-    market0: toMarketStateModel(melee.market_0),
-    market1: toMarketStateModel(melee.market_1),
-    rewardsRemaining: BigInt(melee.rewards_remaining),
-    market0Delta: market_0_rate ? calculateExchangeRateDelta(market_0_rate, melee.market_0) : null,
-    market1Delta: market_1_rate ? calculateExchangeRateDelta(market_1_rate, melee.market_1) : null,
-  };
+  return convertJsonMeleeData({ melee, market_0_rate, market_1_rate });
 };
+
+export type JsonMeleeDataArgs = {
+  melee: Awaited<ReturnType<typeof fetchMeleeData>>;
+} & ExplicitlyNullable<MeleeExchangeRatesJson>;
+
+export function convertJsonMeleeData({
+  melee: { arena_info, market_0, market_1, rewards_remaining },
+  market_0_rate,
+  market_1_rate,
+}: JsonMeleeDataArgs) {
+  return {
+    arenaInfo: toArenaInfoModel(arena_info),
+    market0: toMarketStateModel(market_0),
+    market1: toMarketStateModel(market_1),
+    rewardsRemaining: BigInt(rewards_remaining),
+    market0Delta: market_0_rate ? calculateExchangeRateDelta(market_0_rate, market_0) : null,
+    market1Delta: market_1_rate ? calculateExchangeRateDelta(market_1_rate, market_1) : null,
+  };
+}
 
 export const fetchCachedMeleeData = async () => {
   if (!FEATURE_FLAGS.Arena) throw new Error("Do not call this function when arena isn't enabled.");

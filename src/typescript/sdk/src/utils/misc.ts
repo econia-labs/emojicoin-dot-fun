@@ -271,7 +271,7 @@ export function enumerate<T>(arr: T[]): Array<[T, number]> {
 /**
  * Simple utility function to chunk arrays.
  *
- * NOTE: This this mutates the array passed in.
+ * NOTE: This mutates the array passed in.
  */
 export function chunk<T>(arr: T[], size: number): T[][] {
   const res: T[][] = [];

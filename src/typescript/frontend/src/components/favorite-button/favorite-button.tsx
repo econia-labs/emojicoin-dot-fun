@@ -1,6 +1,6 @@
 import SpinnerIcon from "components/svg/icons/Spinner";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useGetFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
+import { useFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
 import { useFavoriteTransactionBuilder } from "lib/hooks/transaction-builders/use-favorite-builder";
 import { cn } from "lib/utils/class-name";
 import { Heart } from "lucide-react";
@@ -36,7 +36,7 @@ export const FavoriteButton = ({ emojis, className }: Props) => {
   const {
     favoritesQuery: { refetch },
     checkIsFavorite,
-  } = useGetFavoriteMarkets();
+  } = useFavoriteMarkets();
 
   const isFavorite = useMemo(() => checkIsFavorite(emojis), [checkIsFavorite, emojis]);
 

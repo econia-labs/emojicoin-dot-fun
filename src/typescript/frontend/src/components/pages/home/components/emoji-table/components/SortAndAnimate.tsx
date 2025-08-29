@@ -2,7 +2,7 @@ import { useUserSettings } from "context/event-store-context";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import FEATURE_FLAGS from "lib/feature-flags";
-import { useGetFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
+import { useFavoriteMarkets } from "lib/hooks/queries/use-get-favorites";
 
 import Popup from "@/components/popup";
 import { Switch } from "@/components/ui/Switch";
@@ -29,10 +29,10 @@ export default function SortAndAnimate({
 
   const { account } = useAptos();
   const {
-    favoritesQuery: { data: favorites },
-  } = useGetFavoriteMarkets();
+    favoritesQuery: { data },
+  } = useFavoriteMarkets();
 
-  const favoritesDisabled = !favorites || favorites.size === 0;
+  const favoritesDisabled = !data?.favorites || data.favorites.size === 0;
 
   return (
     <div

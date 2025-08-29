@@ -1,4 +1,6 @@
+import { createHomePageURL } from "lib/queries/sorting/query-params";
 import { cn } from "lib/utils/class-name";
+import Link from "next/link";
 import { useState } from "react";
 import { useScramble } from "use-scramble";
 
@@ -11,7 +13,10 @@ import {
 import ScrambledDropdownItem from "@/components/dropdown-menu/ScrambledDropdownItem";
 import { SortMarketsBy } from "@/sdk/indexer-v2/types/common";
 
+import { useHomePageUrlParams } from "../../../hooks/use-url-params";
+
 type HomePageSortOptions = keyof typeof sortOptions;
+type OptionLabel = (typeof sortOptions)[HomePageSortOptions];
 
 export type SortHomePageDropdownProps = {
   sortMarketsBy: HomePageSortOptions;
@@ -25,7 +30,7 @@ const sortOptions = {
   [SortMarketsBy.AllTimeVolume]: "All-Time Vol",
 } as const;
 
-const sortOptionsEntries = Object.entries(sortOptions);
+const sortOptionsEntries = Object.entries(sortOptions) as [HomePageSortOptions, OptionLabel][];
 
 export default function SortHomePageDropdown({
   sortMarketsBy,
@@ -40,6 +45,8 @@ export default function SortHomePageDropdown({
     onAnimationStart: () => setScrambleEnabled(false),
     onAnimationEnd: () => setScrambleEnabled(true),
   });
+
+  const { page } = useHomePageUrlParams();
 
   return (
     <DropdownMenu>
@@ -74,10 +81,14 @@ export default function SortHomePageDropdown({
       >
         <DropdownArrow className="fill-ec-blue" visibility="visible" />
         {sortOptionsEntries.map(([choice, title], i) => (
-          <div key={`sort-home-dropdown-${choice}`}>
+          <Link
+            href={createHomePageURL({ page, sort: choice })}
+            key={`sort-home-dropdown-${choice}`}
+            aria-label={`sort by ${choice}, page ${page}`}
+          >
             <ScrambledDropdownItem
               onSelect={() => {
-                onSortChange(choice as HomePageSortOptions);
+                onSortChange(choice);
               }}
               scrambleText={title}
               className="flex justify-center"
@@ -86,7 +97,7 @@ export default function SortHomePageDropdown({
             {i < sortOptionsEntries.length - 1 && (
               <div className="border-b-2 border-dashed border-b-black" />
             )}
-          </div>
+          </Link>
         ))}
       </DropdownContent>
     </DropdownMenu>

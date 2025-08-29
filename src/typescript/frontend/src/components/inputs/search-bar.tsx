@@ -8,7 +8,7 @@ import EmojiPickerWithInput from "../emoji-picker/EmojiPickerWithInput";
 import { Flex } from "../layout";
 import { InputGroup } from ".";
 
-const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
+const searchIcon = <Image loading="eager" className="w-[18px]" alt="search" src={icon} />;
 
 const SearchBar = ({ className }: { className?: string }) => {
   const setMode = useEmojiPicker((state) => state.setMode);
@@ -21,7 +21,6 @@ const SearchBar = ({ className }: { className?: string }) => {
       <div className="w-full md:w-auto flex h-8 my-1.5 radii-lg px-2 items-center border-dark-gray border border-solid">
         <div className="px-1 w-full">
           <InputGroup
-            variant="fantom"
             isShowError={false}
             forId="search"
             className="med-pixel-text"
@@ -29,10 +28,7 @@ const SearchBar = ({ className }: { className?: string }) => {
           >
             <Flex width="100%">
               {searchIcon}
-              <EmojiPickerWithInput
-                handleClick={async () => {}}
-                inputClassName="search-picker border-none"
-              />
+              <EmojiPickerWithInput inputClassName="!w-full !relative border-none" />
             </Flex>
           </InputGroup>
         </div>

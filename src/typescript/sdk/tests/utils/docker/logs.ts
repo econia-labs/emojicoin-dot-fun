@@ -1,11 +1,10 @@
-/* eslint-disable no-underscore-dangle */
 // cspell:word kolorist
 // cspell:word localnet
-
 import { trueColor } from "kolorist";
 
-// $NO_COLOR is already handled by `kolorist`.
-const colorText = (r: number, g: number, b: number) => (text: string) => trueColor(r, g, b)(text);
+// @see https://github.com/marvinhagemeister/kolorist for more info on config options.
+export const colorText = (r: number, g: number, b: number) => (text: string) =>
+  trueColor(r, g, b)(text);
 
 export type ContainerName =
   | "local-testnet-indexer-api"

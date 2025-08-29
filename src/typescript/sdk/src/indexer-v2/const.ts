@@ -28,3 +28,6 @@ export const toOrderBy = (input: OrderByStrings | OrderBy) => {
       throw new Error(`Invalid order by value: ${input}`);
   }
 };
+
+export const toOrderByString = (orderBy: OrderBy | OrderByStrings): OrderByStrings =>
+  typeof orderBy === "string" ? orderBy : orderBy === ORDER_BY.ASC ? "asc" : "desc";

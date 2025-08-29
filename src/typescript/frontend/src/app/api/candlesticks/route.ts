@@ -1,5 +1,5 @@
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { type NextRequest, NextResponse } from "next/server";
 
 import type { DatabaseJsonType } from "@/sdk/index";
@@ -14,13 +14,10 @@ import { CandlesticksSearchParamsSchema } from "./search-params-schema";
 
 const CHUNK_SIZE = 500;
 
-const fetchCachedAllChunkedCandlestickMetadata = unstable_cache(
+const fetchCachedAllChunkedCandlestickMetadata = unstableCacheWrapper(
   fetchAllChunkedCandlesticksMetadata,
-  [],
-  {
-    revalidate: 20,
-    tags: ["fetch-all-chunked-candlesticks-metadata"],
-  }
+  "fetch-all-chunked-candlesticks-metadata",
+  { revalidate: 20 }
 );
 
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {

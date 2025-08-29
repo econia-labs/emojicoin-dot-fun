@@ -1,16 +1,17 @@
 import { apiRouteErrorHandler } from "lib/api/api-route-error-handler";
 import FEATURE_FLAGS from "lib/feature-flags";
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchArenaLatestCandlesticks } from "@/sdk/indexer-v2";
 
 import { LatestArenaCandlesticksSearchParamsSchema } from "./search-params-schema";
 
-const cachedResponse = unstable_cache(fetchArenaLatestCandlesticks, [], {
-  revalidate: 2,
-  tags: ["fetch-arena-latest-candlesticks"],
-});
+const cachedResponse = unstableCacheWrapper(
+  fetchArenaLatestCandlesticks,
+  "fetch-arena-latest-candlesticks",
+  { revalidate: 2 }
+);
 
 export const GET = apiRouteErrorHandler(async (request: NextRequest) => {
   if (!FEATURE_FLAGS.Arena) {

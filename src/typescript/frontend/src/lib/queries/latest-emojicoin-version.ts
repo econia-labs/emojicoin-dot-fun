@@ -1,6 +1,6 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
+import { unstableCacheWrapper } from "lib/nextjs/unstable-cache-wrapper";
 import type { z } from "zod";
 
 import { sleep } from "@/sdk/index";
@@ -11,13 +11,10 @@ import type { PositiveBigIntSchema } from "@/sdk/utils/validation/bigint";
 const fetchLatestProcessorVersion = () =>
   getProcessorStatus().then((res) => res.lastSuccessVersion.toString());
 
-export const fetchCachedLatestProcessorVersion = unstable_cache(
+export const fetchCachedLatestProcessorVersion = unstableCacheWrapper(
   fetchLatestProcessorVersion,
-  ["latest-emojicoin-indexer-version"],
-  {
-    revalidate: 1,
-    tags: ["latest-emojicoin-indexer-version"],
-  }
+  "latest-emojicoin-indexer-version",
+  { revalidate: 1 }
 );
 
 const FETCH_INTERVAL = 1000;
