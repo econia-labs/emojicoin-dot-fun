@@ -9,18 +9,8 @@ export const BigIntTrailingNRegex = /^-?(([1-9]\d*)|0)n$/;
 // This matches the below pattern: 1234-12-31T23:59:59.666Z
 export const DateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
 
-export const stringifyJSON = <T>(data: T) => {
-  if (data === undefined) {
-    const msg = "Attempted to stringify undefined JSON value.";
-    if (process.env.NODE_ENV !== "production") {
-      throw new Error(msg);
-    } else {
-      console.warn(msg);
-      return JSON.stringify(null);
-    }
-  }
-  return JSON.stringify(data, (_, value) => (typeof value === "bigint" ? `${value}n` : value));
-};
+export const stringifyJSON = <T>(data: T) =>
+  JSON.stringify(data, (_, value) => (typeof value === "bigint" ? `${value}n` : value));
 
 // Specifically for JSON that comes from an `/api` response or the nextjs cache.
 export const parseResponseJSON = <T>(json: string): T =>
